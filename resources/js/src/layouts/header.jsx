@@ -8,9 +8,9 @@ import {
     MenuItem
 } from "@chakra-ui/react";
 import { Button} from '@chakra-ui/react'
-import { 
-    TbCategory, 
-    TbSettings, 
+import {
+    TbCategory,
+    TbSettings,
     TbUserSquareRounded,
     TbChevronDown
 } from "react-icons/tb";
@@ -66,7 +66,7 @@ function Header() {
                         <MenuItem>Trang cá nhân</MenuItem>
                         <MenuItem>Đăng xuất</MenuItem>
                     </MenuList>
-                </Menu>    
+                </Menu>
             </div>
         </div>
     );
