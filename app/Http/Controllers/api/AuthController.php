@@ -42,12 +42,18 @@ class AuthController extends Controller
             }
 
             $tokenResult = $user->createToken('authToken')->plainTextToken;
-
+            $cookie = cookie('token', $tokenResult, 60 * 24);
             return response()->json([
                 'status_code' => 200,
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
-            ]);
+                'first_name'=>$user->first_name,
+                'last_name'=>$user->last_name,
+                'email'=>$user->email,
+                'avatar'=>$user->avatar,
+                'plant'=>$user->plant,
+                'sap_id'=>$user->sap_id
+            ])->withCookie($cookie);
         } catch (\Exception $error) {
             return response()->json([
                 'status_code' => 500,

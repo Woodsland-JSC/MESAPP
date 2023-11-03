@@ -19,9 +19,9 @@ Route::get('/handle-auth', function (Request $request) {
         'status_code' => 500,
         'message' => 'invalid session',
     ],405);
-})->name('login');
+})->name('handleAuth');
 
-Route::post('/login', [AuthController::class,'login'])->name('Authlogin');
+Route::post('/login', [AuthController::class,'login'])->name('login');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users', function (Request $request)
