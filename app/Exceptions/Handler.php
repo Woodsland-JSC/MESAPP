@@ -2,10 +2,16 @@
 
 namespace App\Exceptions;
 
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Http\Request as Requests;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -24,8 +30,29 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (NotFoundHttpException $e, Requests $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'url not found.',
+                    'code' => 404
+                ], 404);
+            }
+        });
+        $this->renderable(function (AccessDeniedHttpException $e, Requests $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Forbidden.',
+                    'code' => 403
+                ], 403);
+            }
+        });
+        $this->renderable(function (UnauthorizedException $e, Requests $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Forbidden.',
+                    'code' => 403
+                ], 403);
+            }
         });
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {

@@ -5,31 +5,204 @@ namespace App\Http\Controllers\sap;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
+
+/**
+ * Class MasterData.
+ *
+ * @author  Nguyen
+ */
 class MasterDataController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/items",
+     *     tags={"MasterData"},
+     *     summary="Get all item master data",
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\JsonContent(
+     *            @OA\Property(
+     *                  property="ItemCode",
+     *                  type="string",
+     *                  example="00001"
+     *              ),
+     *              @OA\Property(
+     *                  property="ItemName",
+     *                  type="string",
+     *                  example="abcd"
+     *              ),
+     *         )
+     *     ),
+     *     security={
+     *         {"api_key": {}}
+     *     }
+     * )
+     */
     function ItemMasterData(Request $request)
     {
-        $conDB = (new ConnectController)->connect_sap();
+        try {
+            $conDB = (new ConnectController)->connect_sap();
 
-        $query='select "ItemCode","ItemName" from OITM';
-        $stmt = odbc_prepare($conDB, $query);
+            $query = 'select "ItemCode","ItemName" from OITM';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
 
-        if (!odbc_execute($stmt, )) {
-            // Handle execution error
-           // die("Error executing SQL statement: " . odbc_errormsg());
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            /**
+             * Data example:
+             *  [
+             *      {
+             *          "ItemCode": "IB0000001",
+             *          "ItemName": "SKOGSTA "
+             *      },
+             *      {
+             *          "ItemCode": "IB0000002",
+             *          "ItemName": "SKOGSTA )"
+             *      },
+             *      ...
+             *   ]
+             */
+            return response()->json([$results], 200);
+        } catch (\Exception $e) {
             return response()->json([
+                'error' => false,
                 'status_code' => 500,
-                'message' => 'Error executing SQL statement:'.odbc_errormsg()
-            ],500);
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $results = array();
-        while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
-        }
-        odbc_close($conDB);
-        $results=json_encode($results);
-        return  $results;
     }
+    /**
+     * @OA\Get(
+     *     path="/api/warehouses",
+     *     tags={"MasterData"},
+     *     summary="Get all warehouse master data",
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\JsonContent(
+     *            @OA\Property(
+     *                  property="ItemCode",
+     *                  type="string",
+     *                  example="00001"
+     *              ),
+     *              @OA\Property(
+     *                  property="ItemName",
+     *                  type="string",
+     *                  example="abcd"
+     *              ),
+     *         )
+     *     ),
+     *     security={
+     *         {"api_key": {}}
+     *     }
+     * )
+     */
+    function WarehouseMasterData(Request $request)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
 
+            $query = 'select "ItemCode","ItemName" from OITM';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json([$results], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/warehouses/{plantId}",
+     *     tags={"MasterData"},
+     *     summary="Get warehouse by plantId",
+     *  *     @OA\Parameter(
+     *         name="plantId",
+     *         in="path",
+     *         description="ID of plant that needs to be fetched",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64",
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\JsonContent(
+     *            @OA\Property(
+     *                  property="ItemCode",
+     *                  type="string",
+     *                  example="00001"
+     *              ),
+     *              @OA\Property(
+     *                  property="ItemName",
+     *                  type="string",
+     *                  example="abcd"
+     *              ),
+     *         )
+     *     ),
+     *     security={
+     *         {"api_key": {}}
+     *     }
+     * )
+     */
+    function WarehouseByPlant(Request $request)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select "ItemCode","ItemName" from OITM';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json([$results], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

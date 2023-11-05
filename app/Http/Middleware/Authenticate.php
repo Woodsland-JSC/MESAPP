@@ -15,7 +15,8 @@ class Authenticate extends Middleware
     {
         return $request->expectsJson() ? null : route('handleAuth');
     }
-    public function handle($request, Closure $next, ...$guards) {
+    public function handle($request, Closure $next, ...$guards)
+    {
 
         if ($token = $request->cookie('token')) {
             $request->headers->set('Authorization', 'Bearer ' . $token);
