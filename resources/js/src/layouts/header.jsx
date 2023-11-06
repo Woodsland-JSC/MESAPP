@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 import logo from "../assets/woodsland.svg";
 import defaultUser from "../assets/default-user.png";
 import "../index.css";
@@ -27,30 +27,30 @@ function Header() {
             {/* Navigator Menu */}
             <div className="">
                 <ul className="flex flex-row space-x-4">
-                    <li className="p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
-                        <Link to="/workspace">
+                    <Link to="/workspace">
+                        <li className="p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
                             <div className="flex items-center space-x-2">
                                 <TbCategory className="text-2xl" />
                                 <p>Workspace</p>
                             </div>
-                        </Link>
-                    </li>
-                    <li className=" p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
-                        <Link to="/users">
+                        </li>
+                    </Link>
+                    <Link to="/users">
+                        <li className=" p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
                             <div className="flex items-center space-x-2">
                                 <TbUserSquareRounded className="text-2xl" />
                                 <p>Quản lý người dùng</p>
                             </div>
-                        </Link>
-                    </li>
-                    <li className="p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
-                        <Link to="/settings">
+                        </li>
+                    </Link>
+                    <Link to="/settings">
+                        <li className="p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all">
                             <div className="flex items-center space-x-2">
                                 <TbSettings className="text-2xl" />
                                 <p>Cài đặt</p>
                             </div>
-                        </Link> 
-                    </li>
+                        </li>
+                    </Link>
                 </ul>
             </div>
 
