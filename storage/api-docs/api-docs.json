@@ -248,22 +248,6 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "URL NOT MATCH"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     }
                 },
                 "security": [
