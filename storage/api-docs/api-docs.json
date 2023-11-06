@@ -1,0 +1,287 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "GTV Hubs",
+        "description": "API APP WoodsLands",
+        "contact": {
+            "email": "tnguyen.nguyen@vn.gt.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log in a user",
+                "description": "Logs in a user and returns a token.",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "The email of the user",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "description": "The password of the user",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "email": {
+                                            "type": "string",
+                                            "example": "abc@gmail.com"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "dfwetewtwsafewt"
+                                        },
+                                        "avartar": {
+                                            "type": "string",
+                                            "example": "img.ico"
+                                        },
+                                        "plant": {
+                                            "type": "string",
+                                            "example": "TQ"
+                                        },
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "dfwetewtwsafewt"
+                                        },
+                                        "sap_id": {
+                                            "type": "string",
+                                            "example": "manager"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid email or password"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout",
+                "operationId": "edf2b3b2f5fefa33e2fd224d2f2505c4",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/items": {
+            "get": {
+                "tags": [
+                    "MasterData"
+                ],
+                "summary": "Get all item master data",
+                "operationId": "6775871674e1585ec0d3baf233879593",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ItemCode": {
+                                            "type": "string",
+                                            "example": "00001"
+                                        },
+                                        "ItemName": {
+                                            "type": "string",
+                                            "example": "abcd"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/warehouses": {
+            "get": {
+                "tags": [
+                    "MasterData"
+                ],
+                "summary": "Get all warehouse master data",
+                "operationId": "3a60e65d0da5890e6fa91bf4f9ad6b5b",
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ItemCode": {
+                                            "type": "string",
+                                            "example": "00001"
+                                        },
+                                        "ItemName": {
+                                            "type": "string",
+                                            "example": "abcd"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/warehouses/{plantId}": {
+            "get": {
+                "tags": [
+                    "MasterData"
+                ],
+                "summary": "Get warehouse by plantId",
+                "operationId": "539c4cbbfc178640499f4389953f402c",
+                "parameters": [
+                    {
+                        "name": "plantId",
+                        "in": "path",
+                        "description": "ID of plant that needs to be fetched",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ItemCode": {
+                                            "type": "string",
+                                            "example": "00001"
+                                        },
+                                        "ItemName": {
+                                            "type": "string",
+                                            "example": "abcd"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "URL NOT MATCH"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    }
+}
