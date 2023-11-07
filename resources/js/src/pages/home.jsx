@@ -1,5 +1,5 @@
 import React from "react";
-import "../home.css";
+import "../assets/styles/home.css";
 import { Link } from "react-router-dom";
 import Layout from "../layouts/layout.jsx";
 import { ChakraProvider } from "@chakra-ui/react";

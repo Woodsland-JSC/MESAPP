@@ -1,4 +1,3 @@
-import '../index.css'
 import Header from '../layouts/header.jsx'
 
 function Layout({ children }) {
