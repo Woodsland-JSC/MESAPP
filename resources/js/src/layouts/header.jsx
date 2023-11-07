@@ -1,8 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/woodsland.svg";
-import defaultUser from "../assets/default-user.png";
-import "../index.css";
 import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
 import {
@@ -11,18 +8,40 @@ import {
     TbUserSquareRounded,
     TbChevronDown,
 } from "react-icons/tb";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+
+import useAppContext from "../store/AppContext";
+import usersApi from "../api/userApi";
+
+import logo from "../assets/images/woodsland.svg";
+import defaultUser from "../assets/images/default-user.png";
 
 function Header() {
+    const { user, setUser, isAuthenticated, setIsAuthenticated } = useAppContext();
+
+    const handleSignOut = async () => {
+        try {
+            const res = await usersApi.signOut();
+            localStorage.removeItem("userInfo");
+            Cookies.remove('isAuthenticated');
+            setUser(null);
+            toast.info("Đã đăng xuất");
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="flex justify-between items-center px-10 pr-12 h-[70px] py-4sticky z-50">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
                 <img src={logo} alt="logo" className="w-12 h-12"></img>
                 <div>
                     <p className="font-bold text-xl ">Woodsland</p>
                     <p className="text-xs text-gray-500">WEB PORTAL</p>
                 </div>
-            </div>
+            </Link>
 
             {/* Navigator Menu */}
             <div className="">
@@ -56,22 +75,28 @@ function Header() {
 
             {/* User */}
             <div className="flex items-center">
-                <img
-                    src={defaultUser}
-                    alt="user"
-                    className="w-9 h-9 rounded-full"
-                ></img>
-                <Menu>
-                    <MenuButton rightIcon={<TbChevronDown />}>
-                        <Button variant="ghost" fontWeight="regular">
-                            Pedro Scott
-                        </Button>
-                    </MenuButton>
-                    <MenuList>
-                        <MenuItem>Trang cá nhân</MenuItem>
-                        <MenuItem>Đăng xuất</MenuItem>
-                    </MenuList>
-                </Menu>
+                {isAuthenticated ? (
+                    <>
+                        <img
+                            src={user?.avatar ? user.avatar : defaultUser}
+                            alt="user"
+                            className="w-9 h-9 rounded-full"
+                        ></img>
+                        <Menu>
+                            <MenuButton rightIcon={<TbChevronDown />}>
+                                <Button variant="ghost" fontWeight="regular">
+                                    {user?.first_name + " " + user?.last_name}
+                                </Button>
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem><Link to="/users">Trang cá nhân</Link></MenuItem>
+                                <MenuItem onClick={() => handleSignOut()}>Đăng xuất</MenuItem>
+                            </MenuList>
+                        </Menu>
+                    </>
+                ) : <>
+                    <Link to="/login">Đăng nhập</Link>
+                </>}
             </div>
         </div>
     );
