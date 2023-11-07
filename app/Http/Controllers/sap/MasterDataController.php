@@ -114,7 +114,7 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "ItemCode","ItemName" from OITM';
+            $query = 'select "WhsCode","WhsName" from OWHS';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -141,13 +141,13 @@ class MasterDataController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/api/warehouses/{plantId}",
+     *     path="/api/warehouses/{WarehouseId}",
      *     tags={"MasterData"},
-     *     summary="Get warehouse by plantId",
+     *     summary="Get warehouse by WarehouseId",
      *  *     @OA\Parameter(
-     *         name="plantId",
+     *         name="WarehouseId",
      *         in="path",
-     *         description="ID of plant that needs to be fetched",
+     *         description="ID of warehouse that needs to be fetched",
      *         required=true,
      *         @OA\Schema(
      *             type="integer",
