@@ -1,19 +1,23 @@
 import React from "react";
 import Layout from "../../layouts/layout";
-import { 
-  HiSquare3Stack3D,
-  HiMagnifyingGlassCircle,
-  HiHomeModern,
-  HiRectangleStack,
-  HiHandThumbUp,
-  HiClipboardDocumentList
- } from "react-icons/hi2";
+import {
+    HiSquare3Stack3D,
+    HiMagnifyingGlassCircle,
+    HiHomeModern,
+    HiRectangleStack,
+    HiHandThumbUp,
+    HiClipboardDocumentList,
+} from "react-icons/hi2";
+import { Link } from "react-router-dom";
 
 function Workspace() {
     return (
         <Layout>
-            <div className="flex justify-center bg-white h-full border-t border-gray-200">
-                <div className="p-16 px-40">
+            {/* Container */}
+            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+
+                {/* Section */}
+                <div className="w-screen mt-[70px] p-12 px-40 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -55,100 +59,113 @@ function Workspace() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold">Quản lý sấy gỗ</div>
+                    <div className="text-3xl font-bold mb-12">Quản lý sấy gỗ</div>
 
                     {/* Card Fields */}
-                    <div className="grid grid-cols-3 gap-4 mt-12">
-                        <a href="#" className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105"
-                        >
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiSquare3Stack3D className="w-7 h-7" />
+                    <div className="grid grid-cols-3 gap-4">
+                        <Link to="/workspace/wood-sorting">
+                            <div className="xl:flex lg:flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                <div className="text-xl h-fit w-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiSquare3Stack3D className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Tạo pallet xếp sấy
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Xếp sấy
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>    
-                        </a>
+                        </Link>
 
-                        <a href="#" className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105"
-                        >
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiHomeModern className="w-7 h-7" />
+                        <Link to="/workspace/kiln">
+                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
+                                <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiHomeModern className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Lò sấy
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Lò sấy
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>
-                            
-                        </a>
-
-                        <a href="#" className="card2 flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105"
-                        >
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiRectangleStack className="w-7 h-7" />
-                            </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Vào lò
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>       
-                        </a>
-
-                        <a href="#" className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105"
-                        >
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiHandThumbUp className="w-7 h-7" />
-                            </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Đánh giá mẻ sấy
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>
-                        </a>
-
-                        <a href="#" className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105">
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiClipboardDocumentList className="w-7 h-7" />
-                            </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Tạo kế hoạch sấy
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>     
-                        </a>
-
-                        <a href="#" className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-lg hover:shadow-md transition-all duration-500 hover:scale-105" >
-                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                              <HiMagnifyingGlassCircle className="w-7 h-7" />
-                            </div>
-                            <div>
-                              <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                  Kiểm tra lò sấy
-                              </h5>
-                              <p class="text-[15px] font-normal text-gray-500 ">
-                                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, vitae.
-                              </p>
-                            </div>
-                            
-                        </a>
+                        </Link>
                         
+                        <Link to="/workspace/load-into-kiln">
+                            <div className="card2 flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiRectangleStack className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Vào lò
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                        
+                        <Link to="/workspace/drying-wood-checking">
+                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105"
+                            >
+                                <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiHandThumbUp className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Đánh giá mẻ sấy
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                        
+
+                        <Link to="/workspace/create-drying-plan">
+                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
+                                <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiClipboardDocumentList className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Tạo kế hoạch sấy
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                        
+                        <Link to="/workspace/kiln-checking">
+                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
+                                    <HiMagnifyingGlassCircle className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                        Kiểm tra lò sấy
+                                    </h5>
+                                    <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                        Lorem ipsum dolor sit amet, consectetur
+                                        adipisicing elit. Deserunt, vitae.
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>     
                     </div>
                 </div>
             </div>

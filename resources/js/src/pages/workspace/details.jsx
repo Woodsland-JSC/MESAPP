@@ -1,9 +1,12 @@
 import React from 'react'
+import Layout from "../../layouts/layout";
 
-function Detail() {
+function Details() {
   return (
-    <div>detail</div>
+    <Layout>
+        <div>detail</div>
+    </Layout>
   )
 }
 
-export default Detail
+export default Details

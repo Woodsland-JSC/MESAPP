@@ -6,6 +6,14 @@ import Login from './pages/(auth)/login';
 import Settings from './pages/settings';
 import Users from './pages/users';
 import Workspace from './pages/workspace/index';
+import CreateDryingPlan from './pages/workspace/create-drying-plan';
+import Details from './pages/workspace/details';
+import DryingWoodChecking from './pages/workspace/drying-wood-checking';
+import Kiln from './pages/workspace/kiln';
+import KilnChecking from './pages/workspace/kiln-checking';
+import LoadIntoKiln from './pages/workspace/load-into-kiln';
+import WoodSorting from './pages/workspace/wood-sorting';
+import UserDetails from './pages/users/details';
 
 const routes = [
   {
@@ -31,28 +39,32 @@ const routes = [
     component: <Settings/>,
   },
   {
-    path: '/workspace/word-sorting',
-    component: <Settings/>,
+    path: '/workspace/wood-sorting',
+    component: <WoodSorting />,
   },
   {
     path: '/workspace/kiln',
-    component: <Settings/>,
+    component: <Kiln/>,
   },
   {
     path: '/workspace/load-into-kiln',
-    component: <Settings/>,
+    component: <LoadIntoKiln />,
   },
   {
     path: '/workspace/drying-wood-checking',
-    component: <Settings/>,
+    component: <DryingWoodChecking />,
   },
   {
-    path: '/workspace/create',
-    component: <Settings/>,
+    path: '/workspace/create-drying-plan',
+    component: <CreateDryingPlan/>,
   },
   {
     path: '/workspace/kiln-checking',
-    component: <Settings/>,
+    component: <KilnChecking/>,
+  },
+  {
+    path: '/workspace/details',
+    component: <Details/>,
   },
 ];
 
