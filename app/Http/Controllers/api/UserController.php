@@ -243,7 +243,8 @@ class UserController extends Controller
             'password' => 'required|same:confirm-password',
             'plant' => 'required',
             'sap_id' => 'required|unique:users,sap_id',
-            'roles' => 'required|exists:roles,name'
+            'roles' => 'required|exists:roles,name',
+            'branch' => 'required'
         ]);
 
         // Check if validation fails
@@ -272,7 +273,8 @@ class UserController extends Controller
             'password' => 'same:confirm-password',
             'plant' => 'required',
             'sap_id' => 'required|unique:users,sap_id,' . $id,
-            'roles' => 'required'
+            'roles' => 'required',
+            'branch' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
