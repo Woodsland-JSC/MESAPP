@@ -9,7 +9,7 @@ import Home from "../pages/home";
 import Login from "../pages/(auth)/login";
 import ForgotPassword from "../pages/(auth)/forgotpassword";
 import SignUp from "../pages/(auth)/signup";
-import Settings from "../pages/settings";
+import Settings from "../pages/settings/index";
 import Users from "../pages/users/index";
 import Workspace from "../pages/workspace/index";
 import CreateDryingPlan from '../pages/workspace/create-drying-plan';

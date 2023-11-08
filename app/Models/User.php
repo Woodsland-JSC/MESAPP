@@ -7,12 +7,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
     protected $table = 'users';
-    protected $guarded=[];
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'avartar',
+        'is_block',
+        'plant',
+        'sap_id',
+        'integration_id',
+        'email',
+        'password',
+        'branch'
+    ];
 
     protected $hidden = [
         'password',
