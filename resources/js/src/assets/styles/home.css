@@ -1,5 +1,5 @@
 .landing-page{
-  background-image: linear-gradient(rgba(255, 255, 255, 1) 10%, rgba(251, 251, 251, 0.1) 100%), linear-gradient(90deg, rgb(182, 237, 243), rgba(125, 171, 193, 1)) !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 1) 15%, rgba(251, 251, 251, 0.1) 80%), linear-gradient(120deg, rgb(173, 189, 228), rgb(160, 203, 224)) !important;
   background-repeat: no-repeat;
   height: 100vh;
 }
@@ -9,7 +9,7 @@
 
   -webkit-animation: AnimationName 3s ease infinite;
   -moz-animation: AnimationName 3s ease infinite;
-  animation: AnimationName 3s ease infinite;
+  animation: AnimationName 5s ease infinite;
 }
 
 @keyframes AnimationName {

@@ -18,9 +18,11 @@ import usersApi from "../api/userApi";
 import logo from "../assets/images/woodsland.svg";
 import defaultUser from "../assets/images/default-user.png";
 
-function Header() {
+function Header(props) {
     const { user, setUser, isAuthenticated, setIsAuthenticated } =
         useAppContext();
+
+    const { variant } = props;
 
     const handleSignOut = async () => {
         try {
@@ -35,21 +37,21 @@ function Header() {
     };
 
     return (
-        <div className=" w-full absolute z-50">
-            <div className="bg-white flex h-[70px] items-center justify-between px-10">
+        <div className="sticky top-0 z-50 ">
+            <div className={`flex h-[70px] bg-white items-center ${variant == "homepage" ? "border-b border-white" : "border-b border-gray-200"} justify-between px-10`}>
                 {/* Logo */}
-                <div className="flex items-center space-x-2">
-                    <img src={logo} alt="logo" className="w-12 h-12"></img>
+                <div className="flex items-center">
+                    <img src={logo} alt="logo" className="w-12 h-12 mr-2"></img>
                     <div>
-                        <p className="font-bold text-xl ">Woodsland</p>
-                        <p className="text-xs text-gray-500">WEB PORTAL</p>
+                        <p className="font-bold text-lg ">Woodsland</p>
+                        <p className="text-[0.7rem] text-gray-500">WEB PORTAL</p>
                     </div>
                 </div>
 
                 {/* Navigator Menu */}
                 <div className="hidden xl:flex lg:flex ">
-                    <ul className="flex flex-row space-x-4">
-                        <NavLink to="/workspace">
+                    <ul className="flex items-center flex-row space-x-4">
+                        <NavLink to="/workspace" className='flex items-center'>
                             {({ isActive }) => (
                                 <li
                                     className={
@@ -71,12 +73,12 @@ function Header() {
                                 </li>
                             )}
                         </NavLink>
-                        <NavLink to="/users">
+                        <NavLink to="/users" className='flex items-center'>
                             {({ isActive }) => (
                                 <li
                                     className={
                                         isActive
-                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
+                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer text-base"
                                             : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
                                     }
                                 >
@@ -93,7 +95,7 @@ function Header() {
                                 </li>
                             )}
                         </NavLink>
-                        <NavLink to="/settings">
+                        <NavLink to="/settings" className='flex items-center'>
                             {({ isActive }) => (
                                 <li
                                     className={
