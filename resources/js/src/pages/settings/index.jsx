@@ -1,9 +1,8 @@
 import React from 'react'
 import Layout from "../../layouts/layout";
 import { Link } from 'react-router-dom';
-import { HiMiniSparkles } from "react-icons/hi2";
 
-function Users() {
+function Settings() {
   return (
     <Layout>
       {/* Container */}
@@ -16,16 +15,14 @@ function Users() {
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
-                                      <HiMiniSparkles className='text-[#1E7BA6] text-lg'/>
                                         <a
                                             href="#"
                                             class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        > 
+                                        >
                                             Home
                                         </a>
                                     </div>
                                 </li>
-                            
                                 <li aria-current="page">
                                     <div class="flex items-center">
                                         <svg
@@ -43,9 +40,7 @@ function Users() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Quản lý người dùng</div>
-                                        </span>
+                                        
                                     </div>
                                 </li>
                             </ol>
@@ -53,11 +48,11 @@ function Users() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">Quản lý người dùng</div>
+                    <div className="text-3xl font-bold mb-12">Cài đặt</div>
                 </div>
             </div>  
     </Layout>
   )
 }
 
-export default Users
+export default Settings

@@ -14,10 +14,10 @@ function Workspace() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+            <div className="flex justify-center bg-[#F8F9F7] ">
 
                 {/* Section */}
-                <div className="w-screen mt-[70px] p-12 px-40 border-t border-gray-200">
+                <div className="w-screen p-12 px-40 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">

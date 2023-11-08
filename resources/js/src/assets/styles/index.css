@@ -7,11 +7,17 @@
   line-height: 1.5;
   font-weight: 400;
 
+  
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+body{
+  background-color: #F8F9F7 !important;
 }
 
 @layer components {
@@ -39,7 +45,7 @@
   }
 
   .loader-line-wrap {
-    animation: spin 2000ms cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+    animation: spin 1500ms cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
     box-sizing: border-box;
     height: 50px;
     left: 0;
