@@ -17,7 +17,7 @@ function Workspace() {
             <div className="flex justify-center bg-[#F8F9F7] ">
 
                 {/* Section */}
-                <div className="w-screen p-12 px-40 border-t border-gray-200">
+                <div className="w-screen p-12 px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -64,7 +64,7 @@ function Workspace() {
                     {/* Card Fields */}
                     <div className="grid grid-cols-3 gap-4">
                         <Link to="/workspace/wood-sorting">
-                            <div className="xl:flex lg:flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                            <div className="xl:flex lg:flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                 <div className="text-xl h-fit w-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiSquare3Stack3D className="w-7 h-7" />
                                 </div>
@@ -81,7 +81,7 @@ function Workspace() {
                         </Link>
 
                         <Link to="/workspace/kiln">
-                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
+                            <div className="flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
                                 <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiHomeModern className="w-7 h-7" />
                                 </div>
@@ -98,7 +98,7 @@ function Workspace() {
                         </Link>
                         
                         <Link to="/workspace/load-into-kiln">
-                            <div className="card2 flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                            <div className="card2 flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                 <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiRectangleStack className="w-7 h-7" />
                                 </div>
@@ -115,7 +115,7 @@ function Workspace() {
                         </Link>
                         
                         <Link to="/workspace/drying-wood-checking">
-                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105"
+                            <div className="flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105"
                             >
                                 <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiHandThumbUp className="w-7 h-7" />
@@ -134,7 +134,7 @@ function Workspace() {
                         
 
                         <Link to="/workspace/create-drying-plan">
-                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
+                            <div className="flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105" >
                                 <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiClipboardDocumentList className="w-7 h-7" />
                                 </div>
@@ -151,7 +151,7 @@ function Workspace() {
                         </Link>
                         
                         <Link to="/workspace/kiln-checking">
-                            <div className="flex gap-x-6 max-w-sm p-6 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                            <div className="flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                 <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
                                     <HiMagnifyingGlassCircle className="w-7 h-7" />
                                 </div>
