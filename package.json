@@ -11,6 +11,8 @@
         "@emotion/styled": "^11.11.0",
         "@fontsource-variable/inter": "^5.0.15",
         "@fontsource-variable/lexend": "^5.0.17",
+        "ag-grid-community": "^30.2.1",
+        "ag-grid-react": "^30.2.1",
         "framer-motion": "^10.16.4",
         "js-cookie": "^3.0.5",
         "react": "^18.2.0",
