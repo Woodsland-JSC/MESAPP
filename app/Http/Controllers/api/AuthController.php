@@ -138,12 +138,15 @@ class AuthController extends Controller
                 'status_code' => 200,
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
+                'id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'avatar' => $user->avatar,
                 'plant' => $user->plant,
-                'sap_id' => $user->sap_id
+                'sap_id' => $user->sap_id,
+                'branch' => $user->branch,
+
             ])->withCookie($cookie);
         } catch (\Exception $error) {
             return response()->json([
