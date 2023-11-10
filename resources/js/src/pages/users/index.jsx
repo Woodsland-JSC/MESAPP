@@ -54,6 +54,7 @@ function Users() {
         { field: "bronze" },
         { field: "total" },
     ]);
+
     const autoGroupColumnDef = useMemo(() => {
         return {
             headerName: "Group",
@@ -73,6 +74,7 @@ function Users() {
             },
         };
     }, []);
+
     const defaultColDef = useMemo(() => {
         return {
             editable: true,
@@ -86,6 +88,7 @@ function Users() {
             minWidth: 100,
         };
     }, []);
+
     const paginationNumberFormatter = useCallback((params) => {
         return "[" + params.value.toLocaleString() + "]";
     }, []);
@@ -134,7 +137,7 @@ function Users() {
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
-                <div className="w-screen p-12 px-40 border-t border-gray-200">
+                <div className="w-screen md:py-12 p-4 md:px-8 lg:px-40 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -160,7 +163,7 @@ function Users() {
                     {/* Main content */}
                     <section style={containerStyle}>
                         <div className="flex justify-between my-4">
-                            <div className="xl:w-1/4">
+                            <div className="md:w-1/4 w-1/2">
                                 <label
                                     for="search"
                                     className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -197,7 +200,7 @@ function Users() {
                             </div>
                             <Link
                                 to="/users/create"
-                                className="flex items-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                className="flex items-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-2/5 text-left sm:w-auto px-5 py-2.5 sm:text-center gap-x-2"
                             >
                                 Tạo User
                                 <FaPlus />
@@ -209,6 +212,7 @@ function Users() {
                                 id="page-size"
                                 options={sizeOptions}
                                 onChange={onPageSizeChanged}
+                                defaultValue={{ value: "10", label: "10" }}
                             />
                         </div>
                         <div style={gridStyle} className="ag-theme-alpine">

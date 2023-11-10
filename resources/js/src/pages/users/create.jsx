@@ -63,18 +63,6 @@ const validationSchema = Yup.object().shape({
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
 
-// const SelectField = ({ options, ...props }) => {
-//     const { setFieldValue } = useFormikContext();
-//     return (
-//         <Select
-//             options={options}
-//             onChange={(option) => setFieldValue(props.name, option.value)}
-//             onBlur={() => setFieldValue(props.name, props.value)}
-//             {...props}
-//         />
-//     );
-// };
-
 const SelectField = ({ options, ...props }) => {
     const [selectedOption, setSelectedOption] = useState();
     const { setFieldValue } = useFormikContext();
@@ -157,6 +145,7 @@ function CreateUser() {
     };
 
     const handleFormSubmit = async (e) => {
+        toast.info("Chưa phát triển submit form");
         console.log("Submit form nè: ", input);
     };
 
@@ -186,7 +175,7 @@ function CreateUser() {
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
-                <div className="w-screen p-12 px-40 border-t border-gray-200">
+                <div className="w-screen md:py-12 p-4 md:px-12 lg:px-40 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -233,9 +222,7 @@ function CreateUser() {
                     <Formik
                         initialValues={input}
                         validationSchema={validationSchema}
-                        onSubmit={(values) => {
-                            console.log("Mừng quá: ", values);
-                        }}
+                        onSubmit={handleFormSubmit}
                     >
                         {({ errors, touched, values }) => {
                             setInput(values);
@@ -250,7 +237,7 @@ function CreateUser() {
                                             <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="w-full">
                                                     <label
-                                                        for="last_name"
+                                                        htmlFor="last_name"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Họ{" "}
@@ -273,7 +260,7 @@ function CreateUser() {
                                                 </div>
                                                 <div className="w-full">
                                                     <label
-                                                        for="first_name"
+                                                        htmlFor="first_name"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Tên{" "}
@@ -296,7 +283,7 @@ function CreateUser() {
                                                 </div>
                                                 <div className="w-full">
                                                     <label
-                                                        for="email"
+                                                        htmlFor="email"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Email{" "}
@@ -320,7 +307,7 @@ function CreateUser() {
                                                 </div>
                                                 <div className="w-full">
                                                     <label
-                                                        for="gender"
+                                                        htmlFor="gender"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Giới tính{" "}
@@ -343,7 +330,7 @@ function CreateUser() {
                                                 </div>
                                                 <div className="w-full">
                                                     <label
-                                                        for="password"
+                                                        htmlFor="password"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Mật khẩu{" "}
@@ -367,7 +354,7 @@ function CreateUser() {
                                                 </div>
                                                 <div className="w-full">
                                                     <label
-                                                        for="authorization"
+                                                        htmlFor="authorization"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Phân quyền{" "}
@@ -394,7 +381,7 @@ function CreateUser() {
                                         </div>
                                         <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
                                             <span className="mb-3">
-                                                Hình đại diện
+                                                Ảnh đại diện
                                             </span>
                                             <input
                                                 type="file"
@@ -417,13 +404,13 @@ function CreateUser() {
                                             <div className="flex gap-2 justify-center">
                                                 <span
                                                     type="button"
-                                                    className="text-white bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                                                    className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                                                 >
                                                     <label
                                                         htmlFor="avatar"
                                                         className="w-full cursor-pointer"
                                                     >
-                                                        Cập nhật hình đại diện
+                                                        Cập nhật ảnh đại diện
                                                     </label>
                                                 </span>
                                                 {avatar.imgSrc &&
@@ -448,7 +435,7 @@ function CreateUser() {
                                     <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
                                         <div className="w-full">
                                             <label
-                                                for="sap-id"
+                                                htmlFor="sap-id"
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 SAP ID{" "}
@@ -470,7 +457,7 @@ function CreateUser() {
                                         </div>
                                         <div className="w-full">
                                             <label
-                                                for="integration-id"
+                                                htmlFor="integration-id"
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 INTEGRATION ID{" "}
@@ -493,7 +480,7 @@ function CreateUser() {
                                         </div>
                                         <div className="w-full">
                                             <label
-                                                for="factory"
+                                                htmlFor="factory"
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 Nhà máy{" "}
@@ -516,7 +503,7 @@ function CreateUser() {
                                         </div>
                                         <div className="w-full">
                                             <label
-                                                for="branch"
+                                                htmlFor="branch"
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 Chi nhánh{" "}
@@ -539,7 +526,7 @@ function CreateUser() {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="mt-5 self-end flex items-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
                                     >
                                         Lưu lại
                                     </button>

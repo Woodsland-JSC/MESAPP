@@ -11,6 +11,7 @@ import ForgotPassword from "../pages/(auth)/forgotpassword";
 import SignUp from "../pages/(auth)/signup";
 import Settings from "../pages/settings/index";
 import Users from "../pages/users/index";
+import User from "../pages/users/details";
 import CreateUser from "../pages/users/create";
 import Workspace from "../pages/workspace/index";
 import CreateDryingPlan from '../pages/workspace/create-drying-plan';
@@ -20,6 +21,8 @@ import Kiln from '../pages/workspace/kiln';
 import KilnChecking from '../pages/workspace/kiln-checking';
 import LoadIntoKiln from '../pages/workspace/load-into-kiln';
 import WoodSorting from '../pages/workspace/wood-sorting';
+
+import Notfound from "../pages/errors/notfound";
 
 import ProtectedRoute from "./ProtectedRoute";
 import useAppContext from "../store/AppContext";
@@ -37,6 +40,7 @@ function AppRoutes() {
                     <Route path="/" element={<Home />} />
                     <Route path="/workspace" element={<Workspace />} />
                     <Route path="/users" element={<Users />} />
+                    <Route path="/user/:userId" element={<User />} />
                     <Route path="/users/create" element={<CreateUser />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/workspace/kiln" element={<Kiln />} />
@@ -47,6 +51,7 @@ function AppRoutes() {
                     <Route path="/workspace/drying-wood-checking" element={<DryingWoodChecking />} />
                     <Route path="/workspace/kiln-checking" element={<KilnChecking />} />
                 </Route>
+                <Route path="*" element={<Notfound />} />
             </Routes>
         </Router>
     );
