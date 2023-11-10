@@ -44,6 +44,7 @@ function AppRoutes() {
                     <Route path="/workspace/load-into-kiln" element={<LoadIntoKiln />} />
                     <Route path="/workspace/drying-wood-checking" element={<DryingWoodChecking />} />
                     <Route path="/workspace/kiln-checking" element={<KilnChecking />} />
+                    <Route path="/workspace/details" element={<Details />} />
                 </Route>
             </Routes>
         </Router>

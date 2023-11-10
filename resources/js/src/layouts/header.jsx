@@ -38,7 +38,7 @@ function Header(props) {
 
     return (
         <div className="sticky top-0 z-50">
-            <div className={`flex h-[69px] bg-white items-center ${variant == "homepage" ? "border-b border-white" : "border-b border-gray-200"} justify-center space-x-40`}>
+            <div className={`flex h-[69px] bg-white items-center ${variant == "homepage" ? "border-b border-white" : "border-b-2 border-gray-200"} justify-between px-32`}>
                 {/* Logo */}
                 <div className="flex items-center h-full">
                     <img src={logo} alt="logo" className="w-12 h-12 mr-2"></img>

@@ -62,7 +62,7 @@ function Workspace() {
                     <div className="text-3xl font-bold mb-12">Quản lý sấy gỗ</div>
 
                     {/* Card Fields */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-y-6">
                         <Link to="/workspace/wood-sorting">
                             <div className="xl:flex lg:flex gap-x-6 max-w-sm p-8 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                 <div className="text-xl h-fit w-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -70,7 +70,7 @@ function Workspace() {
                                 </div>
                                 <div>
                                     <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                        Tạo pallet xếp sấy
+                                        Xếp sấy
                                     </h5>
                                     <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
                                         Lorem ipsum dolor sit amet, consectetur

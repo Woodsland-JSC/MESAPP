@@ -1,13 +1,13 @@
-import React from 'react'
+import React from "react";
 import Layout from "../../layouts/layout";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
 
 function KilnChecking() {
-  return (
-    <Layout>
-      {/* Container */}
-      <div className="flex justify-center bg-[#F8F9F7] ">
+    return (
+        <Layout>
+            {/* Container */}
+            <div className="flex justify-center bg-[#F8F9F7] ">
                 {/* Section */}
                 <div className="w-screen p-12 px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
@@ -76,10 +76,12 @@ function KilnChecking() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Kiểm tra lò sấy</div>
+                    <div className="text-3xl font-bold mb-6">
+                        Kiểm tra lò sấy
+                    </div>
 
                     {/* Controller */}
-                    <div className=" my-4 xl:w-full">
+                    <div className=" my-4 mb-6 xl:w-full">
                         <label
                             for="search"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -115,7 +117,7 @@ function KilnChecking() {
                     </div>
 
                     {/* Content */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-5">
+                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         <BOWCard
                             status="Đang sấy và chưa đánh giá mẻ sấy"
                             batchNumber="2023.41.08"
@@ -163,8 +165,8 @@ function KilnChecking() {
                     </div>
                 </div>
             </div>
-    </Layout> 
-  )
+        </Layout>
+    );
 }
 
-export default KilnChecking
+export default KilnChecking;
