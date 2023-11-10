@@ -5,6 +5,7 @@ namespace App\Http\Controllers\sap;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class MasterData.
@@ -186,6 +187,71 @@ class MasterDataController extends Controller
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
             if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json([$results], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function branch(Request $request)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select "BPLId","BPLName" from OBPL where "Disabled"=' . "'N'";
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json([$results], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function getStockByItem($id)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity" FROM OITW T0 ' .
+                'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
+                'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
+                'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
+                'where T0."ItemCode"= ? and "BPLid" = ? and t3."U_Flag"=? ' .
+                'Group by T0."ItemCode", T2."ItemName", T0."WhsCode", T3."WhsName",T1."BatchNum", T1."Quantity",T0."OnHand",T1."ExpDate"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$id, Auth::user()->branch, 'TS'])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
