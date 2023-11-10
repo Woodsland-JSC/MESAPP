@@ -11,6 +11,7 @@ import ForgotPassword from "../pages/(auth)/forgotpassword";
 import SignUp from "../pages/(auth)/signup";
 import Settings from "../pages/settings/index";
 import Users from "../pages/users/index";
+import CreateUser from "../pages/users/create";
 import Workspace from "../pages/workspace/index";
 import CreateDryingPlan from '../pages/workspace/create-drying-plan';
 import Details from '../pages/workspace/details';
@@ -36,6 +37,7 @@ function AppRoutes() {
                     <Route path="/" element={<Home />} />
                     <Route path="/workspace" element={<Workspace />} />
                     <Route path="/users" element={<Users />} />
+                    <Route path="/users/create" element={<CreateUser />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/workspace/kiln" element={<Kiln />} />
                     <Route path="/workspace/create-drying-plan" element={<CreateDryingPlan />} />
