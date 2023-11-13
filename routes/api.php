@@ -63,7 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('GetItemMasterDataSap');
     Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
-    Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
+    //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
     Route::get('/branch', [MasterDataController::class, 'branch'])->name('branch');
     Route::get('/stock/{itemid}', [MasterDataController::class, 'getStockByItem'])->name('stockbyitem');
 });
