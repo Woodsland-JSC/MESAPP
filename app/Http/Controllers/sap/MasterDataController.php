@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reasons;
 
 /**
  * Class MasterData.
@@ -360,5 +361,9 @@ class MasterDataController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+    function getReason(Request $request)
+    {
+        return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->get(['Code', 'Name']), 200);
     }
 }

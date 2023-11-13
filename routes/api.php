@@ -78,4 +78,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/typeofwood', [MasterDataController::class, 'getLoaiGo'])->name('getLoaiGo');
     Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('getQuyCachSay');
     Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('getLoSay');
+    Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('getReason');
 });
