@@ -9,7 +9,7 @@ function DryingWoodChecking() {
       {/* Container */}
       <div className="flex justify-center bg-[#F8F9F7]">
                 {/* Section */}
-                <div className="w-screen p-12 px-40 border-t border-gray-200">
+                <div className="w-screen p-12 px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -79,7 +79,7 @@ function DryingWoodChecking() {
                     <div className="text-3xl font-bold mb-6">Kiểm tra mẻ sấy</div>
 
                     {/* Controller */}
-                    <div className=" my-4 xl:w-full">
+                    <div className=" my-4 mb-6 xl:w-full">
                         <label
                             for="search"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -115,7 +115,7 @@ function DryingWoodChecking() {
                     </div>
 
                     {/* Content */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-5">
+                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         <BOWCard
                             status="Đang sấy và chưa đánh giá mẻ sấy"
                             batchNumber="2023.41.08"

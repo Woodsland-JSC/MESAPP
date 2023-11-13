@@ -4,14 +4,9 @@ import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
-import toast from "react-hot-toast";
 import Layout from "../../layouts/layout";
-import Loader from "../../components/Loader";
-import generateAvatar from "../../utils/generateAvatar";
-import usersApi from "../../api/userApi";
-import useAppContext from "../../store/AppContext";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
-import PasswordIllustration from "../../assets/images/password-illustration.png";
+import generateAvatar from "../../utils/generateAvatar";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -23,7 +18,7 @@ const authorizationOptions = [
     { value: "client", label: "Client" },
 ];
 
-const inputValidationSchema = Yup.object().shape({
+const validationSchema = Yup.object().shape({
     lastName: Yup.string()
         .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Họ không được quá 30 kí tự")
@@ -38,12 +33,8 @@ const inputValidationSchema = Yup.object().shape({
     gender: Yup.string()
         .oneOf(["male", "female"], "Giá trị không hợp lệ")
         .required("Giới tính là bắt buộc"),
-});
-
-const passwordValidationSchema = Yup.object().shape({
-    oldPassword: Yup.string().required("Mật khẩu cũ là bắt buộc"),
-    newPassword: Yup.string()
-        .required("Mật khẩu mới là bắt buộc")
+    password: Yup.string()
+        .required("Mật khẩu là bắt buộc")
         .test("uppercase", "Mật khẩu cần có ít nhất 1 kí tự in hoa", (value) =>
             /[A-Z]/.test(value)
         )
@@ -65,9 +56,11 @@ const passwordValidationSchema = Yup.object().shape({
             "Mật khẩu phải có từ 8 - 15 ký tự",
             (value) => value && value.length >= 8 && value.length <= 15
         ),
-    reNewPassword: Yup.string()
-        .required("Vui lòng nhập mật khẩu mới")
-        .oneOf([Yup.ref("newPassword"), null], "Mật khẩu không khớp"),
+    authorization: Yup.string().required("Phân quyền là bắt buộc"),
+    sapId: Yup.string().required("SAP ID là bắt buộc"),
+    integrationId: Yup.string().required("Integration ID là bắt buộc"),
+    factory: Yup.string().required("Nhà máy là bắt buộc"),
+    branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
 
 const SelectField = ({ options, ...props }) => {
@@ -89,9 +82,8 @@ const SelectField = ({ options, ...props }) => {
     );
 };
 
-function Settings() {
-    const [formKey, setFormKey] = useState(0);
-    const { loading, setLoading } = useAppContext();
+function CreateUser() {
+    
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
@@ -104,13 +96,13 @@ function Settings() {
         firstName: "",
         lastName: "",
         email: "",
-        gender: "male",
-    });
-
-    const [passwordInput, setPasswordInput] = useState({
-        oldPassword: "",
-        newPassword: "",
-        reNewPassword: "",
+        gender: "0",
+        password: "",
+        authorization: "",
+        sapId: "",
+        integrationId: "",
+        factory: "",
+        branch: "",
     });
 
     const handleChangeAvatar = (event) => {
@@ -145,99 +137,39 @@ function Settings() {
     };
 
     const handleDeleteAvatar = () => {
-        console.log("Ra dì: ", avatar.autoImg);
-        if (!avatar.autoImg) {
-            if (input.lastName && input.firstName) {
-                const tempName =
-                    input.lastName.trim().charAt(0) +
-                    input.firstName.trim().charAt(0);
-                getAutoAvatar(tempName);
-            }
-        } else {
-            setAvatar({
-                ...avatar,
-                file: null,
-                imgSrc: null,
-            });
-        }
-    };
-
-    const handleChangeInfo = async (values) => {
-        toast("Chưa phát triển change info", {
-            icon: ` ℹ️`,
+        setAvatar({
+            ...avatar,
+            file: null,
+            imgSrc: null,
         });
-        console.log("Submit info nè: ", values);
     };
 
-    const handleChangePassword = async (values) => {
-        toast("Chưa phát triển change password", {
-            icon: ` ℹ️`,
-        });
-        console.log("Submit password nè: ", values);
-    };
-
-    const getAutoAvatar = async (name) => {
-        try {
-            const res = await generateAvatar(name);
-            const base64 = await blobToBase64(res);
-            const imgSrc = `data:image/png;base64,${base64}`;
-            setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
-        } catch (error) {
-            console.error(error);
-        }
+    const handleFormSubmit = async (e) => {
+        toast.info("Chưa phát triển submit form");
+        console.log("Submit form nè: ", input);
     };
 
     useEffect(() => {
-        console.log("User gì ta: ",  input.lastName + ' ' + input.firstName);
-        console.log(avatar.file);
-        if (input.lastName && input.firstName && !avatar.file) {
-            const tempName =
-                input.lastName.trim().charAt(0) +
-                input.firstName.trim().charAt(0);
-            getAutoAvatar(tempName);
-        } 
-        
-        if (!input.lastName && !input.firstName) {
-            setAvatar({ ...avatar, autoImg: DefaultAvatar });
-        }
-    }, [input]);
-
-    useEffect(() => {
-        const getCurrentUser = async () => {
+        const getAutoAvatar = async (name) => {
             try {
-                setLoading(true);
-                const res = new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        const userData = {
-                            firstName: "Nguyên",
-                            lastName: "Nguyễn Thanh",
-                            email: "ntnguyen0310@gmail.com",
-                            gender: "male",
-                            avatar: "https://hinhnen4k.com/wp-content/uploads/2022/12/avatar-doremon-9.jpg",
-                        };
-                        resolve(userData);
-                    }, 1500);
-                });
-
-                const userData = await res;
-                const clonedData = (({ avatar, ...rest }) => rest)(userData);
-                setInput(clonedData);
-                if (userData.avatar) {
-                    setAvatar({
-                        autoImg: null,
-                        file: userData.avatar,
-                        imgSrc: userData.avatar,
-                    });
-                }
-                setFormKey((prevKey) => prevKey + 1);
-                setLoading(false);
+                const res = await generateAvatar(name);
+                const base64 = await blobToBase64(res);
+                const imgSrc = `data:image/png;base64,${base64}`;
+                setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
             } catch (error) {
                 console.error(error);
             }
         };
 
-        getCurrentUser();
-    }, []);
+        if (input.lastName && input.firstName && !avatar.file) {
+            const tempName =
+                input.lastName.trim().charAt(0) +
+                input.firstName.trim().charAt(0);
+            getAutoAvatar(tempName);
+        }
+    }, [input]);
+
+    useEffect(() => {});
 
     return (
         <Layout>
@@ -251,11 +183,33 @@ function Settings() {
                                 <li>
                                     <div className="flex items-center">
                                         <Link
-                                            to="/settings"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            to="/users"
+                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
-                                            Cài đặt
+                                            Quản lý người dùng
                                         </Link>
+                                    </div>
+                                </li>
+                                <li aria-current="page">
+                                    <div class="flex items-center">
+                                        <svg
+                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 6 10"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="m1 9 4-4-4-4"
+                                            />
+                                        </svg>
+                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
+                                            <div>Tạo mới</div>
+                                        </span>
                                     </div>
                                 </li>
                             </ol>
@@ -263,24 +217,23 @@ function Settings() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">Cài đặt</div>
+                    <div className="text-3xl font-bold mb-12">Tạo mới</div>
                     {/* Main content */}
                     <Formik
-                        key={formKey}
                         initialValues={input}
-                        validationSchema={inputValidationSchema}
-                        onSubmit={(values) => {
-                            handleChangeInfo(values);
-                        }}
+                        validationSchema={validationSchema}
+                        onSubmit={handleFormSubmit}
                     >
                         {({ errors, touched, values }) => {
+                            setInput(values);
+
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                                     <h1 className="mb-4 text-xl text-center md:text-left">
                                         Thông tin cơ bản
                                     </h1>
-                                    <section className="flex flex-col-reverse md:flex-row-reverse md:gap-4 mt-4 mb-0 sm:my-4">
-                                        <div className="md:w-2/3 my-2 sm:mb-6">
+                                    <section className="flex flex-col-reverse md:flex-row md:gap-4">
+                                        <div className="md:w-2/3 mb-6">
                                             <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="w-full">
                                                     <label
@@ -295,7 +248,6 @@ function Settings() {
                                                     <Field
                                                         name="lastName"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={values.lastName}
                                                     />
                                                     {errors.lastName &&
                                                     touched.lastName ? (
@@ -366,14 +318,6 @@ function Settings() {
                                                     <SelectField
                                                         name="gender"
                                                         options={genderOptions}
-                                                        defaultValue={
-                                                            genderOptions.find(
-                                                                (item) =>
-                                                                    item.value ==
-                                                                    values.gender
-                                                            ) ||
-                                                            genderOptions[0]
-                                                        }
                                                     />
                                                     {errors.gender &&
                                                     touched.gender ? (
@@ -384,9 +328,58 @@ function Settings() {
                                                         <span className="block mt-[8px] h-[14.55px]"></span>
                                                     )}
                                                 </div>
+                                                <div className="w-full">
+                                                    <label
+                                                        htmlFor="password"
+                                                        className="block mb-2 text-md font-medium text-gray-900"
+                                                    >
+                                                        Mật khẩu{" "}
+                                                        <span className="text-red-600">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <Field
+                                                        name="password"
+                                                        type="password"
+                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    />
+                                                    {errors.password &&
+                                                    touched.password ? (
+                                                        <span className="text-xs text-red-600">
+                                                            <ErrorMessage name="password" />
+                                                        </span>
+                                                    ) : (
+                                                        <span className="block mt-[8px] h-[14.55px]"></span>
+                                                    )}
+                                                </div>
+                                                <div className="w-full">
+                                                    <label
+                                                        htmlFor="authorization"
+                                                        className="block mb-2 text-md font-medium text-gray-900"
+                                                    >
+                                                        Phân quyền{" "}
+                                                        <span className="text-red-600">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <SelectField
+                                                        name="authorization"
+                                                        options={
+                                                            authorizationOptions
+                                                        }
+                                                    />
+                                                    {errors.authorization &&
+                                                    touched.authorization ? (
+                                                        <span className="text-xs text-red-600">
+                                                            <ErrorMessage name="authorization" />
+                                                        </span>
+                                                    ) : (
+                                                        <span className="block mt-[8px] h-[14.55px]"></span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-6">
+                                        <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
                                             <span className="mb-3">
                                                 Ảnh đại diện
                                             </span>
@@ -435,6 +428,102 @@ function Settings() {
                                             </div>
                                         </div>
                                     </section>
+                                    <div className="my-4 border-b border-gray-200"></div>
+                                    <h1 className="mb-4 text-xl text-center md:text-left">
+                                        Đồng bộ và tích hợp
+                                    </h1>
+                                    <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="sap-id"
+                                                className="block mb-2 text-md font-medium text-gray-900"
+                                            >
+                                                SAP ID{" "}
+                                                <span className="text-red-600">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <Field
+                                                name="sapId"
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                            />
+                                            {errors.sapId && touched.sapId ? (
+                                                <span className="text-xs text-red-600">
+                                                    <ErrorMessage name="sapId" />
+                                                </span>
+                                            ) : (
+                                                <span className="block mt-[8px] h-[14.55px]"></span>
+                                            )}
+                                        </div>
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="integration-id"
+                                                className="block mb-2 text-md font-medium text-gray-900"
+                                            >
+                                                INTEGRATION ID{" "}
+                                                <span className="text-red-600">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <Field
+                                                name="integrationId"
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                            />
+                                            {errors.integrationId &&
+                                            touched.integrationId ? (
+                                                <span className="text-xs text-red-600">
+                                                    <ErrorMessage name="integrationId" />
+                                                </span>
+                                            ) : (
+                                                <span className="block mt-[8px] h-[14.55px]"></span>
+                                            )}
+                                        </div>
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="factory"
+                                                className="block mb-2 text-md font-medium text-gray-900"
+                                            >
+                                                Nhà máy{" "}
+                                                <span className="text-red-600">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <Field
+                                                name="factory"
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                            />
+                                            {errors.factory &&
+                                            touched.factory ? (
+                                                <span className="text-xs text-red-600">
+                                                    <ErrorMessage name="factory" />
+                                                </span>
+                                            ) : (
+                                                <span className="block mt-[8px] h-[14.55px]"></span>
+                                            )}
+                                        </div>
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="branch"
+                                                className="block mb-2 text-md font-medium text-gray-900"
+                                            >
+                                                Chi nhánh{" "}
+                                                <span className="text-red-600">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <Field
+                                                name="branch"
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                            />
+                                            {errors.branch && touched.branch ? (
+                                                <span className="text-xs text-red-600">
+                                                    <ErrorMessage name="branch" />
+                                                </span>
+                                            ) : (
+                                                <span className="block mt-[8px] h-[14.55px]"></span>
+                                            )}
+                                        </div>
+                                    </div>
                                     <button
                                         type="submit"
                                         className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
@@ -445,125 +534,10 @@ function Settings() {
                             );
                         }}
                     </Formik>
-
-                    <Formik
-                        key="password-form"
-                        initialValues={passwordInput}
-                        validationSchema={passwordValidationSchema}
-                        onSubmit={(values) => {
-                            handleChangePassword(values);
-                        }}
-                    >
-                        {({ errors, touched, values }) => {
-                            return (
-                                <Form className="flex flex-col mt-8 p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
-                                        Thay đổi mật khẩu
-                                    </h1>
-                                    <section className="flex flex-col-reverse md:flex-row md:items-center md:gap-4 mt-4 mb-0 sm:my-4">
-                                        <div className="md:w-2/5 my-2 sm:mb-6">
-                                            <div className="flex flex-col gap-y-2 gap-x-4">
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="oldPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Mật khẩu cũ{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="oldPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.oldPassword &&
-                                                    touched.oldPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="oldPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="newPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Mật khẩu mới{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="newPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.newPassword &&
-                                                    touched.newPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="newPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="reNewPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Nhập lại mật khẩu mới{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="reNewPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.reNewPassword &&
-                                                    touched.reNewPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="reNewPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col justify-center items-center self-center place-items-center md:w-3/5">
-                                            <img
-                                                id="password-display"
-                                                src={PasswordIllustration}
-                                                className="object-cover w-2/3 sm:w-1/2"
-                                                alt="Change-Password"
-                                            />
-                                        </div>
-                                    </section>
-
-                                    <button
-                                        type="submit"
-                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
-                                    >
-                                        Xác nhận
-                                    </button>
-                                </Form>
-                            );
-                        }}
-                    </Formik>
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
         </Layout>
     );
 }
 
-export default Settings;
+export default CreateUser;

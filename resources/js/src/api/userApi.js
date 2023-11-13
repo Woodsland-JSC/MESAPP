@@ -19,9 +19,13 @@ const usersApi = {
         const url = `/logout`;
         return axiosClient().get(url, {});
     },
-    getUserDetails: (token) => {
+    getAllUsers: () => {
+        const url = `/users`;
+        return axiosClient().get(url, {});
+    },
+    getUserDetails: () => {
         const url = `/getUser`;
-        return axiosClient(token).get(url, {});
+        return axiosClient().get(url, {});
     },
 };
 

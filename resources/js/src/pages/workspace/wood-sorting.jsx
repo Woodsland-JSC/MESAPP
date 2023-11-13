@@ -23,7 +23,7 @@ function WoodSorting() {
             {/* Container */}
             <div className="flex justify-center h-full bg-[#F8F9F7]">
                 {/* Section */}
-                <div className="w-screen p-12 px-40">
+                <div className="w-screen p-12 px-32">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">

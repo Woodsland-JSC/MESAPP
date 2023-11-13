@@ -37,20 +37,20 @@ function Header(props) {
     };
 
     return (
-        <div className="sticky top-0 z-50 ">
-            <div className={`flex h-[70px] bg-white items-center ${variant == "homepage" ? "border-b border-white" : "border-b border-gray-200"} justify-between px-10`}>
+        <div className="sticky top-0 z-50">
+            <div className={`flex h-[69px] bg-white items-center ${variant == "homepage" ? "border-b border-white" : "border-b-2 border-gray-200"} justify-between px-32`}>
                 {/* Logo */}
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                     <img src={logo} alt="logo" className="w-12 h-12 mr-2"></img>
                     <div>
-                        <p className="font-bold text-lg ">Woodsland</p>
+                        <p className="font-bold text-xl mb-0 ">Woodsland</p>
                         <p className="text-[0.7rem] text-gray-500">WEB PORTAL</p>
                     </div>
                 </div>
 
                 {/* Navigator Menu */}
-                <div className="hidden xl:flex lg:flex ">
-                    <ul className="flex items-center flex-row space-x-4">
+                <div className="hidden xl:flex lg:flex h-full">
+                    <ul className="flex items-center flex-row space-x-4 ">
                         <NavLink to="/workspace" className='flex items-center'>
                             {({ isActive }) => (
                                 <li
@@ -121,13 +121,13 @@ function Header(props) {
                 </div>
 
                 {/* User */}
-                <div className="flex items-center">
+                <div className="flex items-center h-full">
                     {isAuthenticated ? (
                         <>
                             <img
                                 src={user?.avatar ? user.avatar : defaultUser}
                                 alt="user"
-                                className="w-9 h-9 rounded-full"
+                                className="w-8 h-8 rounded-full"
                             ></img>
                             <Menu>
                                 <MenuButton rightIcon={<TbChevronDown />}>
