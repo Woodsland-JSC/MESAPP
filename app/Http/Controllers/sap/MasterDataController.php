@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reasons;
 
 /**
  * Class MasterData.
@@ -75,7 +76,7 @@ class MasterDataController extends Controller
              *      ...
              *   ]
              */
-            return response()->json([$results], 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -197,7 +198,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
-            return response()->json([$results], 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -227,7 +228,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
-            return response()->json([$results], 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -262,7 +263,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
-            return response()->json([$results], 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -270,5 +271,99 @@ class MasterDataController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+    function getLoaiGo()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select * from "@G_SAY1"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function getQuyCachSay()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select * from "@G_SAY2"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function getLoSay()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select * from "@G_SAY3"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function getReason(Request $request)
+    {
+        return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->get(['Code', 'Name']), 200);
     }
 }

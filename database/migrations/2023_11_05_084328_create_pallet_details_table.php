@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('pallet_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('palletID');
-            $table->string('Code', 50);
-            $table->string('LoaiGo')->nullable();
-            $table->string('MaLo')->nullable();
-            $table->string('LyDo')->nullable();
-            $table->string('QuyCach')->nullable();
+            $table->string('ItemCode');
+            $table->string('WhsCode', 50);
+            $table->string('BatchNum');
+            $table->float('Qty');
             $table->timestamps();
             $table->foreign('palletID')->references('palletID')->on('pallets');
         });
