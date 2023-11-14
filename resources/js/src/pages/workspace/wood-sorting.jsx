@@ -21,9 +21,9 @@ function WoodSorting() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center h-full bg-[#F8F9F7]">
+            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-[#F8F9F7]">
                 {/* Section */}
-                <div className="w-screen p-12 px-32">
+                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -81,7 +81,7 @@ function WoodSorting() {
                                             />
                                         </svg>
                                         <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Tạo pallet xếp sấy</div>
+                                            <div>Xếp sấy</div>
                                         </span>
                                     </div>
                                 </li>
@@ -98,7 +98,7 @@ function WoodSorting() {
                     <div className="p-6 bg-white border-2 border-gray-200 rounded-xl">
                         <section>
                             <form>
-                                <div className="grid gap-4 mb-6 xl:grid-cols-6">
+                                <div className="xl:grid xl:space-y-1 space-y-5 gap-4 mb-6 xl:grid-cols-6">
                                     <div className="col-span-2">
                                         <label
                                             for="first_name"
@@ -175,13 +175,13 @@ function WoodSorting() {
                             " inStock="12" batchNum="12"/>
                         </div>
 
-                        <div className="flex w-full justify-between items-center">
-                            <div className="text-gray-500">
+                        <div className="xl:flex w-full justify-between items-center">
+                            <div className="xl:my-0 my-2 text-gray-500">
                                 Tổng: <span>0</span>
                             </div>
                             <button
                                 type="submit"
-                                className="flex items-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
                             >
                                 Tạo pallet
                                 <FaPlus />

@@ -188,15 +188,15 @@ function Settings() {
     };
 
     useEffect(() => {
-        console.log("User gì ta: ",  input.lastName + ' ' + input.firstName);
+        console.log("User gì ta: ", input.lastName + " " + input.firstName);
         console.log(avatar.file);
         if (input.lastName && input.firstName && !avatar.file) {
             const tempName =
                 input.lastName.trim().charAt(0) +
                 input.firstName.trim().charAt(0);
             getAutoAvatar(tempName);
-        } 
-        
+        }
+
         if (!input.lastName && !input.firstName) {
             setAvatar({ ...avatar, autoImg: DefaultAvatar });
         }
@@ -243,7 +243,7 @@ function Settings() {
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
-                <div className="w-screen md:py-12 p-4 md:px-12 lg:px-40 border-t border-gray-200">
+                <div className="w-screen xl:py-12  p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -263,7 +263,7 @@ function Settings() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">Cài đặt</div>
+                    <div className="text-3xl font-bold mb-6">Cài đặt</div>
                     {/* Main content */}
                     <Formik
                         key={formKey}
@@ -276,11 +276,12 @@ function Settings() {
                         {({ errors, touched, values }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
+                                    <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
                                         Thông tin cơ bản
                                     </h1>
+
                                     <section className="flex flex-col-reverse md:flex-row-reverse md:gap-4 mt-4 mb-0 sm:my-4">
-                                        <div className="md:w-2/3 my-2 sm:mb-6">
+                                        <div className="md:w-2/3 my-2 sm:mb-4">
                                             <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="w-full">
                                                     <label
@@ -294,7 +295,7 @@ function Settings() {
                                                     </label>
                                                     <Field
                                                         name="lastName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         value={values.lastName}
                                                     />
                                                     {errors.lastName &&
@@ -318,7 +319,7 @@ function Settings() {
                                                     </label>
                                                     <Field
                                                         name="firstName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                     />
                                                     {errors.firstName &&
                                                     touched.firstName ? (
@@ -342,7 +343,7 @@ function Settings() {
                                                     <Field
                                                         name="email"
                                                         type="email"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                     />
                                                     {errors.email &&
                                                     touched.email ? (
@@ -387,9 +388,6 @@ function Settings() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-6">
-                                            <span className="mb-3">
-                                                Ảnh đại diện
-                                            </span>
                                             <input
                                                 type="file"
                                                 accept="image/*"
@@ -404,7 +402,7 @@ function Settings() {
                                                     avatar.imgSrc ||
                                                     avatar.autoImg
                                                 }
-                                                className="w-1/2 aspect-square mb-4 rounded-full object-cover"
+                                                className="xl:w-1/2 w-2/5 aspect-square mb-4 rounded-full object-cover"
                                                 alt="Default-Avatar"
                                             />
 
@@ -435,9 +433,10 @@ function Settings() {
                                             </div>
                                         </div>
                                     </section>
+
                                     <button
                                         type="submit"
-                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                        className="mt-0 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
                                     >
                                         Lưu lại
                                     </button>
@@ -456,112 +455,113 @@ function Settings() {
                     >
                         {({ errors, touched, values }) => {
                             return (
-                                <Form className="flex flex-col mt-8 p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
-                                        Thay đổi mật khẩu
-                                    </h1>
-                                    <section className="flex flex-col-reverse md:flex-row md:items-center md:gap-4 mt-4 mb-0 sm:my-4">
-                                        <div className="md:w-2/5 my-2 sm:mb-6">
-                                            <div className="flex flex-col gap-y-2 gap-x-4">
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="oldPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Mật khẩu cũ{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="oldPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.oldPassword &&
-                                                    touched.oldPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="oldPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="newPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Mật khẩu mới{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="newPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.newPassword &&
-                                                    touched.newPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="newPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="reNewPassword"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Nhập lại mật khẩu mới{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="reNewPassword"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    />
-                                                    {errors.reNewPassword &&
-                                                    touched.reNewPassword ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="reNewPassword" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
+                                <div className="pb-9">
+                                    <Form className="flex flex-col mt-8 p-6 bg-white border-2 border-gray-200 rounded-xl">
+                                        <h1 className="mb-0 text-xl font-semibold text-center md:text-left">
+                                            Thay đổi mật khẩu
+                                        </h1>
+                                        <section className="flex flex-col-reverse  md:flex-row md:items-center md:gap-4 mt-4 mb-0 sm:my-4">
+                                            <div className="md:w-2/5 my-2 sm:mb-6">
+                                                <div className="flex flex-col gap-x-4">
+                                                    <div className="w-full">
+                                                        <label
+                                                            htmlFor="oldPassword"
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Mật khẩu cũ{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="oldPassword"
+                                                            type="password"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        />
+                                                        {errors.oldPassword &&
+                                                        touched.oldPassword ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="oldPassword" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            htmlFor="newPassword"
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Mật khẩu mới{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="newPassword"
+                                                            type="password"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        />
+                                                        {errors.newPassword &&
+                                                        touched.newPassword ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="newPassword" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            htmlFor="reNewPassword"
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Nhập lại mật khẩu
+                                                            mới{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="reNewPassword"
+                                                            type="password"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        />
+                                                        {errors.reNewPassword &&
+                                                        touched.reNewPassword ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="reNewPassword" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col justify-center items-center self-center place-items-center md:w-3/5">
-                                            <img
-                                                id="password-display"
-                                                src={PasswordIllustration}
-                                                className="object-cover w-2/3 sm:w-1/2"
-                                                alt="Change-Password"
-                                            />
-                                        </div>
-                                    </section>
+                                            <div className="flex flex-col justify-center items-center self-center place-items-center md:w-3/5">
+                                                <img
+                                                    id="password-display"
+                                                    src={PasswordIllustration}
+                                                    className="object-cover w-2/5 sm:w-1/2"
+                                                    alt="Change-Password"
+                                                />
+                                            </div>
+                                        </section>
 
-                                    <button
-                                        type="submit"
-                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
-                                    >
-                                        Xác nhận
-                                    </button>
-                                </Form>
+                                        <button
+                                            type="submit"
+                                            className=" self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                        >
+                                            Xác nhận
+                                        </button>
+                                    </Form>
+                                </div>
                             );
                         }}
                     </Formik>
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
+            {loading && <Loader />}
         </Layout>
     );
 }

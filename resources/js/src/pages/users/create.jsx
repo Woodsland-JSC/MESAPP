@@ -217,7 +217,7 @@ function CreateUser() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">Tạo mới</div>
+                    <div className="text-3xl font-bold mb-6">Tạo mới</div>
                     {/* Main content */}
                     <Formik
                         initialValues={input}
@@ -228,7 +228,8 @@ function CreateUser() {
                             setInput(values);
 
                             return (
-                                <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
+                                <div className="pb-8">
+                                    <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                                     <h1 className="mb-4 text-xl text-center md:text-left">
                                         Thông tin cơ bản
                                     </h1>
@@ -531,6 +532,8 @@ function CreateUser() {
                                         Lưu lại
                                     </button>
                                 </Form>
+                                </div>
+                                
                             );
                         }}
                     </Formik>

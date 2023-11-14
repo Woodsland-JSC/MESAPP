@@ -12,34 +12,36 @@ function DisabledCheck() {
 
             <div class="rounded-b-xl relative overflow-x-auto">
                 <table class="w-full  text-left text-gray-500 ">
-                    <thead class="font-medium text-gray-700 bg-gray-50 ">
+                    <thead class="font-medium xl:text-base text-sm text-gray-700 bg-gray-50 ">
                         <tr>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
                                 STT
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
                                 TL mo, tóp
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
                                 TL cong
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
                                 Tổng SL kiểm tra
                             </th>
-                            <th scope="col" class="px-6 py-3">
+                            <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
                                 Ngày tạo
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="bg-white border-b">
+                        <tr class="bg-white xl:text-base text-sm border-b">
                             <th
                                 scope="row"
                                 class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
                             >
                                 106295
                             </th>
-                            <td class="px-6 py-4">2023-10-12T07:59:28.050Z</td>
+                            <td class="px-6 py-4">12</td>
+                            <td class="px-6 py-4">OK</td>
+                            <td class="px-6 py-4">OK</td>
                             <td class="px-6 py-4">OK</td>
                         </tr>
                     </tbody>

@@ -9,7 +9,7 @@ function KilnChecking() {
             {/* Container */}
             <div className="flex justify-center bg-[#F8F9F7] ">
                 {/* Section */}
-                <div className="w-screen p-12 px-32 border-t border-gray-200">
+                <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">

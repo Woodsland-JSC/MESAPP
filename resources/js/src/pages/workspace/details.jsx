@@ -19,7 +19,7 @@ function Details() {
     const navigate = useNavigate();
 
     const goBack = () => {
-        navigate(-1); // Quay lại trang trước đó
+        navigate(-1); 
     };
 
     return (
@@ -27,7 +27,7 @@ function Details() {
             <div>
                 <div className="flex justify-center bg-[#F8F9F7] ">
                     {/* Section */}
-                    <div className="w-screen p-12 px-32 border-t border-gray-200">
+                    <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
 
                         {/* Header */}
                         <div className="flex items-center text-2xl font-bold mb-6 gap-x-6">
@@ -47,9 +47,10 @@ function Details() {
                                 </div>
                             </div>
                         </div>
+
                         {/* Content */}
                         <div className="gap-6">
-                            <div className="grid grid-cols-3 gap-6">
+                            <div className="xl:grid xl:grid-cols-3 xl:gap-6 xl:space-y-0 space-y-6">
                                 <InfoCard
                                     purpose="INDOOR"
                                     thickness="30-31"
@@ -68,8 +69,8 @@ function Details() {
                                     )}
                                     {type === "vl" && (
                                         <div className="space-y-6">
-                                            <KilnCheck />
                                             <ControllerCard />
+                                            <KilnCheck />
                                             <SizeCard />
                                         </div>
                                     )}
@@ -79,21 +80,18 @@ function Details() {
                                             <HumidityCheck />
                                             <DisabledCheck />
                                             <SizeCard />
-                                            <div>danh gia detail</div>
                                         </div>
                                     )}
                                     {type === "kh" && (
                                         <div className="space-y-6">
                                             <KilnCheck />
                                             <SizeCard />
-                                            <div>tao ke hoach say detail</div>
                                         </div>
                                     )}
                                     {type === "kt" && (
                                         <div className="space-y-6">
                                             <KilnCheck />
                                             <SizeCard />
-                                            <div>kiem tra me say</div>
                                         </div>
                                     )}
                                 </div>

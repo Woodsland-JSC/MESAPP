@@ -124,20 +124,12 @@ function Users() {
         },
     ]);
 
-    // useEffect(async () => {
-    // 	try {
-    // 		const res = await usersApi.getAllUsers();
-    // 		console.log("Danh sách người dùng: ", res);
-    // 	} catch (error) {
-    // 		console.error(error);
-    // 	}
-    // }, []);
 
     return (
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
-                <div className="w-screen p-12 px-32 border-t border-gray-200">
+                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -157,7 +149,7 @@ function Users() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">
+                    <div className="text-3xl font-bold mb-6">
                         Quản lý người dùng
                     </div>
                     {/* Main content */}
@@ -206,7 +198,7 @@ function Users() {
                                 <FaPlus />
                             </Link>
                         </div>
-                        <div className="flex w-2/3 md:w-1/3 gap-4 items-center mb-3">
+                        <div className="flex w-2/3 md:w-1/3 gap-4 items-center mb-3 ">
                             Page Size:
                             <Select
                                 id="page-size"
@@ -215,7 +207,7 @@ function Users() {
                                 defaultValue={{ value: "10", label: "10" }}
                             />
                         </div>
-                        <div style={gridStyle} className="ag-theme-alpine">
+                        <div style={gridStyle} className="ag-theme-alpine xl:pb-9 pb-6">
                             <AgGridReact
                                 ref={gridRef}
                                 rowData={rowData}

@@ -11,10 +11,10 @@ function Home() {
             <Header variant="homepage"/>
             <div className=" ">
                 <div className=" flex items-center flex-col pt-20">
-                    <div className="text-6xl font-semibold text-center mt-20 text-black">
+                    <div className="text-4xl xl:text-6xl font-semibold text-center mt-20 text-black">
                         Get your work done
                     </div>
-                    <div className="text-7xl font-semibold text-center text-[#135A7C]">
+                    <div className="text-5xl xl:text-7xl font-semibold text-center text-[#135A7C]">
                         in a second.
                     </div>
                     <div className="mt-6 text-center">
