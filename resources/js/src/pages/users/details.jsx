@@ -9,6 +9,7 @@ import Layout from "../../layouts/layout";
 import generateAvatar from "../../utils/generateAvatar";
 import useAppContext from "../../store/AppContext";
 import Loader from "../../components/Loader";
+import TinyLoader from "../../components/TinyLoader";
 import usersApi from "../../api/userApi";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 
@@ -93,6 +94,8 @@ function User() {
     const [formKey, setFormKey] = useState(0);
     const { loading, setLoading } = useAppContext();
 
+    const [avatarLoading, setAvatarLoading] = useState(false);
+
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
@@ -115,6 +118,7 @@ function User() {
     });
 
     const handleChangeAvatar = (event) => {
+        setAvatarLoading(true);
         const file = event.target.files[0];
         setSelectedFile(file);
         const reader = new FileReader();
@@ -129,6 +133,7 @@ function User() {
         };
 
         reader.readAsDataURL(file);
+        setAvatarLoading(false);
     };
 
     const blobToBase64 = (blob) => {
@@ -145,17 +150,30 @@ function User() {
         });
     };
 
-    const handleDeleteAvatar = () => {
-        if (!avatar.autoImg) {console.log("Vào đây");
+    const handleDeleteAvatar = async () => {
+        setAvatar({
+            ...avatar,
+            file: null,
+            imgSrc: null,
+        });
+
+        if (!avatar.autoImg) {
             if (input.lastName && input.firstName) {
+                setAvatarLoading(true);
                 const tempName =
                     input.lastName.trim().charAt(0) +
                     input.firstName.trim().charAt(0);
-                getAutoAvatar(tempName);
+                const base64 = await getAutoAvatar(tempName);
+                setAvatar({
+                    autoImg: base64,
+                    file: null,
+                    imgSrc: null,
+                });
+                setAvatarLoading(false);
             }
         } else {
             setAvatar({
-                ...avatar,
+                autoImg: avatar.autoImg,
                 file: null,
                 imgSrc: null,
             });
@@ -164,30 +182,44 @@ function User() {
 
     const handleFormSubmit = async (values) => {
         toast("Chưa phát triển submit form", {
-            icon: ' ℹ️',
-          });
+            icon: " ℹ️",
+        });
         console.log("Submit form nè: ", values);
     };
 
     const getAutoAvatar = async (name) => {
+        // setAvatarLoading(true);
         try {
             const res = await generateAvatar(name);
             const base64 = await blobToBase64(res);
             const imgSrc = `data:image/png;base64,${base64}`;
-            setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
+            // setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
+            return imgSrc;
         } catch (error) {
             console.error(error);
+            return null;
         }
+        // setAvatarLoading(false);
     };
 
     useEffect(() => {
+        // console.log("User gì ta: ",  input.lastName + ' ' + input.firstName);
         if (input.lastName && input.firstName && !avatar.file) {
+            setAvatarLoading(true);
+
             const tempName =
                 input.lastName.trim().charAt(0) +
                 input.firstName.trim().charAt(0);
-            getAutoAvatar(tempName);
-        } else {
-            setAvatar({...avatar, autoImg: DefaultAvatar})
+            const res = (async () => {
+                const base64 = await getAutoAvatar(tempName);
+                setAvatar({ ...avatar, autoImg: base64 });
+            })();
+            setAvatarLoading(false);
+        }
+
+        if (!input.lastName && !input.firstName) {
+            console.log("Không có tên và họ");
+            setAvatar({ ...avatar, autoImg: DefaultAvatar });
         }
     }, [input]);
 
@@ -212,29 +244,29 @@ function User() {
                             integrationId: "452as458s6a7da",
                             factory: "Công xưởng 2",
                             branch: "Hà Nội",
-                            avatar: "https://hinhnen4k.com/wp-content/uploads/2022/12/avatar-doremon-9.jpg"
+                            avatar: "https://hinhnen4k.com/wp-content/uploads/2022/12/avatar-doremon-9.jpg",
                         };
                         resolve(userData);
-                    }, 1500)
+                    }, 1500);
                 });
-    
+
                 const userData = await res;
                 const clonedData = (({ avatar, ...rest }) => rest)(userData);
                 setInput(clonedData);
-                if (userData.avatar)  {
+                if (userData.avatar) {
                     setAvatar({
                         autoImg: null,
                         file: userData.avatar,
                         imgSrc: userData.avatar,
                     });
                 }
-                setFormKey(prevKey => prevKey + 1);
+                setFormKey((prevKey) => prevKey + 1);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
             }
         };
-    
+
         getCurrentUser();
     }, []);
 
@@ -275,7 +307,7 @@ function User() {
                                             />
                                         </svg>
                                         <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Tạo mới</div>
+                                            <div>Người dùng</div>
                                         </span>
                                     </div>
                                 </li>
@@ -284,7 +316,9 @@ function User() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">Tạo mới</div>
+                    <div className="text-3xl font-bold mb-12">
+                        Thông tin người dùng
+                    </div>
                     {/* Main content */}
                     <Formik
                         key={formKey}
@@ -294,7 +328,7 @@ function User() {
                             handleFormSubmit(values);
                         }}
                     >
-                        {({ errors, touched, values }) => {
+                        {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                                     <h1 className="mb-4 text-xl text-center md:text-left">
@@ -317,6 +351,20 @@ function User() {
                                                         name="lastName"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         value={values.lastName}
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "lastName",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    lastName:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.lastName &&
                                                     touched.lastName ? (
@@ -328,10 +376,7 @@ function User() {
                                                     )}
                                                 </div>
                                                 <div className="w-full">
-                                                    <label
-                                                        htmlFor="first_name"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
+                                                    <label className="block mb-2 text-md font-medium text-gray-900">
                                                         Tên{" "}
                                                         <span className="text-red-600">
                                                             *
@@ -340,6 +385,20 @@ function User() {
                                                     <Field
                                                         name="firstName"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "firstName",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    firstName:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.firstName &&
                                                     touched.firstName ? (
@@ -364,6 +423,20 @@ function User() {
                                                         name="email"
                                                         type="email"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "email",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    email: e
+                                                                        .target
+                                                                        .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.email &&
                                                     touched.email ? (
@@ -387,7 +460,14 @@ function User() {
                                                     <SelectField
                                                         name="gender"
                                                         options={genderOptions}
-                                                        defaultValue={genderOptions.find(item => item.value == values.gender) || genderOptions[0]}
+                                                        defaultValue={
+                                                            genderOptions.find(
+                                                                (item) =>
+                                                                    item.value ==
+                                                                    values.gender
+                                                            ) ||
+                                                            genderOptions[0]
+                                                        }
                                                     />
                                                     {errors.gender &&
                                                     touched.gender ? (
@@ -412,6 +492,20 @@ function User() {
                                                         name="password"
                                                         type="password"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "password",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    password:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.password &&
                                                     touched.password ? (
@@ -437,8 +531,14 @@ function User() {
                                                         options={
                                                             authorizationOptions
                                                         }
-                                                        defaultValue={authorizationOptions.find(item => item.value == values.authorization) || authorizationOptions[0]}
-
+                                                        defaultValue={
+                                                            authorizationOptions.find(
+                                                                (item) =>
+                                                                    item.value ==
+                                                                    values.authorization
+                                                            ) ||
+                                                            authorizationOptions[0]
+                                                        }
                                                     />
                                                     {errors.authorization &&
                                                     touched.authorization ? (
@@ -463,15 +563,23 @@ function User() {
                                                 onChange={handleChangeAvatar}
                                                 className="hidden"
                                             />
-                                            <img
-                                                id="avatar-display"
-                                                src={
-                                                    avatar.imgSrc ||
-                                                    avatar.autoImg
-                                                }
-                                                className="w-1/2 aspect-square mb-4 rounded-full object-cover"
-                                                alt="Default-Avatar"
-                                            />
+                                            <figure className="w-1/2 relative aspect-square mb-4 rounded-full object-cover">
+                                                <img
+                                                    id="avatar-display"
+                                                    src={
+                                                        avatar.imgSrc ||
+                                                        avatar.autoImg
+                                                    }
+                                                    className="w-full aspect-square rounded-full object-cover self-center"
+                                                    alt="Default-Avatar"
+                                                />
+                                                {avatarLoading && (
+                                                    <>
+                                                        <div className="absolute aspect-square rounded-full top-0 left-0 w-full h-full bg-black opacity-40"></div>
+                                                        <TinyLoader className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                                    </>
+                                                )}
+                                            </figure>
 
                                             <div className="flex gap-2 justify-center">
                                                 <span
@@ -518,6 +626,16 @@ function User() {
                                             <Field
                                                 name="sapId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "sapId",
+                                                        e.target.value
+                                                    );
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        sapId: e.target.value,
+                                                    }));
+                                                }}
                                             />
                                             {errors.sapId && touched.sapId ? (
                                                 <span className="text-xs text-red-600">
@@ -540,6 +658,17 @@ function User() {
                                             <Field
                                                 name="integrationId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "integrationId",
+                                                        e.target.value
+                                                    );
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        integrationId:
+                                                            e.target.value,
+                                                    }));
+                                                }}
                                             />
                                             {errors.integrationId &&
                                             touched.integrationId ? (
@@ -563,6 +692,16 @@ function User() {
                                             <Field
                                                 name="factory"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "factory",
+                                                        e.target.value
+                                                    );
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        factory: e.target.value,
+                                                    }));
+                                                }}
                                             />
                                             {errors.factory &&
                                             touched.factory ? (
@@ -586,6 +725,16 @@ function User() {
                                             <Field
                                                 name="branch"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "branch",
+                                                        e.target.value
+                                                    );
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        branch: e.target.value,
+                                                    }));
+                                                }}
                                             />
                                             {errors.branch && touched.branch ? (
                                                 <span className="text-xs text-red-600">
@@ -608,9 +757,7 @@ function User() {
                     </Formik>
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
+            {loading && <Loader />}
         </Layout>
     );
 }

@@ -145,7 +145,9 @@ function CreateUser() {
     };
 
     const handleFormSubmit = async (e) => {
-        toast.info("Chưa phát triển submit form");
+        toast("Chưa phát triển submit form", {
+            icon: " ℹ️"
+        });
         console.log("Submit form nè: ", input);
     };
 
@@ -184,16 +186,16 @@ function CreateUser() {
                                     <div className="flex items-center">
                                         <Link
                                             to="/users"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Quản lý người dùng
                                         </Link>
                                     </div>
                                 </li>
                                 <li aria-current="page">
-                                    <div class="flex items-center">
+                                    <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -207,7 +209,7 @@ function CreateUser() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
+                                        <span className="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
                                             <div>Tạo mới</div>
                                         </span>
                                     </div>
@@ -224,9 +226,7 @@ function CreateUser() {
                         validationSchema={validationSchema}
                         onSubmit={handleFormSubmit}
                     >
-                        {({ errors, touched, values }) => {
-                            setInput(values);
-
+                        {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                                     <h1 className="mb-4 text-xl text-center md:text-left">
@@ -248,6 +248,20 @@ function CreateUser() {
                                                     <Field
                                                         name="lastName"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "lastName",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    lastName:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.lastName &&
                                                     touched.lastName ? (
@@ -271,6 +285,20 @@ function CreateUser() {
                                                     <Field
                                                         name="firstName"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "firstName",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    firstName:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.firstName &&
                                                     touched.firstName ? (
@@ -295,6 +323,20 @@ function CreateUser() {
                                                         name="email"
                                                         type="email"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "email",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    email:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.email &&
                                                     touched.email ? (
@@ -342,6 +384,20 @@ function CreateUser() {
                                                         name="password"
                                                         type="password"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "password",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    password:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.password &&
                                                     touched.password ? (
@@ -446,6 +502,20 @@ function CreateUser() {
                                             <Field
                                                 name="sapId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "sapId",
+                                                        e.target.value
+                                                    );
+                                                    setInput(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            sapId:
+                                                                e.target
+                                                                    .value,
+                                                        })
+                                                    );
+                                                }}
                                             />
                                             {errors.sapId && touched.sapId ? (
                                                 <span className="text-xs text-red-600">
@@ -468,6 +538,20 @@ function CreateUser() {
                                             <Field
                                                 name="integrationId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "integrationId",
+                                                        e.target.value
+                                                    );
+                                                    setInput(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            integrationId:
+                                                                e.target
+                                                                    .value,
+                                                        })
+                                                    );
+                                                }}
                                             />
                                             {errors.integrationId &&
                                             touched.integrationId ? (
@@ -491,6 +575,20 @@ function CreateUser() {
                                             <Field
                                                 name="factory"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "factory",
+                                                        e.target.value
+                                                    );
+                                                    setInput(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            factory:
+                                                                e.target
+                                                                    .value,
+                                                        })
+                                                    );
+                                                }}
                                             />
                                             {errors.factory &&
                                             touched.factory ? (
@@ -514,6 +612,20 @@ function CreateUser() {
                                             <Field
                                                 name="branch"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "branch",
+                                                        e.target.value
+                                                    );
+                                                    setInput(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            branch:
+                                                                e.target
+                                                                    .value,
+                                                        })
+                                                    );
+                                                }}
                                             />
                                             {errors.branch && touched.branch ? (
                                                 <span className="text-xs text-red-600">

@@ -21,7 +21,7 @@ const Notfound = () => {
                     </div>
                     <div className="flex gap-4 justify-center md:justify-start w-full">
                         <span
-                            className="p-[14px] text-normal rounded bg-[#000000] text-white mt-2"
+                            className="p-[14px] text-normal rounded bg-[#000000] text-white mt-2 cursor-pointer"
                             onClick={() => {
                                 navigate(-1, {replace: true});
                             }}
@@ -29,7 +29,7 @@ const Notfound = () => {
                             Trang trước
                         </span>
                         <span
-                            className="p-[14px] text-normal rounded bg-[#E04141] text-white mt-2"
+                            className="p-[14px] text-normal rounded bg-[#E04141] text-white mt-2 cursor-pointer"
                             onClick={() => {
                                 navigate("/", {replace: true});
                             }}

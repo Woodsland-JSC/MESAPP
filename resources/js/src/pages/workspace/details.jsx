@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../layouts/layout";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 import KilnCheck from "../../components/KilnCheck";
@@ -14,21 +14,130 @@ import ControllerCard from "../../components/ControllerCard";
 function Details() {
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
+
     const type = searchParams.get("type");
+    const id = searchParams.get("id");
 
     const navigate = useNavigate();
 
+    const [disabledReports, setDisabledReports] = useState([
+        {
+            id: 106295,
+            createdDate: "2023-10-12T07:59:28.050Z",
+            avgDisabledRate: 12.25,
+            avgCurvedRate: 50,
+            dryingBatch: "2023.45.01",
+            factory: "Bla bla",
+            disabledDetails: [
+                {
+                    id: 1,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 2,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 3,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 4,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+            ],
+        },
+        {
+            id: 106296,
+            createdDate: "2023-10-12T07:59:28.050Z",
+            avgDisabledRate: 12.25,
+            avgCurvedRate: 50,
+            dryingBatch: "2023.45.01",
+            factory: "Bla bla",
+            disabledDetails: [
+                {
+                    id: 1,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 2,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 3,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+                {
+                    id: 4,
+                    pallet: 10,
+                    sample: 5,
+                    disability: 2,
+                    curve: 1,
+                    disabledRate: 60,
+                    curvedRate: 20,
+                    note: "This is test",
+                },
+            ],
+        },
+    ]);
+
     const goBack = () => {
-        navigate(-1); // Quay lại trang trước đó
+        navigate(-1);
     };
 
+    useEffect(() => {
+        console.log("Use effect này để get dữ liệu của mẻ sấy hiện tại");
+    }, []);
+
+    // return id ? (
     return (
         <Layout>
             <div>
                 <div className="flex justify-center bg-[#F8F9F7] ">
                     {/* Section */}
                     <div className="w-screen p-12 px-32 border-t border-gray-200">
-
                         {/* Header */}
                         <div className="flex items-center text-2xl font-bold mb-6 gap-x-6">
                             <button
@@ -77,7 +186,13 @@ function Details() {
                                         <div className="space-y-6">
                                             <KilnCheck />
                                             <HumidityCheck />
-                                            <DisabledCheck />
+                                            <DisabledCheck
+                                                disabilityList={disabledReports}
+                                                generalInfo={{
+                                                    dryingBatch: "2023.45.01",
+                                                    factory: "Nhà máy A",
+                                                }}
+                                            />
                                             <SizeCard />
                                             <div>danh gia detail</div>
                                         </div>
@@ -104,6 +219,9 @@ function Details() {
             </div>
         </Layout>
     );
+    // : (
+    //     <Navigate to="/notfound" replace />
+    // );
 }
 
 export default Details;
