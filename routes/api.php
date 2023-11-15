@@ -79,4 +79,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('getQuyCachSay');
     Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('getLoSay');
     Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('getReason');
+    Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
 });

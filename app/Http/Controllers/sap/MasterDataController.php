@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reasons;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Class MasterData.
@@ -132,7 +133,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
-            return response()->json([$results], 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -207,6 +208,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
+
     function branch(Request $request)
     {
         try {
@@ -337,12 +339,12 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select * from "@G_SAY3"';
+            $query = 'select "Code","Name" from "@G_SAY3" where "U_Factory"=? and "U_Branch"=?';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt)) {
+            if (!odbc_execute($stmt, [Auth::user()->plant, Auth::user()->branch])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -365,5 +367,33 @@ class MasterDataController extends Controller
     function getReason(Request $request)
     {
         return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->get(['Code', 'Name']), 200);
+    }
+    function settings(Request $request)
+    {
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            "Content-Type" => "application/json",
+            "Accept" => "application/json",
+            "Authorization" => "Basic " . BasicAuthToken(),
+        ])->get(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers");
+        //->post(UrlSAPServiceLayer() . "/b1s/v1/Quotations", $body);
+        // Make a request to the service layer
+        //$response = $client->request("POST", "/b1s/v1/Quotations",['verify' => false, 'body' =>  json_encode($body)]);
+        $res = $response->json();
+
+        // $client = new \GuzzleHttp\Client([
+        //     "base_uri" => UrlSAPServiceLayer(),
+        //     "headers" => HeaderAPISAP(),
+        // ]);
+        // $response = $client->request(
+        //     "GET",
+        //     "/b1s/v1/InventoryTransferRequests",
+        //     [
+        //         'verify' => false,
+        //         // 'body' =>  json_encode($body)
+        //     ]
+        // );
+        return response()->json(["data" => $res], 200);
     }
 }

@@ -21,7 +21,10 @@ class Pallet extends Model
         'NgayNhap',
         'status',
         'is_active',
-        'branch'
+        'branch',
+        'DocNum',
+        'DocEntry',
+        'CreateBy'
     ];
     // Sự kiện trước khi tạo mới record
     protected static function boot()
