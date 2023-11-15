@@ -121,20 +121,7 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
         }
     }
-    function pickOven(Request $request)
-    {
-        try {
-            $conDB = (new ConnectController)->connect_sap();
-            odbc_close($conDB);
-            return response()->json($results, 200);
-        } catch (\Exception | QueryException $e) {
-            return response()->json([
-                'error' => false,
-                'status_code' => 500,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+
     function ListOvenAvailiable(Request $request)
     {
         try {
