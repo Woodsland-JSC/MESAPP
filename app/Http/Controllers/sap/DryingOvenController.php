@@ -82,7 +82,7 @@ class DryingOvenController extends Controller
                     'message' => 'Pallet created successfully',
                     'data' => [
                         'pallet' => $pallet,
-                        'details' => $res['DocEntry'],
+                        'details' => $res,
 
                     ]
                 ]);
@@ -119,6 +119,50 @@ class DryingOvenController extends Controller
         } catch (\Exception $e) {
             // Handle the exception (e.g., pallet not found)
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
+        }
+    }
+    function pickOven(Request $request)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception | QueryException $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function ListOvenAvailiable(Request $request)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select "Code","Name"  from "@G_SAY3" where "U_Branch"=? and "U_Factory"=? and IFNULL("U_status",0)<>1';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [Auth::user()->branch, Auth::user()->plant])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

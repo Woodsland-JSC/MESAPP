@@ -368,6 +368,36 @@ class MasterDataController extends Controller
     {
         return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->get(['Code', 'Name']), 200);
     }
+    function listfactory(string $id)
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select "Code","Name"  from "@G_SAY4" where "U_BranchID"=?';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$id])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
     function settings(Request $request)
     {
         $response = Http::withOptions([
