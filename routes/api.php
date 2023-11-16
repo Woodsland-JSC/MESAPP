@@ -71,8 +71,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::group(['prefix' => 'ovens'], function () {
         Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('ovens.index');
-        // Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('pallets.create');
-        // Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('pallets.find');
+        Route::post('/create', [DryingOvenController::class, 'pickOven'])->name('ovens.create');
+        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('ovens.find');
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('GetItemMasterDataSap');

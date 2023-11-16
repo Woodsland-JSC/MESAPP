@@ -21,7 +21,7 @@ class DryingOvenController extends Controller
             DB::beginTransaction();
             $whs = WarehouseCS();
 
-            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'QuyCach', 'NgayNhap']);
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap']);
             $pallet = Pallet::create($palletData);
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('details', []);
@@ -109,6 +109,7 @@ class DryingOvenController extends Controller
 
         return response()->json($response, 200);
     }
+    // Xem chi tiết pallet
     function showbyID($id)
     {
         try {
@@ -121,7 +122,7 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
         }
     }
-
+    // danh sách lò xấy trống theo chi nhánh và nhà máy. hệ thống sẽ check theo user
     function ListOvenAvailiable(Request $request)
     {
         try {

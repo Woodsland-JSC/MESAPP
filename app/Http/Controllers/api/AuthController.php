@@ -17,82 +17,7 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
 
-    /**
-     * @OA\Post(
-     *      path="/api/login",
-     *      operationId="login",
-     *      tags={"Authentication"},
-     *      summary="Log in a user",
-     *      description="Logs in a user and returns a token.",
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              required={"email","password"},
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  format="email",
-     *                  description="The email of the user",
-     *                  example="user@example.com"
-     *              ),
-     *              @OA\Property(
-     *                  property="password",
-     *                  type="string",
-     *                  format="password",
-     *                  description="The password of the user",
-     *                  example="password1234"
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\JsonContent(
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  example="abc@gmail.com"
-     *              ),
-     *              @OA\Property(
-     *                  property="access_token",
-     *                  type="string",
-     *                  example="dfwetewtwsafewt"
-     *              ),
-     *              @OA\Property(
-     *                  property="avartar",
-     *                  type="string",
-     *                  example="img.ico"
-     *              ),
-     *              @OA\Property(
-     *                  property="plant",
-     *                  type="string",
-     *                  example="TQ"
-     *              ),
-     *              @OA\Property(
-     *                  property="first_name",
-     *                  type="string",
-     *                  example="dfwetewtwsafewt"
-     *              ),
-     *              @OA\Property(
-     *                  property="sap_id",
-     *                  type="string",
-     *                  example="manager"
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(
-     *                  property="message",
-     *                  type="string",
-     *                  example="Invalid email or password"
-     *              )
-     *          )
-     *      )
-     * )
-     */
+
     public function login(Request $request)
     {
         try {
@@ -119,7 +44,8 @@ class AuthController extends Controller
                 throw new \Exception('Error in Login');
             }
             $user = Auth::user();
-            if ($user->is_block === 1) { // Giả sử cột 'isActive' trong database xác định trạng thái hoạt động của người dùng
+            if ($user->is_block === 1) {
+                // Giả sử cột 'isActive' trong database xác định trạng thái hoạt động của người dùng
                 // Nếu người dùng không active, trả về lỗi 403 Forbidden
                 Auth::logout(); // Đảm bảo đăng xuất người dùng nếu không active
                 return response()->json([

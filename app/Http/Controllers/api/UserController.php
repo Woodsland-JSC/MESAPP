@@ -62,52 +62,7 @@ class UserController extends Controller
 
         return response()->json($response, 200);
     }
-    /**
-     * @OA\Get(
-     *     path="/api/users/find/{userId}",
-     *     tags={"MasterData"},
-     *     summary="Get detail user by id",
-     *     @OA\Parameter(
-     *         name="userId",
-     *         in="path",
-     *         description="ID of user that needs to be fetched",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="integer",
-     *             format="int64",
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="first_name",
-     *                  type="string",
-     *                  example="Judd Leuschke"
-     *              ),
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  example="mortimer45@example.org"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="plant",
-     *                  type="string",
-     *                  example="TQ"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="sap_id",
-     *                  type="string",
-     *                  example="manager"
-     *              )
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+    // xem chi tiết thông tin user theo id
     function UserById($id)
     {
         $user = User::find($id);
