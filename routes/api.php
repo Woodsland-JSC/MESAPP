@@ -69,6 +69,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('pallets.create');
         Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('pallets.find');
     });
+    Route::group(['prefix' => 'ovens'], function () {
+        Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('ovens.index');
+        // Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('pallets.create');
+        // Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('pallets.find');
+    });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('GetItemMasterDataSap');
     Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
@@ -79,4 +84,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('getQuyCachSay');
     Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('getLoSay');
     Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('getReason');
+    Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
+    Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('admin.listfactory');
 });
