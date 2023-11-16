@@ -13,8 +13,12 @@ export const AppProvider = ({ children }) => {
     let userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const cookieAuth = Cookies.get('isAuthenticated');
     const [loading, setLoading] = useState(false);
+
+    // Dành cho quản lý Auth
     const [user, setUser] = useState(userInfo && cookieAuth ? userInfo : null);
     const [isAuthenticated, setIsAuthenticated] = useState(userInfo && cookieAuth ? true : false);
+    
+    // Dành cho quản lý danh sách mẻ sấy
     const [items, setItems] = useState([]);
 
     const contextValue = useMemo(

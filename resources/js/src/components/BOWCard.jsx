@@ -26,7 +26,7 @@ function BOWCard(props) {
     } else if (location.pathname === "/workspace/load-into-kiln") {
         detailLink = "/workspace/details?type=vl";
     } else if (location.pathname === "/workspace/drying-wood-checking") {
-        detailLink = "/workspace/details?type=dg";
+        detailLink = "/workspace/details?id=1&type=dg";
     } else if (location.pathname === "/workspace/create-drying-plan") {
         detailLink = "/workspace/details?type=kh";
     } else if (location.pathname === "/workspace/kiln-checking") {

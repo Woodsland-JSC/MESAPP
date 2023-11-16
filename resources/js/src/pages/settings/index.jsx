@@ -7,6 +7,7 @@ import Select from "react-select";
 import toast from "react-hot-toast";
 import Layout from "../../layouts/layout";
 import Loader from "../../components/Loader";
+import TinyLoader from "../../components/TinyLoader";
 import generateAvatar from "../../utils/generateAvatar";
 import usersApi from "../../api/userApi";
 import useAppContext from "../../store/AppContext";
@@ -91,7 +92,11 @@ const SelectField = ({ options, ...props }) => {
 
 function Settings() {
     const [formKey, setFormKey] = useState(0);
+
     const { loading, setLoading } = useAppContext();
+
+    const [avatarLoading, setAvatarLoading] = useState(false);
+
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
@@ -114,6 +119,7 @@ function Settings() {
     });
 
     const handleChangeAvatar = (event) => {
+        setAvatarLoading(true);
         const file = event.target.files[0];
         setSelectedFile(file);
         const reader = new FileReader();
@@ -128,6 +134,7 @@ function Settings() {
         };
 
         reader.readAsDataURL(file);
+        setAvatarLoading(false);
     };
 
     const blobToBase64 = (blob) => {
@@ -144,23 +151,39 @@ function Settings() {
         });
     };
 
-    const handleDeleteAvatar = () => {
-        console.log("Ra dì: ", avatar.autoImg);
+    const handleDeleteAvatar = async () => {
+        setAvatar({
+            ...avatar,
+            file: null,
+            imgSrc: null,
+        });
+
         if (!avatar.autoImg) {
             if (input.lastName && input.firstName) {
+                setAvatarLoading(true);
                 const tempName =
                     input.lastName.trim().charAt(0) +
                     input.firstName.trim().charAt(0);
-                getAutoAvatar(tempName);
+                const base64 = await getAutoAvatar(tempName);
+                setAvatar({
+                    autoImg: base64,
+                    file: null,
+                    imgSrc: null,
+                });
+                setAvatarLoading(false);
             }
         } else {
             setAvatar({
-                ...avatar,
+                autoImg: avatar.autoImg,
                 file: null,
                 imgSrc: null,
             });
         }
     };
+
+    useEffect(() => {
+        console.log("Avatar có sự thay đổi: ", avatar);
+    }, [avatar]);
 
     const handleChangeInfo = async (values) => {
         toast("Chưa phát triển change info", {
@@ -177,20 +200,26 @@ function Settings() {
     };
 
     const getAutoAvatar = async (name) => {
+        // setAvatarLoading(true);
         try {
             const res = await generateAvatar(name);
             const base64 = await blobToBase64(res);
             const imgSrc = `data:image/png;base64,${base64}`;
-            setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
+            // setAvatar({ ...avatar, imgSrc: null, autoImg: imgSrc });
+            return imgSrc;
         } catch (error) {
             console.error(error);
+            return null;
         }
+        // setAvatarLoading(false);
     };
 
     useEffect(() => {
         console.log("User gì ta: ", input.lastName + " " + input.firstName);
         console.log(avatar.file);
         if (input.lastName && input.firstName && !avatar.file) {
+            setAvatarLoading(true);
+
             const tempName =
                 input.lastName.trim().charAt(0) +
                 input.firstName.trim().charAt(0);
@@ -198,11 +227,13 @@ function Settings() {
         }
 
         if (!input.lastName && !input.firstName) {
+            console.log("Không có tên và họ");
             setAvatar({ ...avatar, autoImg: DefaultAvatar });
         }
     }, [input]);
 
     useEffect(() => {
+        console.log("Ban đầu");
         const getCurrentUser = async () => {
             try {
                 setLoading(true);
@@ -222,9 +253,10 @@ function Settings() {
                 const userData = await res;
                 const clonedData = (({ avatar, ...rest }) => rest)(userData);
                 setInput(clonedData);
+
                 if (userData.avatar) {
                     setAvatar({
-                        autoImg: null,
+                        ...avatar,
                         file: userData.avatar,
                         imgSrc: userData.avatar,
                     });
@@ -268,12 +300,16 @@ function Settings() {
                     <Formik
                         key={formKey}
                         initialValues={input}
+                        enableReinitialize
                         validationSchema={inputValidationSchema}
                         onSubmit={(values) => {
                             handleChangeInfo(values);
                         }}
+                        onValuesChange={(newValues) => {
+                            console.log("Hello An");
+                        }}
                     >
-                        {({ errors, touched, values }) => {
+                        {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                                     <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
@@ -297,6 +333,20 @@ function Settings() {
                                                         name="lastName"
                                                         className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         value={values.lastName}
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "lastName",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    lastName:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            );
+                                                        }}
                                                     />
                                                     {errors.lastName &&
                                                     touched.lastName ? (
@@ -453,7 +503,7 @@ function Settings() {
                             handleChangePassword(values);
                         }}
                     >
-                        {({ errors, touched, values }) => {
+                        {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <div className="pb-9">
                                     <Form className="flex flex-col mt-8 p-6 bg-white border-2 border-gray-200 rounded-xl">
