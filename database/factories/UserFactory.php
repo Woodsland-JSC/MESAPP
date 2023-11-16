@@ -28,6 +28,7 @@ class UserFactory extends Factory
             'plant' => 'TQ',
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'branch' => 1
         ];
     }
 

@@ -9,14 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    // table cho công nhân sấy
     public function up(): void
     {
-        Schema::create('drying_ovens', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('Code');
-            $table->string('Name')->nullable();
-            $table->integer('is_active')->default(0);
+        Schema::create('worker_dryings', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('PlanID');
+            $table->string('userID');
             $table->timestamps();
+            $table->foreign('PlanID')->references('PlanID')->on('planDryings');
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('drying_ovens');
+        Schema::dropIfExists('worker_dryings');
     }
 };

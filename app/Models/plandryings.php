@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Pallet extends Model
+class plandryings extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'palletID';
-    protected $table = 'pallets';
+    protected $primaryKey = 'PlanID';
+    protected $table = 'plandryings';
     protected $fillable = [
-        'palletID',
+        'PlanID',
         'Code',
-        'LoaiGo',
-        'MaLo',
-        'LyDo',
-        'QuyCach',
-        'NgayNhap',
-        'status',
-        'is_active',
-        'branch',
-        'DocNum',
-        'DocEntry',
+        'Oven',
+        'Reason',
+        'Method',
+        'Mass',
+        'TotalPallet',
+        'PlanDate',
+        'Status',
+        'Checked',
+        'Review',
+        'Disabilities',
         'CreateBy'
     ];
     // Sự kiện trước khi tạo mới record
@@ -58,8 +58,12 @@ class Pallet extends Model
 
         return $this->current_week_start_id;
     }
+    public function worker()
+    {
+        return $this->hasMany(worker::class, 'PlanID', 'PlanID');
+    }
     public function details()
     {
-        return $this->hasMany(pallet_details::class, 'palletID', 'palletID');
+        return $this->hasMany(plandetail::class, 'PlanID', 'PlanID');
     }
 }

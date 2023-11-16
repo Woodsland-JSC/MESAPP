@@ -9,17 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    //table cho chi tiết kế hoạch sấy
     public function up(): void
     {
-        Schema::create('pallet_details', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('palletID');
-            $table->string('ItemCode');
-            $table->string('WhsCode', 50);
-            $table->string('BatchNum');
+        Schema::create('plan_detail', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('PlanID');
+            $table->string('pallet');
+            $table->string('size');
             $table->float('Qty');
+            $table->float('Mass');
             $table->timestamps();
-            $table->foreign('palletID')->references('palletID')->on('pallets');
+            $table->foreign('PlanID')->references('PlanID')->on('planDryings');
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pallet_details');
+        Schema::dropIfExists('plan_detail');
     }
 };
