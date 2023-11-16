@@ -19,8 +19,8 @@ const usersApi = {
         const url = `/logout`;
         return axiosClient().get(url, {});
     },
-    getAllUsers: () => {
-        const url = `/users`;
+    getAllUsers: ({pageSize, page}) => {
+        const url = `/users?pageSize=${pageSize}&page=${page}`;
         return axiosClient().get(url, {});
     },
     getUserDetails: () => {

@@ -13,7 +13,6 @@ import { FaPlus } from "react-icons/fa";
 import Select from "react-select";
 
 const sizeOptions = [
-    { value: "10", label: "10" },
     { value: "20", label: "20" },
     { value: "50", label: "50" },
     { value: "100", label: "100" },
@@ -35,24 +34,21 @@ function Users() {
         []
     );
     const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
-    const [rowData, setRowData] = useState();
+    const [rowData, setRowData] = useState([]);
     const [columnDefs, setColumnDefs] = useState([
         {
-            headerName: "Athlete",
+            headerName: "Họ tên",
             field: "athlete",
-            minWidth: 170,
+            minWidth: 200,
             checkboxSelection: checkboxSelection,
             headerCheckboxSelection: headerCheckboxSelection,
         },
-        { field: "age" },
-        { field: "country" },
-        { field: "year" },
-        { field: "date" },
-        { field: "sport" },
-        { field: "gold" },
-        { field: "silver" },
-        { field: "bronze" },
-        { field: "total" },
+        { field: "Giới tính" },
+        { field: "Email" },
+        { field: "Vai trò" },
+        { field: "Plant" },
+        { field: "Ngày tạo" },
+        { field: "Block" },
     ]);
 
     const autoGroupColumnDef = useMemo(() => {
@@ -93,13 +89,34 @@ function Users() {
         return "[" + params.value.toLocaleString() + "]";
     }, []);
 
-    const onGridReady = useCallback((params) => {
+    const onGridReady = useCallback(async () => {
+        const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
+        console.log(res.data);
+        const data = res.data;
+        setRowData(data);
         fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
             .then((resp) => resp.json())
             .then((data) => {
-                setRowData(data);
+                console.log(data);
             });
     }, []);
+
+    const getUserData = (params) => {
+        const page = params.request.startRow / params.request.endRow + 1;
+        const pageSize = params.request.endRow - params.request.startRow;
+
+        fetch(`/api/users?page=${page}&pageSize=${pageSize}`)
+            .then((res) => res.json())
+            .then((data) => {
+                params.success({
+                    rowData: data.data,
+                    rowCount: data.total,
+                });
+            })
+            .catch(() => {
+                params.fail();
+            });
+    };
 
     const onFirstDataRendered = useCallback((params) => {
         gridRef.current.api.paginationGoToPage(4);

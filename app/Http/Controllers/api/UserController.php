@@ -49,19 +49,57 @@ class UserController extends Controller
      *     }
      * )
      */
+    // function index(Request $request)
+    // {
+    //     $pagination = User::orderBy('id', 'DESC')->paginate(20);
+
+    //     // Get the array representation of the pagination data
+    //     $response = $pagination->toArray();
+
+    //     // Manually add the next page link if it exists
+    //     $response['next_page_url'] = $pagination->nextPageUrl();
+    //     $response['prev_page_url'] = $pagination->previousPageUrl();
+
+    //     return response()->json($response, 200);
+    // }
     function index(Request $request)
     {
-        $pagination = User::orderBy('id', 'DESC')->paginate(20);
-
+        $pageSize = $request->get('pageSize', 20);
+        $pagination = User::orderBy('id', 'DESC')->paginate($pageSize);
+    
         // Get the array representation of the pagination data
         $response = $pagination->toArray();
+    
+        // Build the query parameters
+        $base_url = $request->url();
 
-        // Manually add the next page link if it exists
-        $response['next_page_url'] = $pagination->nextPageUrl();
-        $response['prev_page_url'] = $pagination->previousPageUrl();
-
+        if ($pageSize != 20) {
+            $query = http_build_query([
+                'pageSize' => $pageSize,
+                'page' => $pagination->currentPage() + 1, // next page
+            ]);
+        
+            $response['next_page_url'] = $pagination->nextPageUrl()
+                ? $base_url . '?' . $query
+                : null;
+        
+            $query = http_build_query([
+                'pageSize' => $pageSize,
+                'page' => $pagination->currentPage() - 1, // previous page
+            ]);
+            
+            $response['prev_page_url'] = $pagination->currentPage() > 1
+                ? $base_url . '?' . $query
+                : null;
+        } else{
+            // Manually add the next page link if it exists
+            $response['next_page_url'] = $pagination->nextPageUrl();
+            $response['prev_page_url'] = $pagination->previousPageUrl();
+        }
+    
         return response()->json($response, 200);
     }
+    
     /**
      * @OA\Get(
      *     path="/api/users/find/{userId}",
