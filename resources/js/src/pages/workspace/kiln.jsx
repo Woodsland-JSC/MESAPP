@@ -9,7 +9,7 @@ function Kiln() {
             {/* Container */}
             <div className="flex justify-center bg-[#F8F9F7] ">
                 {/* Section */}
-                <div className="w-screen p-12 px-32 border-t border-gray-200">
+                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -77,7 +77,7 @@ function Kiln() {
 
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">
-                        Danh sách mẻ sấy
+                        Lò sấy
                     </div>
 
                     {/* Controller */}

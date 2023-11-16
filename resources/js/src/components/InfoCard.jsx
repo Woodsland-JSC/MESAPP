@@ -9,12 +9,12 @@ function InfoCard(props) {
         <div className="bg-white rounded-2xl border-2 border-gray-200 h-fit">
             <div className="flex items-center gap-x-3 text-xl font-medium border-b p-4 px-6 border-gray-200">
               <FaInfoCircle  className="text-[#17506B] text-2xl"/>
-              Thông tin mẻ sấy
+              <div className="xl:text-xl xl:w-full  text-lg">Thông tin mẻ sấy</div>
             </div>
             
             <div className="space-y-3 px-6 pb-5 pt-4">
                 <div className="grid grid-cols-2">
-                    <div className="font-medium">Mục đích sấy:</div>
+                    <div className="font-semibold">Mục đích sấy:</div>
                     <span className="font-normal">{purpose}</span>
                 </div>
                 <div className="grid grid-cols-2">

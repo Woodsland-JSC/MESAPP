@@ -51,8 +51,8 @@ function ControllerCard(props) {
             {/* Content */}
 
             {/* Step 1: Vào lò */}
-            <div className="flex items-end gap-x-4 px-6 py-3">
-                <div className="pt-2 w-[85%]">
+            <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-3">
+                <div className="pt-2 xl:w-[85%] w-full md:w-[85%]">
                     <label
                         for="company"
                         className="block mb-2 text-md font-medium text-gray-900 "
@@ -61,31 +61,31 @@ function ControllerCard(props) {
                     </label>
                     <Select options={options} />
                 </div>
-                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-[15%]">
+                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:w-[15%]">
                     Vào lò
                 </button>
             </div>
 
             {/* Step 2: Bắt đầu sấy */}
-            <div className="flex items-end gap-x-4 px-6 pb-5">
-                <div className="pt-2 space-y-1 w-[75%]">
+            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 pb-5 xl:space-y-0 space-y-3">
+                <div className="pt-2 space-y-1 xl:w-[75%]">
                     <div className="font-semibold">Chú ý:</div>
                     <div>
                         Thời gian sẽ bắt đầu được tính khi bấm bắt đầu sấy.
                     </div>
                 </div>
-                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-[25%]">
+                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full">
                     Bắt đầu sấy
                 </button>
             </div>
 
             {/* Step 3: Xác nhận ra lò (Sấy xong) */}
-            <div className="flex items-end gap-x-4 px-6 pb-5">
-                <div className="pt-2 space-y-1 w-[75%]">
+            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 pb-5 xl:space-y-0 space-y-3">
+                <div className="pt-2 space-y-1 w-full xl:w-[75%]">
                     <div className="font-semibold">Tình trạng mẻ sấy:</div>
                     <div>Mẻ sấy đã đủ điều kiện ra lò.</div>
                 </div>
-                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-[25%]">
+                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]">
                     Xác nhận ra lò
                 </button>
             </div>
