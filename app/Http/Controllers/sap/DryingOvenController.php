@@ -98,16 +98,9 @@ class DryingOvenController extends Controller
     // get pallet
     function index(Request $request)
     {
-        $pagination = Pallet::orderBy('palletID', 'DESC')->paginate(20);
+        $pallet = Pallet::orderBy('palletID', 'DESC')->get();
 
-        // Get the array representation of the pagination data
-        $response = $pagination->toArray();
-
-        // Manually add the next page link if it exists
-        $response['next_page_url'] = $pagination->nextPageUrl();
-        $response['prev_page_url'] = $pagination->previousPageUrl();
-
-        return response()->json($response, 200);
+        return response()->json($pallet, 200);
     }
     // Xem chi tiết pallet
     function showbyID($id)
