@@ -175,7 +175,7 @@ function CreateUser() {
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
-                <div className="w-screen md:py-12 p-4 md:px-12 lg:px-40 border-t border-gray-200">
+                <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">

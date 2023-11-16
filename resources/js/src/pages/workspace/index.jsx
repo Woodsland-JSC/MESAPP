@@ -64,7 +64,7 @@ function Workspace() {
 
                     {/* Card Fields */}
                     <div className="flex justify-center">
-                        <div className="grid grid-cols-3 xl:gap-x-7 gap-x-6 xl:gap-y-6 gap-y-6">
+                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-6 xl:gap-y-6 grid-cols-2 gap-y-6">
                             <Link to="/workspace/wood-sorting">
                                 <div className="w-fit xl:flex xl:gap-x-6 max-w-sm items-center justify-center p-6 mr-0 xl:p-8 bg-white border-2 border-gray-200 rounded-3xl
                                 xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">

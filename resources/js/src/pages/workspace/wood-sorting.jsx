@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
 import { FaPlus } from "react-icons/fa";
 import Select from "react-select";
+import AsyncSelect from "react-select/async";
+import palletsApi from "../../api/palletsApi";
+
+import DatePicker from "react-datepicker";
+import { BsCalendar2Week } from "react-icons/bs";
+
+import "react-datepicker/dist/react-datepicker.css";
+import "../../assets/styles/datepicker.css"
 
 const options = [
     { value: "chocolate", label: "Chocolate" },
@@ -11,13 +19,82 @@ const options = [
     { value: "vanilla", label: "Vanilla" },
 ];
 
-// const customStyles = {
-//   container: () => ({
-
-//   }),
-// }
-
 function WoodSorting() {
+    const [woodTypes, setWoodTypes] = useState([]);
+    const [dryingMethods, setDryingMethods] = useState([]);
+    const [dryingReasons, setDryingReasons] = useState([]);
+
+    useEffect(() => {
+        palletsApi
+            .getTypeOfWood()
+            .then((data) => {
+                const options = data.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                setWoodTypes(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching wood types:", error);
+            });
+
+        palletsApi
+            .getDryingMethod()
+            .then((data) => {
+                const options = data.map((item) => ({
+                    value: item.ItemCode,
+                    label: item.ItemName,
+                }));
+                setDryingMethods(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching drying methods:", error);
+            });
+
+        palletsApi
+            .getDryingReason()
+            .then((data) => {
+                const options = data.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                setDryingReasons(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching drying reasons:", error);
+            });
+    }, []);
+
+    const loadDryingMethods = (inputValue, callback) => {
+        palletsApi
+            .getDryingMethod()
+            .then((data) => {
+                const filteredOptions = data.filter(
+                    (option) =>
+                        option.ItemName.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.ItemCode.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
+                );
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.ItemCode,
+                    label: item.ItemName,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching drying methods:", error);
+                callback([]);
+            });
+    };
+
+    // Date picker
+    const [startDate, setStartDate] = useState(new Date());
+
     return (
         <Layout>
             {/* Container */}
@@ -98,17 +175,18 @@ function WoodSorting() {
                     <div className="p-6 bg-white border-2 border-gray-200 rounded-xl">
                         <section>
                             <form>
-                                <div className="xl:grid xl:space-y-1 space-y-5 gap-4 mb-6 xl:grid-cols-6">
-                                    <div className="col-span-2">
+                                <div className="xl:grid xl:space-y-0 space-y-5 gap-5 mb-6 xl:grid-cols-3">
+                                    <div className="col-span-1">
                                         <label
                                             for="first_name"
                                             className="block mb-2 text-md font-medium text-gray-900"
                                         >
                                             Loại gỗ
                                         </label>
-                                        <Select options={options} />
+                                        {/* <Select options={options} /> */}
+                                        <Select options={woodTypes} />
                                     </div>
-                                    <div className="col-span-2">
+                                    <div className="col-span-1">
                                         <label
                                             for="last_name"
                                             className="block mb-2 text-md font-medium text-gray-900"
@@ -122,38 +200,48 @@ function WoodSorting() {
                                             required
                                         />
                                     </div>
-                                    <div className="col-span-2">
+                                    <div className="col-span-1">
                                         <label
                                             for="company"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Mục đích sấy
                                         </label>
-                                        <Select options={options} />
+                                        <Select options={dryingReasons} />
                                     </div>
-                                    <div className="col-span-4">
+                                    <div className="col-span-2">
                                         <label
                                             for="company"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Quy cách thô
                                         </label>
-                                        <Select options={options} />
+                                        {/* <Select cacheOptions defaultOptions options={dryingMethods} /> */}
+                                        <AsyncSelect
+                                            cacheOptions
+                                            defaultOptions
+                                            loadOptions={loadDryingMethods}
+                                            options={dryingMethods}
+                                        />
                                     </div>
 
-                                    <div className="col-span-2">
+                                    <div className="col-span-1">
                                         <label
                                             for="company"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Ngày nhập gỗ
                                         </label>
-                                        <input
+                                        {/* <div className=" border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                                            
+                                        </div> */}
+                                        <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"/>
+                                        {/* <input
                                             type="text"
                                             id="company"
                                             className=" border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                             required
-                                        />
+                                        /> */}
                                     </div>
                                 </div>
                                 <div className="flex w-full justify-end items-end">
@@ -171,8 +259,12 @@ function WoodSorting() {
 
                         {/* List */}
                         <div className="my-6 space-y-5">
-                            <PalletCard name="26 142 2300 - 16 Láng Hạ khối VP+NH - xương ngang ngoài 2
-                            " inStock="12" batchNum="12"/>
+                            <PalletCard
+                                name="26 142 2300 - 16 Láng Hạ khối VP+NH - xương ngang ngoài 2
+                            "
+                                inStock="12"
+                                batchNum="12"
+                            />
                         </div>
 
                         <div className="xl:flex w-full justify-between items-center">

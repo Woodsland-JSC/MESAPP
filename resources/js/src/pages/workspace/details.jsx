@@ -39,10 +39,10 @@ function Details() {
                             </button>
 
                             <div>
-                                <div className="text-2xl font-bold text-[#17506B] ">
+                                <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
                                     Chi tiết mẻ sấy: <span>2023.45.01</span>{" "}
                                 </div>
-                                <div className="text-[1.15rem] font-semibold text-gray-700">
+                                <div className="xl:text-[1.15rem] text-lg font-semibold text-gray-700">
                                     Lò số: <span>2023.45.01</span>{" "}
                                 </div>
                             </div>

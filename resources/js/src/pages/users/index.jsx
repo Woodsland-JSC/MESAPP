@@ -11,6 +11,9 @@ import Layout from "../../layouts/layout";
 import usersApi from "../../api/userApi";
 import { FaPlus } from "react-icons/fa";
 import Select from "react-select";
+import "../../assets/styles/index.css";
+
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 
 const sizeOptions = [
     { value: "10", label: "10" },
@@ -41,6 +44,7 @@ function Users() {
             headerName: "Athlete",
             field: "athlete",
             minWidth: 170,
+            maxHeight: 100,
             checkboxSelection: checkboxSelection,
             headerCheckboxSelection: headerCheckboxSelection,
         },
@@ -101,6 +105,14 @@ function Users() {
             });
     }, []);
 
+    const onGridReady2 = useCallback((params) => {
+        fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
+            .then((resp) => resp.json())
+            .then((data) => {
+                setRowData(data);
+            });
+    }, []);
+
     const onFirstDataRendered = useCallback((params) => {
         gridRef.current.api.paginationGoToPage(4);
     }, []);
@@ -124,7 +136,6 @@ function Users() {
         },
     ]);
 
-
     return (
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
@@ -137,7 +148,7 @@ function Users() {
                                 <li>
                                     <div className="flex items-center">
                                         <Link
-                                            to="/workspace/kiln"
+                                            to="/users"
                                             className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Quản lý người dùng
@@ -152,83 +163,221 @@ function Users() {
                     <div className="text-3xl font-bold mb-6">
                         Quản lý người dùng
                     </div>
+
                     {/* Main content */}
-                    <section style={containerStyle}>
-                        <div className="flex justify-between my-4">
-                            <div className="md:w-1/4 w-1/2">
-                                <label
-                                    for="search"
-                                    className="mb-2 text-sm font-medium text-gray-900 sr-only"
-                                >
-                                    Search
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                        <svg
-                                            className="w-4 h-4 text-gray-500"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 20 20"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                            />
-                                        </svg>
+
+                    <section className="bg-white rounded-lg border-2 mb-2 border-gray-200">
+                        <Tabs size="lg">
+                            <TabList className="">
+                                <Tab>
+                                    <div className="text-base font-medium">
+                                        Danh sách người dùng
                                     </div>
-                                    <input
-                                        type="search"
-                                        id="search"
-                                        className="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Search"
-                                        onInput={onFilterTextBoxChanged}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <Link
-                                to="/users/create"
-                                className="flex items-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-2/5 text-left sm:w-auto px-5 py-2.5 sm:text-center gap-x-2"
-                            >
-                                Tạo User
-                                <FaPlus />
-                            </Link>
-                        </div>
-                        <div className="flex w-2/3 md:w-1/3 gap-4 items-center mb-3 ">
-                            Page Size:
-                            <Select
-                                id="page-size"
-                                options={sizeOptions}
-                                onChange={onPageSizeChanged}
-                                defaultValue={{ value: "10", label: "10" }}
-                            />
-                        </div>
-                        <div style={gridStyle} className="ag-theme-alpine xl:pb-9 pb-6">
-                            <AgGridReact
-                                ref={gridRef}
-                                rowData={rowData}
-                                columnDefs={columnDefs}
-                                autoGroupColumnDef={autoGroupColumnDef}
-                                defaultColDef={defaultColDef}
-                                suppressRowClickSelection={true}
-                                groupSelectsChildren={true}
-                                rowSelection={"multiple"}
-                                rowGroupPanelShow={"always"}
-                                pivotPanelShow={"always"}
-                                pagination={true}
-                                paginationPageSize={10}
-                                paginationNumberFormatter={
-                                    paginationNumberFormatter
-                                }
-                                onGridReady={onGridReady}
-                                onFirstDataRendered={onFirstDataRendered}
-                            />
-                        </div>
+                                </Tab>
+                                <Tab>
+                                    <div className="text-base font-medium">
+                                        Phân quyền
+                                    </div>
+                                </Tab>
+                            </TabList>
+
+                            <TabPanels>
+                                <TabPanel
+                                    className="space-y-4"
+                                    style={gridStyle}
+                                >
+                                    {/* Controller */}
+                                    <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
+                                        <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
+                                            Page Size:
+                                            <Select
+                                                id="page-size"
+                                                options={sizeOptions}
+                                                onChange={onPageSizeChanged}
+                                                defaultValue={{
+                                                    value: "10",
+                                                    label: "10",
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex w-full justify-end space-x-4">
+                                            <div className="">
+                                                <label
+                                                    for="search"
+                                                    className="mb-2 font-medium text-gray-900 sr-only"
+                                                >
+                                                    Search
+                                                </label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg
+                                                            className="w-4 h-4 text-gray-500"
+                                                            aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                stroke="currentColor"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <input
+                                                        type="search"
+                                                        id="search"
+                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                        placeholder="Search"
+                                                        onInput={
+                                                            onFilterTextBoxChanged
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <Link
+                                                to="/users/create"
+                                                className="h-full"
+                                            >
+                                                <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
+                                                    <FaPlus />
+                                                    <div className="">
+                                                        Tạo User
+                                                    </div>
+                                                </button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                    <div className="ag-theme-alpine pb-4 ">
+                                        <AgGridReact
+                                            ref={gridRef}
+                                            rowData={rowData}
+                                            columnDefs={columnDefs}
+                                            autoGroupColumnDef={
+                                                autoGroupColumnDef
+                                            }
+                                            defaultColDef={defaultColDef}
+                                            suppressRowClickSelection={true}
+                                            groupSelectsChildren={true}
+                                            rowSelection={"multiple"}
+                                            rowGroupPanelShow={"always"}
+                                            pivotPanelShow={"always"}
+                                            pagination={true}
+                                            paginationPageSize={10}
+                                            paginationNumberFormatter={
+                                                paginationNumberFormatter
+                                            }
+                                            onGridReady={onGridReady}
+                                            onFirstDataRendered={
+                                                onFirstDataRendered
+                                            }
+                                        />
+                                    </div>
+                                </TabPanel>
+                                            
+                                {/* Phân quyền */}
+                                <TabPanel
+                                    className="space-y-4"
+                                    style={gridStyle}
+                                >
+                                    {/* Controller */}
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
+                                            Page Size:
+                                            <Select
+                                                id="page-size"
+                                                options={sizeOptions}
+                                                onChange={onPageSizeChanged}
+                                                defaultValue={{
+                                                    value: "10",
+                                                    label: "10",
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex w-full justify-end space-x-4">
+                                            <div className="">
+                                                <label
+                                                    for="search"
+                                                    className="mb-2 font-medium text-gray-900 sr-only"
+                                                >
+                                                    Search
+                                                </label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg
+                                                            className="w-4 h-4 text-gray-500"
+                                                            aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                stroke="currentColor"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <input
+                                                        type="search"
+                                                        id="search"
+                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                        placeholder="Search"
+                                                        onInput={
+                                                            onFilterTextBoxChanged
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <Link
+                                                to="/users/roles"
+                                                className="h-full"
+                                            >
+                                                <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
+                                                    <FaPlus />
+                                                    <div className="">
+                                                        Tạo Quyền
+                                                    </div>
+                                                </button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                    <div className="ag-theme-alpine pb-4 ">
+                                        <AgGridReact
+                                            ref={gridRef}
+                                            rowData={rowData}
+                                            columnDefs={columnDefs}
+                                            autoGroupColumnDef={
+                                                autoGroupColumnDef
+                                            }
+                                            defaultColDef={defaultColDef}
+                                            suppressRowClickSelection={true}
+                                            groupSelectsChildren={true}
+                                            rowSelection={"multiple"}
+                                            rowGroupPanelShow={"always"}
+                                            pivotPanelShow={"always"}
+                                            pagination={true}
+                                            paginationPageSize={10}
+                                            paginationNumberFormatter={
+                                                paginationNumberFormatter
+                                            }
+                                            onGridReady={onGridReady2}
+                                            onFirstDataRendered={
+                                                onFirstDataRendered
+                                            }
+                                        />
+                                    </div>
+                                </TabPanel>
+                            </TabPanels>
+                        </Tabs>
                     </section>
+                    <div className="py-4"></div>
                 </div>
             </div>
         </Layout>

@@ -20,6 +20,10 @@ body{
   background-color: #F8F9F7 !important;
 }
 
+.ag-root-wrapper-body.ag-layout-normal {
+  height: 30rem !important;
+}
+
 @layer components {
   .loader {
     bottom: 0;

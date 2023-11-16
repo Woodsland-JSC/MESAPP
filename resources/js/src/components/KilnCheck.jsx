@@ -11,7 +11,7 @@ import {
     useDisclosure,
     Button,
 } from "@chakra-ui/react";
-import CheckCard from "./CheckCard";
+import CheckListItem from "./CheckListItem";
 
 const checkItems = [
     {
@@ -86,14 +86,18 @@ function KilnCheck() {
     const [checkedCount, setCheckedCount] = useState(0);
 
     const handleCheckboxChange = (isChecked) => {
-      setCheckedCount((prevCount) => (isChecked ? prevCount + 1 : prevCount - 1));
+        setCheckedCount((prevCount) =>
+            isChecked ? prevCount + 1 : prevCount - 1
+        );
     };
 
     return (
         <div className="bg-white  rounded-xl border-2 border-gray-200 ">
             <div className="bg-white flex items-center gap-x-3 text-xl px-6 border-b rounded-t-xl border-gray-200 font-medium py-4">
                 <BsFillCheckCircleFill className="text-2xl text-[#17506B]" />
-                Biên bản kiểm tra lò sấy
+                <div className="xl:text-xl xl:w-full  text-lg">
+                    Biên bản kiểm tra lò sấy
+                </div>
             </div>
 
             <div className="bg-white rounded-b-xl">
@@ -101,18 +105,28 @@ function KilnCheck() {
                     <table class="w-full  text-left text-gray-500 ">
                         <thead class="font-semibold xl:text-base text-sm text-gray-700 bg-gray-50 ">
                             <tr>
-                                <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
+                                <th
+                                    scope="col"
+                                    class="py-3 xl:text-left text-center xl:px-6"
+                                >
                                     Số biên bản
                                 </th>
-                                <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
+                                <th
+                                    scope="col"
+                                    class="py-3 xl:text-left text-center xl:px-6"
+                                >
                                     Ngày kiểm tra
                                 </th>
-                                <th scope="col" class="py-3 xl:text-left text-center xl:px-6">
+                                <th
+                                    scope="col"
+                                    class="py-3 xl:text-left text-center xl:px-6"
+                                >
                                     Kết luận
                                 </th>
-                                <th scope="col" class="py-3 xl:text-left text-center xl:px-6 ">
-                                    Action
-                                </th>
+                                <th
+                                    scope="col"
+                                    class="py-3 xl:text-left text-center xl:px-6 "
+                                ></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,39 +163,61 @@ function KilnCheck() {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <div className="xl:ml-10 xl:text-xl ">
-                            Biên bản đánh giá lò sấy
+                        <div className="xl:ml-10 uppercase xl:text-xl ">
+                            Kiểm tra lò sấy
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <div className="xl:px-10 pb-2 text-[17px] text-gray-500 ">
+                        <div className="xl:px-10 pb-2 text-[16px] text-gray-500 ">
                             <strong>Ghi chú: </strong>Lò sấy chỉ đủ tiêu chuẩn
                             hoạt động khi đã đáp ứng tất cả nhu cầu dưới đây
                         </div>
                         <div className="xl:px-10 grid xl:grid-cols-4 lg:grid-cols-3 gap-6">
                             {/* Hiển thị tất cả giá trị checkItems */}
                             {checkItems.map((item) => (
-                                <CheckCard value={item.value} title={item.title} description={item.description} onCheckboxChange={handleCheckboxChange}/>
+                                <CheckListItem
+                                    value={item.value}
+                                    title={item.title}
+                                    description={item.description}
+                                    onCheckboxChange={handleCheckboxChange}
+                                />
                             ))}
                         </div>
                     </ModalBody>
 
                     <ModalFooter>
-                        <div className="flex justify-between xl:px-10 md:px-10 w-full">
+                        <div className="xl:flex justify-between xl:px-10 md:px-10 w-full">
                             <div className="flex text-lg ">
-                                <strong className="hidden xl:flex md:flex">Kết luận: </strong>
-                                <p className={`ml-2  ${checkedCount === 12 ? "text-[#0E8E59]" : "text-[#961717]"}`}>
-                                    {checkedCount === 12 ? "Mẻ sấy đã đủ điều kiện hoạt động." : "Mẻ sấy chưa đủ điều kiện hoạt động."}
+                                <strong className="hidden xl:flex md:flex">
+                                    Kết luận:{" "}
+                                </strong>
+                                <p
+                                    className={`ml-2  ${
+                                        checkedCount === 12
+                                            ? "text-[#0E8E59]"
+                                            : "text-[#961717]"
+                                    }`}
+                                >
+                                    {checkedCount === 12
+                                        ? "Mẻ sấy đã đủ điều kiện hoạt động."
+                                        : "Mẻ sấy chưa đủ điều kiện hoạt động."}
                                 </p>
-                                <p className="ml-2">(<span>{checkedCount}</span>/12)</p>
+                                <p className="ml-2">
+                                    (<span>{checkedCount}</span>/12)
+                                </p>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
-                            >
-                                Đóng
-                            </button>
+                            <div className="flex justify-end gap-x-3 ">
+                                <button className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all">
+                                    Hoàn thành
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                >
+                                    Đóng
+                                </button>
+                            </div>
                         </div>
                     </ModalFooter>
                 </ModalContent>

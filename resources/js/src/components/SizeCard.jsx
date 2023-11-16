@@ -20,13 +20,13 @@ function SizeCard() {
         <div className="border-2 border-gray-200 rounded-xl">
             {/* Header */}
             <div className="bg-white  rounded-t-xl flex justify-between items-center border-b py-4 px-6  border-gray-300">
-                <div className="flex items-center gap-x-3 text-xl font-medium">
+                <div className="flex items-center gap-x-3 font-medium">
                   <BsFilterCircleFill className="text-2xl text-[#17506B]" />
-                  Các kích thước
+                  <div className="xl:text-xl xl:w-full  text-lg">Các kích thước</div>
                 </div>
                 <button
                     onClick={onOpen}
-                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                 >
                     Xem tất cả
                 </button>
