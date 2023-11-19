@@ -21,7 +21,7 @@ class DryingOvenController extends Controller
             DB::beginTransaction();
             $whs = WarehouseCS();
 
-            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'QuyCach', 'NgayNhap']);
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap']);
             $pallet = Pallet::create($palletData);
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('details', []);
@@ -92,23 +92,17 @@ class DryingOvenController extends Controller
             DB::rollBack();
 
             // Log or handle the exception as needed
-            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage() . "sss" . $res['error']['message']['value']], 500);
+            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage()], 500);
         }
     }
     // get pallet
     function index(Request $request)
     {
-        $pagination = Pallet::orderBy('palletID', 'DESC')->paginate(20);
+        $pallet = Pallet::orderBy('palletID', 'DESC')->get();
 
-        // Get the array representation of the pagination data
-        $response = $pagination->toArray();
-
-        // Manually add the next page link if it exists
-        $response['next_page_url'] = $pagination->nextPageUrl();
-        $response['prev_page_url'] = $pagination->previousPageUrl();
-
-        return response()->json($response, 200);
+        return response()->json($pallet, 200);
     }
+    // Xem chi tiết pallet
     function showbyID($id)
     {
         try {
@@ -121,7 +115,7 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
         }
     }
-
+    // danh sách lò xấy trống theo chi nhánh và nhà máy. hệ thống sẽ check theo user
     function ListOvenAvailiable(Request $request)
     {
         try {

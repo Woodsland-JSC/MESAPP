@@ -17,15 +17,16 @@ use Illuminate\Support\Facades\Http;
 
 class PlanController extends Controller
 {
+    // tạo kế hoạch sấy
     function pickOven(Request $request)
     {
         try {
             $conDB = (new ConnectController)->connect_sap();
-
+            // ghi nhận kế hoạch sấy vào hệ thống app
             DB::beginTransaction();
             $PlanData = $request->only(['Oven', 'Reason', 'Method']);
             $plandryings = plandryings::create($PlanData);
-
+            // lock lò sấy
             $sql = 'Update  "@G_SAY3" set "U_status"=1 where "Code"=?';
             $stmt = odbc_prepare($conDB, $sql);
             if (!$stmt) {
@@ -57,5 +58,9 @@ class PlanController extends Controller
         $response['prev_page_url'] = $pagination->previousPageUrl();
 
         return response()->json($response, 200);
+    }
+    // cập nhật trạng thái lò sấy
+    function changeStatus(Request $request)
+    {
     }
 }

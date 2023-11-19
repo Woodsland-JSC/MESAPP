@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
@@ -11,6 +11,7 @@ import useAppContext from "../../store/AppContext";
 import Loader from "../../components/Loader";
 import TinyLoader from "../../components/TinyLoader";
 import usersApi from "../../api/userApi";
+import { areObjectsEqual } from "../../utils/objectFunctions";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 
 const genderOptions = [
@@ -19,7 +20,7 @@ const genderOptions = [
 ];
 
 const authorizationOptions = [
-    { value: "admmin", label: "Admin" },
+    { value: "admin", label: "Admin" },
     { value: "client", label: "Client" },
 ];
 
@@ -39,28 +40,41 @@ const validationSchema = Yup.object().shape({
         .oneOf(["male", "female"], "Giá trị không hợp lệ")
         .required("Giới tính là bắt buộc"),
     password: Yup.string()
-        .required("Mật khẩu là bắt buộc")
-        .test("uppercase", "Mật khẩu cần có ít nhất 1 kí tự in hoa", (value) =>
-            /[A-Z]/.test(value)
-        )
-        .test(
-            "lowercase",
-            "Mật khẩu cần có ít nhất 1 kí tự viết thường",
-            (value) => /[a-z]/.test(value)
-        )
-        .test("digit", "Mật khẩu cần có ít nhất 1 chữ số", (value) =>
-            /\d/.test(value)
-        )
-        .test(
-            "specialChar",
-            "Mật khẩu cần có ít nhất 1 kí tự đặc biệt",
-            (value) => /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(value)
-        )
-        .test(
-            "length",
-            "Mật khẩu phải có từ 8 - 15 ký tự",
-            (value) => value && value.length >= 8 && value.length <= 15
-        ),
+        .nullable()
+        .transform((value) => {
+            if (value === "") {
+                return undefined;
+            }
+            return value;
+        })
+        .test("test-password", "Mật khẩu không hợp lệ", function (value) {
+            if (!value) return true;
+
+            let error;
+
+            const upperCaseRegex = /[A-Z]/;
+            const lowerCaseRegex = /[a-z]/;
+            const numberRegex = /\d/;
+            const specialCharRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/]/;
+
+            if (!upperCaseRegex.test(value)) {
+                error = "Mật khẩu cần có ít nhất 1 kí tự in hoa";
+            } else if (!lowerCaseRegex.test(value)) {
+                error = "Mật khẩu cần có ít nhất 1 kí tự viết thường";
+            } else if (!numberRegex.test(value)) {
+                error = "Mật khẩu cần có ít nhất 1 chữ số";
+            } else if (!specialCharRegex.test(value)) {
+                error = "Mật khẩu cần có ít nhất 1 kí tự đặc biệt";
+            } else if (value.length < 8 || value.length > 15) {
+                error = "Mật khẩu phải có từ 8 - 15 ký tự";
+            }
+
+            if (error) {
+                return this.createError({ message: error });
+            }
+
+            return true;
+        }),
     authorization: Yup.string().required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
     integrationId: Yup.string().required("Integration ID là bắt buộc"),
@@ -90,6 +104,7 @@ const SelectField = ({ options, ...props }) => {
 function User() {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const fileInputRef = useRef();
 
     const [formKey, setFormKey] = useState(0);
     const { loading, setLoading } = useAppContext();
@@ -102,13 +117,17 @@ function User() {
         autoImg: null,
     });
 
+    const [hasChanged, setHasChanged] = useState(false);
+
+    const [originalAvatar, setOriginalAvatar] = useState(null);
+
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [input, setInput] = useState({
         firstName: "",
         lastName: "",
         email: "",
-        gender: "male",
+        gender: "",
         password: "",
         authorization: "",
         sapId: "",
@@ -116,6 +135,8 @@ function User() {
         factory: "",
         branch: "",
     });
+
+    const [originalInfo, setOriginalInfo] = useState(null);
 
     const handleChangeAvatar = (event) => {
         setAvatarLoading(true);
@@ -157,6 +178,10 @@ function User() {
             imgSrc: null,
         });
 
+        if (selectedFile) {
+            setSelectedFile(null);
+        }
+
         if (!avatar.autoImg) {
             if (input.lastName && input.firstName) {
                 setAvatarLoading(true);
@@ -181,14 +206,44 @@ function User() {
     };
 
     const handleFormSubmit = async (values) => {
-        toast("Chưa phát triển submit form", {
-            icon: " ℹ️",
-        });
-        console.log("Submit form nè: ", values);
+        const updatedValues = {...values};
+        const { password: newPassword, ...updatedInfo } = values;
+        const { password: oldPassword, ...oldInfo } = originalInfo;
+        const isChanged = areObjectsEqual(updatedInfo, oldInfo);
+
+        if (!isChanged || newPassword || originalAvatar != avatar.file) {
+            setLoading(true);
+            if (selectedFile) {
+                if (selectedFile instanceof File) {
+                    updatedValues.avatar = selectedFile;
+                }
+            } else if (avatar.file == originalAvatar || avatar.imgSrc == originalAvatar) {
+                updatedValues.avatar = '';
+            } else {
+                updatedValues.avatar = -1;
+            }
+
+            try {
+                const res = await usersApi.updateUser(userId, updatedValues);
+                console.log("Thành công: ", res);
+                toast.success("Điều chỉnh thông tin thành công.");
+                getCurrentUser();
+            } catch (error) {
+                console.error(error);
+                toast.error("Có lỗi xảy ra, vui lòng thử lại.")
+            }
+
+            console.log("Giá trị updated values: ", updatedValues);
+            
+        } else {
+            toast("Bạn chưa điều chỉnh thông tin.", {
+                icon: ` ℹ️`,
+            });
+            return;
+        }
     };
 
     const getAutoAvatar = async (name) => {
-        // setAvatarLoading(true);
         try {
             const res = await generateAvatar(name);
             const base64 = await blobToBase64(res);
@@ -199,75 +254,110 @@ function User() {
             console.error(error);
             return null;
         }
-        // setAvatarLoading(false);
+    };
+
+    const getCurrentUser = async () => {
+        try {
+            if (!userId) {
+                navigate("/notfound");
+                return;
+            }
+            setLoading(true);
+            const data = await usersApi.getUserDetails(userId);
+            const {
+                first_name: firstName,
+                last_name: lastName,
+                email,
+                gender,
+                sap_id: sapId,
+                integration_id: integrationId,
+                plant: factory,
+                branch,
+                avatar,
+            } = data.user;
+
+            console.log("Log nè: ", data.user);
+
+            const role = data.UserRole[0];
+
+            const userData = {
+                firstName: firstName || "",
+                lastName: lastName || "",
+                email: email || "",
+                gender,
+                password: "",
+                authorization: role,
+                sapId: sapId || "",
+                integrationId: integrationId || "",
+                factory: factory || "",
+                branch: branch || "",
+            };
+
+            // const userData = await res;
+            setInput(userData);
+            setOriginalInfo(userData);
+
+            if (avatar) {
+                setOriginalAvatar(avatar);
+                setAvatar({
+                    autoImg: null,
+                    file: data.user.avatar,
+                    imgSrc: data.user.avatar,
+                });
+            }
+            setFormKey((prevKey) => prevKey + 1);
+            setLoading(false);
+        } catch (error) {
+            // console.error(error);
+            toast.error("Không tìm thấy user");
+            if (error.response && error.response.status === 404) {
+                navigate("/notfound", { replace: true });
+            }
+        }
     };
 
     useEffect(() => {
-        // console.log("User gì ta: ",  input.lastName + ' ' + input.firstName);
         if (input.lastName && input.firstName && !avatar.file) {
-            setAvatarLoading(true);
-
             const tempName =
                 input.lastName.trim().charAt(0) +
                 input.firstName.trim().charAt(0);
             const res = (async () => {
                 const base64 = await getAutoAvatar(tempName);
+                console.log("Auto ava: ", base64);
                 setAvatar({ ...avatar, autoImg: base64 });
             })();
             setAvatarLoading(false);
         }
 
         if (!input.lastName && !input.firstName) {
-            console.log("Không có tên và họ");
-            setAvatar({ ...avatar, autoImg: DefaultAvatar });
+            setAvatar({ ...avatar, imgSrc: null, autoImg: DefaultAvatar });
         }
     }, [input]);
 
     useEffect(() => {
-        const getCurrentUser = async () => {
-            try {
-                if (!userId) {
-                    navigate("/notfound");
-                    return;
-                }
-                setLoading(true);
-                const res = new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        const userData = {
-                            firstName: "Nguyên",
-                            lastName: "Nguyễn Thanh",
-                            email: "ntnguyen0310@gmail.com",
-                            gender: "male",
-                            password: "",
-                            authorization: "admin",
-                            sapId: "1112548632458",
-                            integrationId: "452as458s6a7da",
-                            factory: "Công xưởng 2",
-                            branch: "Hà Nội",
-                            avatar: "https://hinhnen4k.com/wp-content/uploads/2022/12/avatar-doremon-9.jpg",
-                        };
-                        resolve(userData);
-                    }, 1500);
-                });
-
-                const userData = await res;
-                const clonedData = (({ avatar, ...rest }) => rest)(userData);
-                setInput(clonedData);
-                if (userData.avatar) {
-                    setAvatar({
-                        autoImg: null,
-                        file: userData.avatar,
-                        imgSrc: userData.avatar,
-                    });
-                }
-                setFormKey((prevKey) => prevKey + 1);
-                setLoading(false);
-            } catch (error) {
-                console.error(error);
+        const handleBeforeUnload = (event) => {
+            if (hasChanged) {
+                const message =
+                    "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa được lưu.";
+                event.returnValue = message;
+                return message;
             }
         };
 
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [hasChanged]);
+
+    useEffect(() => {
         getCurrentUser();
+
+        document.title = "Woodsland - Chi tiết người dùng";
+        return () => {
+            document.title = "Woodsland";
+        };
     }, []);
 
     return (
@@ -460,14 +550,11 @@ function User() {
                                                     <SelectField
                                                         name="gender"
                                                         options={genderOptions}
-                                                        defaultValue={
-                                                            genderOptions.find(
-                                                                (item) =>
-                                                                    item.value ==
-                                                                    values.gender
-                                                            ) ||
-                                                            genderOptions[0]
-                                                        }
+                                                        defaultValue={genderOptions.find(
+                                                            (item) =>
+                                                                item.value ==
+                                                                values.gender
+                                                        )}
                                                     />
                                                     {errors.gender &&
                                                     touched.gender ? (
@@ -484,9 +571,6 @@ function User() {
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Mật khẩu{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
                                                     </label>
                                                     <Field
                                                         name="password"
@@ -536,8 +620,7 @@ function User() {
                                                                 (item) =>
                                                                     item.value ==
                                                                     values.authorization
-                                                            ) ||
-                                                            authorizationOptions[0]
+                                                            ) || null
                                                         }
                                                     />
                                                     {errors.authorization &&
@@ -552,10 +635,11 @@ function User() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-6">
-                                            <span className="mb-3">
+                                            <span className="mb-4">
                                                 Ảnh đại diện
                                             </span>
                                             <input
+                                                ref={fileInputRef}
                                                 type="file"
                                                 accept="image/*"
                                                 name="Avatar"
@@ -563,7 +647,7 @@ function User() {
                                                 onChange={handleChangeAvatar}
                                                 className="hidden"
                                             />
-                                            <figure className="w-1/2 relative aspect-square mb-4 rounded-full object-cover">
+                                            <figure className="w-1/2 relative aspect-square mb-4 rounded-full object-cover border-2 border-solid border-indigo-200 p-1">
                                                 <img
                                                     id="avatar-display"
                                                     src={
@@ -582,17 +666,17 @@ function User() {
                                             </figure>
 
                                             <div className="flex gap-2 justify-center">
-                                                <span
+                                                <button
                                                     type="button"
                                                     className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                                                    onClick={() =>
+                                                        fileInputRef.current.click()
+                                                    }
                                                 >
-                                                    <label
-                                                        htmlFor="avatar"
-                                                        className="w-full cursor-pointer"
-                                                    >
+                                                    <label className="w-full cursor-pointer">
                                                         Cập nhật ảnh đại diện
                                                     </label>
-                                                </span>
+                                                </button>
                                                 {avatar.imgSrc &&
                                                 avatar.imgSrc !=
                                                     DefaultAvatar ? (

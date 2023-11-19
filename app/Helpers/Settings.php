@@ -9,7 +9,7 @@ if (!function_exists('BasicAuthToken')) {
     {
         $setting = Settings::first();
         $username = '{"CompanyDB":"' . $setting->dbname . '","UserName":"' .  $setting->user_sap . '"}';
-        $password = decrypt($setting->password_sap);
+        $password = 'Qwe123$$'; //decrypt($setting->password_sap);
         $authString = base64_encode("$username:$password");
         return $authString;
     }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class ConnectController extends Controller
 {
+    // function connect to SAP HANA DATABASE
     function connect_sap()
     {
 

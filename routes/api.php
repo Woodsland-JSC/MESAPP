@@ -58,8 +58,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index');
         Route::post('/create', [UserController::class, 'create'])->name('users.create');
         Route::get('find/{UserId}', [UserController::class, 'UserById'])->name('users.find');
-        Route::patch('/update/{UserId}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
+        Route::patch('/   update/{UserId}', [UserController::class, 'update'])->name('users.update');
+        Route::patch('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
+        Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');
     });
     /**
      * Pallet Routes
@@ -71,8 +72,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::group(['prefix' => 'ovens'], function () {
         Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('ovens.index');
-        // Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('pallets.create');
-        // Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('pallets.find');
+        Route::post('/create', [DryingOvenController::class, 'pickOven'])->name('ovens.create');
+        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('ovens.find');
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('GetItemMasterDataSap');
