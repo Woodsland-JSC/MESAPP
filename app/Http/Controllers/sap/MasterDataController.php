@@ -241,12 +241,18 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    function getStockByItem($id)
+    function getStockByItem($id, Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity" FROM OITW T0 ' .
+            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity",1 "CDai", 2 "CDay",3"CRong" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
