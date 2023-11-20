@@ -279,6 +279,7 @@ function WoodSorting() {
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
+            
         } catch (error) {
             console.error("Error creating pallet:", error);
             toast.error("Đã xảy ra lỗi khi tạo pallet. Vui lòng thử lại sau.");
