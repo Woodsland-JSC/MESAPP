@@ -29,6 +29,7 @@ function HumidityCheck() {
 
     return (
         <div className="bg-white rounded-xl border-2 border-gray-200">
+            {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 font-medium border-b border-gray-200">
                 <div className="flex items-center gap-x-3">
                     <FaStumbleuponCircle className="text-2xl text-[#17506B]" />

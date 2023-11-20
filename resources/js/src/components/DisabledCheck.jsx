@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { dateToDateTime } from "../utils/convertDatetime";
+import { FaPlus } from "react-icons/fa6";
 
 const tempData = [
     {
@@ -273,7 +274,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                 info.curve ||
                 info.note
             ) {
-                console.log(disabledDetails.length)
+                console.log(disabledDetails.length);
                 const userConfirmed = window.confirm(
                     "Bạn có chắc muốn đóng cửa sổ hiện tại không? \nDữ liệu đã nhập sẽ không được lưu"
                 );
@@ -382,13 +383,16 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                         <BsWrenchAdjustableCircleFill className="text-2xl text-[#17506B]" />
                         Biên bản khảo sát tỉ lệ khuyết tật
                     </div>
-                    <BsFillPlusCircleFill
+                    <button
                         onClick={() => {
                             setViewMode(false);
                             onOpen();
                         }}
-                        className="text-2xl text-[#17506B] cursor-pointer transition-all duration-250 ease-in hover:text-[#17506bc2]"
-                    />
+                        className="bg-gray-800 text-base flex items-center space-x-3 p-2 rounded-xl text-white xl:px-4 active:scale-[.95] h-fit w-fit active:duration-75 transition-all"
+                    >
+                        <FaPlus />
+                        <div className="xl:flex hidden">Tạo mới</div>
+                    </button>
                 </div>
                 {/* <div className="border-b-2 border-gray-100"></div> */}
 
