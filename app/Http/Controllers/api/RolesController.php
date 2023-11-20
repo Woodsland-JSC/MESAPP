@@ -26,16 +26,22 @@ class RolesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $pagination = Role::orderBy('id', 'DESC')->paginate(20);
-        // Get the array representation of the pagination data
-        $response = $pagination->toArray();
-        // Manually add the next page link if it exists
-        $response['next_page_url'] = $pagination->nextPageUrl();
-        $response['prev_page_url'] = $pagination->previousPageUrl();
+    // public function index(Request $request)
+    // {
+    //     $pagination = Role::orderBy('id', 'DESC')->paginate(20);
+    //     // Get the array representation of the pagination data
+    //     $response = $pagination->toArray();
+    //     // Manually add the next page link if it exists
+    //     $response['next_page_url'] = $pagination->nextPageUrl();
+    //     $response['prev_page_url'] = $pagination->previousPageUrl();
 
-        return response()->json($response, 200);
+    //     return response()->json($response, 200);
+    // }
+    function index(Request $request)
+    {
+        $users = Role::orderBy('id', 'DESC')->get();
+
+        return response()->json($users, 200);
     }
 
     /**

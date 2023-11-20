@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
+import toast from "react-hot-toast";
+import useAppContext from "../../store/AppContext";
 import Layout from "../../layouts/layout";
+import Loader from "../../components/Loader";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 import generateAvatar from "../../utils/generateAvatar";
+import usersApi from "../../api/userApi";
+import TinyLoader from "../../components/TinyLoader";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -14,7 +19,7 @@ const genderOptions = [
 ];
 
 const authorizationOptions = [
-    { value: "admmin", label: "Admin" },
+    { value: "admin", label: "Admin" },
     { value: "client", label: "Client" },
 ];
 
@@ -83,12 +88,15 @@ const SelectField = ({ options, ...props }) => {
 };
 
 function CreateUser() {
-    
+    const navigate = useNavigate();
+    const fileInputRef = useRef();
+    const { loading, setLoading } = useAppContext();
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
         autoImg: null,
     });
+    const [avatarLoading, setAvatarLoading] = useState(false);
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -106,6 +114,7 @@ function CreateUser() {
     });
 
     const handleChangeAvatar = (event) => {
+        setAvatarLoading(true);
         const file = event.target.files[0];
         setSelectedFile(file);
         const reader = new FileReader();
@@ -120,6 +129,7 @@ function CreateUser() {
         };
 
         reader.readAsDataURL(file);
+        setAvatarLoading(false);
     };
 
     const blobToBase64 = (blob) => {
@@ -137,18 +147,36 @@ function CreateUser() {
     };
 
     const handleDeleteAvatar = () => {
+        setAvatarLoading(true);
         setAvatar({
             ...avatar,
             file: null,
-            imgSrc: null,
+            imgSrc: DefaultAvatar,
         });
+        setAvatarLoading(false);
     };
 
-    const handleFormSubmit = async (e) => {
-        toast("Chưa phát triển submit form", {
-            icon: " ℹ️"
-        });
-        console.log("Submit form nè: ", input);
+    const handleFormSubmit = async (values) => {
+        setLoading(true);
+        const userData = values;
+        if (selectedFile) {
+            userData.avatar = selectedFile;
+        }
+        try {
+            const res = await usersApi.createUser(userData);
+            // if (res && res.status === 200) {
+            console.log(res);
+            toast.success("Tạo user thành công.");
+            navigate(`/user/${res.user.id}`);
+            // } else {
+            // toast.error("Có lỗi khi tạo user.");
+            // }
+        } catch (e) {
+            console.error(e);
+        }
+        setLoading(false);
+
+        // console.log("Submit form nè: ", input);
     };
 
     useEffect(() => {
@@ -171,7 +199,12 @@ function CreateUser() {
         }
     }, [input]);
 
-    useEffect(() => {});
+    useEffect(() => {
+        document.title = 'Woodsland - Tạo mới người dùng';
+        return () => {
+            document.title = 'Woodsland';
+        };
+    },[]);
 
     return (
         <Layout>
@@ -224,433 +257,447 @@ function CreateUser() {
                     <Formik
                         initialValues={input}
                         validationSchema={validationSchema}
-                        onSubmit={handleFormSubmit}
+                        onSubmit={(values) => handleFormSubmit(values)}
                     >
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <div className="pb-8">
                                     <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
-                                        Thông tin cơ bản
-                                    </h1>
-                                    <section className="flex flex-col-reverse md:flex-row md:gap-4">
-                                        <div className="md:w-2/3 mb-6">
-                                            <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="last_name"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Họ{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="lastName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "lastName",
-                                                                e.target.value
-                                                            );
-                                                            setInput(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    lastName:
-                                                                        e.target
+                                        <h1 className="mb-4 text-xl text-center md:text-left">
+                                            Thông tin cơ bản
+                                        </h1>
+                                        <section className="flex flex-col-reverse md:flex-row md:gap-4">
+                                            <div className="md:w-2/3 mb-6">
+                                                <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Họ{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="lastName"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            onChange={(e) => {
+                                                                setFieldValue(
+                                                                    "lastName",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                                setInput(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        lastName:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    })
+                                                                );
+                                                            }}
+                                                        />
+                                                        {errors.lastName &&
+                                                        touched.lastName ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="lastName" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Tên{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="firstName"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            onChange={(e) => {
+                                                                setFieldValue(
+                                                                    "firstName",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                                setInput(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        firstName:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    })
+                                                                );
+                                                            }}
+                                                        />
+                                                        {errors.firstName &&
+                                                        touched.firstName ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="firstName" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Email{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="email"
+                                                            type="email"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            onChange={(e) => {
+                                                                setFieldValue(
+                                                                    "email",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                                setInput(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        email: e
+                                                                            .target
                                                                             .value,
-                                                                })
-                                                            );
-                                                        }}
-                                                    />
-                                                    {errors.lastName &&
-                                                    touched.lastName ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="lastName" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="first_name"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Tên{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="firstName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "firstName",
-                                                                e.target.value
-                                                            );
-                                                            setInput(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    firstName:
-                                                                        e.target
-                                                                            .value,
-                                                                })
-                                                            );
-                                                        }}
-                                                    />
-                                                    {errors.firstName &&
-                                                    touched.firstName ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="firstName" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="email"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Email{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="email"
-                                                        type="email"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "email",
-                                                                e.target.value
-                                                            );
-                                                            setInput(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    email:
-                                                                        e.target
-                                                                            .value,
-                                                                })
-                                                            );
-                                                        }}
-                                                    />
-                                                    {errors.email &&
-                                                    touched.email ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="email" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="gender"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Giới tính{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <SelectField
-                                                        name="gender"
-                                                        options={genderOptions}
-                                                    />
-                                                    {errors.gender &&
-                                                    touched.gender ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="gender" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="password"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Mật khẩu{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        name="password"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "password",
-                                                                e.target.value
-                                                            );
-                                                            setInput(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    password:
-                                                                        e.target
-                                                                            .value,
-                                                                })
-                                                            );
-                                                        }}
-                                                    />
-                                                    {errors.password &&
-                                                    touched.password ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="password" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="w-full">
-                                                    <label
-                                                        htmlFor="authorization"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Phân quyền{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <SelectField
-                                                        name="authorization"
-                                                        options={
-                                                            authorizationOptions
-                                                        }
-                                                    />
-                                                    {errors.authorization &&
-                                                    touched.authorization ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="authorization" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
+                                                                    })
+                                                                );
+                                                            }}
+                                                        />
+                                                        {errors.email &&
+                                                        touched.email ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="email" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Giới tính{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <SelectField
+                                                            name="gender"
+                                                            options={
+                                                                genderOptions
+                                                            }
+                                                        />
+                                                        {errors.gender &&
+                                                        touched.gender ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="gender" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Mật khẩu{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            name="password"
+                                                            type="password"
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            onChange={(e) => {
+                                                                setFieldValue(
+                                                                    "password",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                                setInput(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        password:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    })
+                                                                );
+                                                            }}
+                                                        />
+                                                        {errors.password &&
+                                                        touched.password ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="password" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <label
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Phân quyền{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <SelectField
+                                                            name="authorization"
+                                                            options={
+                                                                authorizationOptions
+                                                            }
+                                                        />
+                                                        {errors.authorization &&
+                                                        touched.authorization ? (
+                                                            <span className="text-xs text-red-600">
+                                                                <ErrorMessage name="authorization" />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="block mt-[8px] h-[14.55px]"></span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
-                                            <span className="mb-3">
-                                                Ảnh đại diện
-                                            </span>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                name="Avatar"
-                                                id="avatar"
-                                                onChange={handleChangeAvatar}
-                                                className="hidden"
-                                            />
-                                            <img
+                                            <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
+                                                <span className="mb-4">
+                                                    Ảnh đại diện
+                                                </span>
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    name="Avatar"
+                                                    id="avatar"
+                                                    onChange={
+                                                        handleChangeAvatar
+                                                    }
+                                                    className="hidden"
+                                                />
+                                                <figure className="w-1/2 relative aspect-square mb-4 rounded-full object-cover border-2 border-solid border-indigo-200 p-1">
+                                                    <img
+                                                        id="avatar-display"
+                                                        src={
+                                                            (avatar.imgSrc ==
+                                                                DefaultAvatar &&
+                                                            avatar.autoImg
+                                                                ? avatar.autoImg
+                                                                : avatar.imgSrc) ||
+                                                            avatar.autoImg
+                                                        }
+                                                        className="w-full aspect-square rounded-full object-cover self-center"
+                                                        alt="Default-Avatar"
+                                                    />
+                                                    {avatarLoading && (
+                                                        <>
+                                                            <div className="absolute aspect-square rounded-full top-0 left-0 w-full h-full bg-black opacity-40"></div>
+                                                            <TinyLoader className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                                        </>
+                                                    )}
+                                                </figure>
+                                                {/* <img
                                                 id="avatar-display"
                                                 src={
-                                                    avatar.imgSrc ||
+                                                    (avatar.imgSrc == DefaultAvatar && avatar.autoImg ? avatar.autoImg : avatar.imgSrc) ||
                                                     avatar.autoImg
                                                 }
                                                 className="w-1/2 aspect-square mb-4 rounded-full object-cover"
                                                 alt="Default-Avatar"
-                                            />
+                                            /> */}
 
-                                            <div className="flex gap-2 justify-center">
-                                                <span
-                                                    type="button"
-                                                    className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-                                                >
-                                                    <label
-                                                        htmlFor="avatar"
-                                                        className="w-full cursor-pointer"
-                                                    >
-                                                        Cập nhật ảnh đại diện
-                                                    </label>
-                                                </span>
-                                                {avatar.imgSrc &&
-                                                avatar.imgSrc !=
-                                                    DefaultAvatar ? (
-                                                    <span
-                                                        className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
-                                                        onClick={
-                                                            handleDeleteAvatar
+                                                <div className="flex gap-2 justify-center">
+                                                    <button
+                                                        onClick={() =>
+                                                            fileInputRef.current.click()
                                                         }
+                                                        type="button"
+                                                        className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                                                     >
-                                                        <MdDeleteOutline className="text-red-600 text-xl group-hover:text-white" />
-                                                    </span>
-                                                ) : null}
+                                                        <label className="w-full cursor-pointer">
+                                                            Cập nhật ảnh đại
+                                                            diện
+                                                        </label>
+                                                    </button>
+                                                    {avatar.imgSrc &&
+                                                    avatar.imgSrc !=
+                                                        DefaultAvatar ? (
+                                                        <span
+                                                            className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
+                                                            onClick={
+                                                                handleDeleteAvatar
+                                                            }
+                                                        >
+                                                            <MdDeleteOutline className="text-red-600 text-xl group-hover:text-white" />
+                                                        </span>
+                                                    ) : null}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </section>
-                                    <div className="my-4 border-b border-gray-200"></div>
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
-                                        Đồng bộ và tích hợp
-                                    </h1>
-                                    <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
-                                        <div className="w-full">
-                                            <label
-                                                htmlFor="sap-id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                SAP ID{" "}
-                                                <span className="text-red-600">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Field
-                                                name="sapId"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "sapId",
-                                                        e.target.value
-                                                    );
-                                                    setInput(
-                                                        (prev) => ({
+                                        </section>
+                                        <div className="my-4 border-b border-gray-200"></div>
+                                        <h1 className="mb-4 text-xl text-center md:text-left">
+                                            Đồng bộ và tích hợp
+                                        </h1>
+                                        <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
+                                            <div className="w-full">
+                                                <label
+                                                    className="block mb-2 text-md font-medium text-gray-900"
+                                                >
+                                                    SAP ID{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    name="sapId"
+                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "sapId",
+                                                            e.target.value
+                                                        );
+                                                        setInput((prev) => ({
                                                             ...prev,
-                                                            sapId:
-                                                                e.target
-                                                                    .value,
-                                                        })
-                                                    );
-                                                }}
-                                            />
-                                            {errors.sapId && touched.sapId ? (
-                                                <span className="text-xs text-red-600">
-                                                    <ErrorMessage name="sapId" />
-                                                </span>
-                                            ) : (
-                                                <span className="block mt-[8px] h-[14.55px]"></span>
-                                            )}
-                                        </div>
-                                        <div className="w-full">
-                                            <label
-                                                htmlFor="integration-id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                INTEGRATION ID{" "}
-                                                <span className="text-red-600">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Field
-                                                name="integrationId"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "integrationId",
-                                                        e.target.value
-                                                    );
-                                                    setInput(
-                                                        (prev) => ({
+                                                            sapId: e.target
+                                                                .value,
+                                                        }));
+                                                    }}
+                                                />
+                                                {errors.sapId &&
+                                                touched.sapId ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="sapId" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
+                                            <div className="w-full">
+                                                <label
+                                                    className="block mb-2 text-md font-medium text-gray-900"
+                                                >
+                                                    INTEGRATION ID{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    name="integrationId"
+                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "integrationId",
+                                                            e.target.value
+                                                        );
+                                                        setInput((prev) => ({
                                                             ...prev,
                                                             integrationId:
-                                                                e.target
-                                                                    .value,
-                                                        })
-                                                    );
-                                                }}
-                                            />
-                                            {errors.integrationId &&
-                                            touched.integrationId ? (
-                                                <span className="text-xs text-red-600">
-                                                    <ErrorMessage name="integrationId" />
-                                                </span>
-                                            ) : (
-                                                <span className="block mt-[8px] h-[14.55px]"></span>
-                                            )}
-                                        </div>
-                                        <div className="w-full">
-                                            <label
-                                                htmlFor="factory"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Nhà máy{" "}
-                                                <span className="text-red-600">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Field
-                                                name="factory"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "factory",
-                                                        e.target.value
-                                                    );
-                                                    setInput(
-                                                        (prev) => ({
+                                                                e.target.value,
+                                                        }));
+                                                    }}
+                                                />
+                                                {errors.integrationId &&
+                                                touched.integrationId ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="integrationId" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
+                                            <div className="w-full">
+                                                <label
+                                                    className="block mb-2 text-md font-medium text-gray-900"
+                                                >
+                                                    Nhà máy{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    name="factory"
+                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "factory",
+                                                            e.target.value
+                                                        );
+                                                        setInput((prev) => ({
                                                             ...prev,
                                                             factory:
-                                                                e.target
-                                                                    .value,
-                                                        })
-                                                    );
-                                                }}
-                                            />
-                                            {errors.factory &&
-                                            touched.factory ? (
-                                                <span className="text-xs text-red-600">
-                                                    <ErrorMessage name="factory" />
-                                                </span>
-                                            ) : (
-                                                <span className="block mt-[8px] h-[14.55px]"></span>
-                                            )}
-                                        </div>
-                                        <div className="w-full">
-                                            <label
-                                                htmlFor="branch"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Chi nhánh{" "}
-                                                <span className="text-red-600">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Field
-                                                name="branch"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "branch",
-                                                        e.target.value
-                                                    );
-                                                    setInput(
-                                                        (prev) => ({
+                                                                e.target.value,
+                                                        }));
+                                                    }}
+                                                />
+                                                {errors.factory &&
+                                                touched.factory ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="factory" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
+                                            <div className="w-full">
+                                                <label
+                                                    className="block mb-2 text-md font-medium text-gray-900"
+                                                >
+                                                    Chi nhánh{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    name="branch"
+                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "branch",
+                                                            e.target.value
+                                                        );
+                                                        setInput((prev) => ({
                                                             ...prev,
-                                                            branch:
-                                                                e.target
-                                                                    .value,
-                                                        })
-                                                    );
-                                                }}
-                                            />
-                                            {errors.branch && touched.branch ? (
-                                                <span className="text-xs text-red-600">
-                                                    <ErrorMessage name="branch" />
-                                                </span>
-                                            ) : (
-                                                <span className="block mt-[8px] h-[14.55px]"></span>
-                                            )}
+                                                            branch: e.target
+                                                                .value,
+                                                        }));
+                                                    }}
+                                                />
+                                                {errors.branch &&
+                                                touched.branch ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="branch" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
-                                    >
-                                        Lưu lại
-                                    </button>
-                                </Form>
+                                        <button
+                                            type="submit"
+                                            className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                        >
+                                            Lưu lại
+                                        </button>
+                                    </Form>
                                 </div>
-                                
                             );
                         }}
                     </Formik>
                 </div>
             </div>
+            {loading && <Loader />}
         </Layout>
     );
 }

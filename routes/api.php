@@ -56,11 +56,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * User Routes
      */
     Route::group(['prefix' => 'users'], function () {
-        Route::get('/', [UserController::class, 'index'])->name('danh-sach-user');
-        Route::post('/create', [UserController::class, 'create'])->name('tao-user');
-        Route::get('find/{UserId}', [UserController::class, 'UserById'])->name('tim-kiem-user');
-        Route::patch('/update/{UserId}', [UserController::class, 'update'])->name('cap-nhat-user');
-        Route::delete('/disable/{UserId}', [UserController::class, 'blockUser'])->name('chan-user');
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::post('/create', [UserController::class, 'create'])->name('users.create');
+        Route::get('find/{UserId}', [UserController::class, 'UserById'])->name('users.find');
+        Route::patch('/   update/{UserId}', [UserController::class, 'update'])->name('users.update');
+        Route::patch('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
+        Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');
     });
     /**
      * Pallet Routes

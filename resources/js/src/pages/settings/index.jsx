@@ -20,7 +20,7 @@ const genderOptions = [
 ];
 
 const authorizationOptions = [
-    { value: "admmin", label: "Admin" },
+    { value: "admin", label: "Admin" },
     { value: "client", label: "Client" },
 ];
 
