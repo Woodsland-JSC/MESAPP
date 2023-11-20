@@ -252,12 +252,11 @@ class MasterDataController extends Controller
             }
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity",1 "CDai", 2 "CDay",3"CRong" FROM OITW T0 ' .
+            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
-                'where T0."ItemCode"= ? and "BPLid" = ? and t3."U_Flag"=? ' .
-                'Group by T0."ItemCode", T2."ItemName", T0."WhsCode", T3."WhsName",T1."BatchNum", T1."Quantity",T0."OnHand",T1."ExpDate"';
+                'where T1."Quantity" >0 and T0."ItemCode"= ? and "BPLid" = ? and t3."U_Flag"=?';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
