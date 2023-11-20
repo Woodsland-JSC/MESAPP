@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {

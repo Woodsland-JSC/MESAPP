@@ -17,6 +17,7 @@ class DryingOvenController extends Controller
     // save pallet
     function StorePallet(Request $request)
     {
+
         try {
             DB::beginTransaction();
             $whs = WarehouseCS();
@@ -66,7 +67,6 @@ class DryingOvenController extends Controller
                 return response()->json([
                     'message' => 'Failed to create pallet and details',
                     'error' => $res['error'],
-                    'data' => $body
                 ], 500);
             } else {
 

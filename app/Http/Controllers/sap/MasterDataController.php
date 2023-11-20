@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reasons;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class MasterData.
@@ -239,12 +241,18 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    function getStockByItem($id)
+    function getStockByItem($id, Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity" FROM OITW T0 ' .
+            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Batch Quantity",1 "CDai", 2 "CDay",3"CRong" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
@@ -304,17 +312,41 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    function getQuyCachSay()
+    function getQuyCachSay(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
+            $query = "";
+            $filter = "";
+            if ($request->input('reason') == 'OUTDOOR') {
+                $query = 'select * from "@G_SAY2" where "U_Type"=?';
+                $filter = 'OUTDOOR';
+            } elseif ($request->input('reason') == 'SLIN') {
+                $query = 'select * from "@G_SAY2" where "Code" like ?';
+                $filter = 'ISL%';
+            } elseif ($request->input('reason') == 'SLOUT') {
+                $query = 'select * from "@G_SAY2" where "Code" like ?';
+                $filter = 'OSL%';
+            } elseif ($request->input('reason') == 'INDOOR') {
+                $query = 'select * from "@G_SAY2" where "U_Type"=?';
+                $filter = 'INDOOR';
+            } else {
+                $query = 'select * from "@G_SAY2" where "Code" like ?';
+                $filter = 'U%';
+            }
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select * from "@G_SAY2"';
+
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt)) {
+            if (!odbc_execute($stmt, [$filter])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -366,7 +398,11 @@ class MasterDataController extends Controller
     }
     function getReason(Request $request)
     {
-        return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->get(['Code', 'Name']), 200);
+        return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->where('type', 'P')->get(['Code', 'Name']), 200);
+    }
+    function getReasonPlan(Request $request)
+    {
+        return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->where('type', 'L')->get(['Code', 'Name']), 200);
     }
     function listfactory(string $id)
     {
@@ -379,6 +415,37 @@ class MasterDataController extends Controller
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
             if (!odbc_execute($stmt, [$id])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function UserSAPAssign()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            $userData = User::where('sap_id', '<>', null)->pluck('sap_id')->implode(','); // lấy danh sách user đã được assign và conver to string
+
+            $query = 'select "USER_CODE",ifnull("U_NAME","USER_CODE") from "OUSR" where "USER_CODE" NOT IN (?) and "USERID" NOT IN (2,3,4,5,6)';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$userData])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));

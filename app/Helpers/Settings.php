@@ -8,8 +8,8 @@ if (!function_exists('BasicAuthToken')) {
     function BasicAuthToken()
     {
         $setting = Settings::first();
-        $username = '{"CompanyDB":"' . $setting->dbname . '","UserName":"' .  $setting->user_sap . '"}';
-        $password = 'Qwe123$$'; //decrypt($setting->password_sap);
+        $username = '{"CompanyDB":"' . config('sap.DB_NAME') . '","UserName":"' .   config('sap.USER_SAPB1') . '"}';
+        $password = config('sap.PASSWORD_B1'); //decrypt($setting->password_sap);
         $authString = base64_encode("$username:$password");
         return $authString;
     }
@@ -27,8 +27,8 @@ function HeaderAPISAP()
 
 function UrlSAPServiceLayer()
 {
-    $setting = Settings::first();
-    return $setting->url_sapapp;
+    $sapUrl = config('sap.SAP_URL');
+    return $sapUrl;
 }
 function WarehouseCS()
 {

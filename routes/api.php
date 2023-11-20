@@ -8,6 +8,7 @@ use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\RolesController;
 use App\Http\Controllers\api\PermissionsController;
 use App\Http\Controllers\sap\DryingOvenController;
+use App\Http\Controllers\sap\PlanController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,7 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * Permission Routes
      */
     Route::group(['prefix' => 'permissions'], function () {
-        Route::get('/', [PermissionsController::class, 'index'])->name('permissions.index');
+        Route::get('/', [PermissionsController::class, 'index'])->name('danh-sach-quyen');
         // Route::post('/create', [RolesController::class, 'create'])->name('roles.create');
         // Route::patch('/update/{roleId}', [RolesController::class, 'update'])->name('roles.update');
     });
@@ -47,9 +48,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * Role Routes
      */
     Route::group(['prefix' => 'roles'], function () {
-        Route::get('/', [RolesController::class, 'index'])->name('roles.index');
-        Route::post('/create', [RolesController::class, 'create'])->name('roles.create');
-        Route::patch('/update/{roleId}', [RolesController::class, 'update'])->name('roles.update');
+        Route::get('/', [RolesController::class, 'index'])->name('danh-sach-role');
+        Route::post('/create', [RolesController::class, 'create'])->name('tao-role');
+        Route::patch('/update/{roleId}', [RolesController::class, 'update'])->name('cap-nhat-roles');
     });
     /**
      * User Routes
@@ -66,25 +67,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * Pallet Routes
      */
     Route::group(['prefix' => 'pallets'], function () {
-        Route::get('/', [DryingOvenController::class, 'index'])->name('pallets.index');
-        Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('pallets.create');
-        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('pallets.find');
+        Route::get('/', [DryingOvenController::class, 'index'])->name('danh-sach-pallet');
+        Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('tao-xep-say');
+        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('tim-kiem-pallet');
     });
     Route::group(['prefix' => 'ovens'], function () {
-        Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('ovens.index');
-        Route::post('/create', [DryingOvenController::class, 'pickOven'])->name('ovens.create');
-        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('ovens.find');
+        Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('danh-sach-lo');
+        Route::post('/create', [PlanController::class, 'pickOven'])->name('tao-ke-hoach-say');
+        Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('tim-kiem-lo-say');
     });
     # route cho master data
-    Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('GetItemMasterDataSap');
-    Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
+    Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
+    Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('danh sach kho');
     //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
     Route::get('/branch', [MasterDataController::class, 'branch'])->name('branch');
-    Route::get('/stock/{itemid}', [MasterDataController::class, 'getStockByItem'])->name('stockbyitem');
-    Route::get('/typeofwood', [MasterDataController::class, 'getLoaiGo'])->name('getLoaiGo');
-    Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('getQuyCachSay');
-    Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('getLoSay');
-    Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('getReason');
+    Route::get('/stock/{itemid}', [MasterDataController::class, 'getStockByItem'])->name('ton-kho-theo-ma-sp');
+    Route::get('/typeofwood', [MasterDataController::class, 'getLoaiGo'])->name('loai-go');
+    Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('quy-cach-say');
+    Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('lo-say');
+    Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('pallet-muc-dich-say');
+    Route::get('/oven-reasons', [MasterDataController::class, 'getReasonPlan'])->name('lo-say-muc-dich-say');
     Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
-    Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('admin.listfactory');
+    Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
+    Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
 });

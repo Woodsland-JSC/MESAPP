@@ -14,12 +14,17 @@ class reasonSeeder extends Seeder
     public function run(): void
     {
         $reasons = [
-            ['Code' => 'OUTDOOR', 'Name' => 'OUTDOOR'],
-            ['Code' => 'INDOOR', 'Name' => 'INDOOR'],
-            ['Code' => 'SL', 'Name' => 'SẤY LẠI'],
-            ['Code' => 'SU', 'Name' => 'SẤY UỐN'],
-            ['Code' => 'XOUTDOOR', 'Name' => 'X-OUTDOOR'],
-            ['Code' => 'XINDOOR', 'Name' => 'X-INDOOR'],
+            ['Code' => 'OUTDOOR', 'Name' => 'OUTDOOR', 'type' => 'P'],
+            ['Code' => 'INDOOR', 'Name' => 'INDOOR', 'type' => 'P'],
+            ['Code' => 'SL', 'Name' => 'SẤY LẠI', 'type' => 'P'],
+            ['Code' => 'SU', 'Name' => 'SẤY UỐN', 'type' => 'P'],
+            ['Code' => 'XOUTDOOR', 'Name' => 'X-OUTDOOR', 'type' => 'P'],
+            ['Code' => 'XINDOOR', 'Name' => 'X-INDOOR', 'type' => 'P'],
+            ['Code' => 'OUTDOOR', 'Name' => 'OUTDOOR', 'type' => 'L'],
+            ['Code' => 'INDOOR', 'Name' => 'INDOOR', 'type' => 'L'],
+            ['Code' => 'SU', 'Name' => 'SẤY UỐN', 'type' => 'L'],
+            ['Code' => 'SLIN', 'Name' => 'SẤY LẠI INDOOR', 'type' => 'L'],
+            ['Code' => 'SLOUT', 'Name' => 'SẤY LẠI OUTDOOR', 'type' => 'L'],
             // Add more reasons as needed
         ];
 
