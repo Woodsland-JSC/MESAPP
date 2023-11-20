@@ -3,26 +3,45 @@ import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
 import { FaPlus } from "react-icons/fa";
+import { RiInboxArchiveFill } from "react-icons/ri";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
+import toast from "react-hot-toast";
+import { Spinner } from "@chakra-ui/react";
+import axios from "axios";
 
 import DatePicker from "react-datepicker";
-import { BsCalendar2Week } from "react-icons/bs";
-
 import "react-datepicker/dist/react-datepicker.css";
-import "../../assets/styles/datepicker.css"
-
-const options = [
-    { value: "chocolate", label: "Chocolate" },
-    { value: "strawberry", label: "Strawberry" },
-    { value: "vanilla", label: "Vanilla" },
-];
+import "../../assets/styles/datepicker.css";
+import { format } from "date-fns";
 
 function WoodSorting() {
     const [woodTypes, setWoodTypes] = useState([]);
     const [dryingMethods, setDryingMethods] = useState([]);
     const [dryingReasons, setDryingReasons] = useState([]);
+
+    // Date picker
+    const [startDate, setStartDate] = useState(new Date());
+    const formattedStartDate = format(startDate, "yyyy-MM-dd");
+
+    // Input
+    const [batchId, setBatchId] = useState("");
+
+    // Validating
+    const [selectedWoodType, setSelectedWoodType] = useState(null);
+    const [selectedDryingReason, setSelectedDryingReason] = useState(null);
+    const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
+    const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
+
+    const [palletCards, setPalletCards] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [palletQuantities, setPalletQuantities] = useState({});
+
+    const isPalletCardExists = (id, palletCards) => {
+        return palletCards.some((card) => card.key === id);
+    };
 
     useEffect(() => {
         palletsApi
@@ -65,6 +84,7 @@ function WoodSorting() {
             });
     }, []);
 
+    // Search Filter
     const loadDryingMethods = (inputValue, callback) => {
         palletsApi
             .getDryingMethod()
@@ -92,8 +112,178 @@ function WoodSorting() {
             });
     };
 
-    // Date picker
-    const [startDate, setStartDate] = useState(new Date());
+    // Validating
+    const validateData = () => {
+        if (!selectedWoodType || selectedWoodType.value === "") {
+            toast.error("Loại gỗ không được bỏ trống");
+            return false;
+        }
+        if (!batchId.trim()) {
+            toast.error("Mã lô gỗ không được bỏ trống");
+            return false;
+        }
+        if (!selectedDryingReason || selectedDryingReason.value === "") {
+            toast.error("Mục đích sấy không được bỏ trống");
+            return false;
+        }
+        if (!selectedDryingMethod || selectedDryingMethod.value === "") {
+            toast.error("Quy cách thô không được bỏ trống");
+            return false;
+        }
+        if (!startDate) {
+            toast.error("Ngày nhập gỗ không được bỏ trống");
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleAddToList = async () => {
+        if (validateData()) {
+            try {
+                setIsLoading(true);
+
+                const data = {
+                    woodType: selectedWoodType,
+                    batchId: batchId,
+                    dryingReason: selectedDryingReason,
+                    dryingMethod: selectedDryingMethod,
+                    startDate: formattedStartDate,
+                };
+                console.log("1.Dữ liệu từ form:", data);
+
+                const response = await palletsApi.getStockByItem(
+                    selectedDryingMethod.value,
+                    selectedDryingReason.value
+                );
+
+                console.log("2. Get thông tin từ ItemCode:", response);
+
+                if (response && response.length > 0) {
+                    const newPalletCards = response
+                        .filter(
+                            (item) =>
+                                !isPalletCardExists(
+                                    item.WhsCode + item.BatchNum,
+                                    palletCards
+                                )
+                        )
+                        .map((item) => (
+                            <PalletCard
+                                key={item.WhsCode + item.BatchNum}
+                                itemCode={selectedDryingMethod.value}
+                                itemName={selectedDryingMethod.label}
+                                batchNum={item.BatchNum}
+                                inStock={item["Batch Quantity"]}
+                                whsCode={item.WhsCode}
+                                onDelete={() =>
+                                    handleDeletePalletCard(
+                                        item.WhsCode + item.BatchNum
+                                    )
+                                }
+                                onQuantityChange={(quantity) =>
+                                    handlePalletQuantityChange(
+                                        item.WhsCode + item.BatchNum,
+                                        quantity
+                                    )
+                                }
+                            />
+                        ));
+
+                    setPalletCards((prevPalletCards) => [
+                        ...prevPalletCards,
+                        ...newPalletCards,
+                    ]);
+                } else {
+                    toast.warning("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                }
+
+                toast.success("Đã thêm vào danh sách");
+            } catch (error) {
+                console.error("Error fetching stock by item:", error);
+                toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    const handleDeletePalletCard = (id) => {
+        setPalletCards((prevPalletCards) =>
+            prevPalletCards.filter((card) => card.key !== id)
+        );
+        toast.success("Đã xóa khỏi danh sách");
+    };
+
+    const handlePalletQuantityChange = (id, quantity) => {
+        setPalletQuantities((prevQuantities) => ({
+            ...prevQuantities,
+            [id]: quantity,
+        }));
+    };
+
+    // Creating pallets
+    const createPalletObject = () => {
+        const palletObject = {
+            LoaiGo: selectedWoodType.value,
+            MaLo: batchId,
+            LyDo: selectedDryingReason.value,
+            NgayNhap: formattedStartDate,
+            details: palletCards.map((card) => ({
+                ItemCode: card.props.itemCode,
+                WhsCode: card.props.whsCode,
+                BatchNum: card.props.batchNum,
+                Qty: palletQuantities[card.key] || 0,
+                CDai: 1,
+                CDay: 1,
+                CRong: 1,
+            })),
+        };
+        return palletObject;
+    };
+
+    // const handleCreatePallet = () => {
+    //     if (palletCards.length === 0) {
+    //         toast.error("Danh sách không được để trống.");
+    //         return;
+    //     }
+
+    //     const palletObject = createPalletObject();
+    //     console.log("3. Thông tin pallet:", palletObject);
+    //     toast.success("Tạo pallet thành công.");
+    // };
+
+    const handleCreatePallet = async () => {
+        if (palletCards.length === 0) {
+            toast.error("Danh sách không được để trống.");
+            return;
+        }
+
+        const palletObject = createPalletObject();
+
+        try {
+            const response = await axios.post(
+                "/api/pallets/create",
+                palletObject
+            );
+            console.log("3. Thông tin pallet:", palletObject);
+
+            console.log("4. Kết quả tạo pallet:", response.data);
+
+            toast.success("Tạo pallet thành công.");
+
+            setSelectedWoodType(null);
+            setBatchId("");
+            setSelectedDryingReason(null);
+            setSelectedDryingMethod(null);
+            setStartDate(new Date());
+            setPalletCards([]);
+            setPalletQuantities({});
+        } catch (error) {
+            console.error("Error creating pallet:", error);
+            toast.error("Đã xảy ra lỗi khi tạo pallet. Vui lòng thử lại sau.");
+        }
+    };
 
     return (
         <Layout>
@@ -184,7 +374,12 @@ function WoodSorting() {
                                             Loại gỗ
                                         </label>
                                         {/* <Select options={options} /> */}
-                                        <Select options={woodTypes} />
+                                        <Select
+                                            options={woodTypes}
+                                            onChange={(value) =>
+                                                setSelectedWoodType(value)
+                                            }
+                                        />
                                     </div>
                                     <div className="col-span-1">
                                         <label
@@ -195,9 +390,12 @@ function WoodSorting() {
                                         </label>
                                         <input
                                             type="text"
-                                            id="last_name"
-                                            className=" border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                            required
+                                            id="batch_id"
+                                            value={batchId}
+                                            onChange={(e) =>
+                                                setBatchId(e.target.value)
+                                            }
+                                            className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -207,7 +405,12 @@ function WoodSorting() {
                                         >
                                             Mục đích sấy
                                         </label>
-                                        <Select options={dryingReasons} />
+                                        <Select
+                                            options={dryingReasons}
+                                            onChange={(value) =>
+                                                setSelectedDryingReason(value)
+                                            }
+                                        />
                                     </div>
                                     <div className="col-span-2">
                                         <label
@@ -222,6 +425,9 @@ function WoodSorting() {
                                             defaultOptions
                                             loadOptions={loadDryingMethods}
                                             options={dryingMethods}
+                                            onChange={(value) =>
+                                                setSelectedDryingMethod(value)
+                                            }
                                         />
                                     </div>
 
@@ -232,25 +438,22 @@ function WoodSorting() {
                                         >
                                             Ngày nhập gỗ
                                         </label>
-                                        {/* <div className=" border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
-                                            
-                                        </div> */}
-                                        <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"/>
-                                        {/* <input
-                                            type="text"
-                                            id="company"
-                                            className=" border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                            required
-                                        /> */}
+                                        <DatePicker
+                                            selected={startDate}
+                                            onChange={(date) =>
+                                                setStartDate(date)
+                                            }
+                                            className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex w-full justify-end items-end">
-                                    <button
-                                        type="submit"
-                                        className="text-white bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                                    <div
+                                        onClick={handleAddToList}
+                                        className="text-white bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer"
                                     >
                                         Thêm vào danh sách
-                                    </button>
+                                    </div>
                                 </div>
                             </form>
                         </section>
@@ -259,21 +462,36 @@ function WoodSorting() {
 
                         {/* List */}
                         <div className="my-6 space-y-5">
-                            <PalletCard
-                                name="26 142 2300 - 16 Láng Hạ khối VP+NH - xương ngang ngoài 2
-                            "
-                                inStock="12"
-                                batchNum="12"
-                            />
+                            {/* List of Pallet Cards */}
+                            <div className="my-6 space-y-5">
+                                {isLoading ? (
+                                    <div className="text-center">
+                                        <Spinner
+                                            thickness="4px"
+                                            speed="0.65s"
+                                            emptyColor="gray.200"
+                                            color="#155979"
+                                            size="xl"
+                                        />
+                                    </div>
+                                ) : palletCards.length > 0 ? (
+                                    palletCards
+                                ) : (
+                                    <div className="flex flex-col justify-center text-center text-gray-400">
+                                        <div>Danh sách hiện đang trống.</div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="xl:flex w-full justify-between items-center">
                             <div className="xl:my-0 my-2 text-gray-500">
-                                Tổng: <span>0</span>
+                                Tổng: <span>{palletCards.length}</span>
                             </div>
                             <button
-                                type="submit"
-                                className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                type="button"
+                                onClick={handleCreatePallet}
+                                className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
                                 Tạo pallet
                                 <FaPlus />

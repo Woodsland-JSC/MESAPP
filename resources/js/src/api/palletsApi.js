@@ -13,6 +13,14 @@ const palletsApi = {
         const url = `/reasons`;
         return axiosClient().get(url, {});
     },
+    getStockByItem: (item, reason) => {
+        const url = `/stock/${item}`;
+        return axiosClient().get(url, {
+            params: {
+                reason: reason || "SL", // default value = "SL"
+            },
+        });
+    },
 };
 
 export default palletsApi;
