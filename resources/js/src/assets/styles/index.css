@@ -194,4 +194,11 @@ body {
             background-color: rgba(0, 0, 0, 0);
         }
     }
+
+    .react-select__option {
+      @apply block text-base text-[#242424] w-full select-none box-border px-3 py-[11px] hover:bg-[#ebecf0];
+    }
+    .react-select__option_selected {
+      @apply bg-[#42526e] text-white hover:bg-[#42526e];
+    }
 }
