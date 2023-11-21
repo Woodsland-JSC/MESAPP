@@ -84,7 +84,7 @@ function CreateRole() {
                                             />
                                         </svg>
                                         <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Tạo mới quyền</div>
+                                            <div>Tạo mới role</div>
                                         </span>
                                     </div>
                                 </li>
@@ -93,7 +93,7 @@ function CreateRole() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Tạo mới quyền</div>
+                    <div className="text-3xl font-bold mb-6">Tạo mới role</div>
                     {/* Main content */}
                     <form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                         <div className="flex gap-4">

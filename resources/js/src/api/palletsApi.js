@@ -21,6 +21,23 @@ const palletsApi = {
             },
         });
     },
+    getKiln: () => {
+        const url = `ovens/`;
+        return axiosClient().get(url, {});
+    },
+    getThickness: (reason) => {
+        const url = `/dryingmethod`;
+        return axiosClient().get(url, {
+            params: {
+                reason: reason || "SLOUT", // Use the provided reason or a default value
+            },
+        });
+    },
+    getPlanDryingReason: () => {
+        const url = `/reasons`;
+        return axiosClient().get(url, {});
+    },
+    
 };
 
 export default palletsApi;

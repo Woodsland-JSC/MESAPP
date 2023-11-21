@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
-import { FaPlus } from "react-icons/fa";
+import { HiPlus } from "react-icons/hi";
 import { RiInboxArchiveFill } from "react-icons/ri";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
@@ -10,6 +10,7 @@ import palletsApi from "../../api/palletsApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import axios from "axios";
+
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -242,17 +243,6 @@ function WoodSorting() {
         return palletObject;
     };
 
-    // const handleCreatePallet = () => {
-    //     if (palletCards.length === 0) {
-    //         toast.error("Danh sách không được để trống.");
-    //         return;
-    //     }
-
-    //     const palletObject = createPalletObject();
-    //     console.log("3. Thông tin pallet:", palletObject);
-    //     toast.success("Tạo pallet thành công.");
-    // };
-
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
             toast.error("Danh sách không được để trống.");
@@ -369,7 +359,7 @@ function WoodSorting() {
                                 <div className="xl:grid xl:space-y-0 space-y-5 gap-5 mb-6 xl:grid-cols-3">
                                     <div className="col-span-1">
                                         <label
-                                            for="first_name"
+                                            htmlFor="wood_type"
                                             className="block mb-2 text-md font-medium text-gray-900"
                                         >
                                             Loại gỗ
@@ -384,7 +374,7 @@ function WoodSorting() {
                                     </div>
                                     <div className="col-span-1">
                                         <label
-                                            for="last_name"
+                                            htmlFor="batch_id"
                                             className="block mb-2 text-md font-medium text-gray-900"
                                         >
                                             Mã lô gỗ
@@ -401,7 +391,7 @@ function WoodSorting() {
                                     </div>
                                     <div className="col-span-1">
                                         <label
-                                            for="company"
+                                            htmlFor="drying_reason"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Mục đích sấy
@@ -415,7 +405,7 @@ function WoodSorting() {
                                     </div>
                                     <div className="col-span-2">
                                         <label
-                                            for="company"
+                                            htmlFor="drying_method"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Quy cách thô
@@ -434,7 +424,7 @@ function WoodSorting() {
 
                                     <div className="col-span-1">
                                         <label
-                                            for="company"
+                                            htmlFor="indate"
                                             className="block mb-2 text-md font-medium text-gray-900 "
                                         >
                                             Ngày nhập gỗ
@@ -451,7 +441,7 @@ function WoodSorting() {
                                 <div className="flex w-full justify-end items-end">
                                     <div
                                         onClick={handleAddToList}
-                                        className="text-white bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer"
+                                        className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer"
                                     >
                                         Thêm vào danh sách
                                     </div>
@@ -492,10 +482,10 @@ function WoodSorting() {
                             <button
                                 type="button"
                                 onClick={handleCreatePallet}
-                                className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
+                                className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
-                                Tạo pallet
-                                <FaPlus />
+                                <HiPlus className="text-xl" />
+                                Tạo pallet   
                             </button>
                         </div>
                     </div>

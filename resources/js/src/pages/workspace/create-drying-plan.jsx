@@ -1,13 +1,119 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Layout from "../../layouts/layout";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
+import { HiPlus } from "react-icons/hi";
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
+    Button,
+} from "@chakra-ui/react";
+import Select from "react-select";
+import AsyncSelect from "react-select/async";
+import palletsApi from "../../api/palletsApi";
+
+const dryingReasonsPlan = [
+    { value: "OUTDOOR", label: "OUTDOOR" },
+    { value: "INDOOR", label: "INDOOR" },
+    { value: "SU", label: "SẤY UỐN" },
+    { value: "SLOUT", label: "SẤY LẠI OUTDOOR" },
+    { value: "SLIN", label: "SẤY LẠI INDOOR" },
+];
 
 function CreateDryingPlan() {
-  return (
-    <Layout>
-      {/* Container */}
-      <div className="flex justify-center bg-[#F8F9F7] ">
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const [kiln, setKlin] = useState([]);
+    // const [dryingReasonsPlan , setDryingReasonsPlan ] = useState([]);
+    const [thicknessOptions, setThicknessOptions] = useState([]);
+
+    // Validating
+    const [selectedKiln, setSelectedKiln] = useState(null);
+    const [selectedDryingReasonsPlan, setSelectedDryingReasonsPlan] =
+        useState(null);
+    const [selectedThickness, setSelectedThickness] = useState(null);
+
+    useEffect(() => {
+        palletsApi
+            .getKiln()
+            .then((data) => {
+                const options = data.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                setKlin(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching kiln list:", error);
+            });
+
+        // palletsApi
+        //     .getDryingReason()
+        //     .then((data) => {
+        //         const options = data.map((item) => ({
+        //             value: item.Code,
+        //             label: item.Name,
+        //         }));
+        //         setDryingReasons(options);
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error fetching drying reasons:", error);
+        //     });
+
+        palletsApi
+            .getThickness({
+                reason: "SLOUT",
+            })
+            .then((data) => {
+                const options = data.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                setThicknessOptions(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching thickness:", error);
+            });
+    }, [selectedDryingReasonsPlan]);
+
+    const loadOptions = async (inputValue, callback) => {
+        try {
+            const response = await palletsApi.getThickness({
+                reason: selectedDryingReasonsPlan ? selectedDryingReasonsPlan.value : "SLOUT",
+            });
+
+            const options = response.data.map((item) => ({
+                value: item.Code,
+                label: item.Name,
+            }));
+
+            callback(options);
+        } catch (error) {
+            console.error("Error fetching thickness options:", error);
+            callback([]);
+        }
+    };
+
+    const handleCompletion = () => {
+        console.log("Selected Kiln:", selectedKiln.value);
+        console.log(
+            "Selected Drying Reasons Plan:",
+            selectedDryingReasonsPlan.value
+        );
+        console.log("Selected Thickness:", selectedThickness);
+    };
+
+    return (
+        <Layout>
+            {/* Container */}
+            <div className="flex justify-center bg-[#F8F9F7] ">
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
@@ -76,7 +182,106 @@ function CreateDryingPlan() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Tạo kế hoạch sấy</div>
+                    <div className="flex justify-between mb-6 items-center">
+                        <div className="text-3xl font-bold ">
+                            Tạo kế hoạch sấy
+                        </div>
+                        <button
+                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
+                            onClick={onOpen}
+                        >
+                            <HiPlus className="text-xl mr-2" />
+                            Tạo mới
+                        </button>
+                    </div>
+
+                    <Modal
+                        closeOnOverlayClick={false}
+                        onClose={onClose}
+                        isOpen={isOpen}
+                        isCentered
+                    >
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>Tạo kế hoạch sấy</ModalHeader>
+                            <ModalCloseButton />
+                            <ModalBody>
+                                <div className="flex flex-col space-y-5">
+                                    <div className="border-b border-gray-200">
+                                        <div className="text-lg mb-1 font-medium">
+                                            Mẻ sấy số: <span>2023.41.08</span>
+                                        </div>
+                                        <div className="text-gray-500 pb-3">
+                                            Ngày: <span>21/11/2023</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="">
+                                        <label
+                                            for="first_name"
+                                            className="block mb-2 text-md font-medium text-gray-900"
+                                        >
+                                            Lò sấy
+                                        </label>
+                                        <Select
+                                            options={kiln}
+                                            onChange={(value) =>
+                                                setSelectedKiln(value)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="">
+                                        <label
+                                            for="first_name"
+                                            className="block mb-2 text-md font-medium text-gray-900"
+                                        >
+                                            Mục đích sấy
+                                        </label>
+                                        {/* <Select options={options} /> */}
+                                        <Select
+                                            options={dryingReasonsPlan}
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selected Drying Reason:",
+                                                    value
+                                                );
+                                                setSelectedDryingReasonsPlan(
+                                                    value
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="">
+                                        <label
+                                            for="first_name"
+                                            className="block mb-2 text-md font-medium text-gray-900"
+                                        >
+                                            Chiều dày sấy
+                                        </label>
+                                        <AsyncSelect
+                                            cacheOptions
+                                            defaultOptions
+                                            loadOptions={loadOptions}
+                                            onChange={(value) =>
+                                                setSelectedThickness(value)
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <div className="flex gap-4">
+                                    <Button onClick={onClose}>Đóng</Button>
+                                    <Button
+                                        colorScheme="facebook"
+                                        onClick={handleCompletion}
+                                    >
+                                        Hoàn thành
+                                    </Button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
 
                     {/* Controller */}
                     <div className=" my-4 mb-6 xl:w-full">
@@ -161,10 +366,19 @@ function CreateDryingPlan() {
                             weight="130.72 (m³)"
                         />
                     </div>
+
+                    <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">
+                        <button
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold p-5 rounded-full shadow-lg"
+                            onClick={onOpen}
+                        >
+                            <HiPlus className="text-2xl" />
+                        </button>
+                    </div>
                 </div>
             </div>
-    </Layout> 
-  )
+        </Layout>
+    );
 }
 
-export default CreateDryingPlan
+export default CreateDryingPlan;

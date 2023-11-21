@@ -546,7 +546,7 @@ function Users() {
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <FaPlus />
                                                     <div className="">
-                                                        Tạo Quyền
+                                                        Tạo Role
                                                     </div>
                                                 </button>
                                             </Link>
