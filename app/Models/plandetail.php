@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class plandetail extends Model
 {
     use HasFactory;
-    protected $table = 'worker_dryings';
+    protected $table = 'plan_detail';
     protected $fillable = ['PlanID', 'pallet', 'size', 'Mass', 'Qty'];
-    public function pallet()
+    public function detail()
     {
         return $this->belongsTo(plandryings::class, 'PlanID', 'PlanID');
     }

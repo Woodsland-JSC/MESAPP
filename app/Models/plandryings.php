@@ -11,7 +11,7 @@ class plandryings extends Model
 {
     use HasFactory;
     protected $primaryKey = 'PlanID';
-    protected $table = 'plandryings';
+    protected $table = 'planDryings';
     protected $fillable = [
         'PlanID',
         'Code',
@@ -26,6 +26,10 @@ class plandryings extends Model
         'Review',
         'Disabilities',
         'Time',
+        'CheckedBy',
+        'ReviewBy',
+        'RunBy',
+        'CompletedBy',
         'CreateBy'
     ];
     // Sự kiện trước khi tạo mới record

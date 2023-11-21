@@ -75,6 +75,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('danh-sach-lo');
         Route::post('/create', [PlanController::class, 'pickOven'])->name('tao-ke-hoach-say');
         Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('tim-kiem-lo-say');
+        Route::get('/production-batch', [PlanController::class, 'listpallet'])->name('danh-pallet-avaliable');
+        Route::get('/production-availiable', [PlanController::class, 'listovens'])->name('danh-me-avaliable');
+        Route::post('/production-batch', [PlanController::class, 'productionBatch'])->name('vao-lo');
+        Route::get('/production-detail/{PlanID}', [PlanController::class, 'productionDetail'])->name('chi tiết mẻ');
+
+        Route::get('/production-check', [PlanController::class, 'listovens'])->name('danh-sach-kiem-tra-lo');
+        Route::patch('/production-check', [PlanController::class, 'checkOven'])->name('kiem-tra-lo');
+
+        Route::get('/production-run', [PlanController::class, 'ListRunOven'])->name('danh-sach-lo-da-kiem-tra');
+        Route::patch('/production-run', [PlanController::class, 'runOven'])->name('chay-lo');
+        Route::get('/production-completed', [PlanController::class, 'Listcomplete'])->name('danh-sach-me-ra-lo');
+        Route::patch('/production-completed', [PlanController::class, 'completed'])->name('ra-lo');
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
