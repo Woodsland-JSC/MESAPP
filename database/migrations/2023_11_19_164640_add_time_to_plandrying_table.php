@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('plandryings', function (Blueprint $table) {
+        Schema::table('planDryings', function (Blueprint $table) {
             $table->integer('Time');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('plandryings', function (Blueprint $table) {
+        Schema::table('planDryings', function (Blueprint $table) {
             $table->dropColumn('Time');
         });
     }
