@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
@@ -97,6 +97,7 @@ const SelectField = ({ options, ...props }) => {
             options={options}
             value={selectedOption}
             onChange={handleChange}
+            placeholder="Lựa chọn"
         />
     );
 };
@@ -107,7 +108,8 @@ function User() {
     const fileInputRef = useRef();
 
     const [formKey, setFormKey] = useState(0);
-    const { loading, setLoading } = useAppContext();
+    // const { loading, setLoading } = useAppContext();
+    const [loading, setLoading] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
 
@@ -206,7 +208,7 @@ function User() {
     };
 
     const handleFormSubmit = async (values) => {
-        const updatedValues = {...values};
+        const updatedValues = { ...values };
         const { password: newPassword, ...updatedInfo } = values;
         const { password: oldPassword, ...oldInfo } = originalInfo;
         const isChanged = areObjectsEqual(updatedInfo, oldInfo);
@@ -217,8 +219,11 @@ function User() {
                 if (selectedFile instanceof File) {
                     updatedValues.avatar = selectedFile;
                 }
-            } else if (avatar.file == originalAvatar || avatar.imgSrc == originalAvatar) {
-                updatedValues.avatar = '';
+            } else if (
+                avatar.file == originalAvatar ||
+                avatar.imgSrc == originalAvatar
+            ) {
+                updatedValues.avatar = "";
             } else {
                 updatedValues.avatar = -1;
             }
@@ -230,11 +235,10 @@ function User() {
                 getCurrentUser();
             } catch (error) {
                 console.error(error);
-                toast.error("Có lỗi xảy ra, vui lòng thử lại.")
+                toast.error("Có lỗi xảy ra, vui lòng thử lại.");
             }
 
             console.log("Giá trị updated values: ", updatedValues);
-            
         } else {
             toast("Bạn chưa điều chỉnh thông tin.", {
                 icon: ` ℹ️`,
@@ -256,13 +260,48 @@ function User() {
         }
     };
 
-    const getCurrentUser = async () => {
+    useEffect(() => {
+        if (input.lastName && input.firstName && !avatar.file) {
+            const tempName =
+                input.lastName.trim().charAt(0) +
+                input.firstName.trim().charAt(0);
+            const res = (async () => {
+                const base64 = await getAutoAvatar(tempName);
+                console.log("Auto ava: ", base64);
+                setAvatar({ ...avatar, autoImg: base64 });
+            })();
+            setAvatarLoading(false);
+        }
+
+        if (!input.lastName && !input.firstName) {
+            setAvatar({ ...avatar, imgSrc: null, autoImg: DefaultAvatar });
+        }
+    }, [input]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (hasChanged) {
+                const message =
+                    "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa được lưu.";
+                event.returnValue = message;
+                return message;
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [hasChanged]);
+
+    const getCurrentUser = useCallback(async () => {
+        setLoading(true);
         try {
             if (!userId) {
                 navigate("/notfound");
                 return;
             }
-            setLoading(true);
             const data = await usersApi.getUserDetails(userId);
             const {
                 first_name: firstName,
@@ -306,7 +345,6 @@ function User() {
                 });
             }
             setFormKey((prevKey) => prevKey + 1);
-            setLoading(false);
         } catch (error) {
             // console.error(error);
             toast.error("Không tìm thấy user");
@@ -314,47 +352,14 @@ function User() {
                 navigate("/notfound", { replace: true });
             }
         }
-    };
+        setLoading(false);
+    }, [userId]);
 
     useEffect(() => {
-        if (input.lastName && input.firstName && !avatar.file) {
-            const tempName =
-                input.lastName.trim().charAt(0) +
-                input.firstName.trim().charAt(0);
-            const res = (async () => {
-                const base64 = await getAutoAvatar(tempName);
-                console.log("Auto ava: ", base64);
-                setAvatar({ ...avatar, autoImg: base64 });
-            })();
-            setAvatarLoading(false);
-        }
+        document.title = "Woodsland - Chi tiết người dùng";
 
-        if (!input.lastName && !input.firstName) {
-            setAvatar({ ...avatar, imgSrc: null, autoImg: DefaultAvatar });
-        }
-    }, [input]);
-
-    useEffect(() => {
-        const handleBeforeUnload = (event) => {
-            if (hasChanged) {
-                const message =
-                    "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa được lưu.";
-                event.returnValue = message;
-                return message;
-            }
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [hasChanged]);
-
-    useEffect(() => {
         getCurrentUser();
 
-        document.title = "Woodsland - Chi tiết người dùng";
         return () => {
             document.title = "Woodsland";
         };
@@ -414,7 +419,8 @@ function User() {
                         key={formKey}
                         initialValues={input}
                         validationSchema={validationSchema}
-                        onSubmit={(values) => {
+                        onSubmit={(values, e) => {
+                            e.preventDefault();
                             handleFormSubmit(values);
                         }}
                     >
@@ -735,13 +741,14 @@ function User() {
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 INTEGRATION ID{" "}
-                                                <span className="text-red-600">
+                                                {/* <span className="text-red-600">
                                                     *
-                                                </span>
+                                                </span> */}
                                             </label>
                                             <Field
                                                 name="integrationId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                disabled
                                                 onChange={(e) => {
                                                     setFieldValue(
                                                         "integrationId",

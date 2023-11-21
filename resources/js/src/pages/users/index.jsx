@@ -124,10 +124,10 @@ function Users() {
                         <Link to={"/user/" + params.data.id}>
                             <LiaEditSolid className="cursor-pointer text-yellow-700 text-[20px]" />
                         </Link>
-                        <RiDeleteBin6Line
+                        {/* <RiDeleteBin6Line
                             className="cursor-pointer text-red-700 text-[18px]"
                             onClick={() => deleteUser(params.data)}
-                        />
+                        /> */}
                     </div>
                 );
             },
@@ -230,14 +230,18 @@ function Users() {
 
     const onUserGridReady = useCallback(async () => {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
+        showLoadingUser();
         const res = await usersApi.getAllUsers();
         setUserData(res);
+        hideLoadingUser();
     }, []);
 
     const onRoleGridReady = useCallback(async () => {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
+        showLoadingRole();
         const res = await roleApi.getAllRole();
         setRoleData(res);
+        hideLoadingRole();
     }, []);
 
     const onFirstDataRendered = useCallback((params) => {
@@ -255,32 +259,44 @@ function Users() {
         );
     }, []);
 
+    const showLoadingUser = useCallback(() => {
+        userGridRef.current.api.showLoadingOverlay();
+    }, []);
+
+    const showLoadingRole = useCallback(() => {
+        roleGridRef.current.api.showLoadingOverlay();
+    }, []);
+
+    const hideLoadingRole = useCallback(() => {
+        roleGridRef.current.api.hideOverlay();
+    }, []);
+
     // User Actions
-    const deleteUser = async (data) => {
-        const randomNum = Math.floor(Math.random() * 90 + 10);
+    // const deleteUser = async (data) => {
+    //     const randomNum = Math.floor(Math.random() * 90 + 10);
 
-        const userInput = prompt(
-            `Nhập ${randomNum} để xác nhận xoá người dùng ${data.first_name}.\nLưu ý: Không thể hoàn tác xoá dữ liệu người dùng.`
-        );
+    //     const userInput = prompt(
+    //         `Nhập ${randomNum} để xác nhận xoá người dùng ${data.first_name}.\nLưu ý: Không thể hoàn tác xoá dữ liệu người dùng.`
+    //     );
 
-        if (userInput && parseInt(userInput) === randomNum) {
-            if (data.id) {
-                setLoading(true);
-                try {
-                    const res = await usersApi.deleteUser(data.id);
-                    console.log("Result xoá: ", res);
-                    toast.success("Xoá người dùng thành công.");
-                    setUserData(userData.filter((item) => item.id != data.id));
-                } catch (error) {
-                    console.error(error);
-                    toast.error("Có lỗi xảy ra.");
-                }
-                setLoading(false);
-            }
-        } else if (userInput && parseInt(userInput) !== randomNum) {
-            toast.error("Đã huỷ xoá người dùng.");
-        }
-    };
+    //     if (userInput && parseInt(userInput) === randomNum) {
+    //         if (data.id) {
+    //             setLoading(true);
+    //             try {
+    //                 const res = await usersApi.deleteUser(data.id);
+    //                 console.log("Result xoá: ", res);
+    //                 toast.success("Xoá người dùng thành công.");
+    //                 setUserData(userData.filter((item) => item.id != data.id));
+    //             } catch (error) {
+    //                 console.error(error);
+    //                 toast.error("Có lỗi xảy ra.");
+    //             }
+    //             setLoading(false);
+    //         }
+    //     } else if (userInput && parseInt(userInput) !== randomNum) {
+    //         toast.error("Đã huỷ xoá người dùng.");
+    //     }
+    // };
 
     const toggleBlockUser = async (e, data) => {
         try {
@@ -308,28 +324,24 @@ function Users() {
         const params = new URLSearchParams(window.location.search);
 
         if (isRoleTab) {
-          params.set('roletab', 'true');
+            params.set("roletab", "true");
         } else {
-          params.delete('roletab');
+            params.delete("roletab");
         }
-    
+
         const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.pushState({}, '', newUrl);
+        window.history.pushState({}, "", newUrl);
     };
 
     useEffect(() => {
-        setLoading(true);
-
         document.title = "Woodsland - Quản lý người dùng";
         const params = new URLSearchParams(window.location.search);
-    
-        if (params.get('roletab') === 'true') {
+
+        if (params.get("roletab") === "true") {
             setTimeout(() => {
                 roleTab.current.click();
-            })
+            });
         }
-
-        setLoading(false);
 
         return () => {
             document.title = "Woodsland";
@@ -369,12 +381,18 @@ function Users() {
                     <section className="bg-white rounded-lg border-2 mb-2 border-gray-200">
                         <Tabs size="lg">
                             <TabList className="">
-                                <Tab ref={userTab} onClick={() => handleTabClick(false)}>
+                                <Tab
+                                    ref={userTab}
+                                    onClick={() => handleTabClick(false)}
+                                >
                                     <div className="text-base font-medium">
                                         Danh sách người dùng
                                     </div>
                                 </Tab>
-                                <Tab ref={roleTab} onClick={() => handleTabClick(true)}>
+                                <Tab
+                                    ref={roleTab}
+                                    onClick={() => handleTabClick(true)}
+                                >
                                     <div className="text-base font-medium">
                                         Phân quyền
                                     </div>

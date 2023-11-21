@@ -83,6 +83,7 @@ const SelectField = ({ options, ...props }) => {
             options={options}
             value={selectedOption}
             onChange={handleChange}
+            placeholder="Lựa chọn"
         />
     );
 };
@@ -589,24 +590,26 @@ function CreateUser() {
                                                     className="block mb-2 text-md font-medium text-gray-900"
                                                 >
                                                     INTEGRATION ID{" "}
-                                                    <span className="text-red-600">
+                                                    {/* <span className="text-red-600">
                                                         *
-                                                    </span>
+                                                    </span> */}
                                                 </label>
                                                 <Field
                                                     name="integrationId"
                                                     className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "integrationId",
-                                                            e.target.value
-                                                        );
-                                                        setInput((prev) => ({
-                                                            ...prev,
-                                                            integrationId:
-                                                                e.target.value,
-                                                        }));
-                                                    }}
+                                                    disabled
+                                                    value="1"
+                                                    // onChange={(e) => {
+                                                    //     setFieldValue(
+                                                    //         "integrationId",
+                                                    //         e.target.value
+                                                    //     );
+                                                    //     setInput((prev) => ({
+                                                    //         ...prev,
+                                                    //         integrationId:
+                                                    //             e.target.value,
+                                                    //     }));
+                                                    // }}
                                                 />
                                                 {errors.integrationId &&
                                                 touched.integrationId ? (
