@@ -25,7 +25,7 @@ class PlanController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'Oven' => ['required',], // new UniqueOvenStatusRule
+                'Oven' => ['required', new UniqueOvenStatusRule], // new UniqueOvenStatusRule
                 'Reason' => 'required',
                 'Method' => 'required',
                 'Time' => 'required|integer'
@@ -37,6 +37,7 @@ class PlanController extends Controller
             // ghi nhận kế hoạch sấy vào hệ thống app
             DB::beginTransaction();
             $PlanData = $request->only(['Oven', 'Reason', 'Method', 'Time']);
+            $PlanData['CreateBy'] = Auth::user()->id;
             // $PlanData['PlanDate'] = Carbon::now()->addDays($request->input('Time'));
             $plandryings = plandryings::create($PlanData);
 
@@ -75,8 +76,210 @@ class PlanController extends Controller
 
         return response()->json($response, 200);
     }
-    // cập nhật trạng thái lò sấy
-    function changeStatus(Request $request)
+    //danh sách pallet chưa được assign
+    function listpallet()
     {
+        $pallets = DB::table('pallets as a')
+            ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
+            ->select('a.palletID', 'a.Code')
+            ->where('b.plant', '=', Auth::user()->plant)
+            ->whereNull('c.pallet')
+            ->get();
+        return response()->json($pallets, 200);
+    }
+    //danh sách mẻ sấy có thể vào lò
+    function listovens()
+    {
+        $pallets = DB::table('planDryings as a')
+            ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->select('a.*')
+            ->where('b.plant', '=', Auth::user()->plant)
+            ->where('a.Status', 0)
+            ->get();
+        return response()->json($pallets, 200);
+    }
+    //danh sách mẻ sấy có thể vào lò
+    function ListRunOven()
+    {
+        $pallets = DB::table('planDryings as a')
+            ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->select('a.*')
+            ->where('b.plant', '=', Auth::user()->plant)
+            ->where('a.Status', 1)
+            ->get();
+        return response()->json($pallets, 200);
+    }
+    //danh sách mẻ sấy có thể chạy lo
+    function Listcomplete()
+    {
+        $pallets = DB::table('planDryings as a')
+            ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->select('a.*')
+            ->where('b.plant', '=', Auth::user()->plant)
+            ->where('a.Status', 2)
+            ->get();
+        return response()->json($pallets, 200);
+    }
+    //vào lò
+    function productionBatch(Request $request)
+    {
+        $id = $request->input('PlanID');
+        $pallet = $request->input('PalletID');
+        DB::beginTransaction();
+        try {
+            // Check if the referenced PlanID exists in the plandryings table
+            $existingPlan = plandryings::find($id);
+
+            if (!$existingPlan) {
+                throw new \Exception('Lò không hợp lệ.');
+            }
+
+            $data = plandetail::create(['PlanID' => $id, 'pallet' => $pallet, 'size' => 5, 'Qty' => 10, 'Mass' => 10]);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'successfully',
+                [
+                    'data' => $existingPlan,
+                    'detail' =>  plandetail::where('PlanID', $id)->get()
+                ],
+
+
+            ], 200);
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    //hoàn thành đánh giá
+    function checkOven(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validator = Validator::make($request->all(), [
+                'PlanID' => ['required',], // new UniqueOvenStatusRule
+
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
+            $id = $request->input('PlanID');
+            $record = plandryings::find($id);
+            if ($record) {
+                $record->update(
+                    [
+                        'PlanID' => $id,
+                        'Status' => 1,
+                        'Checked' => 1,
+                        'CheckedBy' => Auth::user()->id
+                    ]
+                );
+                DB::commit();
+                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+            } else {
+                return response()->json(['error' => 'Record not found'], 404);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    //chạy lò
+    function runOven(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validator = Validator::make($request->all(), [
+                'PlanID' => ['required',], // new UniqueOvenStatusRule
+
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
+            $id = $request->input('PlanID');
+            $record = plandryings::find($id);
+            if ($record) {
+                $record->update(
+                    [
+                        'PlanID' => $id,
+                        'Status' => 2,
+                        'RunBy' => Auth::user()->id
+                    ]
+                );
+                DB::commit();
+                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+            } else {
+                return response()->json(['error' => 'Record not found'], 404);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    //ra lò
+    function completed(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validator = Validator::make($request->all(), [
+                'PlanID' => ['required',], // new UniqueOvenStatusRule
+
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            }
+            $id = $request->input('PlanID');
+            $record = plandryings::find($id);
+            if ($record) {
+                $record->update(
+                    [
+                        'PlanID' => $id,
+                        'Status' => 3,
+                        'CompletedBy' => Auth::user()->id
+                    ]
+                );
+                DB::commit();
+                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+            } else {
+                return response()->json(['error' => 'Record not found'], 404);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    // chi tiết mẻ
+    function productionDetail($id)
+    {
+
+        // Assuming Plandryings is your model for the plandryings table
+        $plandrying = Plandryings::with('details')
+            ->where('PlanID', $id)
+            ->first();
+
+        if ($plandrying) {
+            // Access the related plan details
+            $planDetails = $plandrying->details;
+            return response()->json(['plandrying' => $plandrying]);
+        } else {
+            return response()->json(['error' => 'No record found for the given PlanID'], 404);
+        }
     }
 }
