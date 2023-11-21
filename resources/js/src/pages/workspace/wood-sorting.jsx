@@ -4,13 +4,12 @@ import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
 import { HiPlus } from "react-icons/hi";
 import { RiInboxArchiveFill } from "react-icons/ri";
+import axios from "axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
-import axios from "axios";
-
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -88,7 +87,7 @@ function WoodSorting() {
     // Search Filter
     const loadDryingMethods = (inputValue, callback) => {
         palletsApi
-            .getDryingMethod()
+            .getDryingReason()
             .then((data) => {
                 const filteredOptions = data.filter(
                     (option) =>
@@ -269,7 +268,6 @@ function WoodSorting() {
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
-            
         } catch (error) {
             console.error("Error creating pallet:", error);
             toast.error("Đã xảy ra lỗi khi tạo pallet. Vui lòng thử lại sau.");
@@ -410,12 +408,10 @@ function WoodSorting() {
                                         >
                                             Quy cách thô
                                         </label>
-                                        {/* <Select cacheOptions defaultOptions options={dryingMethods} /> */}
                                         <AsyncSelect
                                             cacheOptions
-                                            defaultOptions
                                             loadOptions={loadDryingMethods}
-                                            options={dryingMethods}
+                                            // options={dryingMethods}
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
@@ -485,7 +481,7 @@ function WoodSorting() {
                                 className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
                                 <HiPlus className="text-xl" />
-                                Tạo pallet   
+                                Tạo pallet
                             </button>
                         </div>
                     </div>

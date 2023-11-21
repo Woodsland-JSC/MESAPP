@@ -1,5 +1,5 @@
 .landing-page{
-  background-image: linear-gradient(rgba(255, 255, 255, 1) 15%, rgba(251, 251, 251, 0.1) 80%), linear-gradient(120deg, rgb(173, 189, 228), rgb(160, 203, 224)) !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 1) 15%, rgba(251, 251, 251, 0.1) 80%), linear-gradient(120deg, #809DD1, #C9DDFF, #CFE0FF) !important;
   background-repeat: no-repeat;
   height: 100vh;
 }

@@ -77,7 +77,7 @@ function Workspace() {
                                             </h5>
                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
                                                 Tạo và xếp pallet để chuẩn bị
-                                                cho công đoạn vào lò.
+                                                cho vào lò.
                                             </p>
                                         </div>
                                     </div>
@@ -168,7 +168,7 @@ function Workspace() {
                                                 Lò sấy
                                             </h5>
                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                Tiến hành quá trình sấy gỗ.
+                                                Tiến hành khởi động quá trình sấy gỗ.
                                             </p>
                                         </div>
                                     </div>
