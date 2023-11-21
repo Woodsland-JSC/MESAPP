@@ -50,7 +50,25 @@ function ControllerCard(props) {
 
             {/* Content */}
 
+            
+
             {/* Step 1: Vào lò */}
+            <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-3">
+                <div className="pt-2 xl:w-[85%] w-full md:w-[85%]">
+                    <label
+                        for="company"
+                        className="block mb-2 text-md font-medium text-gray-900 "
+                    >
+                        Chọn pallet
+                    </label>
+                    <Select options={options} />
+                </div>
+                <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:w-[15%]">
+                    Vào lò
+                </button>
+            </div>
+
+            {/* Step 2: Kiểm tra lò sấy*/}
             <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-3">
                 <div className="pt-2 xl:w-[85%] w-full md:w-[85%]">
                     <label
