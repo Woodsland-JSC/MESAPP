@@ -49,7 +49,7 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "ItemCode","ItemName" from OITM';
+            $query = 'select "ItemCode","ItemName" from OITM where "Series"=74';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
