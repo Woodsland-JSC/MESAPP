@@ -69,11 +69,15 @@ const usersApi = {
         return axiosClient().patch(url);
 
     },
-    deleteUser: (userId) => {
-        const url = `/users/delete/${userId}`;
-        return axiosClient().delete(url);
+    getAllBranches: () => {
+        const url = `/branch`;
+        return axiosClient().get(url);
+    },
+    // deleteUser: (userId) => {
+    //     const url = `/users/delete/${userId}`;
+    //     return axiosClient().delete(url);
 
-    }
+    // }
 };
 
 export default usersApi;

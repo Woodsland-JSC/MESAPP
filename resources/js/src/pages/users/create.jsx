@@ -4,6 +4,7 @@ import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import toast from "react-hot-toast";
 import useAppContext from "../../store/AppContext";
 import Layout from "../../layouts/layout";
@@ -11,6 +12,7 @@ import Loader from "../../components/Loader";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 import generateAvatar from "../../utils/generateAvatar";
 import usersApi from "../../api/userApi";
+import roleApi from "../../api/roleApi";
 import TinyLoader from "../../components/TinyLoader";
 
 const genderOptions = [
@@ -63,7 +65,7 @@ const validationSchema = Yup.object().shape({
         ),
     authorization: Yup.string().required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
-    integrationId: Yup.string().required("Integration ID là bắt buộc"),
+    // integrationId: Yup.string().required("Integration ID là bắt buộc"),
     factory: Yup.string().required("Nhà máy là bắt buộc"),
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
@@ -88,19 +90,46 @@ const SelectField = ({ options, ...props }) => {
     );
 };
 
+const AsyncSelectField = ({ options, loadOptions, ...props }) => {
+    const [selectedOption, setSelectedOption] = useState();
+    const { setFieldValue } = useFormikContext();
+
+    const handleChange = (option) => {
+        setSelectedOption(option);
+        setFieldValue(props.name, option.value);
+    };
+
+    return (
+        <AsyncSelect
+            {...props}
+            cacheOptions
+            defaultOptions
+            loadOptions={loadOptions}
+            value={selectedOption}
+            options={options}
+            placeholder="Lựa chọn"
+            onChange={handleChange}
+        />
+    );
+};
+
 function CreateUser() {
     const navigate = useNavigate();
     const fileInputRef = useRef();
+    const branchSelectRef = useRef();
+    const factorySelectRef = useRef();
     const { loading, setLoading } = useAppContext();
+
+    const [roles, setRoles] = useState([]);
+    const [branches, setBranches] = useState([]);
+    const [factories, setFactories] = useState([]);
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
         autoImg: null,
     });
     const [avatarLoading, setAvatarLoading] = useState(false);
-
     const [selectedFile, setSelectedFile] = useState(null);
-
     const [input, setInput] = useState({
         firstName: "",
         lastName: "",
@@ -109,7 +138,7 @@ function CreateUser() {
         password: "",
         authorization: "",
         sapId: "",
-        integrationId: "",
+        integrationId: 1,
         factory: "",
         branch: "",
     });
@@ -180,7 +209,65 @@ function CreateUser() {
         // console.log("Submit form nè: ", input);
     };
 
+    const loadBranches = (inputValue, callback) => {
+        usersApi
+            .getAllBranches()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.BPLName?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.BPLId?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching drying methods:", error);
+                callback([]);
+            });
+    };
+
+    const loadRoles = (inputValue, callback) => {
+        roleApi
+            .getAllRole()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.name
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase()) ||
+                        option.id
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase())
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching drying methods:", error);
+                callback([]);
+            });
+    };
+
     useEffect(() => {
+        console.log("Ra select khum");
         const getAutoAvatar = async (name) => {
             try {
                 const res = await generateAvatar(name);
@@ -201,11 +288,41 @@ function CreateUser() {
     }, [input]);
 
     useEffect(() => {
-        document.title = 'Woodsland - Tạo mới người dùng';
-        return () => {
-            document.title = 'Woodsland';
+        const getAllBranches = async () => {
+            try {
+                const res = await usersApi.getAllBranches();
+                const options = res.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+                setBranches(options);
+                console.log("Ra chi nhánh nè: ", options);
+            } catch (error) {
+                console.error(error);
+            }
         };
-    },[]);
+
+        const getAllRoles = async () => {
+            try {
+                const res = await roleApi.getAllRole();
+                const options = res.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+                setRoles(options);
+                console.log("Ra role nè: ", options);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        getAllBranches();
+        getAllRoles();
+        document.title = "Woodsland - Tạo mới người dùng";
+        return () => {
+            document.title = "Woodsland";
+        };
+    }, []);
 
     return (
         <Layout>
@@ -271,9 +388,7 @@ function CreateUser() {
                                             <div className="md:w-2/3 mb-6">
                                                 <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Họ{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -309,9 +424,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Tên{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -347,9 +460,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Email{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -385,9 +496,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Giới tính{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -409,9 +518,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Mật khẩu{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -448,19 +555,25 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Phân quyền{" "}
                                                             <span className="text-red-600">
                                                                 *
                                                             </span>
                                                         </label>
-                                                        <SelectField
+                                                        {/* <SelectField
                                                             name="authorization"
                                                             options={
                                                                 authorizationOptions
                                                             }
+                                                        /> */}
+                                                        <AsyncSelectField
+                                                            ref={roleSelectRef}
+                                                            name="authorization"
+                                                            loadOptions={
+                                                                loadRoles
+                                                            }
+                                                            options={roles}
                                                         />
                                                         {errors.authorization &&
                                                         touched.authorization ? (
@@ -553,9 +666,7 @@ function CreateUser() {
                                         </h1>
                                         <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     SAP ID{" "}
                                                     <span className="text-red-600">
                                                         *
@@ -586,9 +697,7 @@ function CreateUser() {
                                                 )}
                                             </div>
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     INTEGRATION ID{" "}
                                                     {/* <span className="text-red-600">
                                                         *
@@ -621,9 +730,44 @@ function CreateUser() {
                                                 )}
                                             </div>
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Chi nhánh{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <AsyncSelectField
+                                                    ref={branchSelectRef}
+                                                    name="branch"
+                                                    loadOptions={loadBranches}
+                                                    options={branches}
+                                                />
+                                                {/* <Field
+                                                    name="branch"
+                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "branch",
+                                                            e.target.value
+                                                        );
+                                                        setInput((prev) => ({
+                                                            ...prev,
+                                                            branch: e.target
+                                                                .value,
+                                                        }));
+                                                    }}
+                                                /> */}
+                                                {errors.branch &&
+                                                touched.branch ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="branch" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
+                                            <div className="w-full">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     Nhà máy{" "}
                                                     <span className="text-red-600">
                                                         *
@@ -648,39 +792,6 @@ function CreateUser() {
                                                 touched.factory ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="factory" />
-                                                    </span>
-                                                ) : (
-                                                    <span className="block mt-[8px] h-[14.55px]"></span>
-                                                )}
-                                            </div>
-                                            <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
-                                                    Chi nhánh{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    name="branch"
-                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "branch",
-                                                            e.target.value
-                                                        );
-                                                        setInput((prev) => ({
-                                                            ...prev,
-                                                            branch: e.target
-                                                                .value,
-                                                        }));
-                                                    }}
-                                                />
-                                                {errors.branch &&
-                                                touched.branch ? (
-                                                    <span className="text-xs text-red-600">
-                                                        <ErrorMessage name="branch" />
                                                     </span>
                                                 ) : (
                                                     <span className="block mt-[8px] h-[14.55px]"></span>
