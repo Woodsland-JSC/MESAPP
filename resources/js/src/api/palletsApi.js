@@ -29,12 +29,12 @@ const palletsApi = {
         const url = `/dryingmethod`;
         return axiosClient().get(url, {
             params: {
-                reason: reason || "SLOUT", // Use the provided reason or a default value
+                reason,
             },
         });
     },
     getPlanDryingReason: () => {
-        const url = `/reasons`;
+        const url = `/oven-reasons`;
         return axiosClient().get(url, {});
     },
     

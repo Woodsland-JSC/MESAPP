@@ -18,11 +18,11 @@ function Workspace() {
                 {/* Section */}
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    {/* <div className="mb-4 ">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
-                                    <div className="flex items-center">
+                                    <div className="flex items-center opacity-0">
                                         <a
                                             href="#"
                                             class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
@@ -31,39 +31,19 @@ function Workspace() {
                                         </a>
                                     </div>
                                 </li>
-                                <li aria-current="page">
-                                    <div class="flex items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2 ">
-                                            Quản lý sấy gỗ
-                                        </span>
-                                    </div>
-                                </li>
+                                
                             </ol>
                         </nav>
-                    </div>
+                    </div> */}
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">
-                        Quản lý sấy gỗ
+                    <div className="text-3xl font-bold mb-8">
+                        Workspace
                     </div>
 
                     {/* Card Fields */}
-                    <div className="flex justify-center">
+                    <div className="text-xl font-semibold my-5">Quản lý sấy gỗ</div>
+                    <div className="flex justify-center xl:justify-normal">
                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
                             <Link to="/workspace/wood-sorting">
                                 <div className="flex justify-center xl:h-full md:h-full">

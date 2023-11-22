@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
@@ -85,32 +85,33 @@ function WoodSorting() {
     }, []);
 
     // Search Filter
-    const loadDryingMethods = (inputValue, callback) => {
-        palletsApi
-            .getDryingReason()
-            .then((data) => {
-                const filteredOptions = data.filter(
-                    (option) =>
-                        option.ItemName.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        ) ||
-                        option.ItemCode.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        )
-                );
+    // const loadDryingMethods = async (inputValue, callback) => {
+    //     try {
+    //         const response = await palletsApi.getDryingMethod();
+    //         const data = response.data;
+    //         console.log('Input Value:', data);
 
-                const asyncOptions = filteredOptions.map((item) => ({
-                    value: item.ItemCode,
-                    label: item.ItemName,
-                }));
+    //         const filteredOptions = data.filter(
+    //             (option) =>
+    //                 option.ItemName.toLowerCase().includes(
+    //                     inputValue.toLowerCase()
+    //                 ) ||
+    //                 option.ItemCode.toLowerCase().includes(
+    //                     inputValue.toLowerCase()
+    //                 )
+    //         );
 
-                callback(asyncOptions);
-            })
-            .catch((error) => {
-                console.error("Error fetching drying methods:", error);
-                callback([]);
-            });
-    };
+    //         const asyncOptions = filteredOptions.map((item) => ({
+    //             value: item.ItemCode,
+    //             label: item.ItemName,
+    //         }));
+
+    //         callback(asyncOptions);
+    //     } catch (error) {
+    //         console.error("Error fetching drying methods:", error);
+    //         callback([]);
+    //     }
+    // };
 
     // Validating
     const validateData = () => {
@@ -174,7 +175,7 @@ function WoodSorting() {
                                 itemCode={selectedDryingMethod.value}
                                 itemName={selectedDryingMethod.label}
                                 batchNum={item.BatchNum}
-                                inStock={item["Batch Quantity"]}
+                                inStock={item.Quantity}
                                 whsCode={item.WhsCode}
                                 onDelete={() =>
                                     handleDeletePalletCard(
@@ -212,7 +213,7 @@ function WoodSorting() {
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
-        toast.success("Đã xóa khỏi danh sách");
+        toast("Đã xóa khỏi danh sách");
     };
 
     const handlePalletQuantityChange = (id, quantity) => {
@@ -251,16 +252,22 @@ function WoodSorting() {
         const palletObject = createPalletObject();
 
         try {
-            const response = await axios.post(
-                "/api/pallets/create",
-                palletObject
+            // const response = await axios.post(
+            //     "/api/pallets/create",
+            //     palletObject
+            // );
+            const response = await toast.promise(
+                axios.post("/api/pallets/create", palletObject),
+                {
+                    loading: "Đang tạo pallet...",
+                    success: <p>Tạo pallet thành công!</p>,
+                    error: <p>Có lỗi xảy ra, vui lòng thử lại</p>,
+                }
             );
+
             console.log("3. Thông tin pallet:", palletObject);
 
-            console.log("4. Kết quả tạo pallet:", response.data);
-
-            toast.success("Tạo pallet thành công.");
-
+            setWoodTypes(null);
             setSelectedWoodType(null);
             setBatchId("");
             setSelectedDryingReason(null);
@@ -268,9 +275,10 @@ function WoodSorting() {
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
+
+            console.log("4. Kết quả tạo pallet:", response.data);
         } catch (error) {
             console.error("Error creating pallet:", error);
-            toast.error("Đã xảy ra lỗi khi tạo pallet. Vui lòng thử lại sau.");
         }
     };
 
@@ -362,7 +370,7 @@ function WoodSorting() {
                                         >
                                             Loại gỗ
                                         </label>
-                                        {/* <Select options={options} /> */}
+
                                         <Select
                                             options={woodTypes}
                                             onChange={(value) =>
@@ -408,14 +416,20 @@ function WoodSorting() {
                                         >
                                             Quy cách thô
                                         </label>
-                                        <AsyncSelect
-                                            cacheOptions
-                                            loadOptions={loadDryingMethods}
-                                            // options={dryingMethods}
+                                        <Select
+                                            options={dryingMethods}
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
                                         />
+                                        {/* <AsyncSelect
+                                            defaultOption
+                                            cacheOptions
+                                            loadOptions={loadDryingMethods}
+                                            onChange={(value) =>
+                                                setSelectedDryingMethod(value)
+                                            }
+                                        /> */}
                                     </div>
 
                                     <div className="col-span-1">

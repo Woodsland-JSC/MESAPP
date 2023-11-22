@@ -50,17 +50,13 @@ function BOWCard(props) {
                 </div>
             </div>
 
-            <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[1%]"></div>
+            <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[3%]"></div>
 
             {/* Details */}
-            <div className="space-y-2 py-2 px-6 pt-4 text-[15px]  h-[49%]">
+            <div className="space-y-3 py-2 px-6 pt-4 text-[15px]  h-[47%]">
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Chiều dày sấy:</div>
                     <div className="font-medium ">{thickness}</div>
-                </div>
-                <div className="grid grid-cols-2">
-                    <div className="font-semibold">Chiều dài sấy:</div>
-                    <div className="font-medium ">{height}</div>
                 </div>
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Mục đích sấy:</div>

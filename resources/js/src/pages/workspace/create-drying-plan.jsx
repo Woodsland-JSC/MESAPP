@@ -19,20 +19,12 @@ import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
 
-const dryingReasonsPlan = [
-    { value: "OUTDOOR", label: "OUTDOOR" },
-    { value: "INDOOR", label: "INDOOR" },
-    { value: "SU", label: "SẤY UỐN" },
-    { value: "SLOUT", label: "SẤY LẠI OUTDOOR" },
-    { value: "SLIN", label: "SẤY LẠI INDOOR" },
-];
-
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [kiln, setKlin] = useState([]);
-    // const [dryingReasonsPlan , setDryingReasonsPlan ] = useState([]);
-    const [thicknessOptions, setThicknessOptions] = useState([]);
+    const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
+    const [thickness, setThickness] = useState([]);
 
     // Validating
     const [selectedKiln, setSelectedKiln] = useState(null);
@@ -54,60 +46,61 @@ function CreateDryingPlan() {
                 console.error("Error fetching kiln list:", error);
             });
 
-        // palletsApi
-        //     .getDryingReason()
-        //     .then((data) => {
-        //         const options = data.map((item) => ({
-        //             value: item.Code,
-        //             label: item.Name,
-        //         }));
-        //         setDryingReasons(options);
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error fetching drying reasons:", error);
-        //     });
-
         palletsApi
-            .getThickness({
-                reason: "SLOUT",
-            })
+            .getPlanDryingReason()
             .then((data) => {
                 const options = data.map((item) => ({
                     value: item.Code,
                     label: item.Name,
                 }));
-                setThicknessOptions(options);
+                setDryingReasonsPlan(options);
             })
             .catch((error) => {
-                console.error("Error fetching thickness:", error);
-            });
-    }, [selectedDryingReasonsPlan]);
-
-    const loadOptions = async (inputValue, callback) => {
-        try {
-            const response = await palletsApi.getThickness({
-                reason: selectedDryingReasonsPlan ? selectedDryingReasonsPlan.value : "SLOUT",
+                console.error("Error fetching drying reasons:", error);
             });
 
-            const options = response.data.map((item) => ({
-                value: item.Code,
-                label: item.Name,
-            }));
-
-            callback(options);
-        } catch (error) {
-            console.error("Error fetching thickness options:", error);
-            callback([]);
+        if (selectedDryingReasonsPlan) {
+            palletsApi
+                .getThickness({
+                    reason: selectedDryingReasonsPlan.value,
+                })
+                .then((data) => {
+                    const options = data.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+                    setThickness(options);
+                })
+                .catch((error) => {
+                    console.error("Error fetching thickness:", error);
+                });
         }
-    };
+    }, []);
 
     const handleCompletion = () => {
-        console.log("Selected Kiln:", selectedKiln.value);
-        console.log(
-            "Selected Drying Reasons Plan:",
-            selectedDryingReasonsPlan.value
-        );
-        console.log("Selected Thickness:", selectedThickness);
+        console.log("Result:", {
+            Lò: selectedKiln.value,
+            "Mục đích": selectedDryingReasonsPlan.value,
+            selectedThickness,
+        });
+    };
+
+    const loadThicknessOptions = async (inputValue, callback) => {
+        if (selectedDryingReasonsPlan) {
+            try {
+                const response = await palletsApi.getThickness({
+                    reason: selectedDryingReasonsPlan.value,
+                });
+
+                const options = response.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                callback(options);
+            } catch (error) {
+                console.error("Error fetching thickness:", error);
+            }
+        }
     };
 
     return (
@@ -207,15 +200,6 @@ function CreateDryingPlan() {
                             <ModalCloseButton />
                             <ModalBody>
                                 <div className="flex flex-col space-y-5">
-                                    <div className="border-b border-gray-200">
-                                        <div className="text-lg mb-1 font-medium">
-                                            Mẻ sấy số: <span>2023.41.08</span>
-                                        </div>
-                                        <div className="text-gray-500 pb-3">
-                                            Ngày: <span>21/11/2023</span>
-                                        </div>
-                                    </div>
-
                                     <div className="">
                                         <label
                                             for="first_name"
@@ -225,9 +209,13 @@ function CreateDryingPlan() {
                                         </label>
                                         <Select
                                             options={kiln}
-                                            onChange={(value) =>
-                                                setSelectedKiln(value)
-                                            }
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selecte Kiln",
+                                                    value
+                                                );
+                                                setSelectedKiln(value);
+                                            }}
                                         />
                                     </div>
                                     <div className="">
@@ -237,7 +225,6 @@ function CreateDryingPlan() {
                                         >
                                             Mục đích sấy
                                         </label>
-                                        {/* <Select options={options} /> */}
                                         <Select
                                             options={dryingReasonsPlan}
                                             onChange={(value) => {
@@ -258,13 +245,35 @@ function CreateDryingPlan() {
                                         >
                                             Chiều dày sấy
                                         </label>
-                                        <AsyncSelect
-                                            cacheOptions
-                                            defaultOptions
-                                            loadOptions={loadOptions}
-                                            onChange={(value) =>
-                                                setSelectedThickness(value)
-                                            }
+                                        {/* <AsyncSelect
+                                            options={thickness}
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selected Thickness:",
+                                                    value
+                                                );
+                                                setSelectedThickness(value);
+                                            }}
+                                        /> */}
+                                        {/* <AsyncSelect
+                                            loadOptions={loadThicknessOptions}
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selected Thickness:",
+                                                    value
+                                                );
+                                                setSelectedThickness(value);
+                                            }}
+                                        /> */}
+                                        <Select
+                                            options={thickness}
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selected Thickness:",
+                                                    value
+                                                );
+                                                setSelectedThickness(value);
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -369,7 +378,7 @@ function CreateDryingPlan() {
 
                     <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">
                         <button
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold p-5 rounded-full shadow-lg"
+                            class="bg-[#1f2937] hover:bg-[#2d3b4e] text-white font-bold p-5 rounded-full shadow-lg"
                             onClick={onOpen}
                         >
                             <HiPlus className="text-2xl" />
