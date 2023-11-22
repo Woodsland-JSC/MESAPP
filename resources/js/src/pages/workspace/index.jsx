@@ -9,8 +9,13 @@ import {
     HiClipboardDocumentList,
 } from "react-icons/hi2";
 import { Link } from "react-router-dom";
+import useAppContext from "../../store/AppContext";
 
 function Workspace() {
+
+    const { user, setUser, isAuthenticated, setIsAuthenticated } =
+        useAppContext();
+
     return (
         <Layout>
             {/* Container */}
@@ -37,9 +42,13 @@ function Workspace() {
                     </div> */}
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-8">
-                        Workspace
+                    <div className="mb-10">
+                        <div className="text-3xl font-bold mb-2">
+                            Xin chào, {user?.first_name}! 👋
+                        </div>
+                        <div className="text-gray-500">Mọi thứ đã sẵn sàng cho công việc của bạn.</div>
                     </div>
+                    
 
                     {/* Card Fields */}
                     <div className="text-xl font-semibold my-5">Quản lý sấy gỗ</div>
@@ -52,7 +61,7 @@ function Workspace() {
                                             <HiSquare3Stack3D className="w-8 h-8" />
                                         </div>
                                         <div>
-                                            <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
                                                 Xếp sấy
                                             </h5>
                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">

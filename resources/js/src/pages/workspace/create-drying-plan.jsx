@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
@@ -60,10 +59,9 @@ function CreateDryingPlan() {
             });
 
         if (selectedDryingReasonsPlan) {
+            setThickness(null);
             palletsApi
-                .getThickness({
-                    reason: selectedDryingReasonsPlan.value,
-                })
+                .getThickness(selectedDryingReasonsPlan.value)
                 .then((data) => {
                     const options = data.map((item) => ({
                         value: item.Code,
@@ -75,7 +73,15 @@ function CreateDryingPlan() {
                     console.error("Error fetching thickness:", error);
                 });
         }
-    }, []);
+    }, [selectedDryingReasonsPlan]);
+
+    const thicknessRef = useRef(null);
+
+    const handleClearThickness = () => {
+        if (thicknessRef.current) {
+            thicknessRef.current.select.clearValue();
+        }
+    };
 
     const handleCompletion = () => {
         console.log("Result:", {
@@ -85,23 +91,23 @@ function CreateDryingPlan() {
         });
     };
 
-    const loadThicknessOptions = async (inputValue, callback) => {
-        if (selectedDryingReasonsPlan) {
-            try {
-                const response = await palletsApi.getThickness({
-                    reason: selectedDryingReasonsPlan.value,
-                });
+    // const loadThicknessOptions = async (inputValue, callback) => {
+    //     if (selectedDryingReasonsPlan) {
+    //         try {
+    //             const response = await palletsApi.getThickness(
+    //                 selectedDryingReasonsPlan.value
+    //             );
 
-                const options = response.map((item) => ({
-                    value: item.Code,
-                    label: item.Name,
-                }));
-                callback(options);
-            } catch (error) {
-                console.error("Error fetching thickness:", error);
-            }
-        }
-    };
+    //             const options = response.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name,
+    //             }));
+    //             callback(options);
+    //         } catch (error) {
+    //             console.error("Error fetching thickness:", error);
+    //         }
+    //     }
+    // };
 
     return (
         <Layout>
@@ -235,6 +241,7 @@ function CreateDryingPlan() {
                                                 setSelectedDryingReasonsPlan(
                                                     value
                                                 );
+                                                handleClearThickness();
                                             }}
                                         />
                                     </div>
@@ -274,6 +281,7 @@ function CreateDryingPlan() {
                                                 );
                                                 setSelectedThickness(value);
                                             }}
+                                            ref={thicknessRef}
                                         />
                                     </div>
                                 </div>
