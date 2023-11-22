@@ -39,11 +39,12 @@ class AuthController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
-
+            $permissions = $user->roles->flatMap->permissions->pluck('name')->unique()->toArray();
             if (!Hash::check($request->password, $user->password, [])) {
                 throw new \Exception('Error in Login');
             }
             $user = Auth::user();
+
             if ($user->is_block === 1) {
                 // Giả sử cột 'isActive' trong database xác định trạng thái hoạt động của người dùng
                 // Nếu người dùng không active, trả về lỗi 403 Forbidden
@@ -72,6 +73,7 @@ class AuthController extends Controller
                 'plant' => $user->plant,
                 'sap_id' => $user->sap_id,
                 'branch' => $user->branch,
+                'permissions' => $permissions
 
             ])->withCookie($cookie);
         } catch (\Exception $error) {
