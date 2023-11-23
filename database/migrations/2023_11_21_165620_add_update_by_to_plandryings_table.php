@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('plandryings', function (Blueprint $table) {
+        Schema::table('planDryings', function (Blueprint $table) {
             $table->integer('CheckedBy')->nullable();
             $table->integer('RunBy')->nullable();
             $table->integer('ReviewBy')->nullable();

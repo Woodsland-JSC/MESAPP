@@ -24,6 +24,7 @@ class Pallet extends Model
         'branch',
         'DocNum',
         'DocEntry',
+        'flag',
         'CreateBy',
     ];
     // Sự kiện trước khi tạo mới record

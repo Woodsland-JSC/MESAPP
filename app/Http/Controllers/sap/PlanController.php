@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\UniqueOvenStatusRule;
 use Carbon\Carbon;
+use App\Jobs\UpdateProductionOrders;
 
 class PlanController extends Controller
 {
@@ -179,6 +180,21 @@ class PlanController extends Controller
                         'CheckedBy' => Auth::user()->id
                     ]
                 );
+                $body = [
+                    "ProductionOrderStatus" => "boposReleased"
+                ];
+                // Fetch data for API request
+                $data = DB::table('plan_detail as a')
+                    ->join('pallets as b', 'a.pallet', '=', 'b.palletID')
+                    ->select('DocEntry', 'pallet')
+                    ->where('PlanID', $id)
+                    ->distinct()
+                    ->get();
+                //update hàng loạt lệnh production orders sang plan
+                foreach ($data as $entry) {
+                    Pallet::where('palletID', $entry->pallet)->update(['flag' => 1]);
+                    UpdateProductionOrders::dispatch($entry->DocEntry, $entry->pallet);
+                }
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
             } else {
