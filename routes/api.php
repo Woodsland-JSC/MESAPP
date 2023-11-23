@@ -9,6 +9,8 @@ use App\Http\Controllers\api\RolesController;
 use App\Http\Controllers\api\PermissionsController;
 use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
+use App\Http\Controllers\sap\ProductionController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -87,6 +89,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/production-run', [PlanController::class, 'runOven'])->name('chay-lo');
         Route::get('/production-completed', [PlanController::class, 'Listcomplete'])->name('danh-sach-me-ra-lo');
         Route::patch('/production-completed', [PlanController::class, 'completed'])->name('ra-lo');
+    });
+    Route::group(['prefix' => 'production'], function () {
+        Route::get('/receipts-production', [ProductionController::class, 'index'])->name('danh-sach-thanh-pham');
+        Route::post('/receipts-production', [ProductionController::class, 'receipts'])->name('nhap-thanh-pham');
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
