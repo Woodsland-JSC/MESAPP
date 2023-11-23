@@ -568,7 +568,6 @@ function CreateUser() {
                                                             }
                                                         /> */}
                                                         <AsyncSelectField
-                                                            ref={roleSelectRef}
                                                             name="authorization"
                                                             loadOptions={
                                                                 loadRoles

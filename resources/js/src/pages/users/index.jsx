@@ -240,7 +240,7 @@ function Users() {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
         showLoadingRole();
         const res = await roleApi.getAllRole();
-        setRoleData(res);
+        setRoleData(res.map(item => ({...item, name: item.name.charAt(0).toUpperCase() + item.name.slice(1)})));
         hideLoadingRole();
     }, []);
 
@@ -265,6 +265,10 @@ function Users() {
 
     const showLoadingRole = useCallback(() => {
         roleGridRef.current.api.showLoadingOverlay();
+    }, []);
+
+    const hideLoadingUser = useCallback(() => {
+        userGridRef.current.api.hideOverlay();
     }, []);
 
     const hideLoadingRole = useCallback(() => {

@@ -17,7 +17,7 @@ export const AppProvider = ({ children }) => {
     // Dành cho quản lý Auth
     const [user, setUser] = useState(userInfo && cookieAuth ? userInfo : null);
     const [isAuthenticated, setIsAuthenticated] = useState(userInfo && cookieAuth ? true : false);
-    
+
     // Dành cho quản lý danh sách mẻ sấy
     const [items, setItems] = useState([]);
 
