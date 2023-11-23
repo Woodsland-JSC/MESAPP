@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('plandryings', function (Blueprint $table) {
+        Schema::table('planDryings', function (Blueprint $table) {
             $table->dropColumn('CheckedBy');
             $table->dropColumn('RunBy');
             $table->dropColumn('ReviewBy');
