@@ -31,24 +31,23 @@ class DryingOvenController extends Controller
             foreach ($palletDetails as $detailData) {
                 $detailData['palletID'] = $pallet->palletID; // Ensure 'palletID' is correctly set
                 pallet_details::create($detailData); // Ensure the model name is correct (PalletDetail instead of pallet_details)
-                $ldt[] = [
-                    "ItemCode" => $detailData['ItemCode'],
-                    "Quantity" => $detailData['Qty'],
-                    "FromWarehouseCode" => $detailData['WhsCode'],
-                    "WarehouseCode" =>  $whs,
-                    "BatchNumbers" => [[
-                        "BatchNumber" => $detailData['BatchNum'],
-                        "Quantity" => $detailData['Qty']
-                    ]],
-                ];
             }
             // Data body
+
             $body = [
-                "BPLID" => Auth::user()->branch,
+                "ItemNo" => $palletDetails[0]['ItemCode'],
+                "ProductionOrderType" => "bopotSpecial",
+                "PlannedQuantity" => array_sum(array_column($request->input('details', []), 'Qty')),
                 "U_CreateBy" => Auth::user()->sap_id,
-                "U_Pallet" => $pallet->Code,
-                "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
-                "StockTransferLines" => $ldt
+                //"U_Pallet" => $pallet->Code,
+                "Remarks" => "WLAPP PORTAL tạo pallet xếp xấy",
+                "ProductionOrderLines" => [
+                    [
+                        "ItemNo" => $palletDetails[0]['ItemCode'],
+                        "BaseQuantity" => 1
+                    ]
+
+                ]
             ];
             // Make a request to the service layer
             $response = Http::withOptions([
@@ -57,7 +56,7 @@ class DryingOvenController extends Controller
                 "Content-Type" => "application/json",
                 "Accept" => "application/json",
                 "Authorization" => "Basic " . BasicAuthToken(),
-            ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+            ])->post(UrlSAPServiceLayer() . "/b1s/v1/ProductionOrders", $body);
 
 
             $res = $response->json();
@@ -71,8 +70,8 @@ class DryingOvenController extends Controller
             } else {
 
                 $pallet->update([
-                    'DocNum' => $res['DocNum'],
-                    'DocEntry' => $res['DocEntry'],
+                    'DocNum' => $res['DocumentNumber'],
+                    'DocEntry' => $res['AbsoluteEntry'],
                     'CreateBy' => auth()->id(),
 
                 ]);

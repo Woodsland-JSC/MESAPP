@@ -439,7 +439,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
             $userData = User::where('sap_id', '<>', null)->pluck('sap_id')->implode(','); // lấy danh sách user đã được assign và conver to string
 
-            $query = 'select "USER_CODE",ifnull("U_NAME","USER_CODE") from "OUSR" where "USER_CODE" NOT IN (?) and "USERID" NOT IN (2,3,4,5,6)';
+            $query = 'select "USER_CODE",ifnull("U_NAME","USER_CODE") NAME from "OUSR" where "USER_CODE" NOT IN (?) and "USERID" NOT IN (2,3,4,5,6)';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
