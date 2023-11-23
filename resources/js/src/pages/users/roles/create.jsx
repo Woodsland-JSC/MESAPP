@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
@@ -8,24 +8,81 @@ import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
 import roleApi from "../../../api/roleApi";
 
+const permissionsName = [
+    {
+        value: "sepsay",
+        name: "Sếp sấy",
+    },
+    {
+        value: "kehoachsay",
+        name: "Kế hoạch sấy",
+    },
+    {
+        value: "vaolo",
+        name: "Vào lò",
+    },
+    {
+        value: "kiemtralo",
+        name: "Kiểm tra lò",
+    },
+    {
+        value: "losay",
+        name: "Lò sấy",
+    },
+    {
+        value: "danhgiame",
+        name: "Đánh giá mẻ",
+    },
+    {
+        value: "baocao",
+        name: "Báo cáo",
+    },
+    {
+        value: "quanlyuser",
+        name: "Quản lý user",
+    },
+    {
+        value: "monitor",
+        name: "Tích hợp",
+    },
+];
+
 function CreateRole() {
     const { loading, setLoading } = useAppContext();
     const navigate = useNavigate();
 
+    const nameInputRef = useRef();
+
     const [permissions, setPermissions] = useState(null);
     const [roleInfo, setRoleInfo] = useState({
         name: "",
-        permissions: [],
+        permission: [],
     });
 
-    const handleCreateRole = () => {
+    const handleCreateRole = async () => {
         if (!roleInfo.name) {
-            toast.info("Vui lòng nhập thông tin cho role");
+            toast("Vui lòng nhập thông tin cho role");
+            nameInputRef?.current?.focus();
             return;
         }
 
-        toast.success("API chưa hoàn thiện!");
+        if (roleInfo.permission.length < 1) {
+            toast("Role nên có ít nhất 1 quyền hạn.");
+            return;
+        }
 
+        setLoading(true);
+
+        try {
+            const res = await roleApi.createRole(roleInfo);
+            toast.success("Tạo role thành công");
+            setLoading(false);
+            navigate("/users?roletab=true");
+        } catch (error) {
+            toast.error("Có lỗi xảy ra.");
+            setLoading(false);
+        }
+        
         console.log("Role info: ", roleInfo);
     };
 
@@ -34,10 +91,10 @@ function CreateRole() {
         const getPermissions = async () => {
             try {
                 const res = await roleApi.getAllPermission();
-                console.log(res);
+                // console.log(res);
                 setPermissions(res);
             } catch (error) {
-                console.error(error);
+                // console.error(error);
                 toast.error("Có lỗi xảy ra, đang tải lại trang.");
                 navigate(0);
             }
@@ -45,6 +102,19 @@ function CreateRole() {
 
         getPermissions();
         setLoading(false);
+
+        document.title = "Woodsland - Tạo mới role";
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.get("roletab") === "true") {
+            setTimeout(() => {
+                roleTab.current.click();
+            });
+        }
+
+        return () => {
+            document.title = "Woodsland";
+        };
     }, []);
 
     return (
@@ -102,6 +172,7 @@ function CreateRole() {
                                 <span className="text-red-600 ml-1"> *</span>
                             </label>
                             <input
+                                ref={nameInputRef}
                                 type="text"
                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                 onInput={(e) =>
@@ -120,7 +191,7 @@ function CreateRole() {
 
                         <div className="divide-y divide-slate-100 ...">
                             <div className="flex py-3">
-                                <span className="w-1/12 text-bold">STT</span>
+                                <span className="w-1/12 text-bold">#</span>
                                 <span className="w-2/3 text-bold">
                                     Tên permission
                                 </span>
@@ -129,43 +200,50 @@ function CreateRole() {
                             {permissions?.length > 0 &&
                                 permissions.map((item, index) => (
                                     <div key={index} className="flex py-4">
-                                        <span className="w-1/12">
+                                        <span className="w-1/12 sm:w-1/12">
                                             {index + 1}
                                         </span>
                                         <span className="w-2/3">
-                                            {item.name}
+                                            {permissionsName.find(
+                                                (permission) =>
+                                                    permission.value ==
+                                                    item.name
+                                            )?.name || ""}
                                         </span>
-                                        <Checkbox
-                                            onChange={(e) => {
-                                                const isExisted =
-                                                    roleInfo.permissions.includes(
-                                                        item.id
-                                                    );
-                                                
-                                                setRoleInfo((prev) => {
-                                                    if (isExisted) {
-                                                        return {
-                                                            ...prev,
-                                                            permissions:
-                                                                prev.permissions.filter(
-                                                                    (
-                                                                        permission
-                                                                    ) =>
-                                                                        permission ==
-                                                                        item.id
-                                                                ),
-                                                        };
-                                                    } else {
-                                                        return {
-                                                            ...prev,
-                                                            permissions: [...prev.permissions, item.id]
-                                                                
-                                                        };
-                                                    }
-                                                });
+                                        <div className="flex justify-center w-[15%]">
+                                            <Checkbox
+                                                onChange={(e) => {
+                                                    const isExisted =
+                                                        roleInfo.permission.includes(
+                                                            item.id
+                                                        );
 
-                                            }}
-                                        />
+                                                    setRoleInfo((prev) => {
+                                                        if (isExisted) {
+                                                            return {
+                                                                ...prev,
+                                                                permission:
+                                                                    prev.permission.filter(
+                                                                        (
+                                                                            data
+                                                                        ) =>
+                                                                            data ==
+                                                                            item.name
+                                                                    ),
+                                                            };
+                                                        } else {
+                                                            return {
+                                                                ...prev,
+                                                                permission: [
+                                                                    ...prev.permission,
+                                                                    item.name,
+                                                                ],
+                                                            };
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                         </div>

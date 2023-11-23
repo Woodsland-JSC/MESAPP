@@ -72,6 +72,14 @@ const usersApi = {
         const url = `/branch`;
         return axiosClient().get(url);
     },
+    getAllSapId: () => {
+        const url = `/user-sap`;
+        return axiosClient().get(url);
+    },
+    getFactoriesByBranchId: (branchId) => {
+        const url = `/factorybybranch/${branchId}`;
+        return axiosClient().get(url);
+    },
     // deleteUser: (userId) => {
     //     const url = `/users/delete/${userId}`;
     //     return axiosClient().delete(url);

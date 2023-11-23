@@ -22,7 +22,6 @@
 
 // export default ProtectedRoute;
 
-// PrivateRouteWrapper.jsx
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useAppContext from "../store/AppContext";
@@ -34,7 +33,7 @@ const ProtectedRoute = ({ permissionsRequired = [], children }) => {
     const hasPermission = () => {
         // Kiểm tra xem user có quyền truy cập hay không
         if (user && user.permissions) {
-            console.log("hasPermission", permissionsRequired.every((permission) =>user.permissions.includes(permission)));
+            // console.log("hasPermission", permissionsRequired.every((permission) =>user.permissions.includes(permission)));
             return permissionsRequired.every((permission) =>
                 user.permissions.includes(permission)
             );

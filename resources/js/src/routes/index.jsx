@@ -162,7 +162,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/user/create"
+                        path="/users/create"
                         element={
                         <ProtectedRoute permissionsRequired={['quanlyuser']}>
                             <CreateUser />

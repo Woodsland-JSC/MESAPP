@@ -244,35 +244,50 @@ function Users() {
         hideLoadingRole();
     }, []);
 
-    const onFirstDataRendered = useCallback((params) => {
-        userGridRef.current.api.paginationGoToPage(0);
+    const onFirstUserDataRendered = useCallback((params) => {
+        userGridRef?.current?.api?.paginationGoToPage(0);
     }, []);
 
-    const onPageSizeChanged = (selectedOption) => {
+    const onFirstRoleDataRendered = useCallback((params) => {
+        roleGridRef?.current?.api?.paginationGoToPage(0);
+    }, []);
+
+    const onUserPageSizeChanged = (selectedOption) => {
         var value = selectedOption.label;
-        userGridRef.current.api.paginationSetPageSize(Number(value));
+        userGridRef?.current?.api?.paginationSetPageSize(Number(value));
     };
 
-    const onFilterTextBoxChanged = useCallback(() => {
-        userGridRef.current.api.setQuickFilter(
-            document.getElementById("search").value
+    const onRolePageSizeChanged = (selectedOption) => {
+        var value = selectedOption.label;
+        roleGridRef?.current?.api?.paginationSetPageSize(Number(value));
+    };
+
+    const onUserFilterTextBoxChanged = useCallback(() => {
+        userGridRef?.current?.api?.setQuickFilter(
+            document.getElementById("user-search").value
+        );
+    }, []);
+
+    const onRoleFilterTextBoxChanged = useCallback(() => {
+        roleGridRef?.current?.api?.setQuickFilter(
+            document.getElementById("role-search").value
         );
     }, []);
 
     const showLoadingUser = useCallback(() => {
-        userGridRef.current.api.showLoadingOverlay();
+        userGridRef?.current?.api?.showLoadingOverlay();
     }, []);
 
     const showLoadingRole = useCallback(() => {
-        roleGridRef.current.api.showLoadingOverlay();
+        roleGridRef?.current?.api?.showLoadingOverlay();
     }, []);
 
     const hideLoadingUser = useCallback(() => {
-        userGridRef.current.api.hideOverlay();
+        userGridRef?.current?.api?.hideOverlay();
     }, []);
 
     const hideLoadingRole = useCallback(() => {
-        roleGridRef.current.api.hideOverlay();
+        roleGridRef?.current?.api?.hideOverlay();
     }, []);
 
     // User Actions
@@ -321,7 +336,7 @@ function Users() {
 
     // Role Actions
     const deleteRole = async (data) => {
-        console.log("Xoá phân quyền");
+        toast("Chưa biết có phát triển không.");
     };
 
     const handleTabClick = (isRoleTab) => {
@@ -416,7 +431,7 @@ function Users() {
                                             <Select
                                                 id="page-size"
                                                 options={sizeOptions}
-                                                onChange={onPageSizeChanged}
+                                                onChange={onUserPageSizeChanged}
                                                 defaultValue={{
                                                     value: "20",
                                                     label: "20",
@@ -452,11 +467,11 @@ function Users() {
                                                     </div>
                                                     <input
                                                         type="search"
-                                                        id="search"
+                                                        id="user-search"
                                                         className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                                         placeholder="Tìm kiếm"
                                                         onInput={
-                                                            onFilterTextBoxChanged
+                                                            onUserFilterTextBoxChanged
                                                         }
                                                         required
                                                     />
@@ -496,7 +511,7 @@ function Users() {
                                             }
                                             onGridReady={onUserGridReady}
                                             onFirstDataRendered={
-                                                onFirstDataRendered
+                                                onFirstUserDataRendered
                                             }
                                             suppressRowVirtualisation={true}
                                             localeText={localeText}
@@ -516,7 +531,7 @@ function Users() {
                                             <Select
                                                 id="page-size"
                                                 options={sizeOptions}
-                                                onChange={onPageSizeChanged}
+                                                onChange={onRolePageSizeChanged}
                                                 defaultValue={{
                                                     value: "20",
                                                     label: "20",
@@ -551,11 +566,11 @@ function Users() {
                                                     </div>
                                                     <input
                                                         type="search"
-                                                        id="search"
+                                                        id="role-search"
                                                         className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                                         placeholder="Tìm kiếm"
                                                         onInput={
-                                                            onFilterTextBoxChanged
+                                                            onRoleFilterTextBoxChanged
                                                         }
                                                         required
                                                     />
@@ -595,7 +610,7 @@ function Users() {
                                             }
                                             onGridReady={onRoleGridReady}
                                             onFirstDataRendered={
-                                                onFirstDataRendered
+                                                onFirstRoleDataRendered
                                             }
                                             localeText={localeText}
                                         />
