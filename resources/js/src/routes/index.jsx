@@ -110,6 +110,7 @@ import Notfound from "../pages/errors/notfound";
 
 import ProtectedRoute from "./ProtectedRoute";
 import useAppContext from "../store/AppContext";
+import FinishedGoodsReceipt from "../pages/workspace/finished-goods-receipt";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -221,7 +222,7 @@ function AppRoutes() {
                     <Route
                         path="/workspace/wood-sorting"
                         element={
-                        <ProtectedRoute permissionsRequired={['sepxay']}>
+                        <ProtectedRoute permissionsRequired={['sepsay']}>
                             <WoodSorting />
                         </ProtectedRoute>
                         }
@@ -250,7 +251,15 @@ function AppRoutes() {
                         </ProtectedRoute>
                         }
                     />
-                    <Route element={<ProtectedRoute />}>
+                    <Route
+                        path="/workspace/finished-goods-receipt"
+                        element={
+                        <ProtectedRoute >
+                            <FinishedGoodsReceipt />
+                        </ProtectedRoute>
+                        }
+                    />
+                    {/* <Route element={<ProtectedRoute />}> */}
                         {/* <Route path="/" element={<Home />} /> */}
                         {/* <Route path="/workspace" element={<Workspace />} /> */}
                         {/* <Route path="/users" element={<Users />} /> */}
@@ -268,7 +277,7 @@ function AppRoutes() {
                         {/* <Route path="/workspace/drying-wood-checking" element={<DryingWoodChecking />} /> */}
                         {/* <Route path="/workspace/kiln-checking" element={<KilnChecking />} /> */}
                         {/* <Route path="/workspace/details" element={<Details />} /> */}
-                    </Route>
+                    {/* </Route> */}
                     <Route path="*" element={<Notfound />} />
                 </Routes>
             </Wrapper>

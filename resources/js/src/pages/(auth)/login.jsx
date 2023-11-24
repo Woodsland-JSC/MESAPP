@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
@@ -9,6 +9,8 @@ import Logo from "../../assets/images/woodsland-logo.svg";
 import generateAvatar from "../../utils/generateAvatar";
 
 function Login() {
+    const emailInputRef = useRef();
+    const passwordInputRef = useRef();
     const navigate = useNavigate();
     const { setUser, loading, setLoading, isAuthenticated } = useAppContext();
 
@@ -53,6 +55,7 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         setLoading(true);
         try {
             const response = await usersApi.login(info.email, info.password);
