@@ -1,9 +1,34 @@
-import React from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
+import palletsApi from "../../api/palletsApi";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { addDays, format, add } from "date-fns";
+import Loader from "../../components/Loader";
 
 function LoadIntoKiln() {
+    const [loading, setLoading] = useState(true);
+    const [bowCards, setBowCards] = useState([]);
+
+    useEffect(() => {
+        palletsApi
+            .getBOWList()
+
+            .then((response) => {
+                console.log("1. Load danh sách BOWCard:", response);
+
+                setBowCards(response || []);
+            })
+            .catch((error) => {
+                console.error("Error fetching BOWCard list:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
     return (
         <Layout>
             {/* Container */}
@@ -114,10 +139,24 @@ function LoadIntoKiln() {
                         </div>
                     </div>
 
-                    {/* Content */}
+                    {/* BOWCard List */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                        {bowCards?.map((bowCard, index) => (
+                            <BOWCard
+                                key={index}
+                                planID={bowCard.PlanID}
+                                status={bowCard.Status}
+                                batchNumber={bowCard.Code}
+                                kilnNumber={bowCard.Oven}
+                                thickness={bowCard.Method}
+                                purpose={bowCard.Reason}
+                                finishedDate={1}
+                                palletQty={bowCard.TotalPallet}
+                                weight={bowCard.Mass}
+                            />
+                        ))}
                         <BOWCard
-                            status={0}
+                            status={1}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -171,10 +210,12 @@ function LoadIntoKiln() {
                             palletQty="0"
                             weight="0"
                         />
-
                     </div>
                 </div>
             </div>
+            {
+                loading && <Loader />
+            }
         </Layout>
     );
 }

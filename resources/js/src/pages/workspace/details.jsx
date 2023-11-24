@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Layout from "../../layouts/layout";
 import { Link, Navigate } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -10,6 +11,11 @@ import DisabledCheck from "../../components/DisabledCheck";
 import LoadController from "../../components/ControllerCard";
 import InfoCard from "../../components/InfoCard";
 import ControllerCard from "../../components/ControllerCard";
+import palletsApi from "../../api/palletsApi";
+import axios from "axios";
+import toast from "react-hot-toast";
+import Loader from "../../components/Loader";
+import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react";
 
 function Details() {
     const location = useLocation();
@@ -19,6 +25,11 @@ function Details() {
     const id = searchParams.get("id");
 
     const navigate = useNavigate();
+
+    // State
+    const [BOWData, setBOWData] = useState([]);
+
+    const [loading, setLoading] = useState(true);
 
     const [disabledReports, setDisabledReports] = useState([
         {
@@ -124,11 +135,23 @@ function Details() {
     ]);
 
     const goBack = () => {
-        navigate(-1); 
+        navigate(-1);
     };
 
     useEffect(() => {
-        console.log("Use effect này để get dữ liệu của mẻ sấy hiện tại");
+        palletsApi
+            .getBOWById(id)
+            .then((response) => {
+                console.log("Dữ liệu từ API:", response);
+
+                setBOWData(response.plandrying);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi gọi API:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     // return id ? (
@@ -138,7 +161,6 @@ function Details() {
                 <div className="flex justify-center bg-[#F8F9F7] ">
                     {/* Section */}
                     <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
-
                         {/* Header */}
                         <div className="flex items-center text-2xl font-bold mb-6 gap-x-6">
                             <button
@@ -149,12 +171,18 @@ function Details() {
                             </button>
 
                             <div>
-                                <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
-                                    Chi tiết mẻ sấy: <span>2023.45.01</span>{" "}
-                                </div>
+                                <Skeleton isLoaded={!loading}>
+                                    <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
+                                        Chi tiết mẻ sấy:{" "}
+                                        <span>{BOWData.Code}</span>{" "}
+                                    </div>
+                                </Skeleton>
+                                <Skeleton isLoaded={!loading}>
                                 <div className="xl:text-[1.15rem] text-lg font-semibold text-gray-700">
-                                    Lò số: <span>2023.45.01</span>{" "}
+                                    Lò số: <span>{BOWData.Oven}</span>{" "}
                                 </div>
+                                </Skeleton>
+                                
                             </div>
                         </div>
 
@@ -162,31 +190,57 @@ function Details() {
                         <div className="gap-6">
                             <div className="xl:grid xl:grid-cols-3 xl:gap-6 xl:space-y-0 space-y-6">
                                 <InfoCard
-                                    purpose="INDOOR"
-                                    thickness="30-31"
-                                    height="30"
-                                    finishedDate="2023-12-10 09:22:56"
-                                    palletQty="24"
-                                    weight="29.1938"
+                                    purpose={BOWData.Reason}
+                                    thickness={BOWData.Method}
+                                    finishedDate={BOWData.Time}
+                                    palletQty={BOWData.TotalPallet}
+                                    weight={BOWData.Mass}
                                 />
                                 <div className="col-span-2">
-                                    {type === "ls" && (
+                                    {type === "kh" && (
                                         <div className="space-y-6">
-                                            <ControllerCard />
-                                            <KilnCheck />
-                                            <SizeCard />
+                                            <ControllerCard
+                                                progress="kh"
+                                                planID={BOWData.PlanID}
+                                            />
                                         </div>
                                     )}
                                     {type === "vl" && (
                                         <div className="space-y-6">
-                                            <ControllerCard />
+                                            <ControllerCard
+                                                progress="vl"
+                                                planID={BOWData.PlanID}
+                                                reason={BOWData.Reason}
+                                            />
+                                            <SizeCard />
+                                        </div>
+                                    )}
+                                    {type === "kt" && (
+                                        <div className="space-y-6">
+                                            <ControllerCard
+                                                progress="kt"
+                                                planID={BOWData.PlanID}
+                                            />
+                                            <KilnCheck />
+                                            <SizeCard />
+                                        </div>
+                                    )}
+                                    {type === "ls" && (
+                                        <div className="space-y-6">
+                                            <ControllerCard
+                                                progress="ls"
+                                                planID={BOWData.PlanID}
+                                            />
                                             <KilnCheck />
                                             <SizeCard />
                                         </div>
                                     )}
                                     {type === "dg" && (
                                         <div className="space-y-6">
-                                            <ControllerCard />
+                                            <ControllerCard
+                                                progress="dg"
+                                                planID={BOWData.PlanID}
+                                            />
                                             <KilnCheck />
                                             <HumidityCheck />
                                             <DisabledCheck
@@ -196,19 +250,6 @@ function Details() {
                                                     factory: "Nhà máy A",
                                                 }}
                                             />
-                                            <SizeCard />
-                                        </div>
-                                    )}
-                                    {type === "kh" && (
-                                        <div className="space-y-6">
-                                            <KilnCheck />
-                                            <SizeCard />
-                                        </div>
-                                    )}
-                                    {type === "kt" && (
-                                        <div className="space-y-6">
-                                            <ControllerCard />
-                                            <KilnCheck />
                                             <SizeCard />
                                         </div>
                                     )}

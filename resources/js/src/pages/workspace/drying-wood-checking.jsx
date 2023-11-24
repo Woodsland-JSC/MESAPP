@@ -1,13 +1,39 @@
-import React from 'react'
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../layouts/layout";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
+import palletsApi from "../../api/palletsApi";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { addDays, format, add } from "date-fns";
+import Loader from "../../components/Loader";
+
 
 function DryingWoodChecking() {
-  return (
-    <Layout>
-      {/* Container */}
-      <div className="flex justify-center bg-[#F8F9F7]">
+    const [loading, setLoading] = useState(true);
+    const [bowCards, setBowCards] = useState([]);
+
+    useEffect(() => {
+        palletsApi
+            .getBOWList()
+
+            .then((response) => {
+                console.log("1. Load danh sách BOWCard:", response);
+
+                setBowCards(response || []);
+            })
+            .catch((error) => {
+                console.error("Error fetching BOWCard list:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
+    return (
+        <Layout>
+            {/* Container */}
+            <div className="flex justify-center bg-[#F8F9F7]">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
@@ -76,7 +102,9 @@ function DryingWoodChecking() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Đánh giá mẻ sấy</div>
+                    <div className="text-3xl font-bold mb-6">
+                        Đánh giá mẻ sấy
+                    </div>
 
                     {/* Controller */}
                     <div className=" my-4 mb-6 xl:w-full">
@@ -116,28 +144,20 @@ function DryingWoodChecking() {
 
                     {/* Content */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
+                        {bowCards?.map((bowCard, index) => (
+                            <BOWCard
+                                key={index}
+                                planID={bowCard.PlanID}
+                                status={bowCard.Status}
+                                batchNumber={bowCard.Code}
+                                kilnNumber={bowCard.Oven}
+                                thickness={bowCard.Method}
+                                purpose={bowCard.Reason}
+                                finishedDate={1}
+                                palletQty={bowCard.TotalPallet}
+                                weight={bowCard.Mass}
+                            />
+                        ))}
                         <BOWCard
                             status={3}
                             batchNumber="2023.41.08"
@@ -172,11 +192,34 @@ function DryingWoodChecking() {
                             weight="130.72 (m³)"
                         />
 
+                        <BOWCard
+                            status={3}
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="111"
+                            weight="130.72 (m³)"
+                        />
+                        <BOWCard
+                            status={3}
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="111"
+                            weight="130.72 (m³)"
+                        />
                     </div>
                 </div>
             </div>
-    </Layout>
-  )
+            {loading && <Loader />}
+        </Layout>
+    );
 }
 
-export default DryingWoodChecking
+export default DryingWoodChecking;

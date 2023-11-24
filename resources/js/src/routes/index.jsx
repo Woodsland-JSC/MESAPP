@@ -212,7 +212,7 @@ function AppRoutes() {
                     />
                     {/* Cái này cần xem lại */}
                     <Route
-                        path="/workspace/details"
+                        path="/product-detail/"
                         element={
                         <ProtectedRoute permissionsRequired={['kehoachsay']}>
                             <Details />
@@ -259,6 +259,7 @@ function AppRoutes() {
                         </ProtectedRoute>
                         }
                     />
+                    <Route path="/workspace/details" element={<Details />} />
                     {/* <Route element={<ProtectedRoute />}> */}
                         {/* <Route path="/" element={<Home />} /> */}
                         {/* <Route path="/workspace" element={<Workspace />} /> */}

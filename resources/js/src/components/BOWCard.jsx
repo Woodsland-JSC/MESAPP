@@ -5,6 +5,7 @@ import { HiArrowRight } from "react-icons/hi";
 function BOWCard(props) {
     
     const {
+        planID,
         status,
         batchNumber,
         kilnNumber,
@@ -21,16 +22,18 @@ function BOWCard(props) {
 
     let detailLink = "/workspace/details";
 
-    if (location.pathname === "/workspace/kiln") {
-        detailLink = "/workspace/details?type=ls";
+    if (location.pathname === "/workspace/kiln/") {
+        detailLink = "/workspace/details";
     } else if (location.pathname === "/workspace/load-into-kiln") {
-        detailLink = "/workspace/details?type=vl";
+        detailLink = `/workspace/details?id=${planID}&type=vl`;
     } else if (location.pathname === "/workspace/drying-wood-checking") {
-        detailLink = "/workspace/details?id=1&type=dg";
+        detailLink = `/workspace/details?id=${planID}&type=dg`;
     } else if (location.pathname === "/workspace/create-drying-plan") {
-        detailLink = "/workspace/details?type=kh";
+        detailLink = `/workspace/details?id=${planID}&type=kh`;
     } else if (location.pathname === "/workspace/kiln-checking") {
-        detailLink = "/workspace/details?type=kt";
+        detailLink = `/workspace/details?id=${planID}&type=kt`;
+    } else if (location.pathname === "/workspace/kiln") {
+        detailLink = `/workspace/details?id=${planID}&type=ls`;
     }
 
     const getStatusContent = () => {
@@ -45,7 +48,7 @@ function BOWCard(props) {
                 </div>
             ) : status === 2 ? (
                 <div className="bow-status p-1 px-3 text-xs text-red-500 font-semibold bg-red-100 w-fit rounded-full justify-end my-4">
-                    Đang sấy và chưa đánh giá
+                    Đang sấy chưa đánh giá
                 </div>
             ) : status === 3 ? (
                 <div className="bow-status p-1 px-3 text-xs text-green-500 font-semibold bg-green-50 w-fit rounded-full justify-end my-4">
@@ -63,7 +66,13 @@ function BOWCard(props) {
         <div className=" border-2 border-gray-200 rounded-2xl bg-white h-[27rem] shadow-sm">
             {/* Header */}
             <div className="flex flex-col rounded-t-xl py-2 px-6 h-[30%]">
-                {getStatusContent()}
+                <div className="flex space-x-4">
+                    {getStatusContent()}
+                    <div className="bow-status p-1 px-3 text-xs text-gray-400 font-semibold bg-gray-100 w-fit rounded-full justify-end my-4">
+                        PlanID: {planID}
+                    </div>
+                </div>
+                
                 <div className=" text-[1.25rem] font-bold text-[#17506B] ">
                     Mẻ sấy số:
                     <span className="ml-2">{batchNumber}</span>
@@ -73,6 +82,8 @@ function BOWCard(props) {
                     <span className="ml-2">{kilnNumber}</span>
                 </div>
             </div>
+
+            <div className="hidden"></div>
 
             <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[3%]"></div>
 
@@ -101,7 +112,7 @@ function BOWCard(props) {
             </div>
 
             {/* Controller */}
-            <Link to={detailLink} className="">
+            <Link to={`${detailLink}`} className="">
                 <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#F8FAFC] rounded-b-2xl h-[20%]">
                     <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
                         Xem chi tiết

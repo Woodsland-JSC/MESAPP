@@ -46,47 +46,6 @@ function WoodSorting() {
         return palletCards.some((card) => card.key === id);
     };
 
-    // useEffect(() => {
-    //     palletsApi
-    //         .getTypeOfWood()
-    //         .then((data) => {
-    //             const options = data.map((item) => ({
-    //                 value: item.Code,
-    //                 label: item.Name,
-    //             }));
-    //             setWoodTypes(options);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching wood types:", error);
-    //         });
-
-    //     palletsApi
-    //         .getDryingMethod()
-    //         .then((data) => {
-    //             const options = data.map((item) => ({
-    //                 value: item.ItemCode,
-    //                 label: item.ItemName,
-    //             }));
-    //             setDryingMethods(options);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching drying methods:", error);
-    //         });
-
-    //     palletsApi
-    //         .getDryingReason()
-    //         .then((data) => {
-    //             const options = data.map((item) => ({
-    //                 value: item.Code,
-    //                 label: item.Name,
-    //             }));
-    //             setDryingReasons(options);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching drying reasons:", error);
-    //         });
-    // }, []);
-
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -128,35 +87,6 @@ function WoodSorting() {
 
         fetchData();
     }, []);
-
-    // Search Filter
-    // const loadDryingMethods = async (inputValue, callback) => {
-    //     try {
-    //         const response = await palletsApi.getDryingMethod();
-    //         const data = response.data;
-    //         console.log('Input Value:', data);
-
-    //         const filteredOptions = data.filter(
-    //             (option) =>
-    //                 option.ItemName.toLowerCase().includes(
-    //                     inputValue.toLowerCase()
-    //                 ) ||
-    //                 option.ItemCode.toLowerCase().includes(
-    //                     inputValue.toLowerCase()
-    //                 )
-    //         );
-
-    //         const asyncOptions = filteredOptions.map((item) => ({
-    //             value: item.ItemCode,
-    //             label: item.ItemName,
-    //         }));
-
-    //         callback(asyncOptions);
-    //     } catch (error) {
-    //         console.error("Error fetching drying methods:", error);
-    //         callback([]);
-    //     }
-    // };
 
     // Validating
     const validateData = () => {
@@ -320,6 +250,8 @@ function WoodSorting() {
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
+
+
 
             console.log("4. Kết quả tạo pallet:", response.data);
         } catch (error) {
@@ -496,12 +428,13 @@ function WoodSorting() {
                                     </div>
                                 </div>
                                 <div className="flex w-full justify-end items-end">
-                                    <div
+                                    <button
+                                        type="button"
                                         onClick={handleAddToList}
                                         className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer"
                                     >
                                         Thêm vào danh sách
-                                    </div>
+                                    </button>
                                 </div>
                             </form>
                         </section>

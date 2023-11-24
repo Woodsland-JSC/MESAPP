@@ -37,6 +37,26 @@ const palletsApi = {
         const url = `/oven-reasons`;
         return axiosClient().get(url, {});
     },
+    getBOWList: () => {
+        const url = `/ovens/production-availiable`;
+        return axiosClient().get(url, {});
+    },
+    getBOWById: (id) => {
+        const url = `/ovens/production-detail/${id}`;
+        return axiosClient().get(url, {});
+    },
+    getPalletList: (reason) => {
+        const url = `/ovens/production-batch`;
+        return axiosClient().get(url, {
+            params: {
+                reason: reason || "OUTDOOR"
+            },
+        });
+    },
+    loadIntoKiln: () => {
+        const url = `/ovens/production-batch`;
+        return axiosClient().post(url, {});
+    }
     
 };
 
