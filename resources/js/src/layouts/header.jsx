@@ -10,6 +10,7 @@ import {
     TbArrowRight,
     TbInfoSquareRounded,
 } from "react-icons/tb";
+import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { HiMenuAlt3 } from "react-icons/hi";
@@ -43,9 +44,13 @@ function Header(props) {
             localStorage.removeItem("userInfo");
             Cookies.remove("isAuthenticated");
             setUser(null);
-            toast.info("Đã đăng xuất");
+            toast.success("Đã đăng xuất");
         } catch (error) {
             console.error(error);
+            localStorage.removeItem("userInfo");
+            Cookies.remove("isAuthenticated");
+            setUser(null);
+            toast.success("Đã đăng xuất");
         }
     };
 
@@ -54,7 +59,7 @@ function Header(props) {
             <div
                 className={`flex h-[69px] bg-white items-center ${
                     variant == "homepage"
-                        ? "border-b border-white"
+                        ? "border-b-2 border-white"
                         : "border-b-2 border-gray-200"
                 } justify-between px-4 xl:px-32`}
             >
@@ -112,6 +117,28 @@ function Header(props) {
                                     >
                                         <TbUserSquareRounded className="text-2xl" />
                                         <p>Quản lý người dùng</p>
+                                    </div>
+                                </li>
+                            )}
+                        </NavLink>
+                        <NavLink to="/integration" className="flex items-center">
+                            {({ isActive }) => (
+                                <li
+                                    className={
+                                        isActive
+                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
+                                            : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            isActive
+                                                ? "flex items-center space-x-2 text-white"
+                                                : "flex items-center space-x-2"
+                                        }
+                                    >
+                                        <SiSap className="text-2xl"/>
+                                        <p>Tích hợp</p>
                                     </div>
                                 </li>
                             )}
@@ -199,6 +226,16 @@ function Header(props) {
                                                 minH="42px"
                                             >
                                                 Quản lý người dùng
+                                            </MenuItem>
+                                        </Link>
+                                        <Link to="/integration">
+                                            <MenuItem
+                                                icon={
+                                                    <SiSap className="text-2xl"/>
+                                                }
+                                                minH="42px"
+                                            >
+                                                Tích hợp
                                             </MenuItem>
                                         </Link>
                                         <Link to="/settings">

@@ -1,5 +1,4 @@
 import axiosClient from "./axiosClient";
-import axios from "axios";
 
 const usersApi = {
     login: (email, password) => {
@@ -69,11 +68,23 @@ const usersApi = {
         return axiosClient().patch(url);
 
     },
-    deleteUser: (userId) => {
-        const url = `/users/delete/${userId}`;
-        return axiosClient().delete(url);
+    getAllBranches: () => {
+        const url = `/branch`;
+        return axiosClient().get(url);
+    },
+    getAllSapId: () => {
+        const url = `/user-sap`;
+        return axiosClient().get(url);
+    },
+    getFactoriesByBranchId: (branchId) => {
+        const url = `/factorybybranch/${branchId}`;
+        return axiosClient().get(url);
+    },
+    // deleteUser: (userId) => {
+    //     const url = `/users/delete/${userId}`;
+    //     return axiosClient().delete(url);
 
-    }
+    // }
 };
 
 export default usersApi;

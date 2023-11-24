@@ -1,23 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../components/PalletCard";
 import { HiPlus } from "react-icons/hi";
 import { RiInboxArchiveFill } from "react-icons/ri";
+import axios from "axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
-import axios from "axios";
-
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../assets/styles/datepicker.css";
 import { format } from "date-fns";
+import BigSelect from "../../components/Select/BigSelect";
+import Loader from "../../components/Loader";
 
 function WoodSorting() {
+    const [loading, setLoading] = useState(false);
     const [woodTypes, setWoodTypes] = useState([]);
     const [dryingMethods, setDryingMethods] = useState([]);
     const [dryingReasons, setDryingReasons] = useState([]);
@@ -44,74 +46,117 @@ function WoodSorting() {
         return palletCards.some((card) => card.key === id);
     };
 
+    // useEffect(() => {
+    //     palletsApi
+    //         .getTypeOfWood()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name,
+    //             }));
+    //             setWoodTypes(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching wood types:", error);
+    //         });
+
+    //     palletsApi
+    //         .getDryingMethod()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.ItemCode,
+    //                 label: item.ItemName,
+    //             }));
+    //             setDryingMethods(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching drying methods:", error);
+    //         });
+
+    //     palletsApi
+    //         .getDryingReason()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name,
+    //             }));
+    //             setDryingReasons(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching drying reasons:", error);
+    //         });
+    // }, []);
+
     useEffect(() => {
-        palletsApi
-            .getTypeOfWood()
-            .then((data) => {
-                const options = data.map((item) => ({
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const woodTypesData = await palletsApi.getTypeOfWood();
+                const woodTypesOptions = woodTypesData.map((item) => ({
                     value: item.Code,
                     label: item.Name,
                 }));
-                setWoodTypes(options);
-            })
-            .catch((error) => {
+                setWoodTypes(woodTypesOptions);
+            } catch (error) {
                 console.error("Error fetching wood types:", error);
-            });
+            }
 
-        palletsApi
-            .getDryingMethod()
-            .then((data) => {
-                const options = data.map((item) => ({
+            try {
+                const dryingMethodsData = await palletsApi.getDryingMethod();
+                const dryingMethodsOptions = dryingMethodsData.map((item) => ({
                     value: item.ItemCode,
                     label: item.ItemName,
                 }));
-                setDryingMethods(options);
-            })
-            .catch((error) => {
+                console.log(dryingMethodsOptions);
+                setDryingMethods(dryingMethodsOptions);
+            } catch (error) {
                 console.error("Error fetching drying methods:", error);
-            });
+            }
 
-        palletsApi
-            .getDryingReason()
-            .then((data) => {
-                const options = data.map((item) => ({
+            try {
+                const dryingReasonsData = await palletsApi.getDryingReason();
+                const dryingReasonsOptions = dryingReasonsData.map((item) => ({
                     value: item.Code,
                     label: item.Name,
                 }));
-                setDryingReasons(options);
-            })
-            .catch((error) => {
+                setDryingReasons(dryingReasonsOptions);
+            } catch (error) {
                 console.error("Error fetching drying reasons:", error);
-            });
+            }
+            setLoading(false);
+        };
+
+        fetchData();
     }, []);
 
     // Search Filter
-    const loadDryingMethods = (inputValue, callback) => {
-        palletsApi
-            .getDryingMethod()
-            .then((data) => {
-                const filteredOptions = data.filter(
-                    (option) =>
-                        option.ItemName.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        ) ||
-                        option.ItemCode.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        )
-                );
+    // const loadDryingMethods = async (inputValue, callback) => {
+    //     try {
+    //         const response = await palletsApi.getDryingMethod();
+    //         const data = response.data;
+    //         console.log('Input Value:', data);
 
-                const asyncOptions = filteredOptions.map((item) => ({
-                    value: item.ItemCode,
-                    label: item.ItemName,
-                }));
+    //         const filteredOptions = data.filter(
+    //             (option) =>
+    //                 option.ItemName.toLowerCase().includes(
+    //                     inputValue.toLowerCase()
+    //                 ) ||
+    //                 option.ItemCode.toLowerCase().includes(
+    //                     inputValue.toLowerCase()
+    //                 )
+    //         );
 
-                callback(asyncOptions);
-            })
-            .catch((error) => {
-                console.error("Error fetching drying methods:", error);
-                callback([]);
-            });
-    };
+    //         const asyncOptions = filteredOptions.map((item) => ({
+    //             value: item.ItemCode,
+    //             label: item.ItemName,
+    //         }));
+
+    //         callback(asyncOptions);
+    //     } catch (error) {
+    //         console.error("Error fetching drying methods:", error);
+    //         callback([]);
+    //     }
+    // };
 
     // Validating
     const validateData = () => {
@@ -175,7 +220,7 @@ function WoodSorting() {
                                 itemCode={selectedDryingMethod.value}
                                 itemName={selectedDryingMethod.label}
                                 batchNum={item.BatchNum}
-                                inStock={item["Batch Quantity"]}
+                                inStock={item.Quantity}
                                 whsCode={item.WhsCode}
                                 onDelete={() =>
                                     handleDeletePalletCard(
@@ -213,7 +258,7 @@ function WoodSorting() {
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
-        toast.success("Đã xóa khỏi danh sách");
+        toast("Đã xóa khỏi danh sách");
     };
 
     const handlePalletQuantityChange = (id, quantity) => {
@@ -252,16 +297,22 @@ function WoodSorting() {
         const palletObject = createPalletObject();
 
         try {
-            const response = await axios.post(
-                "/api/pallets/create",
-                palletObject
+            // const response = await axios.post(
+            //     "/api/pallets/create",
+            //     palletObject
+            // );
+            const response = await toast.promise(
+                axios.post("/api/pallets/create", palletObject),
+                {
+                    loading: "Đang tạo pallet...",
+                    success: <p>Tạo pallet thành công!</p>,
+                    error: <p>Có lỗi xảy ra, vui lòng thử lại</p>,
+                }
             );
+
             console.log("3. Thông tin pallet:", palletObject);
 
-            console.log("4. Kết quả tạo pallet:", response.data);
-
-            toast.success("Tạo pallet thành công.");
-
+            setWoodTypes(null);
             setSelectedWoodType(null);
             setBatchId("");
             setSelectedDryingReason(null);
@@ -269,10 +320,10 @@ function WoodSorting() {
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
-            
+
+            console.log("4. Kết quả tạo pallet:", response.data);
         } catch (error) {
             console.error("Error creating pallet:", error);
-            toast.error("Đã xảy ra lỗi khi tạo pallet. Vui lòng thử lại sau.");
         }
     };
 
@@ -364,8 +415,9 @@ function WoodSorting() {
                                         >
                                             Loại gỗ
                                         </label>
-                                        {/* <Select options={options} /> */}
+
                                         <Select
+                                            placeholder="Lựa chọn"
                                             options={woodTypes}
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
@@ -397,6 +449,7 @@ function WoodSorting() {
                                             Mục đích sấy
                                         </label>
                                         <Select
+                                            placeholder="Lựa chọn"
                                             options={dryingReasons}
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
@@ -410,16 +463,20 @@ function WoodSorting() {
                                         >
                                             Quy cách thô
                                         </label>
-                                        {/* <Select cacheOptions defaultOptions options={dryingMethods} /> */}
-                                        <AsyncSelect
-                                            cacheOptions
-                                            defaultOptions
-                                            loadOptions={loadDryingMethods}
+                                        <Select
                                             options={dryingMethods}
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
                                         />
+                                        {/* <AsyncSelect
+                                            defaultOption
+                                            cacheOptions
+                                            loadOptions={loadDryingMethods}
+                                            onChange={(value) =>
+                                                setSelectedDryingMethod(value)
+                                            }
+                                        /> */}
                                     </div>
 
                                     <div className="col-span-1">
@@ -485,12 +542,15 @@ function WoodSorting() {
                                 className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
                                 <HiPlus className="text-xl" />
-                                Tạo pallet   
+                                Tạo pallet
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* {
+                loading && <Loader />
+            } */}
         </Layout>
     );
 }

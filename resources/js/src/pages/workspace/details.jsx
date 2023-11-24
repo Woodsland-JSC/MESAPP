@@ -186,6 +186,7 @@ function Details() {
                                     )}
                                     {type === "dg" && (
                                         <div className="space-y-6">
+                                            <ControllerCard />
                                             <KilnCheck />
                                             <HumidityCheck />
                                             <DisabledCheck
@@ -206,6 +207,7 @@ function Details() {
                                     )}
                                     {type === "kt" && (
                                         <div className="space-y-6">
+                                            <ControllerCard />
                                             <KilnCheck />
                                             <SizeCard />
                                         </div>

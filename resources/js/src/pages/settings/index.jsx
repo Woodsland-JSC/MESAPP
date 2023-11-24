@@ -93,7 +93,8 @@ const SelectField = ({ options, ...props }) => {
 function Settings() {
     const [formKey, setFormKey] = useState(0);
 
-    const { loading, setLoading } = useAppContext();
+    // const { loading, setLoading } = useAppContext();
+    const [loading, setLoading] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
 
@@ -277,7 +278,7 @@ function Settings() {
                 {/* Section */}
                 <div className="w-screen xl:py-12  p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -292,7 +293,7 @@ function Settings() {
                                 </li>
                             </ol>
                         </nav>
-                    </div>
+                    </div> */}
 
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">Cài đặt</div>

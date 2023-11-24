@@ -1,0 +1,14 @@
+/* Chakra Custom Tabs */
+
+.css-15mi7bd {
+  margin-right: 1rem;
+  border: 2px solid lightgray !important;
+  background-color: white !important;
+  color: gray !important;
+}
+
+.css-15mi7bd[aria-selected=true], .css-15mi7bd[data-selected] {
+  color: rgba(245, 245, 245) !important;
+  background: rgb(43, 43, 43) !important;
+  border: 2px solid rgb(43, 43, 43) !important;
+}

@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    forwardRef,
+} from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
+import AsyncSelect from "react-select/async";
+import makeAnimated from "react-select/animated";
 import toast from "react-hot-toast";
 import Layout from "../../layouts/layout";
 import generateAvatar from "../../utils/generateAvatar";
@@ -11,6 +19,7 @@ import useAppContext from "../../store/AppContext";
 import Loader from "../../components/Loader";
 import TinyLoader from "../../components/TinyLoader";
 import usersApi from "../../api/userApi";
+import roleApi from "../../api/roleApi";
 import { areObjectsEqual } from "../../utils/objectFunctions";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 
@@ -75,39 +84,155 @@ const validationSchema = Yup.object().shape({
 
             return true;
         }),
-    authorization: Yup.string().required("Phân quyền là bắt buộc"),
+    authorization: Yup.array()
+        .of(Yup.string())
+        .min(1, "Phải có ít nhất 1 quyền")
+        .required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
     integrationId: Yup.string().required("Integration ID là bắt buộc"),
     factory: Yup.string().required("Nhà máy là bắt buộc"),
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
 
-const SelectField = ({ options, ...props }) => {
-    const [selectedOption, setSelectedOption] = useState();
-    const { setFieldValue } = useFormikContext();
+const SelectField = forwardRef(
+    ({ options, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
 
-    const handleChange = (option) => {
-        setSelectedOption(option);
-        setFieldValue(props.name, option.value);
-    };
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option?.value || "");
+            setInput((prev) => ({
+                ...prev,
+                [name]: option?.value || "",
+            }));
+        };
 
-    return (
-        <Select
-            {...props}
-            options={options}
-            value={selectedOption}
-            onChange={handleChange}
-        />
-    );
-};
+        return (
+            <Select
+                {...props}
+                ref={innerRef || ref}
+                options={options}
+                value={selectedOption}
+                onChange={handleChange}
+                placeholder="Lựa chọn"
+            />
+        );
+    }
+);
+
+const AsyncSelectField = forwardRef(
+    ({ options, loadOptions, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
+
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option.value);
+            setInput((prev) => ({
+                ...prev,
+                [name]: option.value,
+            }));
+        };
+
+        return (
+            <AsyncSelect
+                {...props}
+                ref={innerRef || ref}
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
+                value={selectedOption}
+                options={options}
+                placeholder="Lựa chọn"
+                onChange={handleChange}
+            />
+        );
+    }
+);
+
+const animatedComponents = makeAnimated();
+
+const MultiSelectField = forwardRef(
+    ({ options, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
+
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option ? option.map((opt) => opt.label) : []);
+            setInput((prev) => ({
+                ...prev,
+                [name]: option ? option.map((opt) => opt.label) : [],
+            }));
+        };
+
+        return (
+            <Select
+                {...props}
+                ref={innerRef || ref}
+                options={options}
+                value={selectedOption}
+                onChange={handleChange}
+                placeholder="Lựa chọn"
+                components={animatedComponents}
+                isMulti
+            />
+        );
+    }
+);
+
+const AsyncMultiSelectField = forwardRef(
+    ({ loadOptions, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
+
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option ? option.map((opt) => opt.label) : []);
+            setInput((prev) => ({
+                ...prev,
+                [name]: option ? option.map((opt) => opt.label) : [],
+            }));
+        };
+
+        return (
+            <AsyncSelect
+                {...props}
+                ref={innerRef || ref}
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
+                value={selectedOption}
+                onChange={handleChange}
+                components={animatedComponents}
+                closeMenuOnSelect={false}
+                isMulti
+                placeholder="Lựa chọn"
+            />
+        );
+    }
+);
 
 function User() {
     const { userId } = useParams();
     const navigate = useNavigate();
+
     const fileInputRef = useRef();
+    const authorizationInputRef = useRef(null);
+    const branchSelectRef = useRef(null);
+    const sapIdSelectRef = useRef(null);
+    const factorySelectRef = useRef(null);
+
+    const [roles, setRoles] = useState([]);
+    const [branches, setBranches] = useState([]);
+    const [sapId, setSapId] = useState([]);
+    const [factoryLoading, setFactoryLoading] = useState(false);
+    const [factories, setFactories] = useState([]);
 
     const [formKey, setFormKey] = useState(0);
-    const { loading, setLoading } = useAppContext();
+    // const { loading, setLoading } = useAppContext();
+    const [loading, setLoading] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
 
@@ -131,7 +256,7 @@ function User() {
         password: "",
         authorization: "",
         sapId: "",
-        integrationId: "",
+        integrationId: "1",
         factory: "",
         branch: "",
     });
@@ -206,7 +331,7 @@ function User() {
     };
 
     const handleFormSubmit = async (values) => {
-        const updatedValues = {...values};
+        const updatedValues = { ...values };
         const { password: newPassword, ...updatedInfo } = values;
         const { password: oldPassword, ...oldInfo } = originalInfo;
         const isChanged = areObjectsEqual(updatedInfo, oldInfo);
@@ -217,24 +342,26 @@ function User() {
                 if (selectedFile instanceof File) {
                     updatedValues.avatar = selectedFile;
                 }
-            } else if (avatar.file == originalAvatar || avatar.imgSrc == originalAvatar) {
-                updatedValues.avatar = '';
+            } else if (
+                avatar.file == originalAvatar ||
+                avatar.imgSrc == originalAvatar
+            ) {
+                updatedValues.avatar = "";
             } else {
                 updatedValues.avatar = -1;
             }
 
             try {
                 const res = await usersApi.updateUser(userId, updatedValues);
-                console.log("Thành công: ", res);
+                // console.log("Thành công: ", res);
                 toast.success("Điều chỉnh thông tin thành công.");
                 getCurrentUser();
             } catch (error) {
                 console.error(error);
-                toast.error("Có lỗi xảy ra, vui lòng thử lại.")
+                toast.error("Có lỗi xảy ra, vui lòng thử lại.");
             }
-
+            setLoading(false);
             console.log("Giá trị updated values: ", updatedValues);
-            
         } else {
             toast("Bạn chưa điều chỉnh thông tin.", {
                 icon: ` ℹ️`,
@@ -256,64 +383,89 @@ function User() {
         }
     };
 
-    const getCurrentUser = async () => {
-        try {
-            if (!userId) {
-                navigate("/notfound");
-                return;
-            }
-            setLoading(true);
-            const data = await usersApi.getUserDetails(userId);
-            const {
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                gender,
-                sap_id: sapId,
-                integration_id: integrationId,
-                plant: factory,
-                branch,
-                avatar,
-            } = data.user;
-
-            console.log("Log nè: ", data.user);
-
-            const role = data.UserRole[0];
-
-            const userData = {
-                firstName: firstName || "",
-                lastName: lastName || "",
-                email: email || "",
-                gender,
-                password: "",
-                authorization: role,
-                sapId: sapId || "",
-                integrationId: integrationId || "",
-                factory: factory || "",
-                branch: branch || "",
-            };
-
-            // const userData = await res;
-            setInput(userData);
-            setOriginalInfo(userData);
-
-            if (avatar) {
-                setOriginalAvatar(avatar);
-                setAvatar({
-                    autoImg: null,
-                    file: data.user.avatar,
-                    imgSrc: data.user.avatar,
+    const loadBranches = (inputValue, callback) => {
+        usersApi
+            .getAllBranches()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.BPLName?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.BPLId?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
+                    );
                 });
-            }
-            setFormKey((prevKey) => prevKey + 1);
-            setLoading(false);
-        } catch (error) {
-            // console.error(error);
-            toast.error("Không tìm thấy user");
-            if (error.response && error.response.status === 404) {
-                navigate("/notfound", { replace: true });
-            }
-        }
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching branch:", error);
+                callback([]);
+            });
+    };
+
+    const loadRoles = (inputValue, callback) => {
+        roleApi
+            .getAllRole()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.name
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase()) ||
+                        option.id
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase())
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching roles:", error);
+                callback([]);
+            });
+    };
+
+    const loadSapId = (inputValue, callback) => {
+        usersApi
+            .getAllSapId()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.NAME?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.USER_CODE?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.USER_CODE,
+                    label: item.NAME + " - " + item.USER_CODE,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching sap id:", error);
+                callback([]);
+            });
     };
 
     useEffect(() => {
@@ -323,7 +475,7 @@ function User() {
                 input.firstName.trim().charAt(0);
             const res = (async () => {
                 const base64 = await getAutoAvatar(tempName);
-                console.log("Auto ava: ", base64);
+                // console.log("Auto ava: ", base64);
                 setAvatar({ ...avatar, autoImg: base64 });
             })();
             setAvatarLoading(false);
@@ -351,14 +503,148 @@ function User() {
         };
     }, [hasChanged]);
 
-    useEffect(() => {
-        getCurrentUser();
+    const getCurrentUser = useCallback(async () => {
+        try {
+            if (!userId) {
+                navigate("/notfound");
+                return;
+            }
+            const data = await usersApi.getUserDetails(userId);
+            const {
+                first_name: firstName,
+                last_name: lastName,
+                email,
+                gender,
+                sap_id: sapId,
+                integration_id: integrationId,
+                plant: factory,
+                branch,
+                avatar,
+                roles,
+            } = data.user;
 
-        document.title = "Woodsland - Chi tiết người dùng";
+            const role = data.UserRole;
+
+            const userData = {
+                firstName: firstName || "",
+                lastName: lastName || "",
+                email: email || "",
+                gender,
+                password: "",
+                authorization: role,
+                sapId: sapId || "",
+                integrationId: integrationId || "1",
+                factory: factory || "",
+                branch: branch || "",
+            };
+
+            // console.log("User: ", userData);
+
+            // const userData = await res;
+            setInput(userData);
+            setOriginalInfo(userData);
+
+            if (avatar) {
+                setOriginalAvatar(avatar);
+                setAvatar({
+                    autoImg: null,
+                    file: data.user.avatar,
+                    imgSrc: data.user.avatar,
+                });
+            }
+            setFormKey((prevKey) => prevKey + 1);
+        } catch (error) {
+            // console.error(error);
+            toast.error("Không tìm thấy user");
+            if (error.response && error.response.status === 404) {
+                navigate("/notfound", { replace: true });
+            }
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                const branchesPromise = usersApi.getAllBranches();
+                const rolesPromise = roleApi.getAllRole();
+                const sapIdPromise = usersApi.getAllSapId();
+
+                const [branchesRes, rolesRes, sapIdRes] = await Promise.all([
+                    branchesPromise,
+                    rolesPromise,
+                    sapIdPromise,
+                ]);
+
+                const branchesOptions = branchesRes.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+                setBranches(branchesOptions);
+
+                const rolesOptions = rolesRes.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+                setRoles(rolesOptions);
+
+                const sapIdOptions = sapIdRes.map((item) => ({
+                    value: item.USER_CODE,
+                    label: item.NAME + " - " + item.USER_CODE,
+                }));
+                setSapId(sapIdOptions);
+
+                document.title = "Woodsland - Chi tiết người dùng";
+
+                await getCurrentUser();
+
+                setLoading(false);
+            } catch (error) {
+                console.error(error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+
         return () => {
             document.title = "Woodsland";
         };
     }, []);
+
+    useEffect(() => {
+        const selectedBranch = input.branch;
+
+        const getFactoriesByBranchId = async () => {
+            setFactoryLoading(true);
+            try {
+                if (selectedBranch) {
+                    factorySelectRef.current.clearValue();
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch
+                    );
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+
+                    setFactories(options);
+                    setInput((prev) => ({ ...prev, factory: "" }));
+                } else {
+                    setFactories([]);
+                    // factorySelectRef.current?.selectOption([]);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+            setFactoryLoading(false);
+        };
+
+        // console.log("Chỗ này call api nè: ", factorySelectRef.current);
+        getFactoriesByBranchId();
+    }, [input.branch]);
 
     return (
         <Layout>
@@ -414,9 +700,7 @@ function User() {
                         key={formKey}
                         initialValues={input}
                         validationSchema={validationSchema}
-                        onSubmit={(values) => {
-                            handleFormSubmit(values);
-                        }}
+                        onSubmit={(values) => handleFormSubmit(values)}
                     >
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
@@ -555,6 +839,7 @@ function User() {
                                                                 item.value ==
                                                                 values.gender
                                                         )}
+                                                        setInput={setInput}
                                                     />
                                                     {errors.gender &&
                                                     touched.gender ? (
@@ -610,19 +895,33 @@ function User() {
                                                             *
                                                         </span>
                                                     </label>
-                                                    <SelectField
+                                                    <MultiSelectField
                                                         name="authorization"
-                                                        options={
-                                                            authorizationOptions
-                                                        }
+                                                        options={roles}
                                                         defaultValue={
-                                                            authorizationOptions.find(
+                                                            roles.filter(
                                                                 (item) =>
-                                                                    item.value ==
-                                                                    values.authorization
+                                                                    values.authorization.includes(
+                                                                        item.label?.toLowerCase()
+                                                                    )
                                                             ) || null
                                                         }
                                                     />
+                                                    {/* <AsyncMultiSelectField
+                                                            ref={authorizationInputRef}
+                                                            name="authorization"
+                                                            loadOptions={
+                                                                loadRoles
+                                                            }
+                                                            // defaultValue={
+                                                            //     roles.filter(
+                                                            //         (item) =>
+                                                            //             values.authorization.includes(item.name)
+                                                            //     ) || null
+                                                            // }
+                                                            options={roles}
+                                                            setInput={setInput}
+                                                        /> */}
                                                     {errors.authorization &&
                                                     touched.authorization ? (
                                                         <span className="text-xs text-red-600">
@@ -707,7 +1006,7 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            <Field
+                                            {/* <Field
                                                 name="sapId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                 onChange={(e) => {
@@ -720,6 +1019,21 @@ function User() {
                                                         sapId: e.target.value,
                                                     }));
                                                 }}
+                                            /> */}
+                                            {/* <SelectField */}
+                                            <AsyncSelectField
+                                                innerRef={sapIdSelectRef}
+                                                name="sapId"
+                                                loadOptions={loadSapId}
+                                                defaultValue={
+                                                    sapId.find(
+                                                        (item) =>
+                                                            item.value ==
+                                                            values.sapId
+                                                    ) || null
+                                                }
+                                                options={sapId}
+                                                setInput={setInput}
                                             />
                                             {errors.sapId && touched.sapId ? (
                                                 <span className="text-xs text-red-600">
@@ -735,62 +1049,31 @@ function User() {
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 INTEGRATION ID{" "}
-                                                <span className="text-red-600">
+                                                {/* <span className="text-red-600">
                                                     *
-                                                </span>
+                                                </span> */}
                                             </label>
                                             <Field
                                                 name="integrationId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "integrationId",
-                                                        e.target.value
-                                                    );
-                                                    setInput((prev) => ({
-                                                        ...prev,
-                                                        integrationId:
-                                                            e.target.value,
-                                                    }));
-                                                }}
+                                                disabled
+                                                value="1"
+                                                // onChange={(e) => {
+                                                //     setFieldValue(
+                                                //         "integrationId",
+                                                //         e.target.value
+                                                //     );
+                                                //     setInput((prev) => ({
+                                                //         ...prev,
+                                                //         integrationId:
+                                                //             e.target.value,
+                                                //     }));
+                                                // }}
                                             />
                                             {errors.integrationId &&
                                             touched.integrationId ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="integrationId" />
-                                                </span>
-                                            ) : (
-                                                <span className="block mt-[8px] h-[14.55px]"></span>
-                                            )}
-                                        </div>
-                                        <div className="w-full">
-                                            <label
-                                                htmlFor="factory"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Nhà máy{" "}
-                                                <span className="text-red-600">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Field
-                                                name="factory"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "factory",
-                                                        e.target.value
-                                                    );
-                                                    setInput((prev) => ({
-                                                        ...prev,
-                                                        factory: e.target.value,
-                                                    }));
-                                                }}
-                                            />
-                                            {errors.factory &&
-                                            touched.factory ? (
-                                                <span className="text-xs text-red-600">
-                                                    <ErrorMessage name="factory" />
                                                 </span>
                                             ) : (
                                                 <span className="block mt-[8px] h-[14.55px]"></span>
@@ -806,7 +1089,21 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            <Field
+                                            <AsyncSelectField
+                                                innerRef={branchSelectRef}
+                                                name="branch"
+                                                loadOptions={loadBranches}
+                                                options={branches}
+                                                defaultValue={
+                                                    branches.find(
+                                                        (item) =>
+                                                            item.value ==
+                                                            values.branch
+                                                    ) || null
+                                                }
+                                                setInput={setInput}
+                                            />
+                                            {/* <Field
                                                 name="branch"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                 onChange={(e) => {
@@ -819,10 +1116,58 @@ function User() {
                                                         branch: e.target.value,
                                                     }));
                                                 }}
-                                            />
+                                            /> */}
                                             {errors.branch && touched.branch ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="branch" />
+                                                </span>
+                                            ) : (
+                                                <span className="block mt-[8px] h-[14.55px]"></span>
+                                            )}
+                                        </div>
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="factory"
+                                                className="block mb-2 text-md font-medium text-gray-900"
+                                            >
+                                                Nhà máy{" "}
+                                                <span className="text-red-600">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <SelectField
+                                                innerRef={factorySelectRef}
+                                                name="factory"
+                                                // loadOptions={loadFactories}
+                                                defaultValue={
+                                                    factories.find(
+                                                        (item) =>
+                                                            item.value ==
+                                                            values.factory
+                                                    ) || null
+                                                }
+                                                options={factories}
+                                                isLoading={factoryLoading}
+                                                setInput={setInput}
+                                            />
+                                            {/* <Field
+                                                name="factory"
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                onChange={(e) => {
+                                                    setFieldValue(
+                                                        "factory",
+                                                        e.target.value
+                                                    );
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        factory: e.target.value,
+                                                    }));
+                                                }}
+                                            /> */}
+                                            {errors.factory &&
+                                            touched.factory ? (
+                                                <span className="text-xs text-red-600">
+                                                    <ErrorMessage name="factory" />
                                                 </span>
                                             ) : (
                                                 <span className="block mt-[8px] h-[14.55px]"></span>
