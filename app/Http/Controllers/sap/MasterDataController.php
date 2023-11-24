@@ -88,32 +88,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    /**
-     * @OA\Get(
-     *     path="/api/warehouses",
-     *     tags={"MasterData"},
-     *     summary="Get all warehouse master data",
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="ItemCode",
-     *                  type="string",
-     *                  example="00001"
-     *              ),
-     *              @OA\Property(
-     *                  property="ItemName",
-     *                  type="string",
-     *                  example="abcd"
-     *              ),
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+
     function WarehouseMasterData(Request $request)
     {
         try {
@@ -144,42 +119,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    /**
-     * @OA\Get(
-     *     path="/api/warehouses/{WarehouseId}",
-     *     tags={"MasterData"},
-     *     summary="Get warehouse by WarehouseId",
-     *  *     @OA\Parameter(
-     *         name="WarehouseId",
-     *         in="path",
-     *         description="ID of warehouse that needs to be fetched",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="integer",
-     *             format="int64",
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="ItemCode",
-     *                  type="string",
-     *                  example="00001"
-     *              ),
-     *              @OA\Property(
-     *                  property="ItemName",
-     *                  type="string",
-     *                  example="abcd"
-     *              ),
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+
     function WarehouseByPlant(Request $request)
     {
         try {

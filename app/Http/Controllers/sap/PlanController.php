@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\UniqueOvenStatusRule;
 use Carbon\Carbon;
 use App\Jobs\UpdateProductionOrders;
+use App\Jobs\issueProduction;
+use App\Jobs\receiptProduction;
 
 class PlanController extends Controller
 {
@@ -78,15 +80,30 @@ class PlanController extends Controller
         return response()->json($response, 200);
     }
     //danh sách pallet chưa được assign
-    function listpallet()
+    function listpallet(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
             ->select('a.palletID', 'a.Code')
             ->where('b.plant', '=', Auth::user()->plant)
-            ->whereNull('c.pallet')
-            ->get();
+            ->whereNull('c.pallet');
+        if ($request->reason == 'INDOOR') {
+            $pallets = $pallets->where('LyDo', 'INDOOR')->orwhere('LyDo', 'XINDOOR')->get();
+        } else if ($request->reason == 'OUTDOOR') {
+            $pallets = $pallets->where('LyDo', 'OUTDOOR')->orwhere('LyDo', 'XOUTDOOR')->get();
+        } else if ($request->reason === 'SU') {
+            $pallets = $pallets->where('LyDo', 'SU')->get();
+        } else {
+            $pallets = $pallets->where('LyDo', 'SL')->get();
+        }
+
         return response()->json($pallets, 200);
     }
     //danh sách mẻ sấy có thể vào lò
@@ -135,7 +152,11 @@ class PlanController extends Controller
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
             }
-
+            plandryings::where('PlanID', $id)->update(
+                [
+                    'Status' => 1,
+                ]
+            );
             $data = plandetail::create(['PlanID' => $id, 'pallet' => $pallet, 'size' => 5, 'Qty' => 10, 'Mass' => 10]);
             DB::commit();
 
@@ -174,8 +195,7 @@ class PlanController extends Controller
             if ($record) {
                 $record->update(
                     [
-                        'PlanID' => $id,
-                        'Status' => 1,
+                        'Status' => 2,
                         'Checked' => 1,
                         'CheckedBy' => Auth::user()->id
                     ]
@@ -226,11 +246,61 @@ class PlanController extends Controller
             if ($record) {
                 $record->update(
                     [
-                        'PlanID' => $id,
-                        'Status' => 2,
+                        'Status' => 3,
                         'RunBy' => Auth::user()->id
                     ]
                 );
+
+                $results = Plandryings::select(
+                    'planDryings.Code as newbatch',
+                    'pallets.DocEntry',
+                    'pallet_details.ItemCode',
+                    'pallet_details.WhsCode',
+                    'pallet_details.Qty',
+                    'pallet_details.CDai',
+                    'pallet_details.CRong',
+                    'pallet_details.CDay',
+                    'pallet_details.BatchNum',
+                    DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+                    'pallet_details.palletID'
+                )
+                    ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+                    ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                    ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+                    ->where('planDryings.PlanID', $id)
+                    ->get();
+
+                $groupedResults = $results->groupBy('DocEntry');
+
+                foreach ($groupedResults as $docEntry => $group) {
+                    $data = [];
+                    foreach ($group as $batchData) {
+                        $data[] = [
+                            "BatchNumber" => $batchData->BatchNum,
+                            "Quantity" => $batchData->Qty,
+                            "ItemCode" => $batchData->ItemCode,
+                        ];
+                    }
+
+                    $header = $group->first();
+
+                    $body = [
+                        "DocumentLines" => [
+                            [
+                                "Quantity" => $header->TotalQty,
+                                "BaseLine" => 0,
+                                "WarehouseCode" => $header->WhsCode,
+                                "BaseEntry" => $header->DocEntry,
+                                "BaseType" => 202,
+                                "BatchNumbers" => $data,
+                            ],
+                        ],
+                    ];
+
+
+                    issueProduction::dispatch($body);
+                }
+
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
             } else {
@@ -262,11 +332,74 @@ class PlanController extends Controller
             if ($record) {
                 $record->update(
                     [
-                        'PlanID' => $id,
-                        'Status' => 3,
+                        'Status' => 4,
                         'CompletedBy' => Auth::user()->id
                     ]
                 );
+                $results = Plandryings::select(
+                    'planDryings.Code as newbatch',
+                    'planDryings.Oven',
+                    'pallets.DocEntry',
+                    'pallet_details.ItemCode',
+                    'pallet_details.WhsCode',
+                    'pallet_details.Qty',
+                    'pallet_details.CDai',
+                    'pallet_details.CRong',
+                    'pallet_details.CDay',
+                    'pallet_details.BatchNum',
+                    DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+                    'pallet_details.palletID'
+                )
+                    ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+                    ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                    ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+                    ->where('planDryings.PlanID', $id)
+                    ->get();
+
+                $groupedResults = $results->groupBy('DocEntry');
+
+                $test = [];
+                foreach ($groupedResults as $docEntry => $group) {
+                    $data = [];
+                    foreach ($group as $batchData) {
+                        $data[] = [
+                            "BatchNumber" => $batchData->newbatch,
+                            "Quantity" => $batchData->Qty,
+                            "ItemCode" => $batchData->ItemCode,
+                            "U_CDai" => $batchData->CDai,
+                            "U_CRong" =>  $batchData->CRong,
+                            "U_CDay" =>  $batchData->CDay,
+                        ];
+                    }
+
+                    $header = $group->first();
+
+                    $body = [
+                        "DocumentLines" => [
+                            [
+                                "Quantity" => $header->TotalQty,
+                                "BaseLine" => 0,
+                                "WarehouseCode" => $header->WhsCode,
+                                "BaseEntry" => $header->DocEntry,
+                                "BaseType" => 202,
+                                "BatchNumbers" => $data,
+                            ],
+                        ],
+                    ];
+
+                    $test[] = $body;
+                    receiptProduction::dispatch($body);
+                }
+                // ulock lò sấy
+                $conDB = (new ConnectController)->connect_sap();
+                $sql = 'Update  "@G_SAY3" set "U_status"=0 where "Code"=?';
+                $stmt = odbc_prepare($conDB, $sql);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt, [$results->first()->Oven])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
             } else {
