@@ -117,7 +117,7 @@ function DryingWoodChecking() {
                     {/* Content */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={3}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -128,7 +128,7 @@ function DryingWoodChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={3}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -139,7 +139,7 @@ function DryingWoodChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={3}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -150,7 +150,7 @@ function DryingWoodChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={3}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -160,6 +160,18 @@ function DryingWoodChecking() {
                             palletQty="111"
                             weight="130.72 (m³)"
                         />
+                        <BOWCard
+                            status={3}
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="111"
+                            weight="130.72 (m³)"
+                        />
+
                     </div>
                 </div>
             </div>

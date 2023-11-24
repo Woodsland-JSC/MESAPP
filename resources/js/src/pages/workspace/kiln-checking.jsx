@@ -119,7 +119,7 @@ function KilnChecking() {
                     {/* Content */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={1}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -130,7 +130,7 @@ function KilnChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={1}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -141,7 +141,7 @@ function KilnChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={1}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -152,7 +152,7 @@ function KilnChecking() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status={1}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -162,6 +162,7 @@ function KilnChecking() {
                             palletQty="111"
                             weight="130.72 (m³)"
                         />
+
                     </div>
                 </div>
             </div>

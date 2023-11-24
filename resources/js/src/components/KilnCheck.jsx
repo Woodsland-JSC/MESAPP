@@ -185,7 +185,6 @@ function KilnCheck() {
                             ))}
                         </div>
                     </ModalBody>
-
                     <ModalFooter>
                         <div className="xl:flex justify-between xl:px-10 md:px-10 w-full">
                             <div className="flex text-lg ">
@@ -208,14 +207,14 @@ function KilnCheck() {
                                 </p>
                             </div>
                             <div className="flex justify-end gap-x-3 ">
-                                <button className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all">
-                                    Hoàn thành
-                                </button>
                                 <button
                                     onClick={onClose}
                                     className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 >
                                     Đóng
+                                </button>
+                                <button className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all">
+                                    Hoàn thành
                                 </button>
                             </div>
                         </div>

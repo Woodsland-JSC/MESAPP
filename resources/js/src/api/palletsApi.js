@@ -17,7 +17,7 @@ const palletsApi = {
         const url = `/stock/${item}`;
         return axiosClient().get(url, {
             params: {
-                reason: reason || "SL", // default value = "SL"
+                reason: reason || "SL",
             },
         });
     },
@@ -29,7 +29,7 @@ const palletsApi = {
         const url = `/dryingmethod`;
         return axiosClient().get(url, {
             params: {
-                reason,
+                reason: reason || "INDOOR"
             },
         });
     },

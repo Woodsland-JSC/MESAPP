@@ -54,7 +54,7 @@ function Header(props) {
             <div
                 className={`flex h-[69px] bg-white items-center ${
                     variant == "homepage"
-                        ? "border-b border-white"
+                        ? "border-b-2 border-white"
                         : "border-b-2 border-gray-200"
                 } justify-between px-4 xl:px-32`}
             >

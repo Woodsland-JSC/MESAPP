@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../layouts/layout";
 import { Link } from "react-router-dom";
 import BOWCard from "../../components/BOWCard";
@@ -14,22 +14,31 @@ import {
     useDisclosure,
     Button,
 } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { addDays, format, add } from 'date-fns';
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [kiln, setKlin] = useState([]);
+    const [kiln, setKiln] = useState([]);
     const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
-    const [thickness, setThickness] = useState([]);
+    const [thicknessOptions, setThicknessOptions] = useState([]);
 
     // Validating
     const [selectedKiln, setSelectedKiln] = useState(null);
     const [selectedDryingReasonsPlan, setSelectedDryingReasonsPlan] =
         useState(null);
     const [selectedThickness, setSelectedThickness] = useState(null);
+
+    const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [bowCards, setBowCards] = useState([]);
 
     useEffect(() => {
         palletsApi
@@ -39,7 +48,7 @@ function CreateDryingPlan() {
                     value: item.Code,
                     label: item.Name,
                 }));
-                setKlin(options);
+                setKiln(options);
             })
             .catch((error) => {
                 console.error("Error fetching kiln list:", error);
@@ -59,55 +68,98 @@ function CreateDryingPlan() {
             });
 
         if (selectedDryingReasonsPlan) {
-            setThickness(null);
+            loadThicknessOptions(selectedDryingReasonsPlan.value, (options) => {
+                setThicknessOptions(options);
+            });
+            setReloadAsyncSelectKey((prevKey) => prevKey + 1);
+        }
+    }, [selectedDryingReasonsPlan]);
+
+    const asyncSelectKey = useMemo(
+        () => reloadAsyncSelectKey,
+        [reloadAsyncSelectKey]
+    );
+
+    const filter = (inputValue, options) =>
+        options.filter((option) =>
+            option.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+
+    const loadOptionsCallback = (inputValue, callback) => {
+        if (selectedDryingReasonsPlan) {
             palletsApi
                 .getThickness(selectedDryingReasonsPlan.value)
-                .then((data) => {
-                    const options = data.map((item) => ({
+                .then((response) => {
+                    const options = response.map((item) => ({
                         value: item.Code,
                         label: item.Name,
+                        U_Time: item.U_Time,
+                        U_Type: item.U_Type,
                     }));
-                    setThickness(options);
+                    callback(options);
                 })
                 .catch((error) => {
                     console.error("Error fetching thickness:", error);
                 });
         }
-    }, [selectedDryingReasonsPlan]);
+    };
 
-    const thicknessRef = useRef(null);
-
-    const handleClearThickness = () => {
-        if (thicknessRef.current) {
-            thicknessRef.current.select.clearValue();
-        }
+    const loadThicknessOptions = (inputValue, callback) => {
+        loadOptionsCallback(inputValue, callback);
     };
 
     const handleCompletion = () => {
-        console.log("Result:", {
-            Lò: selectedKiln.value,
-            "Mục đích": selectedDryingReasonsPlan.value,
-            selectedThickness,
+        console.log("1. Dữ liệu thu thập được:", {
+            "Mã Lò": selectedKiln.value,
+            "Mục đích sấy": selectedDryingReasonsPlan.value,
+            "Chiều dày sấy": selectedThickness.value,
+            "Thời gian sấy dự kiến:": selectedThickness.U_Time,
         });
+
+        setIsLoading(true);
+
+        const postData = {
+            Oven: selectedKiln.value,
+            Reason: selectedDryingReasonsPlan.value,
+            Method: selectedThickness.value,
+            Time: selectedThickness.U_Time,
+        };
+
+        axios
+            .post("/api/ovens/create", postData)
+            .then((response) => {
+                console.log("2. Kết quả từ API:", response.data);
+
+                const A = response.data.Time; 
+                const B = new Date();
+
+                const result = format(add(B, { days: A }), "yyyy-MM-dd HH:mm:ss");
+
+                const newBowCard = {
+                    status: 0,
+                    batchNumber: response.data.Code, 
+                    kilnNumber: response.data.Oven, 
+                    thickness: response.data.Method, 
+                    height: "0",
+                    purpose: response.data.Reason, 
+                    finishedDate: result,
+                    palletQty: 0,
+                    weight: 0,
+                };
+
+                setBowCards([newBowCard, ...bowCards]);
+
+                toast.success("Tạo kế hoạch sấy thành công.");
+                setIsLoading(false);
+
+                onClose();
+            })
+            .catch((error) => {
+                console.error("Error calling API:", error);
+                toast.error("Không thể tạo kế hoạch sấy. Hãy thử lại sau");
+                setIsLoading(false);
+            });
     };
-
-    // const loadThicknessOptions = async (inputValue, callback) => {
-    //     if (selectedDryingReasonsPlan) {
-    //         try {
-    //             const response = await palletsApi.getThickness(
-    //                 selectedDryingReasonsPlan.value
-    //             );
-
-    //             const options = response.map((item) => ({
-    //                 value: item.Code,
-    //                 label: item.Name,
-    //             }));
-    //             callback(options);
-    //         } catch (error) {
-    //             console.error("Error fetching thickness:", error);
-    //         }
-    //     }
-    // };
 
     return (
         <Layout>
@@ -241,7 +293,6 @@ function CreateDryingPlan() {
                                                 setSelectedDryingReasonsPlan(
                                                     value
                                                 );
-                                                handleClearThickness();
                                             }}
                                         />
                                     </div>
@@ -252,18 +303,13 @@ function CreateDryingPlan() {
                                         >
                                             Chiều dày sấy
                                         </label>
-                                        {/* <AsyncSelect
-                                            options={thickness}
-                                            onChange={(value) => {
-                                                console.log(
-                                                    "Selected Thickness:",
-                                                    value
-                                                );
-                                                setSelectedThickness(value);
-                                            }}
-                                        /> */}
-                                        {/* <AsyncSelect
+
+                                        <AsyncSelect
+                                            key={asyncSelectKey}
+                                            loadingMessage={() => "Đang tải..."}
+                                            id="thickness"
                                             loadOptions={loadThicknessOptions}
+                                            defaultOptions
                                             onChange={(value) => {
                                                 console.log(
                                                     "Selected Thickness:",
@@ -271,30 +317,34 @@ function CreateDryingPlan() {
                                                 );
                                                 setSelectedThickness(value);
                                             }}
-                                        /> */}
-                                        <Select
-                                            options={thickness}
-                                            onChange={(value) => {
-                                                console.log(
-                                                    "Selected Thickness:",
-                                                    value
-                                                );
-                                                setSelectedThickness(value);
-                                            }}
-                                            ref={thicknessRef}
                                         />
                                     </div>
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <div className="flex gap-4">
-                                    <Button onClick={onClose}>Đóng</Button>
-                                    <Button
-                                        colorScheme="facebook"
+                                <div className="flex justify-end gap-x-3 mt-4">
+                                    <button
+                                        onClick={onClose}
+                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                         onClick={handleCompletion}
                                     >
-                                        Hoàn thành
-                                    </Button>
+                                        {isLoading ? (
+                                            <div className="flex items-center space-x-4">
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
+                                                <div>Đang tải...</div>
+                                            </div>
+                                        ) : (
+                                            "Hoàn thành"
+                                        )}
+                                    </button>
                                 </div>
                             </ModalFooter>
                         </ModalContent>
@@ -338,8 +388,11 @@ function CreateDryingPlan() {
 
                     {/* Content */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                        {bowCards.map((bowCard, index) => (
+                            <BOWCard key={index} {...bowCard} />
+                        ))}
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status="Placeholder"
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -350,7 +403,7 @@ function CreateDryingPlan() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status="Placeholder"
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -361,7 +414,7 @@ function CreateDryingPlan() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status="Placeholder"
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
@@ -372,7 +425,29 @@ function CreateDryingPlan() {
                             weight="130.72 (m³)"
                         />
                         <BOWCard
-                            status="Đang sấy và chưa đánh giá mẻ sấy"
+                            status="Placeholder"
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="111"
+                            weight="130.72 (m³)"
+                        />
+                        <BOWCard
+                            status="Placeholder"
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="111"
+                            weight="130.72 (m³)"
+                        />
+                        <BOWCard
+                            status="Placeholder"
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
