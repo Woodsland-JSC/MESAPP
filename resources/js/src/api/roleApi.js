@@ -17,44 +17,17 @@ const roleApi = {
     },
     createRole: (rolesData) => {
         const url = `/roles/create`;
-        const formData = new FormData();
-        formData.append("first_name", rolesData.firstName);
-        formData.append("last_name", rolesData.lastName);
-        formData.append("gender", rolesData.gender);
-        formData.append("email", rolesData.email);
-        formData.append("password", rolesData.password);
-        formData.append("plant", rolesData.factory);
-        formData.append("sap_id", rolesData.sapId);
-        formData.append("integration_id", rolesData.integrationId);
-        formData.append("roles", rolesData.authorization);
-        formData.append("branch", rolesData.branch);
-        formData.append("avatar", rolesData.avatar ? rolesData.avatar : "");
-
-        return axiosClient().post(url, formData);
+        return axiosClient().post(url, rolesData);
     },
-    updateRole: (rolesId, rolesData) => {
-        const url = `/roless/update/${rolesId}`;
-        const formData = new FormData();
-        formData.append("_method", "patch");
-        formData.append("first_name", rolesData.firstName);
-        formData.append("last_name", rolesData.lastName);
-        formData.append("gender", rolesData.gender);
-        formData.append("email", rolesData.email);
-        formData.append("password", rolesData.password);
-        formData.append("plant", rolesData.factory);
-        formData.append("sap_id", rolesData.sapId);
-        formData.append("integration_id", rolesData.integrationId);
-        formData.append("roles", rolesData.authorization);
-        formData.append("branch", rolesData.branch);
-        formData.append("avatar", rolesData.avatar ? rolesData.avatar : "");
+    // updateRole: (rolesId, rolesData) => {
+    //     const url = `/roless/update/${rolesId}`;
+    //     return axiosClient().patch(url, rolesData);
+    // },
+    // deleteRole: (roleId) => {
+    //     const url = `/roles/delete/${roleId}`;
+    //     return axiosClient().delete(url);
 
-        return axiosClient().post(url, formData);
-    },
-    deleteRole: (roleId) => {
-        const url = `/roles/delete/${roleId}`;
-        return axiosClient().delete(url);
-
-    }
+    // }
 };
 
 export default roleApi;

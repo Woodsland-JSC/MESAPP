@@ -155,8 +155,8 @@ function CreateDryingPlan() {
                 onClose();
             })
             .catch((error) => {
-                console.error("Error calling API:", error);
-                toast.error("Không thể tạo kế hoạch sấy. Hãy thử lại sau");
+                console.error("Error calling API:", error.response.data.error);
+                toast.error(error.response.data.error);
                 setIsLoading(false);
             });
     };

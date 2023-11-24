@@ -93,7 +93,8 @@ const SelectField = ({ options, ...props }) => {
 function Settings() {
     const [formKey, setFormKey] = useState(0);
 
-    const { loading, setLoading } = useAppContext();
+    // const { loading, setLoading } = useAppContext();
+    const [loading, setLoading] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
 

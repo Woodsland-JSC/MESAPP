@@ -60,7 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index');
         Route::post('/create', [UserController::class, 'create'])->name('users.create');
-        Route::get('find/{UserId}', [UserController::class, 'UserById'])->name('users.find');
+        Route::get('/find/{UserId}', [UserController::class, 'UserById'])->name('users.find');
         Route::patch('/update/{UserId}', [UserController::class, 'update'])->name('users.update');
         Route::patch('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
         Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');

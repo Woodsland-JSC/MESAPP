@@ -15,8 +15,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../assets/styles/datepicker.css";
 import { format } from "date-fns";
+import BigSelect from "../../components/Select/BigSelect";
+import Loader from "../../components/Loader";
 
 function WoodSorting() {
+    const [loading, setLoading] = useState(false);
     const [woodTypes, setWoodTypes] = useState([]);
     const [dryingMethods, setDryingMethods] = useState([]);
     const [dryingReasons, setDryingReasons] = useState([]);
@@ -43,45 +46,87 @@ function WoodSorting() {
         return palletCards.some((card) => card.key === id);
     };
 
+    // useEffect(() => {
+    //     palletsApi
+    //         .getTypeOfWood()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name,
+    //             }));
+    //             setWoodTypes(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching wood types:", error);
+    //         });
+
+    //     palletsApi
+    //         .getDryingMethod()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.ItemCode,
+    //                 label: item.ItemName,
+    //             }));
+    //             setDryingMethods(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching drying methods:", error);
+    //         });
+
+    //     palletsApi
+    //         .getDryingReason()
+    //         .then((data) => {
+    //             const options = data.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name,
+    //             }));
+    //             setDryingReasons(options);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching drying reasons:", error);
+    //         });
+    // }, []);
+
     useEffect(() => {
-        palletsApi
-            .getTypeOfWood()
-            .then((data) => {
-                const options = data.map((item) => ({
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const woodTypesData = await palletsApi.getTypeOfWood();
+                const woodTypesOptions = woodTypesData.map((item) => ({
                     value: item.Code,
                     label: item.Name,
                 }));
-                setWoodTypes(options);
-            })
-            .catch((error) => {
+                setWoodTypes(woodTypesOptions);
+            } catch (error) {
                 console.error("Error fetching wood types:", error);
-            });
+            }
 
-        palletsApi
-            .getDryingMethod()
-            .then((data) => {
-                const options = data.map((item) => ({
+            try {
+                const dryingMethodsData = await palletsApi.getDryingMethod();
+                const dryingMethodsOptions = dryingMethodsData.map((item) => ({
                     value: item.ItemCode,
                     label: item.ItemName,
                 }));
-                setDryingMethods(options);
-            })
-            .catch((error) => {
+                console.log(dryingMethodsOptions);
+                setDryingMethods(dryingMethodsOptions);
+            } catch (error) {
                 console.error("Error fetching drying methods:", error);
-            });
+            }
 
-        palletsApi
-            .getDryingReason()
-            .then((data) => {
-                const options = data.map((item) => ({
+            try {
+                const dryingReasonsData = await palletsApi.getDryingReason();
+                const dryingReasonsOptions = dryingReasonsData.map((item) => ({
                     value: item.Code,
                     label: item.Name,
                 }));
-                setDryingReasons(options);
-            })
-            .catch((error) => {
+                setDryingReasons(dryingReasonsOptions);
+            } catch (error) {
                 console.error("Error fetching drying reasons:", error);
-            });
+            }
+            setLoading(false);
+        };
+
+        fetchData();
     }, []);
 
     // Search Filter
@@ -372,6 +417,7 @@ function WoodSorting() {
                                         </label>
 
                                         <Select
+                                            placeholder="Lựa chọn"
                                             options={woodTypes}
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
@@ -403,6 +449,7 @@ function WoodSorting() {
                                             Mục đích sấy
                                         </label>
                                         <Select
+                                            placeholder="Lựa chọn"
                                             options={dryingReasons}
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
@@ -501,6 +548,9 @@ function WoodSorting() {
                     </div>
                 </div>
             </div>
+            {/* {
+                loading && <Loader />
+            } */}
         </Layout>
     );
 }

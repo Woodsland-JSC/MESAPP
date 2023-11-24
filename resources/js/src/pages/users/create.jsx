@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
+import AsyncSelect from "react-select/async";
+import makeAnimated from 'react-select/animated';
 import toast from "react-hot-toast";
 import useAppContext from "../../store/AppContext";
 import Layout from "../../layouts/layout";
@@ -11,6 +13,7 @@ import Loader from "../../components/Loader";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 import generateAvatar from "../../utils/generateAvatar";
 import usersApi from "../../api/userApi";
+import roleApi from "../../api/roleApi";
 import TinyLoader from "../../components/TinyLoader";
 
 const genderOptions = [
@@ -18,10 +21,10 @@ const genderOptions = [
     { value: "female", label: "Nữ" },
 ];
 
-const authorizationOptions = [
-    { value: "admin", label: "Admin" },
-    { value: "client", label: "Client" },
-];
+// const authorizationOptions = [
+//     { value: "admin", label: "Admin" },
+//     { value: "client", label: "Client" },
+// ];
 
 const validationSchema = Yup.object().shape({
     lastName: Yup.string()
@@ -61,54 +64,139 @@ const validationSchema = Yup.object().shape({
             "Mật khẩu phải có từ 8 - 15 ký tự",
             (value) => value && value.length >= 8 && value.length <= 15
         ),
-    authorization: Yup.string().required("Phân quyền là bắt buộc"),
+    authorization: Yup.array()
+        .of(Yup.string())
+        .min(1, 'Phải có ít nhất 1 quyền')
+        .required('Phân quyền là bắt buộc'),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
-    integrationId: Yup.string().required("Integration ID là bắt buộc"),
+    // integrationId: Yup.string().required("Integration ID là bắt buộc"),
     factory: Yup.string().required("Nhà máy là bắt buộc"),
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
 
-const SelectField = ({ options, ...props }) => {
+const SelectField = forwardRef(({ options, name, setInput, innerRef, ...props }, ref) => {
     const [selectedOption, setSelectedOption] = useState();
     const { setFieldValue } = useFormikContext();
 
     const handleChange = (option) => {
         setSelectedOption(option);
-        setFieldValue(props.name, option.value);
+        setFieldValue(name, option?.value || "");
+        setInput((prev) => ({
+            ...prev,
+            [name]: option?.value || "",
+        }));
     };
 
     return (
         <Select
             {...props}
+            ref={innerRef || ref}
             options={options}
             value={selectedOption}
             onChange={handleChange}
+            placeholder="Lựa chọn"
         />
     );
-};
+});
+
+const AsyncSelectField = forwardRef(({ options, loadOptions, name, setInput, innerRef, ...props }, ref) => {
+    const [selectedOption, setSelectedOption] = useState();
+    const { setFieldValue } = useFormikContext();
+
+    const handleChange = (option) => {
+        setSelectedOption(option);
+        setFieldValue(name, option.value);
+        setInput((prev) => ({
+            ...prev,
+            [name]: option.value,
+        }));
+    };
+
+    return (
+        <AsyncSelect
+            {...props}
+            ref={innerRef || ref}
+            cacheOptions
+            defaultOptions
+            loadOptions={loadOptions}
+            value={selectedOption}
+            options={options}
+            placeholder="Lựa chọn"
+            onChange={handleChange}
+        />
+    );
+});
+
+const animatedComponents = makeAnimated();
+
+const AsyncMultiSelectField = forwardRef(({ loadOptions, name, setInput, innerRef, ...props }, ref) => {
+    const [selectedOption, setSelectedOption] = useState();
+    const { setFieldValue } = useFormikContext();
+
+    const handleChange = (option) => {
+        setSelectedOption(option);
+        setFieldValue(name, option ? option.map((opt) => opt.label) : []);
+        setInput((prev) => ({
+            ...prev,
+            [name]: option ? option.map((opt) => opt.label) : [],
+        }));
+    };
+
+    return (
+        <AsyncSelect
+            {...props}
+            ref={innerRef || ref}
+            cacheOptions
+            defaultOptions
+            loadOptions={loadOptions}
+            value={selectedOption}
+            onChange={handleChange}
+            components={animatedComponents}
+            closeMenuOnSelect={false}
+            isMulti
+            placeholder="Lựa chọn"
+        />
+    );
+});
 
 function CreateUser() {
     const navigate = useNavigate();
-    const fileInputRef = useRef();
+
+    const fileInputRef = useRef(null);
+
+    // const authorizationInputRef = React.createRef();;
+    // const branchSelectRef = React.createRef();;
+    // const sapIdSelectRef = React.createRef();;
+    // const factorySelectRef = React.createRef();;
+
+    const authorizationInputRef = useRef(null);
+    const branchSelectRef = useRef(null);
+    const sapIdSelectRef = useRef(null);
+    const factorySelectRef = useRef(null);
+
     const { loading, setLoading } = useAppContext();
+
+    const [roles, setRoles] = useState([]);
+    const [branches, setBranches] = useState([]);
+    const [sapId, setSapId] = useState([]);
+    const [factoryLoading, setFactoryLoading] = useState(false);
+    const [factories, setFactories] = useState([]);
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
         autoImg: null,
     });
     const [avatarLoading, setAvatarLoading] = useState(false);
-
     const [selectedFile, setSelectedFile] = useState(null);
-
     const [input, setInput] = useState({
         firstName: "",
         lastName: "",
         email: "",
         gender: "0",
         password: "",
-        authorization: "",
+        authorization: [],
         sapId: "",
-        integrationId: "",
+        integrationId: 1,
         factory: "",
         branch: "",
     });
@@ -157,6 +245,7 @@ function CreateUser() {
     };
 
     const handleFormSubmit = async (values) => {
+        console.log(values);
         setLoading(true);
         const userData = values;
         if (selectedFile) {
@@ -179,7 +268,136 @@ function CreateUser() {
         // console.log("Submit form nè: ", input);
     };
 
+    const loadBranches = (inputValue, callback) => {
+        usersApi
+            .getAllBranches()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.BPLName?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.BPLId?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching branch:", error);
+                callback([]);
+            });
+    };
+
+    const loadRoles = (inputValue, callback) => {
+        roleApi
+            .getAllRole()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.name
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase()) ||
+                        option.id
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase())
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.id,
+                    label: 
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching roles:", error);
+                callback([]);
+            });
+    };
+
+    const loadSapId = (inputValue, callback) => {
+        usersApi
+            .getAllSapId()
+            .then((data) => {
+                const filteredOptions = data.filter((option) => {
+                    return (
+                        option.NAME
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase()) ||
+                        option.USER_CODE
+                            ?.toLowerCase()
+                            .includes(inputValue.toLowerCase())
+                    );
+                });
+
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.USER_CODE,
+                    label: 
+                        item.NAME + ' - ' + item.USER_CODE,
+                }));
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching sap id:", error);
+                callback([]);
+            });
+    };
+
+    const loadFactories = (inputValue, callback) => {
+        const selectedBranchId = input.branch;
+
+        if (!selectedBranchId) {
+            setFactories([]);
+            return;
+        }
+
+        usersApi
+            .getFactoriesByBranchId(selectedBranchId)
+            .then((data) => {
+                let filteredOptions = data;
+                // if (inputValue) {
+                //     console.log("Vào filter khum: ", inputValue);
+                //     filteredOptions = data.filter((option) => {
+                //         return (
+                //             option.Name
+                //                 ?.toLowerCase()
+                //                 .includes(inputValue.toLowerCase().trim()) ||
+                //             option.Code
+                //                 ?.toLowerCase()
+                //                 .includes(inputValue.toLowerCase().trim())
+                //         );
+                //     });
+                // }
+
+                
+                const asyncOptions = filteredOptions.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                
+                console.log("Factories nè: ", asyncOptions);
+
+                callback(asyncOptions);
+            })
+            .catch((error) => {
+                console.error("Error fetching factory:", error);
+                callback([]);
+            });
+    };
+
     useEffect(() => {
+        console.log("Ra branch khum: ", branchSelectRef.current?.props.options);
         const getAutoAvatar = async (name) => {
             try {
                 const res = await generateAvatar(name);
@@ -200,15 +418,129 @@ function CreateUser() {
     }, [input]);
 
     useEffect(() => {
-        document.title = 'Woodsland - Tạo mới người dùng';
-        return () => {
-            document.title = 'Woodsland';
+        const getAllBranches = async () => {
+            try {
+                const res = await usersApi.getAllBranches();
+                const options = res.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+                setBranches(options);
+                // console.log("Ra chi nhánh nè: ", options);
+            } catch (error) {
+                console.error(error);
+            }
         };
-    },[]);
+
+        const getAllRoles = async () => {
+            try {
+                const res = await roleApi.getAllRole();
+                const options = res.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                }));
+                setRoles(options);
+                // console.log("Ra role nè: ", options);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        const getAllSapId = async () => {
+            try {
+                const res = await usersApi.getAllSapId();
+                const options = res.map((item) => ({
+                    value: item.USER_CODE,
+                    label: 
+                        item.NAME + ' - ' + item.USER_CODE,
+                }));
+                setSapId(options);
+                // console.log("Ra sap id nè: ", options);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        getAllBranches();
+        getAllRoles();
+        getAllSapId();
+        document.title = "Woodsland - Tạo mới người dùng";
+        return () => {
+            document.title = "Woodsland";
+        };
+    }, []);
+
+    // const handleBranchChange = (selectedBranch) => {
+    //     factorySelectRef.current.clear(); 
+    //     loadFactories(selectedBranch, setFactories); 
+    // };
+    
+    // useEffect(() => {
+    //     const selectedBranch = input.branch;
+
+    //     if (selectedBranch) {
+    //         const getFactoriesByBranchId = async () => {
+    //             try {
+    //                 const res = await usersApi.getFactoriesByBranchId(selectedBranch);
+    //                 const options = res.map((item) => ({
+    //                     value: item.Code,
+    //                     label: item.Name,
+    //                 }));
+    //                 // setFactories(options);
+    //                 loadFactories(selectedBranch, (options) => {
+    //                     setFactories(options);
+    //                   });
+    //             } catch (error) {
+    //                 console.error(error);
+    //             }
+    //         };
+    
+    //         console.log("Chỗ này call api nè:");
+    //         getFactoriesByBranchId();
+
+    //     } else {
+    //         // setFactories([]);
+    //         console.log("Chỗ này xoá options của factory nè", factorySelectRef.current?.state);
+    //     }
+    // }, [input.branch]);
+
+    useEffect(() => {
+        const selectedBranch = input.branch;
+        
+        const getFactoriesByBranchId = async () => {
+            setFactoryLoading(true);
+            try {
+                if (selectedBranch) {
+                    factorySelectRef.current.clearValue();
+                    const res = await usersApi.getFactoriesByBranchId(selectedBranch);
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+
+                    setFactories(options);
+                    setInput(prev => ({...prev, factory: ""}))
+
+                } else {
+                    setFactories([]);
+                    // factorySelectRef.current?.selectOption([]);
+
+                }
+            } catch (error) {
+                console.error(error);
+            }
+            setFactoryLoading(false);
+
+        };
+        
+        // console.log("Chỗ này call api nè: ", factorySelectRef.current);
+        getFactoriesByBranchId();
+    }, [input.branch]);
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+            <div className="flex justify-center bg-[#F8F9F7] h-screen">
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
@@ -270,9 +602,7 @@ function CreateUser() {
                                             <div className="md:w-2/3 mb-6">
                                                 <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Họ{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -308,9 +638,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Tên{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -346,9 +674,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Email{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -384,9 +710,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Giới tính{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -397,6 +721,7 @@ function CreateUser() {
                                                             options={
                                                                 genderOptions
                                                             }
+                                                            setInput={setInput}
                                                         />
                                                         {errors.gender &&
                                                         touched.gender ? (
@@ -408,9 +733,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Mật khẩu{" "}
                                                             <span className="text-red-600">
                                                                 *
@@ -447,19 +770,26 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                     <div className="w-full">
-                                                        <label
-                                                            className="block mb-2 text-md font-medium text-gray-900"
-                                                        >
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Phân quyền{" "}
                                                             <span className="text-red-600">
                                                                 *
                                                             </span>
                                                         </label>
-                                                        <SelectField
+                                                        {/* <SelectField
                                                             name="authorization"
                                                             options={
                                                                 authorizationOptions
                                                             }
+                                                        /> */}
+                                                        <AsyncMultiSelectField
+                                                            ref={authorizationInputRef}
+                                                            name="authorization"
+                                                            loadOptions={
+                                                                loadRoles
+                                                            }
+                                                            options={roles}
+                                                            setInput={setInput}
                                                         />
                                                         {errors.authorization &&
                                                         touched.authorization ? (
@@ -552,15 +882,13 @@ function CreateUser() {
                                         </h1>
                                         <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     SAP ID{" "}
                                                     <span className="text-red-600">
                                                         *
                                                     </span>
                                                 </label>
-                                                <Field
+                                                {/* <Field
                                                     name="sapId"
                                                     className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                     onChange={(e) => {
@@ -574,6 +902,14 @@ function CreateUser() {
                                                                 .value,
                                                         }));
                                                     }}
+                                                /> */}
+                                                <AsyncSelectField
+                                                    innerRef={sapIdSelectRef}
+                                                    name="sapId"
+                                                    loadOptions={loadSapId}
+                                                    options={sapId}
+                                                    setInput={setInput}
+
                                                 />
                                                 {errors.sapId &&
                                                 touched.sapId ? (
@@ -585,28 +921,28 @@ function CreateUser() {
                                                 )}
                                             </div>
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     INTEGRATION ID{" "}
-                                                    <span className="text-red-600">
+                                                    {/* <span className="text-red-600">
                                                         *
-                                                    </span>
+                                                    </span> */}
                                                 </label>
                                                 <Field
                                                     name="integrationId"
                                                     className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "integrationId",
-                                                            e.target.value
-                                                        );
-                                                        setInput((prev) => ({
-                                                            ...prev,
-                                                            integrationId:
-                                                                e.target.value,
-                                                        }));
-                                                    }}
+                                                    disabled
+                                                    value="1"
+                                                    // onChange={(e) => {
+                                                    //     setFieldValue(
+                                                    //         "integrationId",
+                                                    //         e.target.value
+                                                    //     );
+                                                    //     setInput((prev) => ({
+                                                    //         ...prev,
+                                                    //         integrationId:
+                                                    //             e.target.value,
+                                                    //     }));
+                                                    // }}
                                                 />
                                                 {errors.integrationId &&
                                                 touched.integrationId ? (
@@ -618,48 +954,21 @@ function CreateUser() {
                                                 )}
                                             </div>
                                             <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
-                                                    Nhà máy{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    name="factory"
-                                                    className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    onChange={(e) => {
-                                                        setFieldValue(
-                                                            "factory",
-                                                            e.target.value
-                                                        );
-                                                        setInput((prev) => ({
-                                                            ...prev,
-                                                            factory:
-                                                                e.target.value,
-                                                        }));
-                                                    }}
-                                                />
-                                                {errors.factory &&
-                                                touched.factory ? (
-                                                    <span className="text-xs text-red-600">
-                                                        <ErrorMessage name="factory" />
-                                                    </span>
-                                                ) : (
-                                                    <span className="block mt-[8px] h-[14.55px]"></span>
-                                                )}
-                                            </div>
-                                            <div className="w-full">
-                                                <label
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
                                                     Chi nhánh{" "}
                                                     <span className="text-red-600">
                                                         *
                                                     </span>
                                                 </label>
-                                                <Field
+                                                <AsyncSelectField
+                                                    innerRef={branchSelectRef}
+                                                    name="branch"
+                                                    loadOptions={loadBranches}
+                                                    options={branches}
+                                                    setInput={setInput}
+
+                                                />
+                                                {/* <Field
                                                     name="branch"
                                                     className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                     onChange={(e) => {
@@ -673,11 +982,36 @@ function CreateUser() {
                                                                 .value,
                                                         }));
                                                     }}
-                                                />
+                                                /> */}
                                                 {errors.branch &&
                                                 touched.branch ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="branch" />
+                                                    </span>
+                                                ) : (
+                                                    <span className="block mt-[8px] h-[14.55px]"></span>
+                                                )}
+                                            </div>
+                                            <div className="w-full">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Nhà máy{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <SelectField
+                                                    innerRef={factorySelectRef}
+                                                    name="factory"
+                                                    // loadOptions={loadFactories}
+                                                    options={factories}
+                                                    isLoading={factoryLoading}
+                                                    setInput={setInput}
+
+                                                />
+                                                {errors.factory &&
+                                                touched.factory ? (
+                                                    <span className="text-xs text-red-600">
+                                                        <ErrorMessage name="factory" />
                                                     </span>
                                                 ) : (
                                                     <span className="block mt-[8px] h-[14.55px]"></span>
