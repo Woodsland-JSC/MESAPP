@@ -115,14 +115,14 @@ class UserController extends Controller
     function blockUser($id)
     {
         $user = User::find($id);
-    
+
         if ($user) {
             $user->is_block = $user->is_block == 1 ? 0 : 1;
             $user->save();
-    
+
             return response()->json(['message' => 'Update successfully'], 200);
         }
-    
+
         return response()->json(['error' => 'User not found'], 404);
     }
     /**
@@ -220,7 +220,7 @@ class UserController extends Controller
             'password' => 'required',
             'plant' => 'required',
             'sap_id' => 'required|unique:users,sap_id',
-            'integration_id' => 'required|unique:users,integration_id',
+            'integration_id' => 'required',
             'roles' => 'required|exists:roles,name',
             'branch' => 'required',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -278,24 +278,25 @@ class UserController extends Controller
 
         $user = User::find($id);
 
-        
         if ($request->has('avatar')) {
+            $avatar = $request->file('avatar');
+
             if ($request->avatar == '-1') {
                 // Delete avatar file and set avatar field to null
                 if ($user->avatar) {
                     Storage::delete('public/' . $user->avatar);
                     $input['avatar'] = null;
                 }
-            } elseif ($request->hasFile('avatar')) {
+            } elseif ($avatar) {
                 // Delete old avatar file
                 if ($user->avatar) {
                     Storage::delete('public/' . $user->avatar);
                 }
-        
+
                 // Upload new avatar file
                 $avatar = $request->file('avatar');
                 $avatarPath = $avatar->storeAs('public/avatars/' . $user->id, $avatar->getClientOriginalName());
-        
+
                 $avatarPathWithoutPublic = str_replace('public/', '', $avatarPath);
                 $input['avatar'] = $avatarPathWithoutPublic;
             }
@@ -310,6 +311,80 @@ class UserController extends Controller
         $user->assignRole([$request->input('roles')]);
 
         return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+    }
+    public function updateProfile(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'gender' => 'required|in:male,female',
+            // 'avatar' => 'nullable|string|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $input = $request->only(['first_name', 'last_name', 'gender']);
+
+        $user = User::find($id);
+
+        if ($request->has('avatar')) {
+            $avatar = $request->file('avatar');
+
+            if ($request->avatar == '-1') {
+                // Delete avatar file and set avatar field to null
+                if ($user->avatar) {
+                    Storage::delete('public/' . $user->avatar);
+                    $input['avatar'] = null;
+                }
+            } elseif ($avatar) {
+                // Delete old avatar file
+                if ($user->avatar) {
+                    Storage::delete('public/' . $user->avatar);
+                }
+
+                // Upload new avatar file
+                $avatarPath = $avatar->storeAs('public/avatars/' . $user->id, $avatar->getClientOriginalName());
+                $avatarPathWithoutPublic = str_replace('public/', '', $avatarPath);
+                $input['avatar'] = $avatarPathWithoutPublic;
+            }
+        }
+
+        $user->update($input);
+
+        if ($user->avatar) {
+            $user->avatar = asset('storage/' . $user->avatar);
+        }
+
+        return response()->json(['message' => 'Profile updated successfully', 'user' => $user], 200);
+    }
+    public function changePassword(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'oldPassword' => 'required',
+            'newPassword' => 'required|min:8|max:15|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'Không tìm thấy user, hoặc user bị block'], 404);
+        }
+
+        if (!Hash::check($request->input('oldPassword'), $user->password)) {
+            return response()->json(['error' => 'Mật khẩu cũ không đúng'], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->input('newPassword')),
+        ]);
+
+        return response()->json(['message' => 'Password updated successfully'], 200);
     }
     // public function delete($id)
     // {

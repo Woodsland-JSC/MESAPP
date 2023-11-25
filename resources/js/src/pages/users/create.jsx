@@ -468,6 +468,7 @@ function CreateUser() {
         document.title = "Woodsland - Tạo mới người dùng";
         return () => {
             document.title = "Woodsland";
+            document.body.classList.remove('body-no-scroll');
         };
     }, []);
 
@@ -512,6 +513,7 @@ function CreateUser() {
             setFactoryLoading(true);
             try {
                 if (selectedBranch) {
+                    setFactories([]);
                     factorySelectRef.current.clearValue();
                     const res = await usersApi.getFactoriesByBranchId(selectedBranch);
                     const options = res.map((item) => ({
@@ -525,7 +527,6 @@ function CreateUser() {
                 } else {
                     setFactories([]);
                     // factorySelectRef.current?.selectOption([]);
-
                 }
             } catch (error) {
                 console.error(error);
@@ -537,6 +538,14 @@ function CreateUser() {
         // console.log("Chỗ này call api nè: ", factorySelectRef.current);
         getFactoriesByBranchId();
     }, [input.branch]);
+
+    useEffect(() => {
+        if (loading) {
+            document.body.classList.add("body-no-scroll");
+        } else {
+            document.body.classList.remove("body-no-scroll");
+        }
+    }, [loading])
 
     return (
         <Layout>

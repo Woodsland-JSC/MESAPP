@@ -39,9 +39,14 @@ const usersApi = {
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);
         formData.append("integration_id", userData.integrationId);
-        formData.append("roles", userData.authorization);
+        // formData.append("roles", userData.authorization);
         formData.append("branch", userData.branch);
         formData.append("avatar", userData.avatar ? userData.avatar : "");
+
+        userData.authorization.forEach((role, index) => {
+            formData.append(`roles[${index}]`, role);
+        });
+    
 
         return axiosClient().post(url, formData);
     },
@@ -57,11 +62,35 @@ const usersApi = {
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);
         formData.append("integration_id", userData.integrationId);
-        formData.append("roles", userData.authorization);
+        // formData.append("roles", userData.authorization);
         formData.append("branch", userData.branch);
-        formData.append("avatar", userData.avatar ? userData.avatar : "");
+        if (userData.avatar) {
+            formData.append("avatar", userData.avatar ? userData.avatar : "");
+        }
+
+        userData.authorization.forEach((role, index) => {
+            formData.append(`roles[${index}]`, role);
+        });
 
         return axiosClient().post(url, formData);
+    },
+    updateProfile: (userId, userData) => {
+        const url = `/users/update-profile/${userId}`;
+        const formData = new FormData();
+        formData.append("_method", "patch");
+        formData.append("first_name", userData.firstName);
+        formData.append("last_name", userData.lastName);
+        formData.append("gender", userData.gender);
+        if (userData.avatar) {
+            formData.append("avatar", userData.avatar ? userData.avatar : "");
+        }
+
+        return axiosClient().post(url, formData);
+    },
+    changePassword: (userId, data) => {
+        const url = `/users/change-password/${userId}`;
+
+        return axiosClient().patch(url, data);
     },
     blockUser: (userId) => {
         const url = `/users/disable/${userId}`;
