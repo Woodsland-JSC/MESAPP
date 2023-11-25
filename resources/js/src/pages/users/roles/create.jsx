@@ -114,8 +114,17 @@ function CreateRole() {
 
         return () => {
             document.title = "Woodsland";
+            document.body.classList.remove('body-no-scroll');
         };
     }, []);
+    
+    useEffect(() => {
+        if (loading) {
+            document.body.classList.add('body-no-scroll');
+        } else {
+            document.body.classList.remove('body-no-scroll');
+        }
+    }, [loading]);
 
     return (
         <Layout>

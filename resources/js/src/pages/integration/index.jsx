@@ -260,7 +260,7 @@ function Integration() {
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -275,7 +275,7 @@ function Integration() {
                                 </li>
                             </ol>
                         </nav>
-                    </div>
+                    </div> */}
 
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">Tích hợp</div>

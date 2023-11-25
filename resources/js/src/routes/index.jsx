@@ -11,7 +11,7 @@
 // import Login from "../pages/(auth)/login";
 // import ForgotPassword from "../pages/(auth)/forgotpassword";
 // import SignUp from "../pages/(auth)/signup";
-// import Settings from "../pages/settings/index";
+// import Profile from "../pages/profile/index";
 // import Users from "../pages/users/index";
 // import User from "../pages/users/details";
 // import CreateUser from "../pages/users/create";
@@ -57,7 +57,7 @@
 //                         <Route path="/users/create" element={<CreateUser />} />
 //                         <Route path="/roles/create" element={<CreateRole />} />
 //                         <Route path="/roles/:roleId" element={<CreateRole />} />
-//                         <Route path="/settings" element={<Settings />} />
+//                         <Route path="/profile" element={<Profile />} />
 //                         <Route path="/integration" element={<Integration />} />
 //                         <Route path="/workspace/kiln" element={<Kiln />} />
 //                         <Route path="/workspace/create-drying-plan" element={<CreateDryingPlan />} />
@@ -91,7 +91,7 @@ import Home from "../pages/home";
 import Login from "../pages/(auth)/login";
 import ForgotPassword from "../pages/(auth)/forgotpassword";
 import SignUp from "../pages/(auth)/signup";
-import Settings from "../pages/settings/index";
+import Profile from "../pages/profile/index";
 import Users from "../pages/users/index";
 import User from "../pages/users/details";
 import CreateUser from "../pages/users/create";
@@ -179,10 +179,10 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/settings"
+                        path="/profile"
                         element={
                         <ProtectedRoute>
-                            <Settings />
+                            <Profile />
                         </ProtectedRoute>
                         }
                     />
@@ -267,7 +267,7 @@ function AppRoutes() {
                         {/* <Route path="/users/create" element={<CreateUser />} />
                         <Route path="/roles/create" element={<CreateRole />} />
                         <Route path="/roles/:roleId" element={<CreateRole />} />
-                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/profile" element={<Profile />} />
                         <Route path="/integration" element={<Integration />} /> */}
                         {/* <Route path="/workspace/kiln" element={<Kiln />} />
                         <Route path="/workspace/create-drying-plan" element={<CreateDryingPlan />} /> */}

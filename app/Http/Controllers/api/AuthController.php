@@ -58,6 +58,11 @@ class AuthController extends Controller
 
             $tokenResult = $user->createToken('authToken')->plainTextToken;
             $cookie = cookie('token', $tokenResult, 60 * 24);
+
+            if ($user->avatar) {
+                $user->avatar = asset('storage/' . $user->avatar);
+            }
+            
             /*
                 @Responses
             */
