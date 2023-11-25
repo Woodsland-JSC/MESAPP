@@ -171,18 +171,13 @@ function Details() {
                             </button>
 
                             <div>
-                                <Skeleton isLoaded={!loading}>
                                     <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
                                         Chi tiết mẻ sấy:{" "}
                                         <span>{BOWData.Code}</span>{" "}
                                     </div>
-                                </Skeleton>
-                                <Skeleton isLoaded={!loading}>
-                                <div className="xl:text-[1.15rem] text-lg font-semibold text-gray-700">
-                                    Lò số: <span>{BOWData.Oven}</span>{" "}
-                                </div>
-                                </Skeleton>
-                                
+                                    <div className="xl:text-[1.15rem] text-lg font-semibold text-gray-700">
+                                        Lò số: <span>{BOWData.Oven}</span>{" "}
+                                    </div>
                             </div>
                         </div>
 
