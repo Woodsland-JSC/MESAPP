@@ -14,7 +14,13 @@ class ConnectController extends Controller
 
         try {
             $host = 'sap.woodsland.com.vn:30015';
-            $driver = 'HDBODBC';
+            $driver = '';
+            if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+                $driver = 'HDBODBC';
+            } else {
+                $driver = '/usr/sap/hdbclient/libodbcHDB.so';
+            }
+
             $db_name = "WOODSLAND_UATS";
             $username = 'SYSTEM';
             // Password
