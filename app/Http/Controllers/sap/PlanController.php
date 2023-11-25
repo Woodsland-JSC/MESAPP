@@ -195,6 +195,7 @@ class PlanController extends Controller
                     [
                         'Status' => 2,
                         'Checked' => 1,
+                        'Review' => 1,
                         'CheckedBy' => Auth::user()->id
                     ]
                 );
