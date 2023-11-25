@@ -9,6 +9,7 @@ import {
     TbChevronDown,
     TbArrowRight,
     TbInfoSquareRounded,
+    TbAnalyze,
 } from "react-icons/tb";
 import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
@@ -139,7 +140,7 @@ function Header(props) {
                                                 : "flex items-center space-x-2"
                                         }
                                     >
-                                        <SiSap className="text-2xl"/>
+                                        <TbAnalyze className="text-2xl"/>
                                         <p>Tích hợp</p>
                                     </div>
                                 </li>

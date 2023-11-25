@@ -242,11 +242,11 @@ function WoodSorting() {
 
             console.log("3. Thông tin pallet:", palletObject);
 
-            setWoodTypes(null);
-            setSelectedWoodType(null);
-            setBatchId("");
-            setSelectedDryingReason(null);
-            setSelectedDryingMethod(null);
+            // setWoodTypes(null);
+            // setSelectedWoodType(null);
+            // setBatchId("");
+            // setSelectedDryingReason(null);
+            // setSelectedDryingMethod(null);
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});

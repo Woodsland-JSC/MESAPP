@@ -12,6 +12,9 @@ function LoadIntoKiln() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
 
+    // Mini Loading When Loading Into Kiln
+    const [miniLoading, setMiniLoading] = useState(false);
+
     useEffect(() => {
         palletsApi
             .getBOWList()
@@ -142,21 +145,36 @@ function LoadIntoKiln() {
                     {/* BOWCard List */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {bowCards?.map((bowCard, index) => (
-                            <BOWCard
-                                key={index}
-                                planID={bowCard.PlanID}
-                                status={bowCard.Status}
-                                batchNumber={bowCard.Code}
-                                kilnNumber={bowCard.Oven}
-                                thickness={bowCard.Method}
-                                purpose={bowCard.Reason}
-                                finishedDate={1}
-                                palletQty={bowCard.TotalPallet}
-                                weight={bowCard.Mass}
-                            />
+                            (bowCard.Status === 1 || bowCard.Status === 0) && (
+                                <BOWCard
+                                    key={index}
+                                    planID={bowCard.PlanID}
+                                    status={bowCard.Status}
+                                    batchNumber={bowCard.Code}
+                                    kilnNumber={bowCard.Oven}
+                                    thickness={bowCard.Method}
+                                    purpose={bowCard.Reason}
+                                    finishedDate={format(addDays(new Date(bowCard.created_at), bowCard.Time), 'yyyy-MM-dd HH:mm:ss')}
+                                    palletQty={bowCard.TotalPallet}
+                                    weight={bowCard.Mass}
+                                    isChecked={bowCard.Checked}
+                                    isReviewed={bowCard.Review}
+                                />
+                            )
                         ))}
                         <BOWCard
-                            status={1}
+                            status={0}
+                            batchNumber="2023.41.08"
+                            kilnNumber="15 (TH)"
+                            thickness="24-27"
+                            height="24"
+                            purpose="INDOOR"
+                            finishedDate="2023-11-07 10:58:14"
+                            palletQty="0"
+                            weight="0"
+                        />
+                        <BOWCard
+                            status={0}
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"

@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi";
 
 function BOWCard(props) {
-    
     const {
         planID,
         status,
@@ -15,8 +14,12 @@ function BOWCard(props) {
         finishedDate,
         palletQty,
         weight,
+        isReviewed,
+        isChecked,
         type,
     } = props;
+
+    console.log("Review:", isReviewed)
 
     const location = useLocation();
 
@@ -37,28 +40,32 @@ function BOWCard(props) {
     }
 
     const getStatusContent = () => {
-        return (
-            status === 0 ? (
-                <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">
-                    Tạo mới kế hoạch sấy
-                </div>
-            ) : status === 1 ? (
-                <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
-                    Đang vào lò
-                </div>
-            ) : status === 2 ? (
-                <div className="bow-status p-1 px-3 text-xs text-red-500 font-semibold bg-red-100 w-fit rounded-full justify-end my-4">
-                    Đang sấy chưa đánh giá
-                </div>
-            ) : status === 3 ? (
+        return status === 0 ? (
+            <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">
+                Tạo mới kế hoạch sấy
+            </div>
+        ) : status === 1 ? (
+            <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
+                Đang vào lò
+            </div>
+        ) : status === 2 ? (
+            <div className="bow-status p-1 px-3 text-xs text-orange-600 font-semibold bg-orange-100 w-fit rounded-full justify-end my-4">
+                Đã kiểm tra lò
+            </div>
+        ) : status === 3 ? (
+            isReviewed === 1 ? (
                 <div className="bow-status p-1 px-3 text-xs text-green-500 font-semibold bg-green-50 w-fit rounded-full justify-end my-4">
-                    Đang sấy và đã đánh giá
-                </div>
+                Đang sấy và đã đánh giá
+            </div>
             ) : (
-                <div className="bow-status p-1 px-3 text-xs text-gray-600 font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">
-                    Placeholder
-                </div>
+                <div className="bow-status p-1 px-3 text-xs text-red-500 font-semibold bg-red-100 w-fit rounded-full justify-end my-4">
+                Đang sấy chưa đánh giá
+            </div>
             )
+        ) : (
+            <div className="bow-status p-1 px-3 text-xs text-gray-600 font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">
+                Placeholder
+            </div>
         );
     };
 
@@ -72,7 +79,7 @@ function BOWCard(props) {
                         PlanID: {planID}
                     </div>
                 </div>
-                
+
                 <div className=" text-[1.25rem] font-bold text-[#17506B] ">
                     Mẻ sấy số:
                     <span className="ml-2">{batchNumber}</span>
@@ -118,7 +125,6 @@ function BOWCard(props) {
                         Xem chi tiết
                         <HiArrowRight className="ml-2" />
                     </div>
-                    
                 </div>
             </Link>
         </div>

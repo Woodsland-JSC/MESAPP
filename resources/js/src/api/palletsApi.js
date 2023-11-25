@@ -38,7 +38,7 @@ const palletsApi = {
         return axiosClient().get(url, {});
     },
     getBOWList: () => {
-        const url = `/ovens/production-availiable`;
+        const url = `/ovens/listproduction`;
         return axiosClient().get(url, {});
     },
     getBOWById: (id) => {

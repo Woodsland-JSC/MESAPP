@@ -23,7 +23,7 @@ import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import Loader from "../../components/Loader";
 
-function CreateDryingPlan() {   
+function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(true);
 
@@ -83,23 +83,22 @@ function CreateDryingPlan() {
     useEffect(() => {
         palletsApi
             .getBOWList()
-            
+
             .then((response) => {
                 console.log("1. Load danh sách BOWCard:", response);
-                
-                setBowCards(response || []); 
+
+                setBowCards(response || []);
                 setLoading(false);
             })
             .catch((error) => {
                 console.error("Error fetching BOWCard list:", error);
                 setLoading(false);
-            }) 
-            // .finally(() => {
-                
-            // });    
-        
+            });
+        // .finally(() => {
+
+        // });
     }, []);
-    const filteredBowCards = bowCards.filter(bowCard => bowCard.Status === 0);
+    const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0);
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
@@ -429,9 +428,17 @@ function CreateDryingPlan() {
                                 kilnNumber={bowCard.Oven}
                                 thickness={bowCard.Method}
                                 purpose={bowCard.Reason}
-                                finishedDate={1}
+                                finishedDate={format(
+                                    addDays(
+                                        new Date(bowCard.created_at),
+                                        bowCard.Time
+                                    ),
+                                    "yyyy-MM-dd HH:mm:ss"
+                                )}
                                 palletQty={bowCard.TotalPallet}
                                 weight={bowCard.Mass}
+                                isChecked={bowCard.Checked}
+                                isReviewed={bowCard.Review}
                             />
                         ))}
                         <BOWCard
@@ -512,9 +519,7 @@ function CreateDryingPlan() {
                     </div>
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
+            {loading && <Loader />}
         </Layout>
     );
 }

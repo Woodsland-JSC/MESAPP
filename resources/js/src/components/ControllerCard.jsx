@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { BsFillSkipForwardCircleFill } from "react-icons/bs";
+import { CgSpinnerTwo } from "react-icons/cg";
+import { FaCheck } from "react-icons/fa6";
 import {
     Step,
     Box,
@@ -25,23 +27,13 @@ import {
     useDisclosure,
     Button,
 } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import CheckListItem from "./CheckListItem";
 import palletsApi from "../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-const steps = [
-    { status: "1", description: "Vào lò" },
-    { status: "2", description: "Bắt đầu sấy" },
-    { status: "3", description: "Xác nhận ra lò" },
-];
-
-const options = [
-    { value: "chocolate", label: "Chocolate" },
-    { value: "strawberry", label: "Strawberry" },
-    { value: "vanilla", label: "Vanilla" },
-];
+import { MdFormatColorReset } from "react-icons/md";
 
 const checkItems = [
     {
@@ -111,7 +103,7 @@ const checkItems = [
 ];
 
 function ControllerCard(props) {
-    const { progress, status, reason, planID } = props;
+    const { progress, status, isChecked, isReviewed, reason, planID } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -131,10 +123,11 @@ function ControllerCard(props) {
 
     // Check Input
     const [checkedCount, setCheckedCount] = useState(0);
-    const { activeStep } = useSteps({
-        index: 1,
-        count: steps.length,
-    });
+    // const { activeStep } = useSteps({
+    //     index: 1,
+    //     count: steps.length,
+    // });
+
     const handleCheckboxChange = (isChecked) => {
         setCheckedCount((prevCount) =>
             isChecked ? prevCount + 1 : prevCount - 1
@@ -144,7 +137,16 @@ function ControllerCard(props) {
     // State
     const [PalletData, setPalletData] = useState([]);
     const [selectedPallet, setSelectedPallet] = useState([]);
+    const [dryingInProgress, setDryingInProgress] = useState(false);
+    const [isCompleteChecking, setIsCompleteChecking] = useState(false);
 
+    // Mini Loading
+    const [loadIntoKilnLoading, setLoadIntoKilnLoading] = useState(false);
+    const [loadKilnCheckingLoading, setLoadKilnCheckingLoading] =
+        useState(false);
+    const [loadStartDryingLoading, setLoadStartDryingLoading] = useState(false);
+    const [loadFinishDryingLoading, setLoadFinishDryingLoading] =
+        useState(false);
 
     // Get data Select
     useEffect(() => {
@@ -162,38 +164,14 @@ function ControllerCard(props) {
             });
     }, [reason]);
 
-    // const handleLoadIntoKiln = () => {
-    //     if (!selectedPallet || !selectedPallet.value) {
-    //         // Handle the case where no pallet is selected
-    //         toast.error("Please select a pallet before loading into kiln.");
-    //         return;
-    //     }
-
-    //     const requestData = {
-    //         PlanID: planID,
-    //         PalletID: selectedPallet.value,
-    //     };
-
-    //     palletsApi
-    //         .loadIntoKiln(requestData)
-    //         .then((response) => {
-    //             // Handle the API response if needed
-    //             toast.success("Successfully loaded into kiln!");
-    //             // You may also want to perform additional actions based on the API response
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error loading into kiln:", error);
-    //             // Handle the error if needed
-    //             toast.error("Failed to load into kiln. Please try again.");
-    //         });
-    // };
-
     const handleLoadIntoKiln = async () => {
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
                 return;
             }
+
+            setLoadIntoKilnLoading(true);
 
             const requestData = {
                 PlanID: planID,
@@ -205,14 +183,17 @@ function ControllerCard(props) {
                 requestData
             );
             toast.success("Vào lò thành công!");
+            setLoadIntoKilnLoading(false);
         } catch (error) {
             console.error("Error loading into kiln:", error);
             toast.error("Đã xảy ra lỗi khi vào lò.");
+            setLoadIntoKilnLoading(false);
         }
     };
 
     const handleCompleteCheckingKiln = async () => {
         try {
+            setLoadKilnCheckingLoading(true);
             const response = await axios.patch("/api/ovens/production-check", {
                 PlanID: planID,
             });
@@ -221,18 +202,23 @@ function ControllerCard(props) {
 
                 toast.success("Thông tin đã được lưu lại");
                 console.log("Hoàn thành việc kiểm tra lò sấy!");
+                setLoadKilnCheckingLoading(false);
+                setIsCompleteChecking(true);
+                // window.location.reload();
             } else {
                 toast.error("Có lỗi xảy ra khi thực hiện kiểm tra lò sấy");
+                setLoadKilnCheckingLoading(false);
             }
         } catch (error) {
             console.error("Error completing production check:", error);
-
             toast.error("Hiện không thể lưu thông tin. Hãy thử lại sau.");
+            setLoadKilnCheckingLoading(false);
         }
     };
 
     const handleStartDrying = async () => {
         try {
+            setLoadStartDryingLoading(true);
             const response = await axios.patch("/api/ovens/production-run", {
                 PlanID: planID,
             });
@@ -241,35 +227,45 @@ function ControllerCard(props) {
 
                 toast.success("Bắt đầu sấy thành công");
                 console.log("Đã bắt đầu sấy gỗ!");
+                setLoadStartDryingLoading(false);
                 setDryingInProgress(true);
             } else {
                 toast.error("Không thể sấy lúc này");
+                setLoadStartDryingLoading(false);
             }
         } catch (error) {
             console.error("Error completing production check:", error);
 
             toast.error("Hiện không thể thực hiện hành động này.");
+            setLoadStartDryingLoading(false);
         }
     };
 
     const handleFinishDrying = async () => {
         try {
-            const response = await axios.patch("/api/ovens/production-completed", {
-                PlanID: planID,
-            });
+            setLoadFinishDryingLoading(true);
+            const response = await axios.patch(
+                "/api/ovens/production-completed",
+                {
+                    PlanID: planID,
+                }
+            );
             if (response.status === 200) {
                 onFinalClose();
 
                 toast.success("Ra lò thành công");
                 console.log("Hoàn thành quy trình sấy gỗ");
-                navigate("/workspace/drying-wood-checking")
+                setLoadFinishDryingLoading(false);
+                navigate("/workspace/drying-wood-checking");
             } else {
                 toast.error("Không thể ra lò lúc này");
+                setLoadFinishDryingLoading(false);
             }
         } catch (error) {
             console.error("Error completing production check:", error);
 
             toast.error("Hiện không thể thực hiện hành động này.");
+            setLoadFinishDryingLoading(false);
         }
     };
 
@@ -301,7 +297,7 @@ function ControllerCard(props) {
         ) : progress === "vl" ? (
             <div>
                 <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-6">
-                    <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
+                    <div className="pt-0 xl:w-[75%] w-full md:w-[85%]">
                         <label
                             for="company"
                             className="block mb-2 text-md font-medium text-gray-900 "
@@ -317,15 +313,54 @@ function ControllerCard(props) {
                         />
                     </div>
                     <button
-                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:w-[15%]"
+                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
                         onClick={handleLoadIntoKiln}
                     >
-                        Vào lò
+                        {loadIntoKilnLoading ? (
+                            <div className="flex justify-center items-center space-x-4">
+                                <Spinner size="sm" color="white" />
+                                <div>Đang tải</div>
+                            </div>
+                        ) : (
+                            "Vào lò"
+                        )}
                     </button>
                 </div>
             </div>
         ) : progress === "kt" ? (
             <div>
+                {status === 1 ? (
+                    <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
+                        <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
+                            <label
+                                for="company"
+                                className="block mb-2 text-md font-medium text-gray-900 "
+                            >
+                                Chọn pallet
+                            </label>
+                            <Select
+                                options={PalletData}
+                                onChange={(value) => {
+                                    console.log("Selected Pallet:", value);
+                                    setSelectedPallet(value);
+                                }}
+                            />
+                        </div>
+                        <button
+                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
+                            onClick={handleLoadIntoKiln}
+                        >
+                            {loadIntoKilnLoading ? (
+                                <div className="flex justify-center items-center space-x-4">
+                                    <Spinner size="sm" color="white" />
+                                    <div>Đang tải</div>
+                                </div>
+                            ) : (
+                                "Vào lò"
+                            )}
+                        </button>
+                    </div>
+                ) : null}
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
                     <div className="space-y-1 xl:w-[75%]">
                         <div className="font-semibold">Chú ý:</div>
@@ -333,12 +368,30 @@ function ControllerCard(props) {
                             Lò sấy cần phải được kiểm tra trước khi bắt đầu sấy.
                         </div>
                     </div>
-                    <button
-                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full"
-                        onClick={onOpen}
-                    >
-                        Kiểm tra lò sấy
-                    </button>
+                    {status === 2 ? (
+                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                            <div className="font-medium">Đã kiểm tra</div>
+                            <FaCheck className=" ml-2 text-xl" />
+                        </div>
+                    ) : (
+                        <div className="xl:w-[25%]">
+                            {!isCompleteChecking ? (
+                                <button
+                                    className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full"
+                                    onClick={onOpen}
+                                >
+                                    Kiểm tra lò sấy
+                                </button>
+                            ) : (
+                                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center  w-full">
+                                    <div className="font-medium">
+                                        Đã kiểm tra
+                                    </div>
+                                    <FaCheck className=" ml-2 text-xl" />
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         ) : progress === "ls" ? (
@@ -351,17 +404,27 @@ function ControllerCard(props) {
                             Thời gian sẽ bắt đầu được tính khi bấm bắt đầu sấy.
                         </div>
                     </div>
-                    {!dryingInProgress ? (
-                        <button
-                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full"
-                            onClick={onKilnOpen}
-                        >
-                            Bắt đầu sấy
-                        </button>
+                    {status === 2 ? (
+                        !dryingInProgress ? (
+                            <button
+                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full"
+                                onClick={onKilnOpen}
+                            >
+                                Bắt đầu sấy
+                            </button>
+                        ) : (
+                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                <div className="font-medium">Đang sấy...</div>
+                            </div>
+                        )
                     ) : (
-                        <div className="bg-gray-200 text-gray-600 p-2 rounded-xl  px-4 text-center h-fit items-end xl:w-[25%] w-full">
-                            Đang sấy...
-                        </div>
+                        (dryingInProgress || status === 3) && (
+                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                <div className="font-medium">Đang sấy...</div>
+                            </div>
+                        )
                     )}
                 </div>
             </div>
@@ -370,13 +433,21 @@ function ControllerCard(props) {
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
                     <div className=" space-y-1 w-full xl:w-[75%]">
                         <div className="font-semibold">Tình trạng mẻ sấy:</div>
-                        <div>
-                            Mẻ sấy đã đủ điều kiện ra lò.
-                        </div>
+                        <div>Mẻ sấy đã đủ điều kiện ra lò.</div>
                     </div>
-                    <button className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]" onClick={onFinalOpen}>
-                        Xác nhận ra lò
-                    </button>
+                    {isReviewed === 1 ? (
+                        <button
+                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                            onClick={onFinalOpen}
+                        >
+                            Xác nhận ra lò
+                        </button>
+                    ) : (
+                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                            <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                            <div className="font-medium">Đang sấy...</div>
+                        </div>
+                    )}
                 </div>
             </div>
         ) : null;
@@ -460,7 +531,14 @@ function ControllerCard(props) {
                                     className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                     onClick={handleCompleteCheckingKiln}
                                 >
-                                    Hoàn thành
+                                    {loadKilnCheckingLoading ? (
+                                        <div className="flex justify-center items-center space-x-4">
+                                            <Spinner size="sm" color="white" />
+                                            <div>Đang tải</div>
+                                        </div>
+                                    ) : (
+                                        "Hoàn thành"
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -495,7 +573,14 @@ function ControllerCard(props) {
                                 className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 onClick={handleStartDrying}
                             >
-                                Xác nhận
+                                {loadStartDryingLoading ? (
+                                    <div className="flex justify-center items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Bắt đầu sấy"
+                                )}
                             </button>
                         </div>
                     </ModalFooter>
@@ -529,7 +614,14 @@ function ControllerCard(props) {
                                 className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 onClick={handleFinishDrying}
                             >
-                                Xác nhận
+                                {loadFinishDryingLoading ? (
+                                    <div className="flex justify-center items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
                             </button>
                         </div>
                     </ModalFooter>

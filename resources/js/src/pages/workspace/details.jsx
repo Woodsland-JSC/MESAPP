@@ -16,6 +16,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react";
+import { addDays, format, add } from "date-fns";
 
 function Details() {
     const location = useLocation();
@@ -170,82 +171,177 @@ function Details() {
                                 <HiArrowLeft />
                             </button>
 
-                            <div>
+                            <SkeletonText
+                                isLoaded={!loading}
+                                mt="4"
+                                noOfLines={2}
+                                spacing="4"
+                                skeletonHeight="5"
+                                borderRadius="lg"
+                            >
+                                <div>
                                     <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
                                         Chi tiết mẻ sấy:{" "}
                                         <span>{BOWData.Code}</span>{" "}
                                     </div>
+
                                     <div className="xl:text-[1.15rem] text-lg font-semibold text-gray-700">
                                         Lò số: <span>{BOWData.Oven}</span>{" "}
                                     </div>
-                            </div>
+                                </div>
+                            </SkeletonText>
                         </div>
 
                         {/* Content */}
                         <div className="gap-6">
                             <div className="xl:grid xl:grid-cols-3 xl:gap-6 xl:space-y-0 space-y-6">
-                                <InfoCard
-                                    purpose={BOWData.Reason}
-                                    thickness={BOWData.Method}
-                                    finishedDate={BOWData.Time}
-                                    palletQty={BOWData.TotalPallet}
-                                    weight={BOWData.Mass}
-                                />
+                                <Skeleton
+                                    isLoaded={!loading}
+                                    borderRadius="2xl"
+                                >
+                                    <InfoCard
+                                        purpose={BOWData.Reason}
+                                        thickness={BOWData.Method}
+                                        finishedDate={BOWData.Time}
+                                        // finishedDate={format(addDays(new Date(BOWData.created_at), BOWData.Time), 'yyyy-MM-dd HH:mm:ss')}
+                                        palletQty={BOWData.TotalPallet}
+                                        weight={BOWData.Mass}
+                                    />
+                                </Skeleton>
                                 <div className="col-span-2">
                                     {type === "kh" && (
                                         <div className="space-y-6">
-                                            <ControllerCard
-                                                progress="kh"
-                                                planID={BOWData.PlanID}
-                                            />
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <ControllerCard
+                                                    progress="kh"
+                                                    planID={BOWData.PlanID}
+                                                    status={BOWData.Status}
+                                                    isReviewed={BOWData.Review}
+                                                />
+                                            </Skeleton>
                                         </div>
                                     )}
                                     {type === "vl" && (
                                         <div className="space-y-6">
-                                            <ControllerCard
-                                                progress="vl"
-                                                planID={BOWData.PlanID}
-                                                reason={BOWData.Reason}
-                                            />
-                                            <SizeCard />
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <ControllerCard
+                                                    progress="vl"
+                                                    planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
+                                                    status={BOWData.Status}
+                                                />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <SizeCard />
+                                            </Skeleton>
                                         </div>
                                     )}
                                     {type === "kt" && (
                                         <div className="space-y-6">
-                                            <ControllerCard
-                                                progress="kt"
-                                                planID={BOWData.PlanID}
-                                            />
-                                            <KilnCheck />
-                                            <SizeCard />
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <ControllerCard
+                                                    progress="kt"
+                                                    planID={BOWData.PlanID}
+                                                    status={BOWData.Status}
+                                                />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <SizeCard />
+                                            </Skeleton>
+                                            
                                         </div>
                                     )}
                                     {type === "ls" && (
                                         <div className="space-y-6">
-                                            <ControllerCard
-                                                progress="ls"
-                                                planID={BOWData.PlanID}
-                                            />
-                                            <KilnCheck />
-                                            <SizeCard />
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <ControllerCard
+                                                    progress="ls"
+                                                    planID={BOWData.PlanID}
+                                                    status={BOWData.Status}
+                                                />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <SizeCard />
+                                            </Skeleton>
                                         </div>
                                     )}
                                     {type === "dg" && (
-                                        <div className="space-y-6">
-                                            <ControllerCard
+                                        <div className="space-y-6"> 
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <ControllerCard
                                                 progress="dg"
                                                 planID={BOWData.PlanID}
+                                                status={BOWData.Status}
+                                                isReviewed={BOWData.Review}
                                             />
-                                            <KilnCheck />
-                                            <HumidityCheck />
-                                            <DisabledCheck
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <HumidityCheck />
+                                            </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <DisabledCheck
                                                 disabilityList={disabledReports}
                                                 generalInfo={{
                                                     dryingBatch: "2023.45.01",
                                                     factory: "Nhà máy A",
                                                 }}
                                             />
-                                            <SizeCard />
+                                            </Skeleton>
+                                            
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <SizeCard />
+                                            </Skeleton>
                                         </div>
                                     )}
                                 </div>
