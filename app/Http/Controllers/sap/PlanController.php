@@ -114,28 +114,29 @@ class PlanController extends Controller
             ->select('a.*')
             ->where('b.plant', '=', Auth::user()->plant)
             ->where('a.Status', 0)
+            ->orwhere('a.Status', 1)
             ->get();
         return response()->json($pallets, 200);
     }
-    //danh sách mẻ sấy có thể vào lò
+    //danh sách mẻ sấy có thể chay lo
     function ListRunOven()
     {
         $pallets = DB::table('planDryings as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->select('a.*')
             ->where('b.plant', '=', Auth::user()->plant)
-            ->where('a.Status', 1)
+            ->where('a.Status', 2)
             ->get();
         return response()->json($pallets, 200);
     }
-    //danh sách mẻ sấy có thể chạy lo
+    //danh sách mẻ sấy có thể hoan thanh
     function Listcomplete()
     {
         $pallets = DB::table('planDryings as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->select('a.*')
             ->where('b.plant', '=', Auth::user()->plant)
-            ->where('a.Status', 2)
+            ->where('a.Status', 3)
             ->get();
         return response()->json($pallets, 200);
     }
