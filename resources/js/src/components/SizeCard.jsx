@@ -22,7 +22,7 @@ function SizeCard() {
             <div className="bg-white  rounded-t-xl flex justify-between items-center border-b py-4 px-6  border-gray-300">
                 <div className="flex items-center gap-x-3 font-medium">
                   <BsFilterCircleFill className="text-2xl text-[#17506B]" />
-                  <div className="xl:text-xl xl:w-full  text-lg">Các kích thước</div>
+                  <div className="xl:text-xl xl:w-full  text-lg">Các kích thước pallet</div>
                 </div>
                 <button
                     onClick={onOpen}

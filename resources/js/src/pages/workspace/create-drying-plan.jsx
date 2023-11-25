@@ -20,10 +20,12 @@ import AsyncSelect from "react-select/async";
 import palletsApi from "../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { addDays, format, add } from 'date-fns';
+import { addDays, format, add } from "date-fns";
+import Loader from "../../components/Loader";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [loading, setLoading] = useState(true);
 
     const [kiln, setKiln] = useState([]);
     const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
@@ -36,8 +38,11 @@ function CreateDryingPlan() {
     const [selectedThickness, setSelectedThickness] = useState(null);
 
     const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
+
+    // Mini Loading When Creating Drying Plan
     const [isLoading, setIsLoading] = useState(false);
 
+    const [createdBowCards, setCreatedBowCards] = useState([]);
     const [bowCards, setBowCards] = useState([]);
 
     useEffect(() => {
@@ -74,6 +79,26 @@ function CreateDryingPlan() {
             setReloadAsyncSelectKey((prevKey) => prevKey + 1);
         }
     }, [selectedDryingReasonsPlan]);
+
+    useEffect(() => {
+        palletsApi
+            .getBOWList()
+
+            .then((response) => {
+                console.log("1. Load danh sách BOWCard:", response);
+
+                setBowCards(response || []);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching BOWCard list:", error);
+                setLoading(false);
+            });
+        // .finally(() => {
+
+        // });
+    }, []);
+    const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0);
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
@@ -128,26 +153,29 @@ function CreateDryingPlan() {
         axios
             .post("/api/ovens/create", postData)
             .then((response) => {
-                console.log("2. Kết quả từ API:", response.data);
+                console.log("2. Kết quả từ API:", response);
 
-                const A = response.data.Time; 
+                const A = response.data.Time;
                 const B = new Date();
 
-                const result = format(add(B, { days: A }), "yyyy-MM-dd HH:mm:ss");
+                const result = format(
+                    add(B, { days: A }),
+                    "yyyy-MM-dd HH:mm:ss"
+                );
 
                 const newBowCard = {
                     status: 0,
-                    batchNumber: response.data.Code, 
-                    kilnNumber: response.data.Oven, 
-                    thickness: response.data.Method, 
+                    batchNumber: response.data.Code,
+                    kilnNumber: response.data.Oven,
+                    thickness: response.data.Method,
                     height: "0",
-                    purpose: response.data.Reason, 
+                    purpose: response.data.Reason,
                     finishedDate: result,
                     palletQty: 0,
                     weight: 0,
                 };
 
-                setBowCards([newBowCard, ...bowCards]);
+                setCreatedBowCards([newBowCard, ...createdBowCards]);
 
                 toast.success("Tạo kế hoạch sấy thành công.");
                 setIsLoading(false);
@@ -386,10 +414,32 @@ function CreateDryingPlan() {
                         </div>
                     </div>
 
-                    {/* Content */}
+                    {/* BOW Card List */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards.map((bowCard, index) => (
-                            <BOWCard key={index} {...bowCard} />
+                        {createdBowCards.map((createdbowCard, index) => (
+                            <BOWCard key={index} {...createdbowCard} />
+                        ))}
+                        {filteredBowCards?.map((bowCard, index) => (
+                            <BOWCard
+                                key={index}
+                                planID={bowCard.PlanID}
+                                status={bowCard.Status}
+                                batchNumber={bowCard.Code}
+                                kilnNumber={bowCard.Oven}
+                                thickness={bowCard.Method}
+                                purpose={bowCard.Reason}
+                                finishedDate={format(
+                                    addDays(
+                                        new Date(bowCard.created_at),
+                                        bowCard.Time
+                                    ),
+                                    "yyyy-MM-dd HH:mm:ss"
+                                )}
+                                palletQty={bowCard.TotalPallet}
+                                weight={bowCard.Mass}
+                                isChecked={bowCard.Checked}
+                                isReviewed={bowCard.Review}
+                            />
                         ))}
                         <BOWCard
                             status="Placeholder"
@@ -469,6 +519,7 @@ function CreateDryingPlan() {
                     </div>
                 </div>
             </div>
+            {loading && <Loader />}
         </Layout>
     );
 }

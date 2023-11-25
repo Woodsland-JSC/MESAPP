@@ -7,6 +7,8 @@ import {
     HiRectangleStack,
     HiHandThumbUp,
     HiClipboardDocumentList,
+    HiMiniArchiveBoxArrowDown,
+    HiMiniBanknotes,
 } from "react-icons/hi2";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
@@ -49,7 +51,7 @@ function Workspace() {
                                 {/* Cards List */}
                                 <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                     <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
-                                        <Link to="/workspace/wood-sorting">
+                                        {user.permissions?.includes("sepsay") && (<Link to="/workspace/wood-sorting">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
@@ -70,9 +72,9 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Xếp sấy
                                             </div>
-                                        </Link>
+                                        </Link>)}
 
-                                        <Link to="/workspace/create-drying-plan">
+                                        {user.permissions?.includes("kehoachsay") && (<Link to="/workspace/create-drying-plan">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -94,9 +96,9 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Tạo kế hoạch sấy
                                             </div>
-                                        </Link>
+                                        </Link>)}
 
-                                        <Link to="/workspace/load-into-kiln">
+                                        {user.permissions?.includes("vaolo") && (<Link to="/workspace/load-into-kiln">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -118,9 +120,9 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Vào lò
                                             </div>
-                                        </Link>
+                                        </Link>)}
 
-                                        <Link to="/workspace/kiln-checking">
+                                        {user.permissions?.includes("kiemtralo") && (<Link to="/workspace/kiln-checking">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -142,9 +144,9 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Kiểm tra lò sấy
                                             </div>
-                                        </Link>
+                                        </Link>)}
 
-                                        <Link to="/workspace/kiln">
+                                        {user.permissions?.includes("losay") && (<Link to="/workspace/kiln">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -165,9 +167,9 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Lò sấy
                                             </div>
-                                        </Link>
+                                        </Link>)}
 
-                                        <Link to="/workspace/drying-wood-checking">
+                                        {user.permissions?.includes("danhgiame") && (<Link to="/workspace/drying-wood-checking">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
@@ -188,7 +190,7 @@ function Workspace() {
                                             <div className="flex xl:hidden justify-center text-center mt-2">
                                                 Đánh giá mẻ sấy
                                             </div>
-                                        </Link>
+                                        </Link>)}
                                     </div>
                                 </div>
                             </TabPanel>
@@ -200,7 +202,7 @@ function Workspace() {
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                        <HiSquare3Stack3D className="w-8 h-8" />
+                                                        <HiMiniArchiveBoxArrowDown className="w-8 h-8" />
                                                     </div>
                                                     <div>
                                                         <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -262,11 +264,11 @@ function Workspace() {
                                 {/* Cards List */}
                                 <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                     <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
-                                        <Link to="/workspace/wood-sorting">
+                                        <Link to="#">
                                             <div className="flex justify-center xl:h-full md:h-full">
                                                 <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                     <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                        <HiSquare3Stack3D className="w-8 h-8" />
+                                                        <HiMiniBanknotes className="w-8 h-8" />
                                                     </div>
                                                     <div>
                                                         <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">

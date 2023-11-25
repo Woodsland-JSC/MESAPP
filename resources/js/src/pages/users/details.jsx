@@ -13,6 +13,7 @@ import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import makeAnimated from "react-select/animated";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 import Layout from "../../layouts/layout";
 import generateAvatar from "../../utils/generateAvatar";
 import useAppContext from "../../store/AppContext";
@@ -28,10 +29,10 @@ const genderOptions = [
     { value: "female", label: "Nữ" },
 ];
 
-const authorizationOptions = [
-    { value: "admin", label: "Admin" },
-    { value: "client", label: "Client" },
-];
+// const authorizationOptions = [
+//     { value: "admin", label: "Admin" },
+//     { value: "client", label: "Client" },
+// ];
 
 const validationSchema = Yup.object().shape({
     lastName: Yup.string()
@@ -161,9 +162,10 @@ const MultiSelectField = forwardRef(
         const handleChange = (option) => {
             setSelectedOption(option);
             setFieldValue(name, option ? option.map((opt) => opt.label) : []);
+            // console.log(option ? option.map((opt) => opt.label) : []);
             setInput((prev) => ({
                 ...prev,
-                [name]: option ? option.map((opt) => opt.label) : [],
+                [name]: option ? option.map((opt) => opt.label?.toLowerCase()) : [],
             }));
         };
 
@@ -224,6 +226,7 @@ function User() {
     const sapIdSelectRef = useRef(null);
     const factorySelectRef = useRef(null);
 
+    const [isFirstLoading, setIsFirstLoading] = useState(true);
     const [roles, setRoles] = useState([]);
     const [branches, setBranches] = useState([]);
     const [sapId, setSapId] = useState([]);
@@ -231,7 +234,7 @@ function User() {
     const [factories, setFactories] = useState([]);
 
     const [formKey, setFormKey] = useState(0);
-    // const { loading, setLoading } = useAppContext();
+    const { user, setUser } = useAppContext();
     const [loading, setLoading] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
@@ -330,6 +333,22 @@ function User() {
         }
     };
 
+    const handleSignOut = async () => {
+        try {
+            const res = await usersApi.signOut();
+            localStorage.removeItem("userInfo");
+            Cookies.remove("isAuthenticated");
+            setUser(null);
+            toast.success("Vui lòng đăng nhập để tiếp tục");
+        } catch (error) {
+            console.error(error);
+            localStorage.removeItem("userInfo");
+            Cookies.remove("isAuthenticated");
+            setUser(null);
+            toast.success("Vui lòng đăng nhập để tiếp tục");
+        }
+    };
+
     const handleFormSubmit = async (values) => {
         const updatedValues = { ...values };
         const { password: newPassword, ...updatedInfo } = values;
@@ -347,21 +366,35 @@ function User() {
                 avatar.imgSrc == originalAvatar
             ) {
                 updatedValues.avatar = "";
+                delete updatedValues.avatar;
             } else {
                 updatedValues.avatar = -1;
             }
 
+            // console.log("Updated values: ", updatedValues);
+
             try {
                 const res = await usersApi.updateUser(userId, updatedValues);
                 // console.log("Thành công: ", res);
+                if (user.id != userId) {
+                    toast.success("Điều chỉnh thông tin thành công.");
+                } 
+                if (user.id == userId && newPassword) {
+                    // if (newPassword) {
+                        handleSignOut();
+                        setLoading(false);
+                        return;
+                    // }
+                }
                 toast.success("Điều chỉnh thông tin thành công.");
                 getCurrentUser();
+                setLoading(false);
             } catch (error) {
                 console.error(error);
                 toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+                setLoading(false);
             }
-            setLoading(false);
-            console.log("Giá trị updated values: ", updatedValues);
+            // console.log("Giá trị updated values: ", updatedValues);
         } else {
             toast("Bạn chưa điều chỉnh thông tin.", {
                 icon: ` ℹ️`,
@@ -383,90 +416,163 @@ function User() {
         }
     };
 
-    const loadBranches = (inputValue, callback) => {
-        usersApi
-            .getAllBranches()
-            .then((data) => {
-                const filteredOptions = data.filter((option) => {
-                    return (
-                        option.BPLName?.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        ) ||
-                        option.BPLId?.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        )
-                    );
-                });
+    // const loadBranches = (inputValue, callback) => {
+    //     usersApi
+    //         .getAllBranches()
+    //         .then((data) => {
+    //             const filteredOptions = data.filter((option) => {
+    //                 return (
+    //                     option.BPLName?.toLowerCase().includes(
+    //                         inputValue.toLowerCase()
+    //                     ) ||
+    //                     option.BPLId?.toLowerCase().includes(
+    //                         inputValue.toLowerCase()
+    //                     )
+    //                 );
+    //             });
 
-                const asyncOptions = filteredOptions.map((item) => ({
-                    value: item.BPLId,
-                    label: item.BPLName,
+    //             const asyncOptions = filteredOptions.map((item) => ({
+    //                 value: item.BPLId,
+    //                 label: item.BPLName,
+    //             }));
+
+    //             callback(asyncOptions);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching branch:", error);
+    //             callback([]);
+    //         });
+    // };
+
+    // const loadRoles = (inputValue, callback) => {
+    //     roleApi
+    //         .getAllRole()
+    //         .then((data) => {
+    //             const filteredOptions = data.filter((option) => {
+    //                 return (
+    //                     option.name
+    //                         ?.toLowerCase()
+    //                         .includes(inputValue.toLowerCase()) ||
+    //                     option.id
+    //                         ?.toLowerCase()
+    //                         .includes(inputValue.toLowerCase())
+    //                 );
+    //             });
+
+    //             const asyncOptions = filteredOptions.map((item) => ({
+    //                 value: item.id,
+    //                 label:
+    //                     item.name.charAt(0).toUpperCase() + item.name.slice(1),
+    //             }));
+
+    //             callback(asyncOptions);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching roles:", error);
+    //             callback([]);
+    //         });
+    // };
+
+    // const loadSapId = (inputValue, callback) => {
+    //     usersApi
+    //         .getAllSapId()
+    //         .then((data) => {
+    //             const filteredOptions = data.filter((option) => {
+    //                 return (
+    //                     option.NAME?.toLowerCase().includes(
+    //                         inputValue.toLowerCase()
+    //                     ) ||
+    //                     option.USER_CODE?.toLowerCase().includes(
+    //                         inputValue.toLowerCase()
+    //                     )
+    //                 );
+    //             });
+
+    //             const asyncOptions = filteredOptions.map((item) => ({
+    //                 value: item.USER_CODE,
+    //                 label: item.NAME + " - " + item.USER_CODE,
+    //             }));
+
+    //             callback(asyncOptions);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching sap id:", error);
+    //             callback([]);
+    //         });
+    // };
+
+    const getCurrentUser = useCallback(async () => {
+        try {
+            if (!userId) {
+                navigate("/notfound");
+                return;
+            }
+            const data = await usersApi.getUserDetails(userId);
+            const {
+                first_name: firstName,
+                last_name: lastName,
+                email,
+                gender,
+                sap_id: sapId,
+                integration_id: integrationId,
+                plant,
+                branch,
+                avatar,
+                roles,
+            } = data.user;
+
+            const role = data.UserRole;
+
+            const userData = {
+                firstName: firstName || "",
+                lastName: lastName || "",
+                email: email || "",
+                gender,
+                password: "",
+                authorization: role,
+                sapId: sapId || "",
+                integrationId: integrationId || "1",
+                factory: plant || "",
+                branch: branch || "",
+            };
+
+            // console.log("User: ", userData);
+
+            if (branch) {
+                const res = await usersApi.getFactoriesByBranchId(
+                    branch
+                );
+                
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
                 }));
 
-                callback(asyncOptions);
-            })
-            .catch((error) => {
-                console.error("Error fetching branch:", error);
-                callback([]);
-            });
-    };
+                setFactories(options);
+                setIsFirstLoading(false);
+            }
 
-    const loadRoles = (inputValue, callback) => {
-        roleApi
-            .getAllRole()
-            .then((data) => {
-                const filteredOptions = data.filter((option) => {
-                    return (
-                        option.name
-                            ?.toLowerCase()
-                            .includes(inputValue.toLowerCase()) ||
-                        option.id
-                            ?.toLowerCase()
-                            .includes(inputValue.toLowerCase())
-                    );
+            // const userData = await res;
+            setInput(userData);
+            setOriginalInfo(userData);
+
+            if (avatar) {
+                setOriginalAvatar(avatar);
+                setAvatar({
+                    autoImg: null,
+                    file: data.user.avatar,
+                    imgSrc: data.user.avatar,
                 });
-
-                const asyncOptions = filteredOptions.map((item) => ({
-                    value: item.id,
-                    label:
-                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
-                }));
-
-                callback(asyncOptions);
-            })
-            .catch((error) => {
-                console.error("Error fetching roles:", error);
-                callback([]);
-            });
-    };
-
-    const loadSapId = (inputValue, callback) => {
-        usersApi
-            .getAllSapId()
-            .then((data) => {
-                const filteredOptions = data.filter((option) => {
-                    return (
-                        option.NAME?.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        ) ||
-                        option.USER_CODE?.toLowerCase().includes(
-                            inputValue.toLowerCase()
-                        )
-                    );
-                });
-
-                const asyncOptions = filteredOptions.map((item) => ({
-                    value: item.USER_CODE,
-                    label: item.NAME + " - " + item.USER_CODE,
-                }));
-
-                callback(asyncOptions);
-            })
-            .catch((error) => {
-                console.error("Error fetching sap id:", error);
-                callback([]);
-            });
-    };
+            }
+            setFormKey((prevKey) => prevKey + 1);
+        } catch (error) {
+            // console.error(error);
+            toast.error("Không tìm thấy user");
+            if (error.response && error.response.status === 404) {
+                navigate("/notfound", { replace: true });
+            }
+        }
+    }, [userId]);
 
     useEffect(() => {
         if (input.lastName && input.firstName && !avatar.file) {
@@ -503,65 +609,6 @@ function User() {
         };
     }, [hasChanged]);
 
-    const getCurrentUser = useCallback(async () => {
-        try {
-            if (!userId) {
-                navigate("/notfound");
-                return;
-            }
-            const data = await usersApi.getUserDetails(userId);
-            const {
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                gender,
-                sap_id: sapId,
-                integration_id: integrationId,
-                plant: factory,
-                branch,
-                avatar,
-                roles,
-            } = data.user;
-
-            const role = data.UserRole;
-
-            const userData = {
-                firstName: firstName || "",
-                lastName: lastName || "",
-                email: email || "",
-                gender,
-                password: "",
-                authorization: role,
-                sapId: sapId || "",
-                integrationId: integrationId || "1",
-                factory: factory || "",
-                branch: branch || "",
-            };
-
-            // console.log("User: ", userData);
-
-            // const userData = await res;
-            setInput(userData);
-            setOriginalInfo(userData);
-
-            if (avatar) {
-                setOriginalAvatar(avatar);
-                setAvatar({
-                    autoImg: null,
-                    file: data.user.avatar,
-                    imgSrc: data.user.avatar,
-                });
-            }
-            setFormKey((prevKey) => prevKey + 1);
-        } catch (error) {
-            // console.error(error);
-            toast.error("Không tìm thấy user");
-            if (error.response && error.response.status === 404) {
-                navigate("/notfound", { replace: true });
-            }
-        }
-    }, [userId]);
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -596,8 +643,6 @@ function User() {
                 }));
                 setSapId(sapIdOptions);
 
-                document.title = "Woodsland - Chi tiết người dùng";
-
                 await getCurrentUser();
 
                 setLoading(false);
@@ -609,42 +654,57 @@ function User() {
 
         fetchData();
 
+        document.title = "Woodsland - Chi tiết người dùng";
+
         return () => {
             document.title = "Woodsland";
+            document.body.classList.remove('body-no-scroll');
         };
     }, []);
 
     useEffect(() => {
-        const selectedBranch = input.branch;
-
-        const getFactoriesByBranchId = async () => {
-            setFactoryLoading(true);
-            try {
-                if (selectedBranch) {
-                    factorySelectRef.current.clearValue();
-                    const res = await usersApi.getFactoriesByBranchId(
-                        selectedBranch
-                    );
-                    const options = res.map((item) => ({
-                        value: item.Code,
-                        label: item.Name,
-                    }));
-
-                    setFactories(options);
-                    setInput((prev) => ({ ...prev, factory: "" }));
-                } else {
-                    setFactories([]);
-                    // factorySelectRef.current?.selectOption([]);
+        if (isFirstLoading) {
+            const selectedBranch = input.branch;
+    
+            const getFactoriesByBranchId = async () => {
+                setFactoryLoading(true);
+                try {
+                    if (selectedBranch) {
+                        factorySelectRef.current.clearValue();
+                        setFactories([]);
+                        const res = await usersApi.getFactoriesByBranchId(
+                            selectedBranch
+                        );
+                        
+                        const options = res.map((item) => ({
+                            value: item.Code,
+                            label: item.Name,
+                        }));
+    
+                        setFactories(options);
+                        setInput((prev) => ({ ...prev, factory: "" }));
+                    } else {
+                        setFactories([]);
+                        // factorySelectRef.current?.selectOption([]);
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
-            } catch (error) {
-                console.error(error);
-            }
-            setFactoryLoading(false);
-        };
-
-        // console.log("Chỗ này call api nè: ", factorySelectRef.current);
-        getFactoriesByBranchId();
+                setFactoryLoading(false);
+            };
+    
+            // console.log("Chỗ này call api nè: ", factorySelectRef.current);
+            getFactoriesByBranchId();
+        }
     }, [input.branch]);
+
+    useEffect(() => {
+        if (loading) {
+            document.body.classList.add("body-no-scroll");
+        } else {
+            document.body.classList.remove("body-no-scroll");
+        }
+    }, [loading])
 
     return (
         <Layout>
@@ -659,16 +719,16 @@ function User() {
                                     <div className="flex items-center">
                                         <Link
                                             to="/users"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Quản lý người dùng
                                         </Link>
                                     </div>
                                 </li>
                                 <li aria-current="page">
-                                    <div class="flex items-center">
+                                    <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -676,13 +736,13 @@ function User() {
                                         >
                                             <path
                                                 stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
+                                        <span classNames="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
                                             <div>Người dùng</div>
                                         </span>
                                     </div>
@@ -906,6 +966,7 @@ function User() {
                                                                     )
                                                             ) || null
                                                         }
+                                                        setInput={setInput}
                                                     />
                                                     {/* <AsyncMultiSelectField
                                                             ref={authorizationInputRef}
@@ -1006,25 +1067,24 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            {/* <Field
-                                                name="sapId"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "sapId",
-                                                        e.target.value
-                                                    );
-                                                    setInput((prev) => ({
-                                                        ...prev,
-                                                        sapId: e.target.value,
-                                                    }));
-                                                }}
-                                            /> */}
-                                            {/* <SelectField */}
-                                            <AsyncSelectField
+                                            {/* <AsyncSelectField
                                                 innerRef={sapIdSelectRef}
                                                 name="sapId"
                                                 loadOptions={loadSapId}
+                                                defaultValue={
+                                                    sapId.find(
+                                                        (item) =>
+                                                            item.value ==
+                                                            values.sapId
+                                                    ) || null
+                                                }
+                                                options={sapId}
+                                                setInput={setInput}
+                                            /> */}
+                                            <SelectField
+                                                innerRef={sapIdSelectRef}
+                                                name="sapId"
+                                                // loadOptions={loadSapId}
                                                 defaultValue={
                                                     sapId.find(
                                                         (item) =>
@@ -1089,7 +1149,7 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            <AsyncSelectField
+                                            {/* <AsyncSelectField
                                                 innerRef={branchSelectRef}
                                                 name="branch"
                                                 loadOptions={loadBranches}
@@ -1102,21 +1162,21 @@ function User() {
                                                     ) || null
                                                 }
                                                 setInput={setInput}
-                                            />
-                                            {/* <Field
-                                                name="branch"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "branch",
-                                                        e.target.value
-                                                    );
-                                                    setInput((prev) => ({
-                                                        ...prev,
-                                                        branch: e.target.value,
-                                                    }));
-                                                }}
                                             /> */}
+                                            <SelectField
+                                                innerRef={branchSelectRef}
+                                                name="branch"
+                                                // loadOptions={loadBranches}
+                                                options={branches}
+                                                defaultValue={
+                                                    branches.find(
+                                                        (item) =>
+                                                            item.value ==
+                                                            values.branch
+                                                    ) || null
+                                                }
+                                                setInput={setInput}
+                                            />
                                             {errors.branch && touched.branch ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="branch" />

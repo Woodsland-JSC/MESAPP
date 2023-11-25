@@ -9,6 +9,7 @@ import {
     TbChevronDown,
     TbArrowRight,
     TbInfoSquareRounded,
+    TbAnalyze,
 } from "react-icons/tb";
 import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
@@ -37,6 +38,8 @@ function Header(props) {
         useAppContext();
 
     const { variant } = props;
+
+    console.log(user.permissions?.includes("monitor"))
 
     const handleSignOut = async () => {
         try {
@@ -121,7 +124,7 @@ function Header(props) {
                                 </li>
                             )}
                         </NavLink>
-                        <NavLink to="/integration" className="flex items-center">
+                        {user.permissions?.includes("monitor") && (<NavLink to="/integration" className="flex items-center">
                             {({ isActive }) => (
                                 <li
                                     className={
@@ -137,13 +140,13 @@ function Header(props) {
                                                 : "flex items-center space-x-2"
                                         }
                                     >
-                                        <SiSap className="text-2xl"/>
+                                        <TbAnalyze className="text-2xl"/>
                                         <p>Tích hợp</p>
                                     </div>
                                 </li>
                             )}
-                        </NavLink>
-                        <NavLink to="/settings" className="flex items-center">
+                        </NavLink>)}
+                        {/* <NavLink to="/profile" className="flex items-center">
                             {({ isActive }) => (
                                 <li
                                     className={
@@ -159,12 +162,12 @@ function Header(props) {
                                                 : "flex items-center space-x-2"
                                         }
                                     >
-                                        <TbSettings className="text-2xl" />
+                                        <TbSettings className="text-2xl"/>
                                         <p>Cài đặt</p>
                                     </div>
                                 </li>
                             )}
-                        </NavLink>
+                        </NavLink> */}
                     </ul>
                 </div>
 
@@ -175,7 +178,7 @@ function Header(props) {
                             <img
                                 src={user?.avatar ? user.avatar : defaultUser}
                                 alt="user"
-                                className="w-8 h-8 rounded-full"
+                                className="w-8 h-8 rounded-full object-cover"
                             ></img>
                             <div className="flex xl:hidden">
                                 <Menu>
@@ -198,7 +201,7 @@ function Header(props) {
                                                 user?.last_name}
                                         </div>
                                         <MenuDivider />
-                                        <Link to="/users">
+                                        <Link to="/profile">
                                             <MenuItem
                                                 icon={
                                                     <TbInfoSquareRounded className="text-2xl" />
@@ -215,7 +218,7 @@ function Header(props) {
                                                 }
                                                 minH="42px"
                                             >
-                                                Workscape
+                                                Workspace
                                             </MenuItem>
                                         </Link>
                                         <Link to="/users">
@@ -228,7 +231,7 @@ function Header(props) {
                                                 Quản lý người dùng
                                             </MenuItem>
                                         </Link>
-                                        <Link to="/integration">
+                                        {user.permissions?.includes("monitor") && (<Link to="/integration">
                                             <MenuItem
                                                 icon={
                                                     <SiSap className="text-2xl"/>
@@ -237,17 +240,17 @@ function Header(props) {
                                             >
                                                 Tích hợp
                                             </MenuItem>
-                                        </Link>
-                                        <Link to="/settings">
+                                        </Link>)}
+                                        {/* <Link to="/profile">
                                             <MenuItem
                                                 icon={
                                                     <TbSettings className="text-2xl" />
                                                 }
                                                 minH="42px"
                                             >
-                                                Cài đặt
+                                                Thông tin cá nhân
                                             </MenuItem>
-                                        </Link>
+                                        </Link> */}
                                         <MenuItem
                                             icon={
                                                 <TbArrowRight className="text-2xl" />
@@ -273,7 +276,7 @@ function Header(props) {
                                     </MenuButton>
                                     <MenuList>
                                         <MenuItem>
-                                            <Link to="/users">
+                                            <Link to="/profile">
                                                 Trang cá nhân
                                             </Link>
                                         </MenuItem>

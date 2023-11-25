@@ -19,10 +19,13 @@ body {
 }
 
 .ag-root-wrapper-body.ag-layout-normal {
-  height: 30rem !important;
+    height: 30rem !important;
 }
 
 @layer components {
+    .body-no-scroll {
+        @apply overflow-hidden;
+    }
     .loader {
         bottom: 0;
         left: 0;
@@ -137,54 +140,53 @@ body {
     }
 
     .tiny-loader-wrapper {
-      @apply inline-block h-10 w-10 mx-auto my-auto rounded-md;
-      background: rgba(34, 34, 34, 0.7);
+        @apply inline-block h-10 w-10 mx-auto my-auto rounded-md;
+        background: rgba(34, 34, 34, 0.7);
     }
     .tiny-loader-wrapper.in {
-      @apply opacity-100;
-      -webkit-transform: scale(1);
-      transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
+        @apply opacity-100;
+        -webkit-transform: scale(1);
+        transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
     }
     .tiny-loader {
-      @apply relative w-[62px] h-[80px] mx-auto my-auto mt-0.5;
-      zoom: 0.45;
+        @apply relative w-[62px] h-[80px] mx-auto my-auto mt-0.5;
+        zoom: 0.45;
     }
     .tiny-loader div {
-      @apply absolute block w-3 h-8 bg-[rgba(255,255,255,0)] animate-[fadeG_0.72s_infinite_linear] m-0 p-0 rounded-lg scale-[0.4];
+        @apply absolute block w-3 h-8 bg-[rgba(255,255,255,0)] animate-[fadeG_0.72s_infinite_linear] m-0 p-0 rounded-lg scale-[0.4];
     }
     .tiny-loader div:nth-of-type(1) {
-      @apply -rotate-90 left-0 top-7;
-      animation-delay: 0.27s;
+        @apply -rotate-90 left-0 top-7;
+        animation-delay: 0.27s;
     }
     .tiny-loader div:nth-of-type(2) {
-      @apply -rotate-45 left-2 top-2.5;
-      animation-delay: 0.36s;
+        @apply -rotate-45 left-2 top-2.5;
+        animation-delay: 0.36s;
     }
     .tiny-loader div:nth-of-type(3) {
-      @apply rotate-0 left-[26px] top-[3px];
-      animation-delay: 0.45s;
+        @apply rotate-0 left-[26px] top-[3px];
+        animation-delay: 0.45s;
     }
     .tiny-loader div:nth-of-type(4) {
-      @apply rotate-45 right-2 top-2.5;
-      animation-delay: 0.54s;
+        @apply rotate-45 right-2 top-2.5;
+        animation-delay: 0.54s;
     }
     .tiny-loader div:nth-of-type(5) {
-      @apply rotate-90 right-0 top-7;
-      animation-delay: 0.63s;
+        @apply rotate-90 right-0 top-7;
+        animation-delay: 0.63s;
     }
     .tiny-loader div:nth-of-type(6) {
-      @apply rotate-[135deg] right-2 bottom-[7px];
-      animation-delay: 0.72s;
+        @apply rotate-[135deg] right-2 bottom-[7px];
+        animation-delay: 0.72s;
     }
     .tiny-loader div:nth-of-type(7) {
-      @apply rotate-180 left-[26px] bottom-0;
-      animation-delay: 0.8s;
+        @apply rotate-180 left-[26px] bottom-0;
+        animation-delay: 0.8s;
     }
     .tiny-loader div:nth-of-type(8) {
-      @apply rotate-[-135deg] left-2 bottom-[7px];
-      animation-delay: 0.9s;
+        @apply rotate-[-135deg] left-2 bottom-[7px];
+        animation-delay: 0.9s;
     }
-    
 
     @keyframes fadeG {
         0% {
@@ -196,9 +198,9 @@ body {
     }
 
     .react-select__option {
-      @apply block text-base text-[#242424] w-full select-none box-border px-3 py-[11px] hover:bg-[#ebecf0];
+        @apply block text-base text-[#242424] w-full select-none box-border px-3 py-[11px] hover:bg-[#ebecf0];
     }
     .react-select__option_selected {
-      @apply bg-[#42526e] text-white hover:bg-[#42526e];
+        @apply bg-[#42526e] text-white hover:bg-[#42526e];
     }
 }

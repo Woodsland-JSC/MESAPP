@@ -27,7 +27,7 @@ export const AppProvider = ({ children }) => {
     );
 
     useEffect(() => {
-        if (user && user?.access_token) {
+        if (user || user?.access_token) {
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
