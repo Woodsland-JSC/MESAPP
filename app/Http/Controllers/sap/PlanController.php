@@ -68,16 +68,13 @@ class PlanController extends Controller
     // danh sách kế hoạch sấy
     function listPlan(Request $request)
     {
-        $pagination = plandryings::orderBy('PlanID', 'DESC')->where('Status', '<>', 3)->paginate(50);
-
-        // Get the array representation of the pagination data
-        $response = $pagination->toArray();
-
-        // Manually add the next page link if it exists
-        $response['next_page_url'] = $pagination->nextPageUrl();
-        $response['prev_page_url'] = $pagination->previousPageUrl();
-
-        return response()->json($response, 200);
+        $pallets = DB::table('planDryings as a')
+            ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->select('a.*')
+            ->where('b.plant', '=', Auth::user()->plant)
+            ->where('a.Status', '<>', '4')
+            ->get();
+        return response()->json($pallets, 200);
     }
     //danh sách pallet chưa được assign
     function listpallet(Request $request)
