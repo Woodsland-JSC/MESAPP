@@ -10,6 +10,7 @@ use App\Models\Reasons;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class MasterData.
@@ -210,6 +211,28 @@ class MasterDataController extends Controller
             $results = array();
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
+            }
+
+            $data2 = DB::table('pallets as a')
+                ->join('pallet_details as b', 'a.palletID', '=', 'b.palletID')
+                ->where('a.IssueNumber', 0)
+                ->where('b.ItemCode', $id)
+                ->groupBy('b.ItemCode', 'b.BatchNum')
+                ->select('b.ItemCode', 'b.BatchNum', DB::raw('SUM(b.Qty) as Quantity'))
+                ->get();
+
+            foreach ($results as &$item) {
+                $batchNum = $item['BatchNum'];
+                $quantity = (float) $item['Quantity'];
+
+                // Kiểm tra xem BatchNum có trong $data2 không
+                $matchingItem = collect($data2)->where('BatchNum', $batchNum)->first();
+
+                // Nếu tìm thấy, ghi đè (overwrite) Quantity
+                if ($matchingItem) {
+                    $quantity2 = (float) $matchingItem->Quantity;
+                    $item['Quantity'] = (string)max(0, $quantity - $quantity2);
+                }
             }
             odbc_close($conDB);
             return response()->json($results, 200);

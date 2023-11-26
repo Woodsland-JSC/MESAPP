@@ -255,6 +255,7 @@ class PlanController extends Controller
 
                 $results = Plandryings::select(
                     'planDryings.Code as newbatch',
+                    'pallets.palletID',
                     'pallets.DocEntry',
                     'pallet_details.ItemCode',
                     'pallet_details.WhsCode',
@@ -275,6 +276,7 @@ class PlanController extends Controller
                 $groupedResults = $results->groupBy('DocEntry');
 
                 foreach ($groupedResults as $docEntry => $group) {
+
                     $data = [];
                     foreach ($group as $batchData) {
                         $data[] = [
@@ -285,7 +287,9 @@ class PlanController extends Controller
                     }
 
                     $header = $group->first();
-
+                    Pallet::where('palletID', $header->palletID)->update([
+                        'IssueNumber' => -1
+                    ]);
                     $body = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "DocumentLines" => [

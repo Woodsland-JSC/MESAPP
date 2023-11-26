@@ -35,5 +35,11 @@ class receiptProduction implements ShouldQueue
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $this->body);
+        if ($response->successful()) {
+        } else {
+            $res = $response->json();
+            // Job sẽ được queue worker thử lại
+            throw new \Exception($res['error']);
+        }
     }
 }

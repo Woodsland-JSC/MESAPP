@@ -25,6 +25,8 @@ class Pallet extends Model
         'DocNum',
         'DocEntry',
         'flag',
+        'issue_number',
+        'receipt_number',
         'CreateBy',
     ];
     // Sự kiện trước khi tạo mới record
