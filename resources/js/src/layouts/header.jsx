@@ -38,7 +38,7 @@ function Header(props) {
 
     const { variant } = props;
 
-    console.log(user.permissions?.includes("monitor"))
+    // console.log(user.permissions?.includes("monitor"))
 
     const handleSignOut = async () => {
         try {
@@ -123,7 +123,7 @@ function Header(props) {
                                 </li>
                             )}
                         </NavLink>
-                        {user.permissions?.includes("monitor") && (<NavLink to="/integration" className="flex items-center">
+                        {user?.permissions?.includes("monitor") && (<NavLink to="/integration" className="flex items-center">
                             {({ isActive }) => (
                                 <li
                                     className={
@@ -230,7 +230,7 @@ function Header(props) {
                                                 Quản lý người dùng
                                             </MenuItem>
                                         </Link>
-                                        {user.permissions?.includes("monitor") && (<Link to="/integration">
+                                        {user?.permissions?.includes("monitor") && (<Link to="/integration">
                                             <MenuItem
                                                 icon={
                                                     <SiSap className="text-2xl"/>
