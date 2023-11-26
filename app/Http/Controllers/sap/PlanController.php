@@ -242,6 +242,7 @@ class PlanController extends Controller
             }
             $id = $request->input('PlanID');
             $record = plandryings::find($id);
+            $test = [];
             if ($record) {
                 $record->update(
                     [
@@ -284,6 +285,7 @@ class PlanController extends Controller
                     $header = $group->first();
 
                     $body = [
+                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "DocumentLines" => [
                             [
                                 "Quantity" => $header->TotalQty,
@@ -296,12 +298,13 @@ class PlanController extends Controller
                         ],
                     ];
 
-
+                    $test[]
+                        = $body;
                     issueProduction::dispatch($body);
                 }
 
                 DB::commit();
-                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+                return response()->json(['message' => 'updated successfully', 'data' => $test]);
             } else {
                 return response()->json(['error' => 'Record not found'], 404);
             }
@@ -368,12 +371,14 @@ class PlanController extends Controller
                             "U_CDai" => $batchData->CDai,
                             "U_CRong" =>  $batchData->CRong,
                             "U_CDay" =>  $batchData->CDay,
+                            "U_Status" => "SD"
                         ];
                     }
 
                     $header = $group->first();
 
                     $body = [
+                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "DocumentLines" => [
                             [
                                 "Quantity" => $header->TotalQty,
@@ -382,6 +387,7 @@ class PlanController extends Controller
                                 "BaseEntry" => $header->DocEntry,
                                 "BaseType" => 202,
                                 "BatchNumbers" => $data,
+
                             ],
                         ],
                     ];
