@@ -304,7 +304,7 @@ class PlanController extends Controller
                 }
 
                 DB::commit();
-                return response()->json(['message' => 'updated successfully', 'data' => $test]);
+                return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
             } else {
                 return response()->json(['error' => 'Record not found'], 404);
             }
@@ -406,7 +406,7 @@ class PlanController extends Controller
                     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
                 }
                 DB::commit();
-                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+                return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
             } else {
                 return response()->json(['error' => 'Record not found'], 404);
             }
