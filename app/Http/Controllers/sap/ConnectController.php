@@ -14,12 +14,18 @@ class ConnectController extends Controller
 
         try {
             $host = 'sap.woodsland.com.vn:30015';
-            $driver = 'HDBODBC';
+            $driver = '';
+            if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+                $driver = 'HDBODBC';
+            } else {
+                $driver = '/usr/sap/hdbclient/libodbcHDB.so';
+            }
+
             $db_name = "WOODSLAND_UATS";
             $username = 'SYSTEM';
             // Password
             $password = "S@p@Systemb1";
-            $constring = "Driver={HDBODBC};ServerNode=" . $host . ";UID=" . $username . ";PWD=" . $password . ";CS=" . $db_name . ";char_as_utf8=true";
+            $constring = "Driver={" . $driver . "};ServerNode=" . $host . ";UID=" . $username . ";PWD=" . $password . ";CS=" . $db_name . ";char_as_utf8=true";
             //return odbc_connect("Driver=$driver;ServerNode=$host;Database=$db_name;", $username, $password, SQL_CUR_USE_ODBC);
             return   odbc_connect($constring, ' SQL_CUR_USE_ODBC', '');
         } catch (\Exception $e) {

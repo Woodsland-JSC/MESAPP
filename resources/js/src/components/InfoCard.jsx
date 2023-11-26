@@ -3,7 +3,7 @@ import { FaInfoCircle } from "react-icons/fa";
 
 function InfoCard(props) {
     
-    const { purpose, thickness, height, finishedDate, palletQty, weight} = props;
+    const { purpose, thickness, finishedDate, palletQty, weight} = props;
 
     return (
         <div className="bg-white rounded-2xl border-2 border-gray-200 h-fit">
@@ -20,10 +20,6 @@ function InfoCard(props) {
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Chiều dày sấy:</div>
                     <span>{thickness}</span>
-                </div>
-                <div className="grid grid-cols-2">
-                    <div className="font-semibold">Chiều dài sấy:</div>
-                    <span>{height}</span>
                 </div>
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Ngày ra lò dự kiến:</div>

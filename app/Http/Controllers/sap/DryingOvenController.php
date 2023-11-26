@@ -120,7 +120,7 @@ class DryingOvenController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "Code","Name"  from "@G_SAY3" where "U_Branch"=? and "U_Factory"=? and IFNULL("U_status",0)<>1';
+            $query = 'select "Code","Name"  from "@G_SAY3" where "U_Branch"=? and "U_Factory"=? and IFNULL("U_status",0)<>1 order by "Code" ';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));

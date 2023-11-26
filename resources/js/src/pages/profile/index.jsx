@@ -450,7 +450,7 @@ function Profile() {
                     </div> */}
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Cài đặt</div>
+                    <div className="text-3xl font-bold mb-6">Trang cá nhân</div>
                     {/* Main content */}
                     <Formik
                         key={formKey}
