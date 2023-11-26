@@ -399,7 +399,7 @@ class PlanController extends Controller
                     ];
 
                     $test[] = $body;
-                    receiptProduction::dispatch($body);
+                    receiptProduction::dispatch($body, $header->DocEntry);
                 }
                 // ulock lò sấy
                 $conDB = (new ConnectController)->connect_sap();

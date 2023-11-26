@@ -18,9 +18,11 @@ class receiptProduction implements ShouldQueue
      * Create a new job instance.
      */
     protected $body;
-    public function __construct($body)
+    protected $ponum;
+    public function __construct($body, $ponum)
     {
         $this->body = $body;
+        $this->ponum = $ponum;
     }
 
     /**
@@ -36,6 +38,17 @@ class receiptProduction implements ShouldQueue
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $this->body);
         if ($response->successful()) {
+            $data = [
+                "ProductionOrderStatus" => "boposClosed"
+            ];
+            // close
+            Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'Authorization' => 'Basic ' . BasicAuthToken(),
+            ])->patch(UrlSAPServiceLayer() . '/b1s/v1/ProductionOrders(' . $this->ponum  . ')', $data);
         } else {
             $res = $response->json();
             // Job sẽ được queue worker thử lại
