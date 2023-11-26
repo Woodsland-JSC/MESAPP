@@ -150,12 +150,14 @@ class PlanController extends Controller
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
             }
+            $data = plandetail::create(['PlanID' => $id, 'pallet' => $pallet, 'size' => 5, 'Qty' => 10, 'Mass' => 10]);
+            $number = plandetail::where('PlanID', $id)->count();
             plandryings::where('PlanID', $id)->update(
                 [
                     'Status' => 1,
+                    'TotalPallet' => $number
                 ]
             );
-            $data = plandetail::create(['PlanID' => $id, 'pallet' => $pallet, 'size' => 5, 'Qty' => 10, 'Mass' => 10]);
             DB::commit();
 
             return response()->json([
