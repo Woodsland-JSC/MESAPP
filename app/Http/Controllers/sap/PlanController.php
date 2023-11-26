@@ -432,7 +432,7 @@ class PlanController extends Controller
 
         if ($plandrying) {
             // Access the related plan details
-            $planDetails = $plandrying->details;
+            // $planDetails = $plandrying->details;
             return response()->json(['plandrying' => $plandrying]);
         } else {
             return response()->json(['error' => 'No record found for the given PlanID'], 404);

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 
 class plandryings extends Model
 {
@@ -51,6 +51,16 @@ class plandryings extends Model
                 $model->Code = $current_year . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
             });
         });
+    }
+    public function getCreatedAtAttribute($value)
+    {
+        // Convert the timestamp to the desired format
+        return Carbon::parse($value)->format('Y-m-d H:i:s');
+    }
+    public function getUpdatedAtAttribute($value)
+    {
+        // Convert the timestamp to the desired format
+        return Carbon::parse($value)->format('Y-m-d H:i:s');
     }
     public function worker()
     {
