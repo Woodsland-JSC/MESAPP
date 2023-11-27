@@ -50,7 +50,7 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "ItemCode","ItemName" from OITM where "Series"=?';
+            $query = 'select "ItemCode","ItemName" from OITM where "Series"=? and ("OnHand"-"IsCommited"+"OnOrder")>0';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
