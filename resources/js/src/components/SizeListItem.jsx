@@ -11,7 +11,7 @@ function SizeListItem(props) {
            <div>{size}</div>
         </div>
 
-        <div className=' space-y-2 py-3 p-4'>
+        <div className='text-gray-600 space-y-2 py-3 p-4'>
           <div className='w-fit'>Pallet: {pallet}</div>
           <div className=''>SL: {Qty} (t)</div>
           <div className=''>KL: {weight} (m³)</div>

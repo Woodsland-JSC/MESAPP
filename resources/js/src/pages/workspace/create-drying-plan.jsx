@@ -164,6 +164,7 @@ function CreateDryingPlan() {
                 );
 
                 const newBowCard = {
+                    planID: response.data.PlanID,
                     status: 0,
                     batchNumber: response.data.Code,
                     kilnNumber: response.data.Oven,
@@ -441,7 +442,7 @@ function CreateDryingPlan() {
                                 isReviewed={bowCard.Review}
                             />
                         ))}
-                        <BOWCard
+                        {/* <BOWCard
                             status="Placeholder"
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
@@ -506,7 +507,7 @@ function CreateDryingPlan() {
                             finishedDate="2023-11-07 10:58:14"
                             palletQty="111"
                             weight="130.72 (m³)"
-                        />
+                        /> */}
                     </div>
 
                     <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">

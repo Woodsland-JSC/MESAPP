@@ -211,7 +211,7 @@ function LoadIntoKiln() {
                             batchNumber="2023.41.08"
                             kilnNumber="15 (TH)"
                             thickness="24-27"
-                            height="24"
+                            height="24"np
                             purpose="INDOOR"
                             finishedDate="2023-11-07 10:58:14"
                             palletQty="0"
