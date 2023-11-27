@@ -249,7 +249,7 @@ function FinishedGoodsReceipt() {
 
                                 <Box flexShrink="0">
                                     <StepTitle>{step.title}</StepTitle>
-                                    <StepDescription>
+                                    <StepDescription className="hidden sm:block">
                                         {step.description}
                                     </StepDescription>
                                 </Box>
@@ -337,10 +337,10 @@ function FinishedGoodsReceipt() {
                                         divider={<StackDivider />}
                                         spacing="4"
                                     >
-                                        <Box className="flex items-center justify-center gap-4">
+                                        <Box className="flex flex-col md:flex-row items-center justify-center gap-4">
                                             <div>
                                                 <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold">Mã thành phẩm</label>
+                                                    <label className="font-semibold whitespace-nowrap">Mã thành phẩm</label>
                                                     <input
                                                         type="text"
                                                         disabled
@@ -354,7 +354,7 @@ function FinishedGoodsReceipt() {
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold">
+                                                    <label className="font-semibold whitespace-nowrap">
                                                         Tên thành phẩm
                                                     </label>
                                                     <input
@@ -370,7 +370,7 @@ function FinishedGoodsReceipt() {
                                                     />
                                                 </div>
                                                 <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold">Tổng số lượng</label>
+                                                    <label className="font-semibold whitespace-nowrap">Tổng số lượng</label>
                                                     <input
                                                         type="text"
                                                         disabled
@@ -465,105 +465,6 @@ function FinishedGoodsReceipt() {
                     {/* </div> */}
                     {/* </div> */}
 
-                    {/* Content */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6"></div>
-
-                    <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">
-                        <button
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold p-5 rounded-full shadow-lg"
-                            onClick={onOpen}
-                        >
-                            <HiPlus className="text-2xl" />
-                        </button>
-                    </div>
-
-                    <Modal
-                        closeOnOverlayClick={false}
-                        onClose={onClose}
-                        isOpen={isOpen}
-                        isCentered
-                    >
-                        <ModalOverlay />
-                        <ModalContent>
-                            <ModalHeader>Tạo kế hoạch sấy</ModalHeader>
-                            <ModalCloseButton />
-                            <ModalBody>
-                                <div className="flex flex-col space-y-5">
-                                    <div className="border-b border-gray-200">
-                                        <div className="text-lg mb-1 font-medium">
-                                            Mẻ sấy số: <span>2023.41.08</span>
-                                        </div>
-                                        <div className="text-gray-500 pb-3">
-                                            Ngày: <span>21/11/2023</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="">
-                                        <label
-                                            htmlFor="first_name"
-                                            className="block mb-2 text-md font-medium text-gray-900"
-                                        >
-                                            Lò sấy
-                                        </label>
-                                        {/* <Select
-                                            options={[]}
-                                            onChange={(value) =>
-                                                setSelectedKiln(value)
-                                            }
-                                        /> */}
-                                    </div>
-                                    <div className="">
-                                        <label
-                                            htmlFor="first_name"
-                                            className="block mb-2 text-md font-medium text-gray-900"
-                                        >
-                                            Mục đích sấy
-                                        </label>
-                                        {/* <Select options={options} /> */}
-                                        {/* <Select
-                                            options={[]}
-                                            onChange={(value) => {
-                                                console.log(
-                                                    "Selected Drying Reason:",
-                                                    value
-                                                );
-                                                setSelectedDryingReasonsPlan(
-                                                    value
-                                                );
-                                            }}
-                                        /> */}
-                                    </div>
-                                    <div className="">
-                                        <label
-                                            htmlFor="first_name"
-                                            className="block mb-2 text-md font-medium text-gray-900"
-                                        >
-                                            Chiều dày sấy
-                                        </label>
-                                        {/* <AsyncSelect
-                                            cacheOptions
-                                            defaultOptions
-                                            loadOptions={[]}
-                                            onChange={(value) =>
-                                                setSelectedThickness(value)
-                                            }
-                                        /> */}
-                                    </div>
-                                </div>
-                            </ModalBody>
-                            <ModalFooter>
-                                <div className="flex gap-4">
-                                    <Button onClick={onClose}>Đóng</Button>
-                                    <Button
-                                        colorScheme="facebook"
-                                        onClick={handleCompletion}
-                                    >
-                                        Hoàn thành
-                                    </Button>
-                                </div>
-                            </ModalFooter>
-                        </ModalContent>
-                    </Modal>
                 </div>
             </div>
             {
