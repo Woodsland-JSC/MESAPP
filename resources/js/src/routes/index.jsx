@@ -109,8 +109,12 @@ import WoodSorting from '../pages/workspace/wood-sorting';
 import Notfound from "../pages/errors/notfound";
 
 import ProtectedRoute from "./ProtectedRoute";
-import useAppContext from "../store/AppContext";
 import FinishedGoodsReceipt from "../pages/workspace/finished-goods-receipt";
+
+import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
+import WoodAwaitingDryingReport from "../pages/reports/wooddrying/wood-awaiting-drying";
+
+import useAppContext from "../store/AppContext";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -256,6 +260,22 @@ function AppRoutes() {
                         element={
                         <ProtectedRoute >
                             <FinishedGoodsReceipt />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-processing-kiln-stacking"
+                        element={
+                        <ProtectedRoute >
+                            <WoodProcessingKilnStackingReport />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-awaiting-drying"
+                        element={
+                        <ProtectedRoute >
+                            <WoodAwaitingDryingReport />
                         </ProtectedRoute>
                         }
                     />
