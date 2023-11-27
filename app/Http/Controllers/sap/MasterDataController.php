@@ -50,7 +50,7 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "ItemCode","ItemName" from OITM where "Series"=?';
+            $query = 'select "ItemCode","ItemName" from OITM where "Series"=? and ("OnHand"-"IsCommited"+"OnOrder")>0';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -192,12 +192,17 @@ class MasterDataController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $conDB = (new ConnectController)->connect_sap();
-
+            $filter = "";
+            if ($request->reason == 'SL') {
+                $filter = 'T1."U_Status" != ?';
+            } else {
+                $filter = 'T1."U_Status"= ?';
+            }
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
-                'where T1."Quantity" >0 and T0."ItemCode"= ? and "BPLid" = ? and t3."U_Flag"=?';
+                'where T1."Quantity" >0 and T0."ItemCode"= ? and "BPLid" = ? and ' . $filter;
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -235,6 +240,7 @@ class MasterDataController extends Controller
                 }
             }
             odbc_close($conDB);
+            $results = array_filter($results, fn ($item) => (float) $item['Quantity'] > 0);
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -349,6 +355,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
+
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
