@@ -101,7 +101,7 @@ function PalletCard(props) {
                     >
                         Số lượng
                     </label>
-                    <NumberInput defaultValue={0} max={inStock} min={0} onChange={(value) => props.onQuantityChange(value)}>
+                    <NumberInput defaultValue={0} max={1} min={0} onChange={(value) => props.onQuantityChange(value)}>
                         <NumberInputField
                         />
                         <NumberInputStepper>

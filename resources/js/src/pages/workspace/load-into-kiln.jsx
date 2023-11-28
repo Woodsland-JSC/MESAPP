@@ -143,97 +143,43 @@ function LoadIntoKiln() {
                     </div>
 
                     {/* BOWCard List */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards?.map((bowCard, index) => (
-                            (bowCard.Status === 1 || bowCard.Status === 0) && (
-                                <BOWCard
-                                    key={index}
-                                    planID={bowCard.PlanID}
-                                    status={bowCard.Status}
-                                    batchNumber={bowCard.Code}
-                                    kilnNumber={bowCard.Oven}
-                                    thickness={bowCard.Method}
-                                    purpose={bowCard.Reason}
-                                    finishedDate={format(addDays(new Date(bowCard.created_at), bowCard.Time), 'yyyy-MM-dd HH:mm:ss')}
-                                    palletQty={bowCard.TotalPallet}
-                                    weight={bowCard.Mass}
-                                    isChecked={bowCard.Checked}
-                                    isReviewed={bowCard.Review}
-                                />
-                            )
-                        ))}
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"np
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                        <BOWCard
-                            status={0}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="0"
-                            weight="0"
-                        />
-                    </div>
+                    {/* {(bowCards.Status === 0).length > 0 && (bowCards.Status === 1).length > 0 ? ( */}
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                            {bowCards?.map(
+                                (bowCard, index) =>
+                                    (bowCard.Status === 1 ||
+                                        bowCard.Status === 0) && (
+                                        <BOWCard
+                                            key={index}
+                                            planID={bowCard.PlanID}
+                                            status={bowCard.Status}
+                                            batchNumber={bowCard.Code}
+                                            kilnNumber={bowCard.Oven}
+                                            thickness={bowCard.Method}
+                                            purpose={bowCard.Reason}
+                                            finishedDate={format(
+                                                addDays(
+                                                    new Date(
+                                                        bowCard.created_at
+                                                    ),
+                                                    bowCard.Time
+                                                ),
+                                                "yyyy-MM-dd HH:mm:ss"
+                                            )}
+                                            palletQty={bowCard.TotalPallet}
+                                            weight={bowCard.Mass}
+                                            isChecked={bowCard.Checked}
+                                            isReviewed={bowCard.Review}
+                                        />
+                                    )
+                            )}
+                        </div>
+                    {/* ) : (
+                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>
+                    )} */}
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
+            {loading && <Loader />}
         </Layout>
     );
 }

@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import Loader from "../../components/Loader";
 
-
 function DryingWoodChecking() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
@@ -143,93 +142,42 @@ function DryingWoodChecking() {
                     </div>
 
                     {/* Content */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards?.map((bowCard, index) => (
-                            (bowCard.Status === 3 || bowCard.Status === 4) && (
-                                <BOWCard
-                                    key={index}
-                                    planID={bowCard.PlanID}
-                                    status={bowCard.Status}
-                                    batchNumber={bowCard.Code}
-                                    kilnNumber={bowCard.Oven}
-                                    thickness={bowCard.Method}
-                                    purpose={bowCard.Reason}
-                                    finishedDate={format(addDays(new Date(bowCard.created_at), bowCard.Time), 'yyyy-MM-dd HH:mm:ss')}
-                                    palletQty={bowCard.TotalPallet}
-                                    weight={bowCard.Mass}
-                                    isChecked={bowCard.Checked}
-                                    isReviewed={bowCard.Review}
-                                />
-                            )
-                        ))}
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status={3}
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        
-                    </div>
+                    {/* {(bowCards.Status === 4).length > 0 && (bowCards.Status === 3).length > 0 ? ( */}
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                            {bowCards?.map(
+                                (bowCard, index) =>
+                                    (bowCard.Status === 3 ||
+                                        bowCard.Status === 4) && (
+                                        <BOWCard
+                                            key={index}
+                                            planID={bowCard.PlanID}
+                                            status={bowCard.Status}
+                                            batchNumber={bowCard.Code}
+                                            kilnNumber={bowCard.Oven}
+                                            thickness={bowCard.Method}
+                                            purpose={bowCard.Reason}
+                                            finishedDate={format(
+                                                addDays(
+                                                    new Date(
+                                                        bowCard.created_at
+                                                    ),
+                                                    bowCard.Time
+                                                ),
+                                                "yyyy-MM-dd HH:mm:ss"
+                                            )}
+                                            palletQty={bowCard.TotalPallet}
+                                            weight={bowCard.Mass}
+                                            isChecked={bowCard.Checked}
+                                            isReviewed={bowCard.Review}
+                                        />
+                                    )
+                            )}
+                        </div>
+                    {/* ) : (
+                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">
+                             Tiến trình hiện tại không có hoạt động nào.
+                      </div>
+                    )} */}
                 </div>
             </div>
             {loading && <Loader />}

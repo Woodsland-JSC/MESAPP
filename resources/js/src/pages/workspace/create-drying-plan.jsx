@@ -416,100 +416,37 @@ function CreateDryingPlan() {
                     </div>
 
                     {/* BOW Card List */}
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {createdBowCards.map((createdbowCard, index) => (
-                            <BOWCard key={index} {...createdbowCard} />
-                        ))}
-                        {filteredBowCards?.map((bowCard, index) => (
-                            <BOWCard
-                                key={index}
-                                planID={bowCard.PlanID}
-                                status={bowCard.Status}
-                                batchNumber={bowCard.Code}
-                                kilnNumber={bowCard.Oven}
-                                thickness={bowCard.Method}
-                                purpose={bowCard.Reason}
-                                finishedDate={format(
-                                    addDays(
-                                        new Date(bowCard.created_at),
-                                        bowCard.Time
-                                    ),
-                                    "yyyy-MM-dd HH:mm:ss"
-                                )}
-                                palletQty={bowCard.TotalPallet}
-                                weight={bowCard.Mass}
-                                isChecked={bowCard.Checked}
-                                isReviewed={bowCard.Review}
-                            />
-                        ))}
-                        {/* <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        />
-                        <BOWCard
-                            status="Placeholder"
-                            batchNumber="2023.41.08"
-                            kilnNumber="15 (TH)"
-                            thickness="24-27"
-                            height="24"
-                            purpose="INDOOR"
-                            finishedDate="2023-11-07 10:58:14"
-                            palletQty="111"
-                            weight="130.72 (m³)"
-                        /> */}
-                    </div>
-
+                    {/* {createdBowCards || filteredBowCards.length > 0 ? ( */}
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                            {createdBowCards.map((createdbowCard, index) => (
+                                <BOWCard key={index} {...createdbowCard} />
+                            ))}
+                            {filteredBowCards?.map((bowCard, index) => (
+                                <BOWCard
+                                    key={index}
+                                    planID={bowCard.PlanID}
+                                    status={bowCard.Status}
+                                    batchNumber={bowCard.Code}
+                                    kilnNumber={bowCard.Oven}
+                                    thickness={bowCard.Method}
+                                    purpose={bowCard.Reason}
+                                    finishedDate={format(
+                                        addDays(
+                                            new Date(bowCard.created_at),
+                                            bowCard.Time
+                                        ),
+                                        "yyyy-MM-dd HH:mm:ss"
+                                    )}
+                                    palletQty={bowCard.TotalPallet}
+                                    weight={bowCard.Mass}
+                                    isChecked={bowCard.Checked}
+                                    isReviewed={bowCard.Review}
+                                />
+                            ))}
+                        </div>
+                    {/* ) : (
+                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-500 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>
+                    )} */}
                     <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">
                         <button
                             class="bg-[#1f2937] hover:bg-[#2d3b4e] text-white font-bold p-5 rounded-full shadow-lg"
