@@ -150,6 +150,10 @@ class PlanController extends Controller
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
             }
+            $existingPallet = plandryings::where('pallet', $pallet)->first();
+            if ($existingPallet) {
+                throw new \Exception('Pallet không hợp lệ.');
+            }
             $data = pallet_details::find($pallet)->first();
 
 

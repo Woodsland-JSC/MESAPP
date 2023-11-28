@@ -284,14 +284,14 @@ function ControllerCard(props) {
         progress === "kh"
             ? "Tạo kế hoạch sấy"
             : progress === "vl"
-            ? "Vào lò"
-            : progress === "kt"
-            ? "Kiểm tra lò sấy"
-            : progress === "ls"
-            ? "Chạy lò sấy"
-            : progress === "dg"
-            ? "Đánh giá mẻ sấy và xác nhận ra lò"
-            : "";
+                ? "Vào lò"
+                : progress === "kt"
+                    ? "Kiểm tra lò sấy"
+                    : progress === "ls"
+                        ? "Chạy lò sấy"
+                        : progress === "dg"
+                            ? "Đánh giá mẻ sấy và xác nhận ra lò"
+                            : "";
 
     const content =
         progress === "kh" ? (
@@ -363,10 +363,10 @@ function ControllerCard(props) {
                                     >
                                         Chọn pallet
                                     </label>
-                                    <AsyncSelectf
+                                    <AsyncSelect
                                         cacheOptions
                                         placeholder="Chọn pallet"
-                                        loadOptions={loadPalletOptions}
+                                        loadOptions={palletData}
                                         // defaultOptions={palletData}
                                         onChange={(value) => {
                                             console.log(
@@ -539,11 +539,10 @@ function ControllerCard(props) {
                                     Kết luận:{" "}
                                 </strong>
                                 <p
-                                    className={`ml-2  ${
-                                        checkedCount === 12
-                                            ? "text-[#0E8E59]"
-                                            : "text-[#961717]"
-                                    }`}
+                                    className={`ml-2  ${checkedCount === 12
+                                        ? "text-[#0E8E59]"
+                                        : "text-[#961717]"
+                                        }`}
                                 >
                                     {checkedCount === 12
                                         ? "Mẻ sấy đã đủ điều kiện hoạt động."
