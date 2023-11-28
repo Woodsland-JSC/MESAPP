@@ -145,26 +145,38 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::find($id);
+            $existingPlan = plandryings::find($id)->whereNotIn('status', [2, 3, 4])->first();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
             }
-            $data = plandetail::create(['PlanID' => $id, 'pallet' => $pallet, 'size' => 5, 'Qty' => 10, 'Mass' => 10]);
-            $number = plandetail::where('PlanID', $id)->count();
-            plandryings::where('PlanID', $id)->update(
-                [
-                    'Status' => 1,
-                    'TotalPallet' => $number
-                ]
-            );
+            $data = pallet_details::find($pallet)->first();
+
+
+            plandetail::create([
+                'PlanID' => $id,
+                'pallet' => $pallet,
+                'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
+                'Qty' => $data->Qty,
+                'Mass' => max($data['CDay'] * $data['CRong'] * $data['CDai'] * $data->Qty, 1),
+            ]);
+
+
             DB::commit();
+            $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
+                ->selectRaw('COUNT(*) as count, SUM(Mass) as sumMass')->first();
+
+            plandryings::where('PlanID', $id)->update([
+                'Status' => 1,
+                'TotalPallet' => $aggregateData->count,
+                'Mass' => $aggregateData->sumMass ?: 0,
+            ]);
 
             return response()->json([
                 'message' => 'successfully',
                 [
                     'data' => $existingPlan,
-                    'detail' =>  plandetail::where('PlanID', $id)->get()
+
                 ],
 
 
@@ -191,14 +203,20 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id);
+            $record = plandryings::find($id)->whereNotIn('status', [2, 3, 4])->first();
             if ($record) {
                 $record->update(
                     [
                         'Status' => 2,
                         'Checked' => 1,
                         'Review' => 1,
-                        'CheckedBy' => Auth::user()->id
+                        'CheckedBy' => Auth::user()->id,
+                        'CT1' => 1, 'CT2' => 1,
+                        'CT3' => 1, 'CT4' => 1,
+                        'CT5' => 1, 'CT6' => 1,
+                        'CT7' => 1, 'CT8' => 1,
+                        'CT9' => 1, 'CT10' => 1,
+                        'CT11' => 1, 'CT12' => 1
                     ]
                 );
                 $body = [
@@ -219,7 +237,7 @@ class PlanController extends Controller
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
             } else {
-                return response()->json(['error' => 'Record not found'], 404);
+                return response()->json(['error' => 'Lò không hợp lệ'], 404);
             }
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
@@ -243,7 +261,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id);
+            $record = plandryings::find($id)->whereNotIn('status', [0, 1, 3, 4])->first();
             $test = [];
             if ($record) {
                 $record->update(
@@ -312,7 +330,7 @@ class PlanController extends Controller
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
             } else {
-                return response()->json(['error' => 'Record not found'], 404);
+                return response()->json(['error' => 'Lò không hợp lệ'], 404);
             }
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
@@ -336,7 +354,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id);
+            $record = plandryings::find($id)->whereNotIn('status', [0, 1, 2, 4])->first();;
             if ($record) {
                 $record->update(
                     [
@@ -414,7 +432,7 @@ class PlanController extends Controller
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
             } else {
-                return response()->json(['error' => 'Record not found'], 404);
+                return response()->json(['error' => 'Lò không hợp lệ'], 404);
             }
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
@@ -433,13 +451,21 @@ class PlanController extends Controller
         $plandrying = Plandryings::with('details')
             ->where('PlanID', $id)
             ->first();
-
         if ($plandrying) {
-            // Access the related plan details
-            // $planDetails = $plandrying->details;
+
             return response()->json(['plandrying' => $plandrying]);
         } else {
-            return response()->json(['error' => 'No record found for the given PlanID'], 404);
+            return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }
+    }
+    function singlecheckOven(Request $request)
+    {
+        $data = $request->only('CT1', 'CT2', 'CT3', 'CT4', 'CT5', 'CT6', 'CT7', 'CT8', 'CT9', 'CT10', 'CT11', 'CT12');
+
+        $id = $request->PlanID;
+        $rc = plandryings::where('PlanID', $id)->update(
+            array_merge($data, ['CheckedBy' => Auth::user()->id])
+        );
+        return response()->json(['message' => 'success', 'plandrying' => $rc], 200);
     }
 }
