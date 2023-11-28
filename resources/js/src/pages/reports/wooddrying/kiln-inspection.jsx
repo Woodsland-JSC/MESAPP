@@ -453,42 +453,67 @@ function KilnInspectionReport() {
         return target;
     };
 
-    const handleExportPdf = () => {
-        try {
-            const input = reportContainer.current;
+    // const handleExportPdf = async () => {
+    //     const input = reportContainer.current;
 
-            html2canvas(input, { scale: 2 }).then((canvas) => {
-                const imgData = canvas.toDataURL("image/png");
-                const pdf = new jsPDF({
-                    orientation: "portrait",
-                    unit: "mm",
-                    format: "a4",
-                });
+    //     html2canvas(input, { scale: 2 }).then((canvas) => {
+    //         const imgData = canvas.toDataURL("image/png");
+    //         const pdf = new jsPDF("p", "mm", "a4");
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = pdf.internal.pageSize.getHeight();
 
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
+    //         // Tính toán lề và kích thước hình ảnh
+    //         const marginLeft = 10;
+    //         const marginRight = 10;
+    //         const marginTop = 10;
+    //         const marginBottom = 10;
+    //         const imgWidth = pdfWidth - marginLeft - marginRight;
+    //         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-                const marginLeft = 10;
-                const marginRight = 10;
-                const marginTop = 10;
-                const marginBottom = 10;
+    //         // Thêm hình ảnh và lề vào tài liệu PDF
+    //         pdf.addImage(
+    //             imgData,
+    //             "PNG",
+    //             marginLeft,
+    //             marginTop,
+    //             imgWidth,
+    //             imgHeight
+    //         );
+    //         pdf.save("my-report.pdf");
+    //     });
+    // };
 
-                pdf.addImage(
-                    imgData,
-                    "PNG",
-                    marginLeft,
-                    marginTop,
-                    pdfWidth - marginLeft - marginRight,
-                    pdfHeight - marginTop - marginBottom
-                );
-                pdf.save("Biên-bản-kiểm-tra-lò-sấy.pdf");
-                toast.success("Xuất PDF thành công.");
-            });
-        } catch (error) {
-            console.error(error);
-            toast.error("Có lỗi xảy ra.");
-        }
-    };
+    // const handleExportPdf = async () => {
+    //     const input = reportContainer.current;
+
+    //     html2canvas(input).then((canvas) => {
+    //         const imgData = canvas.toDataURL("image/png");
+    //         const pdf = new jsPDF("p", "mm", "a4");
+    //         pdf.addImage(imgData, "PNG", 10, 10, 190, 237);
+    //         pdf.save("Biên-bản-kiểm-tra-lò-sấy.pdf");
+    //     });
+    // };
+
+
+
+    const handleExportPdf = async () => {
+        const input = reportContainer.current;
+    
+        html2canvas(input).then((canvas) => {
+          // Tạo một tài liệu PDF với kích thước A3
+          const pdf = new jsPDF('l', 'mm', 'a3');
+    
+          // Thêm hình ảnh vào tài liệu PDF
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 22, 7, pdfWidth - 44, pdfHeight - 14);
+    
+          // Lưu tài liệu PDF
+          pdf.save('my-report-a3.pdf');
+        });
+      };
+    
 
     useEffect(() => {
         const currentDate = new Date();
@@ -647,7 +672,7 @@ function KilnInspectionReport() {
                     {/* Main content */}
                     <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-max">
                         {/* Controller */}
-                        <section className="flex flex-col xl:flex-row gap-4">
+                        <section className="flex flex-col lg:flex-row gap-4">
                             <div className="flex flex-col gap-4 sm:flex-row sm:gap-0">
                                 <div className="flex gap-4 items-center">
                                     <label className="whitespace-nowrap">
