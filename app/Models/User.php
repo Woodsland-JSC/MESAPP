@@ -25,7 +25,8 @@ class User extends Authenticatable
         'integration_id',
         'email',
         'password',
-        'branch'
+        'branch',
+        'imagesign'
     ];
 
     protected $hidden = [

@@ -87,7 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/production-check', [PlanController::class, 'listovens'])->name('danh-sach-kiem-tra-lo');
         Route::patch('/production-check', [PlanController::class, 'checkOven'])->name('kiem-tra-lo');
-
+        Route::patch('/production-check-single', [PlanController::class, 'singlecheckOven'])->name('kiem-tra-lo');
         Route::get('/production-run', [PlanController::class, 'ListRunOven'])->name('danh-sach-lo-da-kiem-tra');
         Route::patch('/production-run', [PlanController::class, 'runOven'])->name('chay-lo');
         Route::get('/production-completed', [PlanController::class, 'Listcomplete'])->name('danh-sach-me-ra-lo');

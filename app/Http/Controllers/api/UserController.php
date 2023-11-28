@@ -224,6 +224,7 @@ class UserController extends Controller
             'roles' => 'required|exists:roles,name',
             'branch' => 'required',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
         ]);
 
         // Check if validation fails

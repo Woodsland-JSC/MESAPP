@@ -11,18 +11,19 @@ class plandetail extends Model
     use HasFactory;
     protected $table = 'plan_detail';
     protected $fillable = ['PlanID', 'pallet', 'size', 'Mass', 'Qty'];
+
     public function getCreatedAtAttribute($value)
     {
-        // Convert the timestamp to the desired format
         return Carbon::parse($value)->format('Y-m-d H:i:s');
     }
+
     public function getUpdatedAtAttribute($value)
     {
-        // Convert the timestamp to the desired format
         return Carbon::parse($value)->format('Y-m-d H:i:s');
     }
-    public function detail()
+
+    public function pallet()
     {
-        return $this->belongsTo(plandryings::class, 'PlanID', 'PlanID');
+        return $this->belongsTo(Pallet::class, 'pallet', 'palletID');
     }
 }
