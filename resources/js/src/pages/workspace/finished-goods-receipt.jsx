@@ -52,7 +52,7 @@ const steps = [
 
 function FinishedGoodsReceipt() {
     const navigate = useNavigate();
-    const {loading, setLoading} = useAppContext();
+    const { loading, setLoading } = useAppContext();
     const { activeStep, setActiveStep } = useSteps({
         index: 0,
         count: steps.length,
@@ -149,7 +149,7 @@ function FinishedGoodsReceipt() {
             document.body.classList.remove('body-no-scroll');
         };
     }, []);
-    
+
     useEffect(() => {
         if (loading) {
             document.body.classList.add('body-no-scroll');
@@ -324,6 +324,8 @@ function FinishedGoodsReceipt() {
                                         onClick={() => setActiveStep(1)}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cbo0 !important"
+
                                     >
                                         Tiếp tục
                                     </Button>
@@ -384,7 +386,7 @@ function FinishedGoodsReceipt() {
                                                     />
                                                 </div>
                                             </div>
-                                            <img alt="Hình minh hoạ thành phẩm gỗ" className="w-[400px] -mt-8" src={FinishedGoodsIllustration}/>
+                                            <img alt="Hình minh hoạ thành phẩm gỗ" className="w-[400px] -mt-8" src={FinishedGoodsIllustration} />
                                         </Box>
                                     </Stack>
                                 </CardBody>
@@ -394,6 +396,7 @@ function FinishedGoodsReceipt() {
                                         onClick={() => setActiveStep(2)}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cbo0 !important"
                                     >
                                         Tiếp tục
                                     </Button>
@@ -442,6 +445,7 @@ function FinishedGoodsReceipt() {
                                         onClick={handleSubmit}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cbo0 !important"
                                     >
                                         Hoàn thành
                                     </Button>
