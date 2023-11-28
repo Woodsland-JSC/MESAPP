@@ -909,19 +909,19 @@ function WoodAwaitingDryingReport() {
             }
         };
 
-        const getAllFactories = async () => {
-            try {
-                const res = await usersApi.getAllFactories();
-                const options = res.map((item) => ({
-                    value: item.Code,
-                    label: item.Name,
-                }));
-                setFactories(options);
-            } catch (error) {
-                console.error(error);
-                toast.error("Có lỗi xảy ra");
-            }
-        };
+        // const getAllFactories = async () => {
+        //     try {
+        //         const res = await usersApi.getFactoriesByBranchId(selectedBranch);
+        //         const options = res.map((item) => ({
+        //             value: item.Code,
+        //             label: item.Name,
+        //         }));
+        //         setFactories(options);
+        //     } catch (error) {
+        //         console.error(error);
+        //         toast.error("Có lỗi xảy ra");
+        //     }
+        // };
 
         getAllBranches();
 
@@ -935,70 +935,99 @@ function WoodAwaitingDryingReport() {
         };
     }, []);
 
+    useEffect(() => {
+        const handleGetFactory = async () => {
+            try {
+                console.log("Selected branch: ", selectedBranch);
+                const res = await usersApi.getFactoriesByBranchId(
+                    selectedBranch.value
+                );
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+                setFactories(options);
+                console.log(res);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        handleGetFactory();
+    }, [selectedBranch]);
+
     return (
         <Layout>
             <div className="flex justify-center bg-[#F8F9F7] h-screen ">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">
+                    <div className="text-xl md:text-3xl font-bold mb-6">
                         Báo cáo xếp chờ sấy{" "}
                         {selectedFactory ? " - " + selectedFactory.label : ""}
                     </div>
-
+                    {/* h-[calc(100%-165px)] */}
                     {/* Main content */}
-                    <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-[calc(100%-165px)] md:h-[calc(100%-129px)]">
+                    <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-max  md:h-[calc(100%-129px)]">
                         {/* Controller */}
-                        <section className="flex gap-4">
-                            <div className="flex gap-4 items-center">
-                                <label className="whitespace-nowrap">
-                                    Chi nhánh:{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <Select
-                                    options={branches}
-                                    onChange={(value) =>
-                                        setSelectedBranch(value)
-                                    }
-                                    placeholder="Lựa chọn"
-                                />
+                        <section className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:gap-0">
+                                <div className="flex gap-4 items-center">
+                                    <label className="whitespace-nowrap">
+                                        Chi nhánh:{" "}
+                                        <span className="text-red-600">*</span>
+                                    </label>
+                                    <Select
+                                        options={branches}
+                                        onChange={(value) =>
+                                            setSelectedBranch(value)
+                                        }
+                                        placeholder="Lựa chọn"
+                                        className="flex w-48"
+                                    />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <label className="whitespace-nowrap">
+                                        Nhà máy:{" "}
+                                        <span className="text-red-600">*</span>
+                                    </label>
+                                    <Select
+                                        options={factories}
+                                        onChange={(value) =>
+                                            setSelectedFactory(value)
+                                        }
+                                        placeholder="Lựa chọn"
+                                        className="flex w-40"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex gap-4 items-center">
-                                <label className="whitespace-nowrap">
-                                    Nhà máy:{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <Select
-                                    options={factories}
-                                    onChange={(value) =>
-                                        setSelectedFactory(value)
-                                    }
-                                    placeholder="Lựa chọn"
-                                />
-                            </div>
-                            <div className="flex gap-4 items-center">
-                                <label className="whitespace-nowrap">
-                                    Từ ngày:{" "}
-                                </label>
-                                <DatePicker
-                                    className="font-bold"
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    dateFormat="dd/MM/yyyy"
-                                    maxDate={new Date()}
-                                />
-                            </div>
-                            <div className="flex gap-4 items-center">
-                                <label className="whitespace-nowrap">
-                                    Đến ngày:{" "}
-                                </label>
-                                <DatePicker
-                                    className="font-bold"
-                                    selected={endDate}
-                                    onChange={(date) => setEndDate(date)}
-                                    dateFormat="dd/MM/yyyy"
-                                    maxDate={new Date()}
-                                />
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="flex gap-4 items-center">
+                                    <label className="whitespace-nowrap">
+                                        Từ ngày:{" "}
+                                    </label>
+                                    <DatePicker
+                                        className="border border-gray-300 font-bold text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-24 p-2"
+                                        // className="font-bold"
+                                        selected={startDate}
+                                        onChange={(date) => setStartDate(date)}
+                                        dateFormat="dd/MM/yyyy"
+                                        maxDate={new Date()}
+                                    />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <label className="whitespace-nowrap">
+                                        Đến ngày:{" "}
+                                    </label>
+                                    <DatePicker
+                                        className="border border-gray-300 font-bold text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                        // className="font-bold"
+                                        selected={endDate}
+                                        onChange={(date) => setEndDate(date)}
+                                        dateFormat="dd/MM/yyyy"
+                                        maxDate={new Date()}
+                                    />
+                                </div>
                             </div>
                         </section>
                         <Divider className="my-4" />
@@ -1049,7 +1078,7 @@ function WoodAwaitingDryingReport() {
                                 </div>
                             </div>
                         </div>
-                        <div className="ag-theme-alpine py-4 h-[90%] w-full">
+                        <div className="ag-theme-alpine py-4 h-[87%] w-full">
                             <AgGridReact
                                 ref={reportGridRef}
                                 className="h-full"
