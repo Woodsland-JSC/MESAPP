@@ -145,7 +145,7 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::find($id)->whereNotIn('status', [2, 3, 4])->first();
+            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->first();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
@@ -207,7 +207,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id)->whereNotIn('status', [2, 3, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->first();
             if ($record) {
                 $record->update(
                     [
@@ -267,7 +267,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id)->whereNotIn('status', [0, 1, 3, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->first();
             $test = [];
             if ($record) {
                 $record->update(
@@ -360,7 +360,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id)->whereNotIn('status', [0, 1, 2, 4])->first();;
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->first();;
             if ($record) {
                 $record->update(
                     [

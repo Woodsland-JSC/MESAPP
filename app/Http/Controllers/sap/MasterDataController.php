@@ -5,6 +5,7 @@ namespace App\Http\Controllers\sap;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
+use App\Models\Plants;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reasons;
 use App\Models\User;
@@ -461,5 +462,45 @@ class MasterDataController extends Controller
         //     ]
         // );
         return response()->json(["data" => $res], 200);
+    }
+    function updatePlant()
+    {
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            DB::beginTransaction();
+            $query = 'select * from "@G_SAY4"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            DB::table('plants')->delete();
+            $Plants = [];
+            while ($row = odbc_fetch_array($stmt)) {
+                Plants::create([
+                    'Code' => $row['Code'],
+                    'Name' => $row['Name']
+                ]);
+            }
+
+
+            DB::commit();
+            return response()->json([
+                'message' => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }
