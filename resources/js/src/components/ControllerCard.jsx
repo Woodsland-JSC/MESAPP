@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import { BsFillSkipForwardCircleFill } from "react-icons/bs";
@@ -132,6 +132,8 @@ function ControllerCard(props) {
 
     // State
     const [palletData, setPalletData] = useState([]);
+    const [isPalletLoading, setPalletLoading] = useState([]);
+
     const [selectedPallet, setSelectedPallet] = useState(null);
     const [dryingInProgress, setDryingInProgress] = useState(false);
     const [isCompleteChecking, setIsCompleteChecking] = useState(false);
@@ -146,36 +148,37 @@ function ControllerCard(props) {
 
     // Get data Select
     useEffect(() => {
-        palletsApi
-            .getPalletList(reason)
-            .then((data) => {
-                const options = data.map((item) => ({
-                    value: item.palletID,
-                    label: item.Code,
-                }));
-                setPalletData(options);
-            })
-            .catch((error) => {
-                console.error("Error fetching kiln list:", error);
-            });
-    }, [reason]);
+        // setPalletLoading(true);
+        // palletsApi
+        //     .getPalletList(reason)
+        //     .then((data) => {
+        //         const options = data.map((item) => ({
+        //             value: item.palletID,
+        //             label: item.Code,
+        //         }));
+        //         setPalletData(options);
+        //         setPalletLoading(false);
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error fetching kiln list:", error);
+        //     });
 
-    const loadAsyncOptions = async () => {
-        try {
-            const data = await palletsApi.getPalletList(reason);
+        loadPallets();
+    }, []);
 
-            const options = data.map((item) => ({
-                value: item.palletID,
-                label: item.Code,
-            }));
-
-            setPalletData(options);
-        } catch (error) {
-            console.error("Error loading pallet list:", error);
-        }
+    const loadPallets = async () => {
+        setPalletLoading(true);
+        const data = await palletsApi.getPalletList(reason);
+        const options = data.map((item) => ({
+            value: item.palletID,
+            label: `${item.Code}-${item.MaLo}-${item.LyDo}`,
+        }));
+        console.log("Danh sách pallet:", data);
+        setPalletData(options);
+        setPalletLoading(false);
     };
 
-    const handleLoadIntoKiln = async () => {
+    const handleLoadIntoKiln = async (reason, callback) => {
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
@@ -192,7 +195,13 @@ function ControllerCard(props) {
 
             toast.success("Vào lò thành công!");
 
-            await loadAsyncOptions();
+            // setSelectedPallet(null);
+            // setPalletData([]);
+
+            // Reload pallets
+            await loadPallets();
+
+            setSelectedPallet(null);
 
             setLoadIntoKilnLoading(false);
         } catch (error) {
@@ -284,14 +293,14 @@ function ControllerCard(props) {
         progress === "kh"
             ? "Tạo kế hoạch sấy"
             : progress === "vl"
-                ? "Vào lò"
-                : progress === "kt"
-                    ? "Kiểm tra lò sấy"
-                    : progress === "ls"
-                        ? "Chạy lò sấy"
-                        : progress === "dg"
-                            ? "Đánh giá mẻ sấy và xác nhận ra lò"
-                            : "";
+            ? "Vào lò"
+            : progress === "kt"
+            ? "Kiểm tra lò sấy"
+            : progress === "ls"
+            ? "Chạy lò sấy"
+            : progress === "dg"
+            ? "Đánh giá mẻ sấy và xác nhận ra lò"
+            : "";
 
     const content =
         progress === "kh" ? (
@@ -315,25 +324,17 @@ function ControllerCard(props) {
                         >
                             Chọn pallet
                         </label>
-                        <AsyncSelect
-                            cacheOptions
-                            loadOptions={loadAsyncOptions}
-                            defaultOptions={palletData}
-                            onChange={(value) => {
-                                console.log("Selected Pallet:", value);
-                                setSelectedPallet(value);
-                            }}
-                        />
-                        {/* <Select
+                        <Select
                             placeholder="Chọn pallet"
+                            value={selectedPallet}
+                            loadOptions={loadPallets}
                             options={palletData}
                             onChange={(value) => {
                                 console.log("Selected Pallet:", value);
                                 setSelectedPallet(value);
                             }}
-                            className="basic-single"
-                            classNamePrefix="select"
-                        /> */}
+                            isLoading={isPalletLoading}
+                        />
                     </div>
                     <button
                         className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
@@ -363,7 +364,7 @@ function ControllerCard(props) {
                                     >
                                         Chọn pallet
                                     </label>
-                                    <AsyncSelect
+                                    {/* <AsyncSelect
                                         cacheOptions
                                         placeholder="Chọn pallet"
                                         loadOptions={palletData}
@@ -375,6 +376,18 @@ function ControllerCard(props) {
                                             );
                                             setSelectedPallet(value);
                                         }}
+                                    /> */}
+                                    <Select
+                                        placeholder="Chọn pallet"
+                                        options={palletData}
+                                        onChange={(value) => {
+                                            console.log(
+                                                "Selected Pallet:",
+                                                value
+                                            );
+                                            setSelectedPallet(value);
+                                        }}
+                                        isLoading={isPalletLoading}
                                     />
                                 </div>
                                 <button
@@ -539,10 +552,11 @@ function ControllerCard(props) {
                                     Kết luận:{" "}
                                 </strong>
                                 <p
-                                    className={`ml-2  ${checkedCount === 12
-                                        ? "text-[#0E8E59]"
-                                        : "text-[#961717]"
-                                        }`}
+                                    className={`ml-2  ${
+                                        checkedCount === 12
+                                            ? "text-[#0E8E59]"
+                                            : "text-[#961717]"
+                                    }`}
                                 >
                                     {checkedCount === 12
                                         ? "Mẻ sấy đã đủ điều kiện hoạt động."

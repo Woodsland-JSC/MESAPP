@@ -46,7 +46,7 @@ const palletsApi = {
         return axiosClient().get(url, {});
     },
     getPalletList: (reason) => {
-        const url = `/ovens/production-batch`;
+        const url = `/pallets`;
         return axiosClient().get(url, {
             params: {
                 reason: reason || "OUTDOOR"
