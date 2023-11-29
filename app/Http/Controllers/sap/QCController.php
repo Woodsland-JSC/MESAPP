@@ -37,6 +37,7 @@ class QCController extends Controller
         $validator = Validator::make($req->all(), [
             'PlanID' => 'required', // new UniqueOvenStatusRule
             'rate' => 'required',
+            'option' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
