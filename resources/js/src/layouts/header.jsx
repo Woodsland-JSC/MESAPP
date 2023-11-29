@@ -10,6 +10,7 @@ import {
     TbArrowRight,
     TbInfoSquareRounded,
     TbAnalyze,
+    TbReportAnalytics,
 } from "react-icons/tb";
 import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
@@ -124,28 +125,61 @@ function Header(props) {
                                 </li>
                             )}
                         </NavLink>
-                        {user?.permissions?.includes("monitor") && (<NavLink to="/integration" className="flex items-center">
-                            {({ isActive }) => (
-                                <li
-                                    className={
-                                        isActive
-                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
-                                            : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
-                                    }
-                                >
-                                    <div
+                        {user?.permissions?.includes("monitor") && (
+                            <NavLink
+                                to="/integration"
+                                className="flex items-center"
+                            >
+                                {({ isActive }) => (
+                                    <li
                                         className={
                                             isActive
-                                                ? "flex items-center space-x-2 text-white"
-                                                : "flex items-center space-x-2"
+                                                ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
+                                                : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
                                         }
                                     >
-                                        <TbAnalyze className="text-2xl"/>
-                                        <p>Tích hợp</p>
-                                    </div>
-                                </li>
-                            )}
-                        </NavLink>)}
+                                        <div
+                                            className={
+                                                isActive
+                                                    ? "flex items-center space-x-2 text-white"
+                                                    : "flex items-center space-x-2"
+                                            }
+                                        >
+                                            <TbAnalyze className="text-2xl" />
+                                            <p>Tích hợp</p>
+                                        </div>
+                                    </li>
+                                )}
+                            </NavLink>
+                        )}
+                        {/* {user?.permissions?.includes("monitor") && */}
+                        {/* ( */}
+                            <NavLink
+                                to="/reports"
+                                className="flex items-center"
+                            >
+                                {({ isActive }) => (
+                                    <li
+                                        className={
+                                            isActive
+                                                ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
+                                                : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
+                                        }
+                                    >
+                                        <div
+                                            className={
+                                                isActive
+                                                    ? "flex items-center space-x-2 text-white"
+                                                    : "flex items-center space-x-2"
+                                            }
+                                        >
+                                            <TbReportAnalytics className="text-2xl" />
+                                            <p>Báo cáo</p>
+                                        </div>
+                                    </li>
+                                )}
+                            </NavLink>
+                        {/* )} */}
                         {/* <NavLink to="/profile" className="flex items-center">
                             {({ isActive }) => (
                                 <li
@@ -194,7 +228,10 @@ function Header(props) {
                                             <HiMenuAlt3 className="text-2xl" />
                                         </Button>
                                     </MenuButton>
-                                    <MenuList minWidth="400px" className="shadow-md z-10 mt-4">
+                                    <MenuList
+                                        minWidth="400px"
+                                        className="shadow-md z-10 mt-4"
+                                    >
                                         <div className="px-4 py-2 text-lg font-semibold">
                                             {user?.first_name +
                                                 " " +
@@ -231,16 +268,34 @@ function Header(props) {
                                                 Quản lý người dùng
                                             </MenuItem>
                                         </Link>
-                                        {user?.permissions?.includes("monitor") && (<Link to="/integration">
-                                            <MenuItem
-                                                icon={
-                                                    <SiSap className="text-2xl"/>
-                                                }
-                                                minH="42px"
-                                            >
-                                                Tích hợp
-                                            </MenuItem>
-                                        </Link>)}
+                                        {user?.permissions?.includes(
+                                            "monitor"
+                                        ) && (
+                                            <Link to="/integration">
+                                                <MenuItem
+                                                    icon={
+                                                        <TbAnalyze className="text-2xl" />
+                                                    }
+                                                    minH="42px"
+                                                >
+                                                    Tích hợp
+                                                </MenuItem>
+                                            </Link>
+                                        )}
+                                        {/* {user?.permissions?.includes(
+                                            "monitor"
+                                        ) && ( */}
+                                            <Link to="/reports">
+                                                <MenuItem
+                                                    icon={
+                                                        <TbReportAnalytics className="text-2xl" />
+                                                    }
+                                                    minH="42px"
+                                                >
+                                                    Báo cáo
+                                                </MenuItem>
+                                            </Link>
+                                        {/* )} */}
                                         {/* <Link to="/profile">
                                             <MenuItem
                                                 icon={
@@ -270,8 +325,12 @@ function Header(props) {
                                             variant="ghost"
                                             fontWeight="regular"
                                         >
-                                            {(user?.first_name ? user?.first_name + " " : "") +
-                                                (user?.last_name ? user?.last_name : "")}
+                                            {(user?.first_name
+                                                ? user?.first_name + " "
+                                                : "") +
+                                                (user?.last_name
+                                                    ? user?.last_name
+                                                    : "")}
                                         </Button>
                                     </MenuButton>
                                     <MenuList>

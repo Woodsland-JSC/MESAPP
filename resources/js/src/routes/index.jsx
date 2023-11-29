@@ -111,8 +111,10 @@ import Notfound from "../pages/errors/notfound";
 import ProtectedRoute from "./ProtectedRoute";
 import FinishedGoodsReceipt from "../pages/workspace/finished-goods-receipt";
 
+import Report from "../pages/reports/index";
 import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
 import WoodAwaitingDryingReport from "../pages/reports/wooddrying/wood-awaiting-drying";
+import KilnInspectionReport from "../pages/reports/wooddrying/kiln-inspection";
 
 import useAppContext from "../store/AppContext";
 
@@ -263,6 +265,16 @@ function AppRoutes() {
                         </ProtectedRoute>
                         }
                     />
+
+                    {/* Báo cáo */}
+                    <Route
+                        path="/reports"
+                        element={
+                        <ProtectedRoute >
+                            <Report />
+                        </ProtectedRoute>
+                        }
+                    />
                     <Route
                         path="/reports/wood-processing-kiln-stacking"
                         element={
@@ -276,6 +288,14 @@ function AppRoutes() {
                         element={
                         <ProtectedRoute >
                             <WoodAwaitingDryingReport />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/kiln-inspection"
+                        element={
+                        <ProtectedRoute >
+                            <KilnInspectionReport />
                         </ProtectedRoute>
                         }
                     />
