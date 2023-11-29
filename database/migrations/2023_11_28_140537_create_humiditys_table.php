@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('humiditys', function (Blueprint $table) {
-            $table->string('palletID');
+            $table->string('PlanID');
             $table->float('rate');
             $table->datetime('created_by');
             $table->timestamps();

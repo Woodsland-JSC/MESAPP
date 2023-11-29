@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('humiditys_detail', function (Blueprint $table) {
             $table->id();
-            $table->string('palletID');
-            $table->integer('ref_id')->nullable()->default(-1);
+            $table->string('PlanID');
+            $table->integer('refID')->nullable()->default(-1);
             $table->integer('value');
             $table->string('created_by');
             $table->timestamps();

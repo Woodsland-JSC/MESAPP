@@ -11,7 +11,7 @@ class DisabilityDetail extends Model
     use HasFactory;
     protected $table = 'disability_rates_detail';
     protected $fillable = [
-        'palletID',
+        'PlanID',
         'SLPallet',
         'SLMau',
         'SLMO_TOP',

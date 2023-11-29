@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('disability_rates_detail', function (Blueprint $table) {
             $table->id();
-            $table->string('palletID');
+            $table->string('PlanID');
             $table->integer('refID')->default(-1);
             $table->integer('SLPallet');
             $table->integer('SLMau');

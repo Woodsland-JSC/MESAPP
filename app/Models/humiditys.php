@@ -11,7 +11,7 @@ class humiditys extends Model
     use HasFactory;
     protected $table = 'disability_rates';
     protected $fillable = [
-        'palletID',
+        'PlanID',
         'rate',
         'created_by'
     ];

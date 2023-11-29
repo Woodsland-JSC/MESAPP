@@ -16,47 +16,42 @@ class QCController extends Controller
     public function DanhGiaDoAm(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'palletID' => 'required', // new UniqueOvenStatusRule
+            'PlanID' => 'required', // new UniqueOvenStatusRule
             'value' => 'integer|required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $data = $req->only(
-            'palletID',
+            'PlanID',
             'value',
         );
         humidityDetails::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        $res = humidityDetails::where('palletID', $req->palletID)->get();
+        $res = humidityDetails::where('PlanID', $req->PlanID)->get();
         return response()->json(['message' => 'success', 'plandrying' => $res], 200);
     }
-    public function DoAmDoDang(Request $req)
-    {
-        $res = humidityDetails::where('palletID', $req->id)->wherenull('ref_id')->get();
-        dd($res->count());
-        return response()->json(['message' => 'success', 'plandrying' => $res], 200);
-    }
+
     public function HoanThanhDoAm(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'palletID' => 'required', // new UniqueOvenStatusRule
+            'PlanID' => 'required', // new UniqueOvenStatusRule
             'rate' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $data = $req->only(
-            'palletID',
+            'PlanID',
             'rate',
         );
         $record = humiditys::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        humidityDetails::where('palletID', $req->palletID)->update(['ref_id' => $record->id]);
+        humidityDetails::where('PlanID', $req->PlanID)->update(['ref_id' => $record->id]);
         return response()->json(['message' => 'success'], 200);
     }
     public function DanhGiaKT(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'palletID' => 'required', // new UniqueOvenStatusRule
+            'PlanID' => 'required', // new UniqueOvenStatusRule
             'SLPallet' => 'required',
             'SLMO_TOP' => 'required',
             'SLCong' => 'required',
@@ -66,14 +61,14 @@ class QCController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $data = $req->only(
-            'palletID',
+            'PlanID',
             'SLPallet',
             'SLMO_TOP',
             'SLCong',
             'note',
         );
         DisabilityDetail::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        $res = DisabilityDetail::where('palletID', $req->palletID)->get();
+        $res = DisabilityDetail::where('PlanID', $req->PlanID)->get();
         return response()->json(['message' => 'success', 'plandrying' => $res], 200);
     }
     public function HoanThanhKT(Request $req)
@@ -89,13 +84,20 @@ class QCController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $data = $req->only(
-            'palletID',
+            'PlanID',
             'TotalMau',
             'TLMoTop',
             'TLCong',
         );
         $record = Disability::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        DisabilityDetail::where('palletID', $req->palletID)->update(['refID' => $record->id]);
+        DisabilityDetail::where('PlanID', $req->PlanID)->update(['refID' => $record->id]);
         return response()->json(['message' => 'success'], 200);
+    }
+
+    public function DoAmDoDang(Request $req)
+    {
+        $res = humidityDetails::where('PlanID', $req->id)->wherenull('ref_id')->get();
+        dd($res->count());
+        return response()->json(['message' => 'success', 'plandrying' => $res], 200);
     }
 }
