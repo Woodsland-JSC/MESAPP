@@ -111,6 +111,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
     Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
+    Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
 });
 
 //inlucde route
