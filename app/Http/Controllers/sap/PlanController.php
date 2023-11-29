@@ -220,7 +220,9 @@ class PlanController extends Controller
                         'CT5' => 1, 'CT6' => 1,
                         'CT7' => 1, 'CT8' => 1,
                         'CT9' => 1, 'CT10' => 1,
-                        'CT11' => 1, 'CT12' => 1
+                        'CT11' => 1, 'CT12' => 1,
+                        'DateChecked' => now(),
+                        'NoCheck' => $id
                     ]
                 );
                 $body = [

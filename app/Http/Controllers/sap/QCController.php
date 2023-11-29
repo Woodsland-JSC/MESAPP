@@ -10,6 +10,7 @@ use App\Models\DisabilityDetail;
 use App\Models\humiditys;
 use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
+use App\Models\DryingOvens;
 
 class QCController extends Controller
 {
@@ -94,10 +95,15 @@ class QCController extends Controller
         return response()->json(['message' => 'success'], 200);
     }
 
-    public function DoAmDoDang(Request $req)
+    public function currentData(Request $req)
     {
-        $res = humidityDetails::where('PlanID', $req->id)->wherenull('ref_id')->get();
-        dd($res->count());
-        return response()->json(['message' => 'success', 'plandrying' => $res], 200);
+        //$res = humidityDetails::where('PlanID', $req->id)->wherenull('ref_id')->get();
+        //dd($res->count());
+        $planData =
+            $header = [
+                'Date' => now()->format('Y-m-d'),
+                'PlanID' => $req->PlanID
+            ];
+        return response()->json([$req, $header], 200);
     }
 }
