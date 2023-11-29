@@ -112,3 +112,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
 });
+
+//inlucde route
+include('qc.php');

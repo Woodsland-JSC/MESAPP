@@ -88,7 +88,7 @@ class PlanController extends Controller
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
-            ->select('a.palletID', 'a.Code')
+            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo')
             ->where('b.plant', '=', Auth::user()->plant)
             ->whereNull('c.pallet');
         if ($request->reason == 'INDOOR') {
@@ -150,9 +150,9 @@ class PlanController extends Controller
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
             }
-            $existingPallet = plandetail::where('pallet', $pallet)->first();
-            if ($existingPallet) {
-                throw new \Exception('Pallet không hợp lệ.');
+            $existingPallet = plandetail::where('pallet', $pallet)->count();
+            if ($existingPallet > 1) {
+                throw new \Exception('Pallet đã được assign.');
             }
             $data = pallet_details::find($pallet)->first();
 

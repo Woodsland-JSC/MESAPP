@@ -30,6 +30,12 @@ class QCController extends Controller
         $res = humidityDetails::where('palletID', $req->palletID)->get();
         return response()->json(['message' => 'success', 'plandrying' => $res], 200);
     }
+    public function DoAmDoDang(Request $req)
+    {
+        $res = humidityDetails::where('palletID', $req->id)->wherenull('ref_id')->get();
+        dd($res->count());
+        return response()->json(['message' => 'success', 'plandrying' => $res], 200);
+    }
     public function HoanThanhDoAm(Request $req)
     {
         $validator = Validator::make($req->all(), [
