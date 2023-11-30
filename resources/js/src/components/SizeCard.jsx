@@ -11,7 +11,7 @@ import {
     useDisclosure,
     Button,
 } from "@chakra-ui/react";
-import { BsFilterCircleFill } from "react-icons/bs";
+import { IoScanCircleSharp } from "react-icons/io5";
 
 function SizeCard() {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -19,10 +19,10 @@ function SizeCard() {
     return (
         <div className="border-2 border-gray-200 rounded-xl">
             {/* Header */}
-            <div className="bg-white  rounded-t-xl flex justify-between items-center border-b py-4 px-6  border-gray-300">
+            <div className="bg-white  rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-6  border-gray-300">
                 <div className="flex items-center gap-x-3 font-medium">
-                  <BsFilterCircleFill className="text-2xl text-[#17506B]" />
-                  <div className="xl:text-xl xl:w-full  text-lg">Các kích thước pallet</div>
+                  <IoScanCircleSharp className="text-3xl w-9 h-9 text-[#17506B]" />
+                  <div className="xl:text-xl xl:w-full text-lg">Các kích thước pallet</div>
                 </div>
                 <button
                     onClick={onOpen}

@@ -26,6 +26,7 @@ import Loader from "../../components/Loader";
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(true);
+    const [isKilnLoading, setIsKilnLoading] = useState(false);
 
     const [kiln, setKiln] = useState([]);
     const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
@@ -46,18 +47,19 @@ function CreateDryingPlan() {
     const [bowCards, setBowCards] = useState([]);
 
     useEffect(() => {
-        palletsApi
-            .getKiln()
-            .then((data) => {
-                const options = data.map((item) => ({
-                    value: item.Code,
-                    label: item.Name,
-                }));
-                setKiln(options);
-            })
-            .catch((error) => {
-                console.error("Error fetching kiln list:", error);
-            });
+        loadKilns();
+        // palletsApi
+        //     .getKiln()
+        //     .then((data) => {
+        //         const options = data.map((item) => ({
+        //             value: item.Code,
+        //             label: item.Name,
+        //         }));
+        //         setKiln(options);
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error fetching kiln list:", error);
+        //     });
 
         palletsApi
             .getPlanDryingReason()
@@ -98,6 +100,18 @@ function CreateDryingPlan() {
 
         // });
     }, []);
+
+    const loadKilns = async () => {
+        setIsKilnLoading(true);
+        const data = await palletsApi.getKiln();
+        const options = data.map((item) => ({
+            value: item.Code,
+            label: item.Name,
+        }));
+        setKiln(options);
+        setIsKilnLoading(false);
+    };
+
     const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0);
 
     const asyncSelectKey = useMemo(
@@ -133,61 +147,91 @@ function CreateDryingPlan() {
         loadOptionsCallback(inputValue, callback);
     };
 
+    // Validating
+    const validateData = () => {
+        if (!selectedKiln || selectedKiln.value === "") {
+            toast.error("Lò sấy không được bỏ trống.");
+            return false;
+        }
+        if (
+            !selectedDryingReasonsPlan ||
+            selectedDryingReasonsPlan.value === ""
+        ) {
+            toast.error("Mục đích sấy không được bỏ trống");
+            return false;
+        }
+        if (!selectedThickness || selectedThickness.value === "") {
+            toast.error("Chiều dày sấy không được bỏ trống");
+            return false;
+        }
+
+        return true;
+    };
+
     const handleCompletion = () => {
-        console.log("1. Dữ liệu thu thập được:", {
-            "Mã Lò": selectedKiln.value,
-            "Mục đích sấy": selectedDryingReasonsPlan.value,
-            "Chiều dày sấy": selectedThickness.value,
-            "Thời gian sấy dự kiến:": selectedThickness.U_Time,
-        });
-
-        setIsLoading(true);
-
-        const postData = {
-            Oven: selectedKiln.value,
-            Reason: selectedDryingReasonsPlan.value,
-            Method: selectedThickness.value,
-            Time: selectedThickness.U_Time,
-        };
-
-        axios
-            .post("/api/ovens/create", postData)
-            .then((response) => {
-                console.log("2. Kết quả từ API:", response);
-
-                const A = response.data.Time;
-                const B = new Date();
-
-                const result = format(
-                    add(B, { days: A }),
-                    "yyyy-MM-dd HH:mm:ss"
-                );
-
-                const newBowCard = {
-                    planID: response.data.PlanID,
-                    status: 0,
-                    batchNumber: response.data.Code,
-                    kilnNumber: response.data.Oven,
-                    thickness: response.data.Method,
-                    height: "0",
-                    purpose: response.data.Reason,
-                    finishedDate: result,
-                    palletQty: 0,
-                    weight: 0,
-                };
-
-                setCreatedBowCards([newBowCard, ...createdBowCards]);
-
-                toast.success("Tạo kế hoạch sấy thành công.");
-                setIsLoading(false);
-
-                onClose();
-            })
-            .catch((error) => {
-                console.error("Error calling API:", error.response.data.error);
-                toast.error(error.response.data.error);
-                setIsLoading(false);
+        if (validateData()) {
+            console.log("1. Dữ liệu thu thập được:", {
+                "Mã Lò": selectedKiln.value,
+                "Mục đích sấy": selectedDryingReasonsPlan.value,
+                "Chiều dày sấy": selectedThickness.value,
+                "Thời gian sấy dự kiến:": selectedThickness.U_Time,
             });
+
+            setIsLoading(true);
+
+            const postData = {
+                Oven: selectedKiln.value,
+                Reason: selectedDryingReasonsPlan.value,
+                Method: selectedThickness.value,
+                Time: selectedThickness.U_Time,
+            };
+
+            axios
+                .post("/api/ovens/create", postData)
+                .then((response) => {
+                    console.log("2. Kết quả từ API:", response);
+
+                    const A = response.data.Time;
+                    const B = new Date();
+
+                    const result = format(
+                        add(B, { days: A }),
+                        "yyyy-MM-dd HH:mm:ss"
+                    );
+
+                    const newBowCard = {
+                        planID: response.data.PlanID,
+                        status: 0,
+                        batchNumber: response.data.Code,
+                        kilnNumber: response.data.Oven,
+                        thickness: response.data.Method,
+                        height: "0",
+                        purpose: response.data.Reason,
+                        finishedDate: result,
+                        palletQty: 0,
+                        weight: 0,
+                    };
+
+                    setCreatedBowCards([newBowCard, ...createdBowCards]);
+
+                    toast.success("Tạo kế hoạch sấy thành công.");
+
+                    setSelectedKiln(null);
+                    loadKilns();
+
+                    setIsLoading(false);
+
+                    onClose();
+                })
+                .catch((error) => {
+                    console.error(
+                        "Error calling API:",
+                        error.response.data.error
+                    );
+                    toast.error(error.response.data.error);
+                    setIsLoading(false);
+                });
+        }
     };
 
     return (
@@ -295,6 +339,7 @@ function CreateDryingPlan() {
                                             Lò sấy
                                         </label>
                                         <Select
+                                            value={selectedKiln}
                                             options={kiln}
                                             onChange={(value) => {
                                                 console.log(
@@ -417,33 +462,33 @@ function CreateDryingPlan() {
 
                     {/* BOW Card List */}
                     {/* {createdBowCards || filteredBowCards.length > 0 ? ( */}
-                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                            {createdBowCards.map((createdbowCard, index) => (
-                                <BOWCard key={index} {...createdbowCard} />
-                            ))}
-                            {filteredBowCards?.map((bowCard, index) => (
-                                <BOWCard
-                                    key={index}
-                                    planID={bowCard.PlanID}
-                                    status={bowCard.Status}
-                                    batchNumber={bowCard.Code}
-                                    kilnNumber={bowCard.Oven}
-                                    thickness={bowCard.Method}
-                                    purpose={bowCard.Reason}
-                                    finishedDate={format(
-                                        addDays(
-                                            new Date(bowCard.created_at),
-                                            bowCard.Time
-                                        ),
-                                        "yyyy-MM-dd HH:mm:ss"
-                                    )}
-                                    palletQty={bowCard.TotalPallet}
-                                    weight={bowCard.Mass}
-                                    isChecked={bowCard.Checked}
-                                    isReviewed={bowCard.Review}
-                                />
-                            ))}
-                        </div>
+                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                        {createdBowCards.map((createdbowCard, index) => (
+                            <BOWCard key={index} {...createdbowCard} />
+                        ))}
+                        {filteredBowCards?.map((bowCard, index) => (
+                            <BOWCard
+                                key={index}
+                                planID={bowCard.PlanID}
+                                status={bowCard.Status}
+                                batchNumber={bowCard.Code}
+                                kilnNumber={bowCard.Oven}
+                                thickness={bowCard.Method}
+                                purpose={bowCard.Reason}
+                                finishedDate={format(
+                                    addDays(
+                                        new Date(bowCard.created_at),
+                                        bowCard.Time
+                                    ),
+                                    "yyyy-MM-dd HH:mm:ss"
+                                )}
+                                palletQty={bowCard.TotalPallet}
+                                weight={bowCard.Mass}
+                                isChecked={bowCard.Checked}
+                                isReviewed={bowCard.Review}
+                            />
+                        ))}
+                    </div>
                     {/* ) : (
                         <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-500 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>
                     )} */}

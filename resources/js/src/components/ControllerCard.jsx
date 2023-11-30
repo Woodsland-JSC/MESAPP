@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
-import { BsFillSkipForwardCircleFill } from "react-icons/bs";
+import { PiCaretCircleDoubleRightFill } from "react-icons/pi";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { FaCheck } from "react-icons/fa6";
 import {
@@ -148,21 +148,6 @@ function ControllerCard(props) {
 
     // Get data Select
     useEffect(() => {
-        // setPalletLoading(true);
-        // palletsApi
-        //     .getPalletList(reason)
-        //     .then((data) => {
-        //         const options = data.map((item) => ({
-        //             value: item.palletID,
-        //             label: item.Code,
-        //         }));
-        //         setPalletData(options);
-        //         setPalletLoading(false);
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error fetching kiln list:", error);
-        //     });
-
         loadPallets();
     }, []);
 
@@ -195,13 +180,10 @@ function ControllerCard(props) {
 
             toast.success("Vào lò thành công!");
 
-            // setSelectedPallet(null);
-            // setPalletData([]);
+            setSelectedPallet(null);
 
             // Reload pallets
             await loadPallets();
-
-            setSelectedPallet(null);
 
             setLoadIntoKilnLoading(false);
         } catch (error) {
@@ -364,21 +346,10 @@ function ControllerCard(props) {
                                     >
                                         Chọn pallet
                                     </label>
-                                    {/* <AsyncSelect
-                                        cacheOptions
-                                        placeholder="Chọn pallet"
-                                        loadOptions={palletData}
-                                        // defaultOptions={palletData}
-                                        onChange={(value) => {
-                                            console.log(
-                                                "Selected Pallet:",
-                                                value
-                                            );
-                                            setSelectedPallet(value);
-                                        }}
-                                    /> */}
                                     <Select
                                         placeholder="Chọn pallet"
+                                        value={selectedPallet}
+                                        loadOptions={loadPallets}
                                         options={palletData}
                                         onChange={(value) => {
                                             console.log(
@@ -501,11 +472,11 @@ function ControllerCard(props) {
     return (
         <div className="bg-white border-2 border-gray-200 rounded-xl">
             {/* Header */}
-            <div className="flex flex-col gap-x-3 px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center gap-x-3 font-medium text-xl">
-                    <BsFillSkipForwardCircleFill className="text-2xl text-[#17506B]" />
-                    Tiến trình:
-                    <span>{progressTitle}</span>
+            <div className="flex flex-col px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center gap-x-3 font-medium">
+                    <PiCaretCircleDoubleRightFill className="text-2xl w-8 h-8 text-[#17506B]" />
+                    <div className="text-xl">Tiến trình: <span>{progressTitle}</span></div>
+                    
                 </div>
                 <div className="w-full"></div>
             </div>

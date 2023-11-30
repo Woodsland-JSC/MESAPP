@@ -11,7 +11,6 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import {
-    BsWrenchAdjustableCircleFill,
     BsFillPlusCircleFill,
     BsFillBookmarkCheckFill,
 } from "react-icons/bs";
@@ -22,6 +21,7 @@ import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { dateToDateTime } from "../utils/convertDatetime";
 import { FaPlus } from "react-icons/fa6";
+import { MdBuildCircle } from "react-icons/md";
 
 const tempData = [
     {
@@ -380,7 +380,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
             <div className="bg-white rounded-xl border-2 border-gray-200">
                 <div className="text-xl flex justify-between items-center font-medium border-b px-6 p-4 border-gray-200">
                     <div className="flex gap-x-3">
-                        <BsWrenchAdjustableCircleFill className="text-2xl text-[#17506B]" />
+                        <MdBuildCircle className="text-2xl text-[#17506B]" />
                         Biên bản khảo sát tỉ lệ khuyết tật
                     </div>
                     <button

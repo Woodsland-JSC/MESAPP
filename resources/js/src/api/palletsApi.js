@@ -46,7 +46,7 @@ const palletsApi = {
         return axiosClient().get(url, {});
     },
     getPalletList: (reason) => {
-        const url = `/pallets`;
+        const url = `/ovens/production-batch`;
         return axiosClient().get(url, {
             params: {
                 reason: reason || "OUTDOOR"
@@ -56,7 +56,12 @@ const palletsApi = {
     loadIntoKiln: () => {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
+    },
+    saveCheckingKiln: () => {
+        const url = `/ovens/production-check-single`;
+        return axiosClient().patch(url, {});
     }
+
     
 };
 
