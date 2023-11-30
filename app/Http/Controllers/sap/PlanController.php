@@ -157,7 +157,7 @@ class PlanController extends Controller
             if ($existingPallet > 1) {
                 throw new \Exception('Pallet đã được assign.');
             }
-            $data = pallet_details::find($pallet)->first();
+            $data = pallet_details::where('palletID', $pallet)->first();
 
 
             plandetail::create([
