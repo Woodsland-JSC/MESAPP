@@ -531,10 +531,34 @@ class PlanController extends Controller
             );
         }
 
-        $rc = plandryings::where('PlanID', $id)->update(
+        plandryings::where('PlanID', $id)->update(
             array_merge($data, ['CheckedBy' => Auth::user()->id])
         );
-
-        return response()->json(['message' => 'success'], 200);
+        $plandrying = Plandryings::where('PlanID', $id)
+            ->first();
+        $CT11Detail = logchecked::where('PlanID', $id)->select(
+            'M1',
+            'M2',
+            'M3',
+            'M4',
+            'M5'
+        )->get();
+        $CT12Detail
+            = logchecked::where('PlanID', $id)->select(
+                'Q1',
+                'Q2',
+                'Q3',
+                'Q4',
+                'Q5',
+                'Q6',
+                'Q7',
+                'Q8',
+            )->get();
+        return response()->json([
+            'message' => 'success',
+            'plandrying' => $plandrying,
+            'CT11Detail' => $CT11Detail,
+            'CT12Detail' => $CT12Detail
+        ], 200);
     }
 }
