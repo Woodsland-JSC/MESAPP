@@ -9,10 +9,11 @@ use Carbon\Carbon;
 class humiditys extends Model
 {
     use HasFactory;
-    protected $table = 'disability_rates';
+    protected $table = 'humiditys';
     protected $fillable = [
         'PlanID',
         'rate',
+        'note',
         'created_by'
     ];
     public function getCreatedAtAttribute($value)

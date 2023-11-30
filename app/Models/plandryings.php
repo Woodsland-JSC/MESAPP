@@ -28,7 +28,8 @@ class plandryings extends Model
         'CT7', 'CT8',
         'CT9', 'CT10',
         'CT11', 'CT12',
-        'DateChecked', 'NoCheck'
+        'DateChecked', 'NoCheck',
+        'result'
     ];
     // Sự kiện trước khi tạo mới record
     protected static function boot()
