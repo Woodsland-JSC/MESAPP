@@ -462,7 +462,7 @@ class PlanController extends Controller
         $Disability = Disability::where('PlanID', $id)->get();
         if ($plandrying) {
 
-            return response()->json(['plandrying' => $plandrying, 'Humiditys' => $humiditys, 'Disability' => $Disability]);
+            return response()->json(['plandrying' => $plandrying, 'Humidity' => $humiditys, 'Disability' => $Disability]);
         } else {
             return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }
