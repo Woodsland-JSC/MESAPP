@@ -11,6 +11,7 @@ use App\Models\worker;
 use App\Models\plandetail;
 use App\Models\humiditys;
 use App\Models\Disability;
+use App\Models\logchecked;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -460,21 +461,104 @@ class PlanController extends Controller
             ->first();
         $humiditys = humiditys::where('PlanID', $id)->get();
         $Disability = Disability::where('PlanID', $id)->get();
+        $CT11Detail = logchecked::where('PlanID', $id)->select(
+            'M1',
+            'M2',
+            'M3',
+            'M4',
+            'M5'
+        )->get();
+        $CT12Detail
+            = logchecked::where('PlanID', $id)->select(
+                'Q1',
+                'Q2',
+                'Q3',
+                'Q4',
+                'Q5',
+                'Q6',
+                'Q7',
+                'Q8',
+            )->get();
         if ($plandrying) {
 
-            return response()->json(['plandrying' => $plandrying, 'Humiditys' => $humiditys, 'Disability' => $Disability]);
+            return response()->json(
+                [
+                    'plandrying' => $plandrying,
+                    'Humidity' => $humiditys,
+                    'Disability' => $Disability,
+                    'CT11Detail' => $CT11Detail,
+                    'CT12Detail' => $CT12Detail
+                ]
+            );
         } else {
             return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }
     }
     function singlecheckOven(Request $request)
     {
-        $data = $request->only('CT1', 'CT2', 'CT3', 'CT4', 'CT5', 'CT6', 'CT7', 'CT8', 'CT9', 'CT10', 'CT11', 'CT12');
+        $data = $request->only(
+            'CT1',
+            'CT2',
+            'CT3',
+            'CT4',
+            'CT5',
+            'CT6',
+            'CT7',
+            'CT8',
+            'CT9',
+            'CT10',
+            'CT11',
+            'CT12',
+            'SoLan',
+            'CBL',
+            'DoThucTe'
+        );
+        $CT11Detail = $request->only('CT11Detail');
+        $CT12Detail = $request->only('CT12Detail');
 
         $id = $request->PlanID;
-        $rc = plandryings::where('PlanID', $id)->update(
+
+        if ($CT11Detail) {
+            logchecked::UpdateOrCreate(
+                ['PlanID' => $id],
+                array_merge($CT11Detail['CT11Detail'], ['PlanID' => $id])
+            );
+        };
+        if ($CT12Detail) {
+            logchecked::UpdateOrCreate(
+                ['PlanID' => $id],
+                array_merge($CT12Detail['CT12Detail'], ['PlanID' => $id])
+            );
+        }
+
+        plandryings::where('PlanID', $id)->update(
             array_merge($data, ['CheckedBy' => Auth::user()->id])
         );
-        return response()->json(['message' => 'success', 'plandrying' => $rc], 200);
+        $plandrying = Plandryings::where('PlanID', $id)
+            ->first();
+        $CT11Detail = logchecked::where('PlanID', $id)->select(
+            'M1',
+            'M2',
+            'M3',
+            'M4',
+            'M5'
+        )->get();
+        $CT12Detail
+            = logchecked::where('PlanID', $id)->select(
+                'Q1',
+                'Q2',
+                'Q3',
+                'Q4',
+                'Q5',
+                'Q6',
+                'Q7',
+                'Q8',
+            )->get();
+        return response()->json([
+            'message' => 'success',
+            'plandrying' => $plandrying,
+            'CT11Detail' => $CT11Detail,
+            'CT12Detail' => $CT12Detail
+        ], 200);
     }
 }
