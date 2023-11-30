@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('humiditys', function (Blueprint $table) {
-            $table->integer('note')->nullable();
+            $table->string('note')->nullable();
         });
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('humiditys', function (Blueprint $table) {
             $table->string('PlanID');
             $table->float('rate');
-            $table->datetime('created_by');
+            $table->integer('created_by');
             $table->timestamps();
         });
     }

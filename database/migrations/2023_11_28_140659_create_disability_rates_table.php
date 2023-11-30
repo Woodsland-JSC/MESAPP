@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('disability_rates', function (Blueprint $table) {
             $table->id();
             $table->string('PlanID');
-            $table->integer('TotalMau');
-            $table->integer('TLMoTop');
-            $table->integer('TLCong');
-            $table->string('created_by');
+            $table->float('TotalMau');
+            $table->float('TLMoTop');
+            $table->float('TLCong');
+            $table->integer('created_by');
             $table->timestamps();
         });
     }

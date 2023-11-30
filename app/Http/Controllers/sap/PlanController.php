@@ -9,6 +9,8 @@ use App\Models\pallet_details;
 use App\Models\plandryings;
 use App\Models\worker;
 use App\Models\plandetail;
+use App\Models\humiditys;
+use App\Models\Disability;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -207,13 +209,12 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::find($id)->whereNotIn('status', [2, 3, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->first();
             if ($record) {
                 $record->update(
                     [
                         'Status' => 2,
                         'Checked' => 1,
-                        'Review' => 1,
                         'CheckedBy' => Auth::user()->id,
                         'CT1' => 1, 'CT2' => 1,
                         'CT3' => 1, 'CT4' => 1,
@@ -457,9 +458,11 @@ class PlanController extends Controller
         $plandrying = Plandryings::with('details')
             ->where('PlanID', $id)
             ->first();
+        $humiditys = humiditys::where('PlanID', $id)->get();
+        $Disability = Disability::where('PlanID', $id)->get();
         if ($plandrying) {
 
-            return response()->json(['plandrying' => $plandrying]);
+            return response()->json(['plandrying' => $plandrying, 'Humiditys' => $humiditys, 'Disability' => $Disability]);
         } else {
             return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }

@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('PlanID');
             $table->integer('refID')->default(-1);
-            $table->integer('SLPallet');
-            $table->integer('SLMau');
-            $table->integer('SLMO_TOP');
-            $table->integer('SLCong');
+            $table->float('SLPallet');
+            $table->float('SLMau');
+            $table->float('SLMO_TOP');
+            $table->float('SLCong');
             $table->text('note');
-            $table->string('created_by');
+            $table->integer('created_by');
             $table->timestamps();
         });
     }

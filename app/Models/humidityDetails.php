@@ -12,7 +12,7 @@ class humidityDetails extends Model
     protected $table = 'humiditys_detail';
     protected $fillable = [
         'PlanID',
-        'ref_id',
+        'refID',
         'value',
         'created_by'
     ];
