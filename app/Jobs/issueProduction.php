@@ -35,11 +35,6 @@ class issueProduction implements ShouldQueue
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenExits', $this->body);
-        if ($response->successful()) {
-        } else {
-            $res = $response->json();
-            // Job sẽ được queue worker thử lại
-            throw new \Exception($res['error']);
-        }
+       
     }
 }

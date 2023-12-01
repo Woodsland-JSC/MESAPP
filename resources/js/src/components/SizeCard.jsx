@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect, useRef } from "react";
 import SizeListItem from "./SizeListItem";
 import {
     Modal,
@@ -12,17 +13,59 @@ import {
     Button,
 } from "@chakra-ui/react";
 import { IoScanCircleSharp } from "react-icons/io5";
+import palletsApi from "../api/palletsApi";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { Spinner } from "@chakra-ui/react";
+import "../assets/styles/index.css";
+import {
+    Table,
+    Thead,
+    Tbody,
+    Tfoot,
+    Tr,
+    Th,
+    Td,
+    TableCaption,
+    TableContainer,
+  } from '@chakra-ui/react'
 
-function SizeCard() {
+function SizeCard(props) {
+    const { planID, reload } = props;
+    console.log("Giá trị planID nhận được:", planID);
+
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [sizeData, setSizeData] = useState([]);
+    const [isPalletLoading, setPalletLoading] = useState(true);
+
+    useEffect(() => {
+        palletsApi
+            .getBOWById(planID)
+            .then((response) => {
+                console.log("Dữ liệu trả về ở SizeCard:", response);
+
+                setSizeData(response.plandrying.details);
+                setPalletLoading(false);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi gọi API:", error);
+
+                setPalletLoading(false);
+            })
+            .finally(() => {});
+    }, [props.reload]);
 
     return (
-        <div className="border-2 border-gray-200 rounded-xl">
+        <div className="border-2 mb-4 border-gray-200 rounded-xl">
             {/* Header */}
-            <div className="bg-white  rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-6  border-gray-300">
+            <div className="bg-white rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-6  border-gray-300">
                 <div className="flex items-center gap-x-3 font-medium">
-                  <IoScanCircleSharp className="text-3xl w-9 h-9 text-[#17506B]" />
-                  <div className="xl:text-xl xl:w-full text-lg">Các kích thước pallet</div>
+                    <div className="w-9 h-9">
+                        <IoScanCircleSharp className="text-3xl w-full h-full text-[#17506B]" />
+                    </div>
+                    <div className="xl:text-xl xl:w-full text-lg">
+                        Các kích thước pallet
+                    </div>
                 </div>
                 <button
                     onClick={onOpen}
@@ -37,56 +80,42 @@ function SizeCard() {
                 closeOnOverlayClick={false}
                 isOpen={isOpen}
                 onClose={onClose}
-                size="6xl"
+                size="4xl"
             >
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Tất cả kích thước</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <div class="relative overflow-x-auto w-full">
-                            <table class="w-full  text-left text-gray-500 ">
-                                <thead class="font-semibold text-gray-700 bg-gray-50 ">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3">
-                                            Pallet
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Dày
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Rộng
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            Dài
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            SL
-                                        </th>
-                                        <th scope="col" class="px-6 py-3">
-                                            KL
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="bg-white border-b">
-                                        <th
-                                            scope="row"
-                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
-                                        >
-                                            106295
-                                        </th>
-                                        <td class="px-6 py-4">
-                                            2023-10-12T07:59:28.050Z
-                                        </td>
-                                        <td class="px-6 py-4">OK</td>
-                                        <td class="px-6 py-4">OK</td>
-                                        <td class="px-6 py-4">OK</td>
-                                        <td class="px-6 py-4">OK</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <TableContainer>
+                            <Table variant="simple">
+                                <Thead className="bg-gray-50 top-0 sticky z-40">
+                                    <Tr>
+                                        <Th>Pallet</Th>
+                                        <Th>Kích thước (Dày*Rộng*Dài)</Th>
+                                        <Th isNumeric>Số lượng</Th>
+                                        <Th isNumeric>Khối lượng</Th>
+                                    </Tr>
+                                </Thead>
+                            </Table>
+                        </TableContainer>
+                        <div className="relative overflow-y-auto max-h-[450px]">
+                        <TableContainer>
+                            <Table variant="simple">
+                                <Tbody className="">
+                                    {sizeData.map((item) => (
+                                        <Tr>
+                                            <Td>{item.pallet}</Td>
+                                            <Td>{item.size}</Td>
+                                            <Td isNumeric>{item.Qty}</Td>
+                                            <Td isNumeric>{item.Mass}</Td>
+                                        </Tr>    
+                                    ))}
+                                </Tbody>
+                            </Table>
+                        </TableContainer>
                         </div>
+                        
                     </ModalBody>
 
                     <ModalFooter>
@@ -100,20 +129,33 @@ function SizeCard() {
                 </ModalContent>
             </Modal>
 
-            <div className="bg-white rounded-b-xl p-6 py-3 space-y-4">
+            <div className="bg-white flex justify-center rounded-b-xl p-6 py-3 space-y-4">
                 {/* List Items */}
-                <div className="grid w-full py-1 overflow-x-auto">
-                    <div className=" flex flex-row mb-2 space-x-4 w-full">
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
-                        <SizeListItem size="35x92x1060" pallet="2340-0640" Qty="466" weight="1.5906"/>
+                {isPalletLoading ? (
+                    <Spinner
+                        thickness="4px"
+                        speed="0.65s"
+                        emptyColor="gray.200"
+                        color="#155979"
+                        size="xl"
+                        className="my-4"
+                    />
+                ) : (
+                    <div className="grid w-full py-1 overflow-x-auto">
+                        <div className=" flex flex-row mb-2 space-x-4 w-full">
+                            <>
+                                {sizeData.map((item) => (
+                                    <SizeListItem
+                                        size={item.size}
+                                        pallet={item.pallet}
+                                        Qty={item.Qty}
+                                        weight={item.Mass}
+                                    />
+                                ))}
+                            </>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

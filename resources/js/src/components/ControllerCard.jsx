@@ -38,73 +38,75 @@ import { MdFormatColorReset } from "react-icons/md";
 
 const checkItems = [
     {
-        value: "1",
+        value: 1,
         title: "1. Vệ sinh lò sấy",
-        description: "Sạch sẽ, không có các vật thể lạ trong lò",
+        description: "Sạch sẽ, không có các vật thể lạ trong lò.",
     },
     {
-        value: "2",
-        title: "2 .Không bị rò rỉ nước",
-        description: "Giàn nhiệt kín không bị rò rỉ nước",
+        value: 2,
+        title: "2. Không bị rò rỉ nước",
+        description: "Giàn nhiệt kín không bị rò rỉ nước.",
     },
     {
-        value: "3",
-        title: "3 .Hệ thống gia nhiệt",
+        value: 3,
+        title: "3. Hệ thống gia nhiệt",
         description:
-            "Van nhiệt đóng mở đúng theo tín hiệu điện Giàn nhiệt không bị rò rỉ nhiệt ra ngoài",
+            "Van nhiệt đóng mở đúng theo tín hiệu điện Giàn nhiệt không bị rò rỉ nhiệt ra ngoài.",
     },
     {
-        value: "4",
-        title: "4 .Hệ thống điều tiết ẩm",
-        description: "Ống phun ầm phải ở dạng sương, không được phun thành tia",
-    },
-    {
-        value: "5",
-        title: "5 .Đầu đo đo độ ẩm gỗ",
-        description: "Các đầu đo không bị đứt, còn đầu gài vào thanh gỗ mẫu",
-    },
-    {
-        value: "6",
-        title: "6 .Cửa thoát ẩm",
-        description: "Hoạt động đóng mở bằng tay/tự động dễ dàng, không bị kẹt",
-    },
-    {
-        value: "7",
-        title: "7 .Giấy cảm biến đo EMC",
-        description: "Tối đa 3 lượt sấy phải thay giấy mới",
-    },
-    {
-        value: "8",
-        title: "8 .Cảm biến nhiệt độ trong lò sấy",
+        value: 4,
+        title: "4. Hệ thống điều tiết ẩm",
         description:
-            "Không sai khác so với nhiệt độ trong lò quá 2⁰C (Dùng súng bắn nhiệt đo nhiệt độ thực tế trong lò)",
+            "Ống phun ầm phải ở dạng sương, không được phun thành tia.",
     },
     {
-        value: "9",
+        value: 5,
+        title: "5. Đầu đo đo độ ẩm gỗ",
+        description: "Các đầu đo không bị đứt, còn đầu gài vào thanh gỗ mẫu.",
+    },
+    {
+        value: 6,
+        title: "6. Cửa thoát ẩm",
+        description:
+            "Hoạt động đóng mở bằng tay/tự động dễ dàng, không bị kẹt.",
+    },
+    {
+        value: 7,
+        title: "7. Giấy cảm biến đo EMC",
+        description: "Tối đa 3 lượt sấy phải thay giấy mới.",
+    },
+    {
+        value: 8,
+        title: "8. Cảm biến nhiệt độ trong lò sấy",
+        description:
+            "Không sai khác so với nhiệt độ trong lò quá 2⁰C (Đo bằng súng bắn nhiệt).",
+    },
+    {
+        value: 9,
         title: "9. Van hơi, van nước hồi",
-        description: "Kín, không bị rò rỉ",
+        description: "Kín, không bị rò rỉ.",
     },
     {
-        value: "10",
-        title: "10 .Đinh, dây đo độ ẩm",
-        description: "Hoạt động tốt",
+        value: 10,
+        title: "10. Đinh, dây đo độ ẩm",
+        description: "Hoạt động tốt.",
     },
     {
-        value: "11",
-        title: "11 .Chiều dày thực tế",
+        value: 11,
+        title: "11. Chiều dày thực tế",
         description:
-            "Kiểm tra 5 palet ngẫu nhiên,mỗi palet 5 thanh ngẫu nhiên trong lò,dung sai cho phép + 2(mm)",
+            "Kiểm tra 5 palet ngẫu nhiên,mỗi palet 5 thanh ngẫu nhiên trong lò,dung sai cho phép + 2(mm).",
     },
     {
-        value: "12",
-        title: "12 .Động cơ quạt gió tốc độ gió quạt",
+        value: 12,
+        title: "12. Động cơ quạt & tốc độ gió quạt",
         description:
-            "Tốc độ gió quạt đạt tối thiểu 1m/s Các quạt quay cùng chiều và ngược chiều phải đồng đều",
+            "Tốc độ gió quạt đạt tối thiểu 1m/s Các quạt quay cùng chiều và ngược chiều phải đồng đều.",
     },
 ];
 
 function ControllerCard(props) {
-    const { progress, status, isChecked, isReviewed, reason, planID } = props;
+    const { progress, status, isChecked, isReviewed, reason, planID, onReload } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -122,14 +124,6 @@ function ControllerCard(props) {
 
     // console.log("Plan ID: ", planID);
 
-    // Check Checklist Items
-    const [checkedCount, setCheckedCount] = useState(0);
-    const handleCheckboxChange = (isChecked) => {
-        setCheckedCount((prevCount) =>
-            isChecked ? prevCount + 1 : prevCount - 1
-        );
-    };
-
     // State
     const [palletData, setPalletData] = useState([]);
     const [isPalletLoading, setPalletLoading] = useState([]);
@@ -145,6 +139,18 @@ function ControllerCard(props) {
     const [loadStartDryingLoading, setLoadStartDryingLoading] = useState(false);
     const [loadFinishDryingLoading, setLoadFinishDryingLoading] =
         useState(false);
+
+    // Kiln Check Handle
+    // No 7 Handle
+    const [no7Count, setNo7Count] = useState(0);
+
+    // Check Checklist Items
+    const [checkedCount, setCheckedCount] = useState(0);
+    const handleCheckboxChange = (isChecked) => {
+        setCheckedCount((prevCount) =>
+            isChecked ? prevCount + 1 : prevCount - 1
+        );
+    };
 
     // Get data Select
     useEffect(() => {
@@ -177,6 +183,7 @@ function ControllerCard(props) {
             };
 
             await axios.post("/api/ovens/production-batch", requestData);
+            props.onReload(prevState => !prevState);
 
             toast.success("Vào lò thành công!");
 
@@ -475,8 +482,9 @@ function ControllerCard(props) {
             <div className="flex flex-col px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-x-3 font-medium">
                     <PiCaretCircleDoubleRightFill className="text-2xl w-8 h-8 text-[#17506B]" />
-                    <div className="text-xl">Tiến trình: <span>{progressTitle}</span></div>
-                    
+                    <div className="xl:text-xl xl:w-full w-[70%] text-lg">
+                        Tiến trình: <span>{progressTitle}</span>
+                    </div>
                 </div>
                 <div className="w-full"></div>
             </div>
@@ -494,30 +502,33 @@ function ControllerCard(props) {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <div className="xl:ml-10 uppercase xl:text-xl ">
+                        <div className="xl:ml-6 uppercase xl:text-xl ">
                             Kiểm tra lò sấy
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <div className="xl:px-10 pb-2 text-[16px] text-gray-500 ">
-                            <strong>Ghi chú: </strong>Lò sấy chỉ đủ tiêu chuẩn
-                            hoạt động khi đã đáp ứng tất cả nhu cầu dưới đây
-                        </div>
-                        <div className="xl:px-10 grid xl:grid-cols-4 lg:grid-cols-3 gap-6">
-                            {/* Hiển thị tất cả giá trị checkItems */}
-                            {checkItems.map((item) => (
-                                <CheckListItem
-                                    value={item.value}
-                                    title={item.title}
-                                    description={item.description}
-                                    onCheckboxChange={handleCheckboxChange}
-                                />
-                            ))}
+                        <div className="h-full">
+                            <div className="xl:px-6 pb-2 text-[16px] text-gray-500 ">
+                                <strong>Ghi chú: </strong>Lò sấy chỉ đủ tiêu
+                                chuẩn hoạt động khi đã đáp ứng tất cả nhu cầu
+                                dưới đây
+                            </div>
+                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
+                                {/* Hiển thị tất cả giá trị checkItems */}
+                                {checkItems.map((item) => (
+                                    <CheckListItem
+                                        value={item.value}
+                                        title={item.title}
+                                        description={item.description}
+                                        onCheckboxChange={handleCheckboxChange}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </ModalBody>
-                    <ModalFooter>
-                        <div className="xl:flex justify-between xl:px-10 md:px-10 w-full">
+                    <ModalFooter className="bg-white border-t-2 border-gray-200 w-full sticky bottom-0">
+                        <div className=" xl:flex items-center justify-between xl:px-6 md:px-6 w-full">
                             <div className="flex text-lg ">
                                 <strong className="hidden xl:flex md:flex">
                                     Kết luận:{" "}
@@ -537,15 +548,15 @@ function ControllerCard(props) {
                                     (<span>{checkedCount}</span>/12)
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-x-3 ">
+                            <div className="flex xl:w-fit md:w-fit w-full items-center justify-end py-4 xl:py-0 lg:py-0 md:py-0 gap-x-3 ">
                                 <button
                                     onClick={onClose}
-                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                 >
                                     Đóng
                                 </button>
                                 <button
-                                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                     onClick={handleCompleteCheckingKiln}
                                 >
                                     {loadKilnCheckingLoading ? (

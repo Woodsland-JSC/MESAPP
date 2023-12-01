@@ -22,6 +22,16 @@ import usersApi from "../api/userApi";
 
 import logo from "../assets/images/woodsland.svg";
 import defaultUser from "../assets/images/default-user.png";
+import {
+    Fade,
+    ScaleFade,
+    Slide,
+    SlideFade,
+    Collapse,
+    useDisclosure,
+    Box,
+    IconButton,
+} from "@chakra-ui/react";
 
 import {
     Menu,
@@ -33,8 +43,11 @@ import {
     MenuOptionGroup,
     MenuDivider,
 } from "@chakra-ui/react";
+import { IoClose } from "react-icons/io5";
 
 function Header(props) {
+    const { isOpen, onToggle } = useDisclosure();
+
     const { user, setUser, isAuthenticated, setIsAuthenticated } =
         useAppContext();
 
@@ -154,31 +167,28 @@ function Header(props) {
                         )}
                         {/* {user?.permissions?.includes("monitor") && */}
                         {/* ( */}
-                            <NavLink
-                                to="/reports"
-                                className="flex items-center"
-                            >
-                                {({ isActive }) => (
-                                    <li
+                        <NavLink to="/reports" className="flex items-center">
+                            {({ isActive }) => (
+                                <li
+                                    className={
+                                        isActive
+                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
+                                            : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
+                                    }
+                                >
+                                    <div
                                         className={
                                             isActive
-                                                ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
-                                                : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
+                                                ? "flex items-center space-x-2 text-white"
+                                                : "flex items-center space-x-2"
                                         }
                                     >
-                                        <div
-                                            className={
-                                                isActive
-                                                    ? "flex items-center space-x-2 text-white"
-                                                    : "flex items-center space-x-2"
-                                            }
-                                        >
-                                            <TbReportAnalytics className="text-2xl" />
-                                            <p>Báo cáo</p>
-                                        </div>
-                                    </li>
-                                )}
-                            </NavLink>
+                                        <TbReportAnalytics className="text-2xl" />
+                                        <p>Báo cáo</p>
+                                    </div>
+                                </li>
+                            )}
+                        </NavLink>
                         {/* )} */}
                         {/* <NavLink to="/profile" className="flex items-center">
                             {({ isActive }) => (
@@ -205,7 +215,7 @@ function Header(props) {
                     </ul>
                 </div>
 
-                {/* User */}
+                {/* Right*/}
                 <div className="flex items-center h-full">
                     {isAuthenticated ? (
                         <>
@@ -214,89 +224,76 @@ function Header(props) {
                                 alt="user"
                                 className="w-8 h-8 rounded-full object-cover"
                             ></img>
+
+                            {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <Menu>
-                                    <MenuButton
-                                        aria-label="Options"
-                                        variant="outline"
+                                <IconButton
+                                    variant="ghost"
+                                    onClick={onToggle}
+                                    className="w-fit ml-2"
+                                >
+                                    <HiMenuAlt3 className="text-2xl" />
+                                </IconButton>
+                                <Slide
+                                    direction="bottom"
+                                    in={isOpen}
+                                    style={{ zIndex: 10 }}
+                                >
+                                    <Box
+                                        p="40px"
+                                        color="white"
+                                        mt="4"
+                                        bg="gray.800"
+                                        rounded="md"
+                                        shadow="md"
                                     >
-                                        <Button
-                                            variant="ghost"
-                                            fontWeight="regular"
-                                            data-collapse-toggle="navbar-sticky"
-                                        >
-                                            <HiMenuAlt3 className="text-2xl" />
-                                        </Button>
-                                    </MenuButton>
-                                    <MenuList
-                                        minWidth="400px"
-                                        className="shadow-md z-10 mt-4"
-                                    >
-                                        <div className="px-4 py-2 text-lg font-semibold">
+                                        <div className="px-2 border-b-2 border-gray-200 py-4 text-2xl font-semibold">
                                             {user?.first_name +
                                                 " " +
                                                 user?.last_name}
                                         </div>
-                                        <MenuDivider />
-                                        <Link to="/profile">
-                                            <MenuItem
-                                                icon={
+                                        <div className="space-y-4 gap-y-2">
+                                            <Link to="/profile">
+                                                <div className="flex gap-x-4 my-1 mt-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4">
                                                     <TbInfoSquareRounded className="text-2xl" />
-                                                }
-                                                minH="42px"
-                                            >
-                                                Trang cá nhân
-                                            </MenuItem>
-                                        </Link>
-                                        <Link to="/workspace">
-                                            <MenuItem
-                                                icon={
-                                                    <TbCategory className="text-2xl" />
-                                                }
-                                                minH="42px"
-                                            >
-                                                Workspace
-                                            </MenuItem>
-                                        </Link>
-                                        <Link to="/users">
-                                            <MenuItem
-                                                icon={
-                                                    <TbUserSquareRounded className="text-2xl" />
-                                                }
-                                                minH="42px"
-                                            >
-                                                Quản lý người dùng
-                                            </MenuItem>
-                                        </Link>
-                                        {user?.permissions?.includes(
-                                            "monitor"
-                                        ) && (
-                                            <Link to="/integration">
-                                                <MenuItem
-                                                    icon={
-                                                        <TbAnalyze className="text-2xl" />
-                                                    }
-                                                    minH="42px"
-                                                >
-                                                    Tích hợp
-                                                </MenuItem>
+                                                    <div>Trang cá nhân</div>
+                                                </div>
                                             </Link>
-                                        )}
-                                        {/* {user?.permissions?.includes(
+                                            <Link to="/workspace">
+                                                <div className="flex gap-x-4 p-2 my-1 text-xl items-center rounded-xl hover:bg-gray-700 px-4">
+                                                    <TbCategory className="text-2xl" />
+                                                    <div>Workspace</div>
+                                                </div>
+                                            </Link>
+                                            <Link to="/users">
+                                                <div className="flex gap-x-4 p-2 my-1  text-xl items-center rounded-xl hover:bg-gray-700 px-4">
+                                                    <TbUserSquareRounded className="text-2xl" />
+                                                    <div>
+                                                        Quản lý người dùng
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                            {user?.permissions?.includes(
+                                                "monitor"
+                                            ) && (
+                                                <Link to="/integration">
+                                                    <div className="flex gap-x-4 p-2 my-1 text-xl items-center rounded-xl hover:bg-gray-700 px-4">
+                                                        <TbAnalyze className="text-2xl" />
+                                                        <div>Tích hợp</div>
+                                                    </div>
+                                                </Link>
+                                            )}
+                                            {/* {user?.permissions?.includes(
                                             "monitor"
                                         ) && ( */}
                                             <Link to="/reports">
-                                                <MenuItem
-                                                    icon={
-                                                        <TbReportAnalytics className="text-2xl" />
-                                                    }
-                                                    minH="42px"
-                                                >
-                                                    Báo cáo
-                                                </MenuItem>
+                                                <div className="flex gap-x-4 p-2 my-1 text-xl items-center rounded-xl hover:bg-gray-700 px-4">
+                                                    <TbReportAnalytics className="text-2xl" />
+                                                    <div>Báo cáo</div>
+                                                </div>
                                             </Link>
-                                        {/* )} */}
-                                        {/* <Link to="/profile">
+                                            {/* )} */}
+                                            {/* <Link to="/profile">
                                             <MenuItem
                                                 icon={
                                                     <TbSettings className="text-2xl" />
@@ -306,18 +303,29 @@ function Header(props) {
                                                 Thông tin cá nhân
                                             </MenuItem>
                                         </Link> */}
-                                        <MenuItem
-                                            icon={
-                                                <TbArrowRight className="text-2xl" />
-                                            }
-                                            minH="42px"
-                                            onClick={() => handleSignOut()}
-                                        >
-                                            Đăng xuất
-                                        </MenuItem>
-                                    </MenuList>
-                                </Menu>
+                                            <div>
+                                                <div
+                                                    className="flex cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4"
+                                                    onClick={() =>
+                                                        handleSignOut()
+                                                    }
+                                                >
+                                                    <TbArrowRight className="text-2xl" />
+                                                    <div>Đăng xuất</div>
+                                                </div>
+                                                <div
+                                                    className="flex cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4"
+                                                    onClick={onToggle}
+                                                >
+                                                    <IoClose className="text-2xl" />
+                                                    <div>Đóng</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Box>
+                                </Slide>
                             </div>
+
                             <div className="hidden xl:flex">
                                 <Menu>
                                     <MenuButton rightIcon={<TbChevronDown />}>

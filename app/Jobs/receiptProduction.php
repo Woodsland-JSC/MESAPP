@@ -49,10 +49,11 @@ class receiptProduction implements ShouldQueue
                 'Accept' => 'application/json',
                 'Authorization' => 'Basic ' . BasicAuthToken(),
             ])->patch(UrlSAPServiceLayer() . '/b1s/v1/ProductionOrders(' . $this->ponum  . ')', $data);
-        } else {
-            $res = $response->json();
-            // Job sẽ được queue worker thử lại
-            throw new \Exception($res['error']);
         }
+        // } else {
+        //     $res = $response->json();
+        //     // Job sẽ được queue worker thử lại
+        //     throw new \Exception($res['error']);
+        // }
     }
 }

@@ -21,7 +21,7 @@ import {
     TableCaption,
     TableContainer,
 } from "@chakra-ui/react";
-import { FaStumbleuponCircle } from "react-icons/fa";
+import { RiWaterPercentFill } from "react-icons/ri";
 import { FaPlus } from "react-icons/fa6";
 
 function HumidityCheck() {
@@ -32,7 +32,9 @@ function HumidityCheck() {
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 font-medium border-b border-gray-200">
                 <div className="flex items-center gap-x-3">
-                    <FaStumbleuponCircle className="text-2xl text-[#17506B]" />
+                    <div className="w-8 h-8">
+                        <RiWaterPercentFill className="w-full h-full text-[#17506B]" />
+                    </div>
                     <div className="xl:text-xl xl:w-full w-[70%] text-lg">
                         Danh sách biên bản kiểm tra độ ẩm
                     </div>
