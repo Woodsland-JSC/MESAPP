@@ -152,6 +152,9 @@ function WoodSorting() {
                                 batchNum={item.BatchNum}
                                 inStock={item.Quantity}
                                 whsCode={item.WhsCode}
+                                height={item.CDai}
+                                width={item.CRong}
+                                thickness={item.CDay}
                                 onDelete={() =>
                                     handleDeletePalletCard(
                                         item.WhsCode + item.BatchNum
@@ -210,13 +213,17 @@ function WoodSorting() {
                 WhsCode: card.props.whsCode,
                 BatchNum: card.props.batchNum,
                 Qty: palletQuantities[card.key] || 0,
-                CDai: 1,
-                CDay: 1,
-                CRong: 1,
+                CDai: card.props.height,
+                CDay: card.props.thickness,
+                CRong: card.props.width,
             })),
         };
         return palletObject;
     };
+
+    let woodTypeSelectRef = null;
+    let dryingReasonSelectRef = null;
+    let dryingMethodSelectRef = null;
 
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
@@ -227,10 +234,6 @@ function WoodSorting() {
         const palletObject = createPalletObject();
 
         try {
-            // const response = await axios.post(
-            //     "/api/pallets/create",
-            //     palletObject
-            // );
             const response = await toast.promise(
                 axios.post("/api/pallets/create", palletObject),
                 {
@@ -242,16 +245,24 @@ function WoodSorting() {
 
             console.log("3. Thông tin pallet:", palletObject);
 
+            if (woodTypeSelectRef) {
+                woodTypeSelectRef.clearValue();
+            }
+            if (dryingReasonSelectRef) {
+                dryingReasonSelectRef.clearValue();
+            }
+            if (dryingMethodSelectRef) {
+                dryingMethodSelectRef.clearValue();
+            }
+
             // setWoodTypes(null);
             // setSelectedWoodType(null);
-            // setBatchId("");
+            setBatchId("");
             // setSelectedDryingReason(null);
             // setSelectedDryingMethod(null);
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
-
-
 
             console.log("4. Kết quả tạo pallet:", response.data);
         } catch (error) {
@@ -349,7 +360,10 @@ function WoodSorting() {
                                         </label>
 
                                         <Select
-                                            placeholder="Lựa chọn"
+                                            placeholder="Chọn loại gỗ"
+                                            ref={(ref) => {
+                                                woodTypeSelectRef = ref;
+                                            }}
                                             options={woodTypes}
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
@@ -381,7 +395,10 @@ function WoodSorting() {
                                             Mục đích sấy
                                         </label>
                                         <Select
-                                            placeholder="Lựa chọn"
+                                            ref={(ref) => {
+                                                dryingReasonSelectRef = ref;
+                                            }}
+                                            placeholder="Chọn mục đích sấy"
                                             options={dryingReasons}
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
@@ -396,19 +413,15 @@ function WoodSorting() {
                                             Quy cách thô
                                         </label>
                                         <Select
+                                            ref={(ref) => {
+                                                dryingMethodSelectRef = ref;
+                                            }}
+                                            placeholder="Chọn quy cách thô"
                                             options={dryingMethods}
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
                                         />
-                                        {/* <AsyncSelect
-                                            defaultOption
-                                            cacheOptions
-                                            loadOptions={loadDryingMethods}
-                                            onChange={(value) =>
-                                                setSelectedDryingMethod(value)
-                                            }
-                                        /> */}
                                     </div>
 
                                     <div className="col-span-1">

@@ -202,8 +202,19 @@ function Details() {
                                     <InfoCard
                                         purpose={BOWData.Reason}
                                         thickness={BOWData.Method}
-                                        finishedDate={BOWData.Time}
-                                        // finishedDate={format(addDays(new Date(BOWData.created_at), BOWData.Time), 'yyyy-MM-dd HH:mm:ss')}
+                                        finishedDate={
+                                            BOWData.Time && BOWData.created_at
+                                                ? format(
+                                                      addDays(
+                                                          new Date(
+                                                              BOWData.created_at
+                                                          ),
+                                                          parseInt(BOWData.Time)
+                                                      ),
+                                                      "yyyy-MM-dd HH:mm:ss"
+                                                  )
+                                                : "Invalid Date"
+                                        }
                                         palletQty={BOWData.TotalPallet}
                                         weight={BOWData.Mass}
                                     />
@@ -269,7 +280,6 @@ function Details() {
                                             >
                                                 <SizeCard />
                                             </Skeleton>
-                                            
                                         </div>
                                     )}
                                     {type === "ls" && (
@@ -299,17 +309,17 @@ function Details() {
                                         </div>
                                     )}
                                     {type === "dg" && (
-                                        <div className="space-y-6"> 
+                                        <div className="space-y-6">
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
                                                 <ControllerCard
-                                                progress="dg"
-                                                planID={BOWData.PlanID}
-                                                status={BOWData.Status}
-                                                isReviewed={BOWData.Review}
-                                            />
+                                                    progress="dg"
+                                                    planID={BOWData.PlanID}
+                                                    status={BOWData.Status}
+                                                    isReviewed={BOWData.Review}
+                                                />
                                             </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
@@ -328,14 +338,17 @@ function Details() {
                                                 borderRadius="2xl"
                                             >
                                                 <DisabledCheck
-                                                disabilityList={disabledReports}
-                                                generalInfo={{
-                                                    dryingBatch: "2023.45.01",
-                                                    factory: "Nhà máy A",
-                                                }}
-                                            />
+                                                    disabilityList={
+                                                        disabledReports
+                                                    }
+                                                    generalInfo={{
+                                                        dryingBatch:
+                                                            "2023.45.01",
+                                                        factory: "Nhà máy A",
+                                                    }}
+                                                />
                                             </Skeleton>
-                                            
+
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"

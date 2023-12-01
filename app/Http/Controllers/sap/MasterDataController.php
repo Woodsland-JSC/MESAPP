@@ -5,6 +5,7 @@ namespace App\Http\Controllers\sap;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\sap\ConnectController;
+use App\Models\Plants;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reasons;
 use App\Models\User;
@@ -50,7 +51,7 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "ItemCode","ItemName" from OITM where "Series"=?';
+            $query = 'select "ItemCode","ItemName" from OITM where "Series"=? and ("OnHand"-"IsCommited"+"OnOrder")>0';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -192,12 +193,17 @@ class MasterDataController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $conDB = (new ConnectController)->connect_sap();
-
+            $filter = "";
+            if ($request->reason == 'SL') {
+                $filter = 'T1."U_Status" != ?';
+            } else {
+                $filter = 'T1."U_Status"= ?';
+            }
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
-                'where T1."Quantity" >0 and T0."ItemCode"= ? and "BPLid" = ? and t3."U_Flag"=?';
+                'where T1."Quantity" >0 and T0."ItemCode"= ? and "BPLid" = ? and ' . $filter;
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -235,6 +241,7 @@ class MasterDataController extends Controller
                 }
             }
             odbc_close($conDB);
+            $results = array_filter($results, fn ($item) => (float) $item['Quantity'] > 0);
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -349,6 +356,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
             odbc_close($conDB);
+
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -400,14 +408,14 @@ class MasterDataController extends Controller
     {
         try {
             $conDB = (new ConnectController)->connect_sap();
-            $userData = User::where('sap_id', '<>', null)->pluck('sap_id')->implode(','); // lấy danh sách user đã được assign và conver to string
+            $userData = User::where('sap_id', '<>', null)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(','); // lấy danh sách user đã được assign và conver to string
 
-            $query = 'select "USER_CODE",ifnull("U_NAME","USER_CODE") NAME from "OUSR" where "USER_CODE" NOT IN (?) and "USERID" NOT IN (2,3,4,5,6)';
+            $query = 'select "USER_CODE",ifnull("U_NAME","USER_CODE") NAME from "OUSR" where "USER_CODE" NOT IN (' . $userData . ') and "USERID" NOT IN (2,3,4,5,6)';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [$userData])) {
+            if (!odbc_execute($stmt)) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -454,5 +462,45 @@ class MasterDataController extends Controller
         //     ]
         // );
         return response()->json(["data" => $res], 200);
+    }
+    function updatePlant()
+    {
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            DB::beginTransaction();
+            $query = 'select * from "@G_SAY4"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            DB::table('plants')->delete();
+            $Plants = [];
+            while ($row = odbc_fetch_array($stmt)) {
+                Plants::create([
+                    'Code' => $row['Code'],
+                    'Name' => $row['Name']
+                ]);
+            }
+
+
+            DB::commit();
+            return response()->json([
+                'message' => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

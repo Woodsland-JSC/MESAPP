@@ -808,6 +808,8 @@ function FinishedGoodsReceipt() {
                                         onClick={() => setActiveStep(1)}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cb0 !important"
+
                                     >
                                         Tiếp tục
                                     </Button>
@@ -878,6 +880,7 @@ function FinishedGoodsReceipt() {
                                         onClick={() => setActiveStep(2)}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cb0 !important"
                                     >
                                         Tiếp tục
                                     </Button>
@@ -926,6 +929,7 @@ function FinishedGoodsReceipt() {
                                         onClick={handleSubmit}
                                         variant="solid"
                                         colorScheme="blue"
+                                        backgroundColor="#2b6cb0 !important"
                                     >
                                         Hoàn thành
                                     </Button>

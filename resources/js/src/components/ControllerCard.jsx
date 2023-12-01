@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import { BsFillSkipForwardCircleFill } from "react-icons/bs";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { FaCheck } from "react-icons/fa6";
@@ -119,15 +120,10 @@ function ControllerCard(props) {
 
     let navigate = useNavigate();
 
-    console.log("Plan ID: ", planID);
+    // console.log("Plan ID: ", planID);
 
-    // Check Input
+    // Check Checklist Items
     const [checkedCount, setCheckedCount] = useState(0);
-    // const { activeStep } = useSteps({
-    //     index: 1,
-    //     count: steps.length,
-    // });
-
     const handleCheckboxChange = (isChecked) => {
         setCheckedCount((prevCount) =>
             isChecked ? prevCount + 1 : prevCount - 1
@@ -135,8 +131,8 @@ function ControllerCard(props) {
     };
 
     // State
-    const [PalletData, setPalletData] = useState([]);
-    const [selectedPallet, setSelectedPallet] = useState([]);
+    const [palletData, setPalletData] = useState([]);
+    const [selectedPallet, setSelectedPallet] = useState(null);
     const [dryingInProgress, setDryingInProgress] = useState(false);
     const [isCompleteChecking, setIsCompleteChecking] = useState(false);
 
@@ -164,13 +160,27 @@ function ControllerCard(props) {
             });
     }, [reason]);
 
+    const loadAsyncOptions = async () => {
+        try {
+            const data = await palletsApi.getPalletList(reason);
+
+            const options = data.map((item) => ({
+                value: item.palletID,
+                label: item.Code,
+            }));
+
+            setPalletData(options);
+        } catch (error) {
+            console.error("Error loading pallet list:", error);
+        }
+    };
+
     const handleLoadIntoKiln = async () => {
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
                 return;
             }
-
             setLoadIntoKilnLoading(true);
 
             const requestData = {
@@ -178,11 +188,12 @@ function ControllerCard(props) {
                 PalletID: selectedPallet.value,
             };
 
-            const response = await axios.post(
-                "/api/ovens/production-batch",
-                requestData
-            );
+            await axios.post("/api/ovens/production-batch", requestData);
+
             toast.success("Vào lò thành công!");
+
+            await loadAsyncOptions();
+
             setLoadIntoKilnLoading(false);
         } catch (error) {
             console.error("Error loading into kiln:", error);
@@ -273,14 +284,14 @@ function ControllerCard(props) {
         progress === "kh"
             ? "Tạo kế hoạch sấy"
             : progress === "vl"
-            ? "Vào lò"
-            : progress === "kt"
-            ? "Kiểm tra lò sấy"
-            : progress === "ls"
-            ? "Chạy lò sấy"
-            : progress === "dg"
-            ? "Đánh giá mẻ sấy và xác nhận ra lò"
-            : "";
+                ? "Vào lò"
+                : progress === "kt"
+                    ? "Kiểm tra lò sấy"
+                    : progress === "ls"
+                        ? "Chạy lò sấy"
+                        : progress === "dg"
+                            ? "Đánh giá mẻ sấy và xác nhận ra lò"
+                            : "";
 
     const content =
         progress === "kh" ? (
@@ -304,13 +315,25 @@ function ControllerCard(props) {
                         >
                             Chọn pallet
                         </label>
-                        <Select
-                            options={PalletData}
+                        <AsyncSelect
+                            cacheOptions
+                            loadOptions={loadAsyncOptions}
+                            defaultOptions={palletData}
                             onChange={(value) => {
                                 console.log("Selected Pallet:", value);
                                 setSelectedPallet(value);
                             }}
                         />
+                        {/* <Select
+                            placeholder="Chọn pallet"
+                            options={palletData}
+                            onChange={(value) => {
+                                console.log("Selected Pallet:", value);
+                                setSelectedPallet(value);
+                            }}
+                            className="basic-single"
+                            classNamePrefix="select"
+                        /> */}
                     </div>
                     <button
                         className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
@@ -330,35 +353,45 @@ function ControllerCard(props) {
         ) : progress === "kt" ? (
             <div>
                 {status === 1 ? (
-                    <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
-                        <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
-                            <label
-                                for="company"
-                                className="block mb-2 text-md font-medium text-gray-900 "
-                            >
-                                Chọn pallet
-                            </label>
-                            <Select
-                                options={PalletData}
-                                onChange={(value) => {
-                                    console.log("Selected Pallet:", value);
-                                    setSelectedPallet(value);
-                                }}
-                            />
-                        </div>
-                        <button
-                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
-                            onClick={handleLoadIntoKiln}
-                        >
-                            {loadIntoKilnLoading ? (
-                                <div className="flex justify-center items-center space-x-4">
-                                    <Spinner size="sm" color="white" />
-                                    <div>Đang tải</div>
+                    <div>
+                        {!isCompleteChecking ? (
+                            <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
+                                <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
+                                    <label
+                                        for="company"
+                                        className="block mb-2 text-md font-medium text-gray-900 "
+                                    >
+                                        Chọn pallet
+                                    </label>
+                                    <AsyncSelect
+                                        cacheOptions
+                                        placeholder="Chọn pallet"
+                                        loadOptions={palletData}
+                                        // defaultOptions={palletData}
+                                        onChange={(value) => {
+                                            console.log(
+                                                "Selected Pallet:",
+                                                value
+                                            );
+                                            setSelectedPallet(value);
+                                        }}
+                                    />
                                 </div>
-                            ) : (
-                                "Vào lò"
-                            )}
-                        </button>
+                                <button
+                                    className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
+                                    onClick={handleLoadIntoKiln}
+                                >
+                                    {loadIntoKilnLoading ? (
+                                        <div className="flex justify-center items-center space-x-4">
+                                            <Spinner size="sm" color="white" />
+                                            <div>Đang tải</div>
+                                        </div>
+                                    ) : (
+                                        "Vào lò"
+                                    )}
+                                </button>
+                            </div>
+                        ) : null}
                     </div>
                 ) : null}
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
@@ -506,11 +539,10 @@ function ControllerCard(props) {
                                     Kết luận:{" "}
                                 </strong>
                                 <p
-                                    className={`ml-2  ${
-                                        checkedCount === 12
-                                            ? "text-[#0E8E59]"
-                                            : "text-[#961717]"
-                                    }`}
+                                    className={`ml-2  ${checkedCount === 12
+                                        ? "text-[#0E8E59]"
+                                        : "text-[#961717]"
+                                        }`}
                                 >
                                     {checkedCount === 12
                                         ? "Mẻ sấy đã đủ điều kiện hoạt động."
