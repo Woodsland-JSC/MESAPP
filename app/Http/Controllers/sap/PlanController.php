@@ -211,8 +211,9 @@ class PlanController extends Controller
             }
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
-            if ($record) {
-                $record->update(
+
+            if ($record->count() > 0) {
+                plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 2,
                         'Checked' => 1,
@@ -227,9 +228,7 @@ class PlanController extends Controller
                         'NoCheck' => $id
                     ]
                 );
-                $body = [
-                    "ProductionOrderStatus" => "boposReleased"
-                ];
+
                 // Fetch data for API request
                 $data = DB::table('plan_detail as a')
                     ->join('pallets as b', 'a.pallet', '=', 'b.palletID')
