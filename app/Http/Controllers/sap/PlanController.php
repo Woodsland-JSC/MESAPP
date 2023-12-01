@@ -148,7 +148,7 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->first();
+            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
@@ -157,7 +157,7 @@ class PlanController extends Controller
             if ($existingPallet > 1) {
                 throw new \Exception('Pallet đã được assign.');
             }
-            $data = pallet_details::find($pallet)->first();
+            $data = pallet_details::where('palletID', $pallet)->first();
 
 
             plandetail::create([
@@ -210,7 +210,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
             if ($record) {
                 $record->update(
                     [
@@ -269,7 +269,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->get();
             $test = [];
             if ($record) {
                 $record->update(
@@ -363,7 +363,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->first();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();;
             if ($record) {
                 $record->update(
                     [

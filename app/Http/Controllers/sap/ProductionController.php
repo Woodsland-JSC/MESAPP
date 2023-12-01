@@ -5,30 +5,40 @@ namespace App\Http\Controllers\sap;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use App\Jobs\receiptProductionAlocate;
+use App\Models\AllocateLogs;
 
 class ProductionController extends Controller
 {
     //
-    function index()
+    function index(Request $request)
     {
-        $data = [
-            [
-                'ItemCode' => '0001',
-                'ItemName' => 'Item test',
-                'Qty' => 20
-            ],
-            [
-                'ItemCode' => '0002',
-                'ItemName' => 'Item test',
-                'Qty' => 50
-            ],
-            [
-                'ItemCode' => '0003',
-                'ItemName' => 'Item test',
-                'Qty' => 50
-            ]
-        ];
-        return response()->json($data, 200);
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select a."DocEntry",a."DocNum",a."ItemCode","PlannedQty",
+                ifnull(c."Qty",0) "ReceiptQty","PlannedQty"-ifnull(c."Qty",0) "OpenQty", null "Allocate"
+                from OWOR A join OUSR B ON A."UserSign"=B."USERID"
+                left join (
+                    select distinct "BaseEntry","ItemCode" ,
+                    sum("Quantity") over(PARTITION BY "BaseEntry","ItemCode") "Qty"
+                    from IGN1
+                    where "BaseType"=202
+                )C ON A."DocEntry"=c."BaseEntry" where  "Type"=? and a."Status"=? and "U_Xuong"=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['S', 'R', $request->xuong])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        odbc_close($conDB);
+        return response()->json($results, 200);
     }
     function receipts(Request $request)
     {
@@ -39,9 +49,115 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select a."DocEntry",a."DocNum",a."ItemCode",a."Warehouse","PlannedQty",
+                ifnull(c."Qty",0) "ReceiptQty","PlannedQty"-ifnull(c."Qty",0) "OpenQty", null "Allocate"
+                from OWOR A join OUSR B ON A."UserSign"=B."USERID"
+                left join (
+                    select distinct "BaseEntry","ItemCode" ,
+                    sum("Quantity") over(PARTITION BY "BaseEntry","ItemCode") "Qty"
+                    from IGN1
+                    where "BaseType"=202
+                )C ON A."DocEntry"=c."BaseEntry" where  "Type"=? and a."Status"=? and "U_Xuong"=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['S', 'R', '0001'])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+
+        $rss = $this->allocate($results, $request->Qty);
+        foreach ($rss as $rs) {
+            $data[] = [
+                "BatchNumber" => now()->format('Ymd') . $rs['DocEntry'],
+                "Quantity" => $rs['Allocate'],
+                "ItemCode" =>  $rs['ItemCode'],
+                "U_Status" => "SD"
+            ];
+            $body = [
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+
+                "DocumentLines" => [
+                    [
+                        "Quantity" => $rs['Allocate'],
+                        "BaseLine" => 0,
+                        "WarehouseCode" => $rs['Warehouse'],
+                        "BaseEntry" => $rs['DocEntry'],
+                        "BaseType" => 202,
+                        "BatchNumbers" => $data,
+
+                    ],
+                ],
+            ];
+            AllocateLogs::created([
+                'BaseEntry' => $rs['DocEntry'],
+                'ItemCode' => $rs['ItemCode'],
+                'Qty' => $rs['Allocate'],
+                'Body' =>  $body
+            ]);
+            receiptProductionAlocate::dispatch($body);
+        }
+
         return response()->json([
             'message' => 'nhập sản lượng thành công',
-            'data' => $request->all()
+            'data' => $request->all(),
+            $rs
         ], 200);
+    }
+    function allocate($data, $totalQty)
+    {
+
+        foreach ($data as &$item) {
+            // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
+            if (isset($item['OpenQty']) && $item['OpenQty'] <= $totalQty) {
+                $item['Allocate'] = $item['OpenQty'];
+                $totalQty -= $item['OpenQty'];
+            } else {
+                // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
+                if ($item['OpenQty'] > 0) {
+                    $item['Allocate'] = min($item['OpenQty'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+
+        // Sử dụng array_filter với callback ngắn gọn hơn
+        $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
+
+        return array_values($filteredData);
+    }
+    function listProduction(Request $request)
+    {
+    }
+    function listo(Request $request)
+    {
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT A.* FROM "@V_TO" a join ousr b ON A."U_Xuong"=b."U_Xuong" where USER_CODE=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [Auth::user()->sap_id])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        odbc_close($conDB);
+        return response()->json($results, 200);
     }
 }
