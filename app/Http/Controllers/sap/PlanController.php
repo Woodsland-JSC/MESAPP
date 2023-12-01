@@ -211,8 +211,9 @@ class PlanController extends Controller
             }
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
-            if ($record) {
-                $record->update(
+
+            if ($record->count() > 0) {
+                plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 2,
                         'Checked' => 1,
@@ -227,9 +228,7 @@ class PlanController extends Controller
                         'NoCheck' => $id
                     ]
                 );
-                $body = [
-                    "ProductionOrderStatus" => "boposReleased"
-                ];
+
                 // Fetch data for API request
                 $data = DB::table('plan_detail as a')
                     ->join('pallets as b', 'a.pallet', '=', 'b.palletID')
@@ -271,8 +270,8 @@ class PlanController extends Controller
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->get();
             $test = [];
-            if ($record) {
-                $record->update(
+            if ($record->count() > 0) {
+                plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 3,
                         'RunBy' => Auth::user()->id
@@ -363,9 +362,9 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();;
-            if ($record) {
-                $record->update(
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+            if ($record->count() > 0) {
+                plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 4,
                         'CompletedBy' => Auth::user()->id
