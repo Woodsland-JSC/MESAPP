@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
+import { TiDeleteOutline } from "react-icons/ti";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import toast from "react-hot-toast";
@@ -100,9 +102,12 @@ const SelectField = ({ options, name, setInput, ...props }) => {
 
 function Profile() {
     const fileInputRef = useRef(null);
+
     let oldPasswordRef = useRef(null);
     let newPasswordRef = useRef(null);
     let reNewPasswordRef = useRef(null);
+
+    const signInputRef = useRef(null);
 
     const [formKey, setFormKey] = useState(0);
 
@@ -111,6 +116,8 @@ function Profile() {
     const [saving, setSaving] = useState(false);
 
     const [avatarLoading, setAvatarLoading] = useState(false);
+
+    const [signature, setSignature] = useState(null);
 
     const [avatar, setAvatar] = useState({
         file: null,
@@ -122,6 +129,8 @@ function Profile() {
     const [factories, setFactories] = useState([]);
 
     const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedSignature, setSelectedSignature] = useState(null);
+    const [previewSignature, setPreviewSignature] = useState(null);
 
     const [input, setInput] = useState({
         firstName: "",
@@ -159,6 +168,54 @@ function Profile() {
         reader.readAsDataURL(file);
         setAvatarLoading(false);
     };
+
+    // const handleChangeSignature = (event) => {
+    //     const file = event.target.files[0];
+    //     setSelectedSignature(file);
+    //     const reader = new FileReader();
+
+    //     reader.onload = (event) => {
+    //         const imgSrc = event.target.result;
+    //         setSignature(imgSrc);
+    //     };
+
+    //     reader.readAsDataURL(file);
+    // };
+
+    const onDrop = useCallback((acceptedFiles) => {
+        setSelectedSignature(acceptedFiles[0]);
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            setSignature(acceptedFiles[0]);
+            setPreviewSignature(reader.result);
+        };
+
+        reader.readAsDataURL(acceptedFiles[0]);
+    }, []);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop: (acceptedFiles, rejectedFiles) => {
+            if (rejectedFiles && rejectedFiles.length > 0) {
+                toast.error("Chỉ được upload file hình ảnh");
+            } else {
+                const imageFile = acceptedFiles[0];
+                // Kiểm tra kích thước
+                if (imageFile.size > 2*1024) {
+                    toast.error("Vui lòng chọn hình có kích thước <= 2MB.");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const previewUrl = reader.result;
+                    setPreviewSignature(previewUrl);
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        },
+        accept: "image/*",
+        multiple: false,
+    });
 
     const blobToBase64 = (blob) => {
         return new Promise((resolve, reject) => {
@@ -272,10 +329,10 @@ function Profile() {
         const currentUser = JSON.parse(localStorage.getItem("userInfo"));
 
         currentUser.last_name = values.firstName;
-        currentUser.first_name= values.firstName;
-        currentUser.last_name= values.lastName;
-        currentUser.gender= values.gender;
-        currentUser.avatar= userResponse?.user?.avatar;
+        currentUser.first_name = values.firstName;
+        currentUser.last_name = values.lastName;
+        currentUser.gender = values.gender;
+        currentUser.avatar = userResponse?.user?.avatar;
 
         localStorage.setItem("userInfo", JSON.stringify(currentUser));
         // console.log(currentUser);
@@ -631,6 +688,61 @@ function Profile() {
                                                     />
                                                     <span className="block mt-[8px] h-[14.55px]"></span>
                                                 </div>
+                                            </div>
+                                            <div className="flex flex-col gap-y-2">
+                                                <label
+                                                    htmlFor="signature"
+                                                    className="block mb-2 text-md font-medium text-gray-900"
+                                                >
+                                                    Upload chữ ký{" "}
+                                                </label>
+                                                {/* <input
+                                                ref={signInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                name="Signature"
+                                                onChange={handleChangeSignature}
+                                                    id="signature"
+                                                /> */}
+                                                <div
+                                                    className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 "
+                                                    {...getRootProps()}
+                                                >
+                                                    <input
+                                                        {...getInputProps()}
+                                                    />
+                                                    {isDragActive ? (
+                                                        <p>
+                                                            Thả hình ảnh tại đây
+                                                            ...
+                                                        </p>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1">
+                                                            <span>
+                                                                Kéo và thả hình
+                                                                ảnh chữ ký vào
+                                                                đây, hoặc
+                                                            </span>
+                                                            <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                                                chọn từ file
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {previewSignature && (
+                                                    <div className="relative">
+                                                        <img
+                                                            className="mt-2 h-[200px] w-[200px] object-cover "
+                                                            src={
+                                                                previewSignature
+                                                            }
+                                                            alt=""
+                                                        />
+                                                        <span className="cursor-pointer absolute text-xl text-red-600 top-3 left-2 z-10">
+                                                            <TiDeleteOutline />
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-6">

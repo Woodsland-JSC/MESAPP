@@ -143,20 +143,16 @@ const exampleData = [
     },
 ];
 
-// const columnData = [
-//     {
-//         name: "Lò Sấy Thuận Hưng (M3)",
-//         id: "TH",
-//     },
-//     {
-//         name: "Lò Sấy Yên Sơn 1 (M3)",
-//         id: "YS1",
-//     },
-//     {
-//         name: "Lò Sấy Thái Bình (M3)",
-//         id: "TB",
-//     },
-// ];
+const dimensionOptions = [
+    {
+        value: "A4",
+        label: "A4",
+    },
+    {
+        value: "A3",
+        label: "A3",
+    },
+];
 
 const workSheetName = "Sheet1";
 const workBookName = "Biên bản kiểm tra lò sấy";
@@ -191,236 +187,15 @@ function KilnInspectionReport() {
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [selectedFactory, setSelectedFactory] = useState(null);
 
+    const [selectedDimension, setSelectedDimension] = useState({
+        value: "A3",
+        label: "A3",
+    });
+
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
 
     const [firstTimeRender, setFirstTimeRender] = useState(true);
-
-    const [reportData, setReportData] = useState([]);
-    const [summaryData, setSummaryData] = useState(null);
-
-    const [gridApi, setGridApi] = useState(null);
-    const [gridColumnApi, setGridColumnApi] = useState(null);
-
-    const [reportColumnDefs, setReportColumnDefs] = useState([
-        {
-            headerName: "#",
-            valueGetter: function (params) {
-                if (params.node.rowPinned) {
-                    return "";
-                } else return params.node.rowIndex + 1;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-            minWidth: 10,
-            maxHeight: 100,
-            filter: false,
-        },
-        {
-            headerName: "Ngày xếp",
-            minWidth: 160,
-            valueGetter: function (params) {
-                return params.data.createdDate;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Mã pallet",
-            minWidth: 80,
-            valueGetter: function (params) {
-                return params.data.palletId;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Mã lô gỗ",
-            minWidth: 100,
-            valueGetter: function (params) {
-                return params.data.batchId;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Tên quy cách",
-            minWidth: 350,
-            valueGetter: function (params) {
-                return params.data.specificationName;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Dài",
-            minWidth: 60,
-            valueGetter: function (params) {
-                return params.data.length;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Rộng",
-            minWidth: 60,
-            valueGetter: function (params) {
-                return params.data.width;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Dầy",
-            minWidth: 60,
-            valueGetter: function (params) {
-                return params.data.thickness;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Số lượng",
-            minWidth: 120,
-            valueGetter: function (params) {
-                return params.data.quantity;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Khối lượng",
-            minWidth: 130,
-            valueGetter: function (params) {
-                return params.data.quantity;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Mục đích sấy",
-            minWidth: 140,
-            valueGetter: function (params) {
-                return params.data.purpose;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-        {
-            headerName: "Trạng thái",
-            minWidth: 180,
-            valueGetter: function (params) {
-                return params.data.status;
-            },
-            headerClass: "bg-cyan-200 hover:bg-slate-300",
-        },
-    ]);
-
-    const autoGroupColumnDef = useMemo(() => {
-        return {
-            headerName: "Group",
-            minWidth: 170,
-            field: "id",
-            valueGetter: (params) => {
-                if (params.node.group) {
-                    return params.node.key;
-                } else {
-                    return params.data[params.colDef.field];
-                }
-            },
-            headerCheckboxSelection: true,
-            cellRenderer: "agGroupCellRenderer",
-            cellRendererParams: {
-                checkbox: true,
-            },
-        };
-    }, []);
-
-    const defaultColDef = useMemo(() => {
-        return {
-            editable: false,
-            // enableRowGroup: true,
-            enablePivot: true,
-            enableValue: true,
-            sortable: true,
-            resizable: true,
-            filter: true,
-            flex: 1,
-            minWidth: 100,
-        };
-    }, []);
-
-    const gridOptions = {
-        enableRangeSelection: true,
-        enableCellTextSelection: true,
-        rowGroupPanelShow: "always",
-    };
-
-    const onReportGridReady = useCallback(async (params) => {
-        console.log("Ra gì: ", params.api);
-        console.log("Ra gì 2: ", params.columnApi.getColumnDefs);
-        setGridApi(params.api);
-        setGridColumnApi(params.columnApi);
-        showLoadingReport();
-        // const res = await usersApi.getAllUsers();
-        setTimeout(() => {
-            setReportData(exampleData);
-            // console.log("Alo: ", reportGridRef.current.api);
-            reportGridRef.current.api.setPinnedBottomRowData(
-                calculateSummary(exampleData)
-            );
-        }, 1000);
-        hideLoadingReport();
-    }, []);
-
-    const onFirstDataRendered = useCallback((params) => {
-        console.log("Bắt sự kiện render dữ liệu");
-        reportGridRef.current.api.paginationGoToPage(0);
-    }, []);
-
-    const onFilterTextBoxChanged = useCallback(() => {
-        reportGridRef.current.api.setQuickFilter(
-            document.getElementById("search").value
-        );
-    }, []);
-
-    const showLoadingReport = useCallback(() => {
-        reportGridRef.current.api.showLoadingOverlay();
-    }, []);
-
-    const hideLoadingReport = useCallback(() => {
-        reportGridRef.current.api.hideOverlay();
-    }, []);
-
-    const getRowStyle = useCallback((params) => {
-        if (params.node.rowPinned) {
-            return { fontWeight: "bold", backgroundColor: "rgb(212 212 216)" };
-        }
-    }, []);
-
-    const calculateSummary = (data) => {
-        var totalSummary = 0;
-
-        if (data) {
-            Number(
-                data
-                    .reduce((acc, item) => {
-                        return acc + (item.weight || 0);
-                    }, 0)
-                    .toFixed(4)
-            );
-        }
-
-        console.log("Ra dùm, mơn: ", totalSummary);
-
-        setSummaryData(totalSummary);
-
-        var result = [];
-        result.push({
-            weight: totalSummary,
-        });
-        return result;
-    };
-
-    const pinnedBottomRowData = useMemo(() => {
-        return calculateSummary(reportData);
-    }, []);
-
-    const getChangedReportData = (data) => {
-        console.log(
-            "Dữ liệu thay đổi: ",
-            data.api.getModel().rowsToDisplay.map((row) => row.data)
-        );
-    };
 
     // Này là hàm thêm pinned top row
     // const onPinnedRowTopCount = useCallback(() => {
@@ -437,21 +212,6 @@ function KilnInspectionReport() {
     //     });
     //     return calculatePinnedBottomData(result);
     // };
-
-    const calculatePinnedBottomData = (target) => {
-        let columnsWithAggregation = ["age"];
-        columnsWithAggregation.forEach((element) => {
-            gridApi.forEachNodeAfterFilter((rowNode) => {
-                if (rowNode.data[element]) {
-                    target[element] += Number(rowNode.data[element].toFixed(2));
-                }
-            });
-            if (target[element]) {
-                target[element] = `Age Sum: ${target[element].toFixed(2)}`;
-            }
-        });
-        return target;
-    };
 
     // const handleExportPdf = async () => {
     //     const input = reportContainer.current;
@@ -494,26 +254,130 @@ function KilnInspectionReport() {
     //     });
     // };
 
-
-
     const handleExportPdf = async () => {
         const input = reportContainer.current;
-    
-        html2canvas(input).then((canvas) => {
-          // Tạo một tài liệu PDF với kích thước A3
-          const pdf = new jsPDF('l', 'mm', 'a3');
-    
-          // Thêm hình ảnh vào tài liệu PDF
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgData = canvas.toDataURL('image/png');
-          pdf.addImage(imgData, 'PNG', 22, 7, pdfWidth - 44, pdfHeight - 14);
-    
-          // Lưu tài liệu PDF
-          pdf.save('my-report-a3.pdf');
-        });
-      };
-    
+        console.log("Ra gì: ", input);
+
+        if (selectedDimension && selectedDimension.value == "A3") {
+            html2canvas(input).then((canvas) => {
+                const pdf = new jsPDF("l", "mm", "a3");
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgData = canvas.toDataURL("image/png");
+                pdf.addImage(
+                    imgData,
+                    "PNG",
+                    22,
+                    7,
+                    pdfWidth - 44,
+                    pdfHeight - 14
+                );
+
+                pdf.save("Biên-bản-kiểm-tra-lò-A3.pdf");
+            });
+        } else if (selectedDimension && selectedDimension.value == "A4") {
+            // html2canvas(input).then((canvas) => {
+            //     const imgData = canvas.toDataURL("image/png");
+            //     console.log("Đâu ra canvas giúp tôi: ", canvas);
+            //     console.log("Đâu ra hình tao coi: ", imgData);
+            //     const pdf = new jsPDF("p", "mm", "a4");
+            //     const pdfWidth = pdf.internal.pageSize.getWidth();
+            //     const pdfHeight = pdf.internal.pageSize.getHeight();
+            //     const marginLeft = 10;
+            //     const marginRight = 10;
+            //     const marginTop = 10;
+            //     const marginBottom = 10;
+            //     const imgWidth = pdfWidth - marginLeft - marginRight;
+            //     // Tính toán chiều cao của mỗi trang
+            //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            //     // Chia thành 2 trang
+            //     const page1Height = pdfHeight / 2;
+            //     const page2Height = pdfHeight / 2;
+            //     // Trang 1
+            //     pdf.addImage(
+            //         imgData,
+            //         "PNG",
+            //         marginLeft,
+            //         marginTop,
+            //         imgWidth,
+            //         Math.min(imgHeight, page1Height)
+            //     );
+            //     // Trang 2
+            //     if (imgHeight > page1Height) {
+            //         pdf.addPage();
+            //         pdf.addImage(
+            //             imgData,
+            //             "PNG",
+            //             marginLeft,
+            //             marginTop,
+            //             imgWidth,
+            //             Math.min(imgHeight - page1Height, page2Height)
+            //         );
+            //     }
+            //     pdf.save("Biên-bản-kiểm-tra-lò-A4.pdf");
+            // });
+            html2canvas(input).then((canvas) => {
+                const imgData = canvas.toDataURL("image/png");
+            
+                const pdf = new jsPDF("p", "mm", "a4");
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+                const marginLeft = 10;
+                const marginRight = 10;
+                const marginTop = 10;
+                const marginBottom = 10;
+                const imgWidth = pdfWidth - marginLeft - marginRight;
+            
+                // Tính toán chiều cao của hình
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+                // Kiểm tra nếu hình cao hơn chiều cao của trang A4 (bao gồm margin)
+                if (imgHeight > pdfHeight - marginTop - marginBottom) {
+                    const remainingHeight = imgHeight - (pdfHeight - marginTop - marginBottom);
+            
+                    // Trang 1
+                    pdf.addImage(
+                        imgData,
+                        "PNG",
+                        marginLeft,
+                        marginTop,
+                        imgWidth,
+                        pdfHeight - marginTop - marginBottom
+                    );
+            
+                    // Trang 2
+                    pdf.addPage();
+                    pdf.addImage(
+                        imgData,
+                        "PNG",
+                        marginLeft,
+                        marginTop - remainingHeight, // Điều chỉnh vị trí để giữ phần thừa
+                        imgWidth,
+                        pdfHeight - marginTop - marginBottom
+                    );
+                } else {
+                    // Nếu hình không vượt quá trang A4, in toàn bộ ở trang 1
+                    pdf.addImage(
+                        imgData,
+                        "PNG",
+                        marginLeft,
+                        marginTop,
+                        imgWidth,
+                        imgHeight
+                    );
+                }
+            
+                pdf.save("Biên-bản-kiểm-tra-lò-A4.pdf");
+            });
+            
+        }
+    };
+
+    const onDimensionChanged = (value) => {
+        setSelectedDimension(value);
+    };
 
     useEffect(() => {
         const currentDate = new Date();
@@ -748,8 +612,18 @@ function KilnInspectionReport() {
                         </section>
 
                         <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center mt-4">
-                            <div className="flex w-full justify-end space-x-4">
-                                <div className="h-full">
+                            <div className="flex xl:w-2/3 md:w-2/3 gap-x-4 items-center whitespace-nowrap">
+                                Khổ giấy thể hiện:
+                                <Select
+                                    id="page-size"
+                                    options={dimensionOptions}
+                                    onChange={onDimensionChanged}
+                                    defaultValue={selectedDimension}
+                                    className="z-[9]"
+                                />
+                            </div>
+                            <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                <div className="h-full w-3/7 sm:w-auto">
                                     <button
                                         onClick={handleExportPdf}
                                         className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
@@ -763,211 +637,229 @@ function KilnInspectionReport() {
 
                         <Divider className="my-4" />
 
-                        <div ref={reportContainer}>
-                            <table className="border-collapse border border-slate-500 w-full mb-4">
-                                <thead>
-                                    <tr>
-                                        <th
-                                            rowSpan={4}
-                                            className="px-6 py-3 capitalize w-60 text-center border border-slate-700"
-                                        >
-                                            <img
-                                                className="w-32 h-fit mx-auto"
-                                                src={woodsland}
-                                                alt="logo"
-                                            />
-                                        </th>
-                                        <th
-                                            colSpan={2}
-                                            className="px-6 py-3 font-semibold capitalize text-center border border-slate-700"
-                                        >
-                                            Quy trình sấy gỗ
-                                        </th>
-                                        <th
-                                            rowSpan={4}
-                                            className="px-6 py-3 text-left font-light border-slate-700 w-64"
-                                        >
-                                            <div className="flex flex-col">
-                                                <span>Mã số: QT-14/BM-02</span>{" "}
-                                                <span>Ngày BH: 19/08/2020</span>
-                                                <span>Lần BH: 04</span>{" "}
-                                            </div>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th
-                                            colSpan={2}
-                                            className="px-6 py-3 text-center text-xl font-bold uppercase border border-slate-700"
-                                        >
-                                            Biên bản kiểm tra lò sấy
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                            Chi nhánh: {}
-                                        </th>
-                                        <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                            Nhà máy: {}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                            Lò số: {}
-                                        </th>
-                                        <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                            Ngày kiểm: {}
-                                        </th>
-                                    </tr>
-                                </thead>
-                            </table>
-
-                            <span className="text-lg">
-                                I. Thông tin đánh giá
-                            </span>
-
-                            <div className="relative overflow-x-auto my-4">
-                                <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                                    <thead className="text-base text-gray-700 uppercase bg-gray-50">
+                        <div className="w-full h-[500mm] overflow-x-scroll overflow-hidden">
+                            <div
+                                ref={reportContainer}
+                                className={`${
+                                    selectedDimension.value == "A3"
+                                        ? "w-[420mm] h-[297mm]"
+                                        : "w-[210mm]"
+                                } mx-auto`}
+                            >
+                                <table className="border-collapse border border-slate-500 w-full mb-4">
+                                    <thead>
                                         <tr>
                                             <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                rowSpan={4}
+                                                className="px-6 py-3 capitalize w-60 text-center border border-slate-700"
                                             >
-                                                STT
+                                                <img
+                                                    className="w-32 h-fit mx-auto"
+                                                    src={woodsland}
+                                                    alt="logo"
+                                                />
                                             </th>
                                             <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                colSpan={2}
+                                                className="px-6 py-3 font-semibold capitalize text-center border border-slate-700"
                                             >
-                                                Danh mục kiểm tra
+                                                Quy trình sấy gỗ
                                             </th>
                                             <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                rowSpan={4}
+                                                className="px-6 py-3 text-left font-light border-slate-700 w-64"
                                             >
-                                                Yêu cầu
+                                                <div className="flex flex-col">
+                                                    <span>
+                                                        Mã số: QT-14/BM-02
+                                                    </span>{" "}
+                                                    <span>
+                                                        Ngày BH: 19/08/2020
+                                                    </span>
+                                                    <span>Lần BH: 04</span>{" "}
+                                                </div>
                                             </th>
+                                        </tr>
+                                        <tr>
                                             <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                colSpan={2}
+                                                className="px-6 py-3 text-center text-xl font-bold uppercase border border-slate-700"
                                             >
-                                                Tình trạng
+                                                Biên bản kiểm tra lò sấy
                                             </th>
-                                            <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
-                                            >
-                                                Đánh giá
+                                        </tr>
+                                        <tr>
+                                            <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                Chi nhánh: {}
                                             </th>
-                                            <th
-                                                scope="col"
-                                                className="px-6 py-3 capitalize text-center border border-slate-700"
-                                            >
-                                                Ghi chú
+                                            <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                Nhà máy: {}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                Lò số: {}
+                                            </th>
+                                            <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                Ngày kiểm: {}
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {exampleData?.length > 0 &&
-                                            exampleData.map((item, index) => (
-                                                <tr className="bg-white border-b">
-                                                    <th
-                                                        scope="row"
-                                                        className="px-4 py-2.5 text-center w-4 font-medium text-gray-900 whitespace-nowrap border border-slate-700"
-                                                    >
-                                                        {index + 1}
-                                                    </th>
-                                                    <td className="px-4 py-2.5 border border-slate-700">
-                                                        {item.checklist}
-                                                    </td>
-                                                    <td className="px-4 py-2.5 border border-slate-700">
-                                                        {item.requirement}
-                                                    </td>
-                                                    <td className="px-4 py-2.5 w-56 border border-slate-700">
-                                                        {Object.keys(
-                                                            item.condition
-                                                        ).length == 0 ? (
-                                                            ""
-                                                        ) : (
-                                                            <>
-                                                                {Object.entries(
-                                                                    item.condition
-                                                                ).map(
-                                                                    ([
-                                                                        key,
-                                                                        value,
-                                                                    ]) => {
-                                                                        return (
-                                                                            <div
-                                                                                key={
-                                                                                    key
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    key
-                                                                                }
-
-                                                                                :{" "}
-                                                                                {Array.isArray(
-                                                                                    value
-                                                                                )
-                                                                                    ? value.join(
-                                                                                          ", "
-                                                                                      )
-                                                                                    : value}{" "}
-                                                                                {index ==
-                                                                                    11 &&
-                                                                                    "(m/s)"}
-                                                                            </div>
-                                                                        );
-                                                                    }
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </td>
-
-                                                    <td className="px-4 py-2.5 text-center border border-slate-700">
-                                                        <Checkbox
-                                                            isDisabled
-                                                            isChecked={
-                                                                item.evaluation ==
-                                                                1
-                                                                    ? true
-                                                                    : false
-                                                            }
-                                                        ></Checkbox>
-                                                    </td>
-                                                    <td className="px-4 py-2.5 border border-slate-700">
-                                                        {item.note}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                    </tbody>
                                 </table>
-                            </div>
 
-                            <span className="text-lg">
-                                II. Chữ ký người lập biên bản
-                            </span>
+                                <span className="text-lg">
+                                    I. Thông tin đánh giá
+                                </span>
 
-                            <section
-                                id="signature"
-                                className="flex justify-end mr-12 my-4"
-                            >
-                                <div className="flex flex-col items-center">
-                                    <p className="font-bold my-4">
-                                        Người tạo phiếu
-                                    </p>
-                                    <img
-                                        src={signature}
-                                        alt="Chữ-ký-người-tạo"
-                                        className="w-32 h-fit"
-                                    />
-                                    <span className="my-4">
-                                        Nguyễn Văn Cường
-                                    </span>
+                                <div className="relative overflow-x-auto my-4">
+                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                                        <thead className="text-base text-gray-700 uppercase bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    STT
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    Danh mục kiểm tra
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    Yêu cầu
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    Tình trạng
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    Đánh giá
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                >
+                                                    Ghi chú
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {exampleData?.length > 0 &&
+                                                exampleData.map(
+                                                    (item, index) => (
+                                                        <tr className="bg-white border-b">
+                                                            <th
+                                                                scope="row"
+                                                                className="px-4 py-2.5 text-center w-4 font-medium text-gray-900 whitespace-nowrap border border-slate-700"
+                                                            >
+                                                                {index + 1}
+                                                            </th>
+                                                            <td className="px-4 py-2.5 border border-slate-700">
+                                                                {item.checklist}
+                                                            </td>
+                                                            <td className="px-4 py-2.5 border border-slate-700">
+                                                                {
+                                                                    item.requirement
+                                                                }
+                                                            </td>
+                                                            <td className="px-4 py-2.5 w-56 border border-slate-700">
+                                                                {Object.keys(
+                                                                    item.condition
+                                                                ).length ==
+                                                                0 ? (
+                                                                    ""
+                                                                ) : (
+                                                                    <>
+                                                                        {Object.entries(
+                                                                            item.condition
+                                                                        ).map(
+                                                                            ([
+                                                                                key,
+                                                                                value,
+                                                                            ]) => {
+                                                                                return (
+                                                                                    <div
+                                                                                        key={
+                                                                                            key
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            key
+                                                                                        }
+
+                                                                                        :{" "}
+                                                                                        {Array.isArray(
+                                                                                            value
+                                                                                        )
+                                                                                            ? value.join(
+                                                                                                  ", "
+                                                                                              )
+                                                                                            : value}{" "}
+                                                                                        {index ==
+                                                                                            11 &&
+                                                                                            "(m/s)"}
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </td>
+
+                                                            <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                                <Checkbox
+                                                                    isDisabled
+                                                                    isChecked={
+                                                                        item.evaluation ==
+                                                                        1
+                                                                            ? true
+                                                                            : false
+                                                                    }
+                                                                ></Checkbox>
+                                                            </td>
+                                                            <td className="px-4 py-2.5 border border-slate-700">
+                                                                {item.note}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </section>
+
+                                <span className="text-lg">
+                                    II. Chữ ký người lập biên bản
+                                </span>
+
+                                <section
+                                    id="signature"
+                                    className="flex justify-end mr-12 my-4"
+                                >
+                                    <div className="flex flex-col items-center">
+                                        <p className="font-bold my-4">
+                                            Người tạo phiếu
+                                        </p>
+                                        <img
+                                            src={signature}
+                                            alt="Chữ-ký-người-tạo"
+                                            className="w-32 h-fit"
+                                        />
+                                        <span className="my-4">
+                                            Nguyễn Văn Cường
+                                        </span>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
                     </section>
                 </div>

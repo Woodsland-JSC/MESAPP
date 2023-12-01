@@ -439,8 +439,8 @@ function Users() {
                                                 className="z-[9]"
                                             />
                                         </div>
-                                        <div className="flex w-full justify-end space-x-4">
-                                            <div className="">
+                                        <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                            <div className="w-1/2 sm:w-auto">
                                                 <label
                                                     for="search"
                                                     className="mb-2 font-medium text-gray-900 sr-only"
@@ -479,7 +479,7 @@ function Users() {
                                             </div>
                                             <Link
                                                 to="/users/create"
-                                                className="h-full"
+                                                className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <FaPlus />
@@ -525,7 +525,7 @@ function Users() {
                                     style={gridStyle}
                                 >
                                     {/* Controller */}
-                                    <div className="flex justify-between items-center">
+                                    <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
                                         <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
                                             Số lượng mỗi trang:
                                             <Select
@@ -538,8 +538,8 @@ function Users() {
                                                 }}
                                             />
                                         </div>
-                                        <div className="flex w-full justify-end space-x-4">
-                                            <div className="">
+                                        <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                            <div className="w-1/2 sm:w-auto">
                                                 <label
                                                     for="search"
                                                     className="mb-2 font-medium text-gray-900 sr-only"
@@ -578,7 +578,7 @@ function Users() {
                                             </div>
                                             <Link
                                                 to="/roles/create"
-                                                className="h-full"
+                                                className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <FaPlus />

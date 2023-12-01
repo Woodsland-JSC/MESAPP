@@ -206,7 +206,7 @@ function Workspace() {
                                                     </div>
                                                     <div>
                                                         <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                            Nhập thành phẩm
+                                                            Nhập sản lượng
                                                         </h5>
                                                         <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
                                                             Lorem ipsum dolor
