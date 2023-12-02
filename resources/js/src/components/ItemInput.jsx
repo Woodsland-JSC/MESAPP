@@ -658,6 +658,7 @@ const ItemInput = ({
                                 colorScheme="red"
                                 onClick={handleSubmitQuantity}
                                 ml={3}
+                                backgroundColor="#c53030 !important"
                             >
                                 Xác nhận
                             </Button>
