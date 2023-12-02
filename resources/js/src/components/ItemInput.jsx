@@ -34,6 +34,7 @@ import {
 import Select from "react-select";
 import toast from "react-hot-toast";
 import { AiTwotoneDelete } from "react-icons/ai";
+import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
 
 const factories = [
@@ -47,8 +48,16 @@ const factories = [
     },
 ];
 
-const ItemInput = ({ data, index, nextGroup, onReceiptFromChild }) => {
+const ItemInput = ({
+    data,
+    index,
+    fromGroup,
+    nextGroup,
+    onReceiptFromChild,
+    onRejectFromChild,
+}) => {
     const checkRef = useRef(null);
+    const { user } = useAppContext();
     console.log("Ra nè: ", nextGroup);
     const {
         isOpen: isAlertDialogOpen,
@@ -82,35 +91,76 @@ const ItemInput = ({ data, index, nextGroup, onReceiptFromChild }) => {
     const handleSubmitQuantity = async () => {
         try {
             if (amount && amount > 0) {
+                // onReceiptFromChild({
+                //     id: 70152702,
+                //     subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
+                //     thickness: 15,
+                //     width: 367.5,
+                //     length: 740,
+                //     amount: amount,
+                //     createdDate: new Date(),
+                //     createdBy: {
+                //         id: 54,
+                //         last_name: "Nguyen",
+                //         first_name: "An",
+                //     },
+                //     fromGroup: {
+                //         id: "TH-X3SC",
+                //         no: 3,
+                //         name: "Tổ Sơ chế X3",
+                //     },
+                //     nextGroup: nextGroup
+                // });
                 onReceiptFromChild({
-                    id: 70152702,
-                    subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                    thickness: 15,
-                    width: 367.5,
-                    length: 740,
-                    amount: amount,
+                    id: selectedItemDetails.id,
+                    itemId: data?.id,
+                    subItemName: selectedItemDetails.subItemName,
+                    thickness: selectedItemDetails.thickness,
+                    width: selectedItemDetails.width,
+                    length: selectedItemDetails.length,
+                    amount: Number(amount),
                     createdDate: new Date(),
                     createdBy: {
-                        id: 54,
-                        last_name: "Nguyen",
-                        first_name: "An",
+                        id: user.id,
+                        last_name: user.last_name,
+                        first_name: user.first_name,
                     },
-                    fromGroup: {
-                        id: "TH-X3SC",
-                        no: 3,
-                        name: "Tổ Sơ chế X3",
-                    },
-                    nextGroup: nextGroup
+                    fromGroup: fromGroup,
+                    nextGroup: nextGroup,
                 });
             }
-            toast.success("Ghi nhận thành công!");
-            onAlertDialogClose();
-            closeInputModal();
+            if (faultyAmount && faultyAmount > 0) {
+                const result = {
+                    id: selectedItemDetails.id,
+                    itemId: data?.id,
+                    subItemName: selectedItemDetails.subItemName,
+                    thickness: selectedItemDetails.thickness,
+                    width: selectedItemDetails.width,
+                    length: selectedItemDetails.length,
+                    amount: Number(faultyAmount),
+                    createdDate: new Date(),
+                    createdBy: {
+                        id: user.id,
+                        last_name: user.last_name,
+                        first_name: user.first_name,
+                    },
+                    fromGroup: fromGroup,
+                    previousGroup: nextGroup,
+                };
+                onRejectFromChild(result, faults);
+            }
+            toast.success("Ghi nhận & chuyển tiếp thành công!");
         } catch (error) {
             // Xử lý lỗi (nếu có)
             console.error("Đã xảy ra lỗi:", error);
             toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
+        setFaults({});
+        setAmount(null);
+        setFaultyAmount(null);
+
+        onAlertDialogClose();
+        closeInputModal();
     };
 
     useEffect(() => {
@@ -274,6 +324,8 @@ const ItemInput = ({ data, index, nextGroup, onReceiptFromChild }) => {
                     <ModalBody>
                         <div className="flex flex-col justify-center ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
+                                {/* {selectedItemDetails?.pendingErrors && */}
+                                {/* selectedItemDetails?.pendingErrors.length > 0 && ( */}
                                 <Alert status="error">
                                     <AlertIcon />
                                     <AlertDescription className="flex items-center gap-3">
@@ -284,10 +336,15 @@ const ItemInput = ({ data, index, nextGroup, onReceiptFromChild }) => {
                                             colorScheme="red"
                                             fontSize="1.2rem"
                                         >
-                                            125
+                                            {selectedItemDetails?.pendingErrors?.reduce(
+                                                (total, item) =>
+                                                    total + item.amount,
+                                                0
+                                            ) || 0}
                                         </Badge>
                                     </AlertDescription>
                                 </Alert>
+                                {/* )} */}
                                 <div className="flex flex-col md:flex-row justify-between items-center">
                                     <div className="flex flex-col gap-4">
                                         <label className="font-semibold">
@@ -391,63 +448,93 @@ const ItemInput = ({ data, index, nextGroup, onReceiptFromChild }) => {
                                         </NumberInputStepper>
                                     </NumberInput>
                                 </Box>
-                                <div className="flex justify-between items-center p-3 my-4 border border-red-600 rounded">
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex gap-4">
-                                            <Text className="font-semibold">
-                                                Phôi trả lại:{" "}
-                                            </Text>{" "}
-                                            <Badge
-                                                colorScheme="red"
-                                                fontSize="1.2rem"
+                                {selectedItemDetails?.returns &&
+                                    selectedItemDetails?.returns.length > 0 &&
+                                    selectedItemDetails?.returns.map(
+                                        (item, index) => (
+                                            <div className="flex justify-between items-center p-3 my-4 border border-red-600 rounded">
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex gap-4">
+                                                        <Text className="font-semibold">
+                                                            Phôi trả lại:{" "}
+                                                        </Text>{" "}
+                                                        <Badge
+                                                            colorScheme="red"
+                                                            fontSize="1.2rem"
+                                                        >
+                                                            {item?.amount}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <Text className="font-semibold">
+                                                            Lý do:{" "}
+                                                        </Text>
+                                                        <span className="ml-1">
+                                                            {item?.label}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <button
+                                                        onClick={() =>
+                                                            toast(
+                                                                "Chức năng chưa phát triển"
+                                                            )
+                                                        }
+                                                        className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
+                                                    >
+                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                {selectedItemDetails?.pendingErrors &&
+                                    selectedItemDetails?.pendingErrors.length >
+                                        0 &&
+                                    selectedItemDetails?.pendingErrors.map(
+                                        (item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex justify-between items-center p-3 my-4 border border-red-600 rounded"
                                             >
-                                                125
-                                            </Badge>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <Text className="font-semibold">
-                                                Lý do:{" "}
-                                            </Text>
-                                            <span className="ml-1">
-                                                Số lượng chưa chuẩn
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <button className="rounded-full p-2 duration-200 ease hover:bg-slate-100">
-                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center p-3 my-4 border border-red-600 rounded">
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex gap-4">
-                                            <Text className="font-semibold">
-                                                Số lượng ghi nhận lỗi chờ xác
-                                                nhận:{" "}
-                                            </Text>{" "}
-                                            <Badge
-                                                colorScheme="red"
-                                                fontSize="1.2rem"
-                                            >
-                                                1
-                                            </Badge>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <Text className="font-semibold">
-                                                Thời gian giao:{" "}
-                                            </Text>
-                                            <span className="ml-1 text-violet-700">
-                                                30/11/2023 14:12:23
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <button className="rounded-full p-2 duration-200 ease hover:bg-slate-100">
-                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                        </button>
-                                    </div>
-                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex gap-4">
+                                                        <Text className="font-semibold">
+                                                            Số lượng ghi nhận
+                                                            lỗi chờ xác nhận:{" "}
+                                                        </Text>{" "}
+                                                        <Badge
+                                                            colorScheme="red"
+                                                            fontSize="1.2rem"
+                                                        >
+                                                            {item?.amount}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <Text className="font-semibold">
+                                                            Thời gian giao:{" "}
+                                                        </Text>
+                                                        <span className="ml-1 text-violet-700">
+                                                            30/11/2023 14:12:23
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <button
+                                                        onClick={() =>
+                                                            toast(
+                                                                "Chức năng chưa phát triển"
+                                                            )
+                                                        }
+                                                        className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
+                                                    >
+                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
                                 <Box>
                                     <label className="font-semibold text-red-700">
                                         Khai báo số lượng lỗi
