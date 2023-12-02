@@ -955,13 +955,42 @@ function FinishedGoodsReceipt() {
         console.log("Ra example data: ", exampleData);
     };
 
-    const onFilterTextBoxChanged = async (value) => {
-        console.log(value);
+    const onFilterTextBoxChanged = async (e) => {
+        const input = e.target.value;
+        if (!input) {
+            if (selectedGroup) {
+                if (selectedGroup.value == "TH-X3SC") {
+                    setCurrentData(exampleData);
+                } else if (selectedGroup.value == "TH-X3TC1") {
+                    setCurrentData(exampleData1);
+                } else if (selectedGroup.value == "TH-X3TC2") {
+                    setCurrentData(exampleData2);
+                } else {
+                    setCurrentData([]);
+                }
+            }
+            return;
+        }
+        if (input) {
+            var result = currentData.filter((item) => {
+                if (item.itemName.toLowerCase().includes(input.toLowerCase())) {
+                    return true;
+                }
+            
+                const hasSubItem = item.itemDetails.some(
+                    (detail) => detail.subItemName.toLowerCase().includes(input.toLowerCase())
+                );
+            
+                return hasSubItem;
+            });
+
+            setCurrentData(result);
+        }
     };
 
-    useEffect(() => {
-        console.log("Log phôi chờ: ", awaitingReception);
-    }, [awaitingReception]);
+    // useEffect(() => {
+    //     console.log("Log phôi chờ: ", awaitingReception);
+    // }, [awaitingReception]);
 
     useEffect(() => {
         // const getFinishedGoods = async () => {
