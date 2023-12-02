@@ -45,7 +45,7 @@ const reasonOfReturn = [
     },
 ];
 
-const AwaitingReception = ({ data, onConfirmReceipt, onRejectReceipt }) => {
+const AwaitingReception = ({ data, index, onConfirmReceipt, onRejectReceipt }) => {
     const [selectedReason, setSelectedReason] = useState(null);
     const {
         isOpen: isInputAlertDialogOpen,
@@ -60,15 +60,16 @@ const AwaitingReception = ({ data, onConfirmReceipt, onRejectReceipt }) => {
 
     const handleConfirmReceipt = async () => {
         onInputAlertDialogClose();
-        onConfirmReceipt(data);
+        onConfirmReceipt(index);
     };
     const handleRejectReceipt = async () => {
         onDismissAlertDialogClose();
-        onConfirmReceipt(data);
-        onRejectReceipt(data, reasonOfReturn.find(item => item.value == selectedReason));
+        const reason = reasonOfReturn.find(item => item.value == selectedReason);
+        onRejectReceipt(index, reason);
     };
 
-    console.log("Bên chờ phôi: ", data);
+    console.log("Huhu: ", data);
+
     return (
         <>
             <Card maxW="sm">

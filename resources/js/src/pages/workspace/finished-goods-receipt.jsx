@@ -131,7 +131,7 @@ const groupListOptions = [
     // },
 ];
 
-const waitingReceiptNotifications = [
+var waitingReceiptNotifications = [
     {
         id: 70152702,
         subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
@@ -153,10 +153,11 @@ const waitingReceiptNotifications = [
     },
 ];
 
-const exampleData = [
+var exampleData = [
     {
         id: 1,
         itemName: "TYBYN bar table 74x74x102 acacia/black",
+        previousGroup: null,
         fromGroup: {
             id: "TH-X3SC",
             no: 3,
@@ -175,7 +176,8 @@ const exampleData = [
                 width: 367.5,
                 length: 740,
                 stockQuantity: 420,
-
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2344TP-01",
@@ -204,6 +206,8 @@ const exampleData = [
                 width: 35,
                 length: 40,
                 stockQuantity: 0,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2344TP-01",
@@ -223,6 +227,7 @@ const exampleData = [
     {
         id: 2,
         itemName: "TJUSIG hanger 78",
+        previousGroup: null,
         fromGroup: {
             id: "TH-X3SC",
             no: 3,
@@ -241,6 +246,8 @@ const exampleData = [
                 width: 35,
                 length: 40,
                 stockQuantity: 20,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2345TP-02",
@@ -269,6 +276,8 @@ const exampleData = [
                 width: 30,
                 length: 780,
                 stockQuantity: 630,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2345TP-02",
@@ -297,6 +306,8 @@ const exampleData = [
                 width: 26,
                 length: 115,
                 stockQuantity: 0,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2346TP-02",
@@ -315,10 +326,15 @@ const exampleData = [
     },
 ];
 
-const exampleData1 = [
+var exampleData1 = [
     {
         id: 1,
         itemName: "TYBYN bar table 74x74x102 acacia/black",
+        previousGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
         fromGroup: {
             id: "TH-X3TC1",
             no: 4,
@@ -337,7 +353,8 @@ const exampleData1 = [
                 width: 367.5,
                 length: 740,
                 stockQuantity: 1000,
-
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2344TP-01",
@@ -366,6 +383,8 @@ const exampleData1 = [
                 width: 367.5,
                 length: 740,
                 stockQuantity: 0,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2344TP-01",
@@ -384,10 +403,15 @@ const exampleData1 = [
     },
 ];
 
-const exampleData2 = [
+var exampleData2 = [
     {
         id: 2,
         itemName: "TJUSIG hanger 78",
+        previousGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
         fromGroup: {
             id: "TH-X3TC2",
             no: 4,
@@ -406,6 +430,8 @@ const exampleData2 = [
                 width: 35,
                 length: 40,
                 stockQuantity: 1000,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2345TP-02",
@@ -434,6 +460,8 @@ const exampleData2 = [
                 width: 30,
                 length: 780,
                 stockQuantity: 630,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2345TP-02",
@@ -462,6 +490,8 @@ const exampleData2 = [
                 width: 26,
                 length: 115,
                 stockQuantity: 0,
+                pendingErrors: [],
+                returns: [],
                 productionCommands: [
                     {
                         command: "TH2346TP-02",
@@ -589,21 +619,378 @@ function FinishedGoodsReceipt() {
                 [groupId]: [...prev[groupId], data],
             }));
         }
+        const currentGroupId = data?.fromGroup?.id;
+
+        switch (currentGroupId) {
+            case "TH-X3SC":
+                exampleData = exampleData.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                setCurrentData(exampleData);
+                break;
+            case "TH-X3TC1":
+                exampleData1 = exampleData1.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                console.log("Final: ", exampleData1);
+                setCurrentData(exampleData1);
+                break;
+            case "TH-X3TC2":
+                exampleData2 = exampleData.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                setCurrentData(exampleData2);
+                break;
+        }
         console.log("Dữ liệu nhận từ con:", data);
         // setDataFromChild(data);
     };
 
-    const handleConfirmReceipt = (data) => {
-        console.log("Thực hiện confirm: ", data);
+    const handleRejectFromChild = (data, faults) => {
+        const currentGroupId = data?.fromGroup?.id;
+
+        switch (currentGroupId) {
+            case "TH-X3SC":
+                exampleData = exampleData.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        pendingErrors: [
+                                            ...detail.pendingErrors,
+                                            faults,
+                                        ],
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                setCurrentData(exampleData);
+                console.log("hm ra nhiều: ", exampleData);
+                break;
+            case "TH-X3TC1":
+                exampleData1 = exampleData1.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        pendingErrors: [
+                                            ...detail.pendingErrors,
+                                            faults,
+                                        ],
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                console.log("Final: ", exampleData1);
+                setCurrentData(exampleData1);
+                break;
+            case "TH-X3TC2":
+                exampleData2 = exampleData.map((item) => {
+                    if (item.id === data.itemId) {
+                        return {
+                            ...item,
+                            itemDetails: item.itemDetails.map((detail) => {
+                                if (detail.id === data.id) {
+                                    return {
+                                        ...detail,
+                                        pendingErrors: [
+                                            ...detail.pendingErrors,
+                                            faults,
+                                        ],
+                                        stockQuantity:
+                                            Number(detail.stockQuantity) -
+                                            Number(data.amount),
+                                    };
+                                }
+                                return detail;
+                            }),
+                        };
+                    }
+                    return item;
+                });
+                setCurrentData(exampleData2);
+                break;
+        }
+        console.log("Data nè: ", data);
+        console.log("Faults nè: ", faults);
     };
 
-    const handleRejectReceipt = (data, reason) => {
-        console.log("Thực hiện reject: ", reason);
+    const handleConfirmReceipt = (index) => {
+        if (selectedGroup) {
+            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+
+            switch (selectedGroup.value) {
+                case "TH-X3SC":
+                    exampleData = exampleData.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            stockQuantity:
+                                                Number(detail.stockQuantity) +
+                                                Number(receiptSubItem.amount),
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    setCurrentData(exampleData);
+                    break;
+                case "TH-X3TC1":
+                    exampleData1 = exampleData1.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            stockQuantity:
+                                                Number(detail.stockQuantity) +
+                                                Number(receiptSubItem.amount),
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    console.log("Final: ", exampleData1);
+                    setCurrentData(exampleData1);
+                    break;
+                case "TH-X3TC2":
+                    exampleData2 = exampleData.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            stockQuantity:
+                                                Number(detail.stockQuantity) +
+                                                Number(receiptSubItem.amount),
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    setCurrentData(exampleData2);
+                    break;
+            }
+            setAwaitingReception((prev) => {
+                const groupKey = selectedGroup.value;
+                const updatedGroup = awaitingReception[groupKey].filter(
+                    (item, i) => i !== index
+                );
+                return {
+                    ...prev,
+                    [groupKey]: updatedGroup,
+                };
+            });
+        }
+        toast.success("Ghi nhận thành công.");
+        onModalClose();
     };
 
-    useEffect(() => {
-        console.log("Log phôi chờ: ", awaitingReception);
-    }, [awaitingReception]);
+    const handleRejectReceipt = (index, reason) => {
+        if (selectedGroup) {
+            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+
+            switch (receiptSubItem?.fromGroup?.id) {
+                case "TH-X3SC":
+                    exampleData = exampleData.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    // setCurrentData(exampleData);
+                    break;
+                case "TH-X3TC1":
+                    exampleData1 = exampleData1.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    // setCurrentData(exampleData1);
+                    break;
+                case "TH-X3TC2":
+                    exampleData2 = exampleData.map((item) => {
+                        if (item.id === receiptSubItem.itemId) {
+                            return {
+                                ...item,
+                                itemDetails: item.itemDetails.map((detail) => {
+                                    if (detail.id === receiptSubItem.id) {
+                                        return {
+                                            ...detail,
+                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                        };
+                                    }
+                                    return detail;
+                                }),
+                            };
+                        }
+                        return item;
+                    });
+                    // setCurrentData(exampleData2);
+                    break;
+            }
+            setAwaitingReception((prev) => {
+                const groupKey = selectedGroup.value;
+                const updatedGroup = awaitingReception[groupKey].filter(
+                    (item, i) => i !== index
+                );
+                return {
+                    ...prev,
+                    [groupKey]: updatedGroup,
+                };
+            });
+        }
+        toast.success("Huỷ bỏ & chuyển lại thành công.");
+        onModalClose();
+        // console.log("Ra index: ", index);
+        // console.log("Thực hiện reject: ", reason);
+        console.log("Ra example data: ", exampleData);
+    };
+
+    const onFilterTextBoxChanged = async (e) => {
+        const input = e.target.value;
+        if (!input) {
+            if (selectedGroup) {
+                if (selectedGroup.value == "TH-X3SC") {
+                    setCurrentData(exampleData);
+                } else if (selectedGroup.value == "TH-X3TC1") {
+                    setCurrentData(exampleData1);
+                } else if (selectedGroup.value == "TH-X3TC2") {
+                    setCurrentData(exampleData2);
+                } else {
+                    setCurrentData([]);
+                }
+            }
+            return;
+        }
+        if (input) {
+            var result = currentData.filter((item) => {
+                if (item.itemName.toLowerCase().includes(input.toLowerCase())) {
+                    return true;
+                }
+            
+                const hasSubItem = item.itemDetails.some(
+                    (detail) => detail.subItemName.toLowerCase().includes(input.toLowerCase())
+                );
+            
+                return hasSubItem;
+            });
+
+            setCurrentData(result);
+        }
+    };
+
+    // useEffect(() => {
+    //     console.log("Log phôi chờ: ", awaitingReception);
+    // }, [awaitingReception]);
 
     useEffect(() => {
         // const getFinishedGoods = async () => {
@@ -990,9 +1377,9 @@ function FinishedGoodsReceipt() {
                                             id="search"
                                             className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            // onInput={
-                                            //     onReportFilterTextBoxChanged
-                                            // }
+                                            onInput={
+                                                onFilterTextBoxChanged
+                                            }
                                             required
                                         />
                                     </div>
@@ -1258,6 +1645,9 @@ function FinishedGoodsReceipt() {
                                             onReceiptFromChild={
                                                 handleReceiptFromChild
                                             }
+                                            onRejectFromChild={
+                                                handleRejectFromChild
+                                            }
                                         />
                                     ))
                                 ) : (
@@ -1299,8 +1689,13 @@ function FinishedGoodsReceipt() {
                                         <AwaitingReception
                                             data={item}
                                             key={index}
-                                            onConfirmReceipt={handleConfirmReceipt}
-                                            onRejectReceipt={handleRejectReceipt}
+                                            index={index}
+                                            onConfirmReceipt={
+                                                handleConfirmReceipt
+                                            }
+                                            onRejectReceipt={
+                                                handleRejectReceipt
+                                            }
                                         />
                                     )
                                 )}
