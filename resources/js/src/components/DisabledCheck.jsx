@@ -621,7 +621,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.pallet &&
-                                                    touched.pallet ? (
+                                                        touched.pallet ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="pallet" />
                                                         </span>
@@ -662,7 +662,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.sample &&
-                                                    touched.sample ? (
+                                                        touched.sample ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="sample" />
                                                         </span>
@@ -706,7 +706,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.disability &&
-                                                    touched.disability ? (
+                                                        touched.disability ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="disability" />
                                                         </span>
@@ -747,7 +747,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.curve &&
-                                                    touched.curve ? (
+                                                        touched.curve ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="curve" />
                                                         </span>
@@ -779,7 +779,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         }}
                                                     />
                                                     {errors.note &&
-                                                    touched.note ? (
+                                                        touched.note ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="note" />
                                                         </span>
@@ -791,8 +791,10 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                     type="submit"
                                                     colorScheme="whatsapp"
                                                     className="w-fit self-end mt-2"
+                                                    backgroundColor="#2f8558 !important"
                                                 >
                                                     Ghi nhận
+
                                                 </Button>
                                             </Form>
                                         );
