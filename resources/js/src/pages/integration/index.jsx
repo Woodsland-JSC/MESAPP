@@ -109,7 +109,8 @@ function Integration() {
             //         </Link>
             //     );
             // },
-            minWidth: 210,
+            width: 90,
+            maxWidth: 100,
             maxHeight: 100,
             checkboxSelection: checkboxSelection,
             headerCheckboxSelection: headerCheckboxSelection,
@@ -313,8 +314,8 @@ function Integration() {
                                                 className="z-[9]"
                                             />
                                         </div>
-                                        <div className="flex w-full justify-end space-x-4">
-                                            <div className="">
+                                        <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                            <div className="w-3/5 sm:w-auto">
                                                 <label
                                                     for="search"
                                                     className="mb-2 font-medium text-gray-900 sr-only"
@@ -351,7 +352,7 @@ function Integration() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="h-full">
+                                            <div className="h-full w-3/7 sm:w-auto">
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <MdOutlineRefresh />
                                                     <div onClick={handleRetryGrid}>
