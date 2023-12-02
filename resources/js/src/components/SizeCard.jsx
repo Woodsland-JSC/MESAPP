@@ -28,7 +28,7 @@ import {
     Td,
     TableCaption,
     TableContainer,
-  } from '@chakra-ui/react'
+} from "@chakra-ui/react";
 
 function SizeCard(props) {
     const { planID, reload } = props;
@@ -87,7 +87,7 @@ function SizeCard(props) {
                     <ModalHeader>Tất cả kích thước</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                    <TableContainer>
+                        <TableContainer>
                             <Table variant="simple">
                                 <Thead className="bg-gray-50 top-0 sticky z-40">
                                     <Tr>
@@ -100,22 +100,21 @@ function SizeCard(props) {
                             </Table>
                         </TableContainer>
                         <div className="relative overflow-y-auto max-h-[450px]">
-                        <TableContainer>
-                            <Table variant="simple">
-                                <Tbody className="">
-                                    {sizeData.map((item) => (
-                                        <Tr>
-                                            <Td>{item.pallet}</Td>
-                                            <Td>{item.size}</Td>
-                                            <Td isNumeric>{item.Qty}</Td>
-                                            <Td isNumeric>{item.Mass}</Td>
-                                        </Tr>    
-                                    ))}
-                                </Tbody>
-                            </Table>
-                        </TableContainer>
+                            <TableContainer>
+                                <Table variant="simple">
+                                    <Tbody className="">
+                                        {sizeData.map((item) => (
+                                            <Tr>
+                                                <Td>{item.pallet}</Td>
+                                                <Td>{item.size}</Td>
+                                                <Td isNumeric>{item.Qty}</Td>
+                                                <Td isNumeric>{item.Mass}</Td>
+                                            </Tr>
+                                        ))}
+                                    </Tbody>
+                                </Table>
+                            </TableContainer>
                         </div>
-                        
                     </ModalBody>
 
                     <ModalFooter>
@@ -132,14 +131,16 @@ function SizeCard(props) {
             <div className="bg-white flex justify-center rounded-b-xl p-6 py-3 space-y-4">
                 {/* List Items */}
                 {isPalletLoading ? (
-                    <Spinner
-                        thickness="4px"
-                        speed="0.65s"
-                        emptyColor="gray.200"
-                        color="#155979"
-                        size="xl"
-                        className="my-4"
-                    />
+                    <div className="">
+                        <Spinner
+                            thickness="4px"
+                            speed="0.65s"
+                            emptyColor="gray.200"
+                            color="#155979"
+                            size="xl"
+                            className="my-4"
+                        />
+                    </div>
                 ) : (
                     <div className="grid w-full py-1 overflow-x-auto">
                         <div className=" flex flex-row mb-2 space-x-4 w-full">
