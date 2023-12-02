@@ -189,119 +189,119 @@ const ItemInput = ({
                     </span> */}
                     {data.itemDetails.length > 0
                         ? data.itemDetails.map((item, index) => (
-                              <section
-                                  onClick={() => openInputModal(item)}
-                                  className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
-                                  key={index}
-                              >
-                                  <span className="ml-1">
-                                      {index + 1}. {item.subItemName} (
-                                      {item.thickness}*{item.width}*
-                                      {item.length})
-                                  </span>
-                                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 mt-2">
-                                      <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-                                          <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                              <tr>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-6 py-3"
-                                                  >
-                                                      Lệnh sản xuất
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-6 py-3 text-right"
-                                                  >
-                                                      Sản lượng
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-6 py-3 text-right"
-                                                  >
-                                                      Đã làm
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-6 py-3 text-right"
-                                                  >
-                                                      Bị lỗi
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-6 py-3 text-right"
-                                                  >
-                                                      Còn thực hiện
-                                                  </th>
-                                              </tr>
-                                          </thead>
-                                          <tbody>
-                                              {item.productionCommands.length >
-                                              0 ? (
-                                                  item.productionCommands.map(
-                                                      (production, index) => (
-                                                          <tr
-                                                              className="bg-white border-b"
-                                                              key={index}
-                                                          >
-                                                              <th
-                                                                  scope="row"
-                                                                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                              >
-                                                                  {
-                                                                      production.command
-                                                                  }
-                                                              </th>
-                                                              <td className="px-6 py-4 text-right">
-                                                                  {
-                                                                      production.quantity
-                                                                  }
-                                                              </td>
-                                                              <td className="px-6 py-4 text-right">
-                                                                  {
-                                                                      production.done
-                                                                  }
-                                                              </td>
-                                                              <td className="px-6 py-4 text-right">
-                                                                  {
-                                                                      production.faults
-                                                                  }
-                                                              </td>
-                                                              <td className="px-6 py-4 text-right">
-                                                                  {
-                                                                      production.processing
-                                                                  }
-                                                              </td>
-                                                          </tr>
-                                                      )
-                                                  )
-                                              ) : (
-                                                  <span>Không có dữ liệu</span>
-                                              )}
-                                          </tbody>
-                                          <tfoot>
-                                              <tr>
-                                                  <td className="px-6 py-3">
-                                                      Tổng
-                                                  </td>
-                                                  <td className="px-6 py-3 text-right font-bold">
-                                                      {item.totalQuantity}
-                                                  </td>
-                                                  <td className="px-6 py-3 text-right font-bold">
-                                                      {item.totalDone}
-                                                  </td>
-                                                  <td className="px-6 py-3 text-right font-bold">
-                                                      {item.totalFaults}
-                                                  </td>
-                                                  <td className="px-6 py-3 text-right font-bold">
-                                                      {item.totalProcessing}
-                                                  </td>
-                                              </tr>
-                                          </tfoot>
-                                      </table>
-                                  </div>
-                              </section>
-                          ))
+                            <section
+                                onClick={() => openInputModal(item)}
+                                className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                key={index}
+                            >
+                                <span className="ml-1">
+                                    {index + 1}. {item.subItemName} (
+                                    {item.thickness}*{item.width}*
+                                    {item.length})
+                                </span>
+                                <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 mt-2">
+                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+                                        <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3"
+                                                >
+                                                    Lệnh sản xuất
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-right"
+                                                >
+                                                    Sản lượng
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-right"
+                                                >
+                                                    Đã làm
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-right"
+                                                >
+                                                    Bị lỗi
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-right"
+                                                >
+                                                    Còn thực hiện
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {item.productionCommands.length >
+                                                0 ? (
+                                                item.productionCommands.map(
+                                                    (production, index) => (
+                                                        <tr
+                                                            className="bg-white border-b"
+                                                            key={index}
+                                                        >
+                                                            <th
+                                                                scope="row"
+                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                                                            >
+                                                                {
+                                                                    production.command
+                                                                }
+                                                            </th>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {
+                                                                    production.quantity
+                                                                }
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {
+                                                                    production.done
+                                                                }
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {
+                                                                    production.faults
+                                                                }
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {
+                                                                    production.processing
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )
+                                            ) : (
+                                                <span>Không có dữ liệu</span>
+                                            )}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td className="px-6 py-3">
+                                                    Tổng
+                                                </td>
+                                                <td className="px-6 py-3 text-right font-bold">
+                                                    {item.totalQuantity}
+                                                </td>
+                                                <td className="px-6 py-3 text-right font-bold">
+                                                    {item.totalDone}
+                                                </td>
+                                                <td className="px-6 py-3 text-right font-bold">
+                                                    {item.totalFaults}
+                                                </td>
+                                                <td className="px-6 py-3 text-right font-bold">
+                                                    {item.totalProcessing}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </section>
+                        ))
                         : null}
                 </div>
             </div>
@@ -491,7 +491,7 @@ const ItemInput = ({
                                     )}
                                 {selectedItemDetails?.pendingErrors &&
                                     selectedItemDetails?.pendingErrors.length >
-                                        0 &&
+                                    0 &&
                                     selectedItemDetails?.pendingErrors.map(
                                         (item, index) => (
                                             <div
@@ -619,6 +619,7 @@ const ItemInput = ({
                                 }
                                 colorScheme="green"
                                 onClick={onAlertDialogOpen}
+                                backgroundColor="#2f8558 !important"
                             >
                                 Ghi nhận
                             </Button>

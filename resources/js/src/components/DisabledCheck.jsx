@@ -791,7 +791,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                     type="submit"
                                                     colorScheme="whatsapp"
                                                     className="w-fit self-end mt-2"
-                                                    backgroundColor="#2f8558 !important"
+
                                                 >
                                                     Ghi nhận
 
