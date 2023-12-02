@@ -593,6 +593,14 @@ function FinishedGoodsReceipt() {
         // setDataFromChild(data);
     };
 
+    const handleConfirmReceipt = (data) => {
+        console.log("Thực hiện confirm: ", data);
+    };
+
+    const handleRejectReceipt = (data, reason) => {
+        console.log("Thực hiện reject: ", reason);
+    };
+
     useEffect(() => {
         console.log("Log phôi chờ: ", awaitingReception);
     }, [awaitingReception]);
@@ -954,7 +962,7 @@ function FinishedGoodsReceipt() {
                             <div className="flex w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
-                                        for="search"
+                                        htmlFor="search"
                                         className="mb-2 font-medium text-gray-900 sr-only"
                                     >
                                         Tìm kiếm
@@ -1291,6 +1299,8 @@ function FinishedGoodsReceipt() {
                                         <AwaitingReception
                                             data={item}
                                             key={index}
+                                            onConfirmReceipt={handleConfirmReceipt}
+                                            onRejectReceipt={handleRejectReceipt}
                                         />
                                     )
                                 )}
