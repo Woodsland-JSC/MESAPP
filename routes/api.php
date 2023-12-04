@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/production-batch', [PlanController::class, 'listpallet'])->name('danh-pallet-avaliable');
         Route::get('/production-availiable', [PlanController::class, 'listovens'])->name('danh-me-avaliable');
         Route::post('/production-batch', [PlanController::class, 'productionBatch'])->name('vao-lo');
+        Route::delete('/production-batch-delete', [PlanController::class, 'removePallet'])->name('xoa-lo');
         Route::get('/production-detail/{PlanID}', [PlanController::class, 'productionDetail'])->name('chi tiết mẻ');
 
         Route::get('/production-check', [PlanController::class, 'listovens'])->name('danh-sach-kiem-tra-lo');

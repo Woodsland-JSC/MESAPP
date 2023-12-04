@@ -571,11 +571,18 @@ class PlanController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         //check oven hợp lệ
-        $check = plandryings::where('PlanID', $request->PlanID)->where('Status', 1)->orWhere('Status', 0)->count();
-        if ($check = 0) {
-            return response()->json(['error' => 'Lò không hợp lệ'], 404);
+        $check = plandryings::where('PlanID', $request->PlanID)->get();
+
+        if ($check) {
+            if ($check->pluck('Status')->first() == 1) {
+                plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
+            } else {
+                return response()->json(['error' => 'Lò không hợp lệ'], 501);
+            }
+        } else {
+            return response()->json(['error' => 'Lò không hợp lệ'], 501);
         }
-        plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
+
 
         return response()->json(['message' => 'success'], 200);
     }
