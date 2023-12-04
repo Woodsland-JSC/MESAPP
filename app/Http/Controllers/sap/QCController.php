@@ -32,7 +32,19 @@ class QCController extends Controller
         $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
-
+    function removeDoAm(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PlanID' => 'required', // new UniqueOvenStatusRule
+            'ID' => 'integer|required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        humidityDetails::where('id', $request->ID)->where('PlanID', $request->PlanID)->where('refID', -1)->delete();
+        $res = humidityDetails::where('PlanID', $request->PlanID)->where('refID', -1)->get();
+        return response()->json(['message' => 'success', 'humiditys' => $res], 200);
+    }
     public function HoanThanhDoAm(Request $req)
     {
         $validator = Validator::make($req->all(), [

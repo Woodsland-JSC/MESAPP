@@ -348,14 +348,14 @@ class PlanController extends Controller
             ], 500);
         }
     }
- 
+
     //ra lò
     function completed(Request $request)
     {
         try {
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
-                'PlanID' =>'required', // new UniqueOvenStatusRule
+                'PlanID' => 'required', // new UniqueOvenStatusRule
 
             ]);
             if ($validator->fails()) {
@@ -560,5 +560,23 @@ class PlanController extends Controller
             'CT11Detail' => $CT11Detail,
             'CT12Detail' => $CT12Detail
         ], 200);
+    }
+    function removePallet(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PlanID' => 'required', // new UniqueOvenStatusRule
+            'PalletID' => 'integer|required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        //check oven hợp lệ
+        $check = plandryings::where('PlanID', $request->PlanID)->where('Status', 1)->orWhere('Status', 0)->count();
+        if ($check = 0) {
+            return response()->json(['error' => 'Lò không hợp lệ'], 404);
+        }
+        plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
+
+        return response()->json(['message' => 'success'], 200);
     }
 }
