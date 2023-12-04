@@ -567,22 +567,23 @@ class PlanController extends Controller
             'PlanID' => 'required', // new UniqueOvenStatusRule
             'PalletID' => 'integer|required',
         ]);
+
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-        //check oven hợp lệ
-        $check = plandryings::where('PlanID', $request->PlanID)->get();
+
+        // Check if the oven is valid
+        $check = plandryings::where('PlanID', $request->PlanID)->first();
 
         if ($check) {
-            if ($check->pluck('Status')->first() == 1) {
+            if ($check->Status == 1) {
                 plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
             } else {
-                return response()->json(['error' => 'Lò không hợp lệ'], 501);
+                return response()->json(['error' => 'Trạng thái lò không hợp lệ'], 501);
             }
         } else {
-            return response()->json(['error' => 'Lò không hợp lệ'], 501);
+            return response()->json(['error' => 'Lò không tồn tại'], 501);
         }
-
 
         return response()->json(['message' => 'success'], 200);
     }
