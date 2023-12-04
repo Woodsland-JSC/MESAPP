@@ -30,7 +30,7 @@ class QCController extends Controller
         );
         humidityDetails::create(array_merge($data, ['created_by' => Auth::user()->id]));
         $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
-        return response()->json(['message' => 'success', 'plandrying' => $res], 200);
+        return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
 
     public function HoanThanhDoAm(Request $req)
