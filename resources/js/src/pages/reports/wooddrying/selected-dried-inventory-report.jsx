@@ -632,6 +632,8 @@ function SelectedDriedInventoryReport() {
             const columnXepsay = `${column.id}_xepsay`;
             const columnVaolo = `${column.id}_vaolo`;
             const columnDaralo = `${column.id}_daralo`;
+            const columnKhosausay = `${column.id}_khosausay`;
+            const columnKholuadat = `${column.id}_kholuadat`;
 
             totalSummary[columnTonngoaibai] = Number(
                 data
@@ -658,6 +660,20 @@ function SelectedDriedInventoryReport() {
                 data
                     .reduce((acc, item) => {
                         return acc + (item[columnDaralo] || 0);
+                    }, 0)
+                    .toFixed(4)
+            );
+            totalSummary[columnKhosausay] = Number(
+                data
+                    .reduce((acc, item) => {
+                        return acc + (item[columnKhosausay] || 0);
+                    }, 0)
+                    .toFixed(4)
+            );
+            totalSummary[columnKholuadat] = Number(
+                data
+                    .reduce((acc, item) => {
+                        return acc + (item[columnKholuadat] || 0);
                     }, 0)
                     .toFixed(4)
             );
