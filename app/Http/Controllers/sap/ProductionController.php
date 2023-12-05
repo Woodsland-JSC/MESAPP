@@ -214,9 +214,29 @@ class ProductionController extends Controller
                 'FactoryName' => 'Nhà Máy CBG Thái Bình'
             ],
         ];
-
+        $notfication = [
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 1,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 2,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 1,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+        ];
         odbc_close($conDB);
-        return response()->json(['Data' => $results, 'SLPHOIDANHAN' => $data, 'Factorys' => $factory], 200);
+        return response()->json([
+            'Data' => $results, 'SLPHOIDANHAN' => $data,
+            'Factorys' => $factory,
+            'notifications' => $notfication
+        ], 200);
     }
     function listo(Request $request)
     {
