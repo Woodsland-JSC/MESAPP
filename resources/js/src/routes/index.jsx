@@ -115,6 +115,7 @@ import Report from "../pages/reports/index";
 import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
 import WoodAwaitingDryingReport from "../pages/reports/wooddrying/wood-awaiting-drying";
 import KilnInspectionReport from "../pages/reports/wooddrying/kiln-inspection";
+import SelectedDriedInventoryReport from "../pages/reports/wooddrying/selected-dried-inventory-report";
 
 import useAppContext from "../store/AppContext";
 
@@ -296,6 +297,14 @@ function AppRoutes() {
                         element={
                         <ProtectedRoute >
                             <KilnInspectionReport />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/selected-dried-inventory"
+                        element={
+                        <ProtectedRoute >
+                            <SelectedDriedInventoryReport />
                         </ProtectedRoute>
                         }
                     />

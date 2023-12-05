@@ -43,6 +43,11 @@ const exampleData = [
         name: "Báo cáo xếp chờ xấy",
         link: "/reports/wood-awaiting-drying",
     },
+    {
+        id: "0003",
+        name: "Báo cáo tồn sấy lựa",
+        link: "/reports/selected-dried-inventory",
+    },
 ];
 
 const exampleData1 = [
