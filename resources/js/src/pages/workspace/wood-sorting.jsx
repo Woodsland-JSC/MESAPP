@@ -315,7 +315,7 @@ function WoodSorting() {
                                         </Link>
                                     </div>
                                 </li>
-                                <li aria-current="page">
+                                {/* <li aria-current="page">
                                     <div class="flex items-center">
                                         <svg
                                             class="w-3 h-3 text-gray-400 mx-1"
@@ -336,7 +336,7 @@ function WoodSorting() {
                                             <div>Xếp sấy</div>
                                         </span>
                                     </div>
-                                </li>
+                                </li> */}
                             </ol>
                         </nav>
                     </div>
@@ -444,7 +444,8 @@ function WoodSorting() {
                                     <button
                                         type="button"
                                         onClick={handleAddToList}
-                                        className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer"
+                                        className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                        disabled={(palletCards.length) > 0 ? true : false}
                                     >
                                         Thêm vào danh sách
                                     </button>

@@ -1078,11 +1078,11 @@ function FinishedGoodsReceipt() {
                                             to="/workspace"
                                             class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
-                                            <div>Quản lý sấy gỗ</div>
+                                            <div>Quản lý sản xuất</div>
                                         </Link>
                                     </div>
                                 </li>
-                                <li aria-current="page">
+                                {/* <li aria-current="page">
                                     <div class="flex items-center">
                                         <svg
                                             class="w-3 h-3 text-gray-400 mx-1"
@@ -1103,7 +1103,7 @@ function FinishedGoodsReceipt() {
                                             <div>Nhập sản lượng</div>
                                         </span>
                                     </div>
-                                </li>
+                                </li> */}
                             </ol>
                         </nav>
                     </div>

@@ -2,6 +2,7 @@ import React from "react";
 import Layout from "../../layouts/layout";
 import {
     HiSquare3Stack3D,
+    HiMiniMagnifyingGlassCircle,
     HiMagnifyingGlassCircle,
     HiHomeModern,
     HiRectangleStack,
@@ -9,6 +10,7 @@ import {
     HiClipboardDocumentList,
     HiMiniArchiveBoxArrowDown,
     HiMiniBanknotes,
+    HiArchiveBoxArrowDown,
 } from "react-icons/hi2";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
@@ -22,7 +24,7 @@ function Workspace() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center bg-[#F8F9F7] ">
+            <div className="flex overflow-x-hidden justify-center bg-[#F8F9F7] ">
                 {/* Section */}
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Header */}
@@ -36,29 +38,46 @@ function Workspace() {
                     </div>
 
                     {/* Card Fields */}
-                    <div className="w-full flex justify-center">
-                        <Tabs variant="soft-rounded" colorScheme="blackAlpha">
-                            <TabList>
-                                <Tab>Quản lý sấy gỗ</Tab>
-                                <Tab>Quản lý sản xuất</Tab>
-                                <Tab>Quản lý bán hàng</Tab>
+                    <div className="w-full overflow-x-hidden">
+                        <Tabs
+                            className=""
+                            variant="soft-rounded"
+                            colorScheme="blackAlpha"
+                        >
+                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-4">
+                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                    <div className="w-[150px]">
+                                        Quản lý sấy gỗ
+                                    </div>
+                                </Tab>
+                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                    <div className="w-[150px]">
+                                        Quản lý sản xuất
+                                    </div>
+                                </Tab>
+                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                    <div className="w-[150px]">
+                                        Quản lý bán hàng
+                                    </div>
+                                </Tab>
                             </TabList>
-                            <TabPanels px="0" className="">
+
+                            <TabPanels px="0" className="w-full flex justify-center">
                                 <TabPanel
                                     className=""
-                                    style={{ padding: "1rem 0rem" }}
+                                    style={{ padding: "1rem 1rem" }}
                                 >
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             {user.permissions?.includes(
                                                 "sepsay"
                                             ) && (
                                                 <Link to="/workspace/wood-sorting">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiSquare3Stack3D className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiSquare3Stack3D className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -85,9 +104,9 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/create-drying-plan">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiClipboardDocumentList className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiClipboardDocumentList className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -115,9 +134,9 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/load-into-kiln">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiRectangleStack className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiRectangleStack className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -144,9 +163,9 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/kiln-checking">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiMagnifyingGlassCircle className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiMiniMagnifyingGlassCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -175,9 +194,9 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/kiln">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiHomeModern className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiHomeModern className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -204,9 +223,9 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/drying-wood-checking">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-4 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiHandThumbUp className="w-8 h-8" />
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiHandThumbUp className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -231,15 +250,15 @@ function Workspace() {
                                         </div>
                                     </div>
                                 </TabPanel>
-                                <TabPanel style={{ padding: "1rem 0rem" }}>
+                                <TabPanel style={{ padding: "1rem 1rem" }}>
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             <Link to="/workspace/finished-goods-receipt">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <HiMiniArchiveBoxArrowDown className="w-8 h-8" />
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -257,56 +276,86 @@ function Workspace() {
                                                 </div>
 
                                                 <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Xếp sấy
+                                                    Nhập thành phẩm
                                                 </div>
                                             </Link>
 
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
-                                            </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
-                                            </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
 
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
 
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </TabPanel>
-                                <TabPanel style={{ padding: "1rem 0rem" }}>
+                                <TabPanel style={{ padding: "1rem 1rem" }}>
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-7">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             <Link to="#">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <HiMiniBanknotes className="w-8 h-8" />
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                            <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/>
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -329,39 +378,65 @@ function Workspace() {
                                                 </div>
                                             </Link>
 
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
-                                            </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
-                                            </div>
-
-                                            <div className="flex justify-center xl:h-full md:h-full">
-                                                <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-6  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl"></div>
-                                            </div>
-                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                Tạo kế hoạch sấy
+                                            <div>
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                    Tạo kế hoạch sấy
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -5,7 +5,7 @@ function SizeListItem(props) {
   const { size, pallet, Qty, weight  } = props;
 
   return (
-    <div className='bg-[#F9FAFB] border border-gray-200 rounded-xl w-[12rem]'>
+    <div className='bg-[#F9FAFB] border border-gray-200 rounded-xl h-[10rem] w-[12rem]'>
         <div className='flex text-left font-medium p-4 py-3 border-b border-gray-200 w-full'>
            <div>KT:</div>
            <div>{size}</div>

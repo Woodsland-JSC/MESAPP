@@ -29,6 +29,7 @@ function Details() {
 
     // State
     const [BOWData, setBOWData] = useState([]);
+    const [reload, setReload] = useState(false);
 
     const [loading, setLoading] = useState(true);
 
@@ -246,18 +247,22 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
+                                                    onReload={setReload}
                                                 />
                                             </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <SizeCard />
+                                                <SizeCard 
+                                                    planID={BOWData.PlanID}
+                                                    reload={reload}
+                                                />
                                             </Skeleton>
                                         </div>
                                     )}
                                     {type === "kt" && (
-                                        <div className="space-y-6">
+                                        <div className="space-y-6 pb-5">
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
@@ -266,6 +271,7 @@ function Details() {
                                                     progress="kt"
                                                     planID={BOWData.PlanID}
                                                     status={BOWData.Status}
+                                                    onReload={setReload}
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -278,7 +284,10 @@ function Details() {
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <SizeCard />
+                                                <SizeCard 
+                                                    planID={BOWData.PlanID}
+                                                    reload={reload}
+                                                />
                                             </Skeleton>
                                         </div>
                                     )}
@@ -303,8 +312,11 @@ function Details() {
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
+                                
                                             >
-                                                <SizeCard />
+                                                <SizeCard 
+                                                    planID={BOWData.PlanID}
+                                                />
                                             </Skeleton>
                                         </div>
                                     )}
@@ -348,12 +360,13 @@ function Details() {
                                                     }}
                                                 />
                                             </Skeleton>
-
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <SizeCard />
+                                                <SizeCard 
+                                                    planID={BOWData.PlanID}
+                                                />
                                             </Skeleton>
                                         </div>
                                     )}

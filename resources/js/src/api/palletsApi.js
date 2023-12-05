@@ -56,7 +56,12 @@ const palletsApi = {
     loadIntoKiln: () => {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
+    },
+    saveCheckingKiln: () => {
+        const url = `/ovens/production-check-single`;
+        return axiosClient().patch(url, {});
     }
+
     
 };
 

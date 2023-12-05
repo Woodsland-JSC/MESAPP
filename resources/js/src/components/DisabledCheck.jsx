@@ -10,11 +10,7 @@ import {
     Button,
     useDisclosure,
 } from "@chakra-ui/react";
-import {
-    BsWrenchAdjustableCircleFill,
-    BsFillPlusCircleFill,
-    BsFillBookmarkCheckFill,
-} from "react-icons/bs";
+import { BsFillPlusCircleFill, BsFillBookmarkCheckFill } from "react-icons/bs";
 import { GrDocumentText } from "react-icons/gr";
 import { FaInfoCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -22,6 +18,7 @@ import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { dateToDateTime } from "../utils/convertDatetime";
 import { FaPlus } from "react-icons/fa6";
+import { MdBuildCircle } from "react-icons/md";
 
 const tempData = [
     {
@@ -379,9 +376,13 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
         <>
             <div className="bg-white rounded-xl border-2 border-gray-200">
                 <div className="text-xl flex justify-between items-center font-medium border-b px-6 p-4 border-gray-200">
-                    <div className="flex gap-x-3">
-                        <BsWrenchAdjustableCircleFill className="text-2xl text-[#17506B]" />
-                        Biên bản khảo sát tỉ lệ khuyết tật
+                    <div className="flex gap-x-3 items-center ">
+                        <div className="w-8 h-8">
+                            <MdBuildCircle className="w-full h-full text-[#17506B]" />
+                        </div>
+                        <div className="xl:text-xl xl:w-full w-[70%] text-lg">
+                            Biên bản khảo sát tỉ lệ khuyết tật
+                        </div>
                     </div>
                     <button
                         onClick={() => {
@@ -620,7 +621,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.pallet &&
-                                                    touched.pallet ? (
+                                                        touched.pallet ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="pallet" />
                                                         </span>
@@ -661,7 +662,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.sample &&
-                                                    touched.sample ? (
+                                                        touched.sample ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="sample" />
                                                         </span>
@@ -705,7 +706,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.disability &&
-                                                    touched.disability ? (
+                                                        touched.disability ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="disability" />
                                                         </span>
@@ -746,7 +747,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.curve &&
-                                                    touched.curve ? (
+                                                        touched.curve ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="curve" />
                                                         </span>
@@ -778,7 +779,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         }}
                                                     />
                                                     {errors.note &&
-                                                    touched.note ? (
+                                                        touched.note ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="note" />
                                                         </span>
@@ -790,8 +791,10 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                     type="submit"
                                                     colorScheme="whatsapp"
                                                     className="w-fit self-end mt-2"
+
                                                 >
                                                     Ghi nhận
+
                                                 </Button>
                                             </Form>
                                         );

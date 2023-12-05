@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BsFillCheckCircleFill } from "react-icons/bs";
+import { HiMiniCheckCircle } from "react-icons/hi2";
 import {
     Modal,
     ModalOverlay,
@@ -93,11 +93,16 @@ function KilnCheck() {
 
     return (
         <div className="bg-white  rounded-xl border-2 border-gray-200 ">
-            <div className="bg-white flex items-center gap-x-3 text-xl px-6 border-b rounded-t-xl border-gray-200 font-medium py-4">
-                <BsFillCheckCircleFill className="text-2xl text-[#17506B]" />
-                <div className="xl:text-xl xl:w-full  text-lg">
-                    Biên bản kiểm tra lò sấy
-                </div>
+            <div className="bg-white flex items-center px-6 border-b rounded-t-xl border-gray-200 font-medium py-4">
+                <div className="flex items-center gap-x-3 font-medium">
+                    <div className="w-9 h-9">
+                        <HiMiniCheckCircle  className="text-2xl w-[97%] h-full text-[#17506B]"/>
+                    </div>
+
+                    <div className="xl:text-xl xl:w-full  text-lg">
+                        Biên bản kiểm tra lò sấy
+                    </div>
+                </div>   
             </div>
 
             <div className="bg-white rounded-b-xl">
