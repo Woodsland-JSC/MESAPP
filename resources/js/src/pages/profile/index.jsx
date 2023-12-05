@@ -129,7 +129,7 @@ function Profile() {
     const [factories, setFactories] = useState([]);
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [selectedSignature, setSelectedSignature] = useState(null);
+    // const [selectedSignature, setSelectedSignature] = useState(null);
     const [previewSignature, setPreviewSignature] = useState(null);
 
     const [input, setInput] = useState({
@@ -182,17 +182,17 @@ function Profile() {
     //     reader.readAsDataURL(file);
     // };
 
-    const onDrop = useCallback((acceptedFiles) => {
-        setSelectedSignature(acceptedFiles[0]);
-        const reader = new FileReader();
+    // const onDrop = useCallback((acceptedFiles) => {
+    //     setSelectedSignature(acceptedFiles[0]);
+    //     const reader = new FileReader();
 
-        reader.onload = (event) => {
-            setSignature(acceptedFiles[0]);
-            setPreviewSignature(reader.result);
-        };
+    //     reader.onload = (event) => {
+    //         setSignature(acceptedFiles[0]);
+    //         setPreviewSignature(reader.result);
+    //     };
 
-        reader.readAsDataURL(acceptedFiles[0]);
-    }, []);
+    //     reader.readAsDataURL(acceptedFiles[0]);
+    // }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop: (acceptedFiles, rejectedFiles) => {
@@ -201,10 +201,11 @@ function Profile() {
             } else {
                 const imageFile = acceptedFiles[0];
                 // Kiểm tra kích thước
-                if (imageFile.size > 2*1024) {
+                if (imageFile.size > 2 * 1024 * 1024) {
                     toast.error("Vui lòng chọn hình có kích thước <= 2MB.");
                     return;
                 }
+                setSignature(imageFile);
                 const reader = new FileReader();
                 reader.onload = () => {
                     const previewUrl = reader.result;
@@ -275,12 +276,13 @@ function Profile() {
         };
 
         const previousAvatar = originalInfo.avatar;
+        const previousSignature = originalInfo.imagesign;
 
         const isChanged = areObjectsEqual(updatedValues, previousValues);
 
         setSaving(true);
 
-        if (!isChanged || previousAvatar != avatar.file) {
+        if (!isChanged || previousAvatar != avatar.file || previousSignature != signature) {
             if (selectedFile) {
                 if (selectedFile instanceof File) {
                     updatedValues.avatar = selectedFile;
@@ -292,6 +294,19 @@ function Profile() {
                 updatedValues.avatar = "";
             } else {
                 updatedValues.avatar = -1;
+            }
+
+            if (signature) {
+                if (signature instanceof File) {
+                    updatedValues.imagesign = signature;
+                }
+            } else if (
+                signature == previousSignature ||
+                previewSignature == previousSignature
+            ) {
+                updatedValues.imagesign = "";
+            } else {
+                updatedValues.imagesign = -1;
             }
         } else {
             toast("Thông tin chưa thay đổi.");
@@ -322,6 +337,7 @@ function Profile() {
             lastName: values.lastName,
             gender: values.gender,
             avatar: userResponse?.user?.avatar,
+            imagesign: userResponse?.user?.imagesign,
         }));
 
         setSaving(false);
@@ -381,6 +397,11 @@ function Profile() {
         // setAvatarLoading(false);
     };
 
+    const handleDeleteSignature = () => {
+        setSignature(null);
+        setPreviewSignature(null);
+    }
+
     useEffect(() => {
         setAvatarLoading(true);
         if (input.lastName && input.firstName && !avatar.file) {
@@ -413,13 +434,14 @@ function Profile() {
                     email: userRes.email,
                     gender: userRes.gender,
                     avatar: userRes.avatar,
+                    imagesign: userRes.imagesign,
                     branch: userRes.branch,
                     factory: userRes.plant,
                 };
 
                 setOriginalInfo(userData);
 
-                const clonedData = (({ avatar, ...rest }) => rest)(userData);
+                const clonedData = (({ avatar, imagesign,  ...rest }) => rest)(userData);
                 setInput(clonedData);
 
                 if (userData.avatar) {
@@ -429,6 +451,12 @@ function Profile() {
                         imgSrc: userData.avatar,
                     });
                 }
+
+                if (userData.imagesign) {
+                    setPreviewSignature(userData.imagesign);
+                    setSignature(userData.imagesign);
+                }
+
                 setFormKey((prevKey) => prevKey + 1);
 
                 const branchesResponse = await usersApi.getAllBranches();
@@ -705,42 +733,51 @@ function Profile() {
                                                     id="signature"
                                                 /> */}
                                                 <div
-                                                    className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 "
+                                                    className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 mb-4"
                                                     {...getRootProps()}
                                                 >
                                                     <input
                                                         {...getInputProps()}
                                                     />
                                                     {isDragActive ? (
-                                                        <p>
+                                                        <p className="py-4">
                                                             Thả hình ảnh tại đây
                                                             ...
                                                         </p>
                                                     ) : (
-                                                        <div className="flex items-center gap-1">
-                                                            <span>
-                                                                Kéo và thả hình
-                                                                ảnh chữ ký vào
-                                                                đây, hoặc
+                                                        <>
+                                                            <div className="flex flex-col md:flex-row items-center gap-1">
+                                                                <span className="sm:block hidden">
+                                                                    Kéo và thả
+                                                                    hình ảnh chữ
+                                                                    ký vào đây,
+                                                                    hoặc
+                                                                </span>
+                                                                <span className="sm:hidden">Upload chữ ký</span>
+                                                                <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                                                    chọn từ file
+                                                                </span>
+                                                            </div>
+                                                            <span className="text-[12px] text-center w-full mt-4 sm:text-left md:text-sm text-red-600">
+                                                                Lưu ý: Tỉ lệ ảnh nên là 1:1 và ≤ 2MB
                                                             </span>
-                                                            <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
-                                                                chọn từ file
-                                                            </span>
-                                                        </div>
+                                                        </>
                                                     )}
                                                 </div>
                                                 {previewSignature && (
-                                                    <div className="relative">
-                                                        <img
-                                                            className="mt-2 h-[200px] w-[200px] object-cover "
-                                                            src={
-                                                                previewSignature
-                                                            }
-                                                            alt=""
-                                                        />
-                                                        <span className="cursor-pointer absolute text-xl text-red-600 top-3 left-2 z-10">
-                                                            <TiDeleteOutline />
-                                                        </span>
+                                                    <div>
+                                                        <div className="relative w-fit mx-auto">
+                                                            <img
+                                                                className="mt-2 h-[200px] w-[200px] object-contain shadow-xl rounded"
+                                                                src={
+                                                                    previewSignature
+                                                                }
+                                                                alt="Signature-preview"
+                                                            />
+                                                            <span onClick={handleDeleteSignature} className="cursor-pointer absolute top-3 right-2 z-10">
+                                                                <TiDeleteOutline className="text-2xl text-red-600"/>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>

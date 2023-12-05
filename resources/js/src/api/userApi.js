@@ -41,7 +41,13 @@ const usersApi = {
         formData.append("integration_id", userData.integrationId);
         // formData.append("roles", userData.authorization);
         formData.append("branch", userData.branch);
-        formData.append("avatar", userData.avatar ? userData.avatar : "");
+        if (userData.avatar) {
+            formData.append("avatar", userData.avatar ? userData.avatar : "");
+        }
+
+        if (userData.imagesign) {
+            formData.append("imagesign", userData.imagesign ? userData.imagesign : "");
+        }
 
         userData.authorization.forEach((role, index) => {
             formData.append(`roles[${index}]`, role);
@@ -68,6 +74,10 @@ const usersApi = {
             formData.append("avatar", userData.avatar ? userData.avatar : "");
         }
 
+        if (userData.imagesign) {
+            formData.append("imagesign", userData.imagesign ? userData.imagesign : "");
+        }
+
         userData.authorization.forEach((role, index) => {
             formData.append(`roles[${index}]`, role);
         });
@@ -83,6 +93,9 @@ const usersApi = {
         formData.append("gender", userData.gender);
         if (userData.avatar) {
             formData.append("avatar", userData.avatar ? userData.avatar : "");
+        }
+        if (userData.imagesign) {
+            formData.append("imagesign", userData.imagesign ? userData.imagesign : "");
         }
 
         return axiosClient().post(url, formData);

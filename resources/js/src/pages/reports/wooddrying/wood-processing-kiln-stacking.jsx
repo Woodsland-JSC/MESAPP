@@ -900,24 +900,24 @@ function WoodProcessingKilnStackingReport() {
                     <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-[calc(100%-129px)]">
                         {/* Controller */}
                         <section className="flex gap-2 md:gap-4">
-                            <div className="flex gap-2 md:gap-4">
+                            <div className="flex gap-2 md:gap-4 items-center">
                                 <label className="whitespace-nowrap text-sm md:text-base">
                                     Từ ngày:{" "}
                                 </label>
                                 <DatePicker
-                                    className="font-bold text-sm md:text-base"
+                                    className="border border-gray-300 font-bold text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-24 p-2"
                                     selected={startDate}
                                     onChange={(date) => setStartDate(date)}
                                     dateFormat="dd/MM/yyyy"
                                     maxDate={new Date()}
                                 />
                             </div>
-                            <div className="flex gap-2 md:gap-4">
+                            <div className="flex gap-2 md:gap-4 items-center">
                                 <label className="whitespace-nowrap text-sm md:text-base">
                                     Đến ngày:{" "}
                                 </label>
                                 <DatePicker
-                                    className="font-bold text-sm md:text-base"
+                                    className="border border-gray-300 font-bold text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-24 p-2"
                                     selected={endDate}
                                     onChange={(date) => setEndDate(date)}
                                     dateFormat="dd/MM/yyyy"
