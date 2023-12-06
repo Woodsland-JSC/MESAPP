@@ -204,16 +204,19 @@ class ProductionController extends Controller
         ];
         $notfication = [
             [
+                'id' => 1,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 1,
                 'Date' => now()->format('Y-m-d H:m:i')
             ],
             [
+                'id' => 3,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 2,
                 'Date' => now()->format('Y-m-d H:m:i')
             ],
             [
+                'id' => 4,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 1,
                 'Date' => now()->format('Y-m-d H:m:i')
