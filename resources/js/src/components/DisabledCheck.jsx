@@ -13,69 +13,30 @@ import {
 import { BsFillPlusCircleFill, BsFillBookmarkCheckFill } from "react-icons/bs";
 import { GrDocumentText } from "react-icons/gr";
 import { FaInfoCircle } from "react-icons/fa";
-import toast from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { dateToDateTime } from "../utils/convertDatetime";
 import { FaPlus } from "react-icons/fa6";
 import { MdBuildCircle } from "react-icons/md";
+import { RiWaterPercentFill } from "react-icons/ri";
+import { LuCalendarRange } from "react-icons/lu";
+import { LuFlagTriangleRight } from "react-icons/lu";
+import { LuWarehouse } from "react-icons/lu";
+import { LuKeyRound } from "react-icons/lu";
+import { LuStretchHorizontal } from "react-icons/lu";
+import { MdWaterDrop } from "react-icons/md";
+import { HiMiniSparkles } from "react-icons/hi2";
+import { MdNoteAlt } from "react-icons/md";
+import { HiOutlineTrash } from "react-icons/hi";
+import { IoClose } from "react-icons/io5";
+import toast from "react-hot-toast";
+import { addDays, format, add } from "date-fns";
+import compareDesc from "date-fns/compareDesc/index.js";
+import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
+import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
+import { PiSealWarningFill } from "react-icons/pi";
+import { MdDoNotDisturbOnTotalSilence } from "react-icons/md";
 
-const tempData = [
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè",
-    },
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè",
-    },
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè",
-    },
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè Test nè Test nèTest nè Test nè Test nè Test nè Test nè",
-    },
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè",
-    },
-    {
-        pallet: 10,
-        sample: 8,
-        disability: 5,
-        curve: 3,
-        disabledRate: 2,
-        curvedRate: 1,
-        note: "Test nè",
-    },
-];
 
 const validationSchema = Yup.object().shape({
     pallet: Yup.number()
@@ -99,7 +60,7 @@ const validationSchema = Yup.object().shape({
     disability: Yup.number()
         .positive("Phải là số nguyên dương")
         .integer("Phải là số nguyên")
-        .min(1, "Phải là số nguyên dương lớn hơn 0")
+        .min(0, "Phải là số nguyên dương lớn hơn 0")
         .test(
             "is-less-than-or-equal",
             "Số lượng mo, tóp phải ≤ số lượng mẫu",
@@ -112,7 +73,7 @@ const validationSchema = Yup.object().shape({
     curve: Yup.number()
         .positive("Phải là số nguyên dương")
         .integer("Phải là số nguyên")
-        .min(1, "Phải là số nguyên dương lớn hơn 0")
+        .min(0, "Phải là số nguyên dương lớn hơn 0")
         .test(
             "is-less-than-or-equal",
             "Số lượng cong phải ≤ số lượng mẫu",
@@ -137,7 +98,7 @@ const DisabledCheckCard = ({ item }) => {
     } = item;
 
     return (
-        <div className="rounded text-sm bg-slate-700 text-white h-fit w-[250px] p-3 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
+        <div className="w-full rounded text-sm bg-slate-700 text-white h-fit min-w-[250px] p-3 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
             <div className="grid grid-cols-[70%,30%] pb-2">
                 <div className="text-sm">Số pallet:</div>
                 <span className="text-right text-sm">{pallet}</span>
@@ -176,9 +137,10 @@ const DisabledCheckCard = ({ item }) => {
     );
 };
 
-const DisabledCheck = ({ disabilityList, generalInfo }) => {
+const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
+
     console.log("Ra truyền từ cha xuống nè: ", disabilityList);
-    // const {} = props;
+    // const { planID, oven, code, reason } = props;
 
     let palletInput = useRef();
     let sampleInput = useRef();
@@ -234,7 +196,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
             disabilityInput.current.focus();
             return;
         }
-        if (!values.curve) {
+        if (!values.curve || !values.curve) {
             toast.error("Vui lòng nhập số lượng cong.");
             curveInput.current.focus();
             return;
@@ -294,10 +256,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
             console.log("Submit nè");
             toast.error("Vui lòng nhập thông tin khảo sát.");
         } else {
-            // Chỗ này để post dữ liệu
-            toast("Chưa phát triển submit form", {
-                icon: " ℹ️",
-            });
+            toast.sucess("Thông tin khảo sát đã được lưu lại.");
             setRate({
                 disabledRate: null,
                 curvedRate: null,
@@ -327,7 +286,6 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
     }, [info.disability, info.curve, info.sample]);
 
     useEffect(() => {
-        // Tính toán trung bình disabledRate và curvedRate
         const disabledRateSum = disabledDetails.reduce(
             (sum, item) => sum + item.disabledRate,
             0
@@ -345,7 +303,6 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                 ? curvedRateSum / disabledDetails.length
                 : null;
 
-        // Tính toán tổng số lượng disabilities và curves
         const totalOfDisabilities = disabledDetails.reduce(
             (sum, item) => sum + item.disability,
             0
@@ -398,22 +355,22 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                 {/* <div className="border-b-2 border-gray-100"></div> */}
 
                 <div className="rounded-b-xl relative overflow-x-auto">
-                    <table className="w-full  text-left text-gray-500 ">
+                    <table className="w-full text-left text-gray-500 ">
                         <thead className="font-medium text-gray-700 bg-gray-50 ">
-                            <tr>
-                                <th scope="col" className="px-6 py-3">
+                            <tr className="w-full text-[15px]">
+                                <th scope="col" className=" flex-nowrap xl:px-6 pl-6 py-3">
                                     STT
                                 </th>
-                                <th scope="col" className="px-6 py-3">
+                                <th scope="col" className="w-fit flex-nowrap xl:px-6  pl-6 py-3">
                                     TL mo, tóp
                                 </th>
-                                <th scope="col" className="px-6 py-3">
+                                <th scope="col" className="xl:px-6 pl-6 py-3">
                                     TL cong
                                 </th>
-                                <th scope="col" className="px-6 py-3">
+                                <th scope="col" className="xl:w-fit w-[60%] xl:px-6  py-3">
                                     Tổng SL kiểm tra
                                 </th>
-                                <th scope="col" className="px-6 py-3">
+                                <th scope="col" className="xl:px-6 pl-6 py-3">
                                     Ngày tạo
                                 </th>
                             </tr>
@@ -421,7 +378,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                         <tbody>
                             {disabilityList.length > 0 ? (
                                 disabilityList.map((item, index) => (
-                                    <tr className="bg-white border-b">
+                                    <tr  className="text-[15px] bg-white border-b">
                                         <th
                                             scope="row"
                                             className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
@@ -447,7 +404,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                 "%"}
                                         </td>
                                         <td className="px-6 py-4">
-                                            Chưa biết điền gì
+                                            --/--/--
                                         </td>
                                         <td className="px-6 py-4">
                                             {dateToDateTime(item.createdDate)}
@@ -477,52 +434,56 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
+                        <div className="xl:ml-10 xl:text-center text-[#155979] text-lg uppercase xl:text-xl ">
                             Biên bản khảo sát tỉ lệ khuyết tật
-                        </h1>
+                        </div>
                     </ModalHeader>
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalBody>
-                        <section className="flex flex-col gap-4 my-4 md:flex-row">
-                            <div className="bg-white rounded-2xl border-2 border-gray-200 h-fit w-full md:w-1/2">
-                                <div className="flex items-center gap-x-3 text-xl font-medium border-b p-4 px-6 border-gray-200">
-                                    <FaInfoCircle className="text-[#17506B] text-2xl" />
-                                    Thông tin chung
+                        <section className="flex flex-col justify-center">
+                            {/* Infomation */}
+                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 px-8">
+                                    <FaInfoCircle className="w-7 h-7 text-[]" />
+                                    <div className="text-xl font-semibold">
+                                        Thông tin chung
+                                    </div>
                                 </div>
-
-                                <div className="space-y-3 px-6 pb-5 pt-4">
-                                    <div className="grid grid-cols-2">
-                                        <div className="font-medium">
-                                            Mẻ sấy:
-                                        </div>
-                                        <span className="font-normal">
-                                            {" " + reportInfo.dryingBatch}
-                                        </span>
+                                <div className="grid grid-cols-2 p-3 px-8">
+                                    <div className=" flex font-semibold items-center">
+                                        <LuCalendarRange className="w-5 h-5 mr-3" />
+                                        Ngày kiểm tra:
                                     </div>
-                                    <div className="grid grid-cols-2">
-                                        <div className="font-semibold">
-                                            Ngày khảo sát:
-                                        </div>
-                                        <span>
-                                            {" " +
-                                                dateToDateTime(
-                                                    reportInfo.createdDate
-                                                )}
-                                        </span>
+                                    <span className=" text-base ">
+                                        {format(new Date(), "yyyy-MM-dd")}
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                    <div className="font-semibold flex items-center">
+                                        <LuStretchHorizontal className="w-5 h-5 mr-3" />
+                                        Mẻ sấy số:
                                     </div>
-                                    <div className="grid grid-cols-2">
-                                        <div className="font-semibold">
-                                            Nhà máy:
-                                        </div>
-                                        <span>{" " + reportInfo.factory}</span>
+                                    <span className="font-normal text-base ">
+                                        {code}
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                    <div className="font-semibold flex items-center">
+                                        <LuWarehouse className="w-5 h-5 mr-3" />
+                                        Nhà máy:
                                     </div>
+                                    <span className="font-normal text-base ">
+                                        {oven}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-2xl border-2 border-green-300 h-fit w-full md:w-1/2">
-                                <div className="flex items-center gap-x-3 text-xl font-medium border-b p-4 px-6 border-gray-200">
-                                    <BsFillBookmarkCheckFill className="text-[#17506B] text-2xl" />
-                                    Kết quả
+
+                            {/* Result  */}
+                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 h-fit w-full md:w-1/2 mb-7">
+                                <div className="flex bg-gray-100 items-center gap-x-3 text-xl font-medium border-b p-4 px-8 border-gray-200 rounded-t-xl">
+                                    <MdDoNotDisturbOnTotalSilence className=" w-8 h-8 text-2xl " />
+                                    <div className="font-semibold">Tỉ lệ khuyết tật</div>
                                 </div>
 
                                 <div className="space-y-3 px-6 pb-5 pt-4">
@@ -531,7 +492,13 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                             Tỉ lệ mo, tóp trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {result.avgDisabledRate || 0}
+                                            {result.avgDisabledRate !==
+                                                undefined &&
+                                            result.avgDisabledRate !== null
+                                                ? result.avgDisabledRate.toFixed(
+                                                      2
+                                                  )
+                                                : "0.00"}
                                             <span className="font-bold">
                                                 {" "}
                                                 %
@@ -543,7 +510,13 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                             Tỉ lệ cong trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {result.avgCurvedRate || 0}
+                                            {result.avgCurvedRate !==
+                                                undefined &&
+                                            result.avgCurvedRate !== null
+                                                ? result.avgCurvedRate.toFixed(
+                                                      2
+                                                  )
+                                                : "0.00"}
                                             <span className="font-bold">
                                                 {" "}
                                                 %
@@ -562,13 +535,13 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                             </div>
                         </section>
 
-                        <div className="border-b-2 border-gray-100"></div>
-
                         {!viewMode && (
-                            <section className="bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 px-6 mt-4">
-                                <div className="flex items-center gap-x-3 text-xl font-medium mb-4">
-                                    <FaInfoCircle className="text-[#17506B] text-2xl" />
-                                    Thông tin khảo sát
+                            <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 pb-6 px-4">
+                                <div className="flex gap-x-4 rounded-t-xl items-center p-4">
+                                    <MdNoteAlt className="w-8 h-9 text-[]" />
+                                    <div className="text-xl font-semibold">
+                                        Ghi nhận khảo sát
+                                    </div>
                                 </div>
                                 <Formik
                                     initialValues={info}
@@ -621,7 +594,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.pallet &&
-                                                        touched.pallet ? (
+                                                    touched.pallet ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="pallet" />
                                                         </span>
@@ -662,7 +635,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         )}
                                                     />
                                                     {errors.sample &&
-                                                        touched.sample ? (
+                                                    touched.sample ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="sample" />
                                                         </span>
@@ -700,13 +673,12 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                             <input
                                                                 {...field}
                                                                 type="number"
-                                                                min="1"
                                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                             />
                                                         )}
                                                     />
                                                     {errors.disability &&
-                                                        touched.disability ? (
+                                                    touched.disability ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="disability" />
                                                         </span>
@@ -741,13 +713,12 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                             <input
                                                                 {...field}
                                                                 type="number"
-                                                                min="1"
                                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                             />
                                                         )}
                                                     />
                                                     {errors.curve &&
-                                                        touched.curve ? (
+                                                    touched.curve ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="curve" />
                                                         </span>
@@ -779,7 +750,7 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                         }}
                                                     />
                                                     {errors.note &&
-                                                        touched.note ? (
+                                                    touched.note ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="note" />
                                                         </span>
@@ -791,10 +762,8 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                                                     type="submit"
                                                     colorScheme="whatsapp"
                                                     className="w-fit self-end mt-2"
-
                                                 >
                                                     Ghi nhận
-
                                                 </Button>
                                             </Form>
                                         );
@@ -803,14 +772,14 @@ const DisabledCheck = ({ disabilityList, generalInfo }) => {
                             </section>
                         )}
 
-                        <section className="my-4 px-6">
+                        <section className="xl:mx-auto xl:w-[60%] my-4">
                             {disabledDetails.length > 0 && (
                                 <div className="flex items-center gap-x-3 text-xl font-medium py-4 border-gray-200">
                                     <GrDocumentText className="text-[#17506B] text-2xl" />
                                     Danh sách chi tiết
                                 </div>
                             )}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3">
                                 {disabledDetails.length > 0 &&
                                     disabledDetails.map((item, index) => (
                                         <DisabledCheckCard

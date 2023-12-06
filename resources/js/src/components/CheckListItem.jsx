@@ -62,9 +62,9 @@ function CheckListItem(props) {
     };
 
     return (
-        <div className="bg-[#F7FDFF] flex relative flex-col rounded-xl w-full h-fit xl:h-[12rem] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#99b4c1] border-2 border-gray-200">
+        <div className="bg-[#F7FDFF] flex relative flex-col rounded-xl w-full h-fit xl:h-[12.8rem] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#99b4c1] border-2 border-gray-200">
             {/* <div className="absolute -top-1 -right-0.5 bg-green-500 shadow-sm shadow-black text-white w-4 h-4 flex items-center justify-center rounded-full" /> */}
-            <div className="px-4 py-3 bg-[#F1F8FB] h-[30%] rounded-t-xl w-full flex items-center border-b border-gray-200">
+            <div className="px-4 py-3 bg-[#F1F8FB] h-[35%] rounded-t-xl w-full flex items-center border-b border-gray-200">
                 <Checkbox
                     value={value}
                     isChecked={isChecked}
@@ -73,14 +73,14 @@ function CheckListItem(props) {
                     colorScheme="blue"
                     className="w-full"
                 >
-                    <div className="tx-[#155979] text-lg ml-1 font-semibold">
+                    <div className="tx-[#155979] text-[1.05rem] ml-1 font-semibold">
                         {title}
                     </div>
                 </Checkbox>
             </div>
 
-            <div className="px-4 xl:h-[70%] lg:h-[68%] text-base py-2 pt-3">
-                <div className="xl:h-[60%] lg:h-[60%]">{description}</div>
+            <div className="px-4 xl:h-[70%] lg:h-[65%] text-base py-2 pt-3">
+                <div className="xl:h-[70%] lg:h-[70%]">{description}</div>
                 <div className="flex justify-end ">
                     {value === 7 ? (
                         <>
@@ -165,7 +165,7 @@ function CheckListItem(props) {
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] px-4 pt-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>

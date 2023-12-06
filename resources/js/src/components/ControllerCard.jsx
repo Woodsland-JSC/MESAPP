@@ -455,22 +455,32 @@ function ControllerCard(props) {
         ) : progress === "dg" ? (
             <div className="">
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                    <div className=" space-y-1 w-full xl:w-[75%]">
-                        <div className="font-semibold">Tình trạng mẻ sấy:</div>
-                        <div>Mẻ sấy đã đủ điều kiện ra lò.</div>
-                    </div>
+                    
                     {isReviewed === 1 ? (
-                        <button
-                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                            onClick={onFinalOpen}
-                        >
-                            Xác nhận ra lò
-                        </button>
+                        <>
+                            <div className=" space-y-1 w-full xl:w-[75%]">
+                                <div className="font-semibold">Tình trạng mẻ sấy:</div>
+                                <div className="text-green-500">Mẻ sấy đã đủ điều kiện ra lò.</div>
+                            </div>
+                            <button
+                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                onClick={onFinalOpen}
+                            >
+                                Xác nhận ra lò
+                            </button>
+                        </>
                     ) : (
-                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                            <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                            <div className="font-medium">Đang sấy...</div>
-                        </div>
+                        <>
+                            <div className=" space-y-1 w-full xl:w-[75%]">
+                                <div className="font-semibold">Tình trạng mẻ sấy:</div>
+                                <div className="text-red-500">Mẻ sấy chưa đủ điều kiện ra lò.</div>
+                            </div>
+                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                <div className="font-medium">Đang sấy...</div>
+                            </div>
+                        </>
+                        
                     )}
                 </div>
             </div>
@@ -514,7 +524,7 @@ function ControllerCard(props) {
                                 chuẩn hoạt động khi đã đáp ứng tất cả nhu cầu
                                 dưới đây
                             </div>
-                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
+                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 gap-6">
                                 {/* Hiển thị tất cả giá trị checkItems */}
                                 {checkItems.map((item) => (
                                     <CheckListItem

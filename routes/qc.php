@@ -12,6 +12,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/deleteDoAm', [QCController::class, 'removeDoAm']);
         Route::post('/hoanthanhdoam', [QCController::class, 'HoanThanhDoAm']);
         Route::post('/ghinhankt', [QCController::class, 'DanhGiaKT']);
-        Route::post('/hoanthanhkt', [QCController::class, 'HoanThanhKT']);
+        Route::post('/hoanthanhkt', [QCController::class, 'HoanThanhKT']); 
+        Route::get('/gethumidlistbyid', [QCController::class, 'getHumidListById']);
     });
 });

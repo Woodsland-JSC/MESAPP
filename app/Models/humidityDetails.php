@@ -25,4 +25,5 @@ class humidityDetails extends Model
     {
         return Carbon::parse($value)->format('Y-m-d H:i:s');
     }
+    
 }
