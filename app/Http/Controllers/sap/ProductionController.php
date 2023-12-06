@@ -138,6 +138,105 @@ class ProductionController extends Controller
     }
     function listProduction(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'TO' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from uv_detailreceipt where "U_To"=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$request->TO])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+        odbc_close($conDB);
+        return response()->json($results, 200);
+    }
+    function viewdetail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ItemCode' => 'required',
+            'TO' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'SELECT a."ItemCode",e."ItemName","SanPhamDich",sum("totalProcessing") "totalMax",' .
+            'ifnull(e."U_CDay",1) "CDay",ifnull(e."U_CDai",1) "CDai",ifnull(e."U_CRong", 1) "CRong"' .
+            'FROM UV_DETAILRECEIPT a LEFT JOIN OITM E on a."ItemCode"=E."ItemCode" WHERE a."ItemCode"=? and "U_To"=?' .
+            'group by a."ItemCode",e."ItemName","SanPhamDich" ,ifnull(e."U_CDay",1),ifnull(e."U_CDai",1),ifnull(e."U_CRong",1)';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$request->ItemCode, $request->TO])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+        $data = [];
+        //số lượng phôi
+        if ($results[0]['ItemCode'] == $results[0]['SanPhamDich']) {
+            $data =  $this->SLPhoiNhan($results[0]['ItemCode']);
+        } else {
+            $data[0]['ItemCode'] = $results[0]['ItemCode'];
+            $data[0]['ItemName'] = $results[0]['ItemName'];
+            $data[0]['Quantity'] = 0;
+        }
+        $factory = [
+            [
+                'Factory' => '01',
+                'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+            ],
+            [
+                'Factory' => '02',
+                'FactoryName' => 'Nhà Máy CBG Yên sơn'
+            ],
+            [
+                'Factory' => '03',
+                'FactoryName' => 'Nhà Máy CBG Thái Bình'
+            ],
+        ];
+        $notfication = [
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 1,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 2,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+            [
+                'text' => 'Số lượng đã giao chờ SX xác nhận',
+                'Quantity' => 1,
+                'Date' => now()->format('Y-m-d H:m:i')
+            ],
+        ];
+        odbc_close($conDB);
+        return response()->json([
+            'Data' => $results, 'SLPHOIDANHAN' => $data,
+            'Factorys' => $factory,
+            'notifications' => $notfication
+        ], 200);
     }
     function listo(Request $request)
     {
@@ -159,5 +258,28 @@ class ProductionController extends Controller
         }
         odbc_close($conDB);
         return response()->json($results, 200);
+    }
+    function SLPhoiNhan($itemCode)
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select b."Code",C."ItemName",0 "Quantity"
+                from OITT A JOIN ITT1 B on a."Code"=b."Father"
+                JOIN OITM C ON B."Code"=c."ItemCode"
+                where a."Code"=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$itemCode])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+        return $results;
     }
 }
