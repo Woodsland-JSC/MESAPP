@@ -165,7 +165,7 @@ class PlanController extends Controller
                 'pallet' => $pallet,
                 'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
                 'Qty' => $data->Qty,
-                'Mass' => max($data['CDay'] * $data['CRong'] * $data['CDai'] * $data->Qty, 1),
+                'Mass' => 120
             ]);
 
 

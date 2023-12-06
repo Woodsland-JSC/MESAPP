@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('warehouseQC', function (Blueprint $table) {
+        Schema::create('notireceipt', function (Blueprint $table) {
             $table->id();
-            $table->string('Factory')->nullable();
-            $table->string('WhsCode')->nullable();
-            $table->string('WhsName')->nullable();
+            $table->string('text')->nullable();
+            $table->float('Quantity')->nullable();
+            $table->integer('deleted')->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('warehouseQC');
+        Schema::dropIfExists('notireceipt');
     }
 };

@@ -6,19 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class AllocateLogs extends Model
+class notireceipt extends Model
 {
     use HasFactory;
-    protected $table = 'AllocateLogs';
+    protected $table = 'notireceipt';
     protected $fillable = [
-        'BaseEntry',
-        'ItemCode',
-        'Qty',
-        'Body',
-        'DocNum',
-        'DocEntry',
-        'Status',
-        'Type',
+        'text',
+        'Quantity',
+        'deleted',
+        'baseID'
     ];
     public function getCreatedAtAttribute($value)
     {
