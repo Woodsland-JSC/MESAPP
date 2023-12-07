@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\receiptProductionAlocate;
 use App\Models\AllocateLogs;
+use App\Models\notireceipt;
+use Illuminate\Support\Facades\Redis;
 
 class ProductionController extends Controller
 {
@@ -44,77 +46,62 @@ class ProductionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'ItemCode' => 'required',
-            'Qty' => 'required|integer'
+            'SLD' => 'required',
+            'SLL' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $conDB = (new ConnectController)->connect_sap();
-        $query = 'select a."DocEntry",a."DocNum",a."ItemCode",a."Warehouse","PlannedQty",
-                ifnull(c."Qty",0) "ReceiptQty","PlannedQty"-ifnull(c."Qty",0) "OpenQty", null "Allocate"
-                from OWOR A join OUSR B ON A."UserSign"=B."USERID"
-                left join (
-                    select distinct "BaseEntry","ItemCode" ,
-                    sum("Quantity") over(PARTITION BY "BaseEntry","ItemCode") "Qty"
-                    from IGN1
-                    where "BaseType"=202
-                )C ON A."DocEntry"=c."BaseEntry" where  "Type"=? and a."Status"=? and "U_Xuong"=?';
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        if (!odbc_execute($stmt, ['S', 'R', '0001'])) {
-            // Handle execution error
-            // die("Error executing SQL statement: " . odbc_errormsg());
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        $results = array();
-
-        while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
-        };
-
-        $rss = $this->allocate($results, $request->Qty);
-        foreach ($rss as $rs) {
+        // -99 là xóa data
+        $Allocate = AllocateLogs::create([
+            'ItemCode' => $request->ItemCode,
+            'Qty' => $request->SLD,
+            'Stautus' => 0
+        ]);
+        notireceipt::Create([
+            'baseID' => $Allocate->id,
+            'text' => 'Số lượng đã giao chờ SX xác nhận',
+            'Quantity' => $request->SLD,
+        ]);
+        //  ;
+        if ($request->SLL > 0) {
             $data[] = [
-                "BatchNumber" => now()->format('Ymd') . $rs['DocEntry'],
-                "Quantity" => $rs['Allocate'],
-                "ItemCode" =>  $rs['ItemCode'],
+                "BatchNumber" => now()->format('YmdHMI'),
+                "Quantity" => $request->SLL,
+                "ItemCode" =>  $request->ItemCode,
                 "U_Status" => "SD"
             ];
-            $body = [
-                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-
-                "DocumentLines" => [
-                    [
-                        "Quantity" => $rs['Allocate'],
-                        "BaseLine" => 0,
-                        "WarehouseCode" => $rs['Warehouse'],
-                        "BaseEntry" => $rs['DocEntry'],
-                        "BaseType" => 202,
-                        "BatchNumbers" => $data,
-
+            // cần xử lý thêm phân get kho theo nhà máy
+            $body =
+                [
+                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "ItemCode" => $request->ItemCode,
+                    "DocumentLines" => [
+                        [
+                            "Quantity" => $request->ItemCode,
+                            "BaseLine" => 0,
+                            "WarehouseCode" => 'W07.1.01',
+                            "BatchNumbers" => $data,
+                        ],
                     ],
-                ],
-            ];
-            AllocateLogs::created([
-                'BaseEntry' => $rs['DocEntry'],
-                'ItemCode' => $rs['ItemCode'],
-                'Qty' => $rs['Allocate'],
-                'Body' =>  $body
-            ]);
+                ];
             receiptProductionAlocate::dispatch($body);
+            AllocateLogs::create([
+                'ItemCode' => $request->ItemCode,
+                'Qty' => $request->SLL,
+                'Body' => json_encode($body),
+                'Type' => "59",
+                'Stautus' => 1
+            ]);
         }
 
+
         return response()->json([
-            'message' => 'nhập sản lượng thành công',
-            'data' => $request->all(),
-            $rs
+            'message' => 'nhập sản lượng thành công'
         ], 200);
     }
     function allocate($data, $totalQty)
     {
-
         foreach ($data as &$item) {
             // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
             if (isset($item['OpenQty']) && $item['OpenQty'] <= $totalQty) {
@@ -167,21 +154,22 @@ class ProductionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'ItemCode' => 'required',
-            'TO' => 'required'
+            'TO' => 'required',
+            'DinhTuyen' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $conDB = (new ConnectController)->connect_sap();
         $query = 'SELECT a."ItemCode",e."ItemName","SanPhamDich",sum("totalProcessing") "totalMax",' .
-            'ifnull(e."U_CDay",1) "CDay",ifnull(e."U_CDai",1) "CDai",ifnull(e."U_CRong", 1) "CRong"' .
-            'FROM UV_DETAILRECEIPT a LEFT JOIN OITM E on a."ItemCode"=E."ItemCode" WHERE a."ItemCode"=? and "U_To"=?' .
+            'ifnull(e."U_CDay",1) "CDay",ifnull(e."U_CDai",1) "CDai",ifnull(e."U_CRong", 1) "CRong",' .
+            'Gettotieptheo(?,?) CDTT,CDTTNAME(?,?) CDTTNAME  FROM UV_DETAILRECEIPT a LEFT JOIN OITM E on a."ItemCode"=E."ItemCode" WHERE a."ItemCode"=? and "U_To"=?' .
             'group by a."ItemCode",e."ItemName","SanPhamDich" ,ifnull(e."U_CDay",1),ifnull(e."U_CDai",1),ifnull(e."U_CRong",1)';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [$request->ItemCode, $request->TO])) {
+        if (!odbc_execute($stmt, [$request->DinhTuyen, $request->TO, $request->DinhTuyen, $request->TO, $request->ItemCode, $request->TO])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -216,16 +204,19 @@ class ProductionController extends Controller
         ];
         $notfication = [
             [
+                'id' => 1,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 1,
                 'Date' => now()->format('Y-m-d H:m:i')
             ],
             [
+                'id' => 3,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 2,
                 'Date' => now()->format('Y-m-d H:m:i')
             ],
             [
+                'id' => 4,
                 'text' => 'Số lượng đã giao chờ SX xác nhận',
                 'Quantity' => 1,
                 'Date' => now()->format('Y-m-d H:m:i')
@@ -281,5 +272,53 @@ class ProductionController extends Controller
             $results[] = $row;
         };
         return $results;
+    }
+    function reject(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'reason' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+
+        $data[] = [
+            "BatchNumber" => now()->format('YmdHMI'),
+            "Quantity" => $request->SLL,
+            "ItemCode" =>  $request->ItemCode,
+            "U_Status" => "SD"
+        ];
+        // cần xử lý thêm phân get kho theo nhà máy
+        $body =
+            [
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "ItemCode" => $request->ItemCode,
+                "DocumentLines" => [
+                    [
+                        "Quantity" => $request->ItemCode,
+                        "BaseLine" => 0,
+                        "WarehouseCode" => 'W07.1.01',
+                        "BatchNumbers" => $data,
+                    ],
+                ],
+            ];
+        receiptProductionAlocate::dispatch($body);
+        AllocateLogs::where()->update([
+            'ItemCode' => $request->ItemCode,
+            'Qty' => $request->SLL,
+            'Body' => json_encode($body),
+            'Type' => "59",
+            'Stautus' => 1
+        ]);
+    }
+    function listpending(Request $request)
+    {
+    }
+    function accept(Request $request)
+    {
+    }
+    function delete(Request $request)
+    {
     }
 }
