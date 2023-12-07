@@ -98,7 +98,7 @@ class ReportController extends Controller
 
         //copy($templateFile, $outputFile);
 
-        $templateProcessor = new TemplateProcessor($outputFile);
+        $templateProcessor = new TemplateProcessor($templateFile);
 
         $templateProcessor->setImageValue('signature', storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png'));
         $templateProcessor->setValue('branch', "Test chi nhánh");
