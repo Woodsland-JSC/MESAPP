@@ -42,6 +42,7 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 142,
         TB_kholuadat: 25,
+        total: 999
     },
     {
         name: "Melino-Chân trước",
@@ -66,6 +67,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 47,
         TB_kholuadat: 0,
+        total: 999
+
     },
     {
         name: "NAMM Bench có tay-Chân-tay",
@@ -90,6 +93,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 0,
         TB_kholuadat: 0,
+        total: 999
+
     },
     {
         name: "NAMM Đố- Bench 120",
@@ -114,6 +119,8 @@ const exampleData = [
         TB_daralo: 8.3088,
         TB_khosausay: 47,
         TB_kholuadat: 5,
+        total: 999
+
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -136,6 +143,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 129,
         TB_kholuadat: 24,
+        total: 999
+        ,
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -160,6 +169,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 0,
         TB_kholuadat: 0,
+        total: 999
+
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -184,6 +195,7 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 859,
         TB_kholuadat: 374,
+        total: 999
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -208,6 +220,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 145,
         TB_kholuadat: 73,
+        total: 999
+        ,
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -232,6 +246,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 7,
         TB_kholuadat: 0,
+        total: 999
+
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -256,6 +272,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 450,
         TB_kholuadat: 25,
+        total: 999
+        ,
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -280,6 +298,7 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 176,
         TB_kholuadat: 150,
+        total: 999
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -304,6 +323,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 142,
         TB_kholuadat: 25,
+        total: 999
+        ,
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -328,6 +349,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 0,
         TB_kholuadat: 0,
+        total: 999
+
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -352,6 +375,8 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 14,
         TB_kholuadat: 1,
+        total: 999
+
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -376,6 +401,7 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 237,
         TB_kholuadat: 75,
+        total: 999
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -400,6 +426,7 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 144,
         TB_kholuadat: 45,
+        total: 999
     },
     {
         name: "Skogsta-N tbl-180 tbl-160 tbl-Bench 120-Bench 60-L shape",
@@ -424,26 +451,27 @@ const exampleData = [
         TB_daralo: 0,
         TB_khosausay: 142,
         TB_kholuadat: 25,
+        total: 999
     },
 ];
 
-const columnData = [
-    {
-        name: "Nhà máy Thuận Hung",
-        id: "TH",
-    },
-    {
-        name: "Nhà máy Yên Sơn",
-        id: "YS",
-    },
-    {
-        name: "Nhà máy Thái Bình",
-        id: "TB",
-    },
-];
+// const columnData = [
+//     {
+//         name: "Nhà máy Thuận Hung",
+//         id: "TH",
+//     },
+//     {
+//         name: "Nhà máy Yên Sơn",
+//         id: "YS",
+//     },
+//     {
+//         name: "Nhà máy Thái Bình",
+//         id: "TB",
+//     },
+// ];
 
 const workSheetName = "Sheet1";
-const workBookName = "Thống kê xếp sấy khối chế biến gỗ";
+const workBookName = "Báo cáo tồn sấy lựa";
 
 // var checkboxSelection = function (params) {
 //     return params.columnApi.getRowGroupColumns().length === 0;
@@ -472,6 +500,20 @@ function SelectedDriedInventoryReport() {
 
     const [firstTimeRender, setFirstTimeRender] = useState(true);
 
+    const [columnData, setColumnData] = useState([
+        {
+            name: "Nhà máy Thuận Hung",
+            id: "TH",
+        },
+        {
+            name: "Nhà máy Yên Sơn",
+            id: "YS",
+        },
+        {
+            name: "Nhà máy Thái Bình",
+            id: "TB",
+        },
+    ]);
     const [reportData, setReportData] = useState([]);
     const [summaryData, setSummaryData] = useState(null);
 
@@ -506,7 +548,7 @@ function SelectedDriedInventoryReport() {
             headerName: "Quy Cách",
             children: [
                 {
-                    headerName: "Dầy",
+                    headerName: "Dày",
                     field: "thickness",
                     minWidth: 80,
                     width: 80,
@@ -583,8 +625,8 @@ function SelectedDriedInventoryReport() {
     };
 
     const onReportGridReady = useCallback(async (params) => {
-        console.log("Ra gì: ", params.api);
-        console.log("Ra gì 2: ", params.columnApi.getColumnDefs);
+        // console.log("Ra gì: ", params.api);
+        // console.log("Ra gì 2: ", params.columnApi.getColumnDefs);
         setGridApi(params.api);
         setGridColumnApi(params.columnApi);
         showLoadingReport();
@@ -627,6 +669,14 @@ function SelectedDriedInventoryReport() {
     const calculateSummary = (data) => {
         var totalSummary = {};
 
+        totalSummary.total = Number(
+            data
+                .reduce((acc, item) => {
+                    return acc + (item?.total || 0);
+                }, 0)
+                .toFixed(4)
+        );
+
         columnData.forEach((column) => {
             const columnTonngoaibai = `${column.id}_tonngoaibai`;
             const columnXepsay = `${column.id}_xepsay`;
@@ -634,6 +684,8 @@ function SelectedDriedInventoryReport() {
             const columnDaralo = `${column.id}_daralo`;
             const columnKhosausay = `${column.id}_khosausay`;
             const columnKholuadat = `${column.id}_kholuadat`;
+
+            
 
             totalSummary[columnTonngoaibai] = Number(
                 data
@@ -742,9 +794,24 @@ function SelectedDriedInventoryReport() {
             let currentColumn = 1;
             let currentRow = 1;
 
-            reportColumnDefs.forEach((column) => {
+            reportColumnDefs.forEach((column, index) => {
+                const currentIndex = index;
+                console.log(
+                    "Xin chào: ",
+                    currentIndex <= 2 + columnData.length
+                );
                 const startColumn = currentColumn;
-                const endColumn = currentColumn + (column.children ? 2 : 0);
+                const endColumn =
+                    currentColumn +
+                    (currentIndex == 2
+                        ? 2
+                        : column.children &&
+                          currentIndex <= 2 + columnData.length
+                        ? 3
+                        : column.children &&
+                          currentIndex > 2 + columnData.length
+                        ? 1
+                        : 0);
 
                 if (column.children) {
                     worksheet.mergeCells(
@@ -757,7 +824,7 @@ function SelectedDriedInventoryReport() {
                     worksheet.mergeCells(
                         currentRow,
                         startColumn,
-                        currentRow + 1,
+                        currentRow + 2,
                         endColumn
                     );
                 }
@@ -767,6 +834,7 @@ function SelectedDriedInventoryReport() {
                 headerCell.style.alignment = {
                     vertical: "middle",
                     horizontal: "center",
+                    wrapText: true,
                 };
                 headerCell.style.font = {
                     bold: true,
@@ -807,9 +875,61 @@ function SelectedDriedInventoryReport() {
 
                         subHeaderCell.value = item.headerName;
 
+                        // Merge
+                        if (item.children && item.children.length > 0) {
+                            worksheet.mergeCells(
+                                currentRow + 1,
+                                startColumn + i,
+                                currentRow + 1,
+                                startColumn + i + 2 
+                            );
+                                let j = 1
+                            item.children.forEach((child) => {
+                                const semiSubHeaderCell = worksheet.getCell(
+                                    currentRow + 2,
+                                    startColumn + j
+                                );
+
+                                semiSubHeaderCell.value = child.headerName;
+
+                                semiSubHeaderCell.style.alignment = {
+                                    vertical: "middle",
+                                    horizontal: "center",
+                                    wrapText: true,
+                                };
+        
+                                semiSubHeaderCell.style.font = {
+                                    bold: true,
+                                };
+        
+                                semiSubHeaderCell.style.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: { argb: "e5edff" },
+                                };
+        
+                                semiSubHeaderCell.style.border = {
+                                    top: { style: "thin" },
+                                    left: { style: "thin" },
+                                    bottom: { style: "thin" },
+                                    right: { style: "thin" },
+                                };
+
+                                j++;
+                            })
+                        } else {
+                            worksheet.mergeCells(
+                                currentRow + 1,
+                                startColumn + i,
+                                currentRow + 2,
+                                startColumn + i 
+                            );
+                        }
+
                         subHeaderCell.style.alignment = {
                             vertical: "middle",
                             horizontal: "center",
+                            wrapText: true,
                         };
 
                         subHeaderCell.style.font = {
@@ -839,10 +959,10 @@ function SelectedDriedInventoryReport() {
             currentRow += 1;
 
             // Tính tổng
-            worksheet.getRow(3).height = 25;
-            worksheet.getCell("B3").value = "Tổng";
+            worksheet.getRow(4).height = 25;
+            worksheet.getCell("B4").value = "Tổng";
 
-            ["A3", "B3", "C3", "D3", "E3"].forEach((cell) => {
+            ["A4", "B4", "C4", "D4", "E4"].forEach((cell) => {
                 const colorCell = worksheet.getCell(cell);
 
                 colorCell.style.fill = {
@@ -871,7 +991,7 @@ function SelectedDriedInventoryReport() {
 
             const startSumColumn = 6;
             let currentStartColumn = startSumColumn;
-            const sumRowNumber = 3;
+            const sumRowNumber = 4;
 
             sumTotal.forEach((value) => {
                 const currentSumCell = worksheet.getCell(
@@ -896,6 +1016,11 @@ function SelectedDriedInventoryReport() {
                 currentSumCell.style.alignment = {
                     vertical: "middle",
                 };
+                
+                currentSumCell.style.font = {
+                    bold: true,
+                };
+
                 currentStartColumn++;
             });
 
@@ -907,7 +1032,7 @@ function SelectedDriedInventoryReport() {
 
             console.log("MẢng body: ", arrayOfValues);
             // Đặt giá trị vào worksheet
-            let startRow = 4;
+            let startRow = 5;
 
             // Đặt giá trị vào worksheet
             arrayOfValues.forEach((row) => {
@@ -1135,7 +1260,7 @@ function SelectedDriedInventoryReport() {
                         newHeader.push(item);
                     });
 
-                    newHeader.push( {
+                    newHeader.push({
                         headerName: "Tổng",
                         headerClass:
                             "bg-cyan-200 hover:bg-slate-300 header-row-span-3",
@@ -1145,7 +1270,7 @@ function SelectedDriedInventoryReport() {
                         suppressRowTransform: true,
                         wrapHeaderText: true,
                         // autoHeaderHeight: true,
-                    },)
+                    });
 
                     console.log("Ra gì: ", newHeader);
 
@@ -1236,12 +1361,13 @@ function SelectedDriedInventoryReport() {
                                         />
                                     </div>
                                 </div>
-                                <div className="h-full">
+                                <div
+                                    className="h-full"
+                                    onClick={handleExportExcel}
+                                >
                                     <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                         <PiExportLight />
-                                        <div onClick={handleExportExcel}>
-                                            Excel
-                                        </div>
+                                        <div>Excel</div>
                                     </button>
                                 </div>
                             </div>
