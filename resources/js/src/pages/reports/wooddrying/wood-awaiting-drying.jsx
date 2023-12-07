@@ -19,6 +19,7 @@ import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
 import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 import usersApi from "../../../api/userApi";
+import documents from "../../../assets/images/Documents.png";
 
 const exampleData = [
     {
@@ -309,7 +310,7 @@ function WoodAwaitingDryingReport() {
     const [factories, setFactories] = useState([]);
 
     const [selectedBranch, setSelectedBranch] = useState(null);
-    const [selectedFactory, setSelectedFactory] = useState(null);
+    const [selectedFactory, setSelectedFactory] = useState("");
 
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
@@ -331,13 +332,15 @@ function WoodAwaitingDryingReport() {
                 } else return params.node.rowIndex + 1;
             },
             headerClass: "bg-cyan-200 hover:bg-slate-300",
-            minWidth: 10,
+            width: 50,
+            minWidth: 50,
             maxHeight: 100,
             filter: false,
         },
         {
             headerName: "Ngày xếp",
-            minWidth: 160,
+            minWidth: 180,
+            width: 180,
             valueGetter: function (params) {
                 return params.data.createdDate;
             },
@@ -345,7 +348,8 @@ function WoodAwaitingDryingReport() {
         },
         {
             headerName: "Mã pallet",
-            minWidth: 80,
+            minWidth: 120,
+            width: 120,
             valueGetter: function (params) {
                 return params.data.palletId;
             },
@@ -353,9 +357,19 @@ function WoodAwaitingDryingReport() {
         },
         {
             headerName: "Mã lô gỗ",
-            minWidth: 100,
+            minWidth: 130,
+            width: 130,
             valueGetter: function (params) {
                 return params.data.batchId;
+            },
+            headerClass: "bg-cyan-200 hover:bg-slate-300",
+        },
+        {
+            headerName: "Mã quy cách",
+            minWidth: 130,
+            width: 130,
+            valueGetter: function (params) {
+                return params.data.specificationId;
             },
             headerClass: "bg-cyan-200 hover:bg-slate-300",
         },
@@ -369,7 +383,8 @@ function WoodAwaitingDryingReport() {
         },
         {
             headerName: "Dài",
-            minWidth: 60,
+            minWidth: 80,
+            width: 80,
             valueGetter: function (params) {
                 return params.data.length;
             },
@@ -377,7 +392,8 @@ function WoodAwaitingDryingReport() {
         },
         {
             headerName: "Rộng",
-            minWidth: 60,
+            minWidth: 100,
+            width: 80,
             valueGetter: function (params) {
                 return params.data.width;
             },
@@ -385,7 +401,8 @@ function WoodAwaitingDryingReport() {
         },
         {
             headerName: "Dầy",
-            minWidth: 60,
+            minWidth: 80,
+            width: 80,
             valueGetter: function (params) {
                 return params.data.thickness;
             },
@@ -403,7 +420,7 @@ function WoodAwaitingDryingReport() {
             headerName: "Khối lượng",
             minWidth: 130,
             valueGetter: function (params) {
-                return params.data.quantity;
+                return params.data.weight;
             },
             headerClass: "bg-cyan-200 hover:bg-slate-300",
         },
@@ -470,16 +487,6 @@ function WoodAwaitingDryingReport() {
         console.log("Ra gì 2: ", params.columnApi.getColumnDefs);
         setGridApi(params.api);
         setGridColumnApi(params.columnApi);
-        showLoadingReport();
-        // const res = await usersApi.getAllUsers();
-        setTimeout(() => {
-            setReportData(exampleData);
-            // console.log("Alo: ", reportGridRef.current.api);
-            reportGridRef.current.api.setPinnedBottomRowData(
-                calculateSummary(exampleData)
-            );
-        }, 1000);
-        hideLoadingReport();
     }, []);
 
     const onFirstDataRendered = useCallback((params) => {
@@ -510,8 +517,9 @@ function WoodAwaitingDryingReport() {
     const calculateSummary = (data) => {
         var totalSummary = 0;
 
+        console.log("Moẹ data ra gì: ", data);
         if (data) {
-            Number(
+            totalSummary = Number(
                 data
                     .reduce((acc, item) => {
                         return acc + (item.weight || 0);
@@ -527,6 +535,7 @@ function WoodAwaitingDryingReport() {
         var result = [];
         result.push({
             weight: totalSummary,
+            palletId: "Tổng cộng",
         });
         return result;
     };
@@ -574,6 +583,7 @@ function WoodAwaitingDryingReport() {
     };
 
     const handleExportExcel = async () => {
+        setLoading(true);
         try {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet(workSheetName);
@@ -584,24 +594,6 @@ function WoodAwaitingDryingReport() {
 
             reportColumnDefs.forEach((column) => {
                 const startColumn = currentColumn;
-                const endColumn = currentColumn + (column.children ? 2 : 0);
-
-                if (column.children) {
-                    worksheet.mergeCells(
-                        currentRow,
-                        startColumn,
-                        currentRow,
-                        endColumn
-                    );
-                } else {
-                    worksheet.mergeCells(
-                        currentRow,
-                        startColumn,
-                        currentRow + 1,
-                        endColumn
-                    );
-                }
-
                 const headerCell = worksheet.getCell(currentRow, startColumn);
 
                 headerCell.style.alignment = {
@@ -626,13 +618,24 @@ function WoodAwaitingDryingReport() {
 
                 headerCell.value = column.headerName;
 
-                if (column.headerName == "Tên") {
-                    if (column.headerName == "Tên") {
-                        worksheet.getColumn(currentColumn).width = 50;
-                    }
-                } else {
-                    // Đặt width mặc định
-                    // worksheet.getColumn(currentColumn).width = 50;
+                if (column.headerName == "Ngày xếp") {
+                    worksheet.getColumn(currentColumn).width = 50;
+                } else if (column.headerName == "Mã pallet") {
+                    worksheet.getColumn(currentColumn).width = 15;
+                } else if (column.headerName == "Mã lô gỗ") {
+                    worksheet.getColumn(currentColumn).width = 10;
+                } else if (column.headerName == "Mã quy cách") {
+                    worksheet.getColumn(currentColumn).width = 12;
+                } else if (column.headerName == "Tên quy cách") {
+                    worksheet.getColumn(currentColumn).width = 60;
+                } else if (column.headerName == "Số lượng") {
+                    worksheet.getColumn(currentColumn).width = 13;
+                } else if (column.headerName == "Khối lượng") {
+                    worksheet.getColumn(currentColumn).width = 13;
+                } else if (column.headerName == "Mục đích sấy") {
+                    worksheet.getColumn(currentColumn).width = 15;
+                } else if (column.headerName == "Trạng thái") {
+                    worksheet.getColumn(currentColumn).width = 13;
                 }
 
                 if (column.children) {
@@ -672,82 +675,56 @@ function WoodAwaitingDryingReport() {
                         i++;
                     });
                 }
-                currentColumn = endColumn + 1;
+                currentColumn = startColumn + 1;
             });
 
             worksheet.getRow(currentRow).height = 25;
             currentRow += 1;
 
-            // Tính tổng
-            worksheet.getRow(3).height = 25;
-            worksheet.getCell("B3").value = "Tổng";
-
-            ["A3", "B3", "C3", "D3", "E3"].forEach((cell) => {
-                const colorCell = worksheet.getCell(cell);
-
-                colorCell.style.fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: { argb: "9ad5bf" },
-                };
-
-                colorCell.style.border = {
-                    top: { style: "thin" },
-                    left: { style: "thin" },
-                    bottom: { style: "thin" },
-                    right: { style: "thin" },
-                };
-
-                colorCell.style.alignment = {
-                    vertical: "middle",
-                };
-            });
-
-            const sumTotal = Object.values(summaryData).filter(
-                (value, index) => {
-                    return Object.keys(summaryData)[index] !== "name";
-                }
-            );
+            // const sumTotal = Object.values(summaryData).filter(
+            //     (value, index) => {
+            //         return Object.keys(summaryData)[index] !== "name";
+            //     }
+            // );
 
             const startSumColumn = 6;
             let currentStartColumn = startSumColumn;
-            const sumRowNumber = 3;
+            const sumRowNumber = currentRow;
 
-            sumTotal.forEach((value) => {
-                const currentSumCell = worksheet.getCell(
-                    sumRowNumber,
-                    currentStartColumn
-                );
-                currentSumCell.value = value;
+            // sumTotal.forEach((value) => {
+            //     const currentSumCell = worksheet.getCell(
+            //         sumRowNumber,
+            //         currentStartColumn
+            //     );
+            //     currentSumCell.value = value;
 
-                currentSumCell.style.fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: { argb: "9ad5bf" },
-                };
+            //     currentSumCell.style.fill = {
+            //         type: "pattern",
+            //         pattern: "solid",
+            //         fgColor: { argb: "9ad5bf" },
+            //     };
 
-                currentSumCell.style.border = {
-                    top: { style: "thin" },
-                    left: { style: "thin" },
-                    bottom: { style: "thin" },
-                    right: { style: "thin" },
-                };
+            //     currentSumCell.style.border = {
+            //         top: { style: "thin" },
+            //         left: { style: "thin" },
+            //         bottom: { style: "thin" },
+            //         right: { style: "thin" },
+            //     };
 
-                currentSumCell.style.alignment = {
-                    vertical: "middle",
-                };
-                currentStartColumn++;
-            });
+            //     currentSumCell.style.alignment = {
+            //         vertical: "middle",
+            //     };
+            //     currentStartColumn++;
+            // });
 
             // Đổ dữ liệu nè
             const arrayOfValues = reportData.map((obj, index) => [
-                index + 1,
                 ...Object.values(obj),
             ]);
 
             console.log("MẢng body: ", arrayOfValues);
             // Đặt giá trị vào worksheet
-            let startRow = 4;
+            let startRow = 2;
 
             // Đặt giá trị vào worksheet
             arrayOfValues.forEach((row) => {
@@ -801,6 +778,37 @@ function WoodAwaitingDryingReport() {
                 startRow++;
             });
 
+            // Tính tổng
+            worksheet.getRow(startRow).height = 25;
+
+            var sumTextColumn = 3;
+
+            const sumCellAddress =
+                String.fromCharCode(64 + sumTextColumn) + startRow;
+            worksheet.getCell(sumCellAddress).value = "Tổng cộng";
+
+            reportColumnDefs.forEach((cell, index) => {
+                const cellAddress = String.fromCharCode(64 + index + 1) + startRow;
+                const colorCell = worksheet.getCell(cellAddress);
+
+                colorCell.style.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "9ad5bf" },
+                };
+
+                colorCell.style.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" },
+                };
+
+                colorCell.style.alignment = {
+                    vertical: "middle",
+                };
+            });
+
             // Lưu file Excel
             const buffer = await workbook.xlsx.writeBuffer();
             saveAs(new Blob([buffer]), workBookName + ".xlsx");
@@ -810,6 +818,7 @@ function WoodAwaitingDryingReport() {
             console.error(error);
             toast.error("Có lỗi xảy ra.");
         }
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -818,17 +827,40 @@ function WoodAwaitingDryingReport() {
         const isValidEnd = endDate && endDate <= currentDate;
         const isValidRange = startDate && endDate && startDate <= endDate;
 
-        if (!isValidStart) {
+        // if (!isValidStart) {
+        //     setStartDate(currentDate);
+        //     toast("Tự động thay đổi ngày bắt đầu.");
+        // }
+
+        // if (!isValidEnd) {
+        //     setEndDate(currentDate);
+        //     toast("Tự động thay đổi ngày kết thúc.");
+        // }
+
+        // if (!isValidRange) {
+        //     setStartDate(currentDate);
+        //     setEndDate(currentDate);
+        //     toast("Tự động thay đổi thời gian.");
+        // }
+
+        if (startDate > currentDate) {
             setStartDate(currentDate);
+            toast("Tự động thay đổi ngày bắt đầu.");
         }
 
-        if (!isValidEnd) {
+        if (endDate > currentDate) {
             setEndDate(currentDate);
+            toast("Tự động thay đổi ngày kết thúc.");
         }
 
-        if (!isValidRange) {
-            setStartDate(currentDate);
-            setEndDate(currentDate);
+        // if (endDate < startDate) {
+        //     setStartDate(new Date(endDate));
+        //     toast("Ngày kết thúc phải ≥ ngày bắt đầu.");
+        // }
+
+        if (startDate > endDate) {
+            setEndDate(new Date(startDate));
+            toast("Ngày bắt đầu phải ≤ ngày kết thúc.");
         }
     }, [startDate, endDate]);
 
@@ -938,9 +970,10 @@ function WoodAwaitingDryingReport() {
     useEffect(() => {
         const handleGetFactory = async () => {
             try {
+                setFactories([]);
                 console.log("Selected branch: ", selectedBranch);
                 const res = await usersApi.getFactoriesByBranchId(
-                    selectedBranch.value
+                    selectedBranch?.value
                 );
                 const options = res.map((item) => ({
                     value: item.Code,
@@ -952,9 +985,32 @@ function WoodAwaitingDryingReport() {
                 console.error(error);
             }
         };
-
-        handleGetFactory();
+        if (selectedBranch) {
+            handleGetFactory();
+        }
+        if (selectedFactory) {
+            setSelectedFactory("");
+            setReportData([]);
+        }
     }, [selectedBranch]);
+
+    useEffect(() => {
+        const handleGetReportData = async () => {
+            // showLoadingReport();
+            // const res = await usersApi.getAllUsers();
+            setReportData(exampleData);
+            setTimeout(() => {
+                reportGridRef.current.api.setPinnedBottomRowData(
+                    // console.log("Alo: ", reportGridRef.current.api);
+                    calculateSummary(exampleData)
+                );
+            }, 1000);
+            // hideLoadingReport();
+        };
+        if (selectedFactory && startDate && endDate) {
+            handleGetReportData();
+        }
+    }, [selectedFactory, startDate, endDate]);
 
     return (
         <Layout>
@@ -968,7 +1024,11 @@ function WoodAwaitingDryingReport() {
                     </div>
                     {/* h-[calc(100%-165px)] */}
                     {/* Main content */}
-                    <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-max  md:h-[calc(100%-129px)]">
+                    <section
+                        className={`bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-max md:h-[calc(100%-129px)] ${
+                            reportData?.length < 1 && "md:h-fit"
+                        }`}
+                    >
                         {/* Controller */}
                         <section className="flex flex-col lg:flex-row gap-4">
                             <div className="flex flex-col gap-4 sm:flex-row sm:gap-0">
@@ -996,6 +1056,7 @@ function WoodAwaitingDryingReport() {
                                         onChange={(value) =>
                                             setSelectedFactory(value)
                                         }
+                                        value={selectedFactory}
                                         placeholder="Lựa chọn"
                                         className="flex w-40"
                                     />
@@ -1031,75 +1092,103 @@ function WoodAwaitingDryingReport() {
                             </div>
                         </section>
                         <Divider className="my-4" />
-                        <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
-                            <div className="flex w-full justify-end space-x-4">
-                                <div className="">
-                                    <label
-                                        for="search"
-                                        className="mb-2 font-medium text-gray-900 sr-only"
-                                    >
-                                        Tìm kiếm
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <svg
-                                                className="w-4 h-4 text-gray-500"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                />
-                                            </svg>
+                        <div
+                            className={`${
+                                reportData?.length < 1 &&
+                                "h-fit flex justify-center"
+                            }`}
+                        >
+                            {reportData && reportData.length > 0 ? (
+                                <>
+                                    <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
+                                        <div className="flex w-full justify-end space-x-4">
+                                            <div className="">
+                                                <label
+                                                    for="search"
+                                                    className="mb-2 font-medium text-gray-900 sr-only"
+                                                >
+                                                    Tìm kiếm
+                                                </label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg
+                                                            className="w-4 h-4 text-gray-500"
+                                                            aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                stroke="currentColor"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <input
+                                                        type="search"
+                                                        id="search"
+                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                        placeholder="Tìm kiếm"
+                                                        onInput={
+                                                            onFilterTextBoxChanged
+                                                        }
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="h-full">
+                                                <button
+                                                    onClick={handleExportExcel}
+                                                    className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                >
+                                                    <PiExportLight />
+                                                    <div>Excel</div>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <input
-                                            type="search"
-                                            id="search"
-                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Tìm kiếm"
-                                            onInput={onFilterTextBoxChanged}
-                                            required
+                                    </div>
+                                    <div className="ag-theme-alpine py-4 h-[87%] w-full">
+                                        <AgGridReact
+                                            ref={reportGridRef}
+                                            className="h-full"
+                                            rowData={reportData}
+                                            columnDefs={reportColumnDefs}
+                                            autoGroupColumnDef={
+                                                autoGroupColumnDef
+                                            }
+                                            defaultColDef={defaultColDef}
+                                            suppressRowClickSelection={true}
+                                            groupSelectsChildren={true}
+                                            rowSelection={"multiple"}
+                                            rowGroupPanelShow={"always"}
+                                            pivotPanelShow={"always"}
+                                            onGridReady={onReportGridReady}
+                                            onFirstDataRendered={
+                                                onFirstDataRendered
+                                            }
+                                            suppressRowVirtualisation={true}
+                                            localeText={localeText}
+                                            pinnedBottomRowData={
+                                                pinnedBottomRowData
+                                            }
+                                            getRowStyle={getRowStyle}
+                                            onFilterChanged={
+                                                getChangedReportData
+                                            }
+                                            gridOptions={gridOptions}
                                         />
                                     </div>
-                                </div>
-                                <div className="h-full">
-                                    <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                        <PiExportLight />
-                                        <div onClick={handleExportExcel}>
-                                            Excel
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="ag-theme-alpine py-4 h-[87%] w-full">
-                            <AgGridReact
-                                ref={reportGridRef}
-                                className="h-full"
-                                rowData={reportData}
-                                columnDefs={reportColumnDefs}
-                                autoGroupColumnDef={autoGroupColumnDef}
-                                defaultColDef={defaultColDef}
-                                suppressRowClickSelection={true}
-                                groupSelectsChildren={true}
-                                rowSelection={"multiple"}
-                                rowGroupPanelShow={"always"}
-                                pivotPanelShow={"always"}
-                                onGridReady={onReportGridReady}
-                                onFirstDataRendered={onFirstDataRendered}
-                                suppressRowVirtualisation={true}
-                                localeText={localeText}
-                                pinnedBottomRowData={pinnedBottomRowData}
-                                getRowStyle={getRowStyle}
-                                onFilterChanged={getChangedReportData}
-                                gridOptions={gridOptions}
-                            />
+                                </>
+                            ) : (
+                                <img
+                                    src={documents}
+                                    alt="Tài liệu"
+                                    className="w-1/2 lg:w-1/3 p-4"
+                                />
+                            )}
                         </div>
                     </section>
                 </div>

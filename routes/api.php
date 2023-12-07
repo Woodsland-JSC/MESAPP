@@ -10,6 +10,7 @@ use App\Http\Controllers\api\PermissionsController;
 use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
+use App\Http\Controllers\api\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,6 +120,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
+
+    Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
+    Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
 });
 
 

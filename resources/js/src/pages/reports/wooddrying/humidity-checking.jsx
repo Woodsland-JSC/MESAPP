@@ -157,7 +157,7 @@ const dimensionOptions = [
 ];
 
 const workSheetName = "Sheet1";
-const workBookName = "Biên bản kiểm tra lò sấy";
+const workBookName = "Biên bản kiểm tra độ ẩm";
 
 // var checkboxSelection = function (params) {
 //     return params.columnApi.getRowGroupColumns().length === 0;
@@ -167,7 +167,7 @@ const workBookName = "Biên bản kiểm tra lò sấy";
 //     return params.columnApi.getRowGroupColumns().length === 0;
 // };
 
-function KilnInspectionReport() {
+function HumidityCheckingReport() {
     let factorySelectRef = useRef(null);
     let radioRef = useRef(null);
     const { loading, setLoading } = useAppContext();
@@ -702,7 +702,7 @@ function KilnInspectionReport() {
 
         setFirstTimeRender(false);
 
-        document.title = "Woodsland - Biên bản kiểm tra lò sấy";
+        document.title = "Woodsland - Biên bản kiểm tra độ ẩm";
         const params = new URLSearchParams(window.location.search);
 
         return () => {
@@ -1158,4 +1158,4 @@ function KilnInspectionReport() {
     );
 }
 
-export default KilnInspectionReport;
+export default HumidityCheckingReport;

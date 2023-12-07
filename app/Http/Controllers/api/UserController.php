@@ -82,6 +82,10 @@ class UserController extends Controller
                 $user->avatar = asset('storage/' . $user->avatar);
             }
 
+            if ($user->imagesign) {
+                $user->imagesign = asset('storage/' . $user->imagesign);
+            }
+
             return response()->json(['user' => $user, 'UserRole' => $userRole, 'role' => $roles], 200);
         } catch (ModelNotFoundException $e) {
             // Trả về một response lỗi khi không tìm thấy user
@@ -224,6 +228,7 @@ class UserController extends Controller
             'roles' => 'required|exists:roles,name',
             'branch' => 'required',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imagesign' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 
         ]);
 
@@ -246,6 +251,15 @@ class UserController extends Controller
 
             $avatarPathWithoutPublic = str_replace('public/', '', $avatarPath);
             $user->avatar = $avatarPathWithoutPublic;
+            $user->save();
+        }
+
+        if ($request->hasFile('imagesign')) {
+            $signature = $request->file('imagesign');
+            $signaturePath = $signature->storeAs('public/signatures/' . $user->id, $signature->getClientOriginalName());
+
+            $signaturePathWithoutPublic = str_replace('public/', '', $signaturePath);
+            $user->signature = $signaturePathWithoutPublic;
             $user->save();
         }
 
@@ -303,6 +317,30 @@ class UserController extends Controller
             }
         }
 
+        if ($request->has('imagesign')) {
+            $signature = $request->file('imagesign');
+
+            if ($request->imagesign == '-1') {
+                // Delete signature file and set signature field to null
+                if ($user->imagesign) {
+                    Storage::delete('public/' . $user->imagesign);
+                    $input['imagesign'] = null;
+                }
+            } elseif ($signature) {
+                // Delete old signature file
+                if ($user->imagesign) {
+                    Storage::delete('public/' . $user->imagesign);
+                }
+
+                // Upload new signature file
+                $signature = $request->file('imagesign');
+                $signaturePath = $signature->storeAs('public/signatures/' . $user->id, $signature->getClientOriginalName());
+
+                $signaturePathWithoutPublic = str_replace('public/', '', $signaturePath);
+                $input['imagesign'] = $signaturePathWithoutPublic;
+            }
+        }
+
         unset($input['_method']);
 
         $user->update($input);
@@ -349,6 +387,28 @@ class UserController extends Controller
                 $avatarPath = $avatar->storeAs('public/avatars/' . $user->id, $avatar->getClientOriginalName());
                 $avatarPathWithoutPublic = str_replace('public/', '', $avatarPath);
                 $input['avatar'] = $avatarPathWithoutPublic;
+            }
+        }
+
+        if ($request->has('imagesign')) {
+            $signature = $request->file('imagesign');
+
+            if ($request->imagesign == '-1') {
+                // Delete signature file and set signature field to null
+                if ($user->imagesign) {
+                    Storage::delete('public/' . $user->imagesign);
+                    $input['imagesign'] = null;
+                }
+            } elseif ($signature) {
+                // Delete old signature file
+                if ($user->imagesign) {
+                    Storage::delete('public/' . $user->imagesign);
+                }
+
+                // Upload new signature file
+                $signaturePath = $signature->storeAs('public/signatures/' . $user->id, $signature->getClientOriginalName());
+                $signaturePathWithoutPublic = str_replace('public/', '', $signaturePath);
+                $input['imagesign'] = $signaturePathWithoutPublic;
             }
         }
 
