@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
+use Illuminate\Support\Facades\Process;
 
 class ReportController extends Controller
 {
@@ -140,15 +139,9 @@ class ReportController extends Controller
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            $process = new Process(['soffice', '--convert-to pdf "' . $outputFile . '"', '--outdir "' . $outputPdf . '"']);
-            $process->run();
-            try {
-                $process->mustRun();
+            $result = Process::run($command);
 
-                echo $process->getOutput();
-            } catch (ProcessFailedException $e) {
-                echo $e->getMessage();
-            }
+            return $result->output();
         }
 
 
