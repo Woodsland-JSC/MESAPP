@@ -96,7 +96,7 @@ class ReportController extends Controller
         $outputFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx');
         $filename = 'Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx';
 
-        copy($templateFile, $outputFile);
+        //copy($templateFile, $outputFile);
 
         $templateProcessor = new TemplateProcessor($outputFile);
 
@@ -136,14 +136,13 @@ class ReportController extends Controller
 
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/template/');
-        $output=null;
-        $retval=null;
-        $command = 'soffice --convert-to pdf "'.$outputFile.'" --outdir "'.$outputPdf.'"';
+        $output = null;
+        $retval = null;
+        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
 
         shell_exec($command);
 
         // Download the output file
         return response()->download($outputPdfFile);
     }
-
 }
