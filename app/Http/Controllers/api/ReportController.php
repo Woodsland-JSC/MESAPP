@@ -140,7 +140,6 @@ class ReportController extends Controller
         } else {
             $process = new NGUYEN([$command]);
             $process->run();
-            $process->run();
         }
 
 
