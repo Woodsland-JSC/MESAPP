@@ -139,15 +139,7 @@ class ReportController extends Controller
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            $process = new Process([$command]);
-            $process->run();
-            try {
-                $process->mustRun();
-
-                echo $process->getOutput();
-            } catch (ProcessFailedException $e) {
-                echo $e->getMessage();
-            }
+            exec('/usr/bin/soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"');
         }
 
 
