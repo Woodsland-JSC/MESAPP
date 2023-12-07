@@ -135,11 +135,20 @@ class ReportController extends Controller
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/reports/');
 
-        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
+        $command = '/usr/bin/soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
+
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            exec('/usr/bin/soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"');
+            $process = new Process([$command]);
+            $process->run();
+            try {
+                $process->mustRun();
+
+                echo $process->getOutput();
+            } catch (ProcessFailedException $e) {
+                echo $e->getMessage();
+            }
         }
 
 
