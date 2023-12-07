@@ -96,9 +96,7 @@ class ReportController extends Controller
         $filename = 'Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx';
         $outputFile = storage_path('app/public/reports/' . $filename);
         $templateProcessor = new TemplateProcessor($templateFile);
-        //copy($templateFile, $outputFile);
-
-        $templateProcessor = new TemplateProcessor($templateFile);
+        // comment lại để test do chưa có file ảnh chữ kí :v
         // $templateProcessor->setImageValue('signature', storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png'));
         $templateProcessor->setValue('branch', "Test chi nhánh");
         $templateProcessor->setValue('factory', "Test nhà máy");
@@ -130,18 +128,15 @@ class ReportController extends Controller
         $templateProcessor->setValue('totalquantity', "999");
         $templateProcessor->setValue('totalweight', "999");
 
-        // Save the modified template
         $templateProcessor->saveAs($outputFile);
 
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
-        $outputPdf = storage_path('app/public/template/');
-        $output = null;
-        $retval = null;
+        $outputPdf = storage_path('app/public/reports/');
+        $shellOutput = null; // Renamed the variable to avoid confusion
         $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
-
         shell_exec($command);
 
-        // Download the output file
+        // Download the output PDF file
         return response()->download($outputPdfFile);
     }
 }
