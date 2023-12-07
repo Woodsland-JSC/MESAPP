@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Process;
+use Symfony\Component\Process\Process as NGUYEN;
 
 class ReportController extends Controller
 {
@@ -138,7 +138,9 @@ class ReportController extends Controller
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            shell_exec($command);
+            $process = new NGUYEN([$command]);
+            $process->run();
+            $process->run();
         }
 
 

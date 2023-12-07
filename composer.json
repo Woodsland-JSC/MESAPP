@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.8",
         "phpoffice/phpword": "^1.1",
         "predis/predis": "^2.2",
-        "spatie/laravel-permission": "^6.0"
+        "spatie/laravel-permission": "^6.0",
+        "symfony/symfony": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
