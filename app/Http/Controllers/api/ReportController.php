@@ -93,9 +93,9 @@ class ReportController extends Controller
         ];
         $templateFile = resource_path('templates/Danh Mục Theo Dõi Gỗ Sấy Trong Lò.docx');
         $output = Carbon::now()->format('ymdHis');
-        $outputFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx');
         $filename = 'Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx';
-
+        $outputFile = storage_path('app/public/reports/' . $filename);
+        $templateProcessor = new TemplateProcessor($templateFile);
         //copy($templateFile, $outputFile);
 
         $templateProcessor = new TemplateProcessor($templateFile);
