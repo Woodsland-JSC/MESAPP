@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\Process\Process as NGUYEN;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class ReportController extends Controller
 {
@@ -138,8 +139,15 @@ class ReportController extends Controller
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            $process = new NGUYEN([$command]);
+            $process = new Process([$command]);
             $process->run();
+            try {
+                $process->mustRun();
+
+                echo $process->getOutput();
+            } catch (ProcessFailedException $e) {
+                echo $e->getMessage();
+            }
         }
 
 
