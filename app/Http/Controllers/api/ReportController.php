@@ -140,8 +140,6 @@ class ReportController extends Controller
             shell_exec($command);
         } else {
             $result = Process::run($command);
-
-            return $result->output();
         }
 
 
