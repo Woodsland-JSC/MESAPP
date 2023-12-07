@@ -133,7 +133,7 @@ class ReportController extends Controller
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/reports/');
         $shellOutput = null; // Renamed the variable to avoid confusion
-        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
+        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '" 2>&1';
         shell_exec($command);
 
         // Download the output PDF file
