@@ -138,7 +138,7 @@ class ReportController extends Controller
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
-            Process::run($command);
+            shell_exec($command);
         }
 
 
