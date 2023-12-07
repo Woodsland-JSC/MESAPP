@@ -1,4 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+    useState,
+    useMemo,
+    useEffect,
+    useRef,
+    useCallback,
+} from "react";
+import palletsApi from "../api/palletsApi";
+import axios from "axios";
 import {
     Modal,
     ModalOverlay,
@@ -36,7 +44,7 @@ import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { PiSealWarningFill } from "react-icons/pi";
 import { MdDoNotDisturbOnTotalSilence } from "react-icons/md";
-
+import { Spinner } from "@chakra-ui/react";
 
 const validationSchema = Yup.object().shape({
     pallet: Yup.number()
@@ -86,8 +94,10 @@ const validationSchema = Yup.object().shape({
     note: Yup.string().max(255, "Độ dài tối đa là 255 kí tự"),
 });
 
-const DisabledCheckCard = ({ item }) => {
+//
+const DisabledCheckCard = (props) => {
     const {
+        id,
         pallet,
         sample,
         disability,
@@ -95,53 +105,61 @@ const DisabledCheckCard = ({ item }) => {
         disabledRate,
         curvedRate,
         note,
-    } = item;
+    } = props;
 
     return (
-        <div className="w-full rounded text-sm bg-slate-700 text-white h-fit min-w-[250px] p-3 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
-            <div className="grid grid-cols-[70%,30%] pb-2">
-                <div className="text-sm">Số pallet:</div>
-                <span className="text-right text-sm">{pallet}</span>
+        <div className="w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 \  min-w-[250px] p-4 px-6 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
+            <div className="rounded-full text-sm font-semibold bg-gray-300 mb-4 p-1 px-4 w-fit">
+                ID: {id}
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div>Số lượng mẫu:</div>
-                <span className="text-right">{sample}</span>
+                <div className="text-gray-600 font-medium">Số pallet:</div>
+                <span className="text-right font-semibold">{pallet}</span>
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div>Số lượng mo, tóp:</div>
-                <span className="text-right">{disability}</span>
+                <div className="text-gray-600 font-medium">Số lượng mẫu:</div>
+                <span className="text-right font-semibold">{sample}</span>
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div>Số lượng cong:</div>
-                <span className="text-right">{curve}</span>
+                <div className="text-gray-600 font-medium">
+                    Số lượng mo, tóp:
+                </div>
+                <span className="text-right font-semibold">{disability}</span>
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div>Tỉ lệ mo, tóp:</div>
-                <span className="text-right">
-                    {disabledRate.toFixed() + " %"}{" "}
+                <div className="text-gray-600 font-medium">Số lượng cong:</div>
+                <span className="text-right font-semibold">{curve}</span>
+            </div>
+            <div className="grid grid-cols-[70%,30%] pb-2">
+                <div className="text-gray-600 font-medium">Tỉ lệ mo, tóp:</div>
+                <span className="text-right font-semibold">
+                    {disabledRate} %
                 </span>
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div>Tỉ lệ cong:</div>
-                <span className="text-right">
-                    {curvedRate.toFixed(2) + " %"}
-                </span>
+                <div className="text-gray-600 font-medium">Tỉ lệ cong:</div>
+                <span className="text-right font-semibold">{curvedRate} %</span>
             </div>
             <div className="block">
-                <div>
+                <div className=" text-gray-600 font-medium">
                     Ghi chú:{" "}
-                    <span className="text-right text-sm italic">{note}</span>
+                    <span className="text-right italic truncate font-semibold">
+                        {note}
+                    </span>
                 </div>
             </div>
         </div>
     );
 };
 
-const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
-
-    console.log("Ra truyền từ cha xuống nè: ", disabilityList);
-    // const { planID, oven, code, reason } = props;
-
+const DisabledCheck = ({
+    disabilityList,
+    generalInfo,
+    code,
+    oven,
+    reason,
+    planID,
+}) => {
     let palletInput = useRef();
     let sampleInput = useRef();
     let disabilityInput = useRef();
@@ -156,16 +174,26 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
     });
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: isConfirmOpen,
+        onOpen: onConfirmOpen,
+        onClose: onConfirmClose,
+    } = useDisclosure();
 
     const [viewMode, setViewMode] = useState(false);
 
     const [disabledDetails, setDisabledDetails] = useState([]);
+    const [disabledList, setDisabledList] = useState([]);
+    const [loadCurrentRecord, setLoadCurrentRecord] = useState(true);
+    const [avgDisabledRate, setAvgDisabledRate] = useState(null);
+    const [avgCurvedRate, setAvgCurvedRate] = useState(null);
+    const [sumDisability, setSumDisability] = useState(null);
 
     const [info, setInfo] = useState({
-        pallet: null,
-        sample: null,
-        disability: null,
-        curve: null,
+        pallet: "",
+        sample: "",
+        disability: "",
+        curve: "",
         note: "",
     });
 
@@ -180,7 +208,24 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
         totalOfDisabilities: null,
     });
 
-    const addNewDisabledDetails = (values) => {
+    // Load Data
+    useEffect(() => {
+        loadCurrentDisabledRecords();
+    }, []);
+
+    const loadCurrentDisabledRecords = async () => {
+        try {
+            const response = await palletsApi.getTempDisabledRecords(planID);
+            setDisabledDetails(response.TempData);
+        } catch (error) {
+            console.error("Lỗi khi gọi API:", error);
+        } finally {
+            setLoadCurrentRecord(false);
+        }
+    };
+
+    // Handle Add New Record
+    const addNewDisabledDetails = async (values, { resetForm }) => {
         if (!values.pallet) {
             toast.error("Vui lòng nhập số pallet.");
             palletInput.current.focus();
@@ -202,18 +247,40 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
             return;
         }
 
-        const currentDisbledRate = (values.disability / values.sample) * 100;
-        const currentCurvedRate = (values.curve / values.sample) * 100;
+        const currentDisabledRate = (
+            (values.disability / values.sample) *
+            100
+        ).toFixed(2);
+        const currentCurvedRate = (
+            (values.curve / values.sample) *
+            100
+        ).toFixed(2);
 
         const detailData = {
-            ...values,
-            disabledRate: currentDisbledRate,
+            disabledRate: currentDisabledRate,
             curvedRate: currentCurvedRate,
         };
-        setDisabledDetails([...disabledDetails, detailData]);
-        toast("Đã ghi nhận thành công!", {
-            icon: "👏",
-        });
+
+        const recordData = {
+            PlanID: planID,
+            SLMau: values.sample,
+            SLPallet: values.pallet,
+            SLMO_TOP: values.disability,
+            SLCong: values.curve,
+            note: values.note,
+        };
+
+        console.log("Dữ liệu sẽ được gửi đi:", recordData);
+        try {
+            const response = await palletsApi.addDisabledRecord(recordData);
+            console.log("Trả về:", response.plandrying);
+            await setDisabledDetails(response.plandrying, detailData);
+            toast.success("Thông tin khảo sát đã được ghi nhận");
+
+            resetForm();
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
 
     const handleViewReport = (item) => {
@@ -224,31 +291,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
     };
 
     const handleModalClose = () => {
-        if (!viewMode) {
-            if (
-                disabledDetails.length > 0 ||
-                info.pallet ||
-                info.sample ||
-                info.disability ||
-                info.curve ||
-                info.note
-            ) {
-                console.log(disabledDetails.length);
-                const userConfirmed = window.confirm(
-                    "Bạn có chắc muốn đóng cửa sổ hiện tại không? \nDữ liệu đã nhập sẽ không được lưu"
-                );
-                if (!userConfirmed) {
-                    return;
-                }
-            }
-
-            setDisabledDetails([]);
-            onClose();
-        } else {
-            setReportInfo((prev) => ({ ...prev, createdDate: new Date() }));
-            setDisabledDetails([]);
-            onClose();
-        }
+        onClose();
     };
 
     const handleSubmitReport = async () => {
@@ -273,61 +316,122 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
         }
     };
 
-    useEffect(() => {
-        if (info.disability && info.sample) {
-            const currentRate = (info.disability / info.sample) * 100;
-            setRate({ ...rate, disabledRate: currentRate });
-        }
+    //Calculate disabled and curved items
+    const [calculatedValues, setCalculatedValues] = useState({
+        avgDisabledRate: null,
+        avgCurvedRate: null,
+        sumDisability: null,
+    });
 
-        if (info.curve && info.sample) {
-            const currentRate = (info.curve / info.sample) * 100;
-            setRate({ ...rate, curvedRate: currentRate });
-        }
-    }, [info.disability, info.curve, info.sample]);
-
-    useEffect(() => {
-        const disabledRateSum = disabledDetails.reduce(
-            (sum, item) => sum + item.disabledRate,
-            0
-        );
-        const curvedRateSum = disabledDetails.reduce(
-            (sum, item) => sum + item.curvedRate,
-            0
-        );
+    const calculateValues = useCallback(() => {
         const avgDisabledRate =
             disabledDetails.length > 0
-                ? disabledRateSum / disabledDetails.length
+                ? (
+                      disabledDetails.reduce(
+                          (sum, item) =>
+                              sum + (item.SLMO_TOP / item.SLMau) * 100,
+                          0
+                      ) / disabledDetails.length
+                  ).toFixed(2)
                 : null;
+
         const avgCurvedRate =
             disabledDetails.length > 0
-                ? curvedRateSum / disabledDetails.length
+                ? (
+                      disabledDetails.reduce(
+                          (sum, item) => sum + (item.SLCong / item.SLMau) * 100,
+                          0
+                      ) / disabledDetails.length
+                  ).toFixed(2)
                 : null;
 
-        const totalOfDisabilities = disabledDetails.reduce(
-            (sum, item) => sum + item.disability,
-            0
-        );
-        const totalOfCurves = disabledDetails.reduce(
-            (sum, item) => sum + item.curve,
-            0
-        );
+        const sumDisability =
+            disabledDetails.length > 0
+                ? disabledDetails.reduce(
+                      (sum, item) => sum + item.SLMO_TOP + item.SLCong,
+                      0
+                  )
+                : null;
 
-        // Đặt state mới
-        setResult({
+        setCalculatedValues({
             avgDisabledRate,
             avgCurvedRate,
-            totalOfDisabilities: totalOfDisabilities + totalOfCurves,
+            sumDisability,
         });
     }, [disabledDetails]);
 
     useEffect(() => {
-        if (info.pallet) {
-            if (info.sample) {
-                if (info.sample > info.pallet) {
+        calculateValues();
+    }, [disabledDetails, calculateValues]);
+
+    // Load Disabled List
+    useEffect(() => {}, []);
+
+    // const body = {
+    //     PlanID: planID,
+    //     TotalMau: calculatedValues.sumDisability,
+    //     TLMoTop: calculatedValues.avgDisabledRate,
+    //     TLCong: calculatedValues.avgCurvedRate,
+    // };
+
+    const [body, setBody] = useState({
+        PlanID: null,
+        TotalMau: null,
+        TLMoTop: null,
+        TLCong: null,
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await calculateValues();
+        };
+    
+        fetchData();
+    }, [disabledDetails]);
+    
+    useEffect(() => {
+        const body = {
+            PlanID: planID,
+            TotalMau: calculatedValues.sumDisability,
+            TLMoTop: calculatedValues.avgDisabledRate,
+            TLCong: calculatedValues.avgCurvedRate,
+        };
+    
+    }, [calculatedValues]);
+
+    const finishDisabledCheck = async () => {
+
+        await calculateValues();
+
+        const body = {
+            PlanID: planID,
+            TotalMau: calculatedValues.sumDisability,
+            TLMoTop: calculatedValues.avgDisabledRate,
+            TLCong: calculatedValues.avgCurvedRate,
+        };
+
+        console.log("Dữ liệu sẽ được tạo biên bản khuyết tật: ", body);
+
+        palletsApi
+            .completeDisabledRecord(body)
+            .then((response) => {
+                if (response.message === "success") {
+                    setDisabledList(response.disability);
+                    toast.success("Ghi nhận biên bản khuyết tật thành công.");
+                    setDisabledDetails([null]);
+                    // loadHumidRecordList();
+                    onConfirmClose();
+                    onClose();
+                } else {
+                    toast.error(
+                        "Không thể thực hiện hành động, hãy thử lại sau."
+                    );
                 }
-            }
-        }
-    }, [info.pallet, info.sample, info.disability, info.curve]);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
 
     return (
         <>
@@ -352,22 +456,30 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                         <div className="xl:flex hidden">Tạo mới</div>
                     </button>
                 </div>
-                {/* <div className="border-b-2 border-gray-100"></div> */}
 
                 <div className="rounded-b-xl relative overflow-x-auto">
                     <table className="w-full text-left text-gray-500 ">
                         <thead className="font-medium text-gray-700 bg-gray-50 ">
                             <tr className="w-full text-[15px]">
-                                <th scope="col" className=" flex-nowrap xl:px-6 pl-6 py-3">
+                                <th
+                                    scope="col"
+                                    className=" flex-nowrap xl:px-6 pl-6 py-3"
+                                >
                                     STT
                                 </th>
-                                <th scope="col" className="w-fit flex-nowrap xl:px-6  pl-6 py-3">
+                                <th
+                                    scope="col"
+                                    className="w-fit flex-nowrap xl:px-6  pl-6 py-3"
+                                >
                                     TL mo, tóp
                                 </th>
                                 <th scope="col" className="xl:px-6 pl-6 py-3">
                                     TL cong
                                 </th>
-                                <th scope="col" className="xl:w-fit w-[60%] xl:px-6  py-3">
+                                <th
+                                    scope="col"
+                                    className="xl:w-fit w-[60%] xl:px-6  py-3"
+                                >
                                     Tổng SL kiểm tra
                                 </th>
                                 <th scope="col" className="xl:px-6 pl-6 py-3">
@@ -378,7 +490,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                         <tbody>
                             {disabilityList.length > 0 ? (
                                 disabilityList.map((item, index) => (
-                                    <tr  className="text-[15px] bg-white border-b">
+                                    <tr className="text-[15px] bg-white border-b">
                                         <th
                                             scope="row"
                                             className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
@@ -403,9 +515,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                             {item.avgCurvedRate.toFixed(2) +
                                                 "%"}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            --/--/--
-                                        </td>
+                                        <td className="px-6 py-4">--/--/--</td>
                                         <td className="px-6 py-4">
                                             {dateToDateTime(item.createdDate)}
                                         </td>
@@ -434,7 +544,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <div className="xl:ml-10 xl:text-center text-[#155979] text-lg uppercase xl:text-xl ">
+                        <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
                             Biên bản khảo sát tỉ lệ khuyết tật
                         </div>
                     </ModalHeader>
@@ -480,10 +590,12 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                             </div>
 
                             {/* Result  */}
-                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 h-fit w-full md:w-1/2 mb-7">
-                                <div className="flex bg-gray-100 items-center gap-x-3 text-xl font-medium border-b p-4 px-8 border-gray-200 rounded-t-xl">
-                                    <MdDoNotDisturbOnTotalSilence className=" w-8 h-8 text-2xl " />
-                                    <div className="font-semibold">Tỉ lệ khuyết tật</div>
+                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-7">
+                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 px-8 border-red-200 rounded-t-xl">
+                                    <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
+                                    <div className="font-semibold text-red-600">
+                                        Tỉ lệ khuyết tật
+                                    </div>
                                 </div>
 
                                 <div className="space-y-3 px-6 pb-5 pt-4">
@@ -492,17 +604,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                             Tỉ lệ mo, tóp trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {result.avgDisabledRate !==
-                                                undefined &&
-                                            result.avgDisabledRate !== null
-                                                ? result.avgDisabledRate.toFixed(
-                                                      2
-                                                  )
-                                                : "0.00"}
-                                            <span className="font-bold">
-                                                {" "}
-                                                %
-                                            </span>
+                                            {calculatedValues.avgDisabledRate} %
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[70%,30%]">
@@ -510,17 +612,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                             Tỉ lệ cong trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {result.avgCurvedRate !==
-                                                undefined &&
-                                            result.avgCurvedRate !== null
-                                                ? result.avgCurvedRate.toFixed(
-                                                      2
-                                                  )
-                                                : "0.00"}
-                                            <span className="font-bold">
-                                                {" "}
-                                                %
-                                            </span>
+                                            {calculatedValues.avgCurvedRate} %
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[70%,30%]">
@@ -528,26 +620,26 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                             Tổng khuyết tật:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {result.totalOfDisabilities || 0}
+                                            {calculatedValues.sumDisability}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
-                        {!viewMode && (
-                            <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 pb-6 px-4">
-                                <div className="flex gap-x-4 rounded-t-xl items-center p-4">
-                                    <MdNoteAlt className="w-8 h-9 text-[]" />
-                                    <div className="text-xl font-semibold">
-                                        Ghi nhận khảo sát
-                                    </div>
+                        <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
+                            <div className="flex gap-x-4 rounded-t-xl items-center p-4">
+                                <MdNoteAlt className="w-8 h-9 text-[]" />
+                                <div className="text-xl font-semibold">
+                                    Ghi nhận khảo sát
                                 </div>
+                            </div>
+                            {!viewMode && (
                                 <Formik
                                     initialValues={info}
                                     validationSchema={validationSchema}
-                                    onSubmit={(values) => {
-                                        addNewDisabledDetails(values);
+                                    onSubmit={(values, actions) => {
+                                        addNewDisabledDetails(values, actions);
                                     }}
                                 >
                                     {({
@@ -557,7 +649,7 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                         setFieldValue,
                                     }) => {
                                         return (
-                                            <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
+                                            <Form className="flex flex-col p-6 mb-6 bg-white border-2 border-gray-200 rounded-xl">
                                                 <div className="mb-2">
                                                     <label
                                                         htmlFor="palletAmount"
@@ -732,10 +824,10 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                                     </label>
                                                     <Field
                                                         as="textarea"
-                                                        rows="4"
+                                                        rows="3"
                                                         ref={noteInput}
                                                         name="note"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         value={values.note}
                                                         onChange={(e) => {
                                                             setFieldValue(
@@ -758,50 +850,132 @@ const DisabledCheck = ({ disabilityList, generalInfo, code, oven, reason }) => {
                                                         <span className="block mt-[8px] h-[14.55px]"></span>
                                                     )}
                                                 </div>
-                                                <Button
+                                                {/* <Button
                                                     type="submit"
                                                     colorScheme="whatsapp"
                                                     className="w-fit self-end mt-2"
                                                 >
                                                     Ghi nhận
-                                                </Button>
+                                                </Button> */}
+                                                <button
+                                                    type="submit"
+                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none w-fit self-end"
+                                                >
+                                                    Ghi nhận
+                                                </button>
                                             </Form>
                                         );
                                     }}
                                 </Formik>
-                            </section>
-                        )}
-
-                        <section className="xl:mx-auto xl:w-[60%] my-4">
-                            {disabledDetails.length > 0 && (
-                                <div className="flex items-center gap-x-3 text-xl font-medium py-4 border-gray-200">
-                                    <GrDocumentText className="text-[#17506B] text-2xl" />
-                                    Danh sách chi tiết
-                                </div>
                             )}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3">
-                                {disabledDetails.length > 0 &&
-                                    disabledDetails.map((item, index) => (
-                                        <DisabledCheckCard
-                                            key={item.id || index}
-                                            item={item}
+                            <div className="border-b-2 border-gray-200"></div>
+
+                            <section className="my-4">
+                                {loadCurrentRecord ? (
+                                    <div className="text-center">
+                                        <Spinner
+                                            thickness="4px"
+                                            speed="0.65s"
+                                            emptyColor="gray.200"
+                                            color="#155979"
+                                            size="xl"
                                         />
-                                    ))}
-                            </div>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
+                                        {disabledDetails.length > 0 &&
+                                            disabledDetails.map(
+                                                (item, index) => {
+                                                    const disabledRate = (
+                                                        (item.SLMO_TOP /
+                                                            item.SLMau) *
+                                                        100
+                                                    ).toFixed(2);
+                                                    const curvedRate = (
+                                                        (item.SLCong /
+                                                            item.SLMau) *
+                                                        100
+                                                    ).toFixed(2);
+
+                                                    return (
+                                                        <DisabledCheckCard
+                                                            key={index}
+                                                            id={item.id}
+                                                            pallet={
+                                                                item.SLPallet
+                                                            }
+                                                            sample={item.SLMau}
+                                                            disability={
+                                                                item.SLMO_TOP
+                                                            }
+                                                            curve={item.SLCong}
+                                                            note={item.note}
+                                                            disabledRate={
+                                                                disabledRate
+                                                            }
+                                                            curvedRate={
+                                                                curvedRate
+                                                            }
+                                                        />
+                                                    );
+                                                }
+                                            )}
+                                    </div>
+                                )}
+                            </section>
                         </section>
                     </ModalBody>
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalFooter className="gap-4">
-                        <Button onClick={handleModalClose}>Đóng</Button>
                         {!viewMode && (
-                            <Button
-                                disabled={disabledDetails.length <= 0}
-                                colorScheme="red"
-                                onClick={handleSubmitReport}
-                            >
-                                Hoàn thành
-                            </Button>
+                            <>
+                                <button
+                                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full disabled:bg-[#7aacc3] disabled:cursor-default"
+                                    onClick={onConfirmOpen}
+                                    disabled={disabledDetails.length <= 0}
+                                >
+                                    Hoàn thành
+                                </button>
+                                <Modal
+                                    isOpen={isConfirmOpen}
+                                    onClose={onConfirmClose}
+                                    isCentered
+                                    size="sm"
+                                    blockScrollOnMount={false}
+                                    closeOnOverlayClick={false}
+                                >
+                                    <ModalOverlay />
+                                    <ModalContent>
+                                        <ModalHeader>Bạn chắc chắn muốn lưu kết quả này?</ModalHeader>
+                                        <ModalBody pb={6}>
+                                            Sau khi bấm xác nhận sẽ không thể thu hồi hành động.
+                                        </ModalBody>
+                                        <ModalFooter>
+                                            <Button
+                                                    colorScheme="blue"
+                                                    mr={3}
+                                                    onClick={finishDisabledCheck}
+                                                >
+                                                    Xác nhận
+                                                </Button>
+                                            <Button
+                                                colorScheme="gray"
+                                                mr={3}
+                                                onClick={onConfirmClose}
+                                            >
+                                                Đóng
+                                            </Button>
+                                        </ModalFooter>
+                                    </ModalContent>
+                                </Modal>
+                            </>
                         )}
+                        <button
+                            onClick={handleModalClose}
+                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                        >
+                            Đóng
+                        </button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

@@ -137,7 +137,7 @@ function HumidityCheck(props) {
 
     const loadCurrentHumidRecords = async () => {
         try {
-            const response = await palletsApi.getTempRecords(planID);   
+            const response = await palletsApi.getTempHumidRecords(planID);   
             setHumidityRecords(response.TempData);
         } catch (error) {
             console.error("Lỗi khi gọi API:", error);
@@ -385,7 +385,7 @@ function HumidityCheck(props) {
                 <ModalContent>
                     <div className="top-0 sticky z-20 bg-white border-b-2 border-gray-200">
                         <ModalHeader>
-                            <div className="xl:ml-10 xl:text-center text-[#155979] text-lg uppercase xl:text-xl ">
+                            <div className="xl:ml-10 xl:text-center     text-lg uppercase xl:text-xl ">
                                 Biểu mẫu kiểm tra độ ẩm gỗ sấy
                             </div>
                         </ModalHeader>

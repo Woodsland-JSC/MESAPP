@@ -77,12 +77,21 @@ const palletsApi = {
             },
         });
     },
-    getTempRecords: (PlanID, Type) => {
+    getTempHumidRecords: (PlanID, Type) => {
         const url = `/dgm/giatrihientai`;
         return axiosClient().get(url, {
             params: {
                 PlanID,
                 Type : "DA"
+            },
+        });
+    },   
+    getTempDisabledRecords: (PlanID, Type) => {
+        const url = `/dgm/giatrihientai`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+                Type : "KT"
             },
         });
     },   
@@ -96,6 +105,10 @@ const palletsApi = {
     },
     addDisabledRecord: (data) => {
         const url = `dgm/ghinhankt`;
+        return axiosClient().post(url, data);
+    },
+    completeDisabledRecord: (data) => {
+        const url = `dgm/hoanthanhkt`;
         return axiosClient().post(url, data);
     },
 };

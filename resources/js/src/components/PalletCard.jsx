@@ -8,6 +8,7 @@ import {
     NumberIncrementStepper,
     NumberDecrementStepper,
 } from "@chakra-ui/react";
+import useQuantityValidation from '../hook/useQuantityValidation';
 
 function PalletCard(props) {
     const {
@@ -22,18 +23,19 @@ function PalletCard(props) {
         thickness,
     } = props;
 
-    const [quantity, setQuantity] = useState(1);
+    const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
 
     const handleQuantityChange = (value) => {
-            setQuantity(value);
-            props.onQuantityChange(value);
-    };
+        const quantity = parseFloat(value);
+        const inStock = parseFloat(props.inStock);
 
-    const handleBlur = () => {
         if (quantity > inStock) {
-            toast.error("Số lượng vượt quá số lượng tồn");
-            setQuantity(1);
+            setIsQuantityExceedingStock(true);
+        } else {
+            setIsQuantityExceedingStock(false);
         }
+
+        props.onQuantityChange(value);
     };
 
     return (
@@ -117,12 +119,12 @@ function PalletCard(props) {
                     <NumberInput
                         defaultValue={1}
                         min={1}
-                        max={inStock}
-                        value={quantity}
-                        onChange={(value) => handleQuantityChange(value)}
-                        onBlur={handleBlur}
+                        // onChange={(value) => props.onQuantityChange(value)}
+                        // isDisabled={isQuantityExceedingStock}
+                        isInvalid={isQuantityExceedingStock}
+                        onChange={handleQuantityChange}
                     >
-                        <NumberInputField />
+                        <NumberInputField/>
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />

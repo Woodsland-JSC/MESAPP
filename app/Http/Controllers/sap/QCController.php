@@ -114,8 +114,8 @@ class QCController extends Controller
             'TLCong',
         );
         $record = Disability::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        DisabilityDetail::where('PlanID', $req->PlanID)->update(['refID' => $record->id]);
-        return response()->json(['message' => 'success'], 200);
+        DisabilityDetail::where('PlanID', $req->PlanID)->where('refID', -1)->update(['refID' => $record->id]);
+        return response()->json(['message' => 'success', 'disability' => $record], 200);
     }
 
     public function getHumidListById(Request $req)
@@ -140,8 +140,40 @@ class QCController extends Controller
                 'PlanID' => $humidity->PlanID,
                 'rate' => $humidity->rate,
                 'note' => $humidity->note,
+                'created_by' => $humidity->created_by,
                 'created_at' => $humidity->created_at,
                 'detail' => $humidityDetails->toArray(),
+            ];
+        }
+
+        return response()->json($res, 200);
+    }
+
+    public function getDisabledListById(Request $req)
+    {
+        if (!$req->filled('PlanID')) {
+            return response()->json(['error' => 'Missing PlanID parameter.'], 422);
+        }
+
+        $disabilityData = DB::table('disability_rates')
+            ->where('PlanID', $req->PlanID)
+            ->get();
+
+        $res = [];
+
+        foreach ($disabilityData as $disability) {
+            $disabilityDetails = DB::table('disability_rates_detail')
+                ->where('refID', $disability->id)
+                ->get();
+
+            $res[] = [
+                'id' => $disability->id,
+                'PlanID' => $disability->PlanID,
+                'TotalMau' => $disability->TotalMau,
+                'TLMoTop' => $disability->TLMoTop,
+                'created_by' => $disability->created_by,
+                'created_at' => $disability->created_at,
+                'detail' => $disabilityDetails->toArray(),
             ];
         }
 

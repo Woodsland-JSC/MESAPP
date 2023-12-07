@@ -596,7 +596,7 @@ function ControllerCard(props) {
                     <ModalHeader>Bạn chắc chắn muốn sấy?</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
-                        Sau khi bấm xác nhận hệ sẽ không thể thu hồi hành động.
+                        Sau khi bấm xác nhận sẽ không thể thu hồi hành động.
                     </ModalBody>
 
                     <ModalFooter>
