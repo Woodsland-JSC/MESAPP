@@ -60,9 +60,44 @@ const palletsApi = {
     saveCheckingKiln: () => {
         const url = `/ovens/production-check-single`;
         return axiosClient().patch(url, {});
-    }
-
-    
+    },
+    addHumidRecord: (data) => {
+        const url = `/dgm/ghinhandoam`;
+        return axiosClient().post(url, data);
+    },
+    removeHumidRecord: (deleteData) => {
+        const url = `/dgm/deleteDoAm`;
+        return axiosClient().delete(url, { data: deleteData });
+    },
+    getHumidListById: (PlanID) => {
+        const url = `/dgm/gethumidlistbyid`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+            },
+        });
+    },
+    getTempRecords: (PlanID, Type) => {
+        const url = `/dgm/giatrihientai`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+                Type : "DA"
+            },
+        });
+    },   
+    completeHumidRecord: (data) => {
+        const url = `/dgm/hoanthanhdoam`;
+        return axiosClient().post(url, data);
+    },
+    addDisabledRecord: (data) => {
+        const url = `dgm/ghinhankt`;
+        return axiosClient().post(url, data);
+    },
+    addDisabledRecord: (data) => {
+        const url = `dgm/ghinhankt`;
+        return axiosClient().post(url, data);
+    },
 };
 
 export default palletsApi;

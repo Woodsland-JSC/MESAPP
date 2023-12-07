@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('warehouseQC', function (Blueprint $table) {
             $table->id();
-            $table->string('BaseEntry')->nullable();
+            $table->string('Factory')->nullable();
             $table->string('WhsCode')->nullable();
             $table->string('WhsName')->nullable();
             $table->timestamps();

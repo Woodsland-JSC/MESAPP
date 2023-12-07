@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('humiditys', function (Blueprint $table) {
+        Schema::create('notireceipt', function (Blueprint $table) {
             $table->id();
-            $table->string('PlanID');
-            $table->float('rate');
-            $table->integer('created_by');
+            $table->string('text')->nullable();
+            $table->float('Quantity')->nullable();
+            $table->integer('deleted')->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('humiditys');
+        Schema::dropIfExists('notireceipt');
     }
 };

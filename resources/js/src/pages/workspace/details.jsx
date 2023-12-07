@@ -29,6 +29,7 @@ function Details() {
 
     // State
     const [BOWData, setBOWData] = useState([]);
+    const [humidData, setHumidData] = useState([]);
     const [reload, setReload] = useState(false);
 
     const [loading, setLoading] = useState(true);
@@ -147,6 +148,7 @@ function Details() {
                 console.log("Dữ liệu từ API:", response);
 
                 setBOWData(response.plandrying);
+                setHumidData(response.Humidity);
             })
             .catch((error) => {
                 console.error("Lỗi khi gọi API:", error);
@@ -343,13 +345,22 @@ function Details() {
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <HumidityCheck />
+                                                <HumidityCheck 
+                                                    reason={BOWData.Reason} 
+                                                    oven={BOWData.Oven} 
+                                                    code={BOWData.Code} 
+                                                    planID={BOWData.PlanID}
+                                                />
                                             </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
                                                 <DisabledCheck
+                                                    planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason} 
+                                                    oven={BOWData.Oven} 
+                                                    code={BOWData.Code}
                                                     disabilityList={
                                                         disabledReports
                                                     }

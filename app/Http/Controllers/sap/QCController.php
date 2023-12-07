@@ -61,14 +61,15 @@ class QCController extends Controller
             'note'
         );
         $record = humiditys::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        humidityDetails::where('PlanID', $req->PlanID)->update(['refID' => $record->id]);
+        humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->update(['refID'  => $record->id]);
+        // $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         if ($req->option == 'RL') {
             plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 0]);
         }
         if ($req->option == 'SL') {
             plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 1]);
         }
-        return response()->json(['message' => 'success'], 200);
+        return response()->json(['message' => 'success', 'humiditys' => $record], 200);
     }
     public function DanhGiaKT(Request $req)
     {
@@ -117,6 +118,36 @@ class QCController extends Controller
         return response()->json(['message' => 'success'], 200);
     }
 
+    public function getHumidListById(Request $req)
+    {
+        if (!$req->filled('PlanID')) {
+            return response()->json(['error' => 'Missing PlanID parameter.'], 422);
+        }
+
+        $humiditysData = DB::table('humiditys')
+            ->where('PlanID', $req->PlanID)
+            ->get();
+
+        $res = [];
+
+        foreach ($humiditysData as $humidity) {
+            $humidityDetails = DB::table('humiditys_detail')
+                ->where('refID', $humidity->id)
+                ->get();
+
+            $res[] = [
+                'id' => $humidity->id,
+                'PlanID' => $humidity->PlanID,
+                'rate' => $humidity->rate,
+                'note' => $humidity->note,
+                'created_at' => $humidity->created_at,
+                'detail' => $humidityDetails->toArray(),
+            ];
+        }
+
+        return response()->json($res, 200);
+    }
+
     public function currentData(Request $req)
     {
         $result = DB::table('planDryings as a')
@@ -126,9 +157,9 @@ class QCController extends Controller
             ->select('c.Name', 'a.Oven')
             ->first();
         if ($req->Type == 'DA') {
-            $detail =  humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
+            $temp =  humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         } else {
-            $detail =  DisabilityDetail::where('PlanID', $req->PlanID)->where('refID', -1)->get();
+            $temp =  DisabilityDetail::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         }
 
         $header = [
@@ -136,7 +167,7 @@ class QCController extends Controller
             'PlanID' => $req->PlanID,
             'Factory' => $result->Name,
             'Oven' => $result->Oven,
-            'detail' => $detail,
+            'TempData' => $temp,
             'No' => 135234
         ];
         return response()->json($header, 200);

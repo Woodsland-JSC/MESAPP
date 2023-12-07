@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 
 function PalletCard(props) {
-
     const {
         itemCode,
         itemName,
@@ -22,6 +21,20 @@ function PalletCard(props) {
         height,
         thickness,
     } = props;
+
+    const [quantity, setQuantity] = useState(1);
+
+    const handleQuantityChange = (value) => {
+            setQuantity(value);
+            props.onQuantityChange(value);
+    };
+
+    const handleBlur = () => {
+        if (quantity > inStock) {
+            toast.error("Số lượng vượt quá số lượng tồn");
+            setQuantity(1);
+        }
+    };
 
     return (
         <div className="border-2 border-[#c6d3da] rounded-xl">
@@ -101,9 +114,15 @@ function PalletCard(props) {
                     >
                         Số lượng
                     </label>
-                    <NumberInput defaultValue={1} max={inStock} min={1} onChange={(value) => props.onQuantityChange(value)}>
-                        <NumberInputField
-                        />
+                    <NumberInput
+                        defaultValue={1}
+                        min={1}
+                        max={inStock}
+                        value={quantity}
+                        onChange={(value) => handleQuantityChange(value)}
+                        onBlur={handleBlur}
+                    >
+                        <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />
