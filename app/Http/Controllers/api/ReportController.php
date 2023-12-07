@@ -99,8 +99,8 @@ class ReportController extends Controller
         //copy($templateFile, $outputFile);
 
         $templateProcessor = new TemplateProcessor($templateFile);
-
-        $templateProcessor->setImageValue('signature', storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png'));
+        $signaturePath = storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png');
+        $templateProcessor->setImageValue('signature', file_exists($signaturePath) ? $signaturePath : null);
         $templateProcessor->setValue('branch', "Test chi nhánh");
         $templateProcessor->setValue('factory', "Test nhà máy");
         $templateProcessor->setValue('date', "01/12/2023");
