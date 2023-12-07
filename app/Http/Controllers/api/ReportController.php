@@ -134,7 +134,7 @@ class ReportController extends Controller
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/reports/');
 
-        $command = 'libreoffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
+        $command = 'libreoffice --headless --convert-to pdf:writer_pdf_Export"' . $outputFile . '" --outdir "' . $outputPdf . '"';
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
             shell_exec($command);
         } else {
