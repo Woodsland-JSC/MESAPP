@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 
 class ReportController extends Controller
 {
@@ -133,8 +134,14 @@ class ReportController extends Controller
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/reports/');
         $shellOutput = null; // Renamed the variable to avoid confusion
-        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '" 2>&1';
-        shell_exec($command);
+        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
+        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+            shell_exec($command);
+        } else {
+            Process::run($command);
+        }
+
+
 
         // Download the output PDF file
         return response()->download($outputPdfFile);
