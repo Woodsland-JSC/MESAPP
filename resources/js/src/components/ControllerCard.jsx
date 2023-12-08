@@ -178,7 +178,7 @@ function ControllerCard(props) {
 
     const [checkedCount, setCheckedCount] = useState(0);
 
-    const handleCheckboxChange = (checkboxKey, isChecked) => {
+    const handleCheckboxChange = (checkboxKey, isChecked, SoLan) => {
         setCheckboxStates((prevStates) => ({
             ...prevStates,
             [checkboxKey]: isChecked ? 1 : 0,
@@ -190,9 +190,36 @@ function ControllerCard(props) {
         setCheckedCount(count);
     }, [checkboxStates]);
 
-    const handleSave = () => {
-        console.log(checkboxStates);
-        // Thực hiện các bước lưu dữ liệu ở đây
+    const handleSave = async () => {
+        console.log("1. Dữ liệu checkboxe: ", checkboxStates);
+        const checkboxData = {
+            PlanID: planID,
+            CT1: checkboxStates.CT1,
+            CT2: checkboxStates.CT2,
+            CT3: checkboxStates.CT3,
+            CT4: checkboxStates.CT4,
+            CT5: checkboxStates.CT5,
+            CT6: checkboxStates.CT6,
+            CT7: checkboxStates.CT7,
+            CT8: checkboxStates.CT8,
+            CT9: checkboxStates.CT9,
+            CT10: checkboxStates.CT10,
+            CT11: checkboxStates.CT11,
+            CT12: checkboxStates.CT12,
+            SoLan: checkboxStates.SoLan,
+        };
+
+        console.log("2. Dữ liệu sẽ được đưa lên database: ", checkboxData);
+
+        try {
+            const response = await palletsApi.saveCheckingKiln(checkboxData);
+            console.log("3. Kết quả trả về từ database: ", response);
+            // await setHumidityRecords(response.humiditys);
+            toast.success("Đã lưu thông tin.");
+            onClose();
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
 
     useEffect(() => {
@@ -443,7 +470,7 @@ function ControllerCard(props) {
                         </div>
                     </div>
                     {status === 2 ? (
-                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center gap-x-2 h-fit items-center xl:w-[25%] w-full">
+                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-2 text-center gap-x-2 h-fit items-center xl:w-[25%] w-full">
                             <FaCheck className=" ml-2 text-xl" />
                             <div className="font-medium">Đã hoàn thành</div>
                         </div>
@@ -457,7 +484,7 @@ function ControllerCard(props) {
                                     Kiểm tra lò sấy
                                 </button>
                             ) : (
-                                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center  w-full gap-x-2 ">
+                                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl px-4 text-center h-fit items-center w-full gap-x-2 ">
                                     <FaCheck className=" ml-2 text-xl" />
                                     <div className="font-medium">
                                         Đã hoàn thành
@@ -640,7 +667,7 @@ function ControllerCard(props) {
                                 : (
                                     <button
                                     onClick={handleSave}
-                                    className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                    className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Lưu lại
                                     </button>

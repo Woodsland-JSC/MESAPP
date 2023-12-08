@@ -57,9 +57,9 @@ const palletsApi = {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
     },
-    saveCheckingKiln: () => {
+    saveCheckingKiln: (data) => {
         const url = `/ovens/production-check-single`;
-        return axiosClient().patch(url, {});
+        return axiosClient().patch(url, data);
     },
     addHumidRecord: (data) => {
         const url = `/dgm/ghinhandoam`;
