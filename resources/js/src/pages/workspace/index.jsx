@@ -28,8 +28,8 @@ function Workspace() {
                 {/* Section */}
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Header */}
-                    <div className="mb-12">
-                        <div className="text-3xl font-bold mb-2">
+                    <div className="xl:mb-12 lg:mb-12 md:mb-12 mb-5">
+                        <div className="xl:text-3xl lg:text-3xl md:text-3xl text-[1.75rem] font-bold mb-2">
                             Xin chào, {user?.first_name}! 👋
                         </div>
                         <div className="text-gray-500">
@@ -44,7 +44,7 @@ function Workspace() {
                             variant="soft-rounded"
                             colorScheme="blackAlpha"
                         >
-                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-4">
+                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3">
                                 <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
                                     <div className="w-[150px]">
                                         Quản lý sấy gỗ

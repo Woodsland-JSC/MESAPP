@@ -77,7 +77,7 @@ class QCController extends Controller
             'PlanID' => 'required', // new UniqueOvenStatusRule
             'SLPallet' => 'required',
             'SLMau' => 'required',
-            'SLMO_TOP' => 'required',
+            'SLMoTop' => 'required',
             'SLCong' => 'required',
             'note' => 'required',
         ]);
@@ -88,13 +88,26 @@ class QCController extends Controller
             'PlanID',
             'SLMau',
             'SLPallet',
-            'SLMO_TOP',
+            'SLMoTop',
             'SLCong',
             'note',
         );
         DisabilityDetail::create(array_merge($data, ['created_by' => Auth::user()->id]));
-        $res = DisabilityDetail::where('PlanID', $req->PlanID)->get();
+        $res = DisabilityDetail::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'plandrying' => $res], 200);
+    }
+    function removeDisabledRecord(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PlanID' => 'required', // new UniqueOvenStatusRule
+            'ID' => 'integer|required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        humidityDetails::where('id', $request->ID)->where('PlanID', $request->PlanID)->where('refID', -1)->delete();
+        $res = humidityDetails::where('PlanID', $request->PlanID)->where('refID', -1)->get();
+        return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
     public function HoanThanhKT(Request $req)
     {
@@ -171,6 +184,7 @@ class QCController extends Controller
                 'PlanID' => $disability->PlanID,
                 'TotalMau' => $disability->TotalMau,
                 'TLMoTop' => $disability->TLMoTop,
+                'TLCong' => $disability->TLCong,
                 'created_by' => $disability->created_by,
                 'created_at' => $disability->created_at,
                 'detail' => $disabilityDetails->toArray(),

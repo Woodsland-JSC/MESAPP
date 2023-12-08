@@ -14,7 +14,7 @@ class DisabilityDetail extends Model
         'PlanID',
         'SLPallet',
         'SLMau',
-        'SLMO_TOP',
+        'SLMoTop',
         'SLCong',
         'note',
         'created_by'

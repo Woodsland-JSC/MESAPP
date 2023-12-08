@@ -11,6 +11,7 @@ import {
     ModalCloseButton,
     useDisclosure,
     Button,
+    Divider,
 } from "@chakra-ui/react";
 import {
     Popover,
@@ -72,6 +73,11 @@ function HumidityCheck(props) {
         onOpen: onCompleteOpen,
         onClose: onCompleteClose,
     } = useDisclosure();
+    const {
+        isOpen: isDetailOpen,
+        onOpen: onDetailOpen,
+        onClose: onDetailClose,
+    } = useDisclosure();
 
     const [loadCurrentRecord, setLoadCurrentRecord] = useState(true);
     const [humidityRecords, setHumidityRecords] = useState([]);
@@ -79,6 +85,12 @@ function HumidityCheck(props) {
     const [humidityInput, setHumidityInput] = useState(0);
     const [selectedOption, setSelectedOption] = React.useState("0");
     const [anotherOption, setAnotherOption] = React.useState(null);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+
+    const handleRecordClick = (record) => {
+        setSelectedRecord(record);
+        onDetailOpen();
+    };
 
     const humidityAnalysis = useMemo(() => {
         const total = humidityRecords.length;
@@ -117,9 +129,52 @@ function HumidityCheck(props) {
         ];
     }, [humidityRecords]);
 
+    const selectedAnalysis = useMemo(() => {
+        if (!selectedRecord || !selectedRecord.detail) {
+            return [];
+        }
+
+        const total = selectedRecord.detail.length;
+        const low = selectedRecord.detail.filter(
+            (record) => record.value < 7
+        ).length;
+        const target = selectedRecord.detail.filter(
+            (record) => record.value >= 7 && record.value <= 9
+        ).length;
+        const high = selectedRecord.detail.filter(
+            (record) => record.value >= 10 && record.value <= 15
+        ).length;
+        const veryHigh = selectedRecord.detail.filter(
+            (record) => record.value > 15
+        ).length;
+
+        return [
+            {
+                label: "Thấp (nhỏ hơn 7)",
+                count: low,
+                percentage: (low / total) * 100,
+            },
+            {
+                label: "Đích (7-9)",
+                count: target,
+                percentage: (target / total) * 100,
+            },
+            {
+                label: "Cao (10-15)",
+                count: high,
+                percentage: (high / total) * 100,
+            },
+            {
+                label: "Rất cao (trên 15)",
+                count: veryHigh,
+                percentage: (veryHigh / total) * 100,
+            },
+        ];
+    }, [selectedRecord]);
+
     useEffect(() => {
-        loadCurrentHumidRecords();
         loadHumidRecordList();
+        loadCurrentHumidRecords();
     }, []);
 
     const loadHumidRecordList = async () => {
@@ -137,7 +192,7 @@ function HumidityCheck(props) {
 
     const loadCurrentHumidRecords = async () => {
         try {
-            const response = await palletsApi.getTempHumidRecords(planID);   
+            const response = await palletsApi.getTempHumidRecords(planID);
             setHumidityRecords(response.TempData);
         } catch (error) {
             console.error("Lỗi khi gọi API:", error);
@@ -145,18 +200,18 @@ function HumidityCheck(props) {
             setLoadCurrentRecord(false);
         }
     };
-    
+
     const handleRecord = async () => {
         const recordData = {
             PlanID: planID,
             value: humidityInput,
         };
-    
+
         if (humidityInput === 0) {
             toast.error("Giá trị độ ẩm không được bỏ trống.");
             return;
         }
-    
+
         try {
             const response = await palletsApi.addHumidRecord(recordData);
             await setHumidityRecords(response.humiditys);
@@ -166,13 +221,13 @@ function HumidityCheck(props) {
             console.error("Error:", error);
         }
     };
-    
+
     const handleDelete = async (recordId) => {
         const deleteData = {
             PlanID: planID,
             ID: recordId,
         };
-    
+
         try {
             const response = await palletsApi.removeHumidRecord(deleteData);
             await setHumidityRecords(response.humiditys);
@@ -181,64 +236,6 @@ function HumidityCheck(props) {
             console.error("Error:", error);
         }
     };
-
-    // const loadCurrentHumidRecords = async () => {
-    //     setLoadCurrentRecord(true);
-
-    //     palletsApi
-    //         .getTempRecords(planID)
-    //         .then((response) => {
-    //             console.log("Dữ liệu từ API:", response);
-
-    //             setHumidityRecords(response.TempData);
-    //             setLoadCurrentRecord(false);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Lỗi khi gọi API:", error);
-    //             setLoadCurrentRecord(false);
-    //         });
-    // };
-
-    // const handleRecord = () => {
-    //     const recordData = {
-    //         PlanID: planID,
-    //         value: humidityInput,
-    //     };
-
-    //     if (humidityInput === 0) {
-    //         toast.error("Giá trị độ ẩm không được bỏ trống.");
-    //     } else {
-    //         palletsApi
-    //             .addHumidRecord(recordData)
-    //             .then((response) => {
-    //                 console.log("Kết quả trả về từ api:", response);
-    //                 loadCurrentHumidRecords();
-    //                 // setHumidityRecords(response.humiditys);
-    //                 toast.success("Giá trị độ ẩm đã được ghi nhận");
-    //                 setHumidityInput(0);
-    //             })
-    //             .catch((error) => {
-    //                 console.error("Error:", error);
-    //             });
-    //     }
-    // };
-
-    // const handleDelete = (recordId) => {
-    //     const deleteData = {
-    //         PlanID: planID,
-    //         ID: recordId,
-    //     };
-    //     palletsApi
-    //         .removeHumidRecord(deleteData)
-    //         .then((response) => {
-    //             loadCurrentHumidRecords();
-    //             // setHumidityRecords(response.humiditys);
-    //             toast("Đã xóa khỏi danh sách");
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error:", error);
-    //         });
-    // };
 
     const checkHumidityRequirement = () => {
         if (reason === "INDOOR") {
@@ -385,7 +382,7 @@ function HumidityCheck(props) {
                 <ModalContent>
                     <div className="top-0 sticky z-20 bg-white border-b-2 border-gray-200">
                         <ModalHeader>
-                            <div className="xl:ml-10 xl:text-center     text-lg uppercase xl:text-xl ">
+                            <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
                                 Biểu mẫu kiểm tra độ ẩm gỗ sấy
                             </div>
                         </ModalHeader>
@@ -396,13 +393,13 @@ function HumidityCheck(props) {
                         <section className="flex flex-col justify-center ">
                             {/* Infomation */}
                             <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 px-8">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
                                     <FaInfoCircle className="w-7 h-7 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Thông tin chung
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 p-3 px-8">
+                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                     <div className=" flex font-semibold items-center">
                                         <LuCalendarRange className="w-5 h-5 mr-3" />
                                         Ngày kiểm tra:
@@ -411,7 +408,7 @@ function HumidityCheck(props) {
                                         {format(new Date(), "yyyy-MM-dd")}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                     <div className="font-semibold flex items-center">
                                         <LuStretchHorizontal className="w-5 h-5 mr-3" />
                                         Mẻ sấy số:
@@ -420,7 +417,7 @@ function HumidityCheck(props) {
                                         {code}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                     <div className="font-semibold flex items-center">
                                         <LuWarehouse className="w-5 h-5 mr-3" />
                                         Địa điểm (Lò số):
@@ -429,7 +426,7 @@ function HumidityCheck(props) {
                                         {oven}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                     <div className="font-semibold flex items-center">
                                         <LuKeyRound className="w-5 h-5 mr-3" />
                                         Đơn vị quản lý:
@@ -444,7 +441,7 @@ function HumidityCheck(props) {
 
                             {/* Humid Range */}
                             <div className="xl:mx-auto xl:w-[60%] rounded-xl bg-[#22253d] divide-y-2 divide-[#2B384B] mb-3">
-                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 px-8">
+                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
                                     <div className="flex items-center gap-x-4">
                                         <MdWaterDrop className="w-8 h-8 text-blue-300" />
                                         <div className="text-xl font-semibold">
@@ -471,13 +468,13 @@ function HumidityCheck(props) {
                                                     </th>
                                                     <th
                                                         scope="col"
-                                                        className="px-6 py-3 text-left  text-base w-[35%] font-medium text-[#D2D6FF]  uppercase"
+                                                        className="px-6 py-3 text-left  text-base w-[25%] font-medium text-[#D2D6FF]  uppercase"
                                                     >
                                                         SL Mấu
                                                     </th>
                                                     <th
                                                         scope="col"
-                                                        className="px-6 py-3 text-left  text-base w-[25%]  font-medium text-[#D2D6FF]  uppercase"
+                                                        className="px-6 py-3 text-left  text-base xl:w-[35%] w-fit font-medium text-[#D2D6FF]  uppercase"
                                                     >
                                                         Tỉ lệ
                                                     </th>
@@ -486,16 +483,22 @@ function HumidityCheck(props) {
 
                                             <tbody className=" ">
                                                 <tr className=" w-full bg-[#22253d]">
-                                                    <td className="px-6 py-3 whitespace-nowrap w-[1/2] font-medium text-[#D2D6FF] text-left ">
-                                                        Thấp (nhỏ hơn 7)
+                                                    <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
+                                                        Thấp{" "}
+                                                        <span className="xl:inline-block hidden">
+                                                            (nhỏ hơn 7)
+                                                        </span>
+                                                        <span className="inline-block xl:hidden">
+                                                            ({`<`} 7)
+                                                        </span>
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[35%] text-[#D2D6FF] ">
                                                         {
                                                             humidityAnalysis[0]
                                                                 .count
                                                         }
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                    <td className="px-4 py-3 text-left  whitespace-nowrap w-[25%] text-[#D2D6FF] ">
                                                         {humidityAnalysis[0].percentage.toFixed(
                                                             2
                                                         )}
@@ -504,17 +507,17 @@ function HumidityCheck(props) {
                                                 </tr>
 
                                                 <tr className="w-full p-2 bg-[#2d3254]">
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  selection:font-medium text-[#D2D6FF] items-center flex">
+                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[50 %]  selection:font-medium text-[#D2D6FF] items-center flex">
                                                         Đích (7-9)
                                                         <HiMiniSparkles className="ml-2 text-blue-300" />
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] font-medium text-[#D2D6FF] ">
+                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[25%] font-medium text-[#D2D6FF] ">
                                                         {
                                                             humidityAnalysis[1]
                                                                 .count
                                                         }
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] font-medium text-[#D2D6FF] ">
+                                                    <td className="px-4 py-3 text-left  whitespace-nowrap w-[35%] font-medium text-[#D2D6FF] ">
                                                         {humidityAnalysis[1].percentage.toFixed(
                                                             2
                                                         )}
@@ -532,7 +535,7 @@ function HumidityCheck(props) {
                                                                 .count
                                                         }
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
+                                                    <td className="px-4 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
                                                         {humidityAnalysis[2].percentage.toFixed(
                                                             2
                                                         )}
@@ -542,7 +545,13 @@ function HumidityCheck(props) {
 
                                                 <tr className="w-full bg-[#48519c]">
                                                     <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  font-medium text-[#D2D6FF] ">
-                                                        Rất cao (trên 15)
+                                                        Rất cao{" "}
+                                                        <span className="xl:inline-block hidden">
+                                                            (trên 15)
+                                                        </span>
+                                                        <span className="inline-block xl:hidden">
+                                                            ({`>`} 15)
+                                                        </span>
                                                     </td>
                                                     <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
                                                         {
@@ -550,7 +559,7 @@ function HumidityCheck(props) {
                                                                 .count
                                                         }
                                                     </td>
-                                                    <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                    <td className="px-4 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
                                                         {humidityAnalysis[3].percentage.toFixed(
                                                             2
                                                         )}
@@ -574,7 +583,7 @@ function HumidityCheck(props) {
 
                             {/* Input */}
                             <div className="mb-4 xl:mx-auto xl:w-[60%] border-2 border-gray-200 rounded-xl divide-y divide-gray-200 ">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 px-8">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
                                     <MdNoteAlt className="w-8 h-8 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Ghi nhận độ ẩm
@@ -584,7 +593,7 @@ function HumidityCheck(props) {
                                     {/* Header */}
                                     <div
                                         className="bg-white rounded-t-xl xl:flex md:flex justify-between items-center xl:space-y-0  lg:space-y-0 
-                                    md:space-y-0 xl:space-x-4 md:space-x-4 border-b py-4 space-y-2 px-4 border-gray-300"
+                                                            md:space-y-0 xl:space-x-4 md:space-x-4 border-b py-4 space-y-2 px-4 border-gray-300"
                                     >
                                         <NumberInput
                                             defaultValue={1}
@@ -626,16 +635,16 @@ function HumidityCheck(props) {
                                                 {humidityRecords.map(
                                                     (record, index) => (
                                                         <div
-                                                            className="flex items-center px-8 p-2.5 mx-4 rounded-full bg-gray-100"
+                                                            className="flex justify-between items-center px-6 xl:px-8 lg:px-8 md:px-8 p-2.5 mx-4 rounded-full bg-gray-100"
                                                             key={record.id}
                                                         >
-                                                            <div className="w-[40%]">
+                                                            <div className="xl:w-[40%] lg:w-[40%]">
                                                                 Lần:{" "}
                                                                 <span>
                                                                     {index + 1}
                                                                 </span>
                                                             </div>
-                                                            <div className="flex justify-start w-[26%]">
+                                                            <div className="flex items-center justify-start xl:w-[26%] lg:w-[26%] md:w-[26%]">
                                                                 <div className="text-gray-600 mr-3">
                                                                     Độ ẩm:{" "}
                                                                 </div>
@@ -645,7 +654,7 @@ function HumidityCheck(props) {
                                                                     }
                                                                 </span>
                                                             </div>
-                                                            <div className="flex justify-end w-[33%]">
+                                                            <div className="flex justify-end xl:w-[33%] lg:w-[33%] md:w-[33%]">
                                                                 <button
                                                                     onClick={() =>
                                                                         handleDelete(
@@ -673,6 +682,12 @@ function HumidityCheck(props) {
 
                     <ModalFooter className="bottom-0 sticky bg-white border-2 border-gray-200">
                         <div className=" flex justify-end gap-x-3 xl:px-10 md:px-10 w-full">
+                            <button
+                                onClick={onClose}
+                                className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                            >
+                                Đóng
+                            </button>
                             <button
                                 className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
                                 onClick={handleComplete}
@@ -783,21 +798,61 @@ function HumidityCheck(props) {
                                     </ModalFooter>
                                 </ModalContent>
                             </Modal>
-                            <button
-                                onClick={onClose}
-                                className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
-                            >
-                                Đóng
-                            </button>
                         </div>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
 
-            <div class="relative rounded-b-xl overflow-x-auto">
-                <table class="w-full  text-left text-gray-500 ">
+            <div class="bg-white xl:p-0 lg:p-0 md:p-0 p-4 relative rounded-b-xl max-h-[35rem] overflow-y-auto ">
+                <div class="xl:hidden lg:hidden md:hidden  ">
+                    {recordsList.length > 0 ? (
+                        <div className="space-y-4">
+                            {Array.isArray(recordsList) &&
+                                recordsList.map((item, index) => (
+                                    <div
+                                        className="rounded-xl bg-blue-50 hover:bg-gray-50 cursor-pointer xl:text-base  border border-blue-200"
+                                        onClick={() => handleRecordClick(item)}
+                                    >
+                                        <div className="px-4 py-2.5 flex justify-between items-center border-b border-blue-200">
+                                            <div className="">
+                                                <span className="text-lg font-semibold">
+                                                    #{item.id}
+                                                </span>
+                                            </div>
+                                            <div className="p-1 px-3 bg-blue-200 rounded-xl">
+                                                <span className="font-semibold">
+                                                    {item.rate}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="px-4 divide-y divide-blue-200">
+                                            <div className="flex justify-between py-2">
+                                                <div className="">
+                                                    Ngày tạo:
+                                                </div>
+                                                <span className="font-semibold">
+                                                    {item.created_at}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between py-2">
+                                                <div className="">Tạo bởi:</div>
+                                                <span className="font-semibold">
+                                                    Admin
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    ) : (
+                        <div className="text-center w-full py-3 text-gray-500">
+                            Chưa có biên bản nào được ghi nhận
+                        </div>
+                    )}
+                </div>
+                <table class="w-full xl:inline-table lg:inline-table md:inline-table hidden text-left text-gray-500 ">
                     <thead class="font-semibold text-gray-700 px-4 xl:text-base text-base bg-gray-50 ">
-                        <tr>
+                        <tr className="">
                             <th
                                 scope="col"
                                 class="py-3 xl:text-left text-center xl:px-6"
@@ -826,28 +881,337 @@ function HumidityCheck(props) {
                     </thead>
                     <tbody>
                         {Array.isArray(recordsList) &&
-                            recordsList.map((item, index) => (
-                                <tr class="bg-white hover:bg-gray-50 cursor-pointer xl:text-base text-[15px] border-b">
-                                    <th
-                                        scope="row"
-                                        class="py-3 xl:text-left text-center xl:px-6 font-medium text-gray-900 whitespace-nowrap "
-                                    >
-                                        {item.id}
-                                    </th>
-                                    <td class="py-3 xl:text-left text-center xl:px-6">
-                                        {item.rate}%
-                                    </td>
-                                    <td class="py-3 xl:text-left text-center xl:px-6">
-                                        {item.created_at}
-                                    </td>
-                                    <td class="py-3 xl:text-left text-center xl:px-6">
-                                        Admin
-                                    </td>
-                                </tr>
-                            ))}
+                        recordsList.length > 0 ? (
+                            <>
+                                {recordsList.map((item, index) => (
+                                    <tr class="bg-white hover:bg-gray-50 cursor-pointer xl:text-base text-[15px] border-b " onClick={() => handleRecordClick(item)}>
+                                        <th
+                                            scope="row"
+                                            class="py-4 xl:text-left text-center xl:px-6 font-medium text-gray-900 whitespace-nowrap "
+                                        >
+                                            {item.id}
+                                        </th>
+                                        <td class="py-4 xl:text-left text-center xl:px-6">
+                                            {item.rate}%
+                                        </td>
+                                        <td class="py-4 xl:text-left text-center xl:px-6">
+                                            {item.created_at}
+                                        </td>
+                                        <td class="py-4 xl:text-left text-center xl:px-6">
+                                            Admin
+                                        </td>
+                                    </tr>
+                                ))}
+                            </>
+                        ) : (
+                            <td
+                                class="w-full bg-white text-gray-500 cursor-pointer xl:text-base border-b "
+                                colSpan={4}
+                            >
+                                <div className="flex justify-center  py-3">
+                                    {" "}
+                                    Chưa có biên bản nào được ghi nhận
+                                </div>
+                            </td>
+                        )}
                     </tbody>
                 </table>
             </div>
+            {Array.isArray(recordsList) &&
+                recordsList.map((item, index) => (
+                    <Modal
+                        closeOnOverlayClick={false}
+                        isOpen={isDetailOpen}
+                        onClose={onDetailClose}
+                        scrollBehavior="inside"
+                        size="full"
+                        blockScrollOnMount={false}
+                    >
+                        <ModalOverlay />
+                        <ModalContent>
+                            <div className="top-0 sticky z-20 bg-white border-b-2 border-gray-200">
+                                <ModalHeader>
+                                    <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
+                                        Biểu mẫu kiểm tra độ ẩm gỗ sấy
+                                    </div>
+                                </ModalHeader>
+                                <ModalCloseButton />
+                            </div>
+
+                            <ModalBody className="py-4 overscroll-y-auto">
+                                {selectedRecord && (
+                                    <section className="flex flex-col justify-center ">
+                                        {/* Infomation */}
+                                        <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
+                                            <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                                <FaInfoCircle className="w-7 h-7 text-[]" />
+                                                <div className="text-xl font-semibold">
+                                                    Thông tin chung
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
+                                                <div className=" flex font-semibold items-center">
+                                                    <LuCalendarRange className="w-5 h-5 mr-3" />
+                                                    Ngày kiểm tra:
+                                                </div>
+                                                <span className=" text-base ">
+                                                    {format(
+                                                        new Date(
+                                                            selectedRecord.created_at
+                                                        ),
+                                                        "yyyy-MM-dd"
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
+                                                <div className="font-semibold flex items-center">
+                                                    <LuStretchHorizontal className="w-5 h-5 mr-3" />
+                                                    Mẻ sấy số:
+                                                </div>
+                                                <span className="font-normal text-base ">
+                                                    {code}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
+                                                <div className="font-semibold flex items-center">
+                                                    <LuWarehouse className="w-5 h-5 mr-3" />
+                                                    Địa điểm (Lò số):
+                                                </div>
+                                                <span className="font-normal text-base ">
+                                                    {oven}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
+                                                <div className="font-semibold flex items-center">
+                                                    <LuKeyRound className="w-5 h-5 mr-3" />
+                                                    Đơn vị quản lý:
+                                                </div>
+                                                <span className="font-normal text-base ">
+                                                    TQ
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Humid Range */}
+                                        <div className="xl:mx-auto xl:w-[60%] rounded-xl bg-[#22253d] divide-y-2 divide-[#2B384B] mb-3">
+                                            <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                                <div className="flex items-center gap-x-4">
+                                                    <MdWaterDrop className="w-8 h-8 text-blue-300" />
+                                                    <div className="text-xl font-semibold">
+                                                        Phân bố độ ẩm
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-x-4">
+                                                    <div className="p-2 px-4 rounded-full bg-[#33395C]">
+                                                        {reason}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="">
+                                                {/* Header */}
+                                                <div className="bg-[#22253d]">
+                                                    <table className="min-w-full divide-y-2 divide-[#2B384B]  ">
+                                                        <thead>
+                                                            <tr className="w-full">
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-6 py-3 text-left  text-base w-[40%] font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    Độ ẩm (MC%)
+                                                                </th>
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-6 py-3 text-left  text-base w-[25%] font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    SL Mấu
+                                                                </th>
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-4 py-3 text-left  text-base xl:w-[35%] w-fit font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    Tỉ lệ
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody className=" ">
+                                                            <tr className=" w-full bg-[#22253d]">
+                                                                <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
+                                                                    Thấp{" "}
+                                                                    <span className="xl:inline-block hidden">
+                                                                        (nhỏ hơn
+                                                                        7)
+                                                                    </span>
+                                                                    <span className="inline-block xl:hidden">
+                                                                        ({`<`}{" "}
+                                                                        7)
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[35%] text-[#D2D6FF] ">
+                                                                    {
+                                                                        selectedAnalysis[0]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-3 text-left  whitespace-nowrap w-[25%] text-[#D2D6FF] ">
+                                                                    {selectedAnalysis[0].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full p-2 bg-[#2d3254]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[50 %]  selection:font-medium text-[#D2D6FF] items-center flex">
+                                                                    Đích (7-9)
+                                                                    <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[25%] font-medium text-[#D2D6FF] ">
+                                                                    {
+                                                                        selectedAnalysis[1]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-3 text-left  whitespace-nowrap w-[35%] font-medium text-[#D2D6FF] ">
+                                                                    {selectedAnalysis[1].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full bg-[#3f4477]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  font-medium  text-[#D2D6FF] ">
+                                                                    Cao (10-15)
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
+                                                                    {
+                                                                        selectedAnalysis[2]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
+                                                                    {selectedAnalysis[2].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full bg-[#48519c]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  font-medium text-[#D2D6FF] ">
+                                                                    Rất cao{" "}
+                                                                    <span className="xl:inline-block hidden">
+                                                                        (trên
+                                                                        15)
+                                                                    </span>
+                                                                    <span className="inline-block xl:hidden">
+                                                                        ({`>`}{" "}
+                                                                        15)
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {
+                                                                        selectedAnalysis[3]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {selectedAnalysis[3].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div className="p-1 rounded-b-xl bg-[#48519c]"></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="xl:mx-auto xl:w-[60%] text-gray-500 text-[15px] mb-7">
+                                            <span className="font-semibold">
+                                                Chú ý:
+                                            </span>{" "}
+                                            Đối với mẻ sấy INDOOR nếu MC% {`<`}{" "}
+                                            10 chiếm tỉ lệ lớn hơn 85% thì cho
+                                            ra lò. Đối với mẻ sấy OUTDOOR nếu
+                                            MC% {`>`} 14 chiếm tỉ lệ lớn hơn 85%
+                                            thì cho ra lò.
+                                        </div>
+
+                                        {/* Input */}
+                                        <div className="mb-4 xl:mx-auto xl:w-[60%] border-2 border-gray-200 rounded-xl divide-y divide-gray-200 ">
+                                            <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                                <MdNoteAlt className="w-8 h-8 text-[]" />
+                                                <div className="text-xl font-semibold">
+                                                    Ghi nhận độ ẩm
+                                                </div>
+                                            </div>
+                                            <div className=" mx-auto  mb-4  ">
+                                                <div className="bg-white py-4 rounded-b-xl text-base font-medium  space-y-3">
+                                                    {selectedRecord.detail.map(
+                                                        (record, index) => (
+                                                            <div
+                                                                className="flex justify-between items-center px-6 xl:px-8 lg:px-8 md:px-8 p-2.5 mx-4 rounded-full bg-gray-100"
+                                                                key={record.id}
+                                                            >
+                                                                <div className="xl:w-[40%] lg:w-[40%]">
+                                                                    Lần:{" "}
+                                                                    <span>
+                                                                        {index +
+                                                                            1}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center justify-start xl:w-[26%] lg:w-[26%] md:w-[26%]">
+                                                                    <div className="text-gray-600 mr-3">
+                                                                        Độ ẩm:{" "}
+                                                                    </div>
+                                                                    <span className="font-semibold">
+                                                                        {
+                                                                            record.value
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex justify-end xl:w-[33%] lg:w-[33%] md:w-[33%]">
+                                                                    <button
+                                                                    >
+                                                                        <IoClose className="w-7 h-7 p-1 rounded-full hover:bg-gray-200" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                                <div className="text-gray-500 px-6">
+                                                    Tổng số lượng mẫu:{" "}
+                                                    <span>
+                                                        {
+                                                            selectedRecord
+                                                                .detail.length
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                )}
+                            </ModalBody>
+
+                            <ModalFooter className="bottom-0 sticky bg-white border-2 border-gray-200">
+                                <div className=" flex justify-end gap-x-3 xl:px-10 md:px-10 w-full">
+                                    <button
+                                        onClick={onDetailClose}
+                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                    >
+                                        Đóng
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
+                ))}
         </div>
     );
 }

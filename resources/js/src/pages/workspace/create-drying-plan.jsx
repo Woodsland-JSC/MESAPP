@@ -325,6 +325,7 @@ function CreateDryingPlan() {
                         closeOnOverlayClick={false}
                         onClose={onClose}
                         isOpen={isOpen}
+                        size="xs"
                         isCentered
                     >
                         <ModalOverlay />

@@ -255,7 +255,15 @@ function Header(props) {
                                         <div className="space-y-4 gap-y-2">
                                             <Link to="/profile">
                                                 <div className="flex gap-x-4 my-1 mt-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4">
-                                                    <TbInfoSquareRounded className="text-2xl" />
+                                                    <img
+                                                        src={
+                                                            user?.avatar
+                                                                ? user.avatar
+                                                                : defaultUser
+                                                        }
+                                                        alt="user"
+                                                        className="w-6 h-6 rounded-full object-cover"
+                                                    ></img>
                                                     <div>Trang cá nhân</div>
                                                 </div>
                                             </Link>
@@ -292,6 +300,17 @@ function Header(props) {
                                                     <div>Báo cáo</div>
                                                 </div>
                                             </Link>
+                                            <Link to="#">
+                                                <div
+                                                    className="flex cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4"
+                                                    onClick={() =>
+                                                        handleSignOut()
+                                                    }
+                                                >
+                                                    <TbArrowRight className="text-2xl" />
+                                                    <div>Đăng xuất</div>
+                                                </div>
+                                            </Link>
                                             {/* )} */}
                                             {/* <Link to="/profile">
                                             <MenuItem
@@ -305,19 +324,10 @@ function Header(props) {
                                         </Link> */}
                                             <div>
                                                 <div
-                                                    className="flex cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4"
-                                                    onClick={() =>
-                                                        handleSignOut()
-                                                    }
-                                                >
-                                                    <TbArrowRight className="text-2xl" />
-                                                    <div>Đăng xuất</div>
-                                                </div>
-                                                <div
-                                                    className="flex cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl hover:bg-gray-700 px-4"
+                                                    className="flex justify-center cursor-pointer gap-x-4 p-2 text-xl items-center rounded-xl bg-gray-700 px-4"
                                                     onClick={onToggle}
                                                 >
-                                                    <IoClose className="text-2xl" />
+                                                    {/* <IoClose className="text-2xl" /> */}
                                                     <div>Đóng</div>
                                                 </div>
                                             </div>

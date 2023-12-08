@@ -145,12 +145,62 @@ function ControllerCard(props) {
     const [no7Count, setNo7Count] = useState(0);
 
     // Check Checklist Items
+    // const handleCheckboxChange = (isChecked) => {
+    //     setCheckedCount((prevCount) =>
+    //         isChecked ? prevCount + 1 : prevCount - 1
+    //     );
+    // };
+
+    // const [checkboxStates, setCheckboxStates] = useState({});
+
+    // const handleCheckboxChange = (itemKey, isChecked) => {
+    //     setCheckboxStates((prevState) => ({
+    //         ...prevState,
+    //         [itemKey]: isChecked ? 1 : 0,
+    //     }));
+    // };
+
+
+    const [checkboxStates, setCheckboxStates] = useState({
+        CT1: 0,
+        CT2: 0,
+        CT3: 0,
+        CT4: 0,
+        CT5: 0,
+        CT6: 0,
+        CT7: 0,
+        CT8: 0,
+        CT9: 0,
+        CT10: 0,
+        CT11: 0,
+        CT12: 0,
+    });
+
     const [checkedCount, setCheckedCount] = useState(0);
-    const handleCheckboxChange = (isChecked) => {
-        setCheckedCount((prevCount) =>
-            isChecked ? prevCount + 1 : prevCount - 1
-        );
+
+    const handleCheckboxChange = (checkboxKey, isChecked) => {
+        setCheckboxStates((prevStates) => ({
+            ...prevStates,
+            [checkboxKey]: isChecked ? 1 : 0,
+        }));
     };
+
+    useEffect(() => {
+        const count = Object.values(checkboxStates).reduce((acc, value) => acc + value, 0);
+        setCheckedCount(count);
+    }, [checkboxStates]);
+
+    const handleSave = () => {
+        console.log(checkboxStates);
+        // Thực hiện các bước lưu dữ liệu ở đây
+    };
+
+    useEffect(() => {
+        const checkedCount = Object.values(checkboxStates).filter((value) => value === 1).length;
+
+        console.log(checkedCount === 12 ? "Đạt" : "Không đạt");
+    }, [checkboxStates]);
+
 
     // Get data Select
     useEffect(() => {
@@ -393,12 +443,12 @@ function ControllerCard(props) {
                         </div>
                     </div>
                     {status === 2 ? (
-                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                            <div className="font-medium">Đã kiểm tra</div>
+                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center gap-x-2 h-fit items-center xl:w-[25%] w-full">
                             <FaCheck className=" ml-2 text-xl" />
+                            <div className="font-medium">Đã hoàn thành</div>
                         </div>
                     ) : (
-                        <div className="xl:w-[25%]">
+                        <div className="xl:w-[25%] w-full">
                             {!isCompleteChecking ? (
                                 <button
                                     className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full"
@@ -407,11 +457,11 @@ function ControllerCard(props) {
                                     Kiểm tra lò sấy
                                 </button>
                             ) : (
-                                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center  w-full">
-                                    <div className="font-medium">
-                                        Đã kiểm tra
-                                    </div>
+                                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center  w-full gap-x-2 ">
                                     <FaCheck className=" ml-2 text-xl" />
+                                    <div className="font-medium">
+                                        Đã hoàn thành
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -524,14 +574,20 @@ function ControllerCard(props) {
                                 chuẩn hoạt động khi đã đáp ứng tất cả nhu cầu
                                 dưới đây
                             </div>
-                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 gap-6">
+                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-2 gap-6">
                                 {/* Hiển thị tất cả giá trị checkItems */}
-                                {checkItems.map((item) => (
+                                {checkItems.map((item, index) => (
                                     <CheckListItem
+                                        key={`CT${index + 1}`}
+                                        itemKey={`CT${index + 1}`}
                                         value={item.value}
                                         title={item.title}
                                         description={item.description}
-                                        onCheckboxChange={handleCheckboxChange}
+                                        // onCheckboxChange={handleCheckboxChange}
+                                        isChecked={checkboxStates[`CT${index + 1}`] === 1}
+                                        onCheckboxChange={(isChecked) =>
+                                            handleCheckboxChange(`CT${index + 1}`, isChecked)
+                                        }
                                     />
                                 ))}
                             </div>
@@ -565,19 +621,32 @@ function ControllerCard(props) {
                                 >
                                     Đóng
                                 </button>
-                                <button
+                                {checkedCount === 12
+                                ? (
+                                    <button
                                     className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                     onClick={handleCompleteCheckingKiln}
-                                >
-                                    {loadKilnCheckingLoading ? (
-                                        <div className="flex justify-center items-center space-x-4">
-                                            <Spinner size="sm" color="white" />
-                                            <div>Đang tải</div>
-                                        </div>
-                                    ) : (
-                                        "Hoàn thành"
-                                    )}
-                                </button>
+                                    >
+                                        {loadKilnCheckingLoading ? (
+                                            <div className="flex justify-center items-center space-x-4">
+                                                <Spinner size="sm" color="white" />
+                                                <div>Đang tải</div>
+                                            </div>
+                                        ) : (
+                                            "Hoàn thành"
+                                        )}
+                                    </button>
+                                )
+                                : (
+                                    <button
+                                    onClick={handleSave}
+                                    className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                    >
+                                        Lưu lại
+                                    </button>
+                                )}
+                                
+                                
                             </div>
                         </div>
                     </ModalFooter>

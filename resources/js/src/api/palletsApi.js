@@ -77,6 +77,14 @@ const palletsApi = {
             },
         });
     },
+    getDisabledListById: (PlanID) => {
+        const url = `/dgm/getdisabledlistbyid`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+            },
+        });
+    },
     getTempHumidRecords: (PlanID, Type) => {
         const url = `/dgm/giatrihientai`;
         return axiosClient().get(url, {

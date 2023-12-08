@@ -13,6 +13,7 @@ import {
     Button,
 } from "@chakra-ui/react";
 import { IoScanCircleSharp } from "react-icons/io5";
+import { TbMoodEmpty } from "react-icons/tb";
 import palletsApi from "../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -69,9 +70,9 @@ function SizeCard(props) {
                 </div>
                 <button
                     onClick={onOpen}
-                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium"
                 >
-                    Xem tất cả
+                    Xem <span className="xl:inline-block lg:inline-block md:inline-block hidden" >tất cả</span>
                 </button>
             </div>
 
@@ -80,7 +81,8 @@ function SizeCard(props) {
                 closeOnOverlayClick={false}
                 isOpen={isOpen}
                 onClose={onClose}
-                size="4xl"
+                size="full"
+                scrollBehavior="inside"
             >
                 <ModalOverlay />
                 <ModalContent>
@@ -92,17 +94,12 @@ function SizeCard(props) {
                                 <Thead className="bg-gray-50 top-0 sticky z-40">
                                     <Tr>
                                         <Th>Pallet</Th>
-                                        <Th>Kích thước (Dày*Rộng*Dài)</Th>
+                                        <Th>Kích thước</Th>
                                         <Th isNumeric>Số lượng</Th>
                                         <Th isNumeric>Khối lượng</Th>
                                     </Tr>
                                 </Thead>
-                            </Table>
-                        </TableContainer>
-                        <div className="relative overflow-y-auto max-h-[450px]">
-                            <TableContainer>
-                                <Table variant="simple">
-                                    <Tbody className="">
+                                <Tbody className="">
                                         {sizeData.map((item) => (
                                             <Tr>
                                                 <Td>{item.pallet}</Td>
@@ -112,15 +109,21 @@ function SizeCard(props) {
                                             </Tr>
                                         ))}
                                     </Tbody>
+                            </Table>
+                        </TableContainer>
+                        {/* <div className="relative overflow-y-auto max-h-[450px]">
+                            <TableContainer>
+                                <Table variant="simple">
+                                    
                                 </Table>
                             </TableContainer>
-                        </div>
+                        </div> */}
                     </ModalBody>
 
                     <ModalFooter>
                         <button
                             onClick={onClose}
-                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
                         >
                             Đóng
                         </button>
@@ -131,7 +134,7 @@ function SizeCard(props) {
             <div className="bg-white flex justify-center rounded-b-xl p-6 py-3 space-y-4">
                 {/* List Items */}
                 {isPalletLoading ? (
-                    <div className="">
+                    <div className="h=[10rem]">
                         <Spinner
                             thickness="4px"
                             speed="0.65s"
@@ -144,6 +147,12 @@ function SizeCard(props) {
                 ) : (
                     <div className="grid w-full py-1 overflow-x-auto">
                         <div className=" flex flex-row mb-2 space-x-4 w-full">
+                        {sizeData.length === 0 ? (
+                            <div className="h-[4.5rem] w-full flex flex-col justify-center items-center ">
+                                <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2"/>
+                                <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
+                            </div>
+                        ) : (
                             <>
                                 {sizeData.map((item) => (
                                     <SizeListItem
@@ -154,6 +163,8 @@ function SizeCard(props) {
                                     />
                                 ))}
                             </>
+                        )}
+                            
                         </div>
                     </div>
                 )}

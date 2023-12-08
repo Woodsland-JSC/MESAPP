@@ -31,7 +31,7 @@ import {
 } from "@chakra-ui/react";
 
 function CheckListItem(props) {
-    const { value, title, description, onCheckboxChange, onNo7Change } = props;
+    const { value, title, description, onCheckboxChange, isChecked, onNo7Change } = props;
 
     const {
         isOpen: isNo7Open,
@@ -54,21 +54,22 @@ function CheckListItem(props) {
         onClose: onNo12Close,
     } = useDisclosure();
 
-    const [isChecked, setIsChecked] = useState(false);
+    // const [isChecked, setIsChecked] = useState(false);
 
-    const handleCheckboxChange = () => {
-        setIsChecked((prev) => !prev);
-        onCheckboxChange(!isChecked);
-    };
+    // const handleCheckboxChange = () => {
+    //     setIsChecked((prev) => !prev);
+    //     onCheckboxChange(!isChecked);
+    // };
 
     return (
-        <div className="bg-[#F7FDFF] flex relative flex-col rounded-xl w-full h-fit xl:h-[12.8rem] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#99b4c1] border-2 border-gray-200">
+        <div className="bg-[#F7FDFF] flex relative flex-col rounded-xl w-full h-fit xl:h-[13.5rem] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#99b4c1] border-2 border-gray-200">
             {/* <div className="absolute -top-1 -right-0.5 bg-green-500 shadow-sm shadow-black text-white w-4 h-4 flex items-center justify-center rounded-full" /> */}
-            <div className="px-4 py-3 bg-[#F1F8FB] h-[35%] rounded-t-xl w-full flex items-center border-b border-gray-200">
+            <div className="px-4 py-3 bg-[#F1F8FB] h-[30%] rounded-t-xl w-full flex items-center border-b border-gray-200">
                 <Checkbox
                     value={value}
                     isChecked={isChecked}
-                    onChange={handleCheckboxChange}
+                    onChange={() => onCheckboxChange(!isChecked)}
+                    // onChange={handleCheckboxChange}
                     size="lg"
                     colorScheme="blue"
                     className="w-full"
@@ -79,14 +80,14 @@ function CheckListItem(props) {
                 </Checkbox>
             </div>
 
-            <div className="px-4 xl:h-[70%] lg:h-[65%] text-base py-2 pt-3">
+            <div className="px-4 xl:h-[70%] lg:h-[70%] text-base py-2">
                 <div className="xl:h-[70%] lg:h-[70%]">{description}</div>
-                <div className="flex justify-end ">
+                <div className="xl:h-[30%] lg:h-[30%]  flex justify-end ">
                     {value === 7 ? (
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer mr-3">
+                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -102,7 +103,7 @@ function CheckListItem(props) {
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="bg-[#3182CE] text-white px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo7Open}
                             >
                                 Kiểm tra
@@ -165,7 +166,7 @@ function CheckListItem(props) {
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 pt-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -185,7 +186,7 @@ function CheckListItem(props) {
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo8Open}
                             >
                                 Kiểm tra
@@ -267,7 +268,7 @@ function CheckListItem(props) {
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -290,7 +291,7 @@ function CheckListItem(props) {
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo11Open}
                             >
                                 Kiểm tra
@@ -404,7 +405,7 @@ function CheckListItem(props) {
                         <>
                             <Popover placement='top'>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -433,7 +434,7 @@ function CheckListItem(props) {
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="bg-[#3182CE] text-white h-fit px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo12Open}
                             >
                                 Kiểm tra

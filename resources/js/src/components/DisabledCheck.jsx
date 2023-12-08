@@ -109,7 +109,7 @@ const DisabledCheckCard = (props) => {
 
     return (
         <div className="w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 \  min-w-[250px] p-4 px-6 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
-            <div className="rounded-full text-sm font-semibold bg-gray-300 mb-4 p-1 px-4 w-fit">
+            <div className="rounded-full text-sm font-semibold bg-gray-200 mb-4 p-1 px-4 w-fit">
                 ID: {id}
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
@@ -141,11 +141,11 @@ const DisabledCheckCard = (props) => {
                 <span className="text-right font-semibold">{curvedRate} %</span>
             </div>
             <div className="block">
-                <div className=" text-gray-600 font-medium">
-                    Ghi chú:{" "}
-                    <span className="text-right italic truncate font-semibold">
+                <div className=" w-full  text-gray-600">
+                    <div className="font-medium">Ghi chú: </div>
+                    <div className="font-medium w-full truncate mt-1 text-gray-800">
                         {note}
-                    </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,6 +180,12 @@ const DisabledCheck = ({
         onClose: onConfirmClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isDetailOpen,
+        onOpen: onDetailOpen,
+        onClose: onDetailClose,
+    } = useDisclosure();
+
     const [viewMode, setViewMode] = useState(false);
 
     const [disabledDetails, setDisabledDetails] = useState([]);
@@ -188,6 +194,12 @@ const DisabledCheck = ({
     const [avgDisabledRate, setAvgDisabledRate] = useState(null);
     const [avgCurvedRate, setAvgCurvedRate] = useState(null);
     const [sumDisability, setSumDisability] = useState(null);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+
+    const handleRecordClick = (record) => {
+        setSelectedRecord(record);
+        onDetailOpen();
+    };
 
     const [info, setInfo] = useState({
         pallet: "",
@@ -211,7 +223,21 @@ const DisabledCheck = ({
     // Load Data
     useEffect(() => {
         loadCurrentDisabledRecords();
+        loadDisabledRecordList();
     }, []);
+
+    const loadDisabledRecordList = async () => {
+        palletsApi
+            .getDisabledListById(planID)
+            .then((response) => {
+                console.log("Dữ liệu từ API:", response);
+
+                setDisabledList(response);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi gọi API:", error);
+            });
+    };
 
     const loadCurrentDisabledRecords = async () => {
         try {
@@ -265,7 +291,7 @@ const DisabledCheck = ({
             PlanID: planID,
             SLMau: values.sample,
             SLPallet: values.pallet,
-            SLMO_TOP: values.disability,
+            SLMoTop: values.disability,
             SLCong: values.curve,
             note: values.note,
         };
@@ -329,7 +355,7 @@ const DisabledCheck = ({
                 ? (
                       disabledDetails.reduce(
                           (sum, item) =>
-                              sum + (item.SLMO_TOP / item.SLMau) * 100,
+                              sum + (item.SLMoTop / item.SLMau) * 100,
                           0
                       ) / disabledDetails.length
                   ).toFixed(2)
@@ -348,7 +374,7 @@ const DisabledCheck = ({
         const sumDisability =
             disabledDetails.length > 0
                 ? disabledDetails.reduce(
-                      (sum, item) => sum + item.SLMO_TOP + item.SLCong,
+                      (sum, item) => sum + item.SLMoTop + item.SLCong,
                       0
                   )
                 : null;
@@ -367,13 +393,6 @@ const DisabledCheck = ({
     // Load Disabled List
     useEffect(() => {}, []);
 
-    // const body = {
-    //     PlanID: planID,
-    //     TotalMau: calculatedValues.sumDisability,
-    //     TLMoTop: calculatedValues.avgDisabledRate,
-    //     TLCong: calculatedValues.avgCurvedRate,
-    // };
-
     const [body, setBody] = useState({
         PlanID: null,
         TotalMau: null,
@@ -385,10 +404,10 @@ const DisabledCheck = ({
         const fetchData = async () => {
             await calculateValues();
         };
-    
+
         fetchData();
     }, [disabledDetails]);
-    
+
     useEffect(() => {
         const body = {
             PlanID: planID,
@@ -396,11 +415,9 @@ const DisabledCheck = ({
             TLMoTop: calculatedValues.avgDisabledRate,
             TLCong: calculatedValues.avgCurvedRate,
         };
-    
     }, [calculatedValues]);
 
     const finishDisabledCheck = async () => {
-
         await calculateValues();
 
         const body = {
@@ -418,8 +435,8 @@ const DisabledCheck = ({
                 if (response.message === "success") {
                     setDisabledList(response.disability);
                     toast.success("Ghi nhận biên bản khuyết tật thành công.");
-                    setDisabledDetails([null]);
-                    // loadHumidRecordList();
+                    setDisabledDetails([]);
+                    loadDisabledRecordList();
                     onConfirmClose();
                     onClose();
                 } else {
@@ -453,12 +470,73 @@ const DisabledCheck = ({
                         className="bg-gray-800 text-base flex items-center space-x-3 p-2 rounded-xl text-white xl:px-4 active:scale-[.95] h-fit w-fit active:duration-75 transition-all"
                     >
                         <FaPlus />
-                        <div className="xl:flex hidden">Tạo mới</div>
+                        <div className="xl:flex lg:flex md:flex hidden">
+                            Tạo mới
+                        </div>
                     </button>
                 </div>
 
-                <div className="rounded-b-xl relative overflow-x-auto">
-                    <table className="w-full text-left text-gray-500 ">
+                <div className="bg-white xl:p-0 lg:p-0 md:p-0 p-4 gap-y-4 relative rounded-b-xl max-h-[35rem] overflow-y-auto">
+                    <div className="xl:hidden lg:hidden md:hidden">
+                        {disabledList.length > 0 ? (
+                            <div className="space-y-4">
+                                {Array.isArray(disabledList) &&
+                                    disabledList.map((item, index) => (
+                                        <div
+                                            className="rounded-xl bg-red-50 hover:bg-white cursor-pointer xl:text-base   border border-red-200"
+                                            onClick={() =>
+                                                handleRecordClick(item)
+                                            }
+                                        >
+                                            <div className="px-4 py-2.5 flex justify-between items-center border-b border-red-200">
+                                                <div className="">
+                                                    <span className="text-lg font-semibold">
+                                                        #{item.id}
+                                                    </span>
+                                                </div>
+                                                <div className="p-1 px-3 bg-red-200 rounded-xl">
+                                                    <span className="font-semibold">
+                                                        Tổng: {item.TotalMau}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="px-4 divide-y divide-red-200">
+                                                <div className="flex justify-between py-2">
+                                                    <div className="">
+                                                        Tỉ lệ mo, tóp:
+                                                    </div>
+                                                    <span className="font-semibold">
+                                                        {item.TLMoTop}%
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between py-2">
+                                                    <div className="">
+                                                        Tỉ lệ cong:
+                                                    </div>
+                                                    <span className="font-semibold">
+                                                        {item.TLCong}%
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between py-2">
+                                                    <div className="">
+                                                        Ngày tạo:
+                                                    </div>
+                                                    <span className="font-semibold">
+                                                        {item.created_at}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        ) : (
+                            <div className="text-center w-full py-3 text-gray-500">
+                                Chưa có biên bản nào được ghi nhận
+                            </div>
+                        )}
+                    </div>
+
+                    <table className="w-full xl:inline-table lg:inline-table md:inline-table hidden text-left text-gray-500 ">
                         <thead className="font-medium text-gray-700 bg-gray-50 ">
                             <tr className="w-full text-[15px]">
                                 <th
@@ -488,52 +566,275 @@ const DisabledCheck = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {disabilityList.length > 0 ? (
-                                disabilityList.map((item, index) => (
-                                    <tr className="text-[15px] bg-white border-b">
-                                        <th
-                                            scope="row"
-                                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+                            {Array.isArray(disabledList) &&
+                            disabledList.length > 0 ? (
+                                <>
+                                    {disabledList.map((item, index) => (
+                                        <tr
+                                            className="text-[15px] bg-white border-b"
+                                            onClick={() =>
+                                                handleRecordClick(item)
+                                            }
                                         >
-                                            <span
-                                                href="#"
-                                                className="hover:underline text-bold cursor-pointer"
-                                                onClick={() =>
-                                                    handleViewReport(
-                                                        item.disabledDetails
-                                                    )
-                                                }
+                                            <th
+                                                scope="row"
+                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
                                             >
-                                                {item.id}
-                                            </span>
-                                        </th>
-                                        <td className="px-6 py-4">
-                                            {item.avgDisabledRate.toFixed(2) +
-                                                "%"}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {item.avgCurvedRate.toFixed(2) +
-                                                "%"}
-                                        </td>
-                                        <td className="px-6 py-4">--/--/--</td>
-                                        <td className="px-6 py-4">
-                                            {dateToDateTime(item.createdDate)}
-                                        </td>
-                                    </tr>
-                                ))
+                                                <span
+                                                    href="#"
+                                                    className="hover:underline text-bold cursor-pointer"
+                                                    onClick={() =>
+                                                        handleViewReport(
+                                                            item.disabledDetails
+                                                        )
+                                                    }
+                                                >
+                                                    {item.id}
+                                                </span>
+                                            </th>
+                                            <td className="px-6 py-4">
+                                                {item.TLMoTop + "%"}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {item.TLCong + "%"}
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                {item.TotalMau}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {dateToDateTime(
+                                                    item.created_at
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </>
                             ) : (
-                                <tr
-                                    aria-colspan={5}
-                                    className="text-semibold text-center align-middle"
+                                <td
+                                    class="w-full bg-white text-gray-500 cursor-pointer xl:text-base border-b "
+                                    colSpan={5}
                                 >
-                                    Chưa phát sinh biên bản nào
-                                </tr>
+                                    <div className="flex justify-center  py-3">
+                                        {" "}
+                                        Chưa có biên bản nào được ghi nhận
+                                    </div>
+                                </td>
                             )}
                         </tbody>
                     </table>
                 </div>
+                {Array.isArray(disabledList) &&
+                    disabledList.map((item, index) => (
+                        <Modal
+                            size="full"
+                            isOpen={isDetailOpen}
+                            onClose={onDetailClose}
+                            scrollBehavior="inside"
+                            isCentered
+                            blockScrollOnMount={false}
+                        >
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalHeader>
+                                    <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
+                                        Biên bản khảo sát tỉ lệ khuyết tật
+                                    </div>
+                                </ModalHeader>
+                                <ModalCloseButton />
+                                <div className="border-b-2 border-gray-100"></div>
+                                <ModalBody>
+                                    {selectedRecord && (
+                                        <>
+                                            <section className="flex flex-col justify-center">
+                                                {/* Infomation */}
+                                                <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
+                                                    <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                                        <FaInfoCircle className="w-7 h-7 text-[]" />
+                                                        <div className="text-xl font-semibold">
+                                                            Thông tin chung
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 p-3 px-8">
+                                                        <div className=" flex font-semibold items-center">
+                                                            <LuCalendarRange className="w-5 h-5 mr-3" />
+                                                            Ngày kiểm tra:
+                                                        </div>
+                                                        <span className=" text-base ">
+                                                            {format(
+                                                                new Date(),
+                                                                "yyyy-MM-dd"
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 p-2.5 px-8">
+                                                        <div className="font-semibold flex items-center">
+                                                            <LuStretchHorizontal className="w-5 h-5 mr-3" />
+                                                            Mẻ sấy số:
+                                                        </div>
+                                                        <span className="font-normal text-base ">
+                                                            {code}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 p-2.5 px-8">
+                                                        <div className="font-semibold flex items-center">
+                                                            <LuWarehouse className="w-5 h-5 mr-3" />
+                                                            Nhà máy:
+                                                        </div>
+                                                        <span className="font-normal text-base ">
+                                                            {oven}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Result  */}
+                                                <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-7">
+                                                    <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 py-3 xl:px-8 lg:px-8 md:px-8 border-red-200 rounded-t-xl">
+                                                        <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
+                                                        <div className="font-semibold text-red-600">
+                                                            Tỉ lệ khuyết tật
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-3 px-6 pb-5 pt-4">
+                                                        <div className="grid grid-cols-[70%,30%]">
+                                                            <div className="font-bold">
+                                                                Tỉ lệ mo, tóp
+                                                                trung bình:
+                                                            </div>
+                                                            <span className="font-bold text-right">
+                                                                {
+                                                                    selectedRecord.TLMoTop
+                                                                }{" "}
+                                                                %
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-[70%,30%]">
+                                                            <div className="font-bold">
+                                                                Tỉ lệ cong trung
+                                                                bình:
+                                                            </div>
+                                                            <span className="font-bold text-right">
+                                                                {
+                                                                    selectedRecord.TLCong
+                                                                }{" "}
+                                                                %
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-[70%,30%]">
+                                                            <div className="font-bold">
+                                                                Tổng khuyết tật:
+                                                            </div>
+                                                            <span className="font-bold text-right">
+                                                                {
+                                                                    selectedRecord.TotalMau
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+
+                                            <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
+                                                <div className="flex gap-x-4 rounded-t-xl items-center p-4 xl:px-6 lg:px-6 md:px-6 px-2">
+                                                    <MdNoteAlt className="w-8 h-9 text-[]" />
+                                                    <div className="text-xl font-semibold">
+                                                        Ghi nhận khảo sát
+                                                    </div>
+                                                </div>
+                                                <div className="border-b-2 border-gray-200"></div>
+
+                                                <section className="my-4">
+                                                    {loadCurrentRecord ? (
+                                                        <div className="text-center">
+                                                            <Spinner
+                                                                thickness="4px"
+                                                                speed="0.65s"
+                                                                emptyColor="gray.200"
+                                                                color="#155979"
+                                                                size="xl"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
+                                                            {selectedRecord.detail.length >
+                                                                0 &&
+                                                                selectedRecord.detail.map(
+                                                                    (
+                                                                        item,
+                                                                        index
+                                                                    ) => {
+                                                                        const disabledRate =
+                                                                            (
+                                                                                (item.SLMoTop /
+                                                                                    item.SLMau) *
+                                                                                100
+                                                                            ).toFixed(
+                                                                                2
+                                                                            );
+                                                                        const curvedRate =
+                                                                            (
+                                                                                (item.SLCong /
+                                                                                    item.SLMau) *
+                                                                                100
+                                                                            ).toFixed(
+                                                                                2
+                                                                            );
+
+                                                                        return (
+                                                                            <DisabledCheckCard
+                                                                                key={
+                                                                                    index
+                                                                                }
+                                                                                id={
+                                                                                    item.id
+                                                                                }
+                                                                                pallet={
+                                                                                    item.SLPallet
+                                                                                }
+                                                                                sample={
+                                                                                    item.SLMau
+                                                                                }
+                                                                                disability={
+                                                                                    item.SLMoTop
+                                                                                }
+                                                                                curve={
+                                                                                    item.SLCong
+                                                                                }
+                                                                                note={
+                                                                                    item.note
+                                                                                }
+                                                                                disabledRate={
+                                                                                    disabledRate
+                                                                                }
+                                                                                curvedRate={
+                                                                                    curvedRate
+                                                                                }
+                                                                            />
+                                                                        );
+                                                                    }
+                                                                )}
+                                                        </div>
+                                                    )}
+                                                </section>
+                                            </section>
+                                        </>
+                                    )}
+                                </ModalBody>
+                                <div className="border-b-2 border-gray-100"></div>
+                                <ModalFooter className="gap-4">
+                                    <button
+                                        onClick={onDetailClose}
+                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                    >
+                                        Đóng
+                                    </button>
+                                </ModalFooter>
+                            </ModalContent>
+                        </Modal>
+                    ))}
             </div>
 
+            {/* Modal */}
             <Modal
                 size="full"
                 isOpen={isOpen}
@@ -554,7 +855,7 @@ const DisabledCheck = ({
                         <section className="flex flex-col justify-center">
                             {/* Infomation */}
                             <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 px-8">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
                                     <FaInfoCircle className="w-7 h-7 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Thông tin chung
@@ -591,7 +892,7 @@ const DisabledCheck = ({
 
                             {/* Result  */}
                             <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-7">
-                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 px-8 border-red-200 rounded-t-xl">
+                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 py-3 xl:px-8 lg:px-8 md:px-8 border-red-200 rounded-t-xl">
                                     <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
                                     <div className="font-semibold text-red-600">
                                         Tỉ lệ khuyết tật
@@ -628,7 +929,7 @@ const DisabledCheck = ({
                         </section>
 
                         <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
-                            <div className="flex gap-x-4 rounded-t-xl items-center p-4">
+                            <div className="flex gap-x-4 rounded-t-xl items-center p-4 xl:px-6 lg:px-6 md:px-6 px-2">
                                 <MdNoteAlt className="w-8 h-9 text-[]" />
                                 <div className="text-xl font-semibold">
                                     Ghi nhận khảo sát
@@ -887,7 +1188,7 @@ const DisabledCheck = ({
                                             disabledDetails.map(
                                                 (item, index) => {
                                                     const disabledRate = (
-                                                        (item.SLMO_TOP /
+                                                        (item.SLMoTop /
                                                             item.SLMau) *
                                                         100
                                                     ).toFixed(2);
@@ -906,7 +1207,7 @@ const DisabledCheck = ({
                                                             }
                                                             sample={item.SLMau}
                                                             disability={
-                                                                item.SLMO_TOP
+                                                                item.SLMoTop
                                                             }
                                                             curve={item.SLCong}
                                                             note={item.note}
@@ -927,6 +1228,12 @@ const DisabledCheck = ({
                     </ModalBody>
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalFooter className="gap-4">
+                        <button
+                            onClick={handleModalClose}
+                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                        >
+                            Đóng
+                        </button>
                         {!viewMode && (
                             <>
                                 <button
@@ -946,18 +1253,21 @@ const DisabledCheck = ({
                                 >
                                     <ModalOverlay />
                                     <ModalContent>
-                                        <ModalHeader>Bạn chắc chắn muốn lưu kết quả này?</ModalHeader>
+                                        <ModalHeader>
+                                            Bạn chắc chắn muốn lưu kết quả này?
+                                        </ModalHeader>
                                         <ModalBody pb={6}>
-                                            Sau khi bấm xác nhận sẽ không thể thu hồi hành động.
+                                            Sau khi bấm xác nhận sẽ không thể
+                                            thu hồi hành động.
                                         </ModalBody>
                                         <ModalFooter>
                                             <Button
-                                                    colorScheme="blue"
-                                                    mr={3}
-                                                    onClick={finishDisabledCheck}
-                                                >
-                                                    Xác nhận
-                                                </Button>
+                                                colorScheme="blue"
+                                                mr={3}
+                                                onClick={finishDisabledCheck}
+                                            >
+                                                Xác nhận
+                                            </Button>
                                             <Button
                                                 colorScheme="gray"
                                                 mr={3}
@@ -970,12 +1280,6 @@ const DisabledCheck = ({
                                 </Modal>
                             </>
                         )}
-                        <button
-                            onClick={handleModalClose}
-                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
-                        >
-                            Đóng
-                        </button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

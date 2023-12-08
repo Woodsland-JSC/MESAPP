@@ -355,6 +355,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -390,6 +391,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-2">
@@ -408,6 +410,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
 
