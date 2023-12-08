@@ -117,6 +117,8 @@ function HumidityCheck(props) {
         ];
     }, [humidityRecords]);
 
+    console.log("Danh sách cần lấy: ", humidityRecords);
+
     useEffect(() => {
         loadCurrentHumidRecords();
         loadHumidRecordList();

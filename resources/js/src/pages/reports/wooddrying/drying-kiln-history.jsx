@@ -559,7 +559,7 @@ function DryingKilnHistoryReport() {
         try {
             // Chỗ này sao dùng axios không được nhỉ, check lại sau!!
             const response = await fetch(
-                "http://localhost:8000/api/report/download/drying-process",
+                "http://localhost:8000/api/report/download/drying-kiln-history",
                 {
                     method: "GET",
                     headers: {
@@ -574,7 +574,10 @@ function DryingKilnHistoryReport() {
             // Download the file
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", "Quản Lý Sấy Gỗ.docx");
+            link.setAttribute(
+                "download",
+                "Danh mục theo dõi gỗ sấy trong lò.docx"
+            );
 
             document.body.appendChild(link);
             link.click();
@@ -1106,28 +1109,30 @@ function DryingKilnHistoryReport() {
                             </div>
                         </div>
 
-                        <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center mt-4">
-                            <div className="flex xl:w-2/3 md:w-2/3 gap-x-4 items-center whitespace-nowrap">
-                                Khổ giấy thể hiện:
-                                <Select
-                                    id="page-size"
-                                    options={dimensionOptions}
-                                    onChange={onDimensionChanged}
-                                    defaultValue={selectedDimension}
-                                />
-                            </div>
-                            <div className="flex w-full justify-between sm:justify-end space-x-4">
-                                <div className="h-full w-3/7 sm:w-auto">
-                                    <button
-                                        onClick={handleExportWord}
-                                        className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                    >
-                                        <PiExportLight />
-                                        <div>Word</div>
-                                    </button>
+                        {reportData && reportData.length > 0 && (
+                            <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center mt-4">
+                                <div className="flex xl:w-2/3 md:w-2/3 gap-x-4 items-center whitespace-nowrap">
+                                    Khổ giấy thể hiện:
+                                    <Select
+                                        id="page-size"
+                                        options={dimensionOptions}
+                                        onChange={onDimensionChanged}
+                                        defaultValue={selectedDimension}
+                                    />
+                                </div>
+                                <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                    <div className="h-full w-3/7 sm:w-auto">
+                                        <button
+                                            onClick={handleExportWord}
+                                            className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                        >
+                                            <PiExportLight />
+                                            <div>Word</div>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <Divider className="my-4" />
 
@@ -1332,10 +1337,18 @@ function DryingKilnHistoryReport() {
                                                     >
                                                         Tổng
                                                     </td>
-                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
-                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
-                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
-                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                        {""}
+                                                    </td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                        {""}
+                                                    </td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                        {""}
+                                                    </td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                        {""}
+                                                    </td>
                                                     <td className="px-4 py-2.5 text-right font-semibold border border-slate-700">
                                                         {totalSummary?.totalQuantity ||
                                                             0}

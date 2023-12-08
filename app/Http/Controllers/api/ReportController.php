@@ -135,7 +135,7 @@ class ReportController extends Controller
         $templateProcessor->saveAs($outputFile);
 
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
-        $outputPdf = storage_path('app/public/template/');
+        $outputPdf = storage_path('app/public/reports/');
         $output=null;
         $retval=null;
         $command = 'soffice --convert-to pdf "'.$outputFile.'" --outdir "'.$outputPdf.'"';
@@ -143,7 +143,7 @@ class ReportController extends Controller
         shell_exec($command);
 
         // Download the output file
-        return response()->download($outputPdfFile);
+        return response()->download($outputFile);
     }
 
 }
