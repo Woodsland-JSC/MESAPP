@@ -19,6 +19,10 @@ class AllocateLogs extends Model
         'DocEntry',
         'Status',
         'Type',
+        'Factorys',
+        'SPDich',
+        'CDTT',
+        'TO'
     ];
     public function getCreatedAtAttribute($value)
     {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
+import { useDropzone } from "react-dropzone";
 import { Link, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
@@ -200,6 +201,8 @@ function CreateUser() {
         factory: "",
         branch: "",
     });
+    const [signature, setSignature] = useState(null);
+    const [previewSignature, setPreviewSignature] = useState(null);
 
     const handleChangeAvatar = (event) => {
         setAvatarLoading(true);
@@ -219,6 +222,30 @@ function CreateUser() {
         reader.readAsDataURL(file);
         setAvatarLoading(false);
     };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop: (acceptedFiles, rejectedFiles) => {
+            if (rejectedFiles && rejectedFiles.length > 0) {
+                toast.error("Chỉ được upload file hình ảnh");
+            } else {
+                const imageFile = acceptedFiles[0];
+                // Kiểm tra kích thước
+                if (imageFile.size > 2 * 1024 * 1024) {
+                    toast.error("Vui lòng chọn hình có kích thước <= 2MB.");
+                    return;
+                }
+                setSignature(imageFile);
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const previewUrl = reader.result;
+                    setPreviewSignature(previewUrl);
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        },
+        accept: "image/*",
+        multiple: false,
+    });
 
     const blobToBase64 = (blob) => {
         return new Promise((resolve, reject) => {
@@ -810,6 +837,54 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                 </div>
+                                                <div
+                                                    className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 my-4"
+                                                    {...getRootProps()}
+                                                >
+                                                    <input
+                                                        {...getInputProps()}
+                                                    />
+                                                    {isDragActive ? (
+                                                        <p className="py-4">
+                                                            Thả hình ảnh tại đây
+                                                            ...
+                                                        </p>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex flex-col md:flex-row items-center gap-1">
+                                                                <span className="sm:block hidden">
+                                                                    Kéo và thả
+                                                                    hình ảnh chữ
+                                                                    ký vào đây,
+                                                                    hoặc
+                                                                </span>
+                                                                <span className="sm:hidden">Upload chữ ký</span>
+                                                                <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                                                    chọn từ file
+                                                                </span>
+                                                            </div>
+                                                            <span className="text-[12px] text-center w-full mt-4 sm:text-left md:text-sm text-red-600">
+                                                                Lưu ý: Tỉ lệ ảnh nên là 1:1 và ≤ 2MB
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                {previewSignature && (
+                                                    <div>
+                                                        <div className="relative w-fit mx-auto">
+                                                            <img
+                                                                className="mt-2 h-[200px] w-[200px] object-contain shadow-xl rounded"
+                                                                src={
+                                                                    previewSignature
+                                                                }
+                                                                alt="Signature-preview"
+                                                            />
+                                                            <span onClick={handleDeleteSignature} className="cursor-pointer absolute top-3 right-2 z-10">
+                                                                <TiDeleteOutline className="text-2xl text-red-600"/>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
                                                 <span className="mb-4">

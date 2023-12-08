@@ -10,6 +10,7 @@ use App\Http\Controllers\api\PermissionsController;
 use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
+use App\Http\Controllers\api\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/receipts-productions', [ProductionController::class, 'listProduction'])->name('danh-sach-thanh-pham');
         Route::get('/receipts-productions-detail', [ProductionController::class, 'viewdetail'])->name('detail-thanh-pham');
         Route::post('/receipts-production', [ProductionController::class, 'receipts'])->name('nhap-thanh-pham');
+        Route::delete('remove-receipt', [ProductionController::class, 'delete']);
+        Route::post('/accept-receipts', [ProductionController::class, 'accept']);
+        Route::post('/reject-receipts', [ProductionController::class, 'reject']);
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
@@ -116,6 +120,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
+
+    Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
+    Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
 });
 
 

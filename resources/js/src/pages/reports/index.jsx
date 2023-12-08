@@ -43,6 +43,16 @@ const exampleData = [
         name: "Báo cáo xếp chờ xấy",
         link: "/reports/wood-awaiting-drying",
     },
+    {
+        id: "0003",
+        name: "Báo cáo tồn sấy lựa",
+        link: "/reports/selected-dried-inventory",
+    },
+    {
+        id: "0004",
+        name: "Báo cáo lò đang sấy",
+        link: "/reports/current-drying-kiln",
+    },
 ];
 
 const exampleData1 = [
@@ -50,6 +60,16 @@ const exampleData1 = [
         id: "0001",
         name: "Biên bản kiểm tra lò sấy",
         link: "/reports/kiln-inspection",
+    },
+    {
+        id: "0002",
+        name: "Biên bản lịch sử vào lò",
+        link: "/reports/drying-kiln-history",
+    },
+    {
+        id: "0003",
+        name: "Biên bản kiểm tra độ ẩm",
+        link: "/reports/humidity-checking",
     },
 ];
 
@@ -287,7 +307,7 @@ function Report() {
                             <TabList className="">
                                 <Tab
                                     ref={reportTab}
-                                    onClick={() => handleTabClick(false)}
+                                    // onClick={() => handleTabClick(false)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo
@@ -295,7 +315,7 @@ function Report() {
                                 </Tab>
                                 <Tab
                                     ref={recordTab}
-                                    onClick={() => handleTabClick(true)}
+                                    // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
                                         Biên bản

@@ -29,119 +29,285 @@ import documents from "../../../assets/images/Documents.png";
 
 const exampleData = [
     {
-        id: 1,
-        checklist: "Vệ sinh lò sấy",
-        requirement: "Sạch sẽ, không có các vật thể lạ trong lò",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s03",
+        palletId: "2342-1035",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 2,
-        checklist: "Không bị rò rỉ nước",
-        requirement: "Giàn nhiệt kín không bị rò rỉ nước",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s03",
+        palletId: "2342-1037",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 3,
-        checklist: "Hệ thống gia nhiệt",
-        requirement:
-            "Van nhiệt đóng mở đúng theo tín hiệu điện Giàn nhiệt không bị rò rỉ nhiệt ra ngoài",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s03",
+        palletId: "2342-1040",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 4,
-        checklist: "Hệ thống điều tiết ẩm",
-        requirement: "Ống phun ẩm phải ở dạng sương, không được phun thành tia",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1042",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 5,
-        checklist: "Đầu đo đo độ ẩm gỗ",
-        requirement: "Các đầu đo không bị đứt, còn đầu gài vào thanh gỗ mẫu",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1043",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 6,
-        checklist: "Cửa thoát ẩm",
-        requirement: "Hoạt động đóng mở bằng tay/tự động dễ dàng, không bị kẹt",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1045",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 0.5,
+        weight: 0.5,
     },
     {
-        id: 7,
-        checklist: "Giấy cảm biến đo EMC",
-        requirement: "Tối đa 3 lượt sấy phải thay giấy mới",
-        condition: { "Số lần": 1 },
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1048",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 0.8,
+        weight: 0.8,
     },
     {
-        id: 8,
-        checklist: "Cảm biến nhiệt độ trong lò sấy",
-        requirement:
-            "Không sai khác so với nhiệt độ trong lò quá 2⁰C (Dùng súng bắn nhiệt đo nhiệt độ thực tế trong lò)",
-        condition: { "Cảm biến lò": 28, "Đo thực tế": 27.3 },
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1049",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 9,
-        checklist: "Van hơi, Van nước hồi",
-        requirement: "Kín, không bị rò rỉ",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1051",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 10,
-        checklist: "Đinh, dây đo độ ẩm",
-        requirement: "Hoạt động tốt",
-        condition: {},
-        evaluation: 1,
-        note: "",
+        batchId: "23003s03",
+        palletId: "2342-1052",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 11,
-        checklist: "Chiều dày thực tế",
-        requirement:
-            "Kiểm tra 5 palet ngẫu nhiên, mỗi palet 5 thanh ngẫu nhiên trong lò, dung sai cho phép + 2(mm)",
-        condition: {
-            "Mẫu 1": [24, 25, 24, 24, 24],
-            "Mẫu 2": [23, 24, 24, 24, 23],
-            "Mẫu 3": [24, 24, 24, 24, 24],
-            "Mẫu 4": [25, 24, 25, 24, 24],
-            "Mẫu 5": [24, 24, 24, 24, 24],
-        },
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1054",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
     },
     {
-        id: 12,
-        checklist: "Động cơ quạt gió, Tốc độ gió quạt",
-        requirement:
-            "Tốc độ gió quạt đạt tối thiểu 1m/s. Các quạt quay cùng chiều và ngược chiều phải đồng đều",
-        condition: {
-            "Quạt 1": 1.2,
-            "Quạt 2": 1.2,
-            "Quạt 3": 1.3,
-            "Quạt 4": 1.2,
-            "Quạt 5": 1.2,
-            "Quạt 6": 1.2,
-            "Quạt 7": 1.2,
-            "Quạt 8": 1.2,
-        },
-        evaluation: 1,
-        note: "",
+        batchId: "23003s04",
+        palletId: "2342-1056",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 0.6,
+        weight: 0.6,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1057",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1058",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1060",
+        thickness: 0,
+        width: 52,
+        length: 31,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23004s03",
+        palletId: "2342-1061",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23004s03",
+        palletId: "2342-1062",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23004s03",
+        palletId: "2342-1065",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 0.8,
+        weight: 0.8,
+    },
+    {
+        batchId: "23004s03",
+        palletId: "2342-1066",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 0.7,
+        weight: 0.7,
+    },
+    {
+        batchId: "23004s03",
+        palletId: "2342-1068",
+        thickness: 0,
+        width: 55,
+        length: 31,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1070",
+        thickness: 0,
+        width: 55,
+        length: 24,
+        quantity: 0.5,
+        weight: 0.5,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1071",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1072",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "23003s04",
+        palletId: "2342-1074",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "22004s01",
+        palletId: "2342-1076",
+        thickness: 0,
+        width: 52,
+        length: 25,
+        quantity: 1.5,
+        weight: 1.5,
+    },
+    {
+        batchId: "22004s01",
+        palletId: "2342-1077",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "22004s01",
+        palletId: "2342-1078",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 1,
+        weight: 1,
+    },
+    {
+        batchId: "22004s01",
+        palletId: "2342-1080",
+        thickness: 0,
+        width: 64,
+        length: 24,
+        quantity: 0.7,
+        weight: 0.7,
+    },
+    {
+        batchId: "22004s01",
+        palletId: "2342-1084",
+        thickness: 0,
+        width: 52,
+        length: 31,
+        quantity: 1,
+        weight: 1,
+    },
+];
+
+// Thêm API get tất cả lò theo nhà máy
+const allKiln = [
+    {
+        id: "LO001",
+        name: "Lò số 01",
+    },
+    {
+        id: "LO002",
+        name: "Lò số 02",
+    },
+    {
+        id: "LO003",
+        name: "Lò số 03",
+    },
+    {
+        id: "LO004",
+        name: "Lò số 04",
     },
 ];
 
@@ -157,7 +323,7 @@ const dimensionOptions = [
 ];
 
 const workSheetName = "Sheet1";
-const workBookName = "Biên bản kiểm tra lò sấy";
+const workBookName = "Biên bản lịch sử vào lò";
 
 // var checkboxSelection = function (params) {
 //     return params.columnApi.getRowGroupColumns().length === 0;
@@ -167,8 +333,9 @@ const workBookName = "Biên bản kiểm tra lò sấy";
 //     return params.columnApi.getRowGroupColumns().length === 0;
 // };
 
-function KilnInspectionReport() {
+function DryingKilnHistoryReport() {
     let factorySelectRef = useRef(null);
+    let kilnSelectRef = useRef(null);
     let radioRef = useRef(null);
     const { loading, setLoading } = useAppContext();
 
@@ -187,9 +354,11 @@ function KilnInspectionReport() {
 
     const [branches, setBranches] = useState([]);
     const [factories, setFactories] = useState([]);
+    const [kilns, setKilns] = useState([]);
 
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [selectedFactory, setSelectedFactory] = useState(null);
+    const [selectedKiln, setSelectedKiln] = useState(null);
 
     const [factoryLoading, setFactoryLoading] = useState(false);
 
@@ -206,6 +375,7 @@ function KilnInspectionReport() {
     const [firstTimeRender, setFirstTimeRender] = useState(true);
 
     const [reportData, setReportData] = useState([]);
+    const [totalSummary, setTotalSummary] = useState({});
 
     // Này là hàm thêm pinned top row
     // const onPinnedRowTopCount = useCallback(() => {
@@ -496,6 +666,25 @@ function KilnInspectionReport() {
     // }, [startDate, endDate]);
 
     useEffect(() => {
+        const handleGetFactories = async () => {
+            setKilns([]);
+            setSelectedKiln("");
+            setDateList([]);
+            setReportDate("");
+            setTimeout(() => {
+                const kilnOptions = allKiln.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                }));
+                setKilns(kilnOptions);
+            }, 1000);
+        };
+        if (selectedFactory) {
+            handleGetFactories();
+        }
+    }, [selectedFactory]);
+
+    useEffect(() => {
         const currentDate = new Date();
         const isValidStart = startDate && startDate <= currentDate;
         const isValidEnd = endDate && endDate <= currentDate;
@@ -537,7 +726,7 @@ function KilnInspectionReport() {
             toast("Ngày bắt đầu phải ≤ ngày kết thúc.");
         }
 
-        if (startDate && endDate && selectedFactory) {
+        if (startDate && endDate && selectedKiln) {
             const exampleDateList = [
                 {
                     value: "24/10/2023",
@@ -605,7 +794,7 @@ function KilnInspectionReport() {
             //     });
             // }
         }
-    }, [selectedFactory, startDate, endDate]);
+    }, [selectedKiln, startDate, endDate]);
 
     useEffect(() => {
         if (firstTimeRender) {
@@ -702,7 +891,7 @@ function KilnInspectionReport() {
 
         setFirstTimeRender(false);
 
-        document.title = "Woodsland - Biên bản kiểm tra lò sấy";
+        document.title = "Woodsland - Biên bản lịch sử vào lò";
         const params = new URLSearchParams(window.location.search);
 
         return () => {
@@ -717,6 +906,8 @@ function KilnInspectionReport() {
                 if (selectedBranch?.value) {
                     setFactories([]);
                     setSelectedFactory(null);
+                    setKilns([]);
+                    setSelectedKiln(null);
                     setReportData([]);
                     setReportDate("");
                     setDateList([]);
@@ -746,6 +937,22 @@ function KilnInspectionReport() {
     useEffect(() => {
         if (reportDate) {
             setReportData(exampleData);
+            setTotalSummary({
+                totalQuantity: Number(
+                    exampleData
+                        .reduce((acc, item) => {
+                            return acc + (item?.quantity || 0);
+                        }, 0)
+                        .toFixed(4)
+                ),
+                totalWeight: Number(
+                    exampleData
+                        .reduce((acc, item) => {
+                            return acc + (item?.weight || 0);
+                        }, 0)
+                        .toFixed(4)
+                ),
+            });
         } else {
             setReportData([]);
         }
@@ -779,7 +986,7 @@ function KilnInspectionReport() {
                 <div className="w-screen p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
                     {/* Header */}
                     <div className="text-xl md:text-3xl font-bold mb-6">
-                        Biên bản kiểm tra lò sấy{" "}
+                        Biên bản lịch sử vào lò{" "}
                     </div>
                     {/* h-[calc(100%-165px)] */}
                     {/* Main content */}
@@ -809,8 +1016,25 @@ function KilnInspectionReport() {
                                     <Select
                                         ref={factorySelectRef}
                                         options={factories}
+                                        value={selectedFactory}
                                         onChange={(value) =>
                                             setSelectedFactory(value)
+                                        }
+                                        placeholder="Lựa chọn"
+                                        className="flex w-40"
+                                    />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <label className="whitespace-nowrap">
+                                        Lò sấy:{" "}
+                                        <span className="text-red-600">*</span>
+                                    </label>
+                                    <Select
+                                        ref={kilnSelectRef}
+                                        options={kilns}
+                                        value={selectedKiln}
+                                        onChange={(value) =>
+                                            setSelectedKiln(value)
                                         }
                                         placeholder="Lựa chọn"
                                         className="flex w-40"
@@ -926,7 +1150,7 @@ function KilnInspectionReport() {
                                         <thead>
                                             <tr>
                                                 <th
-                                                    rowSpan={4}
+                                                    rowSpan={5}
                                                     className="px-6 py-3 capitalize w-60 text-center border border-slate-700"
                                                 >
                                                     <img
@@ -939,20 +1163,20 @@ function KilnInspectionReport() {
                                                     colSpan={2}
                                                     className="px-6 py-3 font-semibold capitalize text-center border border-slate-700"
                                                 >
-                                                    Quy trình sấy gỗ
+                                                    Sổ tay COC
                                                 </th>
                                                 <th
-                                                    rowSpan={4}
+                                                    rowSpan={5}
                                                     className="px-6 py-3 text-left font-light border-slate-700 w-64"
                                                 >
                                                     <div className="flex flex-col">
                                                         <span>
-                                                            Mã số: QT-14/BM-02
+                                                            Mã số: BM-COC-09
                                                         </span>{" "}
                                                         <span>
-                                                            Ngày BH: 19/08/2020
+                                                            Ngày BH: 05/09/2013
                                                         </span>
-                                                        <span>Lần BH: 04</span>{" "}
+                                                        <span>Lần BH: 02</span>{" "}
                                                     </div>
                                                 </th>
                                             </tr>
@@ -961,15 +1185,16 @@ function KilnInspectionReport() {
                                                     colSpan={2}
                                                     className="px-6 py-3 text-center text-xl font-bold uppercase border border-slate-700"
                                                 >
-                                                    Biên bản kiểm tra lò sấy
+                                                    Danh mục theo dõi gỗ sấy
+                                                    trong lò
                                                 </th>
                                             </tr>
                                             <tr>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Chi nhánh: {}
+                                                    Chi nhánh: {} | Nhà máy: {}
                                                 </th>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Nhà máy: {}
+                                                    Ngày vào lò: {}
                                                 </th>
                                             </tr>
                                             <tr>
@@ -977,7 +1202,15 @@ function KilnInspectionReport() {
                                                     Lò số: {}
                                                 </th>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Ngày kiểm: {}
+                                                    Loại gỗ sấy: {}
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                    Tổng số pallet: {}
+                                                </th>
+                                                <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                    Trạng thái môi trường: {}
                                                 </th>
                                             </tr>
                                         </thead>
@@ -1001,37 +1234,49 @@ function KilnInspectionReport() {
                                                         scope="col"
                                                         className="px-6 py-3 capitalize text-center border border-slate-700"
                                                     >
-                                                        Danh mục kiểm tra
+                                                        Mã lô gỗ nhập
                                                     </th>
                                                     <th
                                                         scope="col"
                                                         className="px-6 py-3 capitalize text-center border border-slate-700"
                                                     >
-                                                        Yêu cầu
+                                                        Mã pallet
                                                     </th>
                                                     <th
                                                         scope="col"
                                                         className="px-6 py-3 capitalize text-center border border-slate-700"
                                                     >
-                                                        Tình trạng
+                                                        Dày
                                                     </th>
                                                     <th
                                                         scope="col"
                                                         className="px-6 py-3 capitalize text-center border border-slate-700"
                                                     >
-                                                        Đánh giá
+                                                        Rộng
                                                     </th>
                                                     <th
                                                         scope="col"
                                                         className="px-6 py-3 capitalize text-center border border-slate-700"
                                                     >
-                                                        Ghi chú
+                                                        Dài
+                                                    </th>
+                                                    <th
+                                                        scope="col"
+                                                        className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                    >
+                                                        Số lượng
+                                                    </th>
+                                                    <th
+                                                        scope="col"
+                                                        className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                    >
+                                                        Khối lượng
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {exampleData?.length > 0 &&
-                                                    exampleData.map(
+                                                {reportData?.length > 0 &&
+                                                    reportData.map(
                                                         (item, index) => (
                                                             <tr
                                                                 key={index}
@@ -1043,77 +1288,63 @@ function KilnInspectionReport() {
                                                                 >
                                                                     {index + 1}
                                                                 </th>
-                                                                <td className="px-4 py-2.5 border border-slate-700">
-                                                                    {
-                                                                        item.checklist
-                                                                    }
-                                                                </td>
-                                                                <td className="px-4 py-2.5 border border-slate-700">
-                                                                    {
-                                                                        item.requirement
-                                                                    }
-                                                                </td>
-                                                                <td className="px-4 py-2.5 w-56 border border-slate-700">
-                                                                    {Object.keys(
-                                                                        item.condition
-                                                                    ).length ==
-                                                                    0 ? (
-                                                                        ""
-                                                                    ) : (
-                                                                        <>
-                                                                            {Object.entries(
-                                                                                item.condition
-                                                                            ).map(
-                                                                                ([
-                                                                                    key,
-                                                                                    value,
-                                                                                ]) => {
-                                                                                    return (
-                                                                                        <div
-                                                                                            key={
-                                                                                                key
-                                                                                            }
-                                                                                        >
-                                                                                            {
-                                                                                                key
-                                                                                            }
-
-                                                                                            :{" "}
-                                                                                            {Array.isArray(
-                                                                                                value
-                                                                                            )
-                                                                                                ? value.join(
-                                                                                                      ", "
-                                                                                                  )
-                                                                                                : value}{" "}
-                                                                                            {index ==
-                                                                                                11 &&
-                                                                                                "(m/s)"}
-                                                                                        </div>
-                                                                                    );
-                                                                                }
-                                                                            )}
-                                                                        </>
-                                                                    )}
-                                                                </td>
-
                                                                 <td className="px-4 py-2.5 text-center border border-slate-700">
-                                                                    <Checkbox
-                                                                        isDisabled
-                                                                        isChecked={
-                                                                            item.evaluation ==
-                                                                            1
-                                                                                ? true
-                                                                                : false
-                                                                        }
-                                                                    ></Checkbox>
+                                                                    {
+                                                                        item.batchId
+                                                                    }
                                                                 </td>
-                                                                <td className="px-4 py-2.5 border border-slate-700">
-                                                                    {item.note}
+                                                                <td className="px-4 py-2.5 text-center border border-slate-700">
+                                                                    {
+                                                                        item.palletId
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-2.5 text-center w-56 border border-slate-700">
+                                                                    {
+                                                                        item.thickness
+                                                                    }
+                                                                </td>
+
+                                                                <td className="px-4 py-2.5 text-right border border-slate-700">
+                                                                    {item.width}
+                                                                </td>
+                                                                <td className="px-4 py-2.5 text-right border border-slate-700">
+                                                                    {
+                                                                        item.length
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-2.5 text-right border border-slate-700">
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-2.5 text-right border border-slate-700">
+                                                                    {
+                                                                        item.weight
+                                                                    }
                                                                 </td>
                                                             </tr>
                                                         )
                                                     )}
+                                                <tr>
+                                                    <td
+                                                        colSpan={2}
+                                                        className="px-4 py-2.5 text-center font-semibold border border-slate-700"
+                                                    >
+                                                        Tổng
+                                                    </td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
+                                                    <td className="px-4 py-2.5 text-center border border-slate-700">{""}</td>
+                                                    <td className="px-4 py-2.5 text-right font-semibold border border-slate-700">
+                                                        {totalSummary?.totalQuantity ||
+                                                            0}
+                                                    </td>
+                                                    <td className="px-4 py-2.5 text-right font-semibold border border-slate-700">
+                                                        {totalSummary?.totalWeight ||
+                                                            0}
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -1158,4 +1389,4 @@ function KilnInspectionReport() {
     );
 }
 
-export default KilnInspectionReport;
+export default DryingKilnHistoryReport;
