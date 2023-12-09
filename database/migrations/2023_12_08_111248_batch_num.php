@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('allocatelogs', function (Blueprint $table) {
-            $table->string('Type')->nullable();
+        Schema::create('BatchNums', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('palletID');
+            $table->string('ItemCode');
+            $table->string('BatchNumber');
+            $table->float('Quantity');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('allocatelogs', function (Blueprint $table) {
-            $table->drop('Type');
-        });
+        Schema::dropIfExists('BatchNums');
     }
 };

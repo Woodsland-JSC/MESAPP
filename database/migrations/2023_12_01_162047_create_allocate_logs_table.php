@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('AllocateLogs', function (Blueprint $table) {
+        Schema::create('allocatelogs', function (Blueprint $table) {
             $table->id();
             $table->string('BaseEntry')->nullable();
             $table->string('ItemCode')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('AllocateLogs');
+        Schema::dropIfExists('allocatelogs');
     }
 };

@@ -75,6 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [DryingOvenController::class, 'index'])->name('danh-sach-pallet');
         Route::post('/create', [DryingOvenController::class, 'StorePallet'])->name('tao-xep-say');
         Route::get('find/{Id}', [DryingOvenController::class, 'showbyID'])->name('tim-kiem-pallet');
+        Route::post('/v2/create', [DryingOvenController::class, 'StorePalletNew'])->name('tao-xep-say2');
     });
     Route::group(['prefix' => 'ovens'], function () {
         Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('danh-sach-lo');
