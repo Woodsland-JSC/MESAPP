@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('BatchNums', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('palletID');
-            $table->string('ItemCode');
-            $table->string('BatchNumber');
-            $table->float('Quantity');
+            $table->string('palletID')->nullable();
+            $table->string('ItemCode')->nullable();
+            $table->string('BatchNumber')->nullable();
+            $table->float('Quantity')->nullable();
+            $table->float('CDai')->nullable()->default(1);
+            $table->float('CRong')->nullable()->default(1);
+            $table->float('CDay')->nullable()->default(1);
             $table->timestamps();
         });
     }

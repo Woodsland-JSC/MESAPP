@@ -148,7 +148,7 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
+            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
@@ -210,7 +210,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
@@ -268,7 +268,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->get();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
             $test = [];
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(

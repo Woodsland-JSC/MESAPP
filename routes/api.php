@@ -110,6 +110,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
     Route::get('/branch', [MasterDataController::class, 'branch'])->name('branch');
     Route::get('/stock/{itemid}', [MasterDataController::class, 'getStockByItem'])->name('ton-kho-theo-ma-sp');
+    Route::get('/v2/stock/{itemid}', [MasterDataController::class, 'getStockByItemnew'])->name('ton-kho-theo-ma-sp-2');
     Route::get('/typeofwood', [MasterDataController::class, 'getLoaiGo'])->name('loai-go');
     Route::get('/dryingmethod', [MasterDataController::class, 'getQuyCachSay'])->name('quy-cach-say');
     Route::get('/dryingoven', [MasterDataController::class, 'getLoSay'])->name('lo-say');
@@ -119,6 +120,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
+    Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
 
