@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('BaseEntry')->nullable();
             $table->string('ItemCode')->nullable();
-            $table->float('Qty')->nullable();
+            $table->DECIMAL('Qty', 19, 6)->nullable();
             $table->text('Body')->nullable();
             $table->integer('DocNum')->nullable();
             $table->integer('DocEntry')->nullable();

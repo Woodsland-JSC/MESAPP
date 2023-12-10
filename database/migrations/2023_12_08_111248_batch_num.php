@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('palletID')->nullable();
             $table->string('ItemCode')->nullable();
             $table->string('BatchNumber')->nullable();
-            $table->float('Quantity')->nullable();
+            $table->DECIMAL('Quantity', 19, 6)->nullable();
             $table->float('CDai')->nullable()->default(1);
             $table->float('CRong')->nullable()->default(1);
             $table->float('CDay')->nullable()->default(1);

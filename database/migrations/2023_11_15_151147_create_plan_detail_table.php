@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('PlanID');
             $table->string('pallet');
             $table->string('size');
-            $table->float('Qty');
+            $table->DECIMAL('Qty', 19, 2);
             $table->float('Mass');
             $table->timestamps();
             $table->foreign('PlanID')->references('PlanID')->on('planDryings');

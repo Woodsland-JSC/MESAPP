@@ -165,7 +165,7 @@ class PlanController extends Controller
                 'pallet' => $pallet,
                 'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
                 'Qty' => $data->Qty,
-                'Mass' => 120
+                'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
             ]);
 
 
@@ -239,7 +239,6 @@ class PlanController extends Controller
                 //update hàng loạt lệnh production orders sang plan
                 foreach ($data as $entry) {
                     Pallet::where('palletID', $entry->pallet)->update(['flag' => 1]);
-                    UpdateProductionOrders::dispatch($entry->DocEntry, $entry->pallet);
                 }
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
@@ -269,8 +268,14 @@ class PlanController extends Controller
             }
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+            $detailrecord = plandetail::where('PlanID', $id)->count();
             $test = [];
+            if ($detailrecord == 0) {
+                return response()->json(['error' => 'số lượng pallet phải lớn hơn 0'], 500);
+            }
             if ($record->count() > 0) {
+                //chắc chắn lò có pallet
+
                 plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 3,
@@ -315,23 +320,6 @@ class PlanController extends Controller
                     Pallet::where('palletID', $header->palletID)->update([
                         'IssueNumber' => -1
                     ]);
-                    $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [
-                            [
-                                "Quantity" => $header->TotalQty,
-                                "BaseLine" => 0,
-                                "WarehouseCode" => $header->WhsCode,
-                                "BaseEntry" => $header->DocEntry,
-                                "BaseType" => 202,
-                                "BatchNumbers" => $data,
-                            ],
-                        ],
-                    ];
-
-                    $test[]
-                        = $body;
-                    issueProduction::dispatch($body);
                 }
 
                 DB::commit();
@@ -425,7 +413,6 @@ class PlanController extends Controller
                     ];
 
                     $test[] = $body;
-                    receiptProduction::dispatch($body, $header->DocEntry);
                 }
                 // ulock lò sấy
                 $conDB = (new ConnectController)->connect_sap();

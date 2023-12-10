@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pallets', function (Blueprint $table) {
-            $table->integer('IssueNumber')->default(0)->nullable();
-            $table->integer('ReceiptNumber')->default(0)->nullable();
+            $table->float('IssueNumber', 14)->default(0)->nullable();
+            $table->float('ReceiptNumber', 14)->default(0)->nullable();
         });
     }
 
