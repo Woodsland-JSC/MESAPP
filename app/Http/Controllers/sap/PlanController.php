@@ -20,9 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\UniqueOvenStatusRule;
 use Carbon\Carbon;
-use App\Jobs\UpdateProductionOrders;
-use App\Jobs\issueProduction;
-use App\Jobs\receiptProduction;
+use App\Models\Warehouse;
 
 class PlanController extends Controller
 {
