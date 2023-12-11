@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react";
 import { addDays, format, add } from "date-fns";
+import moment from "moment";
 
 function Details() {
     const location = useLocation();
@@ -206,16 +207,15 @@ function Details() {
                                         purpose={BOWData.Reason}
                                         thickness={BOWData.Method}
                                         finishedDate={
-                                            BOWData.Time && BOWData.created_at
-                                                ? format(
-                                                      addDays(
-                                                          new Date(
-                                                              BOWData.created_at
-                                                          ),
-                                                          parseInt(BOWData.Time)
-                                                      ),
-                                                      "yyyy-MM-dd HH:mm:ss"
-                                                  )
+                                            BOWData?.Time && BOWData?.created_at
+                                                ?
+                                                  moment(
+                                                    BOWData.created_at
+                                                )
+                                                    .add(BOWData.Time, "days")
+                                                    .format(
+                                                        "YYYY-MM-DD HH:mm:ss"
+                                                    )
                                                 : "Invalid Date"
                                         }
                                         palletQty={BOWData.TotalPallet}
