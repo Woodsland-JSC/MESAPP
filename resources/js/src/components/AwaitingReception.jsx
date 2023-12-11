@@ -78,21 +78,21 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                         {
                             type == "plywood" ? (
                                 <>
-                                <div className="flex gap-2">
-                            <span>Lệnh sản xuất: </span>
-                            <span className="font-bold">{data?.command || ""}</span>
-                        </div>
+                                    <div className="flex gap-2">
+                                        <span>Lệnh sản xuất: </span>
+                                        <span className="font-bold">{data?.command || ""}</span>
+                                    </div>
                                 </>
                             ) : (
                                 <>
-                                <div className="flex gap-2">
-                            <span>Mã thành phẩm: </span>
-                            <span className="font-bold">{data?.id || ""}</span>
-                        </div>
+                                    <div className="flex gap-2">
+                                        <span>Mã thành phẩm: </span>
+                                        <span className="font-bold">{data?.id || ""}</span>
+                                    </div>
                                 </>
                             )
                         }
-                        
+
                         <div className="flex gap-2">
                             <span>Tên: </span>
                             <span className="font-bold">
@@ -124,7 +124,7 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                                 {data?.amount || ""}
                             </span>
                         </div>
-                        
+
                         <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
                             Người tạo:{" "}
                             {data?.createdBy?.last_name +
@@ -202,6 +202,7 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                                             isChecked={
                                                 item.value === selectedReason
                                             }
+                                            borderColor="darkgrey !important"
                                         />
                                         {item.label}
                                     </label>
