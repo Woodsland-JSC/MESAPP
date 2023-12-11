@@ -691,7 +691,8 @@ function User() {
     }, []);
 
     useEffect(() => {
-        if (isFirstLoading) {
+        console.log("Hello");
+        // if (isFirstLoading) {
             const selectedBranch = input.branch;
 
             const getFactoriesByBranchId = async () => {
@@ -723,7 +724,7 @@ function User() {
 
             // console.log("Chỗ này call api nè: ", factorySelectRef.current);
             getFactoriesByBranchId();
-        }
+        // }
     }, [input.branch]);
 
     useEffect(() => {

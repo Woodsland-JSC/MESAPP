@@ -21,6 +21,7 @@ import palletsApi from "../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
+import moment from "moment";
 import Loader from "../../components/Loader";
 
 function CreateDryingPlan() {
@@ -276,7 +277,9 @@ function CreateDryingPlan() {
                                             class="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div className="">
-                                                <div className="w-[105px]">Quản lý sấy gỗ</div>
+                                                <div className="w-[105px]">
+                                                    Quản lý sấy gỗ
+                                                </div>
                                             </div>
                                         </Link>
                                     </div>
@@ -469,28 +472,26 @@ function CreateDryingPlan() {
                         {createdBowCards.map((createdbowCard, index) => (
                             <BOWCard key={index} {...createdbowCard} />
                         ))}
-                        {filteredBowCards?.map((bowCard, index) => (
-                            <BOWCard
-                                key={index}
-                                planID={bowCard.PlanID}
-                                status={bowCard.Status}
-                                batchNumber={bowCard.Code}
-                                kilnNumber={bowCard.Oven}
-                                thickness={bowCard.Method}
-                                purpose={bowCard.Reason}
-                                finishedDate={format(
-                                    addDays(
-                                        new Date(bowCard.created_at),
-                                        bowCard.Time
-                                    ),
-                                    "yyyy-MM-dd HH:mm:ss"
-                                )}
-                                palletQty={bowCard.TotalPallet}
-                                weight={bowCard.Mass}
-                                isChecked={bowCard.Checked}
-                                isReviewed={bowCard.Review}
-                            />
-                        )).reverse()}
+                        {filteredBowCards
+                            ?.map((bowCard, index) => (
+                                <BOWCard
+                                    key={index}
+                                    planID={bowCard.PlanID}
+                                    status={bowCard.Status}
+                                    batchNumber={bowCard.Code}
+                                    kilnNumber={bowCard.Oven}
+                                    thickness={bowCard.Method}
+                                    purpose={bowCard.Reason}
+                                    finishedDate={moment(bowCard?.created_at)
+                                        .add(bowCard?.Time, "days")
+                                        .format("YYYY-MM-DD HH:mm:ss")}
+                                    palletQty={bowCard.TotalPallet}
+                                    weight={bowCard.Mass}
+                                    isChecked={bowCard.Checked}
+                                    isReviewed={bowCard.Review}
+                                />
+                            ))
+                            .reverse()}
                     </div>
                     {/* ) : (
                         <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-500 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>

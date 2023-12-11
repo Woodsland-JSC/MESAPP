@@ -6,6 +6,7 @@ import palletsApi from "../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
+import moment from "moment";
 import Loader from "../../components/Loader";
 
 function KilnChecking() {
@@ -144,36 +145,38 @@ function KilnChecking() {
                     {/* Content */}
                     {/* {(bowCards.Status === 1).length > 0 &&
                     (bowCards.Status === 2).length > 0 ? ( */}
-                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                            {bowCards?.map(
-                                (bowCard, index) =>
-                                    (bowCard.Status === 1 ||
-                                        bowCard.Status === 2) && (
-                                        <BOWCard
-                                            key={index}
-                                            planID={bowCard.PlanID}
-                                            status={bowCard.Status}
-                                            batchNumber={bowCard.Code}
-                                            kilnNumber={bowCard.Oven}
-                                            thickness={bowCard.Method}
-                                            purpose={bowCard.Reason}
-                                            finishedDate={format(
-                                                addDays(
-                                                    new Date(
-                                                        bowCard.created_at
-                                                    ),
-                                                    bowCard.Time
-                                                ),
-                                                "yyyy-MM-dd HH:mm:ss"
-                                            )}
-                                            palletQty={bowCard.TotalPallet}
-                                            weight={bowCard.Mass}
-                                            isChecked={bowCard.Checked}
-                                            isReviewed={bowCard.Review}
-                                        />
-                                    )
-                            ).reverse()}
-                        </div>
+                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                        {bowCards &&
+                            bowCards?.length > 0 &&
+                            bowCards
+                                ?.map(
+                                    (bowCard, index) =>
+                                        (bowCard.Status === 1 ||
+                                            bowCard.Status === 2) && (
+                                            <BOWCard
+                                                key={index}
+                                                planID={bowCard.PlanID}
+                                                status={bowCard.Status}
+                                                batchNumber={bowCard.Code}
+                                                kilnNumber={bowCard.Oven}
+                                                thickness={bowCard.Method}
+                                                purpose={bowCard.Reason}
+                                                finishedDate={moment(
+                                                    bowCard?.created_at
+                                                )
+                                                    .add(bowCard?.Time, "days")
+                                                    .format(
+                                                        "YYYY-MM-DD HH:mm:ss"
+                                                    )}
+                                                palletQty={bowCard.TotalPallet}
+                                                weight={bowCard.Mass}
+                                                isChecked={bowCard.Checked}
+                                                isReviewed={bowCard.Review}
+                                            />
+                                        )
+                                )
+                                .reverse()}
+                    </div>
                     {/* ) : (
                         <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">
                             Tiến trình hiện tại không có hoạt động nào.

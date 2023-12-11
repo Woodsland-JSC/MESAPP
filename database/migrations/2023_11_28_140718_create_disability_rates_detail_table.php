@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('SLMau');
             $table->float('SLMoTop');
             $table->float('SLCong');
-            $table->text('note');
+            $table->text('note')->nullable();
             // $table->text('note')->nullable();
             $table->integer('created_by');
             $table->timestamps();

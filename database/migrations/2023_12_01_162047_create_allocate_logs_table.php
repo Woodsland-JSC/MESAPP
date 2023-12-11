@@ -20,6 +20,11 @@ return new class extends Migration
             $table->integer('DocNum')->nullable();
             $table->integer('DocEntry')->nullable();
             $table->integer('Status')->default(-1);
+            $table->string('Factorys')->nullable();
+            $table->string('SPDich')->nullable();
+            $table->string('CDTT')->nullable();
+            $table->string('TO')->nullable();
+            $table->string('Type')->nullable();
             $table->timestamps();
         });
     }

@@ -773,6 +773,7 @@ function HumidityCheck(props) {
                                                 colorScheme="blue"
                                                 mr={3}
                                                 onClick={requirementMetHandle}
+                                                className="bg-blue-500"
                                             >
                                                 Duyệt ra lò
                                             </Button>
@@ -783,6 +784,7 @@ function HumidityCheck(props) {
                                                 onClick={
                                                     requirementFailedHandle
                                                 }
+                                                className="bg-blue-500"
                                             >
                                                 Xác nhận
                                             </Button>
@@ -792,6 +794,7 @@ function HumidityCheck(props) {
                                             colorScheme="gray"
                                             mr={3}
                                             onClick={onCompleteClose}
+                                            className="w-full bg-slate-500"
                                         >
                                             Đóng
                                         </Button>

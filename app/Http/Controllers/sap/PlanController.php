@@ -342,13 +342,16 @@ class PlanController extends Controller
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
                 'PlanID' => 'required', // new UniqueOvenStatusRule
-
+                'result' => 'required'
             ]);
             if ($validator->fails()) {
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+            // Lấy kho sấy
+            // lấy kho
+
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
                     [
@@ -360,6 +363,7 @@ class PlanController extends Controller
                     'planDryings.Code as newbatch',
                     'planDryings.Oven',
                     'pallets.DocEntry',
+                    'pallets.Code',
                     'pallet_details.ItemCode',
                     'pallet_details.WhsCode',
                     'pallet_details.Qty',
@@ -396,19 +400,13 @@ class PlanController extends Controller
                     $header = $group->first();
 
                     $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [
-                            [
-                                "Quantity" => $header->TotalQty,
-                                "BaseLine" => 0,
-                                "WarehouseCode" => $header->WhsCode,
-                                "BaseEntry" => $header->DocEntry,
-                                "BaseType" => 202,
-                                "BatchNumbers" => $data,
-
-                            ],
-                        ],
+                        "U_Pallet" => $pallet->Code,
+                        "U_CreateBy" => Auth::user()->sap_id,
+                        "BPLID" => Auth::user()->branch,
+                        "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                        "StockTransferLines" => $ldt
                     ];
+
 
                     $test[] = $body;
                 }

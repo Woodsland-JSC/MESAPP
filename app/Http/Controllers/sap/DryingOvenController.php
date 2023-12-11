@@ -163,9 +163,20 @@ class DryingOvenController extends Controller
             // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
             $ldt = [];
             foreach ($palletDetails as $detailData) {
-                $detailData['palletID'] = $pallet->palletID;
-                //  pallet_details::create($detailData);
+
+                $datainsert = [];
+                $datainsert['palletID'] = $pallet->palletID;
+                $datainsert['WhsCode2'] = $towarehouse;
+                $datainsert['ItemCode'] = $detailData['ItemCode'];
+                $datainsert['WhsCode'] = $detailData['WhsCode'];
+                $datainsert['BatchNum'] = $detailData['BatchNum'];
+                $datainsert['CDai'] = $detailData['CDai'];
+                $datainsert['CDay'] = $detailData['CDay'];
+                $datainsert['CRong'] = $detailData['CRong'];
+                $datainsert['Qty'] = $detailData['Qty'];
+                pallet_details::create($datainsert);
                 $ldt[] = [
+
                     "ItemCode" => $detailData['ItemCode'],
                     "WarehouseCode" =>  $towarehouse,
                     "FromWarehouseCode" => $detailData['WhsCode'],
