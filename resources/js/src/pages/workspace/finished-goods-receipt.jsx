@@ -885,7 +885,7 @@ function FinishedGoodsReceipt() {
                                     if (detail.id === receiptSubItem.id) {
                                         return {
                                             ...detail,
-                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
                                         };
                                     }
                                     return detail;
@@ -905,7 +905,7 @@ function FinishedGoodsReceipt() {
                                     if (detail.id === receiptSubItem.id) {
                                         return {
                                             ...detail,
-                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
                                         };
                                     }
                                     return detail;
@@ -925,7 +925,7 @@ function FinishedGoodsReceipt() {
                                     if (detail.id === receiptSubItem.id) {
                                         return {
                                             ...detail,
-                                            returns: [...detail.returns, {...reason, amount: Number(receiptSubItem.amount)}],
+                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
                                         };
                                     }
                                     return detail;
@@ -976,11 +976,11 @@ function FinishedGoodsReceipt() {
                 if (item.itemName.toLowerCase().includes(input.toLowerCase())) {
                     return true;
                 }
-            
+
                 const hasSubItem = item.itemDetails.some(
                     (detail) => detail.subItemName.toLowerCase().includes(input.toLowerCase())
                 );
-            
+
                 return hasSubItem;
             });
 
@@ -1723,6 +1723,7 @@ function FinishedGoodsReceipt() {
                                 colorScheme="red"
                                 // onClick={}
                                 ml={3}
+
                             >
                                 Xác nhận
                             </Button>

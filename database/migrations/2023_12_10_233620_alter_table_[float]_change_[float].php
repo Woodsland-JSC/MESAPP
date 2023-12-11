@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notireceipt', function (Blueprint $table) {
-            $table->id();
-            $table->string('text')->nullable();
-            $table->DECIMAL('Quantity', 19, 6)->nullable();
-            $table->integer('deleted')->default(0);
-            $table->timestamps();
+        Schema::table('planDryings', function (Blueprint $table) {
+            $table->DECIMAL('Mass', 19, 4)->change();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notireceipt');
+        Schema::table('planDryings', function (Blueprint $table) {
+            //
+        });
     }
 };

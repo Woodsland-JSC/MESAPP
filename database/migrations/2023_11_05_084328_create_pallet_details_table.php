@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('ItemCode');
             $table->string('WhsCode', 50);
             $table->string('BatchNum');
-            $table->float('Qty');
+            $table->DECIMAL('Qty', 19, 2);
             $table->timestamps();
             $table->foreign('palletID')->references('palletID')->on('pallets');
         });

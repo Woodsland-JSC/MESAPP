@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
+use App\Models\Warehouse;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -147,6 +148,100 @@ class DryingOvenController extends Controller
                 'status_code' => 500,
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+    function StorePalletNew(Request $request)
+    {
+
+        try {
+            DB::beginTransaction();
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap']);
+            $towarehouse = Warehouse::where('flag', 'CS')->WHERE('branch', Auth::user()->branch)->first()->WhsCode;
+            $pallet = Pallet::create($palletData);
+            // Lấy danh sách chi tiết pallet từ request
+            $palletDetails = $request->input('Details', []);
+            // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
+            $ldt = [];
+            foreach ($palletDetails as $detailData) {
+                $detailData['palletID'] = $pallet->palletID;
+                //  pallet_details::create($detailData);
+                $ldt[] = [
+                    "ItemCode" => $detailData['ItemCode'],
+                    "WarehouseCode" =>  $towarehouse,
+                    "FromWarehouseCode" => $detailData['WhsCode'],
+                    "Quantity" =>  $detailData['Qty'],
+                    "BatchNumbers" => [
+                        [
+                            "BatchNumber" => $detailData['BatchNum'],
+                            "Quantity" => $detailData['Qty']
+                        ]
+
+                    ]
+
+                ];
+            }
+
+            // Data body
+
+            $body = [
+                "U_Pallet" => $pallet->Code,
+                "U_CreateBy" => Auth::user()->sap_id,
+                "BPLID" => Auth::user()->branch,
+                "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                "StockTransferLines" => $ldt
+            ];
+
+            // Make a request to the service layer
+            $response = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+                "Authorization" => "Basic " . BasicAuthToken(),
+            ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+
+
+            $res = $response->json();
+            // update data
+            if (!empty($res['error'])) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Failed to create pallet and details',
+                    'error' => $res['error'],
+                ], 500);
+            } else {
+
+                $pallet->update([
+                    'DocNum' => $res['DocNum'],
+                    'DocEntry' => $res['DocEntry'],
+                    'CreateBy' => auth()->id(),
+
+                ]);
+                DB::commit();
+                // Trả về thông tin Pallet và chi tiết đã tạo
+                return response()->json([
+                    'message' => 'Pallet created successfully',
+                    'data' => [
+                        'pallet' => $pallet,
+                        'details' => $res,
+
+                    ]
+                ]);
+            }
+            DB::commit();
+            // Trả về thông tin Pallet và chi tiết đã tạo
+            return response()->json([
+                'message' => 'Pallet created successfully',
+                'data' => [
+                    'pallet' => $pallet,
+                ]
+            ]);
+        } catch (\Exception | QueryException $e) {
+            // Rollback in case of an exception
+            DB::rollBack();
+
+            // Log or handle the exception as needed
+            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage()], 500);
         }
     }
 }

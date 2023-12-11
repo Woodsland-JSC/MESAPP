@@ -206,6 +206,7 @@ const AwaitingReception = ({ data, index, onConfirmReceipt, onRejectReceipt }) =
                         variant="solid"
                         colorScheme="red"
                         onClick={onDismissAlertDialogOpen}
+                        backgroundColor="red !important"
                     >
                         Trả lại
                     </Button>
@@ -214,6 +215,7 @@ const AwaitingReception = ({ data, index, onConfirmReceipt, onRejectReceipt }) =
                         variant="solid"
                         colorScheme="green"
                         onClick={onInputAlertDialogOpen}
+                        backgroundColor="#2f855a !important"
                     >
                         Xác nhận
                     </Button>
