@@ -11,6 +11,15 @@ const reportApi = {
             }
         );
     },
+    downloadDryingKilnHistoryReport: () => {
+        const url = `/report/download/drying-kiln-history`;
+        return (
+            axiosClient().get(url),
+            {
+                responseType: "blob",
+            }
+        );
+    },
 };
 
 export default reportApi;

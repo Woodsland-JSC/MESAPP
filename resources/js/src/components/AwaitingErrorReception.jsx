@@ -45,7 +45,13 @@ const reasonOfReturn = [
     },
 ];
 
-const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceipt }) => {
+const AwaitingErrorReception = ({
+    data,
+    type,
+    index,
+    onConfirmErrorReceipt,
+    onRejectErrorReceipt,
+}) => {
     const [selectedReason, setSelectedReason] = useState(null);
     const {
         isOpen: isInputAlertDialogOpen,
@@ -60,12 +66,14 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
 
     const handleConfirmReceipt = async () => {
         onInputAlertDialogClose();
-        onConfirmReceipt(index);
+        onConfirmErrorReceipt(index);
     };
     const handleRejectReceipt = async () => {
         onDismissAlertDialogClose();
-        const reason = reasonOfReturn.find(item => item.value == selectedReason);
-        onRejectReceipt(index, reason);
+        // const reason = reasonOfReturn.find(
+        //     (item) => item.value == selectedReason
+        // );
+        onRejectErrorReceipt(index);
     };
 
     console.log("Huhu: ", data);
@@ -75,53 +83,70 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
             <Card maxW="sm">
                 <CardBody>
                     <Stack mt="2" spacing="2">
-                        {
-                            type == "plywood" ? (
-                                <>
-                                    <div className="flex gap-2">
-                                        <span>Lệnh sản xuất: </span>
-                                        <span className="font-bold">{data?.command || ""}</span>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="flex gap-2">
-                                        <span>Mã thành phẩm: </span>
-                                        <span className="font-bold">{data?.id || ""}</span>
-                                    </div>
-                                </>
-                            )
-                        }
+                        {type == "plywood" ? (
+                            <>
+                                <div className="flex gap-2">
+                                    <span>Lệnh sản xuất: </span>
+                                    <span className="font-bold">
+                                        {data?.command || ""}
+                                    </span>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex gap-2">
+                                    <span>Mã thành phẩm: </span>
+                                    <span className="font-bold">
+                                        {data?.id || ""}
+                                    </span>
+                                </div>
+                            </>
+                        )}
 
-                        <div className="flex gap-2">
-                            <span>Tên: </span>
-                            <span className="font-bold">
-                                {type == "plywood" ? data.itemName : data.data?.subItemName || ""}
-                            </span>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <span>Công đoạn giao: </span>
-                            <span className="font-bold">
-                                {data?.fromGroup?.name || ""}
-                            </span>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <span>Quy cách: </span>
-                            <span className="font-bold">
-                                {data?.thickness +
+                        {type == "plywood" ? (
+                            <>
+                                <div className="flex gap-2">
+                                    <span>Chi tiết/cụm: </span>
+                                    <span className="font-bold">
+                                        {data.itemName || ""} {" - " + data?.thickness +
                                     "x" +
                                     data?.width +
                                     "x" +
                                     data?.length || ""}
+                                    </span>
+                                </div>
+                            </>
+                        ) : (
+                            <></>
+                        )}
+
+                        {/* <div className="flex gap-2">
+                            <span>Tên: </span>
+                            <span className="font-bold">
+                                {type == "plywood"
+                                    ? data.itemName
+                                    : data.data?.subItemName || ""}
                             </span>
-                        </div>
+                        </div> */}
 
                         <div className="flex gap-2">
                             <span>Số lượng: </span>
                             <span className="font-bold">
                                 {data?.amount || ""}
+                            </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <span>Loại lỗi: </span>
+                            <span className="font-bold">
+                                {data?.type || ""}
+                            </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <span>Biện pháp xử lý: </span>
+                            <span className="font-bold">
+                                {data?.method || ""}
                             </span>
                         </div>
 
@@ -169,79 +194,31 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
 
                 <Divider />
                 <CardFooter>
-                    <RadioGroup
-                        onChange={(value) => {
-                            if (value == selectedReason) {
-                                console.log("Dô 1: ", value);
-                                setSelectedReason(null);
-                            } else {
-                                setSelectedReason(value);
-                            }
-                        }}
-                        value={selectedReason}
+                    <Divider />
+                    <ButtonGroup
+                        spacing="2"
+                        className="flex justify-end"
                     >
-                        <Stack direction="row">
-                            {reasonOfReturn &&
-                                reasonOfReturn?.length > 0 &&
-                                reasonOfReturn.map((item, index) => (
-                                    <label
-                                        className="flex gap-2 cursor-pointer"
-                                        key={index + item.value}
-                                        onClick={() => {
-                                            if (item.value == selectedReason) {
-                                                console.log(
-                                                    "Dô 2",
-                                                    selectedReason
-                                                );
-                                                setSelectedReason(null);
-                                            }
-                                        }}
-                                    >
-                                        <Radio
-                                            value={item.value}
-                                            isChecked={
-                                                item.value === selectedReason
-                                            }
-                                            borderColor="darkgrey !important"
-                                        />
-                                        {item.label}
-                                    </label>
-                                    // <Radio onClick={() => console.log("Dô")} value={item.value}>{item.label}</Radio>
-                                ))}
-                        </Stack>
-                    </RadioGroup>
+                        <Button
+                            // isDisabled={!selectedReason}
+                            variant="solid"
+                            colorScheme="red"
+                            className="bg-[#e53e3e]"
+                            onClick={onDismissAlertDialogOpen}
+                        >
+                            Từ chối
+                        </Button>
+                        <Button
+                            // isDisabled={selectedReason}
+                            variant="solid"
+                            colorScheme="green"
+                            className="bg-[#38a169]"
+                            onClick={onInputAlertDialogOpen}
+                        >
+                            Xác nhận
+                        </Button>
+                    </ButtonGroup>
                 </CardFooter>
-                <Divider />
-                <ButtonGroup spacing="2" className="flex justify-end p-[20px]">
-                    <Button
-                        className={`${selectedReason ? "!block" : "!hidden"}`}
-                        variant="ghost"
-                        colorScheme="blue"
-                        onClick={() => setSelectedReason("")}
-                    >
-                        <MdRefresh className="text-2xl" />
-                    </Button>
-                    <Button
-                        isDisabled={!selectedReason}
-                        variant="solid"
-                        colorScheme="red"
-                        className="bg-[#e53e3e]"
-                        onClick={onDismissAlertDialogOpen}
-                        backgroundColor="red !important"
-                    >
-                        Trả lại
-                    </Button>
-                    <Button
-                        isDisabled={selectedReason}
-                        variant="solid"
-                        colorScheme="green"
-                        className="bg-[#38a169]"
-                        onClick={onInputAlertDialogOpen}
-                        backgroundColor="#2f855a !important"
-                    >
-                        Xác nhận
-                    </Button>
-                </ButtonGroup>
             </Card>
             <AlertDialog
                 isOpen={isInputAlertDialogOpen}
@@ -263,7 +240,10 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter>
-                            <Button className="bg-[#edf2f7]" onClick={onInputAlertDialogClose}>
+                            <Button
+                                className="bg-[#edf2f7]"
+                                onClick={onInputAlertDialogClose}
+                            >
                                 Thoát
                             </Button>
                             <Button
@@ -291,12 +271,15 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                                 Bạn có chắc chắn muốn trả lại:{" "}
                                 <span className="font-bold">
                                     {data?.amount || ""}
-                                </span>{" "}
-                                sản phẩm với lý do {" "} <span className="font-bold">{reasonOfReturn.find(item => item.value == selectedReason)?.label}</span> ?
+                                </span>
+                                ?
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter>
-                            <Button className="bg-[#edf2f7]" onClick={onDismissAlertDialogClose}>
+                            <Button
+                                className="bg-[#edf2f7]"
+                                onClick={onDismissAlertDialogClose}
+                            >
                                 Thoát
                             </Button>
                             <Button
@@ -315,4 +298,4 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
     );
 };
 
-export default AwaitingReception;
+export default AwaitingErrorReception;
