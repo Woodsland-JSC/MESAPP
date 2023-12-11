@@ -363,6 +363,7 @@ class PlanController extends Controller
                     'planDryings.Code as newbatch',
                     'planDryings.Oven',
                     'pallets.DocEntry',
+                    'pallets.Code',
                     'pallet_details.ItemCode',
                     'pallet_details.WhsCode',
                     'pallet_details.Qty',
@@ -399,19 +400,13 @@ class PlanController extends Controller
                     $header = $group->first();
 
                     $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [
-                            [
-                                "Quantity" => $header->TotalQty,
-                                "BaseLine" => 0,
-                                "WarehouseCode" => $header->WhsCode,
-                                "BaseEntry" => $header->DocEntry,
-                                "BaseType" => 202,
-                                "BatchNumbers" => $data,
-
-                            ],
-                        ],
+                        "U_Pallet" => $pallet->Code,
+                        "U_CreateBy" => Auth::user()->sap_id,
+                        "BPLID" => Auth::user()->branch,
+                        "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                        "StockTransferLines" => $ldt
                     ];
+
 
                     $test[] = $body;
                 }

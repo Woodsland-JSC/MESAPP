@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('Oven'); //mã lò sấy
             $table->string('Reason'); //mục đích sấy
             $table->string('Method'); //quy cách sấy
-            $table->float('Mass')->default(0)->nullable(); //khối lượng
+            $table->decimal('Mass', 19, 4)->default(0)->nullable(); //khối lượng
             $table->integer('TotalPallet')->default(0)->nullable(); //tổng số pallet
             $table->datetime('PlanDate')->nullable(); //ngày ra lò dự kiến
             $table->integer('Status')->default(0)->nullable(); // trạng thái lò. 0 new, 1. chạy lò, 2.ra lò
