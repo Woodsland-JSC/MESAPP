@@ -162,6 +162,9 @@ class DryingOvenController extends Controller
             $palletDetails = $request->input('Details', []);
             // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
             $ldt = [];
+            $ldt2 = [];
+            $totalkl = 0;
+            $toQty = 0;
             foreach ($palletDetails as $detailData) {
 
                 $datainsert = [];
@@ -190,6 +193,16 @@ class DryingOvenController extends Controller
                     ]
 
                 ];
+                $ldt2[] = [
+                    "U_Item" => $detailData['ItemCode'],
+                    "U_CRong" => $detailData['CRong'],
+                    "U_CDay" => $detailData['CDay'],
+                    "U_CDai" => $detailData['CDai'],
+                    "U_Batch" => $detailData['BatchNum'],
+                    "U_Quant" => $detailData['Qty'],
+                ];
+                $toQty += (float)$detailData['Qty'];
+                $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'];
             }
 
             // Data body
@@ -201,6 +214,14 @@ class DryingOvenController extends Controller
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "StockTransferLines" => $ldt
             ];
+            $body2 = [
+                "U_Code" => $pallet->Code,
+                "U_Status" => "CS",
+                "U_Quant" => $toQty,
+                "U_Vol" => max($totalkl, 1),
+                "U_USER" => Auth::user()->sap_id,
+                "G_PALLETLCollection" => $ldt2
+            ];
 
             // Make a request to the service layer
             $response = Http::withOptions([
@@ -210,11 +231,18 @@ class DryingOvenController extends Controller
                 "Accept" => "application/json",
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
-
+            $response2 = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+                "Authorization" => "Basic " . BasicAuthToken(),
+            ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
             $res = $response->json();
+            $res2 = $response2->json();
             // update data
-            if (!empty($res['error'])) {
+            if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();
                 return response()->json([
                     'message' => 'Failed to create pallet and details',
@@ -225,6 +253,7 @@ class DryingOvenController extends Controller
                 $pallet->update([
                     'DocNum' => $res['DocNum'],
                     'DocEntry' => $res['DocEntry'],
+                    'palletSAP' => $res2['DocEntry'],
                     'CreateBy' => auth()->id(),
 
                 ]);
@@ -234,8 +263,8 @@ class DryingOvenController extends Controller
                     'message' => 'Pallet created successfully',
                     'data' => [
                         'pallet' => $pallet,
-                        'details' => $res,
-
+                        // 'details' => $res,
+                        // 'details2' => $res2,
                     ]
                 ]);
             }

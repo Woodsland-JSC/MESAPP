@@ -27,6 +27,7 @@ return new class extends Migration
             $table->float('IssueNumber', 14)->default(0)->nullable();
             $table->float('ReceiptNumber', 14)->default(0)->nullable();
             $table->integer('flag')->default(0)->nullable();
+            $table->string('palletSAP')->nullable();
             $table->timestamps();
         });
     }
