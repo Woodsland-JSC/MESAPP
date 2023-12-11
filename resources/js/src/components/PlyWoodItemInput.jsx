@@ -39,16 +39,24 @@ import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustratio
 
 const factories = [
     {
-        value: "YS1",
-        label: "Nhà máy chế biến gỗ Yên Sơn 1",
+        value: "YS2",
+        label: "Nhà máy Yên Sơn 2",
     },
     {
-        value: "TB",
-        label: "Nhà máy chế biến gỗ Thái Bình",
+        value: "Viforex",
+        label: "Nhà máy Viforex",
+    },
+    {
+        value: "YS3",
+        label: "Nhà máy Yên Sơn 3",
+    },
+    {
+        value: "CH",
+        label: "Nhà máy Chiêm Hoá",
     },
 ];
 
-const ItemInput = ({
+const PlyWoodItemInput = ({
     data,
     index,
     fromGroup,
@@ -71,15 +79,16 @@ const ItemInput = ({
         onClose: onModalClose,
     } = useDisclosure();
 
-    const [selectedItemDetails, setSelectedItemDetails] = useState(null);
+    const [selectedItemDetails, setSelectedItemDetails] = useState(data);
     const [amount, setAmount] = useState(null);
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
     const [faultyAmount, setFaultyAmount] = useState(null);
 
-    const openInputModal = (item) => {
+    const openInputModal = () => {
         onModalOpen();
-        setSelectedItemDetails(item);
+        console.log("Moe: ", selectedItemDetails);
+        setSelectedItemDetails(data);
     };
 
     const closeInputModal = () => {
@@ -113,23 +122,27 @@ const ItemInput = ({
                 //     },
                 //     nextGroup: nextGroup
                 // });
-                onReceiptFromChild({
-                    id: selectedItemDetails.id,
-                    itemId: data?.id,
-                    subItemName: selectedItemDetails.subItemName,
-                    thickness: selectedItemDetails.thickness,
-                    width: selectedItemDetails.width,
-                    length: selectedItemDetails.length,
-                    amount: Number(amount),
-                    createdDate: new Date(),
-                    createdBy: {
-                        id: user.id,
-                        last_name: user.last_name,
-                        first_name: user.first_name,
+                onReceiptFromChild(
+                    {
+                        // id: selectedItemDetails.id,
+                        itemId: data?.id,
+                        itemName: data?.itemName,
+                        command: selectedItemDetails.command,
+                        thickness: selectedItemDetails.thickness,
+                        width: selectedItemDetails.width,
+                        length: selectedItemDetails.length,
+                        amount: Number(amount),
+                        createdDate: new Date(),
+                        createdBy: {
+                            id: user.id,
+                            last_name: user.last_name,
+                            first_name: user.first_name,
+                        },
+                        fromGroup: fromGroup,
+                        nextGroup: nextGroup,
                     },
-                    fromGroup: fromGroup,
-                    nextGroup: nextGroup,
-                }, receipts);
+                    receipts
+                );
             }
             if (faultyAmount && faultyAmount > 0) {
                 const result = {
@@ -180,132 +193,37 @@ const ItemInput = ({
     }, [faultyAmount]);
 
     return (
-        <>
+        <div className="cursor-pointer" onClick={() => openInputModal()}>
             <div
                 className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
-                data-label={data.itemName}
+                data-label={
+                    data.itemName +
+                    " (" +
+                    data.thickness +
+                    "x" +
+                    data.width +
+                    "x" +
+                    data.length +
+                    ")"
+                }
             >
                 {/* <span className="font-semibold absolute top-0-left-0 bg-green-500"></span> */}
-                <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-1 pt-11 z-[999] bg-white">
+                <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-14 z-[999] bg-white">
                     {/* <span className="font-semibold">
                         TYBYN bar table 74x74x102 acacia/black
                     </span> */}
-                    {data.itemDetails.length > 0
-                        ? data.itemDetails.map((item, index) => (
-                            <section
-                                onClick={() => openInputModal(item)}
-                                className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
-                                key={index}
-                            >
-                                <span className="ml-1">
-                                    {index + 1}. {item.subItemName} (
-                                    {item.thickness}*{item.width}*
-                                    {item.length})
-                                </span>
-                                <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 mt-2 ">
-                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                                        <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                            <tr>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2"
-                                                >
-                                                    Lệnh sản xuất
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-right"
-                                                >
-                                                    Sản lượng
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-right"
-                                                >
-                                                    Đã làm
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-right"
-                                                >
-                                                    Bị lỗi
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-right"
-                                                >
-                                                    Còn thực hiện
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.productionCommands.length >
-                                                0 ? (
-                                                item.productionCommands.map(
-                                                    (production, index) => (
-                                                        <tr
-                                                            className="bg-white border-b"
-                                                            key={index}
-                                                        >
-                                                            <th
-                                                                scope="row"
-                                                                className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                {
-                                                                    production.command
-                                                                }
-                                                            </th>
-                                                            <td className="px-2 py-2 text-right">
-                                                                {
-                                                                    production.quantity
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 py-2 text-right">
-                                                                {
-                                                                    production.done
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 py-2 text-right">
-                                                                {
-                                                                    production.faults
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 py-2 text-right">
-                                                                {
-                                                                    production.processing
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                )
-                                            ) : (
-                                                <span>Không có dữ liệu</span>
-                                            )}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td className="px-2 py-2">
-                                                    Tổng
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold">
-                                                    {item.totalQuantity}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold">
-                                                    {item.totalDone}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold">
-                                                    {item.totalFaults}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold">
-                                                    {item.totalProcessing}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </section>
-                        ))
-                        : null}
+                    <div>
+                        Lệnh sản xuất
+                        <span className="bg-[#e4e4e4] rounded px-2 py-1 ml-2 font-semibold w-fit">
+                            {data.command}
+                        </span>
+                    </div>
+                    <div>
+                        Công đoạn số:{" "}
+                        <span className="bg-[#96bddf] rounded px-2 py-1 ml-2 font-semibold w-fit">
+                            {data.fromGroup.no + ". " + data.fromGroup.name}
+                        </span>{" "}
+                    </div>
                 </div>
             </div>
             <Modal
@@ -327,24 +245,15 @@ const ItemInput = ({
                     <ModalBody px={0} py={0}>
                         <div className="flex flex-col justify-center ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
-                                {/* {selectedItemDetails?.pendingErrors && */}
-                                {/* selectedItemDetails?.pendingErrors.length > 0 && ( */}
-                                <Alert status="error">
-                                    <AlertIcon />
+                                <Alert status="info">
                                     <AlertDescription className="flex items-center gap-3">
-                                        <span className="">
-                                            Lỗi báo từ công đoạn trước:{" "}
+                                        <span className="text-center w-full">
+                                            Lệnh sản xuất:{" "}
+                                            <span className="font-semibold">
+                                                {selectedItemDetails?.command ||
+                                                    ""}
+                                            </span>
                                         </span>
-                                        <Badge
-                                            colorScheme="red"
-                                            fontSize="1.2rem"
-                                        >
-                                            {selectedItemDetails?.pendingErrors?.reduce(
-                                                (total, item) =>
-                                                    total + item.amount,
-                                                0
-                                            ) || 0}
-                                        </Badge>
                                     </AlertDescription>
                                 </Alert>
                                 {/* )} */}
@@ -354,7 +263,7 @@ const ItemInput = ({
                                             Sản phẩm/Chi tiết
                                         </label>
                                         <span>
-                                            {selectedItemDetails?.subItemName}
+                                            {selectedItemDetails?.itemName}
                                         </span>
                                     </div>
                                     <img
@@ -390,10 +299,17 @@ const ItemInput = ({
                                         </span>
                                     </div>
                                 </div>
-                                <Text className="font-semibold px-4">
-                                    Số lượng phôi đã nhận và phôi tồn tại tổ
-                                </Text>
-                                <div className="flex flex-col py-4 bg-green-300 border-t-2 border-b-2 border-dashed">
+                                {/* <div className="flex gap-2 items-center py-4 border-t px-4">
+                                    <Text className="font-semibold">
+                                        Số lượng phôi đã nhận và phôi tồn tại
+                                        tổ:
+                                    </Text>
+                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                        {selectedItemDetails?.stockQuantity ||
+                                            0}
+                                    </span>
+                                </div> */}
+                                {/* <div className="flex flex-col py-4 bg-green-300 border-t-2 border-b-2 border-dashed">
                                     <div className="flex items-center gap-4 px-4">
                                         <span className="ml-2">
                                             {selectedItemDetails?.subItemName} (
@@ -406,26 +322,37 @@ const ItemInput = ({
                                                 0}
                                         </span>
                                     </div>
-                                </div>
+                                </div> */}
                                 <div className="flex gap-2 items-center py-4 border-t px-4">
                                     <Text className="font-semibold">
-                                        Số lượng tối đa có thể xuất
+                                        Số lượng phôi có thể xuất:
                                     </Text>
                                     <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                         {selectedItemDetails?.stockQuantity ||
                                             0}
                                     </span>
                                 </div>
-                                <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4">
+                                <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4 text-yellow-700">
                                     <Text className="font-semibold">
-                                        Số lượng còn phải sản xuất
+                                        Số lượng còn phải sản xuất của lệnh xa
+                                        nhất hiển thị:
                                     </Text>
                                     <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
-                                        {selectedItemDetails?.totalProcessing ||
+                                        {selectedItemDetails?.furthestQuantity ||
                                             0}
                                     </span>
                                 </div>
-                                <Box className="px-4"> 
+                                <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4 text-yellow-700">
+                                    <Text className="font-semibold">
+                                        Số lượng còn phải sản xuất tất cả lệnh
+                                        sản xuất trên chuyền:
+                                    </Text>
+                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
+                                        {selectedItemDetails?.allCommandQuantity ||
+                                            0}
+                                    </span>
+                                </div>
+                                <Box className="px-4">
                                     <label className="font-semibold">
                                         Số lượng ghi nhận sản phẩm
                                     </label>
@@ -455,15 +382,23 @@ const ItemInput = ({
                                         </NumberInputStepper>
                                     </NumberInput>
                                 </Box>
+                                <div className="bg-blue-500 text-white p-3 items-center flex">
+                                    Đã thực hiện
+                                    <Badge className="ml-3" colorScheme="blue" fontSize="1.2rem">
+                                        {selectedItemDetails?.totalDone}
+                                    </Badge>
+                                </div>
                                 {selectedItemDetails?.pendingReceipts &&
-                                    selectedItemDetails?.pendingReceipts.length > 0 &&
+                                    selectedItemDetails?.pendingReceipts
+                                        .length > 0 &&
                                     selectedItemDetails?.pendingReceipts.map(
                                         (item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 mx-3 border border-green-600 rounded">
+                                            <div className="flex justify-between items-center p-3 my-4 border border-green-600 rounded">
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
-                                                            Số lượng đã giao chờ xác nhận:{" "}
+                                                            Số lượng đã giao chờ
+                                                            xác nhận:{" "}
                                                         </Text>{" "}
                                                         <Badge
                                                             colorScheme="green"
@@ -500,7 +435,7 @@ const ItemInput = ({
                                     selectedItemDetails?.returns.length > 0 &&
                                     selectedItemDetails?.returns.map(
                                         (item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded">
+                                            <div className="flex justify-between items-center p-3 my-4 border border-red-600 rounded">
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
@@ -539,15 +474,15 @@ const ItemInput = ({
                                     )}
                                 {selectedItemDetails?.pendingErrors &&
                                     selectedItemDetails?.pendingErrors.length >
-                                    0 &&
+                                        0 &&
                                     selectedItemDetails?.pendingErrors.map(
                                         (item, index) => (
                                             <div
                                                 key={index}
-                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded"
+                                                className="flex justify-between items-center p-3 my-4 border border-red-600 rounded"
                                             >
                                                 <div className="flex flex-col gap-2">
-                                                    <div className="flex gap-4">
+                                                    <div className="flex gap-4 items-center">
                                                         <Text className="font-semibold">
                                                             Số lượng ghi nhận
                                                             lỗi chờ xác nhận:{" "}
@@ -583,6 +518,41 @@ const ItemInput = ({
                                             </div>
                                         )
                                     )}
+                                <div className="px-3 flex flex-col gap-4 text-red-600 border-t border-b py-3 border-red-600 !my-4">
+                                    <span>
+                                        Lỗi báo từ công đoạn:{" "}
+                                        <Badge
+                                            colorScheme="red"
+                                            fontSize="1.2rem"
+                                        >
+                                            {
+                                                selectedItemDetails?.totalStageError
+                                            }
+                                        </Badge>{" "}
+                                    </span>
+                                    <span>
+                                        Lỗi chuyển về:{" "}
+                                        <Badge
+                                            colorScheme="red"
+                                            fontSize="1.2rem"
+                                        >
+                                            {
+                                                selectedItemDetails?.totalBackError
+                                            }
+                                        </Badge>{" "}
+                                    </span>
+                                    <span>
+                                        Lỗi loại:{" "}
+                                        <Badge
+                                            colorScheme="red"
+                                            fontSize="1.2rem"
+                                        >
+                                            {
+                                                selectedItemDetails?.totalTypeError
+                                            }
+                                        </Badge>{" "}
+                                    </span>
+                                </div>
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
                                         Khai báo số lượng lỗi
@@ -612,7 +582,7 @@ const ItemInput = ({
                                             <NumberDecrementStepper />
                                         </NumberInputStepper>
                                     </NumberInput>
-                                    <RadioGroup
+                                    {/* <RadioGroup
                                         ref={checkRef}
                                         className="hidden mt-4 ml-3"
                                     >
@@ -622,7 +592,7 @@ const ItemInput = ({
                                             {selectedItemDetails?.width} *
                                             {selectedItemDetails?.length}) :{" "}
                                         </Radio>
-                                    </RadioGroup>
+                                    </RadioGroup> */}
                                 </Box>
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
@@ -649,14 +619,15 @@ const ItemInput = ({
                     <ModalFooter className="flex flex-col !p-0">
                         <Alert status="info">
                             <AlertIcon />
-                            Công đoạn sản xuất tiếp theo:{" "}
+                            Công đoạn tiếp theo:{" "}
                             <span className="font-bold ml-1">
-                                {nextGroup.name || "chưa rõ"}
+                                {nextGroup.no + ". " + nextGroup.name ||
+                                    "chưa có thông tin"}
                             </span>
                         </Alert>
                         <div className="border-b-2 border-gray-100"></div>
                         <div className="flex items-item justify-end p-4 w-full gap-4">
-                            <Button className="bg-[#edf2f7]" onClick={closeInputModal}>Đóng</Button>
+                            <Button onClick={closeInputModal}>Đóng</Button>
                             <Button
                                 type="button"
                                 isDisabled={
@@ -665,7 +636,6 @@ const ItemInput = ({
                                     !faultyAmount &&
                                     faultyAmount <= 0
                                 }
-                                className="bg-[#2f8558]"
                                 colorScheme="green"
                                 onClick={onAlertDialogOpen}
                                 backgroundColor="#2f8558 !important"
@@ -715,8 +685,8 @@ const ItemInput = ({
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
-        </>
+        </div>
     );
 };
 
-export default ItemInput;
+export default PlyWoodItemInput;

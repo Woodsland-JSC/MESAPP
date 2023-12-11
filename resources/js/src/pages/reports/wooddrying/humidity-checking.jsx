@@ -14,7 +14,17 @@ import toast from "react-hot-toast";
 import ExcelJS from "exceljs";
 import Select from "react-select";
 import { saveAs } from "file-saver";
-import { Checkbox, Radio, RadioGroup, Wrap, WrapItem } from "@chakra-ui/react";
+import {
+    Stack,
+    Checkbox,
+    CheckboxGroup,
+    Radio,
+    RadioGroup,
+    Wrap,
+    WrapItem,
+} from "@chakra-ui/react";
+import { HiMiniSparkles } from "react-icons/hi2";
+import { MdWaterDrop } from "react-icons/md";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Layout from "../../../layouts/layout";
@@ -145,6 +155,81 @@ const exampleData = [
     },
 ];
 
+const humidList = [
+    {
+        PlanID: 9,
+        value: 10,
+    },
+    {
+        PlanID: 9,
+        value: 1,
+    },
+    {
+        PlanID: 9,
+        value: 5,
+    },
+    {
+        PlanID: 9,
+        value: 3,
+    },
+    {
+        PlanID: 9,
+        value: 1,
+    },
+    {
+        PlanID: 9,
+        value: 2,
+    },
+    {
+        PlanID: 9,
+        value: 8,
+    },
+    {
+        PlanID: 9,
+        value: 16,
+    },
+    {
+        PlanID: 9,
+        value: 20,
+    },
+    {
+        PlanID: 9,
+        value: 14,
+    },
+    {
+        PlanID: 9,
+        value: 45,
+    },
+    {
+        PlanID: 9,
+        value: 21,
+    },
+    {
+        PlanID: 9,
+        value: 37,
+    },
+    {
+        PlanID: 9,
+        value: 19,
+    },
+    {
+        PlanID: 9,
+        value: 8,
+    },
+    {
+        PlanID: 9,
+        value: 40,
+    },
+    {
+        PlanID: 9,
+        value: 15,
+    },
+    {
+        PlanID: 9,
+        value: 25,
+    },
+];
+
 const dimensionOptions = [
     {
         value: "A4",
@@ -198,6 +283,8 @@ function HumidityCheckingReport() {
         label: "A3",
     });
 
+    const [humidityRecords, setHumidityRecords] = useState([]);
+
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [dateList, setDateList] = useState([]);
@@ -206,6 +293,43 @@ function HumidityCheckingReport() {
     const [firstTimeRender, setFirstTimeRender] = useState(true);
 
     const [reportData, setReportData] = useState([]);
+
+    const humidityAnalysis = useMemo(() => {
+        const total = humidityRecords.length;
+        const low = humidityRecords.filter((record) => record.value < 7).length;
+        const target = humidityRecords.filter(
+            (record) => record.value >= 7 && record.value <= 9
+        ).length;
+        const high = humidityRecords.filter(
+            (record) => record.value >= 10 && record.value <= 15
+        ).length;
+        const veryHigh = humidityRecords.filter(
+            (record) => record.value > 15
+        ).length;
+
+        return [
+            {
+                label: "Thấp (nhỏ hơn 7)",
+                count: low,
+                percentage: (low / total) * 100,
+            },
+            {
+                label: "Đích (7-9)",
+                count: target,
+                percentage: (target / total) * 100,
+            },
+            {
+                label: "Cao (10-15)",
+                count: high,
+                percentage: (high / total) * 100,
+            },
+            {
+                label: "Rất cao (trên 15)",
+                count: veryHigh,
+                percentage: (veryHigh / total) * 100,
+            },
+        ];
+    }, [humidityRecords]);
 
     // Này là hàm thêm pinned top row
     // const onPinnedRowTopCount = useCallback(() => {
@@ -385,37 +509,41 @@ function HumidityCheckingReport() {
     //     }
     // };
 
+    const [chunkData, setChunkData] = useState([]);
+
     const handleExportWord = async () => {
-        try {
-            // Chỗ này sao dùng axios không được nhỉ, check lại sau!!
-            const response = await fetch(
-                "http://localhost:8000/api/report/download/drying-process",
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+        toast("Chưa phát triển.");
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(new Blob([blob]));
+        // try {
+        //     // Chỗ này sao dùng axios không được nhỉ, check lại sau!!
+        //     const response = await fetch(
+        //         "http://localhost:8000/api/report/download/drying-process",
+        //         {
+        //             method: "GET",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //             },
+        //         }
+        //     );
 
-            // Download the file
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", "Quản Lý Sấy Gỗ.docx");
+        //     const blob = await response.blob();
+        //     const url = window.URL.createObjectURL(new Blob([blob]));
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+        //     // Download the file
+        //     const link = document.createElement("a");
+        //     link.href = url;
+        //     link.setAttribute("download", "Quản Lý Sấy Gỗ.docx");
 
-            toast.success("Xuất báo cáo thành công!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Có lỗi xảy ra.");
-        }
+        //     document.body.appendChild(link);
+        //     link.click();
+        //     document.body.removeChild(link);
+        //     window.URL.revokeObjectURL(url);
+
+        //     toast.success("Xuất báo cáo thành công!");
+        // } catch (error) {
+        //     console.error(error);
+        //     toast.error("Có lỗi xảy ra.");
+        // }
     };
 
     // const handleExportWord = async () => {
@@ -746,10 +874,31 @@ function HumidityCheckingReport() {
     useEffect(() => {
         if (reportDate) {
             setReportData(exampleData);
+            setHumidityRecords(humidList);
         } else {
             setReportData([]);
         }
     }, [reportDate]);
+
+    useEffect(() => {
+        if (humidityRecords && humidityRecords.length > 0) {
+            const chunkSize = 14;
+
+            const chunks = humidityRecords
+                ? Array.from(
+                      { length: Math.ceil(humidityRecords.length / chunkSize) },
+                      (_, index) =>
+                          humidityRecords.slice(
+                              index * chunkSize,
+                              (index + 1) * chunkSize
+                          )
+                  )
+                : [];
+
+            console.log("Chunk ra nhiêu: ", chunks);
+            setChunkData(chunks);
+        }
+    }, [humidityRecords]);
 
     // useEffect(() => {
     //     const handleGetFactory = async () => {
@@ -779,7 +928,7 @@ function HumidityCheckingReport() {
                 <div className="w-screen p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
                     {/* Header */}
                     <div className="text-xl md:text-3xl font-bold mb-6">
-                        Biên bản kiểm tra lò sấy{" "}
+                        Biên bản kiểm tra độ ẩm{" "}
                     </div>
                     {/* h-[calc(100%-165px)] */}
                     {/* Main content */}
@@ -882,28 +1031,30 @@ function HumidityCheckingReport() {
                             </div>
                         </div>
 
-                        <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center mt-4">
-                            <div className="flex xl:w-2/3 md:w-2/3 gap-x-4 items-center whitespace-nowrap">
-                                Khổ giấy thể hiện:
-                                <Select
-                                    id="page-size"
-                                    options={dimensionOptions}
-                                    onChange={onDimensionChanged}
-                                    defaultValue={selectedDimension}
-                                />
-                            </div>
-                            <div className="flex w-full justify-between sm:justify-end space-x-4">
-                                <div className="h-full w-3/7 sm:w-auto">
-                                    <button
-                                        onClick={handleExportWord}
-                                        className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                    >
-                                        <PiExportLight />
-                                        <div>Word</div>
-                                    </button>
+                        {reportData && reportData.length > 0 && (
+                            <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center mt-4">
+                                <div className="flex xl:w-2/3 md:w-2/3 gap-x-4 items-center whitespace-nowrap">
+                                    Khổ giấy thể hiện:
+                                    <Select
+                                        id="page-size"
+                                        options={dimensionOptions}
+                                        onChange={onDimensionChanged}
+                                        defaultValue={selectedDimension}
+                                    />
+                                </div>
+                                <div className="flex w-full justify-between sm:justify-end space-x-4">
+                                    <div className="h-full w-3/7 sm:w-auto">
+                                        <button
+                                            onClick={handleExportWord}
+                                            className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                        >
+                                            <PiExportLight />
+                                            <div>Word</div>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <Divider className="my-4" />
 
@@ -926,8 +1077,8 @@ function HumidityCheckingReport() {
                                         <thead>
                                             <tr>
                                                 <th
-                                                    rowSpan={4}
-                                                    className="px-6 py-3 capitalize w-60 text-center border border-slate-700"
+                                                    rowSpan={5}
+                                                    className="px-6 py-3 capitalize w-52 text-center border border-slate-700"
                                                 >
                                                     <img
                                                         className="w-32 h-fit mx-auto"
@@ -939,18 +1090,20 @@ function HumidityCheckingReport() {
                                                     colSpan={2}
                                                     className="px-6 py-3 font-semibold capitalize text-center border border-slate-700"
                                                 >
-                                                    Quy trình sấy gỗ
+                                                    Quy trình kiểm soát quá
+                                                    trình đặc biệt
                                                 </th>
                                                 <th
-                                                    rowSpan={4}
-                                                    className="px-6 py-3 text-left font-light border-slate-700 w-64"
+                                                    rowSpan={5}
+                                                    className="px-6 py-3 text-left font-light border-slate-700 w-72"
                                                 >
                                                     <div className="flex flex-col">
                                                         <span>
-                                                            Mã số: QT-14/BM-02
+                                                            Mã số:
+                                                            QT-03/HD-06/BM-01
                                                         </span>{" "}
                                                         <span>
-                                                            Ngày BH: 19/08/2020
+                                                            Ngày BH: 22/06/2020
                                                         </span>
                                                         <span>Lần BH: 04</span>{" "}
                                                     </div>
@@ -961,15 +1114,16 @@ function HumidityCheckingReport() {
                                                     colSpan={2}
                                                     className="px-6 py-3 text-center text-xl font-bold uppercase border border-slate-700"
                                                 >
-                                                    Biên bản kiểm tra lò sấy
+                                                    Biểu mẫu kiểm tra độ ẩm gỗ
+                                                    sấy
                                                 </th>
                                             </tr>
                                             <tr>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Chi nhánh: {}
+                                                    Ngày kiểm tra: {}
                                                 </th>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Nhà máy: {}
+                                                    Chi nhánh: {} | Nhà máy: {}
                                                 </th>
                                             </tr>
                                             <tr>
@@ -977,18 +1131,100 @@ function HumidityCheckingReport() {
                                                     Lò số: {}
                                                 </th>
                                                 <th className="px-6 py-3 text-left font-light border border-slate-700">
-                                                    Ngày kiểm: {}
+                                                    Số mẻ sấy: {}
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                    Tổng số lượng mẫu: {}
+                                                </th>
+                                                <th className="px-6 py-3 text-left font-light border border-slate-700">
+                                                    Loại sản phẩm: {}
                                                 </th>
                                             </tr>
                                         </thead>
                                     </table>
 
                                     <span className="text-lg">
-                                        I. Thông tin đánh giá
+                                        I. Thông tin chi tiết
                                     </span>
 
                                     <div className="relative overflow-x-auto my-4">
-                                        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                                        <div
+                                            className={`${
+                                                chunkData &&
+                                                chunkData.length > 0
+                                                    ? "grid"
+                                                    : "flex"
+                                            } ${
+                                                selectedDimension.value == "A3"
+                                                    ? `grid-cols-${chunkData?.length}`
+                                                    : "grid-cols-2"
+                                            } gap-4 `}
+                                        >
+                                            {humidityRecords &&
+                                                humidityRecords.length > 0 &&
+                                                chunkData.map(
+                                                    (chunk, index) => (
+                                                        <div>
+                                                            <table
+                                                                key={index}
+                                                                className="w-full text-sm text-left rtl:text-right text-gray-500"
+                                                            >
+                                                                <thead className="text-base text-gray-700 uppercase bg-gray-50">
+                                                                    <tr>
+                                                                        <th
+                                                                            scope="col"
+                                                                            className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                                        >
+                                                                            STT
+                                                                        </th>
+                                                                        <th
+                                                                            scope="col"
+                                                                            className="px-6 py-3 capitalize text-center border border-slate-700"
+                                                                        >
+                                                                            Độ
+                                                                            ẩm
+                                                                            (MC)
+                                                                            %
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {chunk &&
+                                                                        chunk.length >
+                                                                            0 &&
+                                                                        chunk.map(
+                                                                            (
+                                                                                item,
+                                                                                index
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    className="bg-white border-b"
+                                                                                >
+                                                                                    <td className="px-4 py-2.5 border border-slate-700">
+                                                                                        {
+                                                                                            item.PlanID
+                                                                                        }
+                                                                                    </td>
+                                                                                    <td className="px-4 py-2.5 border border-slate-700">
+                                                                                        {
+                                                                                            item.value
+                                                                                        }
+                                                                                    </td>
+                                                                                </tr>
+                                                                            )
+                                                                        )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    )
+                                                )}
+                                        </div>
+                                        {/* <table className="w-full text-sm text-left rtl:text-right text-gray-500">
                                             <thead className="text-base text-gray-700 uppercase bg-gray-50">
                                                 <tr>
                                                     <th
@@ -1115,7 +1351,160 @@ function HumidityCheckingReport() {
                                                         )
                                                     )}
                                             </tbody>
-                                        </table>
+                                        </table> */}
+                                    </div>
+
+                                    <div className="relative overflow-x-auto mt-4 mb-4">
+                                        <div className="xl:mx-auto rounded-xl bg-[#22253d] divide-y-2 divide-[#2B384B] mb-3">
+                                            <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 px-8">
+                                                <div className="flex items-center gap-x-4">
+                                                    <MdWaterDrop className="w-8 h-8 text-blue-300" />
+                                                    <div className="text-xl font-semibold">
+                                                        Phân bố độ ẩm
+                                                    </div>
+                                                </div>
+                                                {/* <div className="flex items-center gap-x-4">
+                                                    <div className="p-2 px-4 rounded-full bg-[#33395C]">
+                                                        {reason}
+                                                    </div>
+                                                </div> */}
+                                            </div>
+                                            <div className="">
+                                                {/* Header */}
+                                                <div className="bg-[#22253d]">
+                                                    <table className="min-w-full divide-y-2 divide-[#2B384B]  ">
+                                                        <thead>
+                                                            <tr className="w-full">
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-6 py-3 text-left  text-base w-[40%] font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    Độ ẩm (MC%)
+                                                                </th>
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-6 py-3 text-left  text-base w-[35%] font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    SL Mấu
+                                                                </th>
+                                                                <th
+                                                                    scope="col"
+                                                                    className="px-6 py-3 text-left  text-base w-[25%]  font-medium text-[#D2D6FF]  uppercase"
+                                                                >
+                                                                    Tỉ lệ
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody className=" ">
+                                                            <tr className=" w-full bg-[#22253d]">
+                                                                <td className="px-6 py-3 whitespace-nowrap w-[1/2] font-medium text-[#D2D6FF] text-left ">
+                                                                    Thấp (nhỏ
+                                                                    hơn 7)
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {
+                                                                        humidityAnalysis[0]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {humidityAnalysis[0].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full p-2 bg-[#2d3254]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  selection:font-medium text-[#D2D6FF] items-center flex">
+                                                                    Đích (7-9)
+                                                                    <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] font-medium text-[#D2D6FF] ">
+                                                                    {
+                                                                        humidityAnalysis[1]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] font-medium text-[#D2D6FF] ">
+                                                                    {humidityAnalysis[1].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full bg-[#3f4477]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  font-medium  text-[#D2D6FF] ">
+                                                                    Cao (10-15)
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
+                                                                    {
+                                                                        humidityAnalysis[2]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF]">
+                                                                    {humidityAnalysis[2].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr className="w-full bg-[#48519c]">
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/2]  font-medium text-[#D2D6FF] ">
+                                                                    Rất cao
+                                                                    (trên 15)
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {
+                                                                        humidityAnalysis[3]
+                                                                            .count
+                                                                    }
+                                                                </td>
+                                                                <td className="px-6 py-3 text-left  whitespace-nowrap w-[1/4] text-[#D2D6FF] ">
+                                                                    {humidityAnalysis[3].percentage.toFixed(
+                                                                        2
+                                                                    )}
+                                                                    %
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div className="p-1 rounded-b-xl bg-[#48519c]"></div>
+                                            </div>
+                                        </div>
+                                        <p className="italic">
+                                            <span className="underline mr-2 italic">
+                                                Ghi chú:
+                                            </span>
+                                            {
+                                                "INDOOR: MC < 10% chiếm tỉ lệ ≥ 85%, OUTDOOR: MC < 14% chiếm tỉ lệ ≥ 85% thì cho ra lò."
+                                            }
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-4 mb-4">
+                                        <div className="flex">
+                                            <h4>Kết luận</h4>
+                                            <Stack spacing={5} direction="row">
+                                                <Checkbox isDisabled>
+                                                    Ra lò
+                                                </Checkbox>
+                                                <Checkbox
+                                                    isDisabled
+                                                    defaultChecked
+                                                >
+                                                    Sấy lò
+                                                </Checkbox>
+                                            </Stack>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            Cách khác: <span>Hello</span>
+                                        </div>
                                     </div>
 
                                     <span className="text-lg">

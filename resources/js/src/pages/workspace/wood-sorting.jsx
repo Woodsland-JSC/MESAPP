@@ -174,7 +174,8 @@ function WoodSorting() {
                         ...newPalletCards,
                     ]);
                 } else {
-                    toast.warning("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                    toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                    return;
                 }
 
                 toast.success("Đã thêm vào danh sách");

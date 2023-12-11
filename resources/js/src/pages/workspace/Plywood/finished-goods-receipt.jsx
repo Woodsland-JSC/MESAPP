@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
 import {
@@ -67,12 +67,13 @@ import { HiMiniBellAlert } from "react-icons/hi2";
 import Select, { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import toast from "react-hot-toast";
-import productionApi from "../../api/productionApi";
-import FinishedGoodsIllustration from "../../assets/images/wood-receipt-illustration.png";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
-import ItemInput from "../../components/ItemInput";
-import AwaitingReception from "../../components/AwaitingReception";
+import productionApi from "../../../api/productionApi";
+import FinishedGoodsIllustration from "../../../assets/images/wood-receipt-illustration.png";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
+import PlyWoodItemInput from "../../../components/PlyWoodItemInput";
+import AwaitingReception from "../../../components/AwaitingReception";
+import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 
 const steps = [
     { title: "Bước 1", description: "Chọn loại sản phẩm" },
@@ -82,24 +83,44 @@ const steps = [
 
 const groupList = [
     {
-        id: "TH-X3SC",
+        id: "CH-LVL-TV",
+        no: 1,
+        name: "Tạo ván (CH)",
+    },
+    {
+        id: "CH-PLY-XV",
+        no: 1,
+        name: "Xếp ván PLY (CH)",
+    },
+    {
+        id: "CH-LVL-HT",
+        no: 2,
+        name: "Hoàn thiện LVL (CH)",
+    },
+    {
+        id: "CH-PLY-LL",
+        no: 2,
+        name: "Lên lớp PLY (CH)",
+    },
+    {
+        id: "CH-PLY-TV",
+        no: 2,
+        name: "Tạo ván PLY (CH)",
+    },
+    {
+        id: "CH-LVL-KTP",
         no: 3,
-        name: "Tổ Sơ chế X3",
+        name: "Kho thành phẩm LVL (CH)",
     },
     {
-        id: "TH-X3TC1",
+        id: "CH-PLY-LV",
+        no: 3,
+        name: "Lọc ván PLY (CH)",
+    },
+    {
+        id: "CH-PLY-KVC",
         no: 4,
-        name: "Tổ Tinh chế 1 X3",
-    },
-    {
-        id: "TH-X3TC2",
-        no: 4,
-        name: "Tổ Tinh chế 2 X3",
-    },
-    {
-        id: "TH-X3S",
-        no: 6,
-        name: "Tổ Sơn X3",
+        name: "Kho ván cốt PLY (CH)",
     },
     // {
     //     id: "TH-X3ĐG",
@@ -110,20 +131,36 @@ const groupList = [
 
 const groupListOptions = [
     {
-        value: "TH-X3SC",
-        label: "3. Tổ Sơ chế X3 - TH-X3SC",
+        value: "CH-LVL-TV",
+        label: "1. Tạo ván (CH) - CH-LVL-TV",
     },
     {
-        value: "TH-X3TC1",
-        label: "4. Tổ Tinh chế 1 X3 - TH-X3TC1",
+        value: "CH-PLY-XV",
+        label: "1. Xếp ván PLY (CH) - CH-PLY-XV",
     },
     {
-        value: "TH-X3TC2",
-        label: "4. Tổ Tinh chế 2 X3 - TH-X3TC2",
+        value: "CH-LVL-HT",
+        label: "2. Hoàn thiện LVL (CH) - CH-LVL-HT",
     },
     {
-        value: "TH-X3S",
-        label: "6. Tổ Sơn X3 - TH-X3S",
+        value: "CH-PLY-LL",
+        label: "2. Lên lớp PLY (CH) - CH-PLY-LL",
+    },
+    {
+        value: "CH-PLY-TV",
+        label: "2. Tạo ván PLY (CH) - CH-PLY-TV",
+    },
+    {
+        value: "CH-LVL-KTP",
+        label: "3. Kho thành phẩm LVL (CH) - CH-LVL-KTP",
+    },
+    {
+        value: "CH-PLY-LV",
+        label: "3. Lọc ván PLY (CH) - CH-PLY-LV",
+    },
+    {
+        value: "CH-PLY-KVC",
+        label: "4. Kho ván cốt PLY (CH) - CH-PLY-KVC",
     },
     // {
     //     value: "TH-X3ĐG",
@@ -155,372 +192,188 @@ var waitingReceiptNotifications = [
 
 var exampleData = [
     {
-        id: 1,
-        itemName: "TYBYN bar table 74x74x102 acacia/black",
+        command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+        itemId: 10025,
+        itemName: "Ván cốt 18 chờ lên lớp CH",
         previousGroup: null,
         fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
         },
         nextGroup: {
-            id: "TH-X3TC1",
-            no: 4,
-            name: "Tổ Tinh chế 1 X3",
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
         },
-        itemDetails: [
-            {
-                id: 70152702,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 420,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 960,
-                        done: 719,
-                        faults: 0,
-                        processing: 241,
-                    },
-                    {
-                        command: "TH2344TP-02",
-                        quantity: 800,
-                        done: 400,
-                        faults: 2,
-                        processing: 398,
-                    },
-                ],
-                totalQuantity: 1760,
-                totalDone: 1119,
-                totalFaults: 2,
-                totalProcessing: 641,
-            },
-            {
-                id: 70152703,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 500,
-                        done: 300,
-                        faults: 1,
-                        processing: 199,
-                    },
-                ],
-                totalQuantity: 500,
-                totalDone: 300,
-                totalFaults: 1,
-                totalProcessing: 199,
-            },
-        ],
+        thickness: 15.2,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 1322,
+        allCommandQuantity: 0,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalDone: 2026,
+        totalStageError: 12,
+        totalBackError: 0,
+        totalTypeError: 0,
     },
     {
-        id: 2,
-        itemName: "TJUSIG hanger 78",
+        command: "VCN-CH-PLY-07.10.23-C15WN",
+        itemId: 10027,
+        itemName: "Ván cốt 15 WANEK",
         previousGroup: null,
         fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
         },
         nextGroup: {
-            id: "TH-X3TC2",
-            no: 4,
-            name: "Tổ Tinh chế 2 X3",
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
         },
-        itemDetails: [
-            {
-                id: 70421102,
-                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 20,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 10800,
-                        done: 4494,
-                        faults: 0,
-                        processing: 6306,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 4800,
-                        done: 0,
-                        faults: 0,
-                        processing: 4800,
-                    },
-                ],
-                totalQuantity: 15600,
-                totalDone: 4494,
-                totalFaults: 0,
-                totalProcessing: 11106,
-            },
-            {
-                id: 70421103,
-                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
-                thickness: 30,
-                width: 30,
-                length: 780,
-                stockQuantity: 630,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 5400,
-                        done: 1107,
-                        faults: 0,
-                        processing: 4293,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 2400,
-                        done: 0,
-                        faults: 0,
-                        processing: 2400,
-                    },
-                ],
-                totalQuantity: 7800,
-                totalDone: 1107,
-                totalFaults: 0,
-                totalProcessing: 6693,
-            },
-            {
-                id: 70421104,
-                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
-                thickness: 26,
-                width: 26,
-                length: 115,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 14400,
-                        done: 0,
-                        faults: 0,
-                        processing: 14400,
-                    },
-                ],
-                totalQuantity: 14400,
-                totalDone: 0,
-                totalFaults: 0,
-                totalProcessing: 14400,
-            },
-        ],
+        thickness: 15,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 2502,
+        allCommandQuantity: 5,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalStageError: 1,
+        totalBackError: 0,
+        totalTypeError: 0,
+    },
+    {
+        command: "VCN-CH-PLY-09.10.23-C15WN",
+        itemId: 10027,
+        itemName: "Ván cốt 15 WANEK",
+        previousGroup: null,
+        fromGroup: {
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
+        },
+        nextGroup: {
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
+        },
+        thickness: 15,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 1002,
+        allCommandQuantity: 142,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalStageError: 0,
+        totalBackError: 0,
+        totalTypeError: 0,
+    },
+    {
+        command: "VCN-CH-PLY-10.10.23-C15WN",
+        itemId: 10027,
+        itemName: "Ván cốt 15 WANEK",
+        previousGroup: null,
+        fromGroup: {
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
+        },
+        nextGroup: {
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
+        },
+        thickness: 15,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 3256,
+        allCommandQuantity: 175,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalStageError: 3,
+        totalBackError: 7,
+        totalTypeError: 5,
     },
 ];
 
 var exampleData1 = [
     {
-        id: 1,
-        itemName: "TYBYN bar table 74x74x102 acacia/black",
+        command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+        itemId: 10025,
+        itemName: "Ván cốt 18 chờ lên lớp CH",
         previousGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
         },
         fromGroup: {
-            id: "TH-X3TC1",
-            no: 4,
-            name: "Tổ Tinh chế 1 X3",
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
         },
         nextGroup: {
-            id: "TH-X3S",
-            no: 6,
-            name: "Tổ Sơn X3",
+            id: "CH-LVL-KTP",
+            no: 3,
+            name: "Kho thành phẩm LVL (CH)",
         },
-        itemDetails: [
-            {
-                id: 70152702,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 1000,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 960,
-                        done: 719,
-                        faults: 0,
-                        processing: 241,
-                    },
-                    {
-                        command: "TH2344TP-02",
-                        quantity: 800,
-                        done: 400,
-                        faults: 2,
-                        processing: 398,
-                    },
-                ],
-                totalQuantity: 1760,
-                totalDone: 1119,
-                totalFaults: 2,
-                totalProcessing: 641,
-            },
-            {
-                id: 70152703,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 500,
-                        done: 300,
-                        faults: 1,
-                        processing: 199,
-                    },
-                ],
-                totalQuantity: 500,
-                totalDone: 300,
-                totalFaults: 1,
-                totalProcessing: 199,
-            },
-        ],
+        thickness: 15.2,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 2014,
+        allCommandQuantity: 0,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalDone: 1785,
+        totalStageError: 30,
+        totalBackError: 15,
+        totalTypeError: 14,
     },
 ];
 
 var exampleData2 = [
     {
-        id: 2,
-        itemName: "TJUSIG hanger 78",
-        previousGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
+        command: "VCN-CH-PLY-07.10.23-C15WN",
+        itemId: 10027,
+        itemName: "Ván cốt 15 WANEK",
+        previousGroup: null,
         fromGroup: {
-            id: "TH-X3TC2",
-            no: 4,
-            name: "Tổ Tinh chế 2 X3",
+            id: "CH-LVL-TV",
+            no: 1,
+            name: "Tạo ván (CH)",
         },
         nextGroup: {
-            id: "TH-X3S",
-            no: 6,
-            name: "Tổ Sơn X3",
+            id: "CH-LVL-HT",
+            no: 2,
+            name: "Hoàn thiện LVL (CH)",
         },
-        itemDetails: [
-            {
-                id: 70421102,
-                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 1000,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 10800,
-                        done: 4494,
-                        faults: 0,
-                        processing: 6306,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 4800,
-                        done: 0,
-                        faults: 0,
-                        processing: 4800,
-                    },
-                ],
-                totalQuantity: 15600,
-                totalDone: 4494,
-                totalFaults: 0,
-                totalProcessing: 11106,
-            },
-            {
-                id: 70421103,
-                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
-                thickness: 30,
-                width: 30,
-                length: 780,
-                stockQuantity: 630,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 5400,
-                        done: 1107,
-                        faults: 0,
-                        processing: 4293,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 2400,
-                        done: 0,
-                        faults: 0,
-                        processing: 2400,
-                    },
-                ],
-                totalQuantity: 7800,
-                totalDone: 1107,
-                totalFaults: 0,
-                totalProcessing: 6693,
-            },
-            {
-                id: 70421104,
-                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
-                thickness: 26,
-                width: 26,
-                length: 115,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 14400,
-                        done: 0,
-                        faults: 0,
-                        processing: 14400,
-                    },
-                ],
-                totalQuantity: 14400,
-                totalDone: 0,
-                totalFaults: 0,
-                totalProcessing: 14400,
-            },
-        ],
+        thickness: 15,
+        width: 1220,
+        length: 2440,
+        stockQuantity: 4,
+        furthestQuantity: 1120,
+        allCommandQuantity: 15,
+        pendingErrors: [],
+        pendingReceipts: [],
+        returns: [],
+        totalStageError: 0,
+        totalBackError: 0,
+        totalTypeError: 0,
     },
 ];
 
-function FinishedGoodsReceipt() {
+function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
     const { loading, setLoading } = useAppContext();
 
@@ -535,6 +388,11 @@ function FinishedGoodsReceipt() {
         onOpen: onModalOpen,
         onClose: onModalClose,
     } = useDisclosure();
+    const {
+        isOpen: isErrorModalOpen,
+        onOpen: onErrorModalOpen,
+        onClose: onErrorModalClose,
+    } = useDisclosure();
 
     // const { activeStep, setActiveStep } = useSteps({
     //     index: 0,
@@ -543,10 +401,74 @@ function FinishedGoodsReceipt() {
     // const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [awaitingReception, setAwaitingReception] = useState({
-        "TH-X3SC": [],
-        "TH-X3TC1": [],
-        "TH-X3TC2": [],
-        "TH-X3S": [],
+        "CH-LVL-TV": [],
+        "CH-PLY-XV": [],
+        "CH-LVL-HT": [],
+        "CH-PLY-LL": [],
+        "CH-PLY-TV": [],
+        "CH-LVL-KTP": [],
+        "CH-PLY-LV": [],
+        "CH-PLY-KVC": [],
+    });
+
+    const [awaitingErrorReception, setAwaitingErrorReception] = useState({
+        "CH-LVL-TV": [],
+        "CH-PLY-XV": [],
+        "CH-LVL-HT": [
+            {
+                itemName: "Ván LVL 34",
+                command: "VCN-CH-LVL-04.5.23-LVL34.2m7",
+                thickness: 15.2,
+                width: 1220,
+                length: 2440,
+                amount: 1200,
+                type: "Hàng chờ sửa",
+                method: "Hàng chờ sửa",
+                createdDate: "2023-12-11T00:48:22.854Z",
+                createdBy: {
+                    id: 1,
+                    last_name: "Phạm Phương",
+                    first_name: "Thảo",
+                },
+            },
+            {
+                itemName: "Ván cốt WN",
+                command: "VCN-CH-WN-22.9.23-LVL34.2m7",
+                thickness: 15,
+                width: 1220,
+                length: 2440,
+                amount: 5,
+                type: "Tách lớp",
+                method: "Hạ cấp loại 2",
+                createdDate: "2023-12-11T00:48:22.854Z",
+                createdBy: {
+                    id: 1,
+                    last_name: "Hà Thị Bích",
+                    first_name: "Thuỳ",
+                },
+            },
+            {
+                itemName: "Ván LVL 34",
+                command: "VCN-CH-LVL-01.10.23-LVL34.2m7",
+                thickness: 15,
+                width: 1220,
+                length: 2440,
+                amount: 208,
+                type: "Hàng chờ sửa",
+                method: "Hàng chờ sửa",
+                createdDate: "2023-12-11T00:48:22.854Z",
+                createdBy: {
+                    id: 1,
+                    last_name: "Phạm Phương",
+                    first_name: "Thảo",
+                },
+            },
+        ],
+        "CH-PLY-LL": [],
+        "CH-PLY-TV": [],
+        "CH-LVL-KTP": [],
+        "CH-PLY-LV": [],
+        "CH-PLY-KVC": [],
     });
 
     const [currentData, setCurrentData] = useState(exampleData);
@@ -632,52 +554,66 @@ function FinishedGoodsReceipt() {
         const currentGroupId = data?.fromGroup?.id;
 
         switch (currentGroupId) {
-            case "TH-X3SC":
+            case "CH-LVL-TV":
                 exampleData = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
+                    if (item.command === data.command) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            // itemDetails: item.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingReceipts: [
+                            //                 ...detail.pendingReceipts,
+                            //                 receipts,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
+                            pendingReceipts: [
+                                ...item.pendingReceipts,
+                                receipts,
+                            ],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
                         };
                     }
                     return item;
                 });
                 setCurrentData(exampleData);
                 break;
-            case "TH-X3TC1":
+            case "CH-LVL-HT":
                 exampleData1 = exampleData1.map((item) => {
                     if (item.id === data.itemId) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            // itemDetails: item.itemDetails.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingReceipts: [
+                            //                 ...detail.pendingReceipts,
+                            //                 receipts,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
+                            pendingReceipts: [
+                                ...item.pendingReceipts,
+                                receipts,
+                            ],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
                         };
                     }
                     return item;
@@ -685,26 +621,33 @@ function FinishedGoodsReceipt() {
                 console.log("Final: ", exampleData1);
                 setCurrentData(exampleData1);
                 break;
-            case "TH-X3TC2":
+            case "CH-LVL-KTP":
                 exampleData2 = exampleData.map((item) => {
                     if (item.id === data.itemId) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            // itemDetails: item.itemDetails.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingReceipts: [
+                            //                 ...detail.pendingReceipts,
+                            //                 receipts,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
+                            pendingReceipts: [
+                                ...item.pendingReceipts,
+                                receipts,
+                            ],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
                         };
                     }
                     return item;
@@ -720,26 +663,31 @@ function FinishedGoodsReceipt() {
         const currentGroupId = data?.fromGroup?.id;
 
         switch (currentGroupId) {
-            case "TH-X3SC":
+            case "CH-LVL-TV":
                 exampleData = exampleData.map((item) => {
                     if (item.id === data.itemId) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            pendingErrors: [...item.pendingErrors, faults],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
+                            // ...item,
+                            // itemDetails: item.itemDetails.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingErrors: [
+                            //                 ...detail.pendingErrors,
+                            //                 faults,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
                         };
                     }
                     return item;
@@ -747,26 +695,31 @@ function FinishedGoodsReceipt() {
                 setCurrentData(exampleData);
                 // console.log("hm ra nhiều: ", exampleData);
                 break;
-            case "TH-X3TC1":
+            case "CH-LVL-HT":
                 exampleData1 = exampleData1.map((item) => {
                     if (item.id === data.itemId) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            pendingErrors: [...item.pendingErrors, faults],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
+                            // ...item,
+                            // itemDetails: item.itemDetails.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingErrors: [
+                            //                 ...detail.pendingErrors,
+                            //                 faults,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
                         };
                     }
                     return item;
@@ -774,26 +727,30 @@ function FinishedGoodsReceipt() {
                 console.log("Final: ", exampleData1);
                 setCurrentData(exampleData1);
                 break;
-            case "TH-X3TC2":
+            case "CH-LVL-KTP":
                 exampleData2 = exampleData.map((item) => {
                     if (item.id === data.itemId) {
                         return {
                             ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
+                            pendingErrors: [...item.pendingErrors, faults],
+                            stockQuantity:
+                                Number(item.stockQuantity) -
+                                Number(data.amount),
+                            // itemDetails: item.itemDetails.map((detail) => {
+                            //     if (detail.id === data.id) {
+                            //         return {
+                            //             ...detail,
+                            //             pendingErrors: [
+                            //                 ...detail.pendingErrors,
+                            //                 faults,
+                            //             ],
+                            //             stockQuantity:
+                            //                 Number(detail.stockQuantity) -
+                            //                 Number(data.amount),
+                            //         };
+                            //     }
+                            //     return detail;
+                            // }),
                         };
                     }
                     return item;
@@ -810,44 +767,50 @@ function FinishedGoodsReceipt() {
             let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
             switch (selectedGroup.value) {
-                case "TH-X3SC":
+                case "CH-LVL-TV":
                     exampleData = exampleData.map((item) => {
                         if (item.id === receiptSubItem.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                stockQuantity:
+                                    Number(item.stockQuantity) +
+                                    Number(receiptSubItem.amount),
                             };
                         }
                         return item;
                     });
                     setCurrentData(exampleData);
                     break;
-                case "TH-X3TC1":
+                case "CH-LVL-HT":
                     exampleData1 = exampleData1.map((item) => {
                         if (item.id === receiptSubItem.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                stockQuantity:
+                                    Number(item.stockQuantity) +
+                                    Number(receiptSubItem.amount),
                             };
                         }
                         return item;
@@ -855,22 +818,25 @@ function FinishedGoodsReceipt() {
                     console.log("Final: ", exampleData1);
                     setCurrentData(exampleData1);
                     break;
-                case "TH-X3TC2":
+                case "CH-LVL-KTP":
                     exampleData2 = exampleData.map((item) => {
                         if (item.id === receiptSubItem.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                stockQuantity:
+                                    Number(item.stockQuantity) +
+                                    Number(receiptSubItem.amount),
                             };
                         }
                         return item;
@@ -893,66 +859,221 @@ function FinishedGoodsReceipt() {
         onModalClose();
     };
 
+    const handleConfirmErrorReceipt = (index) => {
+        if (selectedGroup) {
+            let receiptSubItem = awaitingErrorReception[selectedGroup.value][index];
+
+            switch (selectedGroup.value) {
+                case "CH-LVL-TV":
+                    exampleData = exampleData.map((item) => {
+                        if (item?.command === receiptSubItem?.command) {
+                            return {
+                                ...item,
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                totalBackError:
+                                    Number(item.totalBackError) +
+                                    Number(receiptSubItem.amount),
+                            };
+                        }
+                        return item;
+                    });
+
+                    setCurrentData(exampleData);
+                    break;
+                case "CH-LVL-HT":
+                    exampleData1 = exampleData1.map((item) => {
+                        if (item?.command === receiptSubItem?.command) {
+                            return {
+                                ...item,
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                totalBackError:
+                                    Number(item.totalBackError) +
+                                    Number(receiptSubItem.amount),
+                            };
+                        }
+
+                        return item;
+                    });
+                    console.log("Final: ", exampleData1);
+                    setCurrentData(exampleData1);
+                    break;
+                case "CH-LVL-KTP":
+                    exampleData2 = exampleData.map((item) => {
+                        if (item?.command === receiptSubItem?.command) {
+                            return {
+                                ...item,
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             stockQuantity:
+                                //                 Number(detail.stockQuantity) +
+                                //                 Number(receiptSubItem.amount),
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
+                                totalBackError:
+                                    Number(item.totalBackError) +
+                                    Number(receiptSubItem.amount),
+                            };
+                        }
+                        return item;
+                    });
+
+                    setCurrentData(exampleData2);
+                    break;
+            }
+
+            console.log("INdex: ", index)
+
+            setAwaitingErrorReception((prev) => {
+                const groupKey = selectedGroup.value;
+                const updatedGroup = awaitingErrorReception[groupKey].filter(
+                    (item, i) => i !== index
+                );
+                console.log("Chỗ này ra gì nhỉ? ", updatedGroup);
+                return {
+                    ...prev,
+                    [groupKey]: updatedGroup,
+                };
+            });
+        }
+        toast.success("Xác nhận thành công.");
+        onModalClose();
+    };
+
     const handleRejectReceipt = (index, reason) => {
         if (selectedGroup) {
             let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
             switch (receiptSubItem?.fromGroup?.id) {
-                case "TH-X3SC":
+                case "CH-LVL-TV":
                     exampleData = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
+                        if (item?.id === receiptSubItem?.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                returns: [
+                                    ...item.returns,
+                                    {
+                                        ...reason,
+                                        amount: Number(receiptSubItem.amount),
+                                    },
+                                ],
+                                // itemDetails: item.itemDetails.map((detail) => {
+                                //     if (detail.id === receiptSubItem.id) {
+                                //         return {
+                                //             ...detail,
+                                //             returns: [
+                                //                 ...detail.returns,
+                                //                 {
+                                //                     ...reason,
+                                //                     amount: Number(
+                                //                         receiptSubItem.amount
+                                //                     ),
+                                //                 },
+                                //             ],
+                                //         };
+                                //     }
+                                //     return detail;
+                                // }),
                             };
                         }
                         return item;
                     });
                     // setCurrentData(exampleData);
                     break;
-                case "TH-X3TC1":
+                case "CH-LVL-HT":
                     exampleData1 = exampleData1.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
+                        if (item?.id === receiptSubItem?.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                returns: [
+                                    ...item.returns,
+                                    {
+                                        ...reason,
+                                        amount: Number(receiptSubItem.amount),
+                                    },
+                                ],
                             };
+                            // return {
+                            //     ...item,
+                            //     itemDetails: item.itemDetails.map((detail) => {
+                            //         if (detail.id === receiptSubItem.id) {
+                            //             return {
+                            //                 ...detail,
+                            //                 returns: [
+                            //                     ...detail.returns,
+                            //                     {
+                            //                         ...reason,
+                            //                         amount: Number(
+                            //                             receiptSubItem.amount
+                            //                         ),
+                            //                     },
+                            //                 ],
+                            //             };
+                            //         }
+                            //         return detail;
+                            //     }),
+                            // };
                         }
                         return item;
                     });
                     // setCurrentData(exampleData1);
                     break;
-                case "TH-X3TC2":
+                case "CH-LVL-KTP":
                     exampleData2 = exampleData.map((item) => {
                         if (item.id === receiptSubItem.itemId) {
                             return {
                                 ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
+                                returns: [
+                                    ...item.returns,
+                                    {
+                                        ...reason,
+                                        amount: Number(receiptSubItem.amount),
+                                    },
+                                ],
                             };
+                            // return {
+                            //     ...item,
+                            //     itemDetails: item.map((detail) => {
+                            //         if (detail.id === receiptSubItem.id) {
+                            //             return {
+                            //                 ...detail,
+                            //                 returns: [
+                            //                     ...detail.returns,
+                            //                     {
+                            //                         ...reason,
+                            //                         amount: Number(
+                            //                             receiptSubItem.amount
+                            //                         ),
+                            //                     },
+                            //                 ],
+                            //             };
+                            //         }
+                            //         return detail;
+                            //     }),
+                            // };
                         }
                         return item;
                     });
@@ -977,15 +1098,35 @@ function FinishedGoodsReceipt() {
         console.log("Ra example data: ", exampleData);
     };
 
+    const handleRejectErrorReceipt = (index) => {
+        if (selectedGroup) {
+            setAwaitingReception((prev) => {
+                const groupKey = selectedGroup.value;
+                const updatedGroup = awaitingErrorReception[groupKey].filter(
+                    (item, i) => i !== index
+                );
+                return {
+                    ...prev,
+                    [groupKey]: updatedGroup,
+                };
+            });
+        }
+        toast.success("Huỷ bỏ & chuyển lại thành công.");
+        onModalClose();
+        // console.log("Ra index: ", index);
+        // console.log("Thực hiện reject: ", reason);
+        console.log("Ra example data: ", exampleData);
+    };
+
     const onFilterTextBoxChanged = async (e) => {
         const input = e.target.value;
         if (!input) {
             if (selectedGroup) {
-                if (selectedGroup.value == "TH-X3SC") {
+                if (selectedGroup.value == "CH-LVL-TV") {
                     setCurrentData(exampleData);
-                } else if (selectedGroup.value == "TH-X3TC1") {
+                } else if (selectedGroup.value == "CH-LVL-HT") {
                     setCurrentData(exampleData1);
-                } else if (selectedGroup.value == "TH-X3TC2") {
+                } else if (selectedGroup.value == "CH-LVL-KTP") {
                     setCurrentData(exampleData2);
                 } else {
                     setCurrentData([]);
@@ -999,8 +1140,10 @@ function FinishedGoodsReceipt() {
                     return true;
                 }
 
-                const hasSubItem = item.itemDetails.some(
-                    (detail) => detail.subItemName.toLowerCase().includes(input.toLowerCase())
+                const hasSubItem = item.itemDetails.some((detail) =>
+                    detail.subItemName
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
                 );
 
                 return hasSubItem;
@@ -1030,7 +1173,7 @@ function FinishedGoodsReceipt() {
         //     }
         // };
         // getFinishedGoods();
-        document.title = "Woodsland - Nhập sản lượng chế biến gỗ";
+        document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
         return () => {
             document.title = "Woodsland";
             document.body.classList.remove("body-no-scroll");
@@ -1047,11 +1190,11 @@ function FinishedGoodsReceipt() {
 
     useEffect(() => {
         if (selectedGroup) {
-            if (selectedGroup.value == "TH-X3SC") {
+            if (selectedGroup.value == "CH-LVL-TV") {
                 setCurrentData(exampleData);
-            } else if (selectedGroup.value == "TH-X3TC1") {
+            } else if (selectedGroup.value == "CH-LVL-HT") {
                 setCurrentData(exampleData1);
-            } else if (selectedGroup.value == "TH-X3TC2") {
+            } else if (selectedGroup.value == "CH-LVL-KTP") {
                 setCurrentData(exampleData2);
             } else {
                 setCurrentData([]);
@@ -1067,7 +1210,7 @@ function FinishedGoodsReceipt() {
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
                     <div className="mb-4 px-4">
-                        <nav className="flex" ariaLabel="Breadcrumb">
+                        <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
@@ -1082,7 +1225,7 @@ function FinishedGoodsReceipt() {
                                 <li aria-current="page">
                                     <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -1098,16 +1241,16 @@ function FinishedGoodsReceipt() {
                                         </svg>
                                         <Link
                                             to="/workspace"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div>Quản lý sản xuất</div>
                                         </Link>
                                     </div>
                                 </li>
                                 {/* <li aria-current="page">
-                                    <div class="flex items-center">
+                                    <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -1121,7 +1264,7 @@ function FinishedGoodsReceipt() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
+                                        <span className="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
                                             <div>Nhập sản lượng</div>
                                         </span>
                                     </div>
@@ -1132,8 +1275,8 @@ function FinishedGoodsReceipt() {
 
                     {/* Header */}
                     <div className="flex justify-between mb-6 items-center px-4">
-                        <div className="text-3xl font-bold ">
-                            Nhập sản lượng chế biến gỗ
+                        <div className="text-3xl md:text-3xl font-bold">
+                            Nhập sản lượng ván công nghiệp
                         </div>
                     </div>
 
@@ -1368,7 +1511,7 @@ function FinishedGoodsReceipt() {
                                     placeholder="Tìm kiếm"
                                     className="mt-4"
                             /> */}
-                            <div className="flex w-full justify-end space-x-4">
+                            <div className="flex flex-col sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -1399,19 +1542,30 @@ function FinishedGoodsReceipt() {
                                             id="search"
                                             className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            onInput={
-                                                onFilterTextBoxChanged
-                                            }
+                                            onInput={onFilterTextBoxChanged}
                                             required
                                         />
                                     </div>
                                 </div>
                                 {selectedGroup &&
+                                    awaitingErrorReception[selectedGroup?.value]
+                                        ?.length > 0 && (
+                                        <button
+                                            onClick={onErrorModalOpen}
+                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                        >
+                                            <HiMiniBellAlert className="text-xl" />
+                                            <div className="w-full whitespace-nowrap">
+                                                Thông báo: Có phôi lỗi chờ xử lý
+                                            </div>
+                                        </button>
+                                    )}
+                                {selectedGroup &&
                                     awaitingReception[selectedGroup?.value]
                                         ?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
-                                            className="w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                         >
                                             <HiMiniBellAlert className="text-xl" />
                                             <div className="w-full whitespace-nowrap">
@@ -1657,7 +1811,7 @@ function FinishedGoodsReceipt() {
 
                                 {currentData.length > 0 ? (
                                     currentData.map((item, index) => (
-                                        <ItemInput
+                                        <PlyWoodItemInput
                                             data={item}
                                             index={index}
                                             key={index}
@@ -1702,14 +1856,14 @@ function FinishedGoodsReceipt() {
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalBody>
-                        <div className="flex gap-4 justify-center ">
+                        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center ">
                             {selectedGroup &&
                                 awaitingReception[selectedGroup?.value]
                                     ?.length > 0 &&
                                 awaitingReception[selectedGroup?.value].map(
                                     (item, index) => (
                                         <AwaitingReception
-                                            type="wood-processing"
+                                            type="plywood"
                                             data={item}
                                             key={index}
                                             index={index}
@@ -1722,6 +1876,47 @@ function FinishedGoodsReceipt() {
                                         />
                                     )
                                 )}
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+            <Modal
+                isCentered
+                isOpen={isErrorModalOpen}
+                size="4xl"
+                onClose={onErrorModalClose}
+                scrollBehavior="inside"
+            >
+                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                <ModalContent>
+                    <ModalHeader>
+                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
+                            Danh sách phôi lỗi chờ xử lý
+                        </h1>
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <div className="border-b-2 border-gray-100"></div>
+                    <ModalBody>
+                        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center ">
+                            {selectedGroup &&
+                                awaitingErrorReception[selectedGroup?.value]
+                                    ?.length > 0 &&
+                                awaitingErrorReception[
+                                    selectedGroup?.value
+                                ].map((item, index) => (
+                                    <AwaitingErrorReception
+                                        type="plywood"
+                                        data={item}
+                                        key={index}
+                                        index={index}
+                                        onConfirmErrorReceipt={
+                                            handleConfirmErrorReceipt
+                                        }
+                                        onRejectErrorReceipt={
+                                            handleRejectErrorReceipt
+                                        }
+                                    />
+                                ))}
                         </div>
                     </ModalBody>
                 </ModalContent>
@@ -1746,7 +1941,6 @@ function FinishedGoodsReceipt() {
                                 colorScheme="red"
                                 // onClick={}
                                 ml={3}
-
                             >
                                 Xác nhận
                             </Button>
@@ -1759,4 +1953,4 @@ function FinishedGoodsReceipt() {
     );
 }
 
-export default FinishedGoodsReceipt;
+export default PlywoodFinishedGoodsReceipt;
