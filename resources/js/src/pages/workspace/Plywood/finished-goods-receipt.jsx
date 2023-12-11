@@ -1552,7 +1552,7 @@ function PlywoodFinishedGoodsReceipt() {
                                         ?.length > 0 && (
                                         <button
                                             onClick={onErrorModalOpen}
-                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                         >
                                             <HiMiniBellAlert className="text-xl" />
                                             <div className="w-full whitespace-nowrap">
@@ -1565,7 +1565,7 @@ function PlywoodFinishedGoodsReceipt() {
                                         ?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
-                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                         >
                                             <HiMiniBellAlert className="text-xl" />
                                             <div className="w-full whitespace-nowrap">
