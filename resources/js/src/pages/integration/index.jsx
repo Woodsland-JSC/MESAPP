@@ -257,7 +257,7 @@ function Integration() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+            <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Breadcrumb */}

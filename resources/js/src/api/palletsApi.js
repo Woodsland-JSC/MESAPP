@@ -21,12 +21,12 @@ const palletsApi = {
     //         },
     //     });
     // },
-    getStockByItem: (item, reason, batchNum) => {
-        const url = `/stock/${item}`;
+    getStockByItem: (item, reason, batchnum) => {
+        const url = `v2/stock/${item}`;
         return axiosClient().get(url, {
             params: {
                 reason,
-                batchNum,
+                batchnum,
             },
         });
     },

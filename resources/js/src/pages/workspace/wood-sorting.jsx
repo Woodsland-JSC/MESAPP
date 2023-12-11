@@ -133,7 +133,7 @@ function WoodSorting() {
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-
+                    selectedDryingMethod.batchNum,
                 );
 
                 console.log("2. Get thông tin từ ItemCode:", response);
@@ -150,7 +150,7 @@ function WoodSorting() {
                         .map((item) => (
                             <PalletCard
                                 key={item.WhsCode + item.BatchNum}
-                                itemCode={selectedDryingMethod.value}
+                                itemCode={selectedDryingMethod.code}
                                 itemName={selectedDryingMethod.label}
                                 batchNum={item.BatchNum}
                                 inStock={item.Quantity}
@@ -212,11 +212,11 @@ function WoodSorting() {
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
             NgayNhap: formattedStartDate,
-            details: palletCards.map((card) => ({
+            Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 WhsCode: card.props.whsCode,
                 BatchNum: card.props.batchNum,
-                Qty: palletQuantities[card.key] || 0,
+                Qty: parseInt(palletQuantities[card.key]) || 0,
                 CDai: card.props.height,
                 CDay: card.props.thickness,
                 CRong: card.props.width,
@@ -237,18 +237,25 @@ function WoodSorting() {
 
         for (const card of palletCards) {
 
-            const inStock = parseFloat(card.props.inStock);
-            const quantity = parseFloat(palletQuantities[card.key] || 0);
+            var inStock = parseFloat(card.props.inStock);
+            var quantity = parseFloat(palletQuantities[card.key] || 0);
             console.log("Lấy giá trị tồn kho:", inStock);
             console.log("Lấy giá trị số lượng:", quantity);
 
             if (quantity > inStock) {
                 toast.error("Giá trị nhập vào không được lớn hơn giá trị tồn kho.");
                 return;
-            }
+            } else if (quantity === 0) {
+                toast.error("Giá trị nhập vào phải lớn hơn 1.");
+                return;
+            } else if (quantity == "" || quantity == NaN || quantity == null) {
+                toast.error("Giá trị nhập vào phải lớn hơn 1.");
+                return;
+            };
         }
 
         const palletObject = createPalletObject();
+        console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
 
         try {
             const response = await toast.promise(
@@ -439,7 +446,7 @@ function WoodSorting() {
                                         type="button"
                                         onClick={handleAddToList}
                                         className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
-                                        disabled={(palletCards.length) > 0 ? true : false}
+                                        // disabled={(palletCards.length) > 0 ? true : false}
                                     >
                                         Thêm vào danh sách
                                     </button>
