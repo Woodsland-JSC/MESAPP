@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('palletID');
             $table->string('ItemCode');
             $table->string('WhsCode', 50);
+            $table->string('WhsCode2', 50);
             $table->string('BatchNum');
             $table->DECIMAL('Qty', 19, 2);
             $table->timestamps();

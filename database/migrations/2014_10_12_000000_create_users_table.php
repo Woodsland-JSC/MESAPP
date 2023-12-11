@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('sap_id')->nullable();
             $table->string('integration_id')->nullable();
             $table->string('other_info')->nullable();
+            $table->string('branch')->nullable();
+            $table->integer('is_block')->default(0);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken()->unique();
             $table->timestamps();

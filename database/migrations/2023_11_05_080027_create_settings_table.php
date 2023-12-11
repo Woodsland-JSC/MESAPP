@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('password_db')->nullable();
             $table->string('token_db')->nullable();
             $table->string('url_sapdb')->nullable();
+            $table->string('dbname')->nullable();
             $table->timestamps();
         });
     }

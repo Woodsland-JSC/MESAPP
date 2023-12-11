@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('pallet');
             $table->string('size');
             $table->DECIMAL('Qty', 19, 2);
-            $table->float('Mass');
+            $table->float('Mass', 19, 4);
+            $table->float('CDai');
+            $table->float('CRong');
+            $table->float('CDay');
             $table->timestamps();
             $table->foreign('PlanID')->references('PlanID')->on('planDryings');
         });
