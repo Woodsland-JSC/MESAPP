@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('WhsCode', 50);
             $table->string('WhsCode2', 50);
             $table->string('BatchNum');
-            $table->DECIMAL('Qty', 19, 2);
+            $table->DECIMAL('Qty', 19);
+            $table->DECIMAL('CDai', 19);
+            $table->DECIMAL('CDay', 19);
+            $table->DECIMAL('CRong', 19);
             $table->timestamps();
             $table->foreign('palletID')->references('palletID')->on('pallets');
         });
