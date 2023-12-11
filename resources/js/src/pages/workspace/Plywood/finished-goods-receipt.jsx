@@ -1205,7 +1205,7 @@ function PlywoodFinishedGoodsReceipt() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center bg-[#F8F9F7] ">
+            <div className="flex justify-center bg-transparent ">
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}

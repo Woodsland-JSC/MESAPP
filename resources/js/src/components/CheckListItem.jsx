@@ -67,11 +67,6 @@ function CheckListItem(props) {
     const [CBL, setCBL] = useState("");
     const [doThucTe, setDoThucTe] = useState("");
     const [actualValue, setActualValue] = useState("");
-    const [sample1, setSample1] = useState("");
-    const [sample2, setSample2] = useState("");
-    const [sample3, setSample3] = useState("");
-    const [sample4, setSample4] = useState("");
-    const [sample5, setSample5] = useState("");
     const [fanValues, setFanValues] = useState({
         q1: "",
         q2: "",
@@ -82,6 +77,19 @@ function CheckListItem(props) {
         q7: "",
         q8: "",
     });
+    const [sample1, setSample1] = useState("");
+    const [sample2, setSample2] = useState("");
+    const [sample3, setSample3] = useState("");
+    const [sample4, setSample4] = useState("");
+    const [sample5, setSample5] = useState("");
+    // const [samplesValues, setSamplesValues] = useState({
+    //     sample1: "",
+    //     sample2: "",
+    //     sample3: "",
+    //     sample4: "",
+    //     sample5: "",
+    //     sample6: "",
+    // });
 
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0) {
