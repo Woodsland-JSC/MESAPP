@@ -21,6 +21,7 @@ function PalletCard(props) {
         width,
         height,
         thickness,
+        // isInvalidQuantity
     } = props;
 
     // const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
@@ -36,7 +37,7 @@ function PalletCard(props) {
             setIsInvalidQuantity(true);
         } else if (quantity === 0) {
             setIsInvalidQuantity(true);
-        } else if (quantity == null || quantity == "" || quantity == NaN) {
+        } else if (quantity == null || quantity == "") {
             setIsInvalidQuantity(true);
         } else {
             setIsInvalidQuantity(false);
@@ -128,7 +129,7 @@ function PalletCard(props) {
                         min={0}
                         // onChange={(value) => props.onQuantityChange(value)}
                         // isDisabled={isQuantityExceedingStock}
-                        isInvalid={isInvalidQuantity }
+                        isInvalid={isInvalidQuantity}
                         onChange={handleQuantityChange}
                     >
                         <NumberInputField/>
