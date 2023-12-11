@@ -63,8 +63,10 @@ function WoodSorting() {
             try {
                 const dryingMethodsData = await palletsApi.getDryingMethod();
                 const dryingMethodsOptions = dryingMethodsData.map((item) => ({
-                    value: item.ItemCode,
+                    value: item.ItemCode+"-"+item.BatchNum,
                     label: item.ItemName,
+                    batchNum: item.BatchNum,
+                    code: item.ItemCode
                 }));
                 console.log(dryingMethodsOptions);
                 setDryingMethods(dryingMethodsOptions);
@@ -129,8 +131,9 @@ function WoodSorting() {
                 console.log("1.Dữ liệu từ form:", data);
 
                 const response = await palletsApi.getStockByItem(
-                    selectedDryingMethod.value,
-                    selectedDryingReason.value
+                    selectedDryingMethod.code,
+                    selectedDryingReason.value,
+
                 );
 
                 console.log("2. Get thông tin từ ItemCode:", response);
@@ -282,7 +285,7 @@ function WoodSorting() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-[#F8F9F7]">
+            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-transparent">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
@@ -334,7 +337,7 @@ function WoodSorting() {
                     </div>
 
                     {/* Components */}
-                    <div className="p-6 bg-white border-2 border-gray-200 rounded-xl">
+                    <div className="p-6 bg-white border-2 border-gray-300 shadow-sm rounded-xl">
                         <section>
                             <form>
                                 <div className="xl:grid xl:space-y-0 space-y-5 gap-5 mb-6 xl:grid-cols-3">
@@ -355,7 +358,6 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
                                             }
-                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -407,10 +409,11 @@ function WoodSorting() {
                                             }}
                                             placeholder="Chọn quy cách thô"
                                             options={dryingMethods}
-                                            onChange={(value) =>
-                                                setSelectedDryingMethod(value)
-                                            }
-                                            isDisabled={(palletCards.length > 0)}
+                                            onChange={(value) => {
+                                                setSelectedDryingMethod(value);
+                                                console.log("Quy cách thô được chọn:", selectedDryingMethod);
+                                                console.log("Mã quy cách thô được chọn:", selectedDryingMethod.code);
+                                            }}
                                         />
                                     </div>
 

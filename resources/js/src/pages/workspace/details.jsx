@@ -162,7 +162,7 @@ function Details() {
     return (
         <Layout>
             <div>
-                <div className="flex justify-center bg-[#F8F9F7] ">
+                <div className="flex justify-center bg-transparent">
                     {/* Section */}
                     <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                         {/* Header */}
