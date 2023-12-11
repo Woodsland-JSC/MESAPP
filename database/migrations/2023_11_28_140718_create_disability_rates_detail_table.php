@@ -17,9 +17,10 @@ return new class extends Migration
             $table->integer('refID')->default(-1);
             $table->float('SLPallet');
             $table->float('SLMau');
-            $table->float('SLMO_TOP');
+            $table->float('SLMoTop');
             $table->float('SLCong');
             $table->text('note');
+            // $table->text('note')->nullable();
             $table->integer('created_by');
             $table->timestamps();
         });

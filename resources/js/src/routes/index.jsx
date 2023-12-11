@@ -110,6 +110,7 @@ import Notfound from "../pages/errors/notfound";
 
 import ProtectedRoute from "./ProtectedRoute";
 import FinishedGoodsReceipt from "../pages/workspace/finished-goods-receipt";
+import PlywoodFinishedGoodsReceipt from "../pages/workspace/Plywood/finished-goods-receipt";
 
 import Report from "../pages/reports/index";
 import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
@@ -262,10 +263,18 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/workspace/finished-goods-receipt"
+                        path="/workspace/wood-processing/finished-goods-receipt"
                         element={
                         <ProtectedRoute >
                             <FinishedGoodsReceipt />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/workspace/plywood/finished-goods-receipt"
+                        element={
+                        <ProtectedRoute >
+                            <PlywoodFinishedGoodsReceipt />
                         </ProtectedRoute>
                         }
                     />

@@ -57,9 +57,9 @@ const palletsApi = {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
     },
-    saveCheckingKiln: () => {
+    saveCheckingKiln: (data) => {
         const url = `/ovens/production-check-single`;
-        return axiosClient().patch(url, {});
+        return axiosClient().patch(url, data);
     },
     addHumidRecord: (data) => {
         const url = `/dgm/ghinhandoam`;
@@ -77,12 +77,29 @@ const palletsApi = {
             },
         });
     },
-    getTempRecords: (PlanID, Type) => {
+    getDisabledListById: (PlanID) => {
+        const url = `/dgm/getdisabledlistbyid`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+            },
+        });
+    },
+    getTempHumidRecords: (PlanID, Type) => {
         const url = `/dgm/giatrihientai`;
         return axiosClient().get(url, {
             params: {
                 PlanID,
                 Type : "DA"
+            },
+        });
+    },   
+    getTempDisabledRecords: (PlanID, Type) => {
+        const url = `/dgm/giatrihientai`;
+        return axiosClient().get(url, {
+            params: {
+                PlanID,
+                Type : "KT"
             },
         });
     },   
@@ -96,6 +113,10 @@ const palletsApi = {
     },
     addDisabledRecord: (data) => {
         const url = `dgm/ghinhankt`;
+        return axiosClient().post(url, data);
+    },
+    completeDisabledRecord: (data) => {
+        const url = `dgm/hoanthanhkt`;
         return axiosClient().post(url, data);
     },
 };

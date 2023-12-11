@@ -27,9 +27,9 @@ class DryingOvenController extends Controller
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('details', []);
 
-            if (count($palletDetails) > 1) {
-                return response()->json(['message' => 'Failed to create pallet and details', 'error' => 'so batch num lon hon 1'], 500);
-            }
+            // if (count($palletDetails) > 1) {
+            //     return response()->json(['message' => 'Failed to create pallet and details', 'error' => 'so batch num lon hon 1'], 500);
+            // }
             $ldt = [];
             // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
             foreach ($palletDetails as $detailData) {

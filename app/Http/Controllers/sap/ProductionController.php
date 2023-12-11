@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Jobs\receiptProductionAlocate;
 use App\Models\AllocateLogs;
 use App\Models\notireceipt;
@@ -13,7 +14,10 @@ use Illuminate\Support\Facades\Redis;
 
 class ProductionController extends Controller
 {
-    //
+    //// -99 là xóa data
+    // -1 new
+    //0 đã push
+    //1 success
     function index(Request $request)
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -47,52 +51,67 @@ class ProductionController extends Controller
         $validator = Validator::make($request->all(), [
             'ItemCode' => 'required',
             'SLD' => 'required',
+            'SPDich' => 'required',
+            'QUYCACH' => 'required',
+            'SLD' => 'required',
             'SLL' => 'required',
+            'TOTT' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        // -99 là xóa data
+
         $Allocate = AllocateLogs::create([
             'ItemCode' => $request->ItemCode,
+            'SPDich' => $request->SPDich,
             'Qty' => $request->SLD,
-            'Stautus' => 0
+            'Stautus' => 0,
+            'Type' => 202,
+            "TO" => $request->TOHT,
+            'CDTT' => $request->TOTT
         ]);
         notireceipt::Create([
             'baseID' => $Allocate->id,
             'text' => 'Số lượng đã giao chờ SX xác nhận',
             'Quantity' => $request->SLD,
+            'QuyCach' =>  $request->QUYCACH,
+            'SPDich' => $request->SPDich,
+
         ]);
         //  ;
         if ($request->SLL > 0) {
-            $data[] = [
-                "BatchNumber" => now()->format('YmdHMI'),
-                "Quantity" => $request->SLL,
-                "ItemCode" =>  $request->ItemCode,
-                "U_Status" => "SD"
-            ];
             // cần xử lý thêm phân get kho theo nhà máy
             $body =
                 [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "ItemCode" => $request->ItemCode,
+                    "U_LSX" => $request->SPDich,
                     "DocumentLines" => [
                         [
-                            "Quantity" => $request->ItemCode,
+                            "ItemCode" => $request->ItemCode,
+                            "Quantity" => $request->SLL,
                             "BaseLine" => 0,
                             "WarehouseCode" => 'W07.1.01',
-                            "BatchNumbers" => $data,
+                            "BatchNumbers" => [
+                                "BatchNumber" => now()->format('YmdHMI'),
+                                "Quantity" => $request->SLL,
+                                "ItemCode" =>  $request->ItemCode,
+                                "U_Status" => "HL"
+
+                            ],
+
                         ],
                     ],
                 ];
-            receiptProductionAlocate::dispatch($body);
-            AllocateLogs::create([
+
+            $record =  AllocateLogs::create([
                 'ItemCode' => $request->ItemCode,
                 'Qty' => $request->SLL,
                 'Body' => json_encode($body),
                 'Type' => "59",
-                'Stautus' => 1
+                'Stautus' => -1,
+                'Factorys' =>  $request->Factory
             ]);
+            receiptProductionAlocate::dispatch($body, $record->id);
         }
 
 
@@ -100,29 +119,7 @@ class ProductionController extends Controller
             'message' => 'nhập sản lượng thành công'
         ], 200);
     }
-    function allocate($data, $totalQty)
-    {
-        foreach ($data as &$item) {
-            // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
-            if (isset($item['OpenQty']) && $item['OpenQty'] <= $totalQty) {
-                $item['Allocate'] = $item['OpenQty'];
-                $totalQty -= $item['OpenQty'];
-            } else {
-                // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
-                if ($item['OpenQty'] > 0) {
-                    $item['Allocate'] = min($item['OpenQty'], $totalQty);
-                    $totalQty -= $item['Allocate'];
-                } else {
-                    $item['Allocate'] = 0;
-                }
-            }
-        }
 
-        // Sử dụng array_filter với callback ngắn gọn hơn
-        $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
-
-        return array_values($filteredData);
-    }
     function listProduction(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -282,13 +279,14 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-
-        $data[] = [
-            "BatchNumber" => now()->format('YmdHMI'),
-            "Quantity" => $request->SLL,
-            "ItemCode" =>  $request->ItemCode,
-            "U_Status" => "SD"
-        ];
+        $data = DB::table('AllocateLogs AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+            ->select('b.*')
+            ->where('a.id', $request->id)
+            ->where('b.Status', -1)
+            ->first();
+        if (!$data) {
+            throw new \Exception('Lò không hợp lệ.');
+        }
         // cần xử lý thêm phân get kho theo nhà máy
         $body =
             [
@@ -299,7 +297,12 @@ class ProductionController extends Controller
                         "Quantity" => $request->ItemCode,
                         "BaseLine" => 0,
                         "WarehouseCode" => 'W07.1.01',
-                        "BatchNumbers" => $data,
+                        "BatchNumbers" => [
+                            "BatchNumber" => now()->format('YmdHMI'),
+                            "Quantity" => $request->SLL,
+                            "ItemCode" =>  $request->ItemCode,
+                            "U_Status" => "HL"
+                        ],
                     ],
                 ],
             ];
@@ -312,13 +315,102 @@ class ProductionController extends Controller
             'Stautus' => 1
         ]);
     }
-    function listpending(Request $request)
-    {
-    }
+
     function accept(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $data = DB::table('AllocateLogs AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+            ->select('b.*')
+            ->where('a.id', $request->id)
+            ->where('b.Status', -1)
+            ->first();
+        if (!$data) {
+            throw new \Exception('Lò không hợp lệ.');
+        }
+        $dataallocate = $this->collectdata($data->SPDich, $data->ItemCode);
+        $allocates = $this->allocate($dataallocate, $data->Qty);
+
+        foreach ($allocates as $allocate) {
+
+            $body = [
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "DocumentLines" => [
+                    "Quantity" => $allocate['Allocate'],
+                    "BaseLine" => 0,
+                    "WarehouseCode" => $allocate['Warehouse'],
+                    "BaseEntry" => $allocate['DocEntry'],
+                    "BaseType" => 202,
+                    "BatchNumbers" => [
+                        [
+                            "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
+                            "Quantity" => $allocate['Allocate'],
+                            "ItemCode" =>  $allocate['ItemCode'],
+                            "U_CDai" => $allocate['CDai'],
+                            "U_CRong" => $allocate['CRong'],
+                            "U_CDay" => $allocate['CDay'],
+                            "U_Status" => "HD"
+                        ]
+                    ]
+                ]
+            ];
+
+            receiptProductionAlocate::dispatch($body, $data->id);
+        }
+        AllocateLogs::where('id', $data->id)->update(['Status' => 0]);
+        return response()->json('success', 200);
     }
     function delete(Request $request)
     {
+    }
+    function collectdata($spdich, $item)
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from uv_detailreceipt where "SanPhamDich"=? and "ItemCode"=? order by "DocEntry" asc';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$spdich, $item])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+        odbc_close($conDB);
+        return  $results;
+    }
+    function allocate($data, $totalQty)
+    {
+        foreach ($data as &$item) {
+            // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
+            if (
+                isset($item['totalProcessing']) && $item['totalProcessing'] <= $totalQty
+            ) {
+                $item['Allocate'] = $item['totalProcessing'];
+                $totalQty -= $item['totalProcessing'];
+            } else {
+                // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
+                if ($item['totalProcessing'] > 0) {
+                    $item['Allocate'] = min($item['totalProcessing'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+
+        // Sử dụng array_filter với callback ngắn gọn hơn
+        $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
+
+        return array_values($filteredData);
     }
 }

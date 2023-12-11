@@ -899,6 +899,7 @@ function HumidityCheckingReport() {
             setChunkData(chunks);
         }
     }, [humidityRecords]);
+
     // useEffect(() => {
     //     const handleGetFactory = async () => {
     //         try {
@@ -1490,9 +1491,7 @@ function HumidityCheckingReport() {
                                         <div className="flex">
                                             <h4>Kết luận</h4>
                                             <Stack spacing={5} direction="row">
-                                                <Checkbox
-                                                    isDisabled
-                                                >
+                                                <Checkbox isDisabled>
                                                     Ra lò
                                                 </Checkbox>
                                                 <Checkbox
@@ -1503,7 +1502,9 @@ function HumidityCheckingReport() {
                                                 </Checkbox>
                                             </Stack>
                                         </div>
-                                        <div className="flex gap-2">Cách khác: <span>Hello</span></div>
+                                        <div className="flex gap-2">
+                                            Cách khác: <span>Hello</span>
+                                        </div>
                                     </div>
 
                                     <span className="text-lg">

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use App\Models\AllocateLogs;
 
 class receiptProductionAlocate implements ShouldQueue
 {
@@ -18,9 +19,11 @@ class receiptProductionAlocate implements ShouldQueue
      * Create a new job instance.
      */
     protected $body;
-    public function __construct($body)
+    protected $id;
+    public function __construct($body, $id)
     {
         $this->body = $body;
+        $this->id = $id;
     }
 
     /**
@@ -35,5 +38,15 @@ class receiptProductionAlocate implements ShouldQueue
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $this->body);
+        if ($response->successful()) {
+            $res = $response->json();
+            AllocateLogs::where('id', $this->id)->update(
+                [
+                    'Status' => 1,
+                    'DocNum' => $res['DocNum'],
+                    'DocEntry' => $res['DocEntry']
+                ]
+            );
+        }
     }
 }

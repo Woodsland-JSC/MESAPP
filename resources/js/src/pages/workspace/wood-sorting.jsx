@@ -174,7 +174,8 @@ function WoodSorting() {
                         ...newPalletCards,
                     ]);
                 } else {
-                    toast.warning("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                    toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                    return;
                 }
 
                 toast.success("Đã thêm vào danh sách");
@@ -231,6 +232,19 @@ function WoodSorting() {
             return;
         }
 
+        for (const card of palletCards) {
+
+            const inStock = parseFloat(card.props.inStock);
+            const quantity = parseFloat(palletQuantities[card.key] || 0);
+            console.log("Lấy giá trị tồn kho:", inStock);
+            console.log("Lấy giá trị số lượng:", quantity);
+
+            if (quantity > inStock) {
+                toast.error("Giá trị nhập vào không được lớn hơn giá trị tồn kho.");
+                return;
+            }
+        }
+
         const palletObject = createPalletObject();
 
         try {
@@ -255,11 +269,7 @@ function WoodSorting() {
                 dryingMethodSelectRef.clearValue();
             }
 
-            // setWoodTypes(null);
-            // setSelectedWoodType(null);
             setBatchId("");
-            // setSelectedDryingReason(null);
-            // setSelectedDryingMethod(null);
             setStartDate(new Date());
             setPalletCards([]);
             setPalletQuantities({});
@@ -315,28 +325,6 @@ function WoodSorting() {
                                         </Link>
                                     </div>
                                 </li>
-                                {/* <li aria-current="page">
-                                    <div class="flex items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Xếp sấy</div>
-                                        </span>
-                                    </div>
-                                </li> */}
                             </ol>
                         </nav>
                     </div>
@@ -368,6 +356,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -403,6 +392,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-2">
@@ -421,6 +411,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedDryingMethod(value)
                                             }
+                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
 

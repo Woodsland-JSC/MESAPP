@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 
 class ReportController extends Controller
 {
@@ -93,14 +94,11 @@ class ReportController extends Controller
         ];
         $templateFile = resource_path('templates/Danh Mục Theo Dõi Gỗ Sấy Trong Lò.docx');
         $output = Carbon::now()->format('ymdHis');
-        $outputFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx');
         $filename = 'Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.docx';
-
-        copy($templateFile, $outputFile);
-
-        $templateProcessor = new TemplateProcessor($outputFile);
-
-        $templateProcessor->setImageValue('signature', storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png'));
+        $outputFile = storage_path('app/public/reports/' . $filename);
+        $templateProcessor = new TemplateProcessor($templateFile);
+        // comment lại để test do chưa có file ảnh chữ kí :v
+        // $templateProcessor->setImageValue('signature', storage_path('app/public/signatures/Nguyen-Van-Cuong-signature.png'));
         $templateProcessor->setValue('branch', "Test chi nhánh");
         $templateProcessor->setValue('factory', "Test nhà máy");
         $templateProcessor->setValue('date', "01/12/2023");
@@ -131,19 +129,22 @@ class ReportController extends Controller
         $templateProcessor->setValue('totalquantity', "999");
         $templateProcessor->setValue('totalweight', "999");
 
-        // Save the modified template
         $templateProcessor->saveAs($outputFile);
 
         $outputPdfFile = storage_path('app/public/reports/Danh Mục Theo Dõi Gỗ Sấy Trong Lò_' . $output . '.pdf');
         $outputPdf = storage_path('app/public/reports/');
-        $output=null;
-        $retval=null;
-        $command = 'soffice --convert-to pdf "'.$outputFile.'" --outdir "'.$outputPdf.'"';
 
-        shell_exec($command);
+        $command = 'soffice --convert-to pdf "' . $outputFile . '" --outdir "' . $outputPdf . '"';
 
-        // Download the output file
-        return response()->download($outputFile);
+        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+            shell_exec($command);
+        } else {
+            $result = Process::run($command);
+        }
+
+
+
+        // Download the output PDF file
+        return response()->download($outputPdfFile);
     }
-
 }

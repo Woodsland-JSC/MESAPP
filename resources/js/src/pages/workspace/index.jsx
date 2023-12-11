@@ -28,8 +28,8 @@ function Workspace() {
                 {/* Section */}
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Header */}
-                    <div className="mb-12">
-                        <div className="text-3xl font-bold mb-2">
+                    <div className="xl:mb-12 lg:mb-12 md:mb-12 mb-5">
+                        <div className="xl:text-3xl lg:text-3xl md:text-3xl text-[1.75rem] font-bold mb-2">
                             Xin chào, {user?.first_name}! 👋
                         </div>
                         <div className="text-gray-500">
@@ -44,7 +44,7 @@ function Workspace() {
                             variant="soft-rounded"
                             colorScheme="blackAlpha"
                         >
-                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-4">
+                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3">
                                 <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
                                     <div className="w-[150px]">
                                         Quản lý sấy gỗ
@@ -254,7 +254,7 @@ function Workspace() {
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            <Link to="/workspace/finished-goods-receipt">
+                                            <Link to="/workspace/wood-processing/finished-goods-receipt">
                                                 <div className="flex justify-center xl:h-full md:h-full">
                                                     <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
@@ -262,7 +262,7 @@ function Workspace() {
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Nhập thành phẩm
+                                                                Nhập thành phẩm chế biến gỗ
                                                             </h5>
                                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
                                                                 Lorem ipsum
@@ -276,7 +276,33 @@ function Workspace() {
                                                 </div>
 
                                                 <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Nhập thành phẩm
+                                                    Nhập thành phẩm chế biến gỗ
+                                                </div>
+                                            </Link>
+
+                                            <Link to="/workspace/plywood/finished-goods-receipt">
+                                                <div className="flex justify-center xl:h-full md:h-full">
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                Nhập thành phẩm ván công nghiệp
+                                                            </h5>
+                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                Lorem ipsum
+                                                                dolor sit, amet
+                                                                consectetur
+                                                                adipisicing
+                                                                elit.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex xl:hidden justify-center text-center mt-2">
+                                                    Nhập thành phẩm ván công nghiệp
                                                 </div>
                                             </Link>
 

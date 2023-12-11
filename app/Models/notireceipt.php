@@ -14,7 +14,10 @@ class notireceipt extends Model
         'text',
         'Quantity',
         'deleted',
-        'baseID'
+        'baseID',
+        'SPDich',
+        'QuyCach',
+        'LyDo'
     ];
     public function getCreatedAtAttribute($value)
     {

@@ -108,7 +108,7 @@ function KilnCheck() {
             <div className="bg-white rounded-b-xl">
                 <div class="relative rounded-b-xl overflow-x-auto">
                     <table class="w-full  text-left text-gray-500 ">
-                        <thead class="font-semibold xl:text-base text-sm text-gray-700 bg-gray-50 ">
+                        <thead class="font-semibold xl:text-base text-gray-700 bg-gray-50 ">
                             <tr>
                                 <th
                                     scope="col"
@@ -135,7 +135,7 @@ function KilnCheck() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="bg-white xl:text-base text-sm border-b">
+                            <tr class="bg-white xl:text-base  border-b">
                                 <th
                                     scope="row"
                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "

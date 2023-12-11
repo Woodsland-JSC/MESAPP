@@ -14,5 +14,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/ghinhankt', [QCController::class, 'DanhGiaKT']);
         Route::post('/hoanthanhkt', [QCController::class, 'HoanThanhKT']); 
         Route::get('/gethumidlistbyid', [QCController::class, 'getHumidListById']);
+        Route::get('/getdisabledlistbyid', [QCController::class, 'getDisabledListById']);
     });
 });
