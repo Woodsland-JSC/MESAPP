@@ -20,8 +20,11 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             CreateAdminUserSeeder::class,
-            UserSeeder::class,
-            reasonSeeder::class
+            //UserSeeder::class,
+            reasonSeeder::class,
+            LoaiLoiSeeder::class,
+            QCHandleSeeder::class
+
         ]);
     }
 }

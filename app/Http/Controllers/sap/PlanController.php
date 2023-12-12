@@ -7,12 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\plandryings;
-use App\Models\worker;
 use App\Models\plandetail;
 use App\Models\humiditys;
 use App\Models\Disability;
 use App\Models\logchecked;
-use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,9 +18,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\UniqueOvenStatusRule;
 use Carbon\Carbon;
-use App\Jobs\UpdateProductionOrders;
-use App\Jobs\issueProduction;
-use App\Jobs\receiptProduction;
+use App\Models\Warehouse;
+use App\Jobs\inventorytransfer;
+use App\Jobs\UpdatePalletSAP;
 
 class PlanController extends Controller
 {
@@ -148,7 +146,7 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
+            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
@@ -165,7 +163,7 @@ class PlanController extends Controller
                 'pallet' => $pallet,
                 'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
                 'Qty' => $data->Qty,
-                'Mass' => 120
+                'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
             ]);
 
 
@@ -210,7 +208,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [2, 3, 4])->get();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
@@ -239,7 +237,6 @@ class PlanController extends Controller
                 //update hàng loạt lệnh production orders sang plan
                 foreach ($data as $entry) {
                     Pallet::where('palletID', $entry->pallet)->update(['flag' => 1]);
-                    UpdateProductionOrders::dispatch($entry->DocEntry, $entry->pallet);
                 }
                 DB::commit();
                 return response()->json(['message' => 'updated successfully', 'data' => $record]);
@@ -268,9 +265,15 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 3, 4])->get();
+            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+            $detailrecord = plandetail::where('PlanID', $id)->count();
             $test = [];
+            if ($detailrecord == 0) {
+                return response()->json(['error' => 'số lượng pallet phải lớn hơn 0'], 500);
+            }
             if ($record->count() > 0) {
+                //chắc chắn lò có pallet
+
                 plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 3,
@@ -315,23 +318,6 @@ class PlanController extends Controller
                     Pallet::where('palletID', $header->palletID)->update([
                         'IssueNumber' => -1
                     ]);
-                    $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [
-                            [
-                                "Quantity" => $header->TotalQty,
-                                "BaseLine" => 0,
-                                "WarehouseCode" => $header->WhsCode,
-                                "BaseEntry" => $header->DocEntry,
-                                "BaseType" => 202,
-                                "BatchNumbers" => $data,
-                            ],
-                        ],
-                    ];
-
-                    $test[]
-                        = $body;
-                    issueProduction::dispatch($body);
                 }
 
                 DB::commit();
@@ -356,13 +342,16 @@ class PlanController extends Controller
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
                 'PlanID' => 'required', // new UniqueOvenStatusRule
-
+                'result' => 'required'
             ]);
             if ($validator->fails()) {
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+            // Lấy kho sấy
+            $towarehouse = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)->first()->WhsCode;
+
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
                     [
@@ -374,8 +363,11 @@ class PlanController extends Controller
                     'planDryings.Code as newbatch',
                     'planDryings.Oven',
                     'pallets.DocEntry',
+                    'pallets.Code',
+                    'pallets.palletID',
+                    'pallets.palletSAP',
                     'pallet_details.ItemCode',
-                    'pallet_details.WhsCode',
+                    'pallet_details.WhsCode2',
                     'pallet_details.Qty',
                     'pallet_details.CDai',
                     'pallet_details.CRong',
@@ -397,35 +389,33 @@ class PlanController extends Controller
                     $data = [];
                     foreach ($group as $batchData) {
                         $data[] = [
-                            "BatchNumber" => $batchData->newbatch,
-                            "Quantity" => $batchData->Qty,
                             "ItemCode" => $batchData->ItemCode,
-                            "U_CDai" => $batchData->CDai,
-                            "U_CRong" =>  $batchData->CRong,
-                            "U_CDay" =>  $batchData->CDay,
-                            "U_Status" => "SD"
+                            "Quantity" => $batchData->Qty,
+                            "WarehouseCode" =>  $towarehouse,
+                            "FromWarehouseCode" => $batchData->WhsCode2,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => $batchData->BatchNum,
+                                    "Quantity" => $batchData->Qty,
+                                    "U_Status" => $request->result
+                                ]
+
+                            ]
                         ];
-                    }
+                    };
 
                     $header = $group->first();
 
                     $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [
-                            [
-                                "Quantity" => $header->TotalQty,
-                                "BaseLine" => 0,
-                                "WarehouseCode" => $header->WhsCode,
-                                "BaseEntry" => $header->DocEntry,
-                                "BaseType" => 202,
-                                "BatchNumbers" => $data,
-
-                            ],
-                        ],
+                        "U_Pallet" => $header->Code,
+                        "U_CreateBy" => Auth::user()->sap_id,
+                        "BPLID" => Auth::user()->branch,
+                        "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                        "StockTransferLines" => $data
                     ];
-
+                    inventorytransfer::dispatch($body);
+                    UpdatePalletSAP::dispatch($header->palletSAP, $request->result);
                     $test[] = $body;
-                    receiptProduction::dispatch($body, $header->DocEntry);
                 }
                 // ulock lò sấy
                 $conDB = (new ConnectController)->connect_sap();

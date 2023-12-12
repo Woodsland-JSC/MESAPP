@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('notireceipt', function (Blueprint $table) {
             $table->id();
             $table->string('text')->nullable();
-            $table->float('Quantity')->nullable();
+            $table->DECIMAL('Quantity', 19, 6)->nullable();
             $table->integer('deleted')->default(0);
+            $table->string('baseID')->nullable();
+            $table->string('SPDich')->nullable();
+            $table->string('QuyCach')->nullable();
+            $table->string('LYDO')->nullable();
             $table->timestamps();
         });
     }

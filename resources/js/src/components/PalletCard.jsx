@@ -21,18 +21,26 @@ function PalletCard(props) {
         width,
         height,
         thickness,
+        // isInvalidQuantity
     } = props;
 
-    const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
+    // const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
+    const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
+    const [quantity, setQuantity] = useState(null);
+    // const [isQuantityEmpty, setIsQuantityEmpty] = useState(false);
 
     const handleQuantityChange = (value) => {
-        const quantity = parseFloat(value);
-        const inStock = parseFloat(props.inStock);
+        var quantity = parseFloat(value);
+        var inStock = parseFloat(props.inStock);
 
         if (quantity > inStock) {
-            setIsQuantityExceedingStock(true);
+            setIsInvalidQuantity(true);
+        } else if (quantity === 0) {
+            setIsInvalidQuantity(true);
+        } else if (quantity == null || quantity == "") {
+            setIsInvalidQuantity(true);
         } else {
-            setIsQuantityExceedingStock(false);
+            setIsInvalidQuantity(false);
         }
 
         props.onQuantityChange(value);
@@ -66,7 +74,7 @@ function PalletCard(props) {
                     <input
                         type="text"
                         id="inStock"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         readOnly={true}
                         required
@@ -83,7 +91,7 @@ function PalletCard(props) {
                     <input
                         type="text"
                         id="batchNum"
-                        className="bg-gray-100 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         readOnly={true}
                         required
@@ -101,7 +109,7 @@ function PalletCard(props) {
                     <input
                         type="text"
                         id="inStock"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         readOnly={true}
                         required
@@ -117,11 +125,11 @@ function PalletCard(props) {
                         Số lượng
                     </label>
                     <NumberInput
-                        defaultValue={1}
-                        min={1}
+                        defaultValue={0}
+                        min={0}
                         // onChange={(value) => props.onQuantityChange(value)}
                         // isDisabled={isQuantityExceedingStock}
-                        isInvalid={isQuantityExceedingStock}
+                        isInvalid={isInvalidQuantity}
                         onChange={handleQuantityChange}
                     >
                         <NumberInputField/>
@@ -142,7 +150,7 @@ function PalletCard(props) {
                     <input
                         type="hidden"
                         id="width"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         required
                         value={width}
@@ -158,7 +166,7 @@ function PalletCard(props) {
                     <input
                         type="hidden"
                         id="height"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         required
                         value={height}
@@ -174,7 +182,7 @@ function PalletCard(props) {
                     <input
                         type="hidden"
                         id="thickness"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                         placeholder="0"
                         required
                         value={thickness}

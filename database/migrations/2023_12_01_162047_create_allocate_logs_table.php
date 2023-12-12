@@ -11,15 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('AllocateLogs', function (Blueprint $table) {
+        Schema::create('allocatelogs', function (Blueprint $table) {
             $table->id();
             $table->string('BaseEntry')->nullable();
             $table->string('ItemCode')->nullable();
-            $table->float('Qty')->nullable();
+            $table->DECIMAL('Qty', 19, 6)->nullable();
             $table->text('Body')->nullable();
             $table->integer('DocNum')->nullable();
             $table->integer('DocEntry')->nullable();
             $table->integer('Status')->default(-1);
+            $table->string('Factorys')->nullable();
+            $table->string('SPDich')->nullable();
+            $table->string('CDTT')->nullable();
+            $table->string('TO')->nullable();
+            $table->string('Type')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('AllocateLogs');
+        Schema::dropIfExists('allocatelogs');
     }
 };

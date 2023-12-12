@@ -21,7 +21,7 @@ class ConnectController extends Controller
                 $driver = '/usr/sap/hdbclient/libodbcHDB.so';
             }
 
-            $db_name = "WOODSLAND_UATS";
+            $db_name = config('sap.DB_NAME');
             $username = 'SYSTEM';
             // Password
             $password = "S@p@Systemb1";

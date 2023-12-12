@@ -21,6 +21,13 @@ return new class extends Migration
             $table->timestamp('NgayNhap')->nullable();
             $table->integer('status')->default(0);
             $table->integer('is_active')->default(0);
+            $table->string('DocNum')->nullable();
+            $table->string('DocEntry')->nullable();
+            $table->string('CreateBy')->nullable();
+            $table->float('IssueNumber', 14)->default(0)->nullable();
+            $table->float('ReceiptNumber', 14)->default(0)->nullable();
+            $table->integer('flag')->default(0)->nullable();
+            $table->string('palletSAP')->nullable();
             $table->timestamps();
         });
     }

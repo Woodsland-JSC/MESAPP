@@ -24,7 +24,7 @@ function Workspace() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex overflow-x-hidden justify-center bg-[#F8F9F7] ">
+            <div className="flex overflow-x-hidden justify-center bg-transparent ">
                 {/* Section */}
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Header */}
@@ -308,7 +308,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -321,7 +321,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -334,7 +334,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -347,7 +347,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -360,7 +360,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -406,7 +406,7 @@ function Workspace() {
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -416,9 +416,10 @@ function Workspace() {
                                                     Tạo kế hoạch sấy
                                                 </div>
                                             </div>
+
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -428,9 +429,10 @@ function Workspace() {
                                                     Tạo kế hoạch sấy
                                                 </div>
                                             </div>
+
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -440,9 +442,10 @@ function Workspace() {
                                                     Tạo kế hoạch sấy
                                                 </div>
                                             </div>
+                                            
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -452,9 +455,10 @@ function Workspace() {
                                                     Tạo kế hoạch sấy
                                                 </div>
                                             </div>
+
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#EDEEEC]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>

@@ -1014,7 +1014,7 @@ function WoodAwaitingDryingReport() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+            <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
                     {/* Header */}

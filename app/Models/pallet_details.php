@@ -10,5 +10,5 @@ class pallet_details extends Model
 
     use HasFactory;
     protected $table = 'pallet_details';
-    protected $fillable = ['palletID', 'ItemCode', 'WhsCode', 'BatchNum', 'Qty', 'CDai', 'CDay', 'CRong'];
+    protected $fillable = ['palletID', 'ItemCode', 'WhsCode', 'WhsCode2', 'BatchNum', 'Qty', 'CDai', 'CDay', 'CRong'];
 }

@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('AllocateLogs', function (Blueprint $table) {
-            $table->string('Type')->nullable();
+        Schema::create('warehouse', function (Blueprint $table) {
+            $table->id();
+            $table->string('WhsCode');
+            $table->string('WhsName');
+            $table->string('branch');
+            $table->string('flag');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('AllocateLogs', function (Blueprint $table) {
-            $table->drop('Type');
-        });
+        Schema::dropIfExists('warehouse');
     }
 };

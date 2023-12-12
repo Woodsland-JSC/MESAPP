@@ -39,6 +39,7 @@ function WoodSorting() {
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
 
     const [palletQuantities, setPalletQuantities] = useState({});
 
@@ -63,8 +64,10 @@ function WoodSorting() {
             try {
                 const dryingMethodsData = await palletsApi.getDryingMethod();
                 const dryingMethodsOptions = dryingMethodsData.map((item) => ({
-                    value: item.ItemCode,
+                    value: item.ItemCode + "-" + item.BatchNum,
                     label: item.ItemName,
+                    batchNum: item.BatchNum,
+                    code: item.ItemCode,
                 }));
                 console.log(dryingMethodsOptions);
                 setDryingMethods(dryingMethodsOptions);
@@ -87,6 +90,7 @@ function WoodSorting() {
 
         fetchData();
     }, []);
+
 
     // Validating
     const validateData = () => {
@@ -114,6 +118,32 @@ function WoodSorting() {
         return true;
     };
 
+    const validateQuantity = () => {
+        for (const card of palletCards) {
+            var inStock = parseFloat(card.props.inStock);
+            var quantity = parseFloat(palletQuantities[card.key] || 0);
+            console.log("Lấy giá trị tồn kho:", inStock);
+            console.log("Lấy giá trị số lượng:", quantity);
+    
+            if (quantity > inStock) {
+                toast.error("Giá trị nhập vào không được lớn hơn giá trị tồn kho.");
+                setIsInvalidQuantity(true);
+                return false;
+            } else if (quantity === 0) {
+                toast.error("Giá trị nhập vào phải lớn hơn 1.");
+                setIsInvalidQuantity(true);
+                return false;
+            } else if (quantity == "" || quantity == null) {
+                toast.error("Giá trị nhập vào phải lớn hơn 1.");
+                setIsInvalidQuantity(true);
+                return false;
+            } else {
+                setIsInvalidQuantity(false);
+                return true;
+            }
+        }
+    };
+
     const handleAddToList = async () => {
         if (validateData()) {
             try {
@@ -129,8 +159,9 @@ function WoodSorting() {
                 console.log("1.Dữ liệu từ form:", data);
 
                 const response = await palletsApi.getStockByItem(
-                    selectedDryingMethod.value,
-                    selectedDryingReason.value
+                    selectedDryingMethod.code,
+                    selectedDryingReason.value,
+                    selectedDryingMethod.batchNum
                 );
 
                 console.log("2. Get thông tin từ ItemCode:", response);
@@ -147,7 +178,7 @@ function WoodSorting() {
                         .map((item) => (
                             <PalletCard
                                 key={item.WhsCode + item.BatchNum}
-                                itemCode={selectedDryingMethod.value}
+                                itemCode={selectedDryingMethod.code}
                                 itemName={selectedDryingMethod.label}
                                 batchNum={item.BatchNum}
                                 inStock={item.Quantity}
@@ -155,6 +186,7 @@ function WoodSorting() {
                                 height={item.CDai}
                                 width={item.CRong}
                                 thickness={item.CDay}
+                                isInvalidQuantity={isInvalidQuantity}
                                 onDelete={() =>
                                     handleDeletePalletCard(
                                         item.WhsCode + item.BatchNum
@@ -209,11 +241,11 @@ function WoodSorting() {
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
             NgayNhap: formattedStartDate,
-            details: palletCards.map((card) => ({
+            Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 WhsCode: card.props.whsCode,
                 BatchNum: card.props.batchNum,
-                Qty: palletQuantities[card.key] || 0,
+                Qty: parseInt(palletQuantities[card.key]) || 0,
                 CDai: card.props.height,
                 CDay: card.props.thickness,
                 CRong: card.props.width,
@@ -227,63 +259,53 @@ function WoodSorting() {
     let dryingMethodSelectRef = null;
 
     const handleCreatePallet = async () => {
-        if (palletCards.length === 0) {
-            toast.error("Danh sách không được để trống.");
-            return;
-        }
-
-        for (const card of palletCards) {
-
-            const inStock = parseFloat(card.props.inStock);
-            const quantity = parseFloat(palletQuantities[card.key] || 0);
-            console.log("Lấy giá trị tồn kho:", inStock);
-            console.log("Lấy giá trị số lượng:", quantity);
-
-            if (quantity > inStock) {
-                toast.error("Giá trị nhập vào không được lớn hơn giá trị tồn kho.");
+        if(validateQuantity()){
+            if (palletCards.length === 0) {
+                toast.error("Danh sách không được để trống.");
                 return;
-            }
-        }
-
-        const palletObject = createPalletObject();
-
-        try {
-            const response = await toast.promise(
-                axios.post("/api/pallets/create", palletObject),
-                {
-                    loading: "Đang tạo pallet...",
-                    success: <p>Tạo pallet thành công!</p>,
-                    error: <p>Có lỗi xảy ra, vui lòng thử lại</p>,
+            }    
+    
+            const palletObject = createPalletObject();
+            console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
+    
+            try {
+                const response = await toast.promise(
+                    axios.post("/api/pallets/v2/create", palletObject),
+                    {
+                        loading: "Đang tạo pallet...",
+                        success: <p>Tạo pallet thành công!</p>,
+                        error: <p>Có lỗi xảy ra, vui lòng thử lại</p>,
+                    }
+                );
+    
+                console.log("3. Thông tin pallet:", palletObject);
+    
+                if (woodTypeSelectRef) {
+                    woodTypeSelectRef.clearValue();
                 }
-            );
-
-            console.log("3. Thông tin pallet:", palletObject);
-
-            if (woodTypeSelectRef) {
-                woodTypeSelectRef.clearValue();
+                if (dryingReasonSelectRef) {
+                    dryingReasonSelectRef.clearValue();
+                }
+                if (dryingMethodSelectRef) {
+                    dryingMethodSelectRef.clearValue();
+                }
+    
+                setBatchId("");
+                setStartDate(new Date());
+                setPalletCards([]);
+                setPalletQuantities({});
+    
+                console.log("4. Kết quả tạo pallet:", response.data);
+            } catch (error) {
+                console.error("Error creating pallet:", error);
             }
-            if (dryingReasonSelectRef) {
-                dryingReasonSelectRef.clearValue();
-            }
-            if (dryingMethodSelectRef) {
-                dryingMethodSelectRef.clearValue();
-            }
-
-            setBatchId("");
-            setStartDate(new Date());
-            setPalletCards([]);
-            setPalletQuantities({});
-
-            console.log("4. Kết quả tạo pallet:", response.data);
-        } catch (error) {
-            console.error("Error creating pallet:", error);
-        }
+        } 
     };
 
     return (
         <Layout>
             {/* Container */}
-            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-[#F8F9F7]">
+            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-transparent">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
@@ -335,7 +357,7 @@ function WoodSorting() {
                     </div>
 
                     {/* Components */}
-                    <div className="p-6 bg-white border-2 border-gray-200 rounded-xl">
+                    <div className="p-6 bg-white border-2 border-gray-300 shadow-sm rounded-xl">
                         <section>
                             <form>
                                 <div className="xl:grid xl:space-y-0 space-y-5 gap-5 mb-6 xl:grid-cols-3">
@@ -356,7 +378,6 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
                                             }
-                                            isDisabled={(palletCards.length > 0)}
                                         />
                                     </div>
                                     <div className="col-span-1">
@@ -392,7 +413,7 @@ function WoodSorting() {
                                             onChange={(value) =>
                                                 setSelectedDryingReason(value)
                                             }
-                                            isDisabled={(palletCards.length > 0)}
+                                            isDisabled={palletCards.length > 0}
                                         />
                                     </div>
                                     <div className="col-span-2">
@@ -408,10 +429,17 @@ function WoodSorting() {
                                             }}
                                             placeholder="Chọn quy cách thô"
                                             options={dryingMethods}
-                                            onChange={(value) =>
-                                                setSelectedDryingMethod(value)
-                                            }
-                                            isDisabled={(palletCards.length > 0)}
+                                            onChange={(value) => {
+                                                setSelectedDryingMethod(value);
+                                                console.log(
+                                                    "Quy cách thô được chọn:",
+                                                    selectedDryingMethod
+                                                );
+                                                console.log(
+                                                    "Mã quy cách thô được chọn:",
+                                                    selectedDryingMethod.code
+                                                );
+                                            }}
                                         />
                                     </div>
 
@@ -436,7 +464,7 @@ function WoodSorting() {
                                         type="button"
                                         onClick={handleAddToList}
                                         className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
-                                        disabled={(palletCards.length) > 0 ? true : false}
+                                        // disabled={(palletCards.length) > 0 ? true : false}
                                     >
                                         Thêm vào danh sách
                                     </button>

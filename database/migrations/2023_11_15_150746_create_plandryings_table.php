@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('Oven'); //mã lò sấy
             $table->string('Reason'); //mục đích sấy
             $table->string('Method'); //quy cách sấy
-            $table->float('Mass')->default(0)->nullable(); //khối lượng
+            $table->decimal('Mass', 19, 4)->default(0)->nullable(); //khối lượng
             $table->integer('TotalPallet')->default(0)->nullable(); //tổng số pallet
             $table->datetime('PlanDate')->nullable(); //ngày ra lò dự kiến
             $table->integer('Status')->default(0)->nullable(); // trạng thái lò. 0 new, 1. chạy lò, 2.ra lò
@@ -26,6 +26,17 @@ return new class extends Migration
             $table->integer('Review')->default(0)->nullable(); // 0. chưa đánh giá, 1. đã đánh giá
             $table->integer('Disabilities')->default(0)->nullable(); //khuyến tật
             $table->string('CreateBy')->nullable(); // user tạo kế hoạch sấy
+            $table->integer('Time');
+            $table->integer('CheckedBy')->nullable();
+            $table->integer('RunBy')->nullable();
+            $table->integer('ReviewBy')->nullable();
+            $table->integer('CompletedBy')->nullable();
+            $table->datetime('DateChecked')->nullable();
+            $table->integer('NoCheck')->nullable();
+            $table->integer('result')->nullable()->default(-1);
+            $table->string('SoLan')->nullable();
+            $table->string('CBL')->nullable();
+            $table->string('DoThucTe')->nullable();
             $table->timestamps();
         });
     }

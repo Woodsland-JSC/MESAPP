@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class AllocateLogs extends Model
 {
     use HasFactory;
-    protected $table = 'AllocateLogs';
+    protected $table = 'allocatelogs';
     protected $fillable = [
         'BaseEntry',
         'ItemCode',
