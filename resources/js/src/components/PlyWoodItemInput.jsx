@@ -127,7 +127,7 @@ const PlyWoodItemInput = ({
                         // id: selectedItemDetails.id,
                         itemId: data?.id,
                         itemName: data?.itemName,
-                        command: selectedItemDetails.command,
+                        // command: selectedItemDetails.command,
                         thickness: selectedItemDetails.thickness,
                         width: selectedItemDetails.width,
                         length: selectedItemDetails.length,
@@ -208,23 +208,108 @@ const PlyWoodItemInput = ({
                 }
             >
                 {/* <span className="font-semibold absolute top-0-left-0 bg-green-500"></span> */}
-                <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-14 z-[999] bg-white">
-                    {/* <span className="font-semibold">
+                {/* <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-14 z-[999] bg-white"> */}
+                {/* <span className="font-semibold">
                         TYBYN bar table 74x74x102 acacia/black
                     </span> */}
-                    <div>
+                {/* <div>
                         Lệnh sản xuất
                         <span className="bg-[#e4e4e4] rounded px-2 py-1 ml-2 font-semibold w-fit">
                             {data.command}
                         </span>
-                    </div>
-                    <div>
+                    </div> */}
+                {/* <div>
                         Công đoạn số:{" "}
                         <span className="bg-[#96bddf] rounded px-2 py-1 ml-2 font-semibold w-fit">
                             {data.fromGroup.no + ". " + data.fromGroup.name}
                         </span>{" "}
-                    </div>
+                    </div> */}
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 pt-14 mt-2 ">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                            <tr>
+                                <th scope="col" className="px-2 py-2">
+                                    Lệnh sản xuất
+                                </th>
+                                <th
+                                    scope="col"
+                                    className="px-2 py-2 text-right"
+                                >
+                                    Sản lượng
+                                </th>
+                                <th
+                                    scope="col"
+                                    className="px-2 py-2 text-right"
+                                >
+                                    Đã làm
+                                </th>
+                                <th
+                                    scope="col"
+                                    className="px-2 py-2 text-right"
+                                >
+                                    Bị lỗi
+                                </th>
+                                <th
+                                    scope="col"
+                                    className="px-2 py-2 text-right"
+                                >
+                                    Còn thực hiện
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.productionCommands?.length > 0 ? (
+                                data?.productionCommands.map(
+                                    (production, index) => (
+                                        <tr
+                                            className="bg-white border-b"
+                                            key={index}
+                                        >
+                                            <th
+                                                scope="row"
+                                                className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap text-[12px] sm:text-md"
+                                            >
+                                                {production.command}
+                                            </th>
+                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                {production.quantity}
+                                            </td>
+                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                {production.done}
+                                            </td>
+                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                {production.faults}
+                                            </td>
+                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                {production.processing}
+                                            </td>
+                                        </tr>
+                                    )
+                                )
+                            ) : (
+                                <span>Không có dữ liệu</span>
+                            )}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td className="px-2 py-2">Tổng</td>
+                                <td className="px-2 py-2 text-right font-bold">
+                                    {data.totalQuantity || 0}
+                                </td>
+                                <td className="px-2 py-2 text-right font-bold">
+                                    {data.totalDone || 0}
+                                </td>
+                                <td className="px-2 py-2 text-right font-bold">
+                                    {data.totalFaults || 0}
+                                </td>
+                                <td className="px-2 py-2 text-right font-bold">
+                                    {data.totalProcessing || 0}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
+                {/* </div> */}
             </div>
             <Modal
                 isCentered
@@ -245,7 +330,7 @@ const PlyWoodItemInput = ({
                     <ModalBody px={0} py={0}>
                         <div className="flex flex-col justify-center ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
-                                <Alert status="info">
+                                {/* <Alert status="info">
                                     <AlertDescription className="flex items-center gap-3">
                                         <span className="text-center w-full">
                                             Lệnh sản xuất:{" "}
@@ -255,7 +340,7 @@ const PlyWoodItemInput = ({
                                             </span>
                                         </span>
                                     </AlertDescription>
-                                </Alert>
+                                </Alert> */}
                                 {/* )} */}
                                 <div className="flex flex-col md:flex-row justify-between items-center">
                                     <div className="flex flex-col gap-4 w-full px-4">
@@ -384,7 +469,11 @@ const PlyWoodItemInput = ({
                                 </Box>
                                 <div className="bg-blue-500 text-white p-3 items-center flex">
                                     Đã thực hiện
-                                    <Badge className="ml-3" colorScheme="blue" fontSize="1.2rem">
+                                    <Badge
+                                        className="ml-3"
+                                        colorScheme="blue"
+                                        fontSize="1.2rem"
+                                    >
                                         {selectedItemDetails?.totalDone}
                                     </Badge>
                                 </div>
@@ -530,7 +619,7 @@ const PlyWoodItemInput = ({
                                             }
                                         </Badge>{" "}
                                     </span>
-                                    <span>
+                                    {/* <span>
                                         Lỗi chuyển về:{" "}
                                         <Badge
                                             colorScheme="red"
@@ -551,7 +640,7 @@ const PlyWoodItemInput = ({
                                                 selectedItemDetails?.totalTypeError
                                             }
                                         </Badge>{" "}
-                                    </span>
+                                    </span> */}
                                 </div>
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
@@ -599,7 +688,7 @@ const PlyWoodItemInput = ({
                                         Lỗi phôi nhận từ nhà máy khác
                                     </label>
                                     <Select
-                                        className="mt-4 mb-12"
+                                        className="mt-4"
                                         placeholder="Lựa chọn"
                                         options={factories}
                                         isClearable
@@ -610,6 +699,42 @@ const PlyWoodItemInput = ({
                                                 factory: value,
                                             }));
                                         }}
+                                    />
+                                </Box>
+                                <Box className="px-3">
+                                    <label className="font-semibold text-red-700">
+                                        Loại lỗi
+                                    </label>
+                                    <Select
+                                        className="mt-4"
+                                        placeholder="Lựa chọn"
+                                        // options={factories}
+                                        isClearable
+                                        isSearchable
+                                        // onChange={(value) => {
+                                        //     setFaults((prev) => ({
+                                        //         ...prev,
+                                        //         factory: value,
+                                        //     }));
+                                        // }}
+                                    />
+                                </Box>
+                                <Box className="px-3">
+                                    <label className="font-semibold text-red-700">
+                                        Hướng xử lý
+                                    </label>
+                                    <Select
+                                        className="mt-4 mb-12"
+                                        placeholder="Lựa chọn"
+                                        // options={factories}
+                                        isClearable
+                                        isSearchable
+                                        // onChange={(value) => {
+                                        //     setFaults((prev) => ({
+                                        //         ...prev,
+                                        //         factory: value,
+                                        //     }));
+                                        // }}
                                     />
                                 </Box>
                             </div>
