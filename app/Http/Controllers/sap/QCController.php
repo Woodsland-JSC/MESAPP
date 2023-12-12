@@ -12,6 +12,8 @@ use App\Models\humiditys;
 use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
 use App\Models\plandryings;
+use App\Models\LoaiLoi;
+use App\Models\QCHandle;
 
 class QCController extends Controller
 {
@@ -217,5 +219,22 @@ class QCController extends Controller
             'No' => 135234
         ];
         return response()->json($header, 200);
+    }
+    public function loailoi()
+    {
+        $data = LoaiLoi::get(['id', 'name']);
+        return response()->json($data, 200);
+    }
+    function huongxuly(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $data = QCHandle::where('type', $request->type)->get(['id', 'name']);
+        return response()->json($data, 200);
     }
 }
