@@ -18,6 +18,15 @@ const productionApi = {
         const url = `/production/receipts-productions`;
         return axiosClient().post(url, data);
     },
+    getErrorTypes: () => {
+        const url = `/loailoi`;
+        return axiosClient().get(url);
+    },
+    // Type: ["CBG", "VCN"]
+    getSolutions: (type) => {
+        const url = `/huongxuly?type=${type}`;
+        return axiosClient().get(url);
+    }
 };
 
 export default productionApi;

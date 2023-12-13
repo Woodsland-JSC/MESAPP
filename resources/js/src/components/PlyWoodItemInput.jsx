@@ -34,6 +34,7 @@ import {
 import Select from "react-select";
 import toast from "react-hot-toast";
 import { AiTwotoneDelete } from "react-icons/ai";
+import productionApi from "../api/productionApi";
 import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
 
@@ -84,6 +85,9 @@ const PlyWoodItemInput = ({
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
     const [faultyAmount, setFaultyAmount] = useState(null);
+
+    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    const [solutionOptions, setSolutionOptions] = useState([]);
 
     const openInputModal = () => {
         onModalOpen();
@@ -191,6 +195,38 @@ const PlyWoodItemInput = ({
             }
         }
     }, [faultyAmount]);
+
+    useEffect(() => {
+        const getErrorTypeOptions = async () => {
+            try {
+                const res = await productionApi.getErrorTypes();
+                const errorTypes = res.map((error, index) => ({
+                    value: error?.id || "",
+                    label: error?.name || ""
+                }));
+                console.log("Other side: ", errorTypes);
+                setErrorTypeOptions(errorTypes);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const getSolutionOptions = async () => {
+            try {
+                const res = await productionApi.getSolutions("VCN");
+                const solutions = res.map((solution, index) => ({
+                    value: solution?.id || "",
+                    label: solution?.name || ""
+                }));
+                console.log("Other side 2: ", solutions);
+                setSolutionOptions(solutions);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        getErrorTypeOptions();
+        getSolutionOptions();
+    }, []);
 
     return (
         <div className="cursor-pointer" onClick={() => openInputModal()}>
@@ -389,7 +425,7 @@ const PlyWoodItemInput = ({
                                         Số lượng phôi đã nhận và phôi tồn tại
                                         tổ:
                                     </Text>
-                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                         {selectedItemDetails?.stockQuantity ||
                                             0}
                                     </span>
@@ -402,7 +438,7 @@ const PlyWoodItemInput = ({
                                             {selectedItemDetails?.width} *
                                             {selectedItemDetails?.length}) :{" "}
                                         </span>
-                                        <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                        <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
                                             {selectedItemDetails?.stockQuantity ||
                                                 0}
                                         </span>
@@ -412,7 +448,7 @@ const PlyWoodItemInput = ({
                                     <Text className="font-semibold">
                                         Số lượng phôi có thể xuất:
                                     </Text>
-                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                         {selectedItemDetails?.stockQuantity ||
                                             0}
                                     </span>
@@ -422,7 +458,7 @@ const PlyWoodItemInput = ({
                                         Số lượng còn phải sản xuất của lệnh xa
                                         nhất hiển thị:
                                     </Text>
-                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
+                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
                                         {selectedItemDetails?.furthestQuantity ||
                                             0}
                                     </span>
@@ -432,7 +468,7 @@ const PlyWoodItemInput = ({
                                         Số lượng còn phải sản xuất tất cả lệnh
                                         sản xuất trên chuyền:
                                     </Text>
-                                    <span class="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
+                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
                                         {selectedItemDetails?.allCommandQuantity ||
                                             0}
                                     </span>
@@ -708,15 +744,15 @@ const PlyWoodItemInput = ({
                                     <Select
                                         className="mt-4"
                                         placeholder="Lựa chọn"
-                                        // options={factories}
+                                        options={errorTypeOptions}
                                         isClearable
                                         isSearchable
-                                        // onChange={(value) => {
-                                        //     setFaults((prev) => ({
-                                        //         ...prev,
-                                        //         factory: value,
-                                        //     }));
-                                        // }}
+                                        onChange={(value) => {
+                                            setFaults((prev) => ({
+                                                ...prev,
+                                                errorType: value,
+                                            }));
+                                        }}
                                     />
                                 </Box>
                                 <Box className="px-3">
@@ -726,15 +762,15 @@ const PlyWoodItemInput = ({
                                     <Select
                                         className="mt-4 mb-12"
                                         placeholder="Lựa chọn"
-                                        // options={factories}
+                                        options={solutionOptions}
                                         isClearable
                                         isSearchable
-                                        // onChange={(value) => {
-                                        //     setFaults((prev) => ({
-                                        //         ...prev,
-                                        //         factory: value,
-                                        //     }));
-                                        // }}
+                                        onChange={(value) => {
+                                            setFaults((prev) => ({
+                                                ...prev,
+                                                solution: value,
+                                            }));
+                                        }}
                                     />
                                 </Box>
                             </div>
