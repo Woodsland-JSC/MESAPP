@@ -230,7 +230,8 @@ class ProductionController extends Controller
     {
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'SELECT A.* FROM "@V_TO" a join ousr b ON A."U_Xuong"=b."U_Xuong" where USER_CODE=?';
+        $query = 'select b."Code", b."Name" from "@V_TO_USER" a join "@V_TO" b on a."U_To"=b."Code"
+        join OUSR c on a."U_User"=c."USERID" where C."USER_CODE" =?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
