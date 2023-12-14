@@ -28,6 +28,7 @@ class Pallet extends Model
         'issue_number',
         'receipt_number',
         'CreateBy',
+        'palletSAP'
     ];
     // Sự kiện trước khi tạo mới record
     protected static function boot()
@@ -45,7 +46,7 @@ class Pallet extends Model
                     ->count() + 1;
 
                 // Set the Code field
-                $model->Code = $current_year . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+                $model->Code = substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
             });
         });
     }

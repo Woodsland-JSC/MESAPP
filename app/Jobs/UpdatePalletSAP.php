@@ -10,17 +10,19 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 
-class inventorytransfer implements ShouldQueue
+class UpdatePalletSAP implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
      */
-    protected $body;
-    public function __construct($body)
+    protected $id;
+    protected $result;
+    public function __construct($id, $result)
     {
-        $this->body = $body;
+        $this->id = $id;
+        $this->result = $result;
     }
 
     /**
@@ -28,25 +30,15 @@ class inventorytransfer implements ShouldQueue
      */
     public function handle(): void
     {
+        $body = [
+            "U_Status" => $this->result
+        ];
         $response = Http::withOptions([
             'verify' => false,
         ])->withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
-        ])->post(UrlSAPServiceLayer() . '/b1s/v1/StockTransfers', $this->body);
-        if ($response->successful()) {
-            // $data = [
-            //     "ProductionOrderStatus" => "boposClosed"
-            // ];
-            // // close
-            // Http::withOptions([
-            //     'verify' => false,
-            // ])->withHeaders([
-            //     'Content-Type' => 'application/json',
-            //     'Accept' => 'application/json',
-            //     'Authorization' => 'Basic ' . BasicAuthToken(),
-            // ])->patch(UrlSAPServiceLayer() . '/b1s/v1/ProductionOrders(' . $this->ponum  . ')', $data);
-        }
+        ])->patch(UrlSAPServiceLayer() . '/b1s/v1/Pallet(' . $this->id . ')', $body);
     }
 }

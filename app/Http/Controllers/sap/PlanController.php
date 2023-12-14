@@ -7,12 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\plandryings;
-use App\Models\worker;
 use App\Models\plandetail;
 use App\Models\humiditys;
 use App\Models\Disability;
 use App\Models\logchecked;
-use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +19,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\UniqueOvenStatusRule;
 use Carbon\Carbon;
 use App\Models\Warehouse;
+use App\Jobs\inventorytransfer;
+use App\Jobs\UpdatePalletSAP;
 
 class PlanController extends Controller
 {
@@ -451,6 +451,8 @@ class PlanController extends Controller
 
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+            // Lấy kho sấy
+            $towarehouse = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)->first()->WhsCode;
 
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update([
@@ -463,8 +465,10 @@ class PlanController extends Controller
                     'planDryings.Oven',
                     'pallets.DocEntry',
                     'pallets.Code',
+                    'pallets.palletID',
+                    'pallets.palletSAP',
                     'pallet_details.ItemCode',
-                    'pallet_details.WhsCode',
+                    'pallet_details.WhsCode2',
                     'pallet_details.Qty',
                     'pallet_details.CDai',
                     'pallet_details.CRong',
@@ -486,26 +490,32 @@ class PlanController extends Controller
                     $data = [];
                     foreach ($group as $batchData) {
                         $data[] = [
-                            "BatchNumber" => $batchData->newbatch,
-                            "Quantity" => $batchData->Qty,
                             "ItemCode" => $batchData->ItemCode,
-                            "U_CDai" => $batchData->CDai,
-                            "U_CRong" =>  $batchData->CRong,
-                            "U_CDay" =>  $batchData->CDay,
-                            "U_Status" => "SD",
+                            "Quantity" => $batchData->Qty,
+                            "WarehouseCode" =>  $towarehouse,
+                            "FromWarehouseCode" => $batchData->WhsCode2,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => $batchData->BatchNum,
+                                    "Quantity" => $batchData->Qty,
+                                    "U_Status" => $request->result
+                                ]
+
+                            ]
                         ];
-                    }
+                    };
 
                     $header = $group->first();
 
                     $body = [
-                        "U_Pallet" => $header->Code, // Assuming $pallet is not defined, so using $header->Code
+                        "U_Pallet" => $header->Code,
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
                         "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
-                        "StockTransferLines" => $data,
+                        "StockTransferLines" => $data
                     ];
-
+                    inventorytransfer::dispatch($body);
+                    UpdatePalletSAP::dispatch($header->palletSAP, $request->result);
                     $test[] = $body;
                 }
 

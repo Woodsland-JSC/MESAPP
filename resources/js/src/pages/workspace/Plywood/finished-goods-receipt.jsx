@@ -192,7 +192,7 @@ var waitingReceiptNotifications = [
 
 var exampleData = [
     {
-        command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+        // command: "VCN-CH-PLY-08.09.23-C15.2Bi",
         itemId: 10025,
         itemName: "Ván cốt 18 chờ lên lớp CH",
         previousGroup: null,
@@ -206,6 +206,22 @@ var exampleData = [
             no: 2,
             name: "Hoàn thiện LVL (CH)",
         },
+        productionCommands: [
+            {
+                command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+                quantity: 5400,
+                done: 1107,
+                faults: 0,
+                processing: 4293,
+            },
+            {
+                command: "VCN-CH-PLY-09.09.23-C15.2Bi",
+                quantity: 2400,
+                done: 0,
+                faults: 0,
+                processing: 2400,
+            },
+        ],
         thickness: 15.2,
         width: 1220,
         length: 2440,
@@ -217,11 +233,11 @@ var exampleData = [
         returns: [],
         totalDone: 2026,
         totalStageError: 12,
-        totalBackError: 0,
-        totalTypeError: 0,
+        // totalBackError: 0,
+        // totalTypeError: 0,
     },
     {
-        command: "VCN-CH-PLY-07.10.23-C15WN",
+        // command: "VCN-CH-PLY-07.10.23-C15WN",
         itemId: 10027,
         itemName: "Ván cốt 15 WANEK",
         previousGroup: null,
@@ -235,6 +251,22 @@ var exampleData = [
             no: 2,
             name: "Hoàn thiện LVL (CH)",
         },
+        productionCommands: [
+            {
+                command: "VCN-CH-PLY-07.10.23-C15WN",
+                quantity: 5400,
+                done: 1107,
+                faults: 0,
+                processing: 4293,
+            },
+            {
+                command: "VCN-CH-PLY-09.10.23-C15WN",
+                quantity: 2400,
+                done: 0,
+                faults: 0,
+                processing: 2400,
+            },
+        ],
         thickness: 15,
         width: 1220,
         length: 2440,
@@ -245,13 +277,13 @@ var exampleData = [
         pendingReceipts: [],
         returns: [],
         totalStageError: 1,
-        totalBackError: 0,
-        totalTypeError: 0,
+        // totalBackError: 0,
+        // totalTypeError: 0,
     },
     {
-        command: "VCN-CH-PLY-09.10.23-C15WN",
-        itemId: 10027,
-        itemName: "Ván cốt 15 WANEK",
+        // command: "VCN-CH-PLY-09.10.23-C15WN",
+        itemId: 10029,
+        itemName: "LVL 22 loại 1 KT",
         previousGroup: null,
         fromGroup: {
             id: "CH-LVL-TV",
@@ -263,6 +295,22 @@ var exampleData = [
             no: 2,
             name: "Hoàn thiện LVL (CH)",
         },
+        productionCommands: [
+            {
+                command: "VCN-YS3-LVL-03.05.23-LVL22",
+                quantity: 5400,
+                done: 1107,
+                faults: 0,
+                processing: 4293,
+            },
+            {
+                command: "VCN-YS3-LVL-08.05.23-LVL22",
+                quantity: 2400,
+                done: 0,
+                faults: 0,
+                processing: 2400,
+            },
+        ],
         thickness: 15,
         width: 1220,
         length: 2440,
@@ -273,42 +321,51 @@ var exampleData = [
         pendingReceipts: [],
         returns: [],
         totalStageError: 0,
-        totalBackError: 0,
-        totalTypeError: 0,
+        // totalBackError: 0,
+        // totalTypeError: 0,
     },
-    {
-        command: "VCN-CH-PLY-10.10.23-C15WN",
-        itemId: 10027,
-        itemName: "Ván cốt 15 WANEK",
-        previousGroup: null,
-        fromGroup: {
-            id: "CH-LVL-TV",
-            no: 1,
-            name: "Tạo ván (CH)",
-        },
-        nextGroup: {
-            id: "CH-LVL-HT",
-            no: 2,
-            name: "Hoàn thiện LVL (CH)",
-        },
-        thickness: 15,
-        width: 1220,
-        length: 2440,
-        stockQuantity: 4,
-        furthestQuantity: 3256,
-        allCommandQuantity: 175,
-        pendingErrors: [],
-        pendingReceipts: [],
-        returns: [],
-        totalStageError: 3,
-        totalBackError: 7,
-        totalTypeError: 5,
-    },
+    // {
+    //     command: "VCN-CH-PLY-10.10.23-C15WN",
+    //     itemId: 10027,
+    //     itemName: "Ván cốt 15 WANEK",
+    //     previousGroup: null,
+    //     fromGroup: {
+    //         id: "CH-LVL-TV",
+    //         no: 1,
+    //         name: "Tạo ván (CH)",
+    //     },
+    //     nextGroup: {
+    //         id: "CH-LVL-HT",
+    //         no: 2,
+    //         name: "Hoàn thiện LVL (CH)",
+    //     },
+    //     productionCommands: [
+    //         {
+    //             command: "TH2346TP-02",
+    //             quantity: 14400,
+    //             done: 0,
+    //             faults: 0,
+    //             processing: 14400,
+    //         },
+    //     ],
+    //     thickness: 15,
+    //     width: 1220,
+    //     length: 2440,
+    //     stockQuantity: 4,
+    //     furthestQuantity: 3256,
+    //     allCommandQuantity: 175,
+    //     pendingErrors: [],
+    //     pendingReceipts: [],
+    //     returns: [],
+    //     totalStageError: 3,
+    //     // totalBackError: 7,
+    //     // totalTypeError: 5,
+    // },
 ];
 
 var exampleData1 = [
     {
-        command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+        // command: "VCN-CH-PLY-08.09.23-C15.2Bi",
         itemId: 10025,
         itemName: "Ván cốt 18 chờ lên lớp CH",
         previousGroup: {
@@ -326,6 +383,22 @@ var exampleData1 = [
             no: 3,
             name: "Kho thành phẩm LVL (CH)",
         },
+        productionCommands: [
+            {
+                command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+                quantity: 5400,
+                done: 1107,
+                faults: 0,
+                processing: 4293,
+            },
+            {
+                command: "VCN-CH-PLY-09.09.23-C15.2Bi",
+                quantity: 2400,
+                done: 0,
+                faults: 0,
+                processing: 2400,
+            },
+        ],
         thickness: 15.2,
         width: 1220,
         length: 2440,
@@ -337,40 +410,95 @@ var exampleData1 = [
         returns: [],
         totalDone: 1785,
         totalStageError: 30,
-        totalBackError: 15,
-        totalTypeError: 14,
+        // totalBackError: 0,
+        // totalTypeError: 0,
     },
 ];
 
 var exampleData2 = [
     {
-        command: "VCN-CH-PLY-07.10.23-C15WN",
-        itemId: 10027,
-        itemName: "Ván cốt 15 WANEK",
-        previousGroup: null,
-        fromGroup: {
-            id: "CH-LVL-TV",
-            no: 1,
-            name: "Tạo ván (CH)",
-        },
-        nextGroup: {
+        // command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+        itemId: 10025,
+        itemName: "Ván cốt 18 chờ lên lớp CH",
+        previousGroup: {
             id: "CH-LVL-HT",
             no: 2,
             name: "Hoàn thiện LVL (CH)",
         },
-        thickness: 15,
+        fromGroup: {
+            id: "CH-LVL-KTP",
+            no: 3,
+            name: "Kho thành phẩm LVL (CH)",
+            
+        },
+        nextGroup: null,
+        productionCommands: [
+            {
+                command: "VCN-CH-PLY-08.09.23-C15.2Bi",
+                quantity: 5400,
+                done: 1107,
+                faults: 0,
+                processing: 4293,
+            },
+            {
+                command: "VCN-CH-PLY-09.09.23-C15.2Bi",
+                quantity: 2400,
+                done: 0,
+                faults: 0,
+                processing: 2400,
+            },
+        ],
+        thickness: 15.2,
         width: 1220,
         length: 2440,
         stockQuantity: 4,
-        furthestQuantity: 1120,
-        allCommandQuantity: 15,
+        furthestQuantity: 2014,
+        allCommandQuantity: 0,
         pendingErrors: [],
         pendingReceipts: [],
         returns: [],
-        totalStageError: 0,
-        totalBackError: 0,
-        totalTypeError: 0,
+        totalDone: 1785,
+        totalStageError: 30,
+        // totalBackError: 0,
+        // totalTypeError: 0,
     },
+    // {
+    //     command: "VCN-CH-PLY-07.10.23-C15WN",
+    //     itemId: 10027,
+    //     itemName: "Ván cốt 15 WANEK",
+    //     previousGroup: null,
+    //     fromGroup: {
+    //         id: "CH-LVL-TV",
+    //         no: 1,
+    //         name: "Tạo ván (CH)",
+    //     },
+    //     nextGroup: {
+    //         id: "CH-LVL-HT",
+    //         no: 2,
+    //         name: "Hoàn thiện LVL (CH)",
+    //     },
+    //     productionCommands: [
+    //         {
+    //             command: "TH2346TP-02",
+    //             quantity: 14400,
+    //             done: 0,
+    //             faults: 0,
+    //             processing: 14400,
+    //         },
+    //     ],
+    //     thickness: 15,
+    //     width: 1220,
+    //     length: 2440,
+    //     stockQuantity: 4,
+    //     furthestQuantity: 1120,
+    //     allCommandQuantity: 15,
+    //     pendingErrors: [],
+    //     pendingReceipts: [],
+    //     returns: [],
+    //     totalStageError: 0,
+    //     // totalBackError: 0,
+    //     // totalTypeError: 0,
+    // },
 ];
 
 function PlywoodFinishedGoodsReceipt() {
@@ -556,7 +684,7 @@ function PlywoodFinishedGoodsReceipt() {
         switch (currentGroupId) {
             case "CH-LVL-TV":
                 exampleData = exampleData.map((item) => {
-                    if (item.command === data.command) {
+                    if (item.id === data.itemId) {
                         return {
                             ...item,
                             // itemDetails: item.map((detail) => {
