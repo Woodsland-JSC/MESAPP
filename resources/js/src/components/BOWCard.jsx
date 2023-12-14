@@ -70,7 +70,7 @@ function BOWCard(props) {
     };
 
     return (
-        <div className=" border-2 border-gray-200 rounded-2xl bg-white h-[27rem] shadow-sm">
+        <div className=" border-2 border-gray-300 rounded-2xl bg-white h-[27rem] shadow-sm">
             {/* Header */}
             <div className="flex flex-col rounded-t-xl py-2 px-6 h-[30%]">
                 <div className="flex space-x-4">

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import useAppContext from "../../store/AppContext";
 import usersApi from "../../api/userApi";
 import Loader from "../../components/Loader";
-import Logo from "../../assets/images/woodsland.svg";
+import Logo from "../../assets/images/WLorigin.svg";
 import generateAvatar from "../../utils/generateAvatar";
 import axios from "axios";
 

@@ -29,7 +29,7 @@ function Workspace() {
                 <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
                     {/* Header */}
                     <div className="xl:mb-12 lg:mb-12 md:mb-12 mb-5">
-                        <div className="xl:text-3xl lg:text-3xl md:text-3xl text-[1.75rem] font-bold mb-2">
+                        <div className="xl:text-3xl lg:text-3xl md:text-3xl text-[1.75rem] font-bold xl:mb-2 lg:mb-2 md:mb-2">
                             Xin chào, {user?.first_name}! 👋
                         </div>
                         <div className="text-gray-500">
@@ -55,9 +55,14 @@ function Workspace() {
                                         Quản lý sản xuất
                                     </div>
                                 </Tab>
-                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                {/* <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
                                     <div className="w-[150px]">
                                         Quản lý bán hàng
+                                    </div>
+                                </Tab> */}
+                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                    <div className="w-[180px]">
+                                        Kiểm định chất lượng
                                     </div>
                                 </Tab>
                             </TabList>
@@ -75,7 +80,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/wood-sorting">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiSquare3Stack3D className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -104,7 +109,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/create-drying-plan">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiClipboardDocumentList className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -134,7 +139,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/load-into-kiln">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiRectangleStack className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -163,7 +168,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/kiln-checking">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiMiniMagnifyingGlassCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -194,7 +199,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/kiln">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiHomeModern className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -223,7 +228,7 @@ function Workspace() {
                                             ) && (
                                                 <Link to="/workspace/drying-wood-checking">
                                                     <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
                                                                 <HiHandThumbUp className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
@@ -256,7 +261,7 @@ function Workspace() {
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             <Link to="/workspace/wood-processing/finished-goods-receipt">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -265,11 +270,7 @@ function Workspace() {
                                                                 Nhập thành phẩm chế biến gỗ
                                                             </h5>
                                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Lorem ipsum
-                                                                dolor sit, amet
-                                                                consectetur
-                                                                adipisicing
-                                                                elit.
+                                                                Nhập thành phẩm chế biến.
                                                             </p>
                                                         </div>
                                                     </div>
@@ -282,7 +283,7 @@ function Workspace() {
 
                                             <Link to="/workspace/plywood/finished-goods-receipt">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
@@ -291,11 +292,7 @@ function Workspace() {
                                                                 Nhập thành phẩm ván công nghiệp
                                                             </h5>
                                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Lorem ipsum
-                                                                dolor sit, amet
-                                                                consectetur
-                                                                adipisicing
-                                                                elit.
+                                                                Nhập thành phẩm ván.
                                                             </p>
                                                         </div>
                                                     </div>
@@ -357,36 +354,22 @@ function Workspace() {
                                                     Tạo kế hoạch sấy
                                                 </div>
                                             </div>
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
-                                </TabPanel>
+                                </TabPanel>                          
                                 <TabPanel style={{ padding: "1rem 1rem" }}>
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             <Link to="#">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-200 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
                                                             <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/>
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Giá thành kế
-                                                                hoạch
+                                                                Chế biến gỗ
                                                             </h5>
                                                             <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
                                                                 Lorem ipsum

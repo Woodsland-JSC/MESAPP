@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiFillCloseCircle } from "react-icons/ai";
 import toast from "react-hot-toast";
 import {
@@ -21,30 +21,42 @@ function PalletCard(props) {
         width,
         height,
         thickness,
+        onQuantityChange,
         // isInvalidQuantity
     } = props;
 
     // const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
-    const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
-    const [quantity, setQuantity] = useState(null);
+    // const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
+    // const [quantity, setQuantity] = useState(null);
     // const [isQuantityEmpty, setIsQuantityEmpty] = useState(false);
 
-    const handleQuantityChange = (value) => {
-        var quantity = parseFloat(value);
-        var inStock = parseFloat(props.inStock);
+    // const handleQuantityChange = (value) => {
+    //     var quantity = parseFloat(value);
+    //     var inStock = parseFloat(props.inStock);
 
-        if (quantity > inStock) {
-            setIsInvalidQuantity(true);
-        } else if (quantity === 0) {
-            setIsInvalidQuantity(true);
-        } else if (quantity == null || quantity == "") {
-            setIsInvalidQuantity(true);
-        } else {
-            setIsInvalidQuantity(false);
-        }
+    //     if (quantity > inStock) {
+    //         setIsInvalidQuantity(true);
+    //     } else if (quantity === 0) {
+    //         setIsInvalidQuantity(true);
+    //     } else if (quantity == null || quantity == "") {
+    //         setIsInvalidQuantity(true);
+    //     } else {
+    //         setIsInvalidQuantity(false);
+    //     }
 
-        props.onQuantityChange(value);
-    };
+    //     props.onQuantityChange(value);
+    // };
+
+    
+    // Check Invalid
+    const [quantity, setQuantity] = useState(null);
+    const [isInvalidQuantity, setIsInvalidQuantity] = useState(props.isInvalidQuantity);
+
+    useEffect(() => {
+        setIsInvalidQuantity(props.isInvalidQuantity);
+    }, [props.isInvalidQuantity]);
+
+    console.log("Giá trị Invalid Quantity ở PalletCard:", isInvalidQuantity);
 
     return (
         <div className="border-2 border-[#c6d3da] rounded-xl">
@@ -54,17 +66,17 @@ function PalletCard(props) {
                     {itemName}
                 </div>
                 <div
-                    className="text-[#17506B] text-2xl cursor-pointer"
+                    className="text-[#17506B] text-3xl cursor-pointer"
                     onClick={onDelete}
                 >
                     <AiFillCloseCircle />
                 </div>
             </div>
-            <div className="xl:block md:block hidden text-xs pt-3 text-gray-500 px-4">
+            {/* <div className="xl:block md:block hidden text-xs pt-3 text-gray-500 px-4">
                 Mã kho: {whsCode}
-            </div>
-            <div className=" pallet-line grid xl:grid-cols-3 md:grid-cols-3 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">
-                <div className="xl:hidden md:hidden block">
+            </div> */}
+            <div className=" pallet-line grid xl:grid-cols-2 md:grid-cols-2 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">
+                <div className="hidden">
                     <label
                         htmlFor="company"
                         className="block mb-2 text-md font-medium text-gray-900 "
@@ -81,7 +93,7 @@ function PalletCard(props) {
                         value={whsCode}
                     />
                 </div>
-                <div>
+                <div className="hidden">
                     <label
                         htmlFor="company"
                         className="block mb-2 text-md font-medium text-gray-900 "
@@ -126,11 +138,12 @@ function PalletCard(props) {
                     </label>
                     <NumberInput
                         defaultValue={0}
-                        min={0}
-                        // onChange={(value) => props.onQuantityChange(value)}
-                        // isDisabled={isQuantityExceedingStock}
                         isInvalid={isInvalidQuantity}
-                        onChange={handleQuantityChange}
+                        // onChange={onQuantityChange}
+                        onChange={(value) => {
+                            setQuantity(value);
+                            onQuantityChange(value);
+                        }}
                     >
                         <NumberInputField/>
                         <NumberInputStepper>

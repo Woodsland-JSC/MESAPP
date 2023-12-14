@@ -86,6 +86,7 @@ function HumidityCheck(props) {
     const [selectedOption, setSelectedOption] = React.useState("0");
     const [anotherOption, setAnotherOption] = React.useState(null);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isCheckingComplete, setIsCheckingComplete] = useState(false);
 
     const handleRecordClick = (record) => {
         setSelectedRecord(record);
@@ -698,7 +699,7 @@ function HumidityCheck(props) {
                                 isOpen={isCompleteOpen}
                                 onClose={onCompleteClose}
                                 isCentered
-                                size="sm"
+                                size="xs"
                                 blockScrollOnMount={false}
                                 closeOnOverlayClick={false}
                             >
@@ -767,37 +768,33 @@ function HumidityCheck(props) {
                                         )}
                                     </ModalBody>
 
-                                    <ModalFooter>
-                                        {checkHumidityRequirement() ? (
-                                            <Button
-                                                colorScheme="blue"
-                                                mr={3}
-                                                onClick={requirementMetHandle}
-                                                className="bg-blue-500"
-                                            >
-                                                Duyệt ra lò
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                colorScheme="blue"
-                                                mr={3}
-                                                onClick={
-                                                    requirementFailedHandle
-                                                }
-                                                className="bg-blue-500"
-                                            >
-                                                Xác nhận
-                                            </Button>
-                                        )}
-
-                                        <Button
-                                            colorScheme="gray"
-                                            mr={3}
+                                    <ModalFooter className="space-x-3">
+                                        <button
                                             onClick={onCompleteClose}
-                                            className="w-full bg-slate-500"
+                                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
                                         >
                                             Đóng
-                                        </Button>
+                                        </button>
+                                        
+                                        {checkHumidityRequirement() ? (
+                                            <button
+                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                            onClick={requirementMetHandle}
+                                            >
+                                                Duyệt ra lò
+                                            </button>
+                                        ) : (
+                                            <button
+                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                            onClick={
+                                                requirementFailedHandle
+                                            }
+                                            >
+                                                Xác nhận
+                                            </button>
+                                        )}
+
+                                        
                                     </ModalFooter>
                                 </ModalContent>
                             </Modal>

@@ -20,7 +20,7 @@ import { HiMenuAlt3 } from "react-icons/hi";
 import useAppContext from "../store/AppContext";
 import usersApi from "../api/userApi";
 
-import logo from "../assets/images/woodsland.svg";
+import logo from "../assets/images/WLorigin.svg";
 import defaultUser from "../assets/images/default-user.png";
 import {
     Fade,
@@ -81,13 +81,13 @@ function Header(props) {
                 } justify-between px-4 xl:px-32`}
             >
                 {/* Logo */}
-                <div className="flex items-center h-full">
-                    <img src={logo} alt="logo" className="w-12 h-12 mr-2"></img>
+                <div className="flex space-x-2 items-center h-full">
+                    <img src={logo} alt="logo" className="flex items-center w-14 h-14"></img>
                     <div>
-                        <p className="font-bold text-xl mb-0 ">Woodsland</p>
-                        <p className="text-[0.7rem] text-gray-500">
+                        {/* <p className="font-bold text-xl mb-0 ">Woodsland</p> */}
+                        {/* <p className="text-[0.7rem] text-gray-500">
                             WEB PORTAL
-                        </p>
+                        </p> */}
                     </div>
                 </div>
 

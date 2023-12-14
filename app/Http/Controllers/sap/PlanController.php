@@ -336,29 +336,128 @@ class PlanController extends Controller
     }
 
     //ra lò
+    // function completed(Request $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+    //         $validator = Validator::make($request->all(), [
+    //             'PlanID' => 'required', // new UniqueOvenStatusRule
+    //             'result' => 'required'
+    //         ]);
+    //         if ($validator->fails()) {
+    //             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //         }
+    //         $id = $request->input('PlanID');
+    //         $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+    //         // Lấy kho sấy
+    //         // lấy kho
+
+    //         if ($record->count() > 0) {
+    //             plandryings::where('PlanID', $id)->update(
+    //                 [
+    //                     'Status' => 4,
+    //                     'CompletedBy' => Auth::user()->id
+    //                 ]
+    //             );
+    //             $results = Plandryings::select(
+    //                 'planDryings.Code as newbatch',
+    //                 'planDryings.Oven',
+    //                 'pallets.DocEntry',
+    //                 'pallets.Code',
+    //                 'pallet_details.ItemCode',
+    //                 'pallet_details.WhsCode',
+    //                 'pallet_details.Qty',
+    //                 'pallet_details.CDai',
+    //                 'pallet_details.CRong',
+    //                 'pallet_details.CDay',
+    //                 'pallet_details.BatchNum',
+    //                 DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+    //                 'pallet_details.palletID'
+    //             )
+    //                 ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+    //                 ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+    //                 ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+    //                 ->where('planDryings.PlanID', $id)
+    //                 ->get();
+
+    //             $groupedResults = $results->groupBy('DocEntry');
+
+    //             $test = [];
+    //             foreach ($groupedResults as $docEntry => $group) {
+    //                 $data = [];
+    //                 foreach ($group as $batchData) {
+    //                     $data[] = [
+    //                         "BatchNumber" => $batchData->newbatch,
+    //                         "Quantity" => $batchData->Qty,
+    //                         "ItemCode" => $batchData->ItemCode,
+    //                         "U_CDai" => $batchData->CDai,
+    //                         "U_CRong" =>  $batchData->CRong,
+    //                         "U_CDay" =>  $batchData->CDay,
+    //                         "U_Status" => "SD"
+    //                     ];
+    //                 }
+
+    //                 $header = $group->first();
+
+    //                 $body = [
+    //                     "U_Pallet" => $pallet->Code,
+    //                     "U_CreateBy" => Auth::user()->sap_id,
+    //                     "BPLID" => Auth::user()->branch,
+    //                     "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+    //                     "StockTransferLines" => $ldt
+    //                 ];
+
+
+    //                 $test[] = $body;
+    //             }
+    //             // ulock lò sấy
+    //             $conDB = (new ConnectController)->connect_sap();
+    //             $sql = 'Update  "@G_SAY3" set "U_status"=0 where "Code"=?';
+    //             $stmt = odbc_prepare($conDB, $sql);
+    //             if (!$stmt) {
+    //                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+    //             }
+    //             if (!odbc_execute($stmt, [$results->first()->Oven])) {
+    //                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+    //             }
+    //             DB::commit();
+    //             return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
+    //         } else {
+    //             return response()->json(['error' => 'Lò không hợp lệ'], 404);
+    //         }
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     function completed(Request $request)
     {
         try {
             DB::beginTransaction();
+
             $validator = Validator::make($request->all(), [
                 'PlanID' => 'required', // new UniqueOvenStatusRule
-                'result' => 'required'
+                'result' => 'required',
             ]);
+
             if ($validator->fails()) {
-                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
             }
+
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
-            // Lấy kho sấy
-            // lấy kho
 
             if ($record->count() > 0) {
-                plandryings::where('PlanID', $id)->update(
-                    [
-                        'Status' => 4,
-                        'CompletedBy' => Auth::user()->id
-                    ]
-                );
+                plandryings::where('PlanID', $id)->update([
+                    'Status' => 4,
+                    'CompletedBy' => Auth::user()->id,
+                ]);
+
                 $results = Plandryings::select(
                     'planDryings.Code as newbatch',
                     'planDryings.Oven',
@@ -393,34 +492,37 @@ class PlanController extends Controller
                             "U_CDai" => $batchData->CDai,
                             "U_CRong" =>  $batchData->CRong,
                             "U_CDay" =>  $batchData->CDay,
-                            "U_Status" => "SD"
+                            "U_Status" => "SD",
                         ];
                     }
 
                     $header = $group->first();
 
                     $body = [
-                        "U_Pallet" => $pallet->Code,
+                        "U_Pallet" => $header->Code, // Assuming $pallet is not defined, so using $header->Code
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
                         "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
-                        "StockTransferLines" => $ldt
+                        "StockTransferLines" => $data,
                     ];
-
 
                     $test[] = $body;
                 }
-                // ulock lò sấy
+
                 $conDB = (new ConnectController)->connect_sap();
-                $sql = 'Update  "@G_SAY3" set "U_status"=0 where "Code"=?';
+                $sql = 'UPDATE "@G_SAY3" SET "U_status"=0 WHERE "Code"=?';
                 $stmt = odbc_prepare($conDB, $sql);
+
                 if (!$stmt) {
                     throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
                 }
+
                 if (!odbc_execute($stmt, [$results->first()->Oven])) {
                     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
                 }
+
                 DB::commit();
+
                 return response()->json(['message' => 'updated successfully', 'data' => $record, 'send' => $test]);
             } else {
                 return response()->json(['error' => 'Lò không hợp lệ'], 404);
@@ -430,10 +532,11 @@ class PlanController extends Controller
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
+
     // chi tiết mẻ
     function productionDetail($id)
     {
