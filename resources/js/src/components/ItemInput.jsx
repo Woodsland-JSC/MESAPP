@@ -34,6 +34,7 @@ import {
 import Select from "react-select";
 import toast from "react-hot-toast";
 import { AiTwotoneDelete } from "react-icons/ai";
+import productionApi from "../api/productionApi";
 import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
 
@@ -76,6 +77,9 @@ const ItemInput = ({
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
     const [faultyAmount, setFaultyAmount] = useState(null);
+
+    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    const [solutionOptions, setSolutionOptions] = useState([]);
 
     const openInputModal = (item) => {
         onModalOpen();
@@ -178,6 +182,38 @@ const ItemInput = ({
             }
         }
     }, [faultyAmount]);
+
+    useEffect(() => {
+        const getErrorTypeOptions = async () => {
+            try {
+                const res = await productionApi.getErrorTypes();
+                const errorTypes = res.map((error, index) => ({
+                    value: error?.id || "",
+                    label: error?.name || ""
+                }));
+                console.log("Other side: ", errorTypes);
+                setErrorTypeOptions(errorTypes);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        const getSolutionOptions = async () => {
+            try {
+                const res = await productionApi.getSolutions("VCN");
+                const solutions = res.map((solution, index) => ({
+                    value: solution?.id || "",
+                    label: solution?.name || ""
+                }));
+                console.log("Other side 2: ", solutions);
+                setSolutionOptions(solutions);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        getErrorTypeOptions();
+        getSolutionOptions();
+    }, []);
 
     return (
         <>
@@ -629,7 +665,7 @@ const ItemInput = ({
                                         Lỗi phôi nhận từ nhà máy khác
                                     </label>
                                     <Select
-                                        className="mt-4 mb-12"
+                                        className="mt-4"
                                         placeholder="Lựa chọn"
                                         options={factories}
                                         isClearable
@@ -638,6 +674,42 @@ const ItemInput = ({
                                             setFaults((prev) => ({
                                                 ...prev,
                                                 factory: value,
+                                            }));
+                                        }}
+                                    />
+                                </Box>
+                                <Box className="px-3">
+                                    <label className="font-semibold text-red-700">
+                                        Loại lỗi
+                                    </label>
+                                    <Select
+                                        className="mt-4"
+                                        placeholder="Lựa chọn"
+                                        options={errorTypeOptions}
+                                        isClearable
+                                        isSearchable
+                                        onChange={(value) => {
+                                            setFaults((prev) => ({
+                                                ...prev,
+                                                errorType: value,
+                                            }));
+                                        }}
+                                    />
+                                </Box>
+                                <Box className="px-3">
+                                    <label className="font-semibold text-red-700">
+                                        Hướng xử lý
+                                    </label>
+                                    <Select
+                                        className="mt-4 mb-12"
+                                        placeholder="Lựa chọn"
+                                        options={solutionOptions}
+                                        isClearable
+                                        isSearchable
+                                        onChange={(value) => {
+                                            setFaults((prev) => ({
+                                                ...prev,
+                                                solution: value,
                                             }));
                                         }}
                                     />
