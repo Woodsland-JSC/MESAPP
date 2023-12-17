@@ -460,23 +460,23 @@ function WoodSorting() {
             [id]: quantity,
         }));
 
-        // setPalletCards((prevPalletCards) => {
-        //     return prevPalletCards.map((card) => {
-        //         if (card.key === id) {
-        //             const inStock = parseFloat(card.props.inStock);
-        //             const newIsInvalidQuantity =
-        //                 quantity > inStock ||
-        //                 quantity == 0 ||
-        //                 quantity <= 0 ||
-        //                 quantity == "" ||
-        //                 quantity == null;
-        //             return React.cloneElement(card, {
-        //                 isInvalidQuantity: newIsInvalidQuantity,
-        //             });
-        //         }
-        //         return card;
-        //     });
-        // });
+        setPalletCards((prevPalletCards) => {
+            return prevPalletCards.map((card) => {
+                if (card.key === id) {
+                    const inStock = parseFloat(card.props.inStock);
+                    const newIsInvalidQuantity =
+                        quantity > inStock ||
+                        quantity == 0 ||
+                        quantity <= 0 ||
+                        quantity == "" ||
+                        quantity == null;
+                    return React.cloneElement(card, {
+                        isInvalidQuantity: newIsInvalidQuantity,
+                    });
+                }
+                return card;
+            });
+        });
     };
 
     // Creating pallets
@@ -526,7 +526,6 @@ function WoodSorting() {
                 quantity == "" ||
                 quantity == null
             ) {
-                setIsInvalidQuantity(true);
                 console.log("Giá trị Invalid Quantity:", isInvalidQuantity);
                 hasInvalidQuantity = true;
                 break;

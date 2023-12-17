@@ -1,5 +1,7 @@
 import React from "react";
 import Layout from "../../layouts/layout";
+import { MdPlaylistAddCheckCircle } from "react-icons/md";
+import { FaPallet } from "react-icons/fa";
 import {
     HiSquare3Stack3D,
     HiMiniMagnifyingGlassCircle,
@@ -264,6 +266,7 @@ function Workspace() {
                                                     <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
                                                             <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -285,7 +288,7 @@ function Workspace() {
                                                 <div className="flex justify-center xl:h-full md:h-full">
                                                     <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -365,7 +368,8 @@ function Workspace() {
                                                 <div className="flex justify-center xl:h-full md:h-full">
                                                     <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/>
+                                                            {/* <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/> */}
+                                                            <MdPlaylistAddCheckCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                         </div>
                                                         <div>
                                                             <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -383,7 +387,7 @@ function Workspace() {
                                                 </div>
 
                                                 <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Xếp sấy
+                                                    Chế biến gỗ
                                                 </div>
                                             </Link>
 

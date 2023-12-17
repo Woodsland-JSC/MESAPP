@@ -249,7 +249,8 @@ class DryingOvenController extends Controller
                     'error' => $res['error'],
                 ], 500);
             } else {
-
+                // dd($res);
+                // dd($res2);
                 $pallet->update([
                     'DocNum' => $res['DocNum'],
                     'DocEntry' => $res['DocEntry'],
