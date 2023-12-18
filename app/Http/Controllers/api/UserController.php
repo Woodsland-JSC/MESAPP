@@ -15,55 +15,7 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/users",
-     *     tags={"MasterData"},
-     *     summary="Get all list users",
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="first_name",
-     *                  type="string",
-     *                  example="Judd Leuschke"
-     *              ),
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  example="mortimer45@example.org"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="plant",
-     *                  type="string",
-     *                  example="TQ"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="sap_id",
-     *                  type="string",
-     *                  example="manager"
-     *              )
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
-    // function index(Request $request)
-    // {
-    //     $pagination = User::orderBy('id', 'DESC')->paginate(20);
 
-    //     // Get the array representation of the pagination data
-    //     $response = $pagination->toArray();
-
-    //     // Manually add the next page link if it exists
-    //     $response['next_page_url'] = $pagination->nextPageUrl();
-    //     $response['prev_page_url'] = $pagination->previousPageUrl();
-
-    //     return response()->json($response, 200);
-    // }
     function index(Request $request)
     {
         $users = User::orderBy('id', 'DESC')->get();
@@ -92,30 +44,7 @@ class UserController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
     }
-    /**
-     * @OA\Get(
-     *     path="/api/users/block/{userId}",
-     *     tags={"MasterData"},
-     *     summary="Get detail user by id",
-     *     @OA\Parameter(
-     *         name="userId",
-     *         in="path",
-     *         description="ID of user that needs to be fetched",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="integer",
-     *             format="int64",
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+
     function blockUser($id)
     {
         $user = User::find($id);
@@ -129,90 +58,7 @@ class UserController extends Controller
 
         return response()->json(['error' => 'User not found'], 404);
     }
-    /**
-     * @OA\post(
-     *     path="/api/users/create",
-     *     tags={"MasterData"},
-     *     summary="Create users",
-     *     @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              required={"first_name","last_name","email","password","confirm-password","plant","sap_id","role"},
-     *              @OA\Property(
-     *                  property="first_name",
-     *                  type="string",
-     *                  format="text",
-     *                  description="The first_name of the user",
-     *                  example="Tony"
-     *              ),
-     *              @OA\Property(
-     *                  property="last_name",
-     *                  type="string",
-     *                  format="text",
-     *                  description="The last_name of the user",
-     *                  example="john"
-     *              ),
-     *              @OA\Property(
-     *                  property="plant",
-     *                  type="string",
-     *                  format="text",
-     *                  description="The plant of the user",
-     *                  example="TQ"
-     *              ),
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  format="email",
-     *                  description="The email of the user",
-     *                  example="user@example.com"
-     *              ),
-     *              @OA\Property(
-     *                  property="confirm-password",
-     *                  type="string",
-     *                  format="password",
-     *                  description="The confirm-password of the user",
-     *                  example="password1234"
-     *              ),
-     *              @OA\Property(
-     *                  property="password",
-     *                  type="string",
-     *                  format="password",
-     *                  description="The password of the user",
-     *                  example="password1234"
-     *              )
-     *          )
-     *      ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="first_name",
-     *                  type="string",
-     *                  example="Judd Leuschke"
-     *              ),
-     *              @OA\Property(
-     *                  property="email",
-     *                  type="string",
-     *                  example="mortimer45@example.org"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="plant",
-     *                  type="string",
-     *                  example="TQ"
-     *              ),
-     *  *              @OA\Property(
-     *                  property="sap_id",
-     *                  type="string",
-     *                  example="manager"
-     *              )
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+
     function create(Request $request)
     {
         // Validate the request
@@ -221,6 +67,7 @@ class UserController extends Controller
             'last_name' => 'required',
             'gender' => 'required',
             'email' => 'required|email|unique:users,email',
+            'username' => 'required|unique:users,username',
             'password' => 'required',
             'plant' => 'required',
             'sap_id' => 'required|unique:users,sap_id',
@@ -272,6 +119,7 @@ class UserController extends Controller
             'first_name' => 'required',
             'last_name' => 'required',
             'email' => 'required|email|unique:users,email,' . $id,
+            'username' => 'required|unique:users,username,' . $id,
             'password' => 'nullable',
             'plant' => 'required',
             'sap_id' => 'required|unique:users,sap_id,' . $id,

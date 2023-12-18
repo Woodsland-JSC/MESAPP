@@ -97,7 +97,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/production-completed', [PlanController::class, 'completed'])->name('ra-lo');
     });
     Route::group(['prefix' => 'production'], function () {
-        Route::get('/receipts-productions', [ProductionController::class, 'listProduction'])->name('danh-sach-thanh-pham');
+        Route::get('/receipts-productions', [ProductionController::class, 'index'])->name('danh-sach-thanh-pham');
         Route::get('/receipts-productions-detail', [ProductionController::class, 'viewdetail'])->name('detail-thanh-pham');
         Route::post('/receipts-production', [ProductionController::class, 'receipts'])->name('nhap-thanh-pham');
         Route::delete('remove-receipt', [ProductionController::class, 'delete']);

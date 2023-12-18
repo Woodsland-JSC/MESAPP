@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\receiptProductionAlocate;
-use App\Models\AllocateLogs;
+use App\Models\SanLuong;
 use App\Models\notireceipt;
 use Illuminate\Support\Facades\Redis;
 
@@ -21,20 +21,12 @@ class ProductionController extends Controller
     function index(Request $request)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select a."DocEntry",a."DocNum",a."ItemCode","PlannedQty",
-                ifnull(c."Qty",0) "ReceiptQty","PlannedQty"-ifnull(c."Qty",0) "OpenQty", null "Allocate"
-                from OWOR A join OUSR B ON A."UserSign"=B."USERID"
-                left join (
-                    select distinct "BaseEntry","ItemCode" ,
-                    sum("Quantity") over(PARTITION BY "BaseEntry","ItemCode") "Qty"
-                    from IGN1
-                    where "BaseType"=202
-                )C ON A."DocEntry"=c."BaseEntry" where  "Type"=? and a."Status"=? and "U_Xuong"=?';
+        $query = 'select * from UV_GHINHANSL where TO=?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['S', 'R', $request->xuong])) {
+        if (!odbc_execute($stmt, [$request->TO])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -49,70 +41,66 @@ class ProductionController extends Controller
     function receipts(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'ItemCode' => 'required',
-            'SLD' => 'required',
-            'SPDich' => 'required',
-            'QUYCACH' => 'required',
-            'SLD' => 'required',
-            'SLL' => 'required',
-            'TOTT' => 'required'
+            'FatherCode' => 'required|string|max:254',
+            'ItemCode' => 'required|string|max:254',
+            'CompleQty' => 'required|numeric',
+            'RejectQty' => 'required|numeric',
+            'CDay' => 'required|integer',
+            'CRong' => 'required|integer',
+            'CDai' => 'required|integer',
+            'Team' => 'required|string|max:254',
+            'NexTeam' => 'required|string|max:254',
+            'Type' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+        $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty','CDay','CRong','CDai','Team','NexTeam','Type']);
+        $SLData['create_by'] = Auth::user()->id;
+        $Allocate = SanLuong::create($SLData);
+        // notireceipt::Create([
+        //     'baseID' => $Allocate->id,
+        //     'text' => 'Số lượng đã giao chờ SX xác nhận',
+        //     'Quantity' => $request->SLD,
+        //     'QuyCach' =>  $request->QUYCACH,
+        //     'SPDich' => $request->SPDich,
 
-        $Allocate = AllocateLogs::create([
-            'ItemCode' => $request->ItemCode,
-            'SPDich' => $request->SPDich,
-            'Qty' => $request->SLD,
-            'Stautus' => 0,
-            'Type' => 202,
-            "TO" => $request->TOHT,
-            'CDTT' => $request->TOTT
-        ]);
-        notireceipt::Create([
-            'baseID' => $Allocate->id,
-            'text' => 'Số lượng đã giao chờ SX xác nhận',
-            'Quantity' => $request->SLD,
-            'QuyCach' =>  $request->QUYCACH,
-            'SPDich' => $request->SPDich,
+        // ]);
+        // //  ;
+        // if ($request->SLL > 0) {
+        //     // cần xử lý thêm phân get kho theo nhà máy
+        //     $body =
+        //         [
+        //             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+        //             "U_LSX" => $request->SPDich,
+        //             "DocumentLines" => [
+        //                 [
+        //                     "ItemCode" => $request->ItemCode,
+        //                     "Quantity" => $request->SLL,
+        //                     "BaseLine" => 0,
+        //                     "WarehouseCode" => 'W07.1.01',
+        //                     "BatchNumbers" => [
+        //                         "BatchNumber" => now()->format('YmdHMI'),
+        //                         "Quantity" => $request->SLL,
+        //                         "ItemCode" =>  $request->ItemCode,
+        //                         "U_Status" => "HL"
 
-        ]);
-        //  ;
-        if ($request->SLL > 0) {
-            // cần xử lý thêm phân get kho theo nhà máy
-            $body =
-                [
-                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "U_LSX" => $request->SPDich,
-                    "DocumentLines" => [
-                        [
-                            "ItemCode" => $request->ItemCode,
-                            "Quantity" => $request->SLL,
-                            "BaseLine" => 0,
-                            "WarehouseCode" => 'W07.1.01',
-                            "BatchNumbers" => [
-                                "BatchNumber" => now()->format('YmdHMI'),
-                                "Quantity" => $request->SLL,
-                                "ItemCode" =>  $request->ItemCode,
-                                "U_Status" => "HL"
+        //                     ],
 
-                            ],
+        //                 ],
+        //             ],
+        //         ];
 
-                        ],
-                    ],
-                ];
-
-            $record =  AllocateLogs::create([
-                'ItemCode' => $request->ItemCode,
-                'Qty' => $request->SLL,
-                'Body' => json_encode($body),
-                'Type' => "59",
-                'Stautus' => -1,
-                'Factorys' =>  $request->Factory
-            ]);
-            receiptProductionAlocate::dispatch($body, $record->id);
-        }
+        //     $record =  AllocateLogs::create([
+        //         'ItemCode' => $request->ItemCode,
+        //         'Qty' => $request->SLL,
+        //         'Body' => json_encode($body),
+        //         'Type' => "59",
+        //         'Stautus' => -1,
+        //         'Factorys' =>  $request->Factory
+        //     ]);
+        //     receiptProductionAlocate::dispatch($body, $record->id);
+        // }
 
 
         return response()->json([
