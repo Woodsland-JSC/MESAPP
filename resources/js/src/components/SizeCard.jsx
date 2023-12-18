@@ -39,25 +39,41 @@ function SizeCard(props) {
     const [sizeData, setSizeData] = useState([]);
     const [isPalletLoading, setPalletLoading] = useState(true);
 
-    useEffect(() => {
-        palletsApi
-            .getBOWById(planID)
-            .then((response) => {
-                console.log("Dữ liệu trả về ở SizeCard:", response);
+    // useEffect(() => {
+    //     palletsApi
+    //         .getBOWById(planID)
+    //         .then((response) => {
+    //             console.log("Dữ liệu trả về ở SizeCard:", response);
 
+    //             setSizeData(response.plandrying.details);
+    //             setPalletLoading(false);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Lỗi khi gọi API:", error);
+
+    //             setPalletLoading(false);
+    //         })
+    //         .finally(() => {});
+    // }, [props.reload]);
+
+    const loadSizeData = () => {
+        palletsApi.getBOWById(planID)
+            .then((response) => {
                 setSizeData(response.plandrying.details);
                 setPalletLoading(false);
             })
             .catch((error) => {
                 console.error("Lỗi khi gọi API:", error);
-
                 setPalletLoading(false);
-            })
-            .finally(() => {});
-    }, [props.reload]);
+            });
+    };
+
+    useEffect(() => {
+        loadSizeData();
+    }, [planID, props.reload ]);
 
     return (
-        <div className="border-2 mb-4 border-gray-200 rounded-xl">
+        <div className="border-2 mb-4 border-gray-300 rounded-xl">
             {/* Header */}
             <div className="bg-white rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-6  border-gray-300">
                 <div className="flex items-center gap-x-3 font-medium">
@@ -156,10 +172,14 @@ function SizeCard(props) {
                             <>
                                 {sizeData.map((item) => (
                                     <SizeListItem
+                                        planID={planID}
+                                        id={item.pallet}
                                         size={item.size}
                                         pallet={item.pallet}
                                         Qty={item.Qty}
                                         weight={item.Mass}
+                                        // onDelete={handleDelete}
+                                        onDelete={loadSizeData}
                                     />
                                 ))}
                             </>

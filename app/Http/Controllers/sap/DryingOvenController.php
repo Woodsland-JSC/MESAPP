@@ -241,6 +241,7 @@ class DryingOvenController extends Controller
 
             $res = $response->json();
             $res2 = $response2->json();
+
             // update data
             if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();
@@ -249,9 +250,8 @@ class DryingOvenController extends Controller
                     'error' => $res['error'],
                 ], 500);
             } else {
-                // dd($res);
-                // dd($res2);
-                $pallet->update([
+
+                Pallet::where('palletID',$pallet->palletID)->update([
                     'DocNum' => $res['DocNum'],
                     'DocEntry' => $res['DocEntry'],
                     'palletSAP' => $res2['DocEntry'],

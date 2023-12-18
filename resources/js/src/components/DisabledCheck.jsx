@@ -452,7 +452,7 @@ const DisabledCheck = ({
 
     return (
         <>
-            <div className="bg-white rounded-xl border-2 border-gray-200">
+            <div className="bg-white rounded-xl border-2 border-gray-300">
                 <div className="text-xl flex justify-between items-center font-medium border-b px-6 p-4 border-gray-200">
                     <div className="flex gap-x-3 items-center ">
                         <div className="w-8 h-8">

@@ -35,6 +35,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdFormatColorReset } from "react-icons/md";
+import KilnCheck from "./KilnCheck";
 
 const checkItems = [
     {
@@ -132,6 +133,7 @@ function ControllerCard(props) {
     const [dryingInProgress, setDryingInProgress] = useState(false);
     const [isCompleteChecking, setIsCompleteChecking] = useState(false);
     const [isCompleteReviewing, setIsCompleteReviewing] = useState(false);
+    const [disabledCheckbox, setDisabledCheckbox] = useState(false);
 
     // Mini Loading
     const [loadIntoKilnLoading, setLoadIntoKilnLoading] = useState(false);
@@ -140,26 +142,10 @@ function ControllerCard(props) {
     const [loadStartDryingLoading, setLoadStartDryingLoading] = useState(false);
     const [loadFinishDryingLoading, setLoadFinishDryingLoading] =
         useState(false);
+    // Loading
+    const [checkingDataLoading, setCheckingDataLoading] = useState(false);
 
-    // Kiln Check Handle
-    // No 7 Handle
-    const [no7Count, setNo7Count] = useState(0);
-
-    // Check Checklist Items
-    // const handleCheckboxChange = (isChecked) => {
-    //     setCheckedCount((prevCount) =>
-    //         isChecked ? prevCount + 1 : prevCount - 1
-    //     );
-    // };
-
-    // const [checkboxStates, setCheckboxStates] = useState({});
-
-    // const handleCheckboxChange = (itemKey, isChecked) => {
-    //     setCheckboxStates((prevState) => ({
-    //         ...prevState,
-    //         [itemKey]: isChecked ? 1 : 0,
-    //     }));
-    // };
+    const [BOWData, setBOWData] = useState([]);
 
 
     const [checkboxStates, setCheckboxStates] = useState({
@@ -177,9 +163,58 @@ function ControllerCard(props) {
         CT12: 0,
     });
 
+    const [soLan, setSoLan] = useState("");
+    const [CBL, setCBL] = useState("");
+    const [doThucTe, setDoThucTe] = useState("");
+
+    const [samples, setSamples] = useState({
+        M1: "",
+        M2: "",
+        M3: "",
+        M4: "",
+        M5: "",
+        M6: "",
+      });
+
+      const [fanValues, setFanValues] = useState({
+        Q1: "",
+        Q2: "",
+        Q3: "",
+        Q4: "",
+        Q5: "",
+        Q6: "",
+        Q7: "",
+        Q8: "",
+    });
+    
+      const handleSoLanChange = (newSoLan) => {
+        setSoLan(newSoLan);
+        console.log("Giá trị số lần nhận được là:", newSoLan);
+      };
+
+      const handleCBLChange = (newCBL) => {
+        setCBL(newCBL);
+        console.log("Giá trị cảm biến lò nhận được là:", newCBL);
+      };
+
+      const handleDoThucTeChange = (newDoThucTe) => {
+        setDoThucTe(newDoThucTe);
+        console.log("Giá trị đo thực tế nhận được là:", newDoThucTe);
+      };
+
+      const handleSampleChange = (newSamples) => {
+        setSamples(newSamples);
+        console.log("Giá trị sample nhận được là:", newSamples);
+      };
+
+      const handleFanValuesChange = (newFanValues) => {
+        setFanValues(newFanValues);
+        console.log("Giá trị tốc độ quạt nhận được là:", newFanValues);
+      };
+
     const [checkedCount, setCheckedCount] = useState(0);
 
-    const handleCheckboxChange = (checkboxKey, isChecked, SoLan) => {
+    const handleCheckboxChange = (checkboxKey, isChecked) => {
         setCheckboxStates((prevStates) => ({
             ...prevStates,
             [checkboxKey]: isChecked ? 1 : 0,
@@ -190,6 +225,26 @@ function ControllerCard(props) {
         const count = Object.values(checkboxStates).reduce((acc, value) => acc + value, 0);
         setCheckedCount(count);
     }, [checkboxStates]);
+
+    // Get data Select
+    useEffect(() => {
+        loadPallets();
+        loadBOWData();
+    }, []);
+
+    const loadBOWData = async () => {
+        palletsApi
+            .getBOWById(planID)
+            .then((response) => {
+                setBOWData(response.plandrying);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi gọi API:", error);
+            })
+            .finally(() => {
+                setCheckingDataLoading(false);
+            })   
+    }
 
     const handleSave = async () => {
         console.log("1. Dữ liệu checkboxe: ", checkboxStates);
@@ -207,7 +262,28 @@ function ControllerCard(props) {
             CT10: checkboxStates.CT10,
             CT11: checkboxStates.CT11,
             CT12: checkboxStates.CT12,
-            SoLan: checkboxStates.SoLan,
+            SoLan: soLan,
+            CBL: CBL,
+            DoThucTe: doThucTe,
+            CT11Detail:
+            {   
+                M1: samples.M1,
+                M2: samples.M2,
+                M3: samples.M3,
+                M4: samples.M4,
+                M5: samples.M5,
+            },
+            CT12Detail:
+            {   
+                Q1: fanValues.Q1,
+                Q2: fanValues.Q2,
+                Q3: fanValues.Q3,
+                Q4: fanValues.Q4,
+                Q5: fanValues.Q5,
+                Q6: fanValues.Q6,
+                Q7: fanValues.Q7,
+                Q8: fanValues.Q8,
+            }
         };
 
         console.log("2. Dữ liệu sẽ được đưa lên database: ", checkboxData);
@@ -215,7 +291,6 @@ function ControllerCard(props) {
         try {
             const response = await palletsApi.saveCheckingKiln(checkboxData);
             console.log("3. Kết quả trả về từ database: ", response);
-            // await setHumidityRecords(response.humiditys);
             toast.success("Đã lưu thông tin.");
             onClose();
         } catch (error) {
@@ -228,13 +303,7 @@ function ControllerCard(props) {
 
         console.log(checkedCount === 12 ? "Đạt" : "Không đạt");
     }, [checkboxStates]);
-
-
-    // Get data Select
-    useEffect(() => {
-        loadPallets();
-    }, []);
-
+    
     const loadPallets = async () => {
         setPalletLoading(true);
         const data = await palletsApi.getPalletList(reason);
@@ -291,7 +360,6 @@ function ControllerCard(props) {
                 console.log("Hoàn thành việc kiểm tra lò sấy!");
                 setLoadKilnCheckingLoading(false);
                 setIsCompleteChecking(true);
-                // window.location.reload();
             } else {
                 toast.error("Có lỗi xảy ra khi thực hiện kiểm tra lò sấy");
                 setLoadKilnCheckingLoading(false);
@@ -568,7 +636,7 @@ function ControllerCard(props) {
         ) : null;
 
     return (
-        <div className="bg-white border-2 border-gray-200 rounded-xl">
+        <div className="bg-white border-2 border-gray-300 rounded-xl">
             {/* Header */}
             <div className="flex flex-col px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-x-3 font-medium">
@@ -605,22 +673,42 @@ function ControllerCard(props) {
                                 chuẩn hoạt động khi đã đáp ứng tất cả nhu cầu
                                 dưới đây
                             </div>
-                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-2 gap-6">
+                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-6">
                                 {/* Hiển thị tất cả giá trị checkItems */}
-                                {checkItems.map((item, index) => (
-                                    <CheckListItem
-                                        key={`CT${index + 1}`}
-                                        itemKey={`CT${index + 1}`}
-                                        value={item.value}
-                                        title={item.title}
-                                        description={item.description}
-                                        // onCheckboxChange={handleCheckboxChange}
-                                        isChecked={checkboxStates[`CT${index + 1}`] === 1}
-                                        onCheckboxChange={(isChecked) =>
-                                            handleCheckboxChange(`CT${index + 1}`, isChecked)
-                                        }
+                                {checkingDataLoading ? (
+                                    <div className="text-center">
+                                    <Spinner
+                                        thickness="4px"
+                                        speed="0.65s"
+                                        emptyColor="gray.200"
+                                        color="#155979"
+                                        size="xl"
                                     />
-                                ))}
+                                </div>
+                                ) : (
+                                    <>
+                                        {checkItems.map((item, index) => (
+                                            <CheckListItem
+                                                key={`CT${index + 1}`}
+                                                itemKey={`CT${index + 1}`}
+                                                value={item.value}
+                                                title={item.title}
+                                                description={item.description}
+                                                disabled={disabledCheckbox}
+                                                isChecked={checkboxStates[`CT${index + 1}`] === 1}
+                                                onCheckboxChange={(isChecked) =>
+                                                    handleCheckboxChange(`CT${index + 1}`, isChecked)
+                                                }
+                                                onSoLanChange={handleSoLanChange}
+                                                onCBLChange={handleCBLChange}
+                                                onDoThucTeChange={handleDoThucTeChange}
+                                                onSampleChange={handleSampleChange}
+                                                onFanValuesChange={handleFanValuesChange}
+                                            />
+                                        ))}
+                                    </>
+                                )}
+                                
                             </div>
                         </div>
                     </ModalBody>
@@ -708,11 +796,11 @@ function ControllerCard(props) {
                                 Đóng
                             </button>
                             <button
-                                className="flex items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                className="flex justify-center items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
                                 onClick={handleStartDrying}
                             >
                                 {loadStartDryingLoading ? (
-                                    <div className="flex w-full justify-center items-center space-x-4">
+                                    <div className="flex  justify-center items-center space-x-4">
                                         <Spinner size="sm" color="white" />
                                         <div>Đang tải</div>
                                     </div>

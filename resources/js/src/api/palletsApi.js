@@ -58,13 +58,17 @@ const palletsApi = {
         const url = `/ovens/production-batch`;
         return axiosClient().get(url, {
             params: {
-                reason: reason || "OUTDOOR"
+                reason: reason,
             },
         });
     },
     loadIntoKiln: () => {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
+    },
+    deletePallet: (deleteData ) => {
+        const url = `/ovens/production-batch-delete`;
+        return axiosClient().delete(url, { data: deleteData });
     },
     saveCheckingKiln: (data) => {
         const url = `/ovens/production-check-single`;

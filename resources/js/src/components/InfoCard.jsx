@@ -6,7 +6,7 @@ function InfoCard(props) {
     const { purpose, thickness, finishedDate, palletQty, weight} = props;
 
     return (
-        <div className="bg-white rounded-2xl border-2 border-gray-200 h-fit">
+        <div className="bg-white rounded-2xl border-2 border-gray-300 h-fit">
             <div className="flex items-center gap-x-3 font-medium border-b p-4 px-6 border-gray-200">
               <div className="w-8 h-8">
                 <FaCircleInfo className="text-[#17506B] w-[85%] h-full"/>

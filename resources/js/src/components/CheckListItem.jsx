@@ -38,7 +38,11 @@ function CheckListItem(props) {
         description,
         onCheckboxChange,
         isChecked,
-        onNo7Change,
+        onSoLanChange,
+        onCBLChange,
+        onDoThucTeChange,
+        onSampleChange,
+        onFanValuesChange,
     } = props;
 
     const {
@@ -63,33 +67,30 @@ function CheckListItem(props) {
     } = useDisclosure();
 
     const [localIsChecked, setLocalIsChecked] = useState(false);
+
     const [soLan, setSoLan] = useState("");
     const [CBL, setCBL] = useState("");
     const [doThucTe, setDoThucTe] = useState("");
-    const [actualValue, setActualValue] = useState("");
-    const [fanValues, setFanValues] = useState({
-        q1: "",
-        q2: "",
-        q3: "",
-        q4: "",
-        q5: "",
-        q6: "",
-        q7: "",
-        q8: "",
+
+    const [samples, setSamples] = useState({
+        M1: "",
+        M2: "",
+        M3: "",
+        M4: "",
+        M5: "",
+        M6: "",
     });
-    const [sample1, setSample1] = useState("");
-    const [sample2, setSample2] = useState("");
-    const [sample3, setSample3] = useState("");
-    const [sample4, setSample4] = useState("");
-    const [sample5, setSample5] = useState("");
-    // const [samplesValues, setSamplesValues] = useState({
-    //     sample1: "",
-    //     sample2: "",
-    //     sample3: "",
-    //     sample4: "",
-    //     sample5: "",
-    //     sample6: "",
-    // });
+
+    const [fanValues, setFanValues] = useState({
+        Q1: "",
+        Q2: "",
+        Q3: "",
+        Q4: "",
+        Q5: "",
+        Q6: "",
+        Q7: "",
+        Q8: "",
+    });
 
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0) {
@@ -98,6 +99,7 @@ function CheckListItem(props) {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
             onCheckboxChange(value ? 1 : 0);
+            onSoLanChange(soLan);
             toast("Dữ liệu đã được lưu.");
             onNo7Close();
         }
@@ -112,44 +114,37 @@ function CheckListItem(props) {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
             onCheckboxChange(value ? 1 : 0);
+            onCBLChange(CBL);
+            onDoThucTeChange(doThucTe);
             toast("Dữ liệu đã được lưu.");
             onNo8Close();
         }
     };
 
     const handleCheckboxNo11Change = () => {
-        if (!sample1) {
-            toast.error("Vui lòng nhập thông tin cho Mẫu 1.");
-        } else if (!sample2) {
-            toast.error("Vui lòng nhập thông tin cho Mẫu 2.");
-        } else if (!sample3) {
-            toast.error("Vui lòng nhập thông tin cho Mẫu 3.");
-        } else if (!sample4) {
-            toast.error("Vui lòng nhập thông tin cho Mẫu 4.");
-        } else if (!sample5) {
-            toast.error("Vui lòng nhập thông tin cho Mẫu 5.");
+        if (Object.values(samples).some((sample) => !sample)) {
+            toast.error("Vui lòng nhập đầy đủ thông tin mẫu.");
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
             onCheckboxChange(1);
+
+            onSampleChange(samples);
             toast("Dữ liệu đã được lưu.");
             onNo11Close();
         }
     };
 
     const handleCheckboxNo12Change = () => {
-        const isValid = Object.values(fanValues).every(
-            (value) => value.trim() !== ""
-        );
-
-        if (isValid) {
+        if (Object.values(fanValues).some((value) => !value)) {
+            toast.error("Vui lòng nhập đầy đủ thông tin cho tất cả các quạt");
+        } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
-            onCheckboxChange(1); // Nếu checkbox đang mở Popover thì set giá trị là 1
+            onCheckboxChange(1);
+            onFanValuesChange(fanValues);
             toast("Dữ liệu đã được lưu.");
             onNo12Close();
-        } else {
-            toast.error("Vui lòng nhập đầy đủ thông tin cho tất cả các quạt.");
         }
     };
 
@@ -165,26 +160,8 @@ function CheckListItem(props) {
         setDoThucTe(value);
     };
 
-    const handleSampleInputChange = (sampleNumber, value) => {
-        switch (sampleNumber) {
-            case 1:
-                setSample1(value);
-                break;
-            case 2:
-                setSample2(value);
-                break;
-            case 3:
-                setSample3(value);
-                break;
-            case 4:
-                setSample4(value);
-                break;
-            case 5:
-                setSample5(value);
-                break;
-            default:
-                break;
-        }
+    const handleSampleInputChange = (sampleKey, value) => {
+        setSamples((prevSamples) => ({ ...prevSamples, [sampleKey]: value }));
     };
 
     const handleFanInputChange = (field, value) => {
@@ -192,28 +169,6 @@ function CheckListItem(props) {
             ...prevValues,
             [field]: value,
         }));
-    };
-
-    const handleFanSpeedInputChange = (sampleNumber, value) => {
-        switch (sampleNumber) {
-            case 1:
-                setSample1(value);
-                break;
-            case 2:
-                setSample2(value);
-                break;
-            case 3:
-                setSample3(value);
-                break;
-            case 4:
-                setSample4(value);
-                break;
-            case 5:
-                setSample5(value);
-                break;
-            default:
-                break;
-        }
     };
 
     return (
@@ -224,6 +179,7 @@ function CheckListItem(props) {
                     value={value}
                     isChecked={isChecked}
                     onChange={() => onCheckboxChange(!isChecked)}
+                    isDisabled
                     // onChange={handleCheckboxChange}
                     size="lg"
                     colorScheme="blue"
@@ -235,14 +191,14 @@ function CheckListItem(props) {
                 </Checkbox>
             </div>
 
-            <div className="px-4 xl:h-[70%] lg:h-[70%] text-base py-2">
+            <div className="px-4 xl:h-[70%] lg:h-[70%] text-base py-3">
                 <div className="xl:h-[70%] lg:h-[70%]">{description}</div>
                 <div className="xl:h-[30%] lg:h-[30%]  flex justify-end ">
                     {value === 7 ? (
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer mr-3">
+                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -253,12 +209,12 @@ function CheckListItem(props) {
                                         Ghi nhận tình trạng
                                     </PopoverHeader>
                                     <PopoverBody>
-                                        Số lần : <span>{setSoLan}</span>
+                                        Số lần : <span>{soLan}</span>
                                     </PopoverBody>
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-1 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 md:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo7Open}
                             >
                                 Kiểm tra
@@ -279,21 +235,21 @@ function CheckListItem(props) {
                                     <ModalBody>
                                         <div>
                                             <label
-                                                htmlFor="quantity"
+                                                htmlFor="soLan"
                                                 className="block mb-2 text-md font-medium text-gray-900 "
                                             >
                                                 Số lần
                                             </label>
-                                            <NumberInput
-                                                min={1}
-                                                onChange={handleSoLanOnChange}
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
+                                            <input
+                                                type="text"
+                                                id="soLan"
+                                                className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                onChange={(e) =>
+                                                    handleSoLanOnChange(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
                                         </div>
                                     </ModalBody>
 
@@ -320,7 +276,7 @@ function CheckListItem(props) {
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -344,7 +300,7 @@ function CheckListItem(props) {
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo8Open}
                             >
                                 Kiểm tra
@@ -353,7 +309,6 @@ function CheckListItem(props) {
                                 isOpen={isNo8Open}
                                 isCentered
                                 onClick={onNo8Close}
-                                // className="xl:px-0 lg:px-0 md:px-0 px-4"
                                 size="xs"
                             >
                                 <ModalOverlay />
@@ -366,22 +321,21 @@ function CheckListItem(props) {
                                     <ModalBody>
                                         <div>
                                             <label
-                                                htmlFor="quantity"
+                                                htmlFor="CBL"
                                                 className="block mb-2 text-md font-medium text-gray-900 "
                                             >
                                                 Cảm biến lò
                                             </label>
-                                            <NumberInput
-                                                defaultValue={1}
-                                                min={1}
-                                                onChange={handleCBLOnChange}
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
+                                            <input
+                                                type="text"
+                                                id="CBL"
+                                                className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                onChange={(e) =>
+                                                    handleCBLOnChange(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
                                         </div>
 
                                         <div className="mt-4">
@@ -391,19 +345,16 @@ function CheckListItem(props) {
                                             >
                                                 Đo thực tế
                                             </label>
-                                            <NumberInput
-                                                defaultValue={1}
-                                                min={1}
-                                                onChange={
-                                                    handleDoThucTeOnChange
+                                            <input
+                                                type="text"
+                                                id="doThucTe"
+                                                className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                onChange={(e) =>
+                                                    handleDoThucTeOnChange(
+                                                        e.target.value
+                                                    )
                                                 }
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
+                                            />
                                         </div>
                                     </ModalBody>
 
@@ -430,7 +381,7 @@ function CheckListItem(props) {
                         <>
                             <Popover>
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -441,7 +392,7 @@ function CheckListItem(props) {
                                         Ghi nhận tình trạng
                                     </PopoverHeader>
                                     <PopoverBody>
-                                        <div className="space-y-2">
+                                        {/* <div className="space-y-2">
                                             <div>
                                                 Mẫu 1 : <span>{sample1}</span>
                                             </div>
@@ -457,12 +408,22 @@ function CheckListItem(props) {
                                             <div>
                                                 Mẫu 5 : <span>{sample5}</span>
                                             </div>
+                                        </div> */}
+                                        <div className="space-y-2">
+                                            {Object.entries(samples).map(
+                                                ([key, value], index) => (
+                                                    <div key={key}>
+                                                        Mẫu {index + 1} :{" "}
+                                                        <span>{value}</span>
+                                                    </div>
+                                                )
+                                            )}
                                         </div>
                                     </PopoverBody>
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="h-fit bg-[#3182CE] text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo11Open}
                             >
                                 Kiểm tra
@@ -482,105 +443,29 @@ function CheckListItem(props) {
                                         </div>
                                     </ModalHeader>
                                     <ModalBody className="space-y-4">
-                                        <div>
-                                            <label
-                                                htmlFor="batch_id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Mẫu 1
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="batch_id"
-                                                className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                onChange={(e) =>
-                                                    handleSampleInputChange(
-                                                        1,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="batch_id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Mẫu 2
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="batch_id"
-                                                className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                onChange={(e) =>
-                                                    handleSampleInputChange(
-                                                        2,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="batch_id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Mẫu 3
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="batch_id"
-                                                className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                onChange={(e) =>
-                                                    handleSampleInputChange(
-                                                        3,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="batch_id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Mẫu 4
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="batch_id"
-                                                className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                onChange={(e) =>
-                                                    handleSampleInputChange(
-                                                        4,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label
-                                                htmlFor="batch_id"
-                                                className="block mb-2 text-md font-medium text-gray-900"
-                                            >
-                                                Mẫu 5
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="batch_id"
-                                                className=" border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                onChange={(e) =>
-                                                    handleSampleInputChange(
-                                                        5,
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-                                        </div>
+                                        {Object.entries(samples).map(
+                                            ([key, value], index) => (
+                                                <div key={key}>
+                                                    <label
+                                                        htmlFor={`batch_id_${key}`}
+                                                        className="block mb-2 text-md font-medium text-gray-900"
+                                                    >
+                                                        Mẫu {index + 1}
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id={`batch_id_${key}`}
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                        onChange={(e) =>
+                                                            handleSampleInputChange(
+                                                                key,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        )}
                                     </ModalBody>
 
                                     <ModalFooter className="flex space-x-4">
@@ -606,7 +491,7 @@ function CheckListItem(props) {
                         <>
                             <Popover placement="top">
                                 <PopoverTrigger>
-                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 mr-3">
+                                    <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
                                         Ghi nhận
                                     </button>
                                 </PopoverTrigger>
@@ -618,40 +503,27 @@ function CheckListItem(props) {
                                     </PopoverHeader>
                                     <PopoverBody>
                                         <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
-                                            <div className="space-y-2">
-                                                <div>
-                                                    Quạt 1 : <span>{fanValues.q1}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 2: <span>{fanValues.q2}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 3: <span>{fanValues.q3}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 4: <span>{fanValues.q4}</span>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div>
-                                                    Quạt 5: <span>{fanValues.q5}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 6: <span>{fanValues.q6}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 7: <span>{fanValues.q7}</span>
-                                                </div>
-                                                <div>
-                                                    Quạt 8: <span>{fanValues.q8}</span>
-                                                </div>
-                                            </div>
+                                            {Object.entries(fanValues).map(
+                                                ([key, value]) => (
+                                                    <div
+                                                        key={key}
+                                                        className="space-y-2"
+                                                    >
+                                                        <div>
+                                                            {`Quạt ${key.substring(
+                                                                1
+                                                            )} : `}
+                                                            <span>{value}</span>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
                                         </div>
                                     </PopoverBody>
                                 </PopoverContent>
                             </Popover>
                             <div
-                                className="bg-[#3182CE] text-white h-fit px-4 py-1 rounded-lg my-2 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                className="bg-[#3182CE] text-white h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onNo12Open}
                             >
                                 Kiểm tra
@@ -673,31 +545,25 @@ function CheckListItem(props) {
                                     <ModalBody className="">
                                         <div className="max-h-[420px] overflow-y-scroll pr-5 xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
                                             <div className="space-y-2 my-4">
-                                                {Array.from({ length: 8 }).map(
-                                                    (_, index) => (
-                                                        <div key={index}>
+                                                {Object.entries(fanValues).map(
+                                                    ([key, value]) => (
+                                                        <div key={key}>
                                                             <label
-                                                                htmlFor={`q${
-                                                                    index + 1
-                                                                }`}
+                                                                htmlFor={key}
                                                                 className="block mb-2 text-md font-medium text-gray-900"
                                                             >
-                                                                {`Quạt ${
-                                                                    index + 1
-                                                                }`}
+                                                                {`Quạt ${key.substring(
+                                                                    1
+                                                                )}`}
                                                             </label>
                                                             <input
                                                                 type="text"
-                                                                id={`q${
-                                                                    index + 1
-                                                                }`}
+                                                                id={key}
                                                                 className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                                value={value}
                                                                 onChange={(e) =>
                                                                     handleFanInputChange(
-                                                                        `q${
-                                                                            index +
-                                                                            1
-                                                                        }`,
+                                                                        key,
                                                                         e.target
                                                                             .value
                                                                     )

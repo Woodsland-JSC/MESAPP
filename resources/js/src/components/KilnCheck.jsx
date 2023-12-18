@@ -92,22 +92,53 @@ function KilnCheck() {
     };
 
     return (
-        <div className="bg-white  rounded-xl border-2 border-gray-200 ">
+        <div className="bg-white  rounded-xl border-2 border-gray-300 ">
             <div className="bg-white flex items-center px-6 border-b rounded-t-xl border-gray-200 font-medium py-4">
                 <div className="flex items-center gap-x-3 font-medium">
                     <div className="w-9 h-9">
-                        <HiMiniCheckCircle  className="text-2xl w-[97%] h-full text-[#17506B]"/>
+                        <HiMiniCheckCircle className="text-2xl w-[97%] h-full text-[#17506B]" />
                     </div>
 
                     <div className="xl:text-xl xl:w-full  text-lg">
                         Biên bản kiểm tra lò sấy
                     </div>
-                </div>   
+                </div>
             </div>
 
-            <div className="bg-white rounded-b-xl">
+            <div className="bg-white xl:p-0 lg:p-0 md:p-0 p-4 rounded-b-xl">
                 <div class="relative rounded-b-xl overflow-x-auto">
-                    <table class="w-full  text-left text-gray-500 ">
+                    <div className="xl:hidden lg:hidden md:hidden">
+                        <div
+                            className="rounded-xl bg-green-50 hover:bg-gray-50 cursor-pointer xl:text-base  border border-green-200"
+                            onClick={onOpen}
+                        >
+                            <div className="px-4 py-2.5 flex justify-between items-center border-b border-green-200">
+                                <div className="">
+                                    <span className="text-lg font-semibold">
+                                        #389917
+                                    </span>
+                                </div>
+                                <div className="p-1 px-3 bg-green-200 rounded-xl">
+                                    <span className="font-semibold">
+                                        ĐẠT
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="px-4 divide-y divide-green-200">
+                                <div className="flex justify-between py-2">
+                                    <div className="">Ngày tạo:</div>
+                                    <span className="font-semibold">
+                                        2023-10-12 07:59:28
+                                    </span>
+                                </div>
+                                {/* <div className="flex justify-between py-2">
+                                    <div className="">Tạo bởi:</div>
+                                    <span className="font-semibold">Admin</span>
+                                </div> */}
+                            </div>
+                        </div>
+                    </div>
+                    <table class="w-full xl:inline-table lg:inline-table md:inline-table hidden text-left text-gray-500 ">
                         <thead class="font-semibold xl:text-base text-gray-700 bg-gray-50 ">
                             <tr>
                                 <th
@@ -134,8 +165,12 @@ function KilnCheck() {
                                 ></th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            <tr class="bg-white xl:text-base  border-b">
+                            <tr
+                                class="bg-white xl:text-base border-b "
+                                onClick={onOpen}
+                            >
                                 <th
                                     scope="row"
                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
@@ -146,12 +181,6 @@ function KilnCheck() {
                                     2023-10-12T07:59:28.050Z
                                 </td>
                                 <td class="px-6 py-4">OK</td>
-                                <td
-                                    class="px-6 font-semibold text-[#17506B] cursor-pointer"
-                                    onClick={onOpen}
-                                >
-                                    Xem
-                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -180,9 +209,9 @@ function KilnCheck() {
                         </div>
                         <div className="xl:px-10 grid xl:grid-cols-4 lg:grid-cols-3 gap-6">
                             {/* Hiển thị tất cả giá trị checkItems */}
-                            {checkItems.map((item) => (
+                            {checkItems.map((item, index) => (
                                 <CheckListItem
-                                    value={item.value}
+                                    key={index}
                                     title={item.title}
                                     description={item.description}
                                     onCheckboxChange={handleCheckboxChange}

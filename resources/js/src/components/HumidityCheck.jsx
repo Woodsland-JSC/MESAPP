@@ -351,7 +351,7 @@ function HumidityCheck(props) {
     };
 
     return (
-        <div className="bg-white rounded-xl border-2 border-gray-200">
+        <div className="bg-white rounded-xl border-2 border-gray-300">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 font-medium border-b border-gray-200">
                 <div className="flex items-center gap-x-3">
@@ -804,7 +804,7 @@ function HumidityCheck(props) {
             </Modal>
 
             <div class="bg-white xl:p-0 lg:p-0 md:p-0 p-4 relative rounded-b-xl max-h-[35rem] overflow-y-auto ">
-                <div class="xl:hidden lg:hidden md:hidden  ">
+                <div class="xl:hidden lg:hidden md:hidden">
                     {recordsList.length > 0 ? (
                         <div className="space-y-4">
                             {Array.isArray(recordsList) &&

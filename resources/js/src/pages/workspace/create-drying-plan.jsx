@@ -402,15 +402,15 @@ function CreateDryingPlan() {
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <div className="flex justify-end gap-x-3 mt-4">
+                                <div className="flex xl:justify-end lg:justify-end md:justify-end gap-x-3 mt-3">
                                     <button
                                         onClick={onClose}
-                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                        className=" bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                     >
                                         Đóng
                                     </button>
                                     <button
-                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                        className="w-full bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                         onClick={handleCompletion}
                                     >
                                         {isLoading ? (
@@ -419,7 +419,7 @@ function CreateDryingPlan() {
                                                     size="sm"
                                                     color="white"
                                                 />
-                                                <div>Đang tải...</div>
+                                                <div>Đang tải</div>
                                             </div>
                                         ) : (
                                             "Hoàn thành"

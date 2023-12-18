@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class QCHandle extends Model
 {
     use HasFactory;
-    protected $table = 'QCHandle';
+    protected $table = 'QChandle';
     protected $fillable = [
         'name',
         'type'

@@ -574,4 +574,5 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
+
 }

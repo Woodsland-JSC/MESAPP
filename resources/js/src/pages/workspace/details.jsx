@@ -35,109 +35,6 @@ function Details() {
 
     const [loading, setLoading] = useState(true);
 
-    const [disabledReports, setDisabledReports] = useState([
-        {
-            id: 106295,
-            createdDate: "2023-10-12T07:59:28.050Z",
-            avgDisabledRate: 12.25,
-            avgCurvedRate: 50,
-            dryingBatch: "2023.45.01",
-            factory: "Bla bla",
-            disabledDetails: [
-                {
-                    id: 1,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 2,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 3,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 4,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-            ],
-        },
-        {
-            id: 106296,
-            createdDate: "2023-10-12T07:59:28.050Z",
-            avgDisabledRate: 12.25,
-            avgCurvedRate: 50,
-            dryingBatch: "2023.45.01",
-            factory: "Bla bla",
-            disabledDetails: [
-                {
-                    id: 1,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 2,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 3,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-                {
-                    id: 4,
-                    pallet: 10,
-                    sample: 5,
-                    disability: 2,
-                    curve: 1,
-                    disabledRate: 60,
-                    curvedRate: 20,
-                    note: "This is test",
-                },
-            ],
-        },
-    ]);
-
     const goBack = () => {
         navigate(-1);
     };
@@ -208,14 +105,11 @@ function Details() {
                                         thickness={BOWData.Method}
                                         finishedDate={
                                             BOWData?.Time && BOWData?.created_at
-                                                ?
-                                                  moment(
-                                                    BOWData.created_at
-                                                )
-                                                    .add(BOWData.Time, "days")
-                                                    .format(
-                                                        "YYYY-MM-DD HH:mm:ss"
-                                                    )
+                                                ? moment(BOWData.created_at)
+                                                      .add(BOWData.Time, "days")
+                                                      .format(
+                                                          "YYYY-MM-DD HH:mm:ss"
+                                                      )
                                                 : "Invalid Date"
                                         }
                                         palletQty={BOWData.TotalPallet}
@@ -256,7 +150,7 @@ function Details() {
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <SizeCard 
+                                                <SizeCard
                                                     planID={BOWData.PlanID}
                                                     reload={reload}
                                                 />
@@ -272,21 +166,24 @@ function Details() {
                                                 <ControllerCard
                                                     progress="kt"
                                                     planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
                                                     status={BOWData.Status}
                                                     onReload={setReload}
                                                 />
                                             </Skeleton>
+                                            {BOWData.Checked === 1 ? (
+                                                <Skeleton
+                                                    isLoaded={!loading}
+                                                    borderRadius="2xl"
+                                                >
+                                                    <KilnCheck />
+                                                </Skeleton>
+                                            ) : null}
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <KilnCheck />
-                                            </Skeleton>
-                                            <Skeleton
-                                                isLoaded={!loading}
-                                                borderRadius="2xl"
-                                            >
-                                                <SizeCard 
+                                                <SizeCard
                                                     planID={BOWData.PlanID}
                                                     reload={reload}
                                                 />
@@ -305,18 +202,19 @@ function Details() {
                                                     status={BOWData.Status}
                                                 />
                                             </Skeleton>
+                                            {BOWData.Checked === 1 ? (
+                                                <Skeleton
+                                                    isLoaded={!loading}
+                                                    borderRadius="2xl"
+                                                >
+                                                    <KilnCheck />
+                                                </Skeleton>
+                                            ) : null}
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <KilnCheck />
-                                            </Skeleton>
-                                            <Skeleton
-                                                isLoaded={!loading}
-                                                borderRadius="2xl"
-                                
-                                            >
-                                                <SizeCard 
+                                                <SizeCard
                                                     planID={BOWData.PlanID}
                                                 />
                                             </Skeleton>
@@ -335,20 +233,20 @@ function Details() {
                                                     isReviewed={BOWData.Review}
                                                 />
                                             </Skeleton>
+                                                <Skeleton
+                                                    isLoaded={!loading}
+                                                    borderRadius="2xl"
+                                                >
+                                                    <KilnCheck />
+                                                </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <KilnCheck />
-                                            </Skeleton>
-                                            <Skeleton
-                                                isLoaded={!loading}
-                                                borderRadius="2xl"
-                                            >
-                                                <HumidityCheck 
-                                                    reason={BOWData.Reason} 
-                                                    oven={BOWData.Oven} 
-                                                    code={BOWData.Code} 
+                                                <HumidityCheck
+                                                    reason={BOWData.Reason}
+                                                    oven={BOWData.Oven}
+                                                    code={BOWData.Code}
                                                     planID={BOWData.PlanID}
                                                 />
                                             </Skeleton>
@@ -358,8 +256,8 @@ function Details() {
                                             >
                                                 <DisabledCheck
                                                     planID={BOWData.PlanID}
-                                                    reason={BOWData.Reason} 
-                                                    oven={BOWData.Oven} 
+                                                    reason={BOWData.Reason}
+                                                    oven={BOWData.Oven}
                                                     code={BOWData.Code}
                                                     disabilityList={
                                                         disabledReports
@@ -375,7 +273,7 @@ function Details() {
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
-                                                <SizeCard 
+                                                <SizeCard
                                                     planID={BOWData.PlanID}
                                                 />
                                             </Skeleton>
