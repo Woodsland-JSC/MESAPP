@@ -57,7 +57,31 @@ class ProductionController extends Controller
         }
         $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty','CDay','CRong','CDai','Team','NexTeam','Type']);
         $SLData['create_by'] = Auth::user()->id;
-        $Allocate = SanLuong::create($SLData);
+        $SanLuong = SanLuong::create($SLData);
+        if($request->CompleQty>0)
+        {
+            $notifi = notireceipt::create([
+                'text'=>'Số lượng đã giao chờ SX xác nhận',
+                'Quantity'=> $request->CompleQty,
+                'baseID'=>  $SanLuong->id,
+                'SPDich'=> $request->FatherCode,
+                'team' => $request->NexTeam,
+                'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
+                'type'=>0
+            ]);
+
+        }
+        if($request->RejectQty>0)
+        {  $notifi = notireceipt::create([
+            'text'=>'Số lượng đã giao chờ SX xác nhận',
+                'Quantity'=> $request->CompleQty,
+                'baseID'=>  $SanLuong->id,
+                'SPDich'=> $request->FatherCode,
+                'team' => $request->NexTeam,
+                'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
+                'type'=>1
+            ]);
+        }
         // notireceipt::Create([
         //     'baseID' => $Allocate->id,
         //     'text' => 'Số lượng đã giao chờ SX xác nhận',

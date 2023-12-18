@@ -17,7 +17,9 @@ class notireceipt extends Model
         'baseID',
         'SPDich',
         'QuyCach',
-        'LyDo'
+        'LyDo',
+        'team',
+        ''
     ];
     public function getCreatedAtAttribute($value)
     {
