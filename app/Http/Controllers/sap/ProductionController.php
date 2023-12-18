@@ -11,7 +11,7 @@ use App\Jobs\receiptProductionAlocate;
 use App\Models\SanLuong;
 use App\Models\notireceipt;
 use Illuminate\Support\Facades\Redis;
-
+use Illuminate\Database\QueryException;
 class ProductionController extends Controller
 {
     //// -99 là xóa data
@@ -55,76 +55,43 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty','CDay','CRong','CDai','Team','NexTeam','Type']);
-        $SLData['create_by'] = Auth::user()->id;
-        $SanLuong = SanLuong::create($SLData);
-        if($request->CompleQty>0)
-        {
-            $notifi = notireceipt::create([
+        try {
+            DB::beginTransaction();
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty','CDay','CRong','CDai','Team','NexTeam','Type']);
+            $SLData['create_by'] = Auth::user()->id;
+            $SanLuong = SanLuong::create($SLData);
+            if($request->CompleQty>0)
+            {
+                $notifi = notireceipt::create([
+                    'text'=>'Số lượng đã giao chờ SX xác nhận',
+                    'Quantity'=> $request->CompleQty,
+                    'baseID'=>  $SanLuong->id,
+                    'SPDich'=> $request->FatherCode,
+                    'team' => $request->NexTeam,
+                    'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
+                    'type'=>0
+                ]);
+
+            }
+            if($request->RejectQty>0)
+            {  $notifi = notireceipt::create([
                 'text'=>'Số lượng đã giao chờ SX xác nhận',
-                'Quantity'=> $request->CompleQty,
-                'baseID'=>  $SanLuong->id,
-                'SPDich'=> $request->FatherCode,
-                'team' => $request->NexTeam,
-                'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
-                'type'=>0
-            ]);
+                    'Quantity'=> $request->RejectQty,
+                    'baseID'=>  $SanLuong->id,
+                    'SPDich'=> $request->FatherCode,
+                    'team' => $request->NexTeam,
+                    'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
+                    'type'=>1
+                ]);
+            }
+            DB::commit();
+
+        } catch (\Exception | QueryException $e){
+            DB::rollBack();
+            return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
 
         }
-        if($request->RejectQty>0)
-        {  $notifi = notireceipt::create([
-            'text'=>'Số lượng đã giao chờ SX xác nhận',
-                'Quantity'=> $request->CompleQty,
-                'baseID'=>  $SanLuong->id,
-                'SPDich'=> $request->FatherCode,
-                'team' => $request->NexTeam,
-                'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
-                'type'=>1
-            ]);
-        }
-        // notireceipt::Create([
-        //     'baseID' => $Allocate->id,
-        //     'text' => 'Số lượng đã giao chờ SX xác nhận',
-        //     'Quantity' => $request->SLD,
-        //     'QuyCach' =>  $request->QUYCACH,
-        //     'SPDich' => $request->SPDich,
 
-        // ]);
-        // //  ;
-        // if ($request->SLL > 0) {
-        //     // cần xử lý thêm phân get kho theo nhà máy
-        //     $body =
-        //         [
-        //             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-        //             "U_LSX" => $request->SPDich,
-        //             "DocumentLines" => [
-        //                 [
-        //                     "ItemCode" => $request->ItemCode,
-        //                     "Quantity" => $request->SLL,
-        //                     "BaseLine" => 0,
-        //                     "WarehouseCode" => 'W07.1.01',
-        //                     "BatchNumbers" => [
-        //                         "BatchNumber" => now()->format('YmdHMI'),
-        //                         "Quantity" => $request->SLL,
-        //                         "ItemCode" =>  $request->ItemCode,
-        //                         "U_Status" => "HL"
-
-        //                     ],
-
-        //                 ],
-        //             ],
-        //         ];
-
-        //     $record =  AllocateLogs::create([
-        //         'ItemCode' => $request->ItemCode,
-        //         'Qty' => $request->SLL,
-        //         'Body' => json_encode($body),
-        //         'Type' => "59",
-        //         'Stautus' => -1,
-        //         'Factorys' =>  $request->Factory
-        //     ]);
-        //     receiptProductionAlocate::dispatch($body, $record->id);
-        // }
 
 
         return response()->json([
