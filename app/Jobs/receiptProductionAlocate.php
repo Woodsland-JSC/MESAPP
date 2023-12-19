@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
-use App\Models\AllocateLogs;
+use App\Models\SanLuong;
 
 class receiptProductionAlocate implements ShouldQueue
 {
@@ -20,10 +20,12 @@ class receiptProductionAlocate implements ShouldQueue
      */
     protected $body;
     protected $id;
-    public function __construct($body, $id)
+    protected $type;
+    public function __construct($body, $id,$type)
     {
         $this->body = $body;
         $this->id = $id;
+        $this->type = $type;
     }
 
     /**
@@ -40,10 +42,10 @@ class receiptProductionAlocate implements ShouldQueue
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $this->body);
         if ($response->successful()) {
             $res = $response->json();
-            AllocateLogs::where('id', $this->id)->update(
+            SanLuong::where('id', $this->id)->update(
                 [
                     'Status' => 1,
-                    'DocNum' => $res['DocNum'],
+                    'ObjType' =>   $this->type,
                     'DocEntry' => $res['DocEntry']
                 ]
             );

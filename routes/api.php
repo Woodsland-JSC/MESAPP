@@ -103,6 +103,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('remove-receipt', [ProductionController::class, 'delete']);
         Route::post('/accept-receipts', [ProductionController::class, 'accept']);
         Route::post('/reject-receipts', [ProductionController::class, 'reject']);
+        Route::get('/danh-sach-phoi-cho-nhan', [ProductionController::class, 'dsphoipending']);
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');

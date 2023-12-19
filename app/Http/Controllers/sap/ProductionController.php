@@ -12,6 +12,7 @@ use App\Models\SanLuong;
 use App\Models\notireceipt;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Database\QueryException;
+
 class ProductionController extends Controller
 {
 
@@ -34,39 +35,35 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty','CDay','CRong','CDai','Team','NexTeam','Type']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'NexTeam', 'Type']);
             $SLData['create_by'] = Auth::user()->id;
             $SanLuong = SanLuong::create($SLData);
-            if($request->CompleQty>0)
-            {
+            if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
-                    'text'=>'Số lượng đã giao chờ xác nhận',
-                    'Quantity'=> $request->CompleQty,
-                    'baseID'=>  $SanLuong->id,
-                    'SPDich'=> $request->FatherCode,
+                    'text' => 'Số lượng đã giao chờ xác nhận',
+                    'Quantity' => $request->CompleQty,
+                    'baseID' =>  $SanLuong->id,
+                    'SPDich' => $request->FatherCode,
                     'team' => $request->NexTeam,
-                    'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
-                    'type'=>0
+                    'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
+                    'type' => 0
                 ]);
-
             }
-            if($request->RejectQty>0)
-            {  $notifi = notireceipt::create([
-                'text'=>'Số lượng lỗi xác nhận',
-                    'Quantity'=> $request->RejectQty,
-                    'baseID'=>  $SanLuong->id,
-                    'SPDich'=> $request->FatherCode,
+            if ($request->RejectQty > 0) {
+                $notifi = notireceipt::create([
+                    'text' => 'Số lượng lỗi xác nhận',
+                    'Quantity' => $request->RejectQty,
+                    'baseID' =>  $SanLuong->id,
+                    'SPDich' => $request->FatherCode,
                     'team' => $request->NexTeam,
-                    'QuyCach'=>$request->CDay."*".$request->CRong."*".$request->CDai,
-                    'type'=>1
+                    'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
+                    'type' => 1
                 ]);
             }
             DB::commit();
-
-        } catch (\Exception | QueryException $e){
+        } catch (\Exception | QueryException $e) {
             DB::rollBack();
             return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
-
         }
 
 
@@ -154,26 +151,113 @@ class ProductionController extends Controller
                 ]);
             }
         }
+        // collect stock pending
+        $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
+            ->where('notireceipt.type', 0)
+            ->where('sanluong.Team', $request->TO)
+            ->where('sanluong.Status', '!=', 1)
+            ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
+            ->select(
+                'sanluong.FatherCode',
+                'sanluong.ItemCode',
+                'sanluong.Team',
+                'sanluong.NexTeam',
+                DB::raw('sum(Quantity) as Quantity')
+            )
 
+
+            ->get();
+        if ($stockpending !== null) {
+            foreach ($results as &$result) {
+
+                $SPDICH = $result['SPDICH'];
+                foreach ($result['Details'] as &$details) {
+                    $ItemChild = $details['ItemChild'];
+                    $TO = $details['TO'];
+
+                    // Find the corresponding stock pending entry
+                    $stockEntry = $stockpending->first(function ($entry) use ($SPDICH, $ItemChild, $TO) {
+                        return $entry['FatherCode'] == $SPDICH && $entry['ItemCode'] == $ItemChild && $entry['Team'] == $TO;
+                    });
+
+                    // Update totalConLai if the stock entry is found
+                    if ($stockEntry !== null) {
+                        $details['totalConLai'] = $details['totalConLai'] - $stockEntry['Quantity'];
+                    }
+                }
+            }
+        }
         odbc_close($conDB);
 
         // Reset array keys to consecutive integers
-          // lấy dữ liệu chưa confirm
-       $notfication= DB::table('sanluong as a')
-       ->join('notireceipt as b', function ($join) {
-           $join->on('a.id', '=', 'b.baseID')
-               ->where('b.deleted', '=', 0);
-       })
-       ->join('users as c', 'a.create_by', '=', 'c.id')
-       ->select('a.FatherCode', 'a.team', 'CDay', 'CRong', 'CDai', 'b.Quantity', 'a.created_at', 'c.first_name',
-       'c.last_name', 'b.text','b.id','b.type','b.confirm')
-       ->where('b.confirm', '=', 0)
-       ->where('a.NexTeam', '=',$request->Team)
-       ->get();
-
-        return response()->json(['data'=>$results,'notification'=>$notfication], 200);
-
-
+        // lấy dữ liệu chưa confirm
+        $notfication = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'b.*'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('a.Team', '=', $request->TO)
+            ->get();
+        //data need confirm
+        $data =
+            DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', 0)
+            ->where('a.NexTeam', '=', $request->TO)
+            ->get();
+        //data need handle
+        $data2
+            = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', 1)
+            ->where('a.NexTeam', '=', $request->TO)
+            ->get();
+        return response()->json(['data' => $results, 'notification' => $notfication, 'phoixacnhan' => $data, 'phoixuly' => $data2], 200);
     }
     function viewdetail(Request $request)
     {
@@ -201,24 +285,39 @@ class ProductionController extends Controller
             ],
         ];
         // lấy dữ liệu chưa confirm
-       $notfication= DB::table('sanluong as a')
-        ->join('notireceipt as b', function ($join) {
-            $join->on('a.id', '=', 'b.baseID')
-                ->where('b.deleted', '=', 0);
-        })
-        ->join('users as c', 'a.create_by', '=', 'c.id')
-        ->select('a.FatherCode', 'a.team', 'CDay', 'CRong', 'CDai', 'b.Quantity', 'a.created_at', 'c.first_name',
-        'c.last_name', 'b.text','b.id','b.type','b.confirm')
-        ->where('b.confirm', '!=', 1)
-        ->where('a.FatherCode', '=', $request->FatherCode)
-        ->where('a.ItemCode', '=',$request->ItemCode)
-        ->where('a.Team', '=',$request->Team)
-        ->get();
+        $notfication = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '!=', 1)
+            ->where('a.FatherCode', '=', $request->FatherCode)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->Team)
+            ->get();
 
         return response()->json([
             //'Data' => $results, 'SLPHOIDANHAN' => $data,
             'Factorys' => $factory,
-            'notifications' => $notfication
+            'notifications' => $notfication,
+            'maxQuantity' => 1000,
+            'remainQty' => 500
         ], 200);
     }
     function listo(Request $request)
@@ -243,29 +342,6 @@ class ProductionController extends Controller
         odbc_close($conDB);
         return response()->json($results, 200);
     }
-    function SLPhoiNhan($itemCode)
-    {
-        $conDB = (new ConnectController)->connect_sap();
-        $query = 'select b."Code",C."ItemName",0 "Quantity"
-                from OITT A JOIN ITT1 B on a."Code"=b."Father"
-                JOIN OITM C ON B."Code"=c."ItemCode"
-                where a."Code"=?';
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        if (!odbc_execute($stmt, [$itemCode])) {
-            // Handle execution error
-            // die("Error executing SQL statement: " . odbc_errormsg());
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
-        $results = array();
-
-        while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
-        };
-        return $results;
-    }
     function reject(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -275,41 +351,20 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data = DB::table('AllocateLogs AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+        $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
             ->select('b.*')
             ->where('a.id', $request->id)
-            ->where('b.Status', -1)
+            ->where('b.Status', 0)
+            ->where('a.type', 0)
+            ->where('a.confirm', 0)
             ->first();
+
         if (!$data) {
-            throw new \Exception('Lò không hợp lệ.');
+            throw new \Exception('data không hợp lệ.');
         }
-        // cần xử lý thêm phân get kho theo nhà máy
-        $body =
-            [
-                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "ItemCode" => $request->ItemCode,
-                "DocumentLines" => [
-                    [
-                        "Quantity" => $request->ItemCode,
-                        "BaseLine" => 0,
-                        "WarehouseCode" => 'W07.1.01',
-                        "BatchNumbers" => [
-                            "BatchNumber" => now()->format('YmdHMI'),
-                            "Quantity" => $request->SLL,
-                            "ItemCode" =>  $request->ItemCode,
-                            "U_Status" => "HL"
-                        ],
-                    ],
-                ],
-            ];
-        receiptProductionAlocate::dispatch($body);
-        AllocateLogs::where()->update([
-            'ItemCode' => $request->ItemCode,
-            'Qty' => $request->SLL,
-            'Body' => json_encode($body),
-            'Type' => "59",
-            'Stautus' => 1
-        ]);
+        SanLuong::where('id', $data->id)->update(['Status' => 1]);
+        notireceipt::where('id', $request->id)->update(['confirm' => 3, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+        return response()->json('success', 200);
     }
 
     function accept(Request $request)
@@ -320,16 +375,18 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data = DB::table('AllocateLogs AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-            ->select('b.*')
+        $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+            ->select('b.*', 'a.id as notiID')
             ->where('a.id', $request->id)
-            ->where('b.Status', -1)
+            ->where('b.Status', 0)
+            ->where('a.type', 0)
+            ->where('a.confirm', 0)
             ->first();
         if (!$data) {
-            throw new \Exception('Lò không hợp lệ.');
+            throw new \Exception('data không hợp lệ.');
         }
-        $dataallocate = $this->collectdata($data->SPDich, $data->ItemCode);
-        $allocates = $this->allocate($dataallocate, $data->Qty);
+        $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+        $allocates = $this->allocate($dataallocate, $data->CompleQty);
 
         foreach ($allocates as $allocate) {
 
@@ -338,14 +395,14 @@ class ProductionController extends Controller
                 "DocumentLines" => [
                     "Quantity" => $allocate['Allocate'],
                     "BaseLine" => 0,
-                    "WarehouseCode" => $allocate['Warehouse'],
+                    //"WarehouseCode" => $allocate['Warehouse'],
                     "BaseEntry" => $allocate['DocEntry'],
                     "BaseType" => 202,
                     "BatchNumbers" => [
                         [
                             "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
                             "Quantity" => $allocate['Allocate'],
-                            "ItemCode" =>  $allocate['ItemCode'],
+                            "ItemCode" =>  $allocate['ItemChild'],
                             "U_CDai" => $allocate['CDai'],
                             "U_CRong" => $allocate['CRong'],
                             "U_CDay" => $allocate['CDay'],
@@ -355,23 +412,35 @@ class ProductionController extends Controller
                 ]
             ];
 
-            receiptProductionAlocate::dispatch($body, $data->id);
+            receiptProductionAlocate::dispatch($body, $data->id, 202);
         }
-        AllocateLogs::where('id', $data->id)->update(['Status' => 0]);
+        SanLuong::where('id', $data->id)->update(['Status' => -1]);
+        notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
         return response()->json('success', 200);
+    }
+    function dsphoipending(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'team' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $data = notireceipt::where('team', $request->team)->where('confirm', 0)->get();
+        return response()->json($data, 200);
     }
     function delete(Request $request)
     {
     }
-    function collectdata($spdich, $item)
+    function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from uv_detailreceipt where "SanPhamDich"=? and "ItemCode"=? order by "DocEntry" asc';
+        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "DocEntry" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [$spdich, $item])) {
+        if (!odbc_execute($stmt, [$spdich, $item, $to])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -389,14 +458,14 @@ class ProductionController extends Controller
         foreach ($data as &$item) {
             // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
             if (
-                isset($item['totalProcessing']) && $item['totalProcessing'] <= $totalQty
+                isset($item['ConLai']) && $item['ConLai'] <= $totalQty
             ) {
-                $item['Allocate'] = $item['totalProcessing'];
-                $totalQty -= $item['totalProcessing'];
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
             } else {
                 // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
-                if ($item['totalProcessing'] > 0) {
-                    $item['Allocate'] = min($item['totalProcessing'], $totalQty);
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
                     $totalQty -= $item['Allocate'];
                 } else {
                     $item['Allocate'] = 0;
