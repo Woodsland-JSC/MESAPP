@@ -168,8 +168,6 @@ class ProductionController extends Controller
        ->select('a.FatherCode', 'a.team', 'CDay', 'CRong', 'CDai', 'b.Quantity', 'a.created_at', 'c.first_name',
        'c.last_name', 'b.text','b.id','b.type','b.confirm')
        ->where('b.confirm', '=', 0)
-       ->where('a.FatherCode', '=', $request->FatherCode)
-       ->where('a.ItemCode', '=',$request->ItemCode)
        ->where('a.NexTeam', '=',$request->Team)
        ->get();
 
