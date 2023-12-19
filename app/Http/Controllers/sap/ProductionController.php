@@ -55,7 +55,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
-                    'team' => $request->NexTeam,
+                    'team' => 'QC',
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1
                 ]);
@@ -255,7 +255,7 @@ class ProductionController extends Controller
             )
             ->where('b.confirm', '=', 0)
             ->where('b.type', 1)
-            ->where('a.NexTeam', '=', $request->TO)
+            ->where('b.team', '=', $request->TO)
             ->get();
         return response()->json(['data' => $results, 'notification' => $notfication, 'phoixacnhan' => $data, 'phoixuly' => $data2], 200);
     }
