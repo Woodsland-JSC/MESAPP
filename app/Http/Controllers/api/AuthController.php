@@ -22,13 +22,17 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'email' => 'email|required',
+                'email' => 'required',
                 'password' => 'required'
             ]);
             if ($validator->fails()) {
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
-            $credentials = request(['email', 'password']);
+            $loginField = filter_var($request->input('email'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+            $credentials = [
+                $loginField => $request->input('email'),
+                'password' => $request->input('password'),
+            ];
 
             if (!Auth::attempt($credentials)) {
                 return response()->json([
@@ -38,7 +42,7 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::where('email', $request->email)->first();
+            $user = Auth::user();
             $permissions = $user->roles->flatMap->permissions->pluck('name')->unique()->toArray();
             if (!Hash::check($request->password, $user->password, [])) {
                 throw new \Exception('Error in Login');
@@ -62,7 +66,7 @@ class AuthController extends Controller
             if ($user->avatar) {
                 $user->avatar = asset('storage/' . $user->avatar);
             }
-            
+
             /*
                 @Responses
             */
