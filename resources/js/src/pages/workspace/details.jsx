@@ -31,6 +31,31 @@ function Details() {
     // State
     const [BOWData, setBOWData] = useState([]);
     const [humidData, setHumidData] = useState([]);
+    const [checkData, setCheckData] = useState({
+        SoLan: "",
+        CBL: "",
+        DoThucTe: "",
+        DateChecked: "",
+        NoCheck: "",
+    });
+    const [checkboxData, setCheckboxData] = useState({
+        CT1: 0,
+        CT2: 0,
+        CT3: 0,
+        CT4: 0,
+        CT5: 0,
+        CT6: 0,
+        CT7: 0,
+        CT8: 0,
+        CT9: 0,
+        CT10: 0,
+        CT11: 0,
+        CT12: 0,
+    });
+    const [CT11Data, setCT11Data] = useState([]);
+    const [CT12Data, setCT12Data] = useState([]);
+    const [palletData, setPalletData] = useState([]);
+    
     const [reload, setReload] = useState(false);
 
     const [loading, setLoading] = useState(true);
@@ -46,6 +71,30 @@ function Details() {
                 console.log("Dữ liệu từ API:", response);
 
                 setBOWData(response.plandrying);
+                setCheckboxData({
+                    CT1: response.plandrying.CT1 || 0,
+                    CT2: response.plandrying.CT2 || 0,
+                    CT3: response.plandrying.CT3 || 0,
+                    CT4: response.plandrying.CT4 || 0,
+                    CT5: response.plandrying.CT5 || 0,
+                    CT6: response.plandrying.CT6 || 0,
+                    CT7: response.plandrying.CT7 || 0,
+                    CT8: response.plandrying.CT8 || 0,
+                    CT9: response.plandrying.CT9 || 0,
+                    CT10: response.plandrying.CT10 || 0,
+                    CT11: response.plandrying.CT11 || 0,
+                    CT12: response.plandrying.CT12 || 0,
+                })
+                setCheckData({
+                    SoLan: response.plandrying.SoLan,
+                    CBL: response.plandrying.CBL,
+                    DoThucTe: response.plandrying.DoThucTe,
+                    DateChecked: response.plandrying.DateChecked,
+                    NoCheck: response.plandrying.NoCheck,
+                });
+                setPalletData(response.plandrying.details);
+                setCT11Data(response.CT11Detail[0]);
+                setCT12Data(response.CT12Detail[0]);
                 setHumidData(response.Humidity);
             })
             .catch((error) => {
@@ -55,6 +104,44 @@ function Details() {
                 setLoading(false);
             });
     }, []);
+
+    const updateData = async () => {
+        palletsApi
+        .getBOWById(id)
+        .then((response) => {
+            console.log("Dữ liệu từ API:", response);
+
+            setBOWData(response.plandrying);
+            setCheckboxData({
+                CT1: response.plandrying.CT1 || 0,
+                CT2: response.plandrying.CT2 || 0,
+                CT3: response.plandrying.CT3 || 0,
+                CT4: response.plandrying.CT4 || 0,
+                CT5: response.plandrying.CT5 || 0,
+                CT6: response.plandrying.CT6 || 0,
+                CT7: response.plandrying.CT7 || 0,
+                CT8: response.plandrying.CT8 || 0,
+                CT9: response.plandrying.CT9 || 0,
+                CT10: response.plandrying.CT10 || 0,
+                CT11: response.plandrying.CT11 || 0,
+                CT12: response.plandrying.CT12 || 0,
+            })
+            setCheckData({
+                SoLan: response.plandrying.SoLan,
+                CBL: response.plandrying.CBL,
+                DoThucTe: response.plandrying.DoThucTe,
+                DateChecked: response.plandrying.DateChecked,
+                NoCheck: response.plandrying.NoCheck,
+            });
+            setPalletData(response.plandrying.details);
+            setCT11Data(response.CT11Detail[0]);
+            setCT12Data(response.CT12Detail[0]);
+            setHumidData(response.Humidity);
+        })
+        .catch((error) => {
+            console.error("Lỗi khi gọi API:", error);
+        })
+    };
 
     // return id ? (
     return (
@@ -76,13 +163,15 @@ function Details() {
                                 isLoaded={!loading}
                                 mt="4"
                                 noOfLines={2}
+                                width="470px"
                                 spacing="4"
                                 skeletonHeight="5"
                                 borderRadius="lg"
                             >
                                 <div>
-                                    <div className="xl:text-2xl text-xl font-bold text-[#17506B] ">
-                                        Chi tiết mẻ sấy:{" "}
+                                    <div className="xl:text-2xl text-2xl font-bold text-[#17506B] ">
+                                        <div className="xl:inline-block lg:inline-block md:inline-block hidden">Chi tiết mẻ sấy:</div>
+                                        <div className="xl:hidden lg:hidden md:hidden inline-block">Mẻ sấy:</div>{" "}
                                         <span>{BOWData.Code}</span>{" "}
                                     </div>
 
@@ -144,6 +233,7 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
                                                     onReload={setReload}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -153,6 +243,7 @@ function Details() {
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
                                                     reload={reload}
+                                                    palletData={palletData}
                                                 />
                                             </Skeleton>
                                         </div>
@@ -169,16 +260,21 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
                                                     onReload={setReload}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
-                                            {BOWData.Checked === 1 ? (
                                                 <Skeleton
                                                     isLoaded={!loading}
                                                     borderRadius="2xl"
                                                 >
-                                                    <KilnCheck />
+                                                    <KilnCheck 
+                                                        Checked={BOWData.Checked}
+                                                        checkData={checkData}
+                                                        checkboxData={checkboxData}
+                                                        CT11Data={CT11Data}
+                                                        CT12Data={CT12Data}                                              
+                                                    />
                                                 </Skeleton>
-                                            ) : null}
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
@@ -186,6 +282,7 @@ function Details() {
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
                                                     reload={reload}
+                                                    palletData={palletData}
                                                 />
                                             </Skeleton>
                                         </div>
@@ -199,23 +296,30 @@ function Details() {
                                                 <ControllerCard
                                                     progress="ls"
                                                     planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
                                                     status={BOWData.Status}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
-                                            {BOWData.Checked === 1 ? (
                                                 <Skeleton
                                                     isLoaded={!loading}
                                                     borderRadius="2xl"
                                                 >
-                                                    <KilnCheck />
+                                                    <KilnCheck 
+                                                        Checked={BOWData.Checked}
+                                                        checkData={checkData}
+                                                        checkboxData={checkboxData}
+                                                        CT11Data={CT11Data}
+                                                        CT12Data={CT12Data}
+                                                    />
                                                 </Skeleton>
-                                            ) : null}
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
                                             >
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
+                                                    palletData={palletData}
                                                 />
                                             </Skeleton>
                                         </div>
@@ -229,15 +333,23 @@ function Details() {
                                                 <ControllerCard
                                                     progress="dg"
                                                     planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
                                                     status={BOWData.Status}
                                                     isReviewed={BOWData.Review}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
                                                 <Skeleton
                                                     isLoaded={!loading}
                                                     borderRadius="2xl"
                                                 >
-                                                    <KilnCheck />
+                                                    <KilnCheck 
+                                                        Checked={BOWData.Checked}
+                                                        checkData={checkData}
+                                                        checkboxData={checkboxData}
+                                                        CT11Data={CT11Data}
+                                                        CT12Data={CT12Data}
+                                                    />
                                                 </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
@@ -259,9 +371,6 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     oven={BOWData.Oven}
                                                     code={BOWData.Code}
-                                                    disabilityList={
-                                                        disabledReports
-                                                    }
                                                     generalInfo={{
                                                         dryingBatch:
                                                             "2023.45.01",
@@ -275,6 +384,7 @@ function Details() {
                                             >
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
+                                                    palletData={palletData}
                                                 />
                                             </Skeleton>
                                         </div>

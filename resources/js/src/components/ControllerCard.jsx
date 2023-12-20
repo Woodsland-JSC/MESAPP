@@ -107,7 +107,7 @@ const checkItems = [
 ];
 
 function ControllerCard(props) {
-    const { progress, status, isChecked, isReviewed, reason, planID, onReload } = props;
+    const { progress, status, isChecked, isReviewed, reason, planID, onReload, onCallback } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -122,8 +122,6 @@ function ControllerCard(props) {
     } = useDisclosure();
 
     let navigate = useNavigate();
-
-    // console.log("Plan ID: ", planID);
 
     // State
     const [palletData, setPalletData] = useState([]);
@@ -147,7 +145,46 @@ function ControllerCard(props) {
 
     const [BOWData, setBOWData] = useState([]);
 
+    // System Data
+    const [fixedStates, setFixedStates] = useState({
+        CT1: 0,
+        CT2: 0,
+        CT3: 0,
+        CT4: 0,
+        CT5: 0,
+        CT6: 0,
+        CT7: 0,
+        CT8: 0,
+        CT9: 0,
+        CT10: 0,
+        CT11: 0,
+        CT12: 0,
+    });
 
+    const [fixedSoLan, setFixedSoLan] = useState("");
+    const [fixedCBL, setFixedCBL] = useState("");
+    const [fixedDoThucTe, setFixedDoThucTe] = useState("");
+
+    const [fixedSamples, setFixedSamples] = useState({
+        M1: "",
+        M2: "",
+        M3: "",
+        M4: "",
+        M5: "",
+      });
+
+      const [fixedFanValues, setFixedFanValues] = useState({
+        Q1: "",
+        Q2: "",
+        Q3: "",
+        Q4: "",
+        Q5: "",
+        Q6: "",
+        Q7: "",
+        Q8: "",
+    });
+
+    //User Data 
     const [checkboxStates, setCheckboxStates] = useState({
         CT1: 0,
         CT2: 0,
@@ -173,7 +210,6 @@ function ControllerCard(props) {
         M3: "",
         M4: "",
         M5: "",
-        M6: "",
       });
 
       const [fanValues, setFanValues] = useState({
@@ -230,13 +266,71 @@ function ControllerCard(props) {
     useEffect(() => {
         loadPallets();
         loadBOWData();
+        console.log();
     }, []);
 
     const loadBOWData = async () => {
+        setCheckingDataLoading(true);
+
         palletsApi
             .getBOWById(planID)
             .then((response) => {
                 setBOWData(response.plandrying);
+
+                setCheckboxStates({
+                    CT1: response.plandrying.CT1 || 0,
+                    CT2: response.plandrying.CT2 || 0,
+                    CT3: response.plandrying.CT3 || 0,
+                    CT4: response.plandrying.CT4 || 0,
+                    CT5: response.plandrying.CT5 || 0,
+                    CT6: response.plandrying.CT6 || 0,
+                    CT7: response.plandrying.CT7 || 0,
+                    CT8: response.plandrying.CT8 || 0,
+                    CT9: response.plandrying.CT9 || 0,
+                    CT10: response.plandrying.CT10 || 0,
+                    CT11: response.plandrying.CT11 || 0,
+                    CT12: response.plandrying.CT12 || 0,
+                  });
+
+                  setFixedStates({
+                    CT1: response.plandrying.CT1 || 0,
+                    CT2: response.plandrying.CT2 || 0,
+                    CT3: response.plandrying.CT3 || 0,
+                    CT4: response.plandrying.CT4 || 0,
+                    CT5: response.plandrying.CT5 || 0,
+                    CT6: response.plandrying.CT6 || 0,
+                    CT7: response.plandrying.CT7 || 0,
+                    CT8: response.plandrying.CT8 || 0,
+                    CT9: response.plandrying.CT9 || 0,
+                    CT10: response.plandrying.CT10 || 0,
+                    CT11: response.plandrying.CT11 || 0,
+                    CT12: response.plandrying.CT12 || 0,
+                  });
+
+                  setFixedSoLan(response.plandrying.SoLan);
+                  setFixedCBL(response.plandrying.CBL);
+                  setFixedDoThucTe(response.plandrying.DoThucTe);
+
+                //   const ct11Detail = response.plandrying.CT11Detail[0]; 
+                //   console.log("Giây phút của sự thật", ct11Detail);
+                    setFixedSamples({
+                        M1: response.CT11Detail[0].M1 || "",
+                        M2: response.CT11Detail[0].M2 || "",
+                        M3: response.CT11Detail[0].M3 || "",
+                        M4: response.CT11Detail[0].M4 || "",
+                        M5: response.CT11Detail[0].M5 || "",
+                    });
+
+                  setFixedFanValues({
+                    Q1: response.CT12Detail[0].Q1 || "",
+                    Q2: response.CT12Detail[0].Q2 || "",
+                    Q3: response.CT12Detail[0].Q3 || "",
+                    Q4: response.CT12Detail[0].Q4 || "",
+                    Q5: response.CT12Detail[0].Q5 || "",
+                    Q6: response.CT12Detail[0].Q6 || "",
+                    Q7: response.CT12Detail[0].Q7 || "",
+                    Q8: response.CT12Detail[0].Q8 || "",
+                  });
             })
             .catch((error) => {
                 console.error("Lỗi khi gọi API:", error);
@@ -246,8 +340,9 @@ function ControllerCard(props) {
             })   
     }
 
+
     const handleSave = async () => {
-        console.log("1. Dữ liệu checkboxe: ", checkboxStates);
+        console.log("1. Dữ liệu checkbox: ", checkboxStates);
         const checkboxData = {
             PlanID: planID,
             CT1: checkboxStates.CT1,
@@ -292,6 +387,7 @@ function ControllerCard(props) {
             const response = await palletsApi.saveCheckingKiln(checkboxData);
             console.log("3. Kết quả trả về từ database: ", response);
             toast.success("Đã lưu thông tin.");
+            loadBOWData();
             onClose();
         } catch (error) {
             console.error("Error:", error);
@@ -347,13 +443,17 @@ function ControllerCard(props) {
         }
     };
 
-    const handleCompleteCheckingKiln = async () => {
+    const handleCompleteCheckingKiln = async (onCallback) => {
         try {
             setLoadKilnCheckingLoading(true);
             const response = await axios.patch("/api/ovens/production-check", {
                 PlanID: planID,
             });
             if (response.status === 200) {
+                // callback();
+                if (typeof onCallback === "function") {
+                    onCallback();
+                }
                 onClose();
 
                 toast.success("Thông tin đã được lưu lại");
@@ -403,6 +503,7 @@ function ControllerCard(props) {
                 "/api/ovens/production-completed",
                 {
                     PlanID: planID,
+                    result: "SD",
                 }
             );
             if (response.status === 200) {
@@ -598,7 +699,7 @@ function ControllerCard(props) {
         ) : progress === "dg" ? (
             <div className="">
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                    {isReviewed === 1 ? (
+                    {(isReviewed === 1 && status === 3) ? (
                         <>
                             <div className=" space-y-1 w-full xl:w-[75%]">
                                 <div className="font-semibold">
@@ -673,19 +774,19 @@ function ControllerCard(props) {
                                 chuẩn hoạt động khi đã đáp ứng tất cả nhu cầu
                                 dưới đây
                             </div>
-                            <div className="xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-6">
-                                {/* Hiển thị tất cả giá trị checkItems */}
-                                {checkingDataLoading ? (
-                                    <div className="text-center">
-                                    <Spinner
-                                        thickness="4px"
-                                        speed="0.65s"
-                                        emptyColor="gray.200"
-                                        color="#155979"
-                                        size="xl"
-                                    />
+                            {checkingDataLoading ? (
+                                <div className="w-full h-full xl:pt-60 lg:pt-60 md:pt-60 pt-40 flex items-center justify-center">
+                                <Spinner
+                                    thickness="4px"
+                                    speed="0.65s"
+                                    emptyColor="gray.200"
+                                    color="#155979"
+                                    size="xl"
+                                />
                                 </div>
-                                ) : (
+                            ) : (
+                                <div className="w-full xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-6">
+                                {/* Hiển thị tất cả giá trị checkItems */}
                                     <>
                                         {checkItems.map((item, index) => (
                                             <CheckListItem
@@ -694,11 +795,17 @@ function ControllerCard(props) {
                                                 value={item.value}
                                                 title={item.title}
                                                 description={item.description}
-                                                disabled={disabledCheckbox}
                                                 isChecked={checkboxStates[`CT${index + 1}`] === 1}
                                                 onCheckboxChange={(isChecked) =>
                                                     handleCheckboxChange(`CT${index + 1}`, isChecked)
                                                 }
+                                                isDisabled={fixedStates[`CT${item.value}`] === 1}
+                                                defaultChecked={fixedStates[`CT${item.value}`] === 1}
+                                                fixedSoLan={fixedSoLan}
+                                                fixedCBL={fixedCBL}
+                                                fixedDoThucTe={fixedDoThucTe}
+                                                fixedSamples={fixedSamples}
+                                                fixedFanValues={fixedFanValues}
                                                 onSoLanChange={handleSoLanChange}
                                                 onCBLChange={handleCBLChange}
                                                 onDoThucTeChange={handleDoThucTeChange}
@@ -707,9 +814,8 @@ function ControllerCard(props) {
                                             />
                                         ))}
                                     </>
-                                )}
-                                
-                            </div>
+                                </div>
+                            )}    
                         </div>
                     </ModalBody>
                     <ModalFooter className="bg-white border-t-2 border-gray-200 w-full sticky bottom-0">

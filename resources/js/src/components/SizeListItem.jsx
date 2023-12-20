@@ -29,8 +29,6 @@ function SizeListItem(props) {
           PlanID: planID,
           PalletID: id
       };
-    
-    console.log("Dữ liệu sẽ được gửi đi", deleteData );
 
       try{
         palletsApi

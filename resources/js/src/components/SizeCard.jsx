@@ -32,7 +32,7 @@ import {
 } from "@chakra-ui/react";
 
 function SizeCard(props) {
-    const { planID, reload } = props;
+    const { planID, reload, palletData } = props;
     console.log("Giá trị planID nhận được:", planID);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -69,6 +69,7 @@ function SizeCard(props) {
     };
 
     useEffect(() => {
+        // setSizeData(palletData);
         loadSizeData();
     }, [planID, props.reload ]);
 
@@ -149,6 +150,32 @@ function SizeCard(props) {
 
             <div className="bg-white flex justify-center rounded-b-xl p-6 py-3 space-y-4">
                 {/* List Items */}
+                {/* <div className="grid w-full py-1 overflow-x-auto">
+                        <div className=" flex flex-row mb-2 space-x-4 w-full">
+                        {palletData.length === 0 ? (
+                            <div className="h-[4.5rem] w-full flex flex-col justify-center items-center ">
+                                <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2"/>
+                                <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
+                            </div>
+                        ) : (
+                            <>
+                                {palletData.map((item) => (
+                                    <SizeListItem
+                                        planID={planID}
+                                        id={item.pallet}
+                                        size={item.size}
+                                        pallet={item.pallet}
+                                        Qty={item.Qty}
+                                        weight={item.Mass}
+                                        // onDelete={handleDelete}
+                                        onDelete={loadSizeData}
+                                    />
+                                ))}
+                            </>
+                        )}
+                            
+                        </div>
+                    </div> */}
                 {isPalletLoading ? (
                     <div className="h=[10rem]">
                         <Spinner

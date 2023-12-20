@@ -23,7 +23,7 @@ function Home() {
                         <span>second.</span>
                     </div>
                     <div className=" hero-txt mt-6 text-center">
-                        <span>Một sản phẩm thuộc Grant Thornton Vietnam.</span>
+                        <span>Một sản phẩm từ Grant Thornton Vietnam.</span>
                     </div>
                     <Link to="/workspace" className="flex justify-center">
                         <button className="flex items-center justify-center xl:mt-8 md:mt-8 mt-14 p-3 px-6 bg-[#000] hover:bg-[#232323] text-white rounded-full active:scale-[.95] active:duration-75 transition-all ">
