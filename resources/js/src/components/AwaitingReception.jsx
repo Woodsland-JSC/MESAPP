@@ -87,7 +87,7 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                                 <>
                                     <div className="flex gap-2">
                                         <span>Mã thành phẩm: </span>
-                                        <span className="font-bold">{data?.id || ""}</span>
+                                        <span className="font-bold">{data?.FatherCode || ""}</span>
                                     </div>
                                 </>
                             )
@@ -96,14 +96,14 @@ const AwaitingReception = ({ data, type, index, onConfirmReceipt, onRejectReceip
                         <div className="flex gap-2">
                             <span>Tên: </span>
                             <span className="font-bold">
-                                {type == "plywood" ? data.itemName : data.data?.subItemName || ""}
+                                {type == "plywood" ? data.itemName : data.data?.ItemName || ""}
                             </span>
                         </div>
 
                         <div className="flex gap-2">
                             <span>Công đoạn giao: </span>
                             <span className="font-bold">
-                                {data?.fromGroup?.name || ""}
+                                {data?.CongDoan || ""}
                             </span>
                         </div>
 

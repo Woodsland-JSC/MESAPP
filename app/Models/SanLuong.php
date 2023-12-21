@@ -20,6 +20,7 @@ class SanLuong extends Model
         'CRong',
         'CDai',
         'Team',
+        'CongDoan',
         'NexTeam',
         'status',
         'ObjType',

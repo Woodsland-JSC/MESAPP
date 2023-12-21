@@ -36,7 +36,7 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'NexTeam', 'Type']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type']);
             $SLData['create_by'] = Auth::user()->id;
             $SanLuong = SanLuong::create($SLData);
             if ($request->CompleQty > 0) {
@@ -46,6 +46,7 @@ class ProductionController extends Controller
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
                     'team' => $request->NexTeam,
+                    'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 0
                 ]);
@@ -57,6 +58,7 @@ class ProductionController extends Controller
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
                     'team' => 'QC',
+                    'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1
                 ]);
@@ -219,6 +221,7 @@ class ProductionController extends Controller
                 'a.ItemCode',
                 'a.ItemName',
                 'a.team',
+                'a.CongDoan',
                 'CDay',
                 'CRong',
                 'CDai',
@@ -248,6 +251,7 @@ class ProductionController extends Controller
                 'a.ItemCode',
                 'a.ItemName',
                 'a.team',
+                'a.CongDoan',
                 'CDay',
                 'CRong',
                 'CDai',
