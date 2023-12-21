@@ -191,18 +191,18 @@ class ProductionController extends Controller
 
         // Reset array keys to consecutive integers
         // lấy dữ liệu chưa confirm
-        $notfication = DB::table('sanluong as a')
-            ->join('notireceipt as b', function ($join) {
-                $join->on('a.id', '=', 'b.baseID')
-                    ->where('b.deleted', '=', 0);
-            })
-            ->join('users as c', 'a.create_by', '=', 'c.id')
-            ->select(
-                'b.*'
-            )
-            ->where('b.confirm', '=', 0)
-            ->where('a.Team', '=', $request->TO)
-            ->get();
+        // $notfication = DB::table('sanluong as a')
+        //     ->join('notireceipt as b', function ($join) {
+        //         $join->on('a.id', '=', 'b.baseID')
+        //             ->where('b.deleted', '=', 0);
+        //     })
+        //     ->join('users as c', 'a.create_by', '=', 'c.id')
+        //     ->select(
+        //         'b.*'
+        //     )
+        //     ->where('b.confirm', '=', 0)
+        //     ->where('a.Team', '=', $request->TO)
+        //     ->get();
         //data need confirm
         $data =
             DB::table('sanluong as a')
@@ -213,6 +213,7 @@ class ProductionController extends Controller
             ->join('users as c', 'a.create_by', '=', 'c.id')
             ->select(
                 'a.FatherCode',
+                'a.ItemCode',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -240,6 +241,7 @@ class ProductionController extends Controller
             ->join('users as c', 'a.create_by', '=', 'c.id')
             ->select(
                 'a.FatherCode',
+                'a.ItemCode',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -257,7 +259,10 @@ class ProductionController extends Controller
             ->where('b.type', 1)
             ->where('b.team', '=', $request->TO)
             ->get();
-        return response()->json(['data' => $results, 'notification' => $notfication, 'phoixacnhan' => $data, 'phoixuly' => $data2], 200);
+        return response()->json([
+            'data' => $results,
+            'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
+        ], 200);
     }
     function viewdetail(Request $request)
     {
@@ -293,6 +298,7 @@ class ProductionController extends Controller
             ->join('users as c', 'a.create_by', '=', 'c.id')
             ->select(
                 'a.FatherCode',
+                'a.ItemCode',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -316,7 +322,7 @@ class ProductionController extends Controller
             //'Data' => $results, 'SLPHOIDANHAN' => $data,
             'Factorys' => $factory,
             'notifications' => $notfication,
-            'maxQuantity' => 1000,
+            'maxQuantity' => 500,
             'remainQty' => 500
         ], 200);
     }
@@ -431,6 +437,21 @@ class ProductionController extends Controller
     }
     function delete(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $data = DB::table('notireceipt as a')
+            ->where('a.id', $request->id)
+            ->where('a.confirm', 0)
+            ->first();
+        if (!$data) {
+            throw new \Exception('data không hợp lệ.');
+        }
+        notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        return response()->json('success', 200);
     }
     function collectdata($spdich, $item, $to)
     {
