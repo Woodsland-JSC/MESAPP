@@ -31,6 +31,21 @@ const productionApi = {
         const url = `/production/receipts-production`;
         return axiosClient().post(url, data);
     },
+    deleteReceiptCBG: (payload) => {
+        console.log("Đói quá: ", payload);
+        const url = `/production/remove-receipt`;
+        return axiosClient().delete(url, { data: payload });
+    },
+    rejectReceiptsCBG: (data) => {
+        const url = `/production/reject-receipts`;
+        return axiosClient().post(url, data);
+
+    },
+    acceptReceiptsCBG: (data) => {
+        const url = `/production/accept-receipts`;
+        return axiosClient().post(url, data);
+
+    },
     getErrorTypes: () => {
         const url = `/loailoi`;
         return axiosClient().get(url);

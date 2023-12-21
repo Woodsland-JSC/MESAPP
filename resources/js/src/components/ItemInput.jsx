@@ -29,6 +29,7 @@ import {
     Text,
     Radio,
     RadioGroup,
+    Spinner,
     useDisclosure,
 } from "@chakra-ui/react";
 import Select from "react-select";
@@ -38,6 +39,7 @@ import productionApi from "../api/productionApi";
 import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
 import Loader from "./Loader";
+import moment from "moment";
 
 // const factories = [
 //     {
@@ -70,18 +72,36 @@ const ItemInput = ({
     } = useDisclosure();
 
     const {
+        isOpen: isDeleteProcessingDialogOpen,
+        onOpen: onDeleteProcessingDialogOpen,
+        onClose: onDeleteProcessingDialogClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isDeleteErrorDialogOpen,
+        onOpen: onDeleteErrorDialogOpen,
+        onClose: onDeleteErrorDialogClose,
+    } = useDisclosure();
+
+    const {
         isOpen: isModalOpen,
         onOpen: onModalOpen,
         onClose: onModalClose,
     } = useDisclosure();
 
     const [loading, setLoading] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [deleteProcessingLoading, setDeleteProcessingLoading] =
+        useState(false);
+    const [deleteErrorLoading, setDeleteErrorLoading] = useState(false);
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
     const [amount, setAmount] = useState("");
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
     const [faultyAmount, setFaultyAmount] = useState("");
+    const [selectedDelete, setSelectedDelete] = useState(null);
+    const [selectedError, setSelectedError] = useState(null);
 
     // const [errorTypeOptions, setErrorTypeOptions] = useState([]);
     // const [solutionOptions, setSolutionOptions] = useState([]);
@@ -97,7 +117,7 @@ const ItemInput = ({
             };
             // console.log("Hi: ", params);
             const res = await productionApi.getFinishedGoodsDetail(params);
-            // console.log("Bye: ", res);
+            console.log("Bye: ", res);
             setSelectedItemDetails({
                 ...item,
                 stockQuantity: res.maxQuantity,
@@ -106,6 +126,7 @@ const ItemInput = ({
                     value: item.Factory,
                     label: item.FactoryName,
                 })),
+                notifications: res.notifications,
             });
             onModalOpen();
         } catch (error) {
@@ -124,15 +145,18 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
+        setConfirmLoading(true);
         try {
             console.log("Làm ơn đi: ", selectedItemDetails);
             const payload = {
                 FatherCode: data.SPDICH,
                 ItemCode: selectedItemDetails.ItemChild,
+                ItemName: selectedItemDetails.ChildName,
                 CDay: Number(selectedItemDetails.CDay),
                 CRong: Number(selectedItemDetails.CRong),
                 CDai: Number(selectedItemDetails.CDai),
                 Team: selectedItemDetails.TO,
+                CongDoan: selectedItemDetails.NameTO,
                 NexTeam: selectedItemDetails.TOTT,
                 Type: "CBG",
                 CompleQty: 0,
@@ -219,6 +243,7 @@ const ItemInput = ({
             console.error("Đã xảy ra lỗi:", error);
             toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
+        setConfirmLoading(false);
         onReceiptFromChild();
         setFaults({});
         setReceipts({});
@@ -227,6 +252,50 @@ const ItemInput = ({
 
         onAlertDialogClose();
         closeInputModal();
+    };
+
+    const handleDeleteProcessingReceipt = async () => {
+        setDeleteProcessingLoading(true);
+        try {
+            const payload = {
+                id: selectedDelete,
+            };
+            const res = await productionApi.deleteReceiptCBG(payload);
+            toast.success("Thành công.");
+            setSelectedItemDetails((prev) => ({
+                ...prev,
+                notifications: prev.notifications.filter(
+                    (notification) => notification.id !== selectedDelete
+                ),
+            }));
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+        }
+        setSelectedDelete(null);
+        onDeleteProcessingDialogClose();
+        setDeleteProcessingLoading(false);
+    };
+
+    const handleDeleteErrorReceipt = async () => {
+        setDeleteErrorLoading(true);
+        try {
+            const payload = {
+                id: selectedError,
+            };
+            const res = await productionApi.deleteReceiptCBG(payload);
+            toast.success("Thành công.");
+            setSelectedItemDetails((prev) => ({
+                ...prev,
+                notifications: prev.notifications.filter(
+                    (notification) => notification.id !== selectedDelete
+                ),
+            }));
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+        }
+        setSelectedError(null);
+        onDeleteErrorDialogClose();
+        setDeleteErrorLoading(false);
     };
 
     useEffect(() => {
@@ -577,12 +646,17 @@ const ItemInput = ({
                                         </NumberInputStepper>
                                     </NumberInput>
                                 </Box>
-                                {selectedItemDetails?.pendingReceipts &&
-                                    selectedItemDetails?.pendingReceipts
-                                        .length > 0 &&
-                                    selectedItemDetails?.pendingReceipts.map(
-                                        (item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 mx-3 border border-green-600 rounded">
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) => notif.confirm == 0
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter((notif) => notif.confirm == 0)
+                                        ?.map((item, index) => (
+                                            <div
+                                                key={"Processing_" + index}
+                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-green-600 rounded"
+                                            >
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
@@ -593,37 +667,59 @@ const ItemInput = ({
                                                             colorScheme="green"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {Number(
+                                                                item?.Quantity
+                                                            )}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Thời gian giao:{" "}
                                                         </Text>
                                                         <span className="ml-1 text-violet-700">
-                                                            30/11/2023 14:12:23
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "DD/MM/YYYY"
+                                                            ) || ""}{" "}
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "HH:mm:ss"
+                                                            ) || ""}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <button
-                                                        onClick={() =>
-                                                            toast(
-                                                                "Chức năng chưa phát triển"
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            onDeleteProcessingDialogOpen();
+                                                            setSelectedDelete(
+                                                                item?.id
+                                                            );
+                                                        }}
                                                         className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
                                                     >
                                                         <AiTwotoneDelete className="text-red-700 text-2xl" />
                                                     </button>
                                                 </div>
                                             </div>
-                                        )
-                                    )}
-                                {selectedItemDetails?.returns &&
-                                    selectedItemDetails?.returns.length > 0 &&
-                                    selectedItemDetails?.returns.map(
-                                        (item, index) => (
+                                        ))}
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) => notif.confirm == 3
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter((notif) => notif.confirm == 3)
+                                        ?.map((item, index) => (
                                             <div className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded">
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
@@ -634,7 +730,9 @@ const ItemInput = ({
                                                             colorScheme="red"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {Number(
+                                                                item?.Quantity
+                                                            )}
                                                         </Badge>
                                                     </div>
                                                     <div className="flex flex-col">
@@ -642,25 +740,25 @@ const ItemInput = ({
                                                             Lý do:{" "}
                                                         </Text>
                                                         <span className="ml-1">
-                                                            {item?.label}
+                                                            {item?.text}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <button
-                                                        onClick={() =>
-                                                            toast(
-                                                                "Chức năng chưa phát triển"
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            onDeleteErrorDialogOpen();
+                                                            setSelectedError(
+                                                                item?.id
+                                                            );
+                                                        }}
                                                         className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
                                                     >
                                                         <AiTwotoneDelete className="text-red-700 text-2xl" />
                                                     </button>
                                                 </div>
                                             </div>
-                                        )
-                                    )}
+                                        ))}
                                 {selectedItemDetails?.pendingErrors &&
                                     selectedItemDetails?.pendingErrors.length >
                                         0 &&
@@ -904,25 +1002,120 @@ const ItemInput = ({
                                 </div>
                             )}
                         </AlertDialogBody>
-                        <AlertDialogFooter>
+                        <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
-                            <Button
+                            {/* <Button
                                 colorScheme="red"
                                 onClick={handleSubmitQuantity}
                                 ml={3}
                                 backgroundColor="#c53030 !important"
                             >
                                 Xác nhận
-                            </Button>
+                            </Button> */}
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleSubmitQuantity}
+                            >
+                                {confirmLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
-            {
-                loading && (
-                    <Loader />
-                )
-            }
+
+            <AlertDialog
+                isOpen={isDeleteProcessingDialogOpen}
+                onClose={onDeleteProcessingDialogClose}
+                closeOnOverlayClick={false}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            Xác nhận xoá chờ xác nhận
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            <div className="text-red-700">
+                                Bạn chắc chắn muốn xoá số lượng đã giao chờ xác
+                                nhận?
+                            </div>
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button
+                                onClick={() => {
+                                    setSelectedDelete(null);
+                                    onDeleteProcessingDialogClose();
+                                }}
+                            >
+                                Huỷ bỏ
+                            </Button>
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleDeleteProcessingReceipt}
+                            >
+                                {deleteProcessingLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            <AlertDialog
+                isOpen={isDeleteErrorDialogOpen}
+                onClose={onDeleteErrorDialogClose}
+                closeOnOverlayClick={false}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            Xác nhận xoá phôi lỗi trả lại
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            <div className="text-red-700">
+                                Bạn chắc chắn muốn xoá số lượng phôi lỗi trả
+                                lại?
+                            </div>
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button
+                                onClick={() => {
+                                    setSelectedError(null);
+                                    onDeleteErrorDialogClose();
+                                }}
+                            >
+                                Huỷ bỏ
+                            </Button>
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleDeleteErrorReceipt}
+                            >
+                                {deleteErrorLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+            {loading && <Loader />}
         </>
     );
 };

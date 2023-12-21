@@ -28,6 +28,7 @@ class ProductionController extends Controller
             'CRong' => 'required|integer',
             'CDai' => 'required|integer',
             'Team' => 'required|string|max:254',
+            'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
         ]);
