@@ -148,7 +148,9 @@ class ProductionController extends Controller
             if (!$compositeKeyExists) {
                 $results[$key]['Details'][] = array_merge($details, [
                     'TO' => $row['TO'],
+                    'NameTO' => $row['NameTO'],
                     'TOTT' => $row['TOTT'],
+                    'NameTOTT' => $row['NameTOTT']
                 ]);
             }
         }
