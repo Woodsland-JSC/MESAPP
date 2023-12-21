@@ -13,6 +13,7 @@ class SanLuong extends Model
     protected $fillable = [
         'FatherCode',
         'ItemCode',
+        'ItemName',
         'CompleQty',
         'RejectQty',
         'CDay',

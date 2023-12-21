@@ -21,6 +21,7 @@ class ProductionController extends Controller
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
+            'ItemName' => 'required|string|max:254',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
             'CDay' => 'required|integer',
@@ -35,7 +36,7 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'NexTeam', 'Type']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'NexTeam', 'Type']);
             $SLData['create_by'] = Auth::user()->id;
             $SanLuong = SanLuong::create($SLData);
             if ($request->CompleQty > 0) {
@@ -214,6 +215,7 @@ class ProductionController extends Controller
             ->select(
                 'a.FatherCode',
                 'a.ItemCode',
+                'a.ItemName',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -242,6 +244,7 @@ class ProductionController extends Controller
             ->select(
                 'a.FatherCode',
                 'a.ItemCode',
+                'a.ItemName',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -299,6 +302,7 @@ class ProductionController extends Controller
             ->select(
                 'a.FatherCode',
                 'a.ItemCode',
+                'a.ItemName',
                 'a.team',
                 'CDay',
                 'CRong',
