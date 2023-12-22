@@ -451,7 +451,7 @@ class ProductionController extends Controller
         }
         $data = DB::table('notireceipt as a')
             ->where('a.id', $request->id)
-            ->where('a.confirm', 0)
+            ->where('a.deleted', 0)
             ->first();
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
