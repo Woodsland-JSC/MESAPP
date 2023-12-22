@@ -63,7 +63,7 @@ import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { Spinner } from "@chakra-ui/react";
 
 function HumidityCheck(props) {
-    const { planID, code, oven, reason, humidList } = props;
+    const { planID, code, oven, reason, humidList, onCallback } = props;
 
     console.log("Hiển thị planID ở Humidity:", planID);
     console.log("Danh sách độ ẩm:", humidList);
@@ -288,6 +288,9 @@ function HumidityCheck(props) {
                     setRecordsList(response.humiditys);
                     toast.success("Đã duyệt ra lò");
                     loadHumidRecordList();
+                    if (typeof onCallback === "function") {
+                        onCallback();
+                    }
                     onCompleteClose();
                     onClose();
                 } else {
@@ -336,6 +339,9 @@ function HumidityCheck(props) {
                         setAnotherOption("");
                         setHumidityRecords([]);
                         loadHumidRecordList();
+                        if (typeof onCallback === "function") {
+                            onCallback();
+                        }
                         onCompleteClose();
                         onClose();
                     } else {

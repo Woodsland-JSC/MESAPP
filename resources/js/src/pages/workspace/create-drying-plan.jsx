@@ -336,7 +336,8 @@ function CreateDryingPlan() {
                             <ModalHeader>Tạo kế hoạch sấy</ModalHeader>
                             <ModalCloseButton />
                             <ModalBody>
-                                <div className="flex flex-col space-y-5">
+                                <div></div>
+                                <div className="flex flex-col space-y-4">
                                     <div className="">
                                         <label
                                             for="first_name"

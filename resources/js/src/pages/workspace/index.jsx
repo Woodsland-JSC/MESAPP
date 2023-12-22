@@ -364,7 +364,7 @@ function Workspace() {
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            <Link to="#">
+                                            <Link to="/workspace/wood-producting-qc">
                                                 <div className="flex justify-center xl:h-full md:h-full">
                                                     <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                         <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">

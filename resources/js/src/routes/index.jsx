@@ -97,7 +97,11 @@ import User from "../pages/users/details";
 import CreateUser from "../pages/users/create";
 import CreateRole from "../pages/users/roles/create";
 import Integration from "../pages/integration";
+
+// Workspace
 import Workspace from "../pages/workspace/index";
+
+// Wood Drying 
 import CreateDryingPlan from '../pages/workspace/create-drying-plan';
 import Details from '../pages/workspace/details';
 import DryingWoodChecking from '../pages/workspace/drying-wood-checking';
@@ -105,6 +109,10 @@ import Kiln from '../pages/workspace/kiln';
 import KilnChecking from '../pages/workspace/kiln-checking';
 import LoadIntoKiln from '../pages/workspace/load-into-kiln';
 import WoodSorting from '../pages/workspace/wood-sorting';
+
+// QC
+import WoodProductingQC from "../pages/workspace/qc/wood-producting-qc";
+import WoodProductionQCDetail from "../pages/workspace/qc/details"
 
 import Notfound from "../pages/errors/notfound";
 
@@ -221,6 +229,29 @@ function AppRoutes() {
                         </ProtectedRoute>
                         }
                     />
+
+                    {/* QC */}
+                    <Route
+                        path="/workspace/wood-producting-qc"
+                        element={
+                        <ProtectedRoute
+                        //  permissionsRequired={['kehoachsay']}
+                        >
+                            <WoodProductingQC />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/workspace/wood-producting-qc/detail"
+                        element={
+                        <ProtectedRoute 
+                        // permissionsRequired={['kehoachsay']}
+                        >
+                            <WoodProductionQCDetail />
+                        </ProtectedRoute>
+                        }
+                    />
+
                     {/* Cái này cần xem lại */}
                     <Route
                         path="/product-detail/"

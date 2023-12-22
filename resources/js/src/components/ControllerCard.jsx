@@ -96,7 +96,7 @@ const checkItems = [
         value: 11,
         title: "11. Chiều dày thực tế",
         description:
-            "Kiểm tra 5 palet ngẫu nhiên,mỗi palet 5 thanh ngẫu nhiên trong lò,dung sai cho phép + 2(mm).",
+            "Kiểm tra 5 pallet ngẫu nhiên,mỗi pallet 5 thanh ngẫu nhiên trong lò,dung sai cho phép + 2(mm).",
     },
     {
         value: 12,
@@ -107,7 +107,21 @@ const checkItems = [
 ];
 
 function ControllerCard(props) {
-    const { progress, status, isChecked, isReviewed, reason, planID, onReload, onCallback } = props;
+    const {
+        progress,
+        status,
+        isChecked,
+        isReviewed,
+        reason,
+        planID,
+        checkData,
+        CT11Data,
+        CT12Data,
+        checkboxData,
+        loadedPalletList,
+        onReload,
+        onCallback,
+    } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -146,45 +160,45 @@ function ControllerCard(props) {
     const [BOWData, setBOWData] = useState([]);
 
     // System Data
-    const [fixedStates, setFixedStates] = useState({
-        CT1: 0,
-        CT2: 0,
-        CT3: 0,
-        CT4: 0,
-        CT5: 0,
-        CT6: 0,
-        CT7: 0,
-        CT8: 0,
-        CT9: 0,
-        CT10: 0,
-        CT11: 0,
-        CT12: 0,
-    });
+    // const [fixedStates, setFixedStates] = useState({
+    //     CT1: 0,
+    //     CT2: 0,
+    //     CT3: 0,
+    //     CT4: 0,
+    //     CT5: 0,
+    //     CT6: 0,
+    //     CT7: 0,
+    //     CT8: 0,
+    //     CT9: 0,
+    //     CT10: 0,
+    //     CT11: 0,
+    //     CT12: 0,
+    // });
 
-    const [fixedSoLan, setFixedSoLan] = useState("");
-    const [fixedCBL, setFixedCBL] = useState("");
-    const [fixedDoThucTe, setFixedDoThucTe] = useState("");
+    // const [fixedSoLan, setFixedSoLan] = useState("");
+    // const [fixedCBL, setFixedCBL] = useState("");
+    // const [fixedDoThucTe, setFixedDoThucTe] = useState("");
 
-    const [fixedSamples, setFixedSamples] = useState({
-        M1: "",
-        M2: "",
-        M3: "",
-        M4: "",
-        M5: "",
-      });
+    // const [fixedSamples, setFixedSamples] = useState({
+    //     M1: "",
+    //     M2: "",
+    //     M3: "",
+    //     M4: "",
+    //     M5: "",
+    // });
 
-      const [fixedFanValues, setFixedFanValues] = useState({
-        Q1: "",
-        Q2: "",
-        Q3: "",
-        Q4: "",
-        Q5: "",
-        Q6: "",
-        Q7: "",
-        Q8: "",
-    });
+    // const [fixedFanValues, setFixedFanValues] = useState({
+    //     Q1: "",
+    //     Q2: "",
+    //     Q3: "",
+    //     Q4: "",
+    //     Q5: "",
+    //     Q6: "",
+    //     Q7: "",
+    //     Q8: "",
+    // });
 
-    //User Data 
+    //User Data
     const [checkboxStates, setCheckboxStates] = useState({
         CT1: 0,
         CT2: 0,
@@ -210,9 +224,9 @@ function ControllerCard(props) {
         M3: "",
         M4: "",
         M5: "",
-      });
+    });
 
-      const [fanValues, setFanValues] = useState({
+    const [fanValues, setFanValues] = useState({
         Q1: "",
         Q2: "",
         Q3: "",
@@ -222,31 +236,34 @@ function ControllerCard(props) {
         Q7: "",
         Q8: "",
     });
-    
-      const handleSoLanChange = (newSoLan) => {
+
+    console.log("01. Dữ liệu checkbox nhận được từ detail là:", checkboxData);
+    console.log("01. Dữ liệu pallet nhận được từ detail là:", palletData);
+
+    const handleSoLanChange = (newSoLan) => {
         setSoLan(newSoLan);
         console.log("Giá trị số lần nhận được là:", newSoLan);
-      };
+    };
 
-      const handleCBLChange = (newCBL) => {
+    const handleCBLChange = (newCBL) => {
         setCBL(newCBL);
         console.log("Giá trị cảm biến lò nhận được là:", newCBL);
-      };
+    };
 
-      const handleDoThucTeChange = (newDoThucTe) => {
+    const handleDoThucTeChange = (newDoThucTe) => {
         setDoThucTe(newDoThucTe);
         console.log("Giá trị đo thực tế nhận được là:", newDoThucTe);
-      };
+    };
 
-      const handleSampleChange = (newSamples) => {
+    const handleSampleChange = (newSamples) => {
         setSamples(newSamples);
         console.log("Giá trị sample nhận được là:", newSamples);
-      };
+    };
 
-      const handleFanValuesChange = (newFanValues) => {
+    const handleFanValuesChange = (newFanValues) => {
         setFanValues(newFanValues);
         console.log("Giá trị tốc độ quạt nhận được là:", newFanValues);
-      };
+    };
 
     const [checkedCount, setCheckedCount] = useState(0);
 
@@ -258,92 +275,37 @@ function ControllerCard(props) {
     };
 
     useEffect(() => {
-        const count = Object.values(checkboxStates).reduce((acc, value) => acc + value, 0);
+        const count = Object.values(checkboxStates).reduce(
+            (acc, value) => acc + value,
+            0
+        );
         setCheckedCount(count);
     }, [checkboxStates]);
 
     // Get data Select
     useEffect(() => {
         loadPallets();
-        loadBOWData();
+        setCheckboxStates({
+            CT1: checkboxData.CT1 || 0,
+            CT2: checkboxData.CT2 || 0,
+            CT3: checkboxData.CT3 || 0,
+            CT4: checkboxData.CT4 || 0,
+            CT5: checkboxData.CT5 || 0,
+            CT6: checkboxData.CT6 || 0,
+            CT7: checkboxData.CT7 || 0,
+            CT8: checkboxData.CT8 || 0,
+            CT9: checkboxData.CT9 || 0,
+            CT10: checkboxData.CT10 || 0,
+            CT11: checkboxData.CT11 || 0,
+            CT12: checkboxData.CT12 || 0,
+        });
+        // loadBOWData();
         console.log();
     }, []);
 
-    const loadBOWData = async () => {
-        setCheckingDataLoading(true);
-
-        palletsApi
-            .getBOWById(planID)
-            .then((response) => {
-                setBOWData(response.plandrying);
-
-                setCheckboxStates({
-                    CT1: response.plandrying.CT1 || 0,
-                    CT2: response.plandrying.CT2 || 0,
-                    CT3: response.plandrying.CT3 || 0,
-                    CT4: response.plandrying.CT4 || 0,
-                    CT5: response.plandrying.CT5 || 0,
-                    CT6: response.plandrying.CT6 || 0,
-                    CT7: response.plandrying.CT7 || 0,
-                    CT8: response.plandrying.CT8 || 0,
-                    CT9: response.plandrying.CT9 || 0,
-                    CT10: response.plandrying.CT10 || 0,
-                    CT11: response.plandrying.CT11 || 0,
-                    CT12: response.plandrying.CT12 || 0,
-                  });
-
-                  setFixedStates({
-                    CT1: response.plandrying.CT1 || 0,
-                    CT2: response.plandrying.CT2 || 0,
-                    CT3: response.plandrying.CT3 || 0,
-                    CT4: response.plandrying.CT4 || 0,
-                    CT5: response.plandrying.CT5 || 0,
-                    CT6: response.plandrying.CT6 || 0,
-                    CT7: response.plandrying.CT7 || 0,
-                    CT8: response.plandrying.CT8 || 0,
-                    CT9: response.plandrying.CT9 || 0,
-                    CT10: response.plandrying.CT10 || 0,
-                    CT11: response.plandrying.CT11 || 0,
-                    CT12: response.plandrying.CT12 || 0,
-                  });
-
-                  setFixedSoLan(response.plandrying.SoLan);
-                  setFixedCBL(response.plandrying.CBL);
-                  setFixedDoThucTe(response.plandrying.DoThucTe);
-
-                //   const ct11Detail = response.plandrying.CT11Detail[0]; 
-                //   console.log("Giây phút của sự thật", ct11Detail);
-                    setFixedSamples({
-                        M1: response.CT11Detail[0].M1 || "",
-                        M2: response.CT11Detail[0].M2 || "",
-                        M3: response.CT11Detail[0].M3 || "",
-                        M4: response.CT11Detail[0].M4 || "",
-                        M5: response.CT11Detail[0].M5 || "",
-                    });
-
-                  setFixedFanValues({
-                    Q1: response.CT12Detail[0].Q1 || "",
-                    Q2: response.CT12Detail[0].Q2 || "",
-                    Q3: response.CT12Detail[0].Q3 || "",
-                    Q4: response.CT12Detail[0].Q4 || "",
-                    Q5: response.CT12Detail[0].Q5 || "",
-                    Q6: response.CT12Detail[0].Q6 || "",
-                    Q7: response.CT12Detail[0].Q7 || "",
-                    Q8: response.CT12Detail[0].Q8 || "",
-                  });
-            })
-            .catch((error) => {
-                console.error("Lỗi khi gọi API:", error);
-            })
-            .finally(() => {
-                setCheckingDataLoading(false);
-            })   
-    }
-
-
     const handleSave = async () => {
-        console.log("1. Dữ liệu checkbox: ", checkboxStates);
-        const checkboxData = {
+        console.log("02. Dữ liệu checkbox: ", checkboxStates);
+        const kilnCheckData = {
             PlanID: planID,
             CT1: checkboxStates.CT1,
             CT2: checkboxStates.CT2,
@@ -360,16 +322,14 @@ function ControllerCard(props) {
             SoLan: soLan,
             CBL: CBL,
             DoThucTe: doThucTe,
-            CT11Detail:
-            {   
+            CT11Detail: {
                 M1: samples.M1,
                 M2: samples.M2,
                 M3: samples.M3,
                 M4: samples.M4,
                 M5: samples.M5,
             },
-            CT12Detail:
-            {   
+            CT12Detail: {
                 Q1: fanValues.Q1,
                 Q2: fanValues.Q2,
                 Q3: fanValues.Q3,
@@ -378,16 +338,20 @@ function ControllerCard(props) {
                 Q6: fanValues.Q6,
                 Q7: fanValues.Q7,
                 Q8: fanValues.Q8,
-            }
+            },
         };
 
-        console.log("2. Dữ liệu sẽ được đưa lên database: ", checkboxData);
+        console.log("02. Dữ liệu sẽ được đưa lên database: ", kilnCheckData);
 
         try {
-            const response = await palletsApi.saveCheckingKiln(checkboxData);
-            console.log("3. Kết quả trả về từ database: ", response);
+            const response = await palletsApi.saveCheckingKiln(kilnCheckData);
+            console.log("03. Kết quả trả về từ database: ", response);
             toast.success("Đã lưu thông tin.");
-            loadBOWData();
+            if (typeof onCallback === "function") {
+                onCallback();
+            }
+            // loadBOWData();
+            console.log("04.Dữ liệu checkbox sau khi cập nhật:", checkboxData);
             onClose();
         } catch (error) {
             console.error("Error:", error);
@@ -395,11 +359,13 @@ function ControllerCard(props) {
     };
 
     useEffect(() => {
-        const checkedCount = Object.values(checkboxStates).filter((value) => value === 1).length;
+        const checkedCount = Object.values(checkboxStates).filter(
+            (value) => value === 1
+        ).length;
 
         console.log(checkedCount === 12 ? "Đạt" : "Không đạt");
     }, [checkboxStates]);
-    
+
     const loadPallets = async () => {
         setPalletLoading(true);
         const data = await palletsApi.getPalletList(reason);
@@ -426,14 +392,17 @@ function ControllerCard(props) {
             };
 
             await axios.post("/api/ovens/production-batch", requestData);
-            props.onReload(prevState => !prevState);
+            props.onReload((prevState) => !prevState);
 
             toast.success("Vào lò thành công!");
 
             setSelectedPallet(null);
 
-            // Reload pallets
+            // // Reload pallets
             await loadPallets();
+            if (typeof onCallback === "function") {
+                onCallback();
+            }
 
             setLoadIntoKilnLoading(false);
         } catch (error) {
@@ -443,27 +412,20 @@ function ControllerCard(props) {
         }
     };
 
-    const handleCompleteCheckingKiln = async (onCallback) => {
+    const handleCompleteCheckingKiln = async () => {
         try {
             setLoadKilnCheckingLoading(true);
             const response = await axios.patch("/api/ovens/production-check", {
                 PlanID: planID,
             });
-            if (response.status === 200) {
-                // callback();
-                if (typeof onCallback === "function") {
-                    onCallback();
-                }
-                onClose();
-
-                toast.success("Thông tin đã được lưu lại");
-                console.log("Hoàn thành việc kiểm tra lò sấy!");
-                setLoadKilnCheckingLoading(false);
-                setIsCompleteChecking(true);
-            } else {
-                toast.error("Có lỗi xảy ra khi thực hiện kiểm tra lò sấy");
-                setLoadKilnCheckingLoading(false);
+            console.log("06. Kết quả kiểm tra log sấy:", response);
+            toast.success("Đã hoàn thành việc kiểm tra lò sấy!");
+            setLoadKilnCheckingLoading(false);
+            setIsCompleteChecking(true);
+            if (typeof onCallback === "function") {
+                onCallback();
             }
+            onClose();
         } catch (error) {
             console.error("Error completing production check:", error);
             toast.error("Hiện không thể lưu thông tin. Hãy thử lại sau.");
@@ -472,27 +434,27 @@ function ControllerCard(props) {
     };
 
     const handleStartDrying = async () => {
-        try {
-            setLoadStartDryingLoading(true);
-            const response = await axios.patch("/api/ovens/production-run", {
-                PlanID: planID,
-            });
-            if (response.status === 200) {
+        if(loadedPalletList.length === 0){
+            toast.error("Hãy cho pallet vào lò trước khi sấy.");
+            onKilnClose();
+        } else {
+            try {
+                setLoadStartDryingLoading(true);
+                const response = await axios.patch("/api/ovens/production-run", {
+                    PlanID: planID,
+                });
                 onKilnClose();
-
+    
                 toast.success("Bắt đầu sấy thành công");
                 console.log("Đã bắt đầu sấy gỗ!");
                 setLoadStartDryingLoading(false);
                 setDryingInProgress(true);
-            } else {
-                toast.error("Không thể sấy lúc này");
+            } catch (error) {
+                console.error("Error completing production check:", error);
+    
+                toast.error("Hiện không thể thực hiện hành động này.");
                 setLoadStartDryingLoading(false);
             }
-        } catch (error) {
-            console.error("Error completing production check:", error);
-
-            toast.error("Hiện không thể thực hiện hành động này.");
-            setLoadStartDryingLoading(false);
         }
     };
 
@@ -594,37 +556,37 @@ function ControllerCard(props) {
                     {/* {!isCompleteChecking ? ( */}
                     <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
                         <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
-                        <label
-                            for="company"
-                            className="block mb-2 text-md font-medium text-gray-900 "
+                            <label
+                                for="company"
+                                className="block mb-2 text-md font-medium text-gray-900 "
+                            >
+                                Chọn pallet
+                            </label>
+                            <Select
+                                placeholder="Chọn pallet"
+                                value={selectedPallet}
+                                loadOptions={loadPallets}
+                                options={palletData}
+                                onChange={(value) => {
+                                    console.log("Selected Pallet:", value);
+                                    setSelectedPallet(value);
+                                }}
+                                isLoading={isPalletLoading}
+                            />
+                        </div>
+                        <button
+                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
+                            onClick={handleLoadIntoKiln}
                         >
-                            Chọn pallet
-                        </label>
-                        <Select
-                            placeholder="Chọn pallet"
-                            value={selectedPallet}
-                            loadOptions={loadPallets}
-                            options={palletData}
-                            onChange={(value) => {
-                                console.log("Selected Pallet:", value);
-                                setSelectedPallet(value);
-                            }}
-                            isLoading={isPalletLoading}
-                        />
-                    </div>
-                    <button
-                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
-                        onClick={handleLoadIntoKiln}
-                    >
-                        {loadIntoKilnLoading ? (
-                            <div className="flex justify-center items-center space-x-4">
-                                <Spinner size="sm" color="white" />
-                                <div>Đang tải</div>
-                            </div>
-                        ) : (
-                            "Vào lò"
-                        )}
-                    </button>
+                            {loadIntoKilnLoading ? (
+                                <div className="flex justify-center items-center space-x-4">
+                                    <Spinner size="sm" color="white" />
+                                    <div>Đang tải</div>
+                                </div>
+                            ) : (
+                                "Vào lò"
+                            )}
+                        </button>
                     </div>
                     {/* ) : null} */}
                 </div>
@@ -636,7 +598,7 @@ function ControllerCard(props) {
                             Lò sấy cần phải được kiểm tra trước khi bắt đầu sấy.
                         </div>
                     </div>
-                    {status === 2 ? (
+                    {isChecked === 1 ? (
                         <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl px-2 text-center gap-x-2 h-fit items-center xl:w-[25%] w-full">
                             <FaCheck className=" ml-2 text-xl" />
                             <div className="font-medium">Đã hoàn thành</div>
@@ -699,7 +661,7 @@ function ControllerCard(props) {
         ) : progress === "dg" ? (
             <div className="">
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                    {(isReviewed === 1 && status === 3) ? (
+                    {isReviewed === 1 && status === 3 ? (
                         <>
                             <div className=" space-y-1 w-full xl:w-[75%]">
                                 <div className="font-semibold">
@@ -776,17 +738,17 @@ function ControllerCard(props) {
                             </div>
                             {checkingDataLoading ? (
                                 <div className="w-full h-full xl:pt-60 lg:pt-60 md:pt-60 pt-40 flex items-center justify-center">
-                                <Spinner
-                                    thickness="4px"
-                                    speed="0.65s"
-                                    emptyColor="gray.200"
-                                    color="#155979"
-                                    size="xl"
-                                />
+                                    <Spinner
+                                        thickness="4px"
+                                        speed="0.65s"
+                                        emptyColor="gray.200"
+                                        color="#155979"
+                                        size="xl"
+                                    />
                                 </div>
                             ) : (
                                 <div className="w-full xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-6">
-                                {/* Hiển thị tất cả giá trị checkItems */}
+                                    {/* Hiển thị tất cả giá trị checkItems */}
                                     <>
                                         {checkItems.map((item, index) => (
                                             <CheckListItem
@@ -795,27 +757,52 @@ function ControllerCard(props) {
                                                 value={item.value}
                                                 title={item.title}
                                                 description={item.description}
-                                                isChecked={checkboxStates[`CT${index + 1}`] === 1}
-                                                onCheckboxChange={(isChecked) =>
-                                                    handleCheckboxChange(`CT${index + 1}`, isChecked)
+                                                isChecked={
+                                                    checkboxStates[
+                                                        `CT${index + 1}`
+                                                    ] === 1
                                                 }
-                                                isDisabled={fixedStates[`CT${item.value}`] === 1}
-                                                defaultChecked={fixedStates[`CT${item.value}`] === 1}
-                                                fixedSoLan={fixedSoLan}
-                                                fixedCBL={fixedCBL}
-                                                fixedDoThucTe={fixedDoThucTe}
-                                                fixedSamples={fixedSamples}
-                                                fixedFanValues={fixedFanValues}
-                                                onSoLanChange={handleSoLanChange}
+                                                onCheckboxChange={(isChecked) =>
+                                                    handleCheckboxChange(
+                                                        `CT${index + 1}`,
+                                                        isChecked
+                                                    )
+                                                }
+                                                isDisabled={
+                                                    checkboxData[
+                                                        `CT${item.value}`
+                                                    ] === 1
+                                                }
+                                                defaultChecked={
+                                                    checkboxData[
+                                                        `CT${item.value}`
+                                                    ] === 1
+                                                }
+                                                fixedSoLan={checkData.SoLan}
+                                                fixedCBL={checkData.CBL}
+                                                fixedDoThucTe={
+                                                    checkData.DoThucTe
+                                                }
+                                                fixedSamples={CT11Data}
+                                                fixedFanValues={CT12Data}
+                                                onSoLanChange={
+                                                    handleSoLanChange
+                                                }
                                                 onCBLChange={handleCBLChange}
-                                                onDoThucTeChange={handleDoThucTeChange}
-                                                onSampleChange={handleSampleChange}
-                                                onFanValuesChange={handleFanValuesChange}
+                                                onDoThucTeChange={
+                                                    handleDoThucTeChange
+                                                }
+                                                onSampleChange={
+                                                    handleSampleChange
+                                                }
+                                                onFanValuesChange={
+                                                    handleFanValuesChange
+                                                }
                                             />
                                         ))}
                                     </>
                                 </div>
-                            )}    
+                            )}
                         </div>
                     </ModalBody>
                     <ModalFooter className="bg-white border-t-2 border-gray-200 w-full sticky bottom-0">
@@ -846,32 +833,31 @@ function ControllerCard(props) {
                                 >
                                     Đóng
                                 </button>
-                                {checkedCount === 12
-                                ? (
+                                {checkedCount === 12 ? (
                                     <button
-                                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
-                                    onClick={handleCompleteCheckingKiln}
+                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                        onClick={handleCompleteCheckingKiln}
                                     >
                                         {loadKilnCheckingLoading ? (
                                             <div className="flex justify-center items-center space-x-4">
-                                                <Spinner size="sm" color="white" />
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
                                                 <div>Đang tải</div>
                                             </div>
                                         ) : (
                                             "Hoàn thành"
                                         )}
                                     </button>
-                                )
-                                : (
+                                ) : (
                                     <button
-                                    onClick={handleSave}
-                                    className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                        onClick={handleSave}
+                                        className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Lưu lại
                                     </button>
                                 )}
-                                
-                                
                             </div>
                         </div>
                     </ModalFooter>
@@ -930,7 +916,6 @@ function ControllerCard(props) {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Bạn chắc chắn muốn ra lò?</ModalHeader>
-                    <ModalCloseButton />
                     <ModalBody pb={6}>
                         Bấm xác nhận để hoàn thành quy trình sấy gỗ.
                     </ModalBody>

@@ -31,6 +31,7 @@ function Details() {
     // State
     const [BOWData, setBOWData] = useState([]);
     const [humidData, setHumidData] = useState([]);
+
     const [checkData, setCheckData] = useState({
         SoLan: "",
         CBL: "",
@@ -38,6 +39,7 @@ function Details() {
         DateChecked: "",
         NoCheck: "",
     });
+    
     const [checkboxData, setCheckboxData] = useState({
         CT1: 0,
         CT2: 0,
@@ -54,6 +56,7 @@ function Details() {
     });
     const [CT11Data, setCT11Data] = useState([]);
     const [CT12Data, setCT12Data] = useState([]);
+    const [loadedPalletList, setLoadedPalletList] = useState([]);
     const [palletData, setPalletData] = useState([]);
     
     const [reload, setReload] = useState(false);
@@ -92,7 +95,7 @@ function Details() {
                     DateChecked: response.plandrying.DateChecked,
                     NoCheck: response.plandrying.NoCheck,
                 });
-                setPalletData(response.plandrying.details);
+                setLoadedPalletList(response.plandrying.details);
                 setCT11Data(response.CT11Detail[0]);
                 setCT12Data(response.CT12Detail[0]);
                 setHumidData(response.Humidity);
@@ -139,7 +142,7 @@ function Details() {
             setHumidData(response.Humidity);
         })
         .catch((error) => {
-            console.error("Lỗi khi gọi API:", error);
+            console.error("Lỗi khi recall API:", error);
         })
     };
 
@@ -217,6 +220,12 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     status={BOWData.Status}
                                                     isReviewed={BOWData.Review}
+                                                    Checked={BOWData.Checked}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    loadedPalletList={loadedPalletList}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data} 
                                                 />
                                             </Skeleton>
                                         </div>
@@ -232,8 +241,15 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
+                                                    isChecked={BOWData.Checked}
                                                     onReload={setReload}
                                                     onCallback={updateData}
+                                                    Checked={BOWData.Checked}
+                                                    loadedPalletList={loadedPalletList}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data} 
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -258,9 +274,16 @@ function Details() {
                                                     progress="kt"
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
+                                                    isChecked={BOWData.Checked}
                                                     status={BOWData.Status}
                                                     onReload={setReload}
                                                     onCallback={updateData}
+                                                    Checked={BOWData.Checked}
+                                                    loadedPalletList={loadedPalletList}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data} 
                                                 />
                                             </Skeleton>
                                                 <Skeleton
@@ -299,6 +322,12 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
                                                     onCallback={updateData}
+                                                    Checked={BOWData.Checked}
+                                                    loadedPalletList={loadedPalletList}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data} 
                                                 />
                                             </Skeleton>
                                                 <Skeleton
@@ -337,6 +366,12 @@ function Details() {
                                                     status={BOWData.Status}
                                                     isReviewed={BOWData.Review}
                                                     onCallback={updateData}
+                                                    Checked={BOWData.Checked}
+                                                    loadedPalletList={loadedPalletList}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data} 
                                                 />
                                             </Skeleton>
                                                 <Skeleton
@@ -360,6 +395,7 @@ function Details() {
                                                     oven={BOWData.Oven}
                                                     code={BOWData.Code}
                                                     planID={BOWData.PlanID}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
                                             <Skeleton

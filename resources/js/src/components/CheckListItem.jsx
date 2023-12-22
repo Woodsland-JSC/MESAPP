@@ -98,6 +98,8 @@ function CheckListItem(props) {
         Q8: "",
     });
 
+    console.log("Giá trị sample nhận được là:", fixedSamples)
+
     useEffect(() => {
         if (fixedSamples) {
             setSamples((prevSamples) => ({
@@ -109,18 +111,9 @@ function CheckListItem(props) {
 
     useEffect(() => {
         if (fixedFanValues) {
-            setFanValues((prevSamples) => ({
-                ...prevSamples,
-                ...fixedFanValues,
-            }));
+            setFanValues(fixedFanValues);
         }
     }, [fixedFanValues]);
-
-    // useEffect(() => {
-    //     if (fixedFanValues) {
-    //         setFanValues(fixedFanValues);
-    //     }
-    // }, [fixedFanValues]);
 
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0) {
@@ -659,12 +652,12 @@ function CheckListItem(props) {
                                             Ghi nhận tình trạng
                                         </PopoverHeader>
                                         <PopoverBody>
-                                            <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
+                                            <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 gap-2 space-y-2">
                                                 {Object.entries(fixedFanValues).map(
                                                     ([key, value]) => (
                                                         <div
                                                             key={key}
-                                                            className="space-y-2"
+                                                            className="gap-2"
                                                         >
                                                             <div>
                                                                 {`Quạt ${key.substring(
@@ -702,7 +695,7 @@ function CheckListItem(props) {
                                                     ).map(([key, value]) => (
                                                         <div
                                                             key={key}
-                                                            className="space-y-2"
+                                                            className="space-y-3 gap-y-3"
                                                         >
                                                             <div>
                                                                 {`Quạt ${key.substring(
@@ -740,7 +733,7 @@ function CheckListItem(props) {
                                                 </div>
                                             </ModalHeader>
                                             <ModalBody className="">
-                                                <div className="max-h-[420px] overflow-y-scroll pr-5 xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
+                                                <div className="max-h-[420px] w-full overflow-y-scroll pr-5 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
                                                     <div className="space-y-2 my-4">
                                                         {Object.entries(
                                                             fanValues
