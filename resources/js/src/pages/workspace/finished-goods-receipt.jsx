@@ -61,6 +61,10 @@ import {
     Button,
     Box,
     Text,
+    Skeleton,
+    SkeletonCircle,
+    SkeletonText,
+    Stack,
     useDisclosure,
 } from "@chakra-ui/react";
 import { HiMiniBellAlert } from "react-icons/hi2";
@@ -108,28 +112,28 @@ const groupList = [
     // },
 ];
 
-const groupListOptions = [
-    {
-        value: "TH-X3SC",
-        label: "3. Tổ Sơ chế X3 - TH-X3SC",
-    },
-    {
-        value: "TH-X3TC1",
-        label: "4. Tổ Tinh chế 1 X3 - TH-X3TC1",
-    },
-    {
-        value: "TH-X3TC2",
-        label: "4. Tổ Tinh chế 2 X3 - TH-X3TC2",
-    },
-    {
-        value: "TH-X3S",
-        label: "6. Tổ Sơn X3 - TH-X3S",
-    },
-    // {
-    //     value: "TH-X3ĐG",
-    //     label: "7. Tổ Đóng gói X3 - TH-X3ĐG",
-    // },
-];
+// const groupListOptions = [
+//     {
+//         value: "TH-X3SC",
+//         label: "3. Tổ Sơ chế X3 - TH-X3SC",
+//     },
+//     {
+//         value: "TH-X3TC1",
+//         label: "4. Tổ Tinh chế 1 X3 - TH-X3TC1",
+//     },
+//     {
+//         value: "TH-X3TC2",
+//         label: "4. Tổ Tinh chế 2 X3 - TH-X3TC2",
+//     },
+//     {
+//         value: "TH-X3S",
+//         label: "6. Tổ Sơn X3 - TH-X3S",
+//     },
+//     // {
+//     //     value: "TH-X3ĐG",
+//     //     label: "7. Tổ Đóng gói X3 - TH-X3ĐG",
+//     // },
+// ];
 
 var waitingReceiptNotifications = [
     {
@@ -522,7 +526,8 @@ var exampleData2 = [
 
 function FinishedGoodsReceipt() {
     const navigate = useNavigate();
-    const { loading, setLoading } = useAppContext();
+    // const { loading, setLoading } = useAppContext();
+    const groupSelectRef = useRef();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -542,15 +547,20 @@ function FinishedGoodsReceipt() {
     // });
     // const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [awaitingReception, setAwaitingReception] = useState({
-        "TH-X3SC": [],
-        "TH-X3TC1": [],
-        "TH-X3TC2": [],
-        "TH-X3S": [],
-    });
+    // const [awaitingReception, setAwaitingReception] = useState({
+    //     "TH-X3SC": [],
+    //     "TH-X3TC1": [],
+    //     "TH-X3TC2": [],
+    //     "TH-X3S": [],
+    // });
+    const [awaitingReception, setAwaitingReception] = useState([]);
+
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(false);
 
     const [currentData, setCurrentData] = useState(exampleData);
-
+    const [groupListOptions, setGroupListOptions] = useState([]);
     // const [goodsReceiptList, setGoodsReceiptList] = useState([]);
     // const [goodsReceiptOptions, setGoodsReceiptOptions] = useState([]);
 
@@ -619,100 +629,104 @@ function FinishedGoodsReceipt() {
     //     }
     // };
 
-    const [selectedGroup, setSelectedGroup] = useState(groupListOptions[0]);
+    const [selectedGroup, setSelectedGroup] = useState(null);
 
     const handleReceiptFromChild = (data, receipts) => {
-        const groupId = data?.nextGroup?.id;
-        if (groupId) {
-            setAwaitingReception((prev) => ({
-                ...prev,
-                [groupId]: [...prev[groupId], data],
-            }));
-        }
-        const currentGroupId = data?.fromGroup?.id;
+        const params = {
+            TO: selectedGroup.value,
+        };
+        getDataFollowingGroup(params);
+        // const groupId = data?.nextGroup?.id;
+        // if (groupId) {
+        //     setAwaitingReception((prev) => ({
+        //         ...prev,
+        //         [groupId]: [...prev[groupId], data],
+        //     }));
+        // }
+        // const currentGroupId = data?.fromGroup?.id;
 
-        switch (currentGroupId) {
-            case "TH-X3SC":
-                exampleData = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData);
-                break;
-            case "TH-X3TC1":
-                exampleData1 = exampleData1.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                console.log("Final: ", exampleData1);
-                setCurrentData(exampleData1);
-                break;
-            case "TH-X3TC2":
-                exampleData2 = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingReceipts: [
-                                            ...detail.pendingReceipts,
-                                            receipts,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData2);
-                break;
-        }
-        console.log("Dữ liệu nhận từ con:", data);
+        // switch (currentGroupId) {
+        //     case "TH-X3SC":
+        //         exampleData = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingReceipts: [
+        //                                     ...detail.pendingReceipts,
+        //                                     receipts,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData);
+        //         break;
+        //     case "TH-X3TC1":
+        //         exampleData1 = exampleData1.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingReceipts: [
+        //                                     ...detail.pendingReceipts,
+        //                                     receipts,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         console.log("Final: ", exampleData1);
+        //         setCurrentData(exampleData1);
+        //         break;
+        //     case "TH-X3TC2":
+        //         exampleData2 = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingReceipts: [
+        //                                     ...detail.pendingReceipts,
+        //                                     receipts,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData2);
+        //         break;
+        // }
+        // console.log("Dữ liệu nhận từ con:", data);
         // setDataFromChild(data);
     };
 
@@ -805,176 +819,210 @@ function FinishedGoodsReceipt() {
         console.log("Faults nè: ", faults);
     };
 
-    const handleConfirmReceipt = (index) => {
+    const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
-            switch (selectedGroup.value) {
-                case "TH-X3SC":
-                    exampleData = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    setCurrentData(exampleData);
-                    break;
-                case "TH-X3TC1":
-                    exampleData1 = exampleData1.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    console.log("Final: ", exampleData1);
-                    setCurrentData(exampleData1);
-                    break;
-                case "TH-X3TC2":
-                    exampleData2 = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            stockQuantity:
-                                                Number(detail.stockQuantity) +
-                                                Number(receiptSubItem.amount),
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    setCurrentData(exampleData2);
-                    break;
-            }
-            setAwaitingReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
+            // switch (selectedGroup.value) {
+            //     case "TH-X3SC":
+            //         exampleData = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 stockQuantity:
+            //                                     Number(detail.stockQuantity) +
+            //                                     Number(receiptSubItem.amount),
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         setCurrentData(exampleData);
+            //         break;
+            //     case "TH-X3TC1":
+            //         exampleData1 = exampleData1.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 stockQuantity:
+            //                                     Number(detail.stockQuantity) +
+            //                                     Number(receiptSubItem.amount),
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         console.log("Final: ", exampleData1);
+            //         setCurrentData(exampleData1);
+            //         break;
+            //     case "TH-X3TC2":
+            //         exampleData2 = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 stockQuantity:
+            //                                     Number(detail.stockQuantity) +
+            //                                     Number(receiptSubItem.amount),
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         setCurrentData(exampleData2);
+            //         break;
+            // }
+            // setAwaitingReception((prev) => {
+            //     const groupKey = selectedGroup.value;
+            //     const updatedGroup = awaitingReception[groupKey].filter(
+            //         (item, i) => i !== index
+            //     );
+            //     return {
+            //         ...prev,
+            //         [groupKey]: updatedGroup,
+            //     };
+            // });
+            setAwaitingReception((prev) => (
+                prev.filter(item => item.id !== id)
+            ));
+            toast.success("Ghi nhận thành công.");
         }
-        toast.success("Ghi nhận thành công.");
-        onModalClose();
+        if (awaitingReception.length <= 0) {
+            onModalClose();
+        }
     };
 
-    const handleRejectReceipt = (index, reason) => {
+    const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
-            switch (receiptSubItem?.fromGroup?.id) {
-                case "TH-X3SC":
-                    exampleData = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData);
-                    break;
-                case "TH-X3TC1":
-                    exampleData1 = exampleData1.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData1);
-                    break;
-                case "TH-X3TC2":
-                    exampleData2 = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                itemDetails: item.itemDetails.map((detail) => {
-                                    if (detail.id === receiptSubItem.id) {
-                                        return {
-                                            ...detail,
-                                            returns: [...detail.returns, { ...reason, amount: Number(receiptSubItem.amount) }],
-                                        };
-                                    }
-                                    return detail;
-                                }),
-                            };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData2);
-                    break;
-            }
-            setAwaitingReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
+            // switch (receiptSubItem?.fromGroup?.id) {
+            //     case "TH-X3SC":
+            //         exampleData = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 returns: [
+            //                                     ...detail.returns,
+            //                                     {
+            //                                         ...reason,
+            //                                         amount: Number(
+            //                                             receiptSubItem.amount
+            //                                         ),
+            //                                     },
+            //                                 ],
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData);
+            //         break;
+            //     case "TH-X3TC1":
+            //         exampleData1 = exampleData1.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 returns: [
+            //                                     ...detail.returns,
+            //                                     {
+            //                                         ...reason,
+            //                                         amount: Number(
+            //                                             receiptSubItem.amount
+            //                                         ),
+            //                                     },
+            //                                 ],
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData1);
+            //         break;
+            //     case "TH-X3TC2":
+            //         exampleData2 = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     itemDetails: item.itemDetails.map((detail) => {
+            //                         if (detail.id === receiptSubItem.id) {
+            //                             return {
+            //                                 ...detail,
+            //                                 returns: [
+            //                                     ...detail.returns,
+            //                                     {
+            //                                         ...reason,
+            //                                         amount: Number(
+            //                                             receiptSubItem.amount
+            //                                         ),
+            //                                     },
+            //                                 ],
+            //                             };
+            //                         }
+            //                         return detail;
+            //                     }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData2);
+            //         break;
+            // }
+            setAwaitingReception((prev) => (
+                prev.filter(item => item.id !== id)
+            ));
+            toast.success("Huỷ bỏ & chuyển lại thành công.");
+            // setAwaitingReception((prev) => {
+            //     const groupKey = selectedGroup.value;
+            //     const updatedGroup = awaitingReception[groupKey].filter(
+            //         (item, i) => i !== index
+            //     );
+            //     return {
+            //         ...prev,
+            //         [groupKey]: updatedGroup,
+            //     };
+            // });
         }
-        toast.success("Huỷ bỏ & chuyển lại thành công.");
-        onModalClose();
+        if (awaitingReception.length <= 0) {
+            onModalClose();
+        }
         // console.log("Ra index: ", index);
         // console.log("Thực hiện reject: ", reason);
-        console.log("Ra example data: ", exampleData);
+        // console.log("Ra example data: ", exampleData);
     };
 
     const onFilterTextBoxChanged = async (e) => {
@@ -999,8 +1047,10 @@ function FinishedGoodsReceipt() {
                     return true;
                 }
 
-                const hasSubItem = item.itemDetails.some(
-                    (detail) => detail.subItemName.toLowerCase().includes(input.toLowerCase())
+                const hasSubItem = item.itemDetails.some((detail) =>
+                    detail.subItemName
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
                 );
 
                 return hasSubItem;
@@ -1015,6 +1065,23 @@ function FinishedGoodsReceipt() {
     // }, [awaitingReception]);
 
     useEffect(() => {
+        const getAllGroup = async () => {
+            setLoading(true);
+            try {
+                const res = await productionApi.getGroup();
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name + " - " + item.Code,
+                }));
+                setGroupListOptions(options);
+                // setSelectedGroup(options[0]);
+                groupSelectRef.current.setValue(options[0]);
+            } catch (error) {
+                toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+            }
+            setLoading(false);
+        };
+        getAllGroup();
         // const getFinishedGoods = async () => {
         //     try {
         //         const res = await productionApi.getFinishedGoodsList();
@@ -1045,18 +1112,49 @@ function FinishedGoodsReceipt() {
         }
     }, [loading]);
 
-    useEffect(() => {
-        if (selectedGroup) {
-            if (selectedGroup.value == "TH-X3SC") {
-                setCurrentData(exampleData);
-            } else if (selectedGroup.value == "TH-X3TC1") {
-                setCurrentData(exampleData1);
-            } else if (selectedGroup.value == "TH-X3TC2") {
-                setCurrentData(exampleData2);
+    const getDataFollowingGroup = async (params) => {
+        setLoadingData(true);
+        try {
+            const res = await productionApi.getFinishedGoodsList(params);
+            console.log("Ra kết quả dùm: ", res);
+            if (typeof res?.data === "object") {
+                setData(Object.values(res.data));
             } else {
-                setCurrentData([]);
+                setData([]);
             }
+
+            if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
+                setAwaitingReception(res?.noti_choxacnhan);
+            } else {
+                setAwaitingReception([]);
+            }
+            // setData(res.data);
+        } catch (error) {
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
         }
+        setLoadingData(false);
+    };
+
+    useEffect(() => {
+        (async () => {
+            if (selectedGroup) {
+                // setLoadingData(true);
+                const params = {
+                    TO: selectedGroup.value,
+                };
+                getDataFollowingGroup(params);
+                if (selectedGroup.value == "TH-X3SC") {
+                    setCurrentData(exampleData);
+                } else if (selectedGroup.value == "TH-X3TC1") {
+                    setCurrentData(exampleData1);
+                } else if (selectedGroup.value == "TH-X3TC2") {
+                    setCurrentData(exampleData2);
+                } else {
+                    setCurrentData([]);
+                }
+                // setLoadingData(false);
+            }
+        })();
     }, [selectedGroup]);
 
     return (
@@ -1067,7 +1165,7 @@ function FinishedGoodsReceipt() {
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
                     <div className="mb-4 px-4">
-                        <nav className="flex" ariaLabel="Breadcrumb">
+                        <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
@@ -1082,7 +1180,7 @@ function FinishedGoodsReceipt() {
                                 <li aria-current="page">
                                     <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -1098,7 +1196,7 @@ function FinishedGoodsReceipt() {
                                         </svg>
                                         <Link
                                             to="/workspace"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div>Quản lý sản xuất</div>
                                         </Link>
@@ -1368,7 +1466,7 @@ function FinishedGoodsReceipt() {
                                     placeholder="Tìm kiếm"
                                     className="mt-4"
                             /> */}
-                            <div className="flex w-full justify-end space-x-4">
+                            <div className="flex flex-col sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -1399,23 +1497,20 @@ function FinishedGoodsReceipt() {
                                             id="search"
                                             className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            onInput={
-                                                onFilterTextBoxChanged
-                                            }
+                                            onInput={onFilterTextBoxChanged}
                                             required
                                         />
                                     </div>
                                 </div>
                                 {selectedGroup &&
-                                    awaitingReception[selectedGroup?.value]
-                                        ?.length > 0 && (
+                                    awaitingReception?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
-                                            className="w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                         >
                                             <HiMiniBellAlert className="text-xl" />
                                             <div className="w-full whitespace-nowrap">
-                                                Thông báo: Có phôi chờ nhận
+                                                Thông báo: Có phôi chờ xác nhận
                                             </div>
                                         </button>
                                     )}
@@ -1426,8 +1521,9 @@ function FinishedGoodsReceipt() {
                             </label>
                             <Select
                                 // isDisabled={true}
+                                ref={groupSelectRef}
                                 options={groupListOptions}
-                                defaultValue={groupListOptions[0]}
+                                defaultValue={selectedGroup}
                                 onChange={(value) => setSelectedGroup(value)}
                                 placeholder="Tìm kiếm"
                                 className="mt-3 mb-8"
@@ -1654,14 +1750,19 @@ function FinishedGoodsReceipt() {
                                         </section>
                                     </div>
                                 </div> */}
-
-                                {currentData.length > 0 ? (
-                                    currentData.map((item, index) => (
+                                {loadingData ? (
+                                    <Stack>
+                                        <Skeleton height="250px" />
+                                        <Skeleton height="250px" />
+                                    </Stack>
+                                ) : data.length > 0 ? (
+                                    data.map((item, index) => (
                                         <ItemInput
                                             data={item}
                                             index={index}
                                             key={index}
                                             selectedGroup={selectedGroup}
+                                            // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
                                             onReceiptFromChild={
@@ -1678,6 +1779,30 @@ function FinishedGoodsReceipt() {
                                     </span>
                                 )}
 
+                                {/* {data.length > 0 ? (
+                                    data.map((item, index) => (
+                                        <ItemInput
+                                            data={item}
+                                            index={index}
+                                            key={index}
+                                            selectedGroup={selectedGroup}
+                                            // fatherCode={data}
+                                            nextGroup={item.nextGroup}
+                                            fromGroup={item.fromGroup}
+                                            onReceiptFromChild={
+                                                handleReceiptFromChild
+                                            }
+                                            onRejectFromChild={
+                                                handleRejectFromChild
+                                            }
+                                        />
+                                    ))
+                                ) : (
+                                    <span className="text-center">
+                                        Không có dữ liệu
+                                    </span>
+                                )} */}
+
                                 {/* <ItemInput />
                                 <ItemInput /> */}
                             </div>
@@ -1688,7 +1813,8 @@ function FinishedGoodsReceipt() {
             <Modal
                 isCentered
                 isOpen={isModalOpen}
-                size="4xl"
+                size="full"
+                // size=""
                 onClose={onModalClose}
                 scrollBehavior="inside"
             >
@@ -1701,13 +1827,11 @@ function FinishedGoodsReceipt() {
                     </ModalHeader>
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody>
-                        <div className="flex gap-4 justify-center ">
-                            {selectedGroup &&
-                                awaitingReception[selectedGroup?.value]
-                                    ?.length > 0 &&
-                                awaitingReception[selectedGroup?.value].map(
-                                    (item, index) => (
+                    <ModalBody className="!px-2">
+                        <div className="flex gap-4 justify-center h-full">
+                            {selectedGroup && awaitingReception?.length > 0 ? (
+                                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                    {awaitingReception.map((item, index) => (
                                         <AwaitingReception
                                             type="wood-processing"
                                             data={item}
@@ -1720,8 +1844,11 @@ function FinishedGoodsReceipt() {
                                                 handleRejectReceipt
                                             }
                                         />
-                                    )
-                                )}
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex w-full h-full justify-center items-center">Không có dữ liệu</div>
+                            )}
                         </div>
                     </ModalBody>
                 </ModalContent>
@@ -1746,7 +1873,6 @@ function FinishedGoodsReceipt() {
                                 colorScheme="red"
                                 // onClick={}
                                 ml={3}
-
                             >
                                 Xác nhận
                             </Button>
