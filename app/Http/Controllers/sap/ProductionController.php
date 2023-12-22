@@ -162,6 +162,7 @@ class ProductionController extends Controller
             ->where('notireceipt.type', 0)
             ->where('sanluong.Team', $request->TO)
             ->where('sanluong.Status', '!=', 1)
+            ->where('notireceipt.deleted', '!=', 1)
             ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
             ->select(
                 'sanluong.FatherCode',
@@ -284,7 +285,39 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+        // COLLECT DATA SAP
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSL where "ItemChild"=? and "TO"=?';
+        $stmt = odbc_prepare($conDB, $query);
 
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        if (!odbc_execute($stmt, [$request->ItemCode, $request->Team])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $row = odbc_fetch_array($stmt);
+        $quantity = (float)$row['Quantity'];
+        // collect stock pending
+        $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
+            ->where('notireceipt.type', 0)
+            ->where('sanluong.Team', $request->Team)
+            ->where('sanluong.ItemCode', $request->ItemCode)
+            ->where('sanluong.Status', '!=', 1)
+            ->where('notireceipt.deleted', '!=', 1)
+            ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
+            ->select(
+                'sanluong.FatherCode',
+                'sanluong.ItemCode',
+                'sanluong.Team',
+                'sanluong.NexTeam',
+                DB::raw('sum(Quantity) as Quantity')
+            )->get();
+
+        if ($stockpending->count() > 0) {
+            $quantity = $quantity - $stockpending->first()->Quantity;
+        }
         $factory = [
             [
                 'Factory' => '01',
@@ -333,8 +366,8 @@ class ProductionController extends Controller
             //'Data' => $results, 'SLPHOIDANHAN' => $data,
             'Factorys' => $factory,
             'notifications' => $notfication,
-            'maxQuantity' => 500,
-            'remainQty' => 500
+            'maxQuantity' =>   $quantity,
+            'remainQty' =>   $quantity
         ], 200);
     }
     function listo(Request $request)
