@@ -39,7 +39,7 @@ class UserController extends Controller
             }
 
             return response()->json(['user' => $user, 'UserRole' => $userRole, 'role' => $roles], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Exception $e) {
             // Trả về một response lỗi khi không tìm thấy user
             return response()->json(['error' => 'User not found'], 404);
         }

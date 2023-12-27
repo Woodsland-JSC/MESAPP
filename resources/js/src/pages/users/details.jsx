@@ -91,6 +91,7 @@ const validationSchema = Yup.object().shape({
         .min(1, "Phải có ít nhất 1 quyền")
         .required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
+    username: Yup.string().required("username là bắt buộc"),
     integrationId: Yup.string().required("Integration ID là bắt buộc"),
     factory: Yup.string().required("Nhà máy là bắt buộc"),
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
@@ -258,6 +259,7 @@ function User() {
         firstName: "",
         lastName: "",
         email: "",
+        username: "",
         gender: "",
         password: "",
         authorization: "",
@@ -542,6 +544,7 @@ function User() {
                 first_name: firstName,
                 last_name: lastName,
                 email,
+                username: username,
                 gender,
                 sap_id: sapId,
                 integration_id: integrationId,
@@ -557,6 +560,7 @@ function User() {
                 firstName: firstName || "",
                 lastName: lastName || "",
                 email: email || "",
+                username: username || "",
                 gender,
                 password: "",
                 authorization: role,
@@ -693,37 +697,37 @@ function User() {
     useEffect(() => {
         console.log("Hello");
         // if (isFirstLoading) {
-            const selectedBranch = input.branch;
+        const selectedBranch = input.branch;
 
-            const getFactoriesByBranchId = async () => {
-                setFactoryLoading(true);
-                try {
-                    if (selectedBranch) {
-                        factorySelectRef.current.clearValue();
-                        setFactories([]);
-                        const res = await usersApi.getFactoriesByBranchId(
-                            selectedBranch
-                        );
+        const getFactoriesByBranchId = async () => {
+            setFactoryLoading(true);
+            try {
+                if (selectedBranch) {
+                    factorySelectRef.current.clearValue();
+                    setFactories([]);
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch
+                    );
 
-                        const options = res.map((item) => ({
-                            value: item.Code,
-                            label: item.Name,
-                        }));
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
 
-                        setFactories(options);
-                        setInput((prev) => ({ ...prev, factory: "" }));
-                    } else {
-                        setFactories([]);
-                        // factorySelectRef.current?.selectOption([]);
-                    }
-                } catch (error) {
-                    console.error(error);
+                    setFactories(options);
+                    setInput((prev) => ({ ...prev, factory: "" }));
+                } else {
+                    setFactories([]);
+                    // factorySelectRef.current?.selectOption([]);
                 }
-                setFactoryLoading(false);
-            };
+            } catch (error) {
+                console.error(error);
+            }
+            setFactoryLoading(false);
+        };
 
-            // console.log("Chỗ này call api nè: ", factorySelectRef.current);
-            getFactoriesByBranchId();
+        // console.log("Chỗ này call api nè: ", factorySelectRef.current);
+        getFactoriesByBranchId();
         // }
     }, [input.branch]);
 
@@ -830,7 +834,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.lastName &&
-                                                    touched.lastName ? (
+                                                        touched.lastName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="lastName" />
                                                         </span>
@@ -864,7 +868,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.firstName &&
-                                                    touched.firstName ? (
+                                                        touched.firstName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="firstName" />
                                                         </span>
@@ -902,9 +906,47 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.email &&
-                                                    touched.email ? (
+                                                        touched.email ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="email" />
+                                                        </span>
+                                                    ) : (
+                                                        <span className="block mt-[8px] h-[14.55px]"></span>
+                                                    )}
+                                                </div>
+                                                <div className="w-full">
+                                                    <label
+                                                        htmlFor="email"
+                                                        className="block mb-2 text-md font-medium text-gray-900"
+                                                    >
+                                                        UserName(Mã NV){" "}
+                                                        <span className="text-red-600">
+                                                            *
+                                                        </span>
+                                                    </label>
+                                                    <Field
+                                                        name="username"
+                                                        type="text"
+                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        onChange={(e) => {
+                                                            setFieldValue(
+                                                                "username",
+                                                                e.target.value
+                                                            );
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    username: e
+                                                                        .target
+                                                                        .value,
+                                                                })
+                                                            );
+                                                        }}
+                                                    />
+                                                    {errors.username &&
+                                                        touched.username ? (
+                                                        <span className="text-xs text-red-600">
+                                                            <ErrorMessage name="username" />
                                                         </span>
                                                     ) : (
                                                         <span className="block mt-[8px] h-[14.55px]"></span>
@@ -931,7 +973,7 @@ function User() {
                                                         setInput={setInput}
                                                     />
                                                     {errors.gender &&
-                                                    touched.gender ? (
+                                                        touched.gender ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="gender" />
                                                         </span>
@@ -966,7 +1008,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.password &&
-                                                    touched.password ? (
+                                                        touched.password ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="password" />
                                                         </span>
@@ -1013,7 +1055,7 @@ function User() {
                                                             setInput={setInput}
                                                         /> */}
                                                     {errors.authorization &&
-                                                    touched.authorization ? (
+                                                        touched.authorization ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="authorization" />
                                                         </span>
@@ -1119,7 +1161,7 @@ function User() {
                                                     </label>
                                                 </button>
                                                 {avatar.imgSrc &&
-                                                avatar.imgSrc !=
+                                                    avatar.imgSrc !=
                                                     DefaultAvatar ? (
                                                     <span
                                                         className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
@@ -1199,20 +1241,20 @@ function User() {
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                 disabled
                                                 value="1"
-                                                // onChange={(e) => {
-                                                //     setFieldValue(
-                                                //         "integrationId",
-                                                //         e.target.value
-                                                //     );
-                                                //     setInput((prev) => ({
-                                                //         ...prev,
-                                                //         integrationId:
-                                                //             e.target.value,
-                                                //     }));
-                                                // }}
+                                            // onChange={(e) => {
+                                            //     setFieldValue(
+                                            //         "integrationId",
+                                            //         e.target.value
+                                            //     );
+                                            //     setInput((prev) => ({
+                                            //         ...prev,
+                                            //         integrationId:
+                                            //             e.target.value,
+                                            //     }));
+                                            // }}
                                             />
                                             {errors.integrationId &&
-                                            touched.integrationId ? (
+                                                touched.integrationId ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="integrationId" />
                                                 </span>
@@ -1306,7 +1348,7 @@ function User() {
                                                 }}
                                             /> */}
                                             {errors.factory &&
-                                            touched.factory ? (
+                                                touched.factory ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="factory" />
                                                 </span>

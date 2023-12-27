@@ -12,6 +12,7 @@ use App\Models\SanLuong;
 use App\Models\notireceipt;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Http;
 
 class ProductionController extends Controller
 {
@@ -54,7 +55,7 @@ class ProductionController extends Controller
             }
             if ($request->RejectQty > 0) {
                 $notifi = notireceipt::create([
-                    'text' => 'Số lượng lỗi xác nhận',
+                    'text' => 'Số lượng lỗi chờ xác nhận',
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
@@ -172,7 +173,6 @@ class ProductionController extends Controller
                 DB::raw('sum(Quantity) as Quantity')
             )
 
-
             ->get();
         if ($stockpending !== null) {
             foreach ($results as &$result) {
@@ -196,80 +196,103 @@ class ProductionController extends Controller
         }
         odbc_close($conDB);
 
-        // Reset array keys to consecutive integers
-        // lấy dữ liệu chưa confirm
-        // $notfication = DB::table('sanluong as a')
-        //     ->join('notireceipt as b', function ($join) {
-        //         $join->on('a.id', '=', 'b.baseID')
-        //             ->where('b.deleted', '=', 0);
-        //     })
-        //     ->join('users as c', 'a.create_by', '=', 'c.id')
-        //     ->select(
-        //         'b.*'
-        //     )
-        //     ->where('b.confirm', '=', 0)
-        //     ->where('a.Team', '=', $request->TO)
-        //     ->get();
+        $data = null;
+        $data2 = null;
+
         //data need confirm
-        $data =
-            DB::table('sanluong as a')
-            ->join('notireceipt as b', function ($join) {
-                $join->on('a.id', '=', 'b.baseID')
-                    ->where('b.deleted', '=', 0);
-            })
-            ->join('users as c', 'a.create_by', '=', 'c.id')
-            ->select(
-                'a.FatherCode',
-                'a.ItemCode',
-                'a.ItemName',
-                'a.team',
-                'a.CongDoan',
-                'CDay',
-                'CRong',
-                'CDai',
-                'b.Quantity',
-                'a.created_at',
-                'c.first_name',
-                'c.last_name',
-                'b.text',
-                'b.id',
-                'b.type',
-                'b.confirm'
-            )
-            ->where('b.confirm', '=', 0)
-            ->where('b.type', 0)
-            ->where('a.NexTeam', '=', $request->TO)
-            ->get();
+        if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
+            $data =
+                DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    DB::raw('0 as type'),
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 1)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+        } else {
+            $data =
+                DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    'b.type',
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 0)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+            $data2
+                = DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    'b.type',
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 1)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+        }
+
         //data need handle
-        $data2
-            = DB::table('sanluong as a')
-            ->join('notireceipt as b', function ($join) {
-                $join->on('a.id', '=', 'b.baseID')
-                    ->where('b.deleted', '=', 0);
-            })
-            ->join('users as c', 'a.create_by', '=', 'c.id')
-            ->select(
-                'a.FatherCode',
-                'a.ItemCode',
-                'a.ItemName',
-                'a.team',
-                'a.CongDoan',
-                'CDay',
-                'CRong',
-                'CDai',
-                'b.Quantity',
-                'a.created_at',
-                'c.first_name',
-                'c.last_name',
-                'b.text',
-                'b.id',
-                'b.type',
-                'b.confirm'
-            )
-            ->where('b.confirm', '=', 0)
-            ->where('b.type', 1)
-            ->where('b.team', '=', $request->TO)
-            ->get();
+
         return response()->json([
             'data' => $results,
             'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
@@ -425,48 +448,87 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-            ->select('b.*', 'a.id as notiID')
-            ->where('a.id', $request->id)
-            ->where('b.Status', 0)
-            ->where('a.type', 0)
-            ->where('a.confirm', 0)
-            ->first();
-        if (!$data) {
-            throw new \Exception('data không hợp lệ.');
-        }
-        $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
-        $allocates = $this->allocate($dataallocate, $data->CompleQty);
+        try {
+            DB::beginTransaction();
+            // to bình thường
 
-        foreach ($allocates as $allocate) {
 
-            $body = [
-                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "DocumentLines" => [
-                    "Quantity" => $allocate['Allocate'],
-                    "BaseLine" => 0,
-                    //"WarehouseCode" => $allocate['Warehouse'],
-                    "BaseEntry" => $allocate['DocEntry'],
-                    "BaseType" => 202,
-                    "BatchNumbers" => [
-                        [
-                            "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
-                            "Quantity" => $allocate['Allocate'],
-                            "ItemCode" =>  $allocate['ItemChild'],
-                            "U_CDai" => $allocate['CDai'],
-                            "U_CRong" => $allocate['CRong'],
-                            "U_CDay" => $allocate['CDay'],
-                            "U_Status" => "HD"
+            $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+                ->select('b.*', 'a.id as notiID')
+                ->where('a.id', $request->id)
+                ->where('b.Status', 0)
+                ->where('a.type', 0)
+                ->where('a.confirm', 0)
+                ->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
+            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+            $allocates = $this->allocate($dataallocate, $data->CompleQty);
+
+            foreach ($allocates as $allocate) {
+
+                $body = [
+                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "DocumentLines" => [[
+                        "Quantity" => $allocate['Allocate'],
+                        "BaseLine" => 0,
+                        //"WarehouseCode" => $allocate['Warehouse'],
+                        "BaseEntry" => $allocate['DocEntry'],
+                        "BaseType" => 202,
+                        "BatchNumbers" => [
+                            [
+                                "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
+                                "Quantity" => $allocate['Allocate'],
+                                "ItemCode" =>  $allocate['ItemChild'],
+                                "U_CDai" => $allocate['CDai'],
+                                "U_CRong" => $allocate['CRong'],
+                                "U_CDay" => $allocate['CDay'],
+                                "U_Status" => "HD"
+                            ]
                         ]
-                    ]
-                ]
-            ];
+                    ]]
+                ];
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                $res = $response->json();
+                if ($response->successful()) {
+                    SanLuong::where('id', $data->id)->update(
+                        [
+                            'Status' => 1,
+                            'ObjType' =>   202,
+                            'DocEntry' => $res['DocEntry']
+                        ]
+                    );
+                    notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
+                    return response()->json('success', 200);
+                    DB::commit();
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed receipt',
+                        'error' => $res['error'],
+                        'body' => $body
+                    ], 500);
+                }
+            }
 
-            receiptProductionAlocate::dispatch($body, $data->id, 202);
+            // receiptProductionAlocate::dispatch($body, $data->id, 202);
+
+
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
         }
-        SanLuong::where('id', $data->id)->update(['Status' => -1]);
-        notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
-        return response()->json('success', 200);
     }
     function dsphoipending(Request $request)
     {
