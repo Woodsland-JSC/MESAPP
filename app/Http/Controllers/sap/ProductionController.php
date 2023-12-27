@@ -19,6 +19,7 @@ class ProductionController extends Controller
 
     function receipts(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
@@ -35,6 +36,18 @@ class ProductionController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $toqc="";
+        if (Auth::user()->plant=='TH')
+        {
+            $toqc='TH-QC';
+        }
+        else if (Auth::user()->plant=='TQ')
+        {
+            $toqc='TQ-QC';
+        }
+        else {
+            $toqc='HG-QC';
         }
         try {
             DB::beginTransaction();
@@ -59,7 +72,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
-                    'team' => 'QC',
+                    'team' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1
@@ -463,28 +476,83 @@ class ProductionController extends Controller
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
-            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
-            $allocates = $this->allocate($dataallocate, $data->CompleQty);
+            if( $data->nextTeam != 'TH-QC' || $data->nextTeam != 'TQ-QC' || $data->nextTeam != 'HG-QC')
+            {
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+                $allocates = $this->allocate($dataallocate, $data->CompleQty);
 
-            foreach ($allocates as $allocate) {
+                foreach ($allocates as $allocate) {
 
+                    $body = [
+                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                        "DocumentLines" => [[
+                            "Quantity" => $allocate['Allocate'],
+                            "BaseLine" => 0,
+                            //"WarehouseCode" => $allocate['Warehouse'],
+                            "BaseEntry" => $allocate['DocEntry'],
+                            "BaseType" => 202,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
+                                    "Quantity" => $allocate['Allocate'],
+                                    "ItemCode" =>  $allocate['ItemChild'],
+                                    "U_CDai" => $allocate['CDai'],
+                                    "U_CRong" => $allocate['CRong'],
+                                    "U_CDay" => $allocate['CDay'],
+                                    "U_Status" => "HD"
+                                ]
+                            ]
+                        ]]
+                    ];
+                    $response = Http::withOptions([
+                        'verify' => false,
+                    ])->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Basic ' . BasicAuthToken(),
+                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                    $res = $response->json();
+                    if ($response->successful()) {
+                        SanLuong::where('id', $data->id)->update(
+                            [
+                                'Status' => 1,
+                                'ObjType' =>   202,
+                                'DocEntry' => $res['DocEntry']
+                            ]
+                        );
+                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
+                        return response()->json('success', 200);
+                        DB::commit();
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Failed receipt',
+                            'error' => $res['error'],
+                            'body' => $body
+                        ], 500);
+                    }
+                }
+            }
+            else
+            {
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "DocumentLines" => [[
-                        "Quantity" => $allocate['Allocate'],
-                        "BaseLine" => 0,
-                        //"WarehouseCode" => $allocate['Warehouse'],
-                        "BaseEntry" => $allocate['DocEntry'],
-                        "BaseType" => 202,
+                        "Quantity" => $data->RejectQty,
+                       // "BaseLine" => 0,
+                        "WarehouseCode" => 'W07.1.01',
+                        //"BaseEntry" => $allocate['DocEntry'],
+                        //"BaseType" => 202,
                         "BatchNumbers" => [
                             [
-                                "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
-                                "Quantity" => $allocate['Allocate'],
-                                "ItemCode" =>  $allocate['ItemChild'],
-                                "U_CDai" => $allocate['CDai'],
-                                "U_CRong" => $allocate['CRong'],
-                                "U_CDay" => $allocate['CDay'],
-                                "U_Status" => "HD"
+                                "BatchNumber" => now()->format('YmdHmi'),
+                                "Quantity" =>  $data->RejectQty,
+                                "ItemCode" =>   $data->ItemCode,
+                                "U_CDai" => $data->CDai,
+                                "U_CRong" => $data->CRong,
+                                "U_CDay" =>  $data->CDay,
+                                "U_Status" => "HL",
+                                "U_TO"=> $data->Team
                             ]
                         ]
                     ]]
@@ -501,7 +569,7 @@ class ProductionController extends Controller
                     SanLuong::where('id', $data->id)->update(
                         [
                             'Status' => 1,
-                            'ObjType' =>   202,
+                            'ObjType' =>   59,
                             'DocEntry' => $res['DocEntry']
                         ]
                     );
@@ -517,6 +585,7 @@ class ProductionController extends Controller
                     ], 500);
                 }
             }
+
 
             // receiptProductionAlocate::dispatch($body, $data->id, 202);
 
