@@ -33,6 +33,7 @@ class ProductionController extends Controller
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
+            //'LSX' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -51,7 +52,7 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type','LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SanLuong = SanLuong::create($SLData);
             if ($request->CompleQty > 0) {
@@ -552,7 +553,8 @@ class ProductionController extends Controller
                                 "U_CRong" => $data->CRong,
                                 "U_CDay" =>  $data->CDay,
                                 "U_Status" => "HL",
-                                "U_TO"=> $data->Team
+                                "U_TO"=> $data->Team,
+                                "U_LSX"=> $data->LSX
                             ]
                         ]
                     ]]
