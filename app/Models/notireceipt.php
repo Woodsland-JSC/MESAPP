@@ -25,6 +25,8 @@ class notireceipt extends Model
         'confirm_at',
         'deleteBy',
         'deleted_at',
+        'ObjType',
+        'DocEntry'
     ];
     public function getCreatedAtAttribute($value)
     {
