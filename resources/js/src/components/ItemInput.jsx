@@ -159,6 +159,7 @@ const ItemInput = ({
                 CongDoan: selectedItemDetails.NameTO,
                 NexTeam: selectedItemDetails.TOTT,
                 Type: "CBG",
+                LSX: selectedItemDetails.LSX[0].LSX ,
                 CompleQty: 0,
                 RejectQty: 0,
             };
