@@ -468,16 +468,17 @@ class ProductionController extends Controller
 
 
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-                ->select('b.*', 'a.id as notiID')
+                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
                 ->where('a.id', $request->id)
-                ->where('b.Status', 0)
-                ->where('a.type', 0)
+                //->where('b.Status', 0)
+               // ->where('a.type', 0)
                 ->where('a.confirm', 0)
                 ->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
-            if( $data->nextTeam != 'TH-QC' || $data->nextTeam != 'TQ-QC' || $data->nextTeam != 'HG-QC')
+
+            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
             {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
@@ -517,13 +518,18 @@ class ProductionController extends Controller
                         SanLuong::where('id', $data->id)->update(
                             [
                                 'Status' => 1,
-                                'ObjType' =>   202,
-                                'DocEntry' => $res['DocEntry']
+                                // 'ObjType' =>   202,
+                                // 'DocEntry' => $res['DocEntry']
                             ]
                         );
-                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
-                        return response()->json('success', 200);
+                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
+                        'ObjType' =>   202,
+                        'DocEntry' => $res['DocEntry'],
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi')]);
                         DB::commit();
+                        return response()->json('success', 200);
+
                     } else {
                         DB::rollBack();
                         return response()->json([
@@ -536,12 +542,14 @@ class ProductionController extends Controller
             }
             else
             {
+
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
+                        "ItemCode" =>   $data->ItemCode,
                        // "BaseLine" => 0,
-                        "WarehouseCode" => 'W07.1.01',
+                        "WarehouseCode" => 'W01.1.01',
                         //"BaseEntry" => $allocate['DocEntry'],
                         //"BaseType" => 202,
                         "BatchNumbers" => [
@@ -571,13 +579,19 @@ class ProductionController extends Controller
                     SanLuong::where('id', $data->id)->update(
                         [
                             'Status' => 1,
-                            'ObjType' =>   59,
-                            'DocEntry' => $res['DocEntry']
+                            // 'ObjType' =>   59,
+                            // 'DocEntry' => $res['DocEntry']
                         ]
                     );
-                    notireceipt::where('id', $data->notiID)->update(['confirm' => 1, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi')]);
-                    return response()->json('success', 200);
+                    notireceipt::where('id', $request->id)->
+                    update(['confirm' => 1,
+                    'ObjType' =>  59,
+                    'DocEntry' => $res['DocEntry'],
+                    'confirmBy' => Auth::user()->id,
+                    'confirm_at' => now()->format('YmdHmi')]);
                     DB::commit();
+                    return response()->json('success', 200);
+
                 } else {
                     DB::rollBack();
                     return response()->json([
