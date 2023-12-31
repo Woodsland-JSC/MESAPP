@@ -13,6 +13,7 @@ use App\Models\notireceipt;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
+use Predis\Command\Redis\AUTH as RedisAUTH;
 
 class ProductionController extends Controller
 {
@@ -480,30 +481,18 @@ class ProductionController extends Controller
 
             if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
             {
-                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
-                $allocates = $this->allocate($dataallocate, $data->CompleQty);
-
-                foreach ($allocates as $allocate) {
-
                     $body = [
-                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "DocumentLines" => [[
-                            "Quantity" => $allocate['Allocate'],
-                            "BaseLine" => 0,
-                            //"WarehouseCode" => $allocate['Warehouse'],
-                            "BaseEntry" => $allocate['DocEntry'],
-                            "BaseType" => 202,
-                            "BatchNumbers" => [
-                                [
-                                    "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
-                                    "Quantity" => $allocate['Allocate'],
-                                    "ItemCode" =>  $allocate['ItemChild'],
-                                    "U_CDai" => $allocate['CDai'],
-                                    "U_CRong" => $allocate['CRong'],
-                                    "U_CDay" => $allocate['CDay'],
-                                    "U_Status" => "HD"
-                                ]
-                            ]
+                        "U_BaseEntry" =>$data->notiID,
+                        "U_FatherCode" => $data->FatherCode,
+                        "U_TO" =>  $data->Team,
+                        "U_GRID" =>  $data->LSX,
+                        "U_NM"=> auth()->user()->plant,
+                        "U_Type"=> "CBG",
+                        "U_Status"=> "Draft",
+                        "U_Error" => "N",
+                        "V_DGP1Collection" => [[
+                            "U_ItemCode" => $data->ItemCode,
+                            "U_Qty" => $data->RejectQty,
                         ]]
                     ];
                     $response = Http::withOptions([
@@ -512,14 +501,12 @@ class ProductionController extends Controller
                         'Content-Type' => 'application/json',
                         'Accept' => 'application/json',
                         'Authorization' => 'Basic ' . BasicAuthToken(),
-                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
                     $res = $response->json();
                     if ($response->successful()) {
                         SanLuong::where('id', $data->id)->update(
                             [
                                 'Status' => 1,
-                                // 'ObjType' =>   202,
-                                // 'DocEntry' => $res['DocEntry']
                             ]
                         );
                         notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
@@ -538,33 +525,22 @@ class ProductionController extends Controller
                             'body' => $body
                         ], 500);
                     }
-                }
             }
             else
             {
 
                 $body = [
-                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "DocumentLines" => [[
-                        "Quantity" => $data->RejectQty,
-                        "ItemCode" =>   $data->ItemCode,
-                       // "BaseLine" => 0,
-                        "WarehouseCode" => 'W01.1.01',
-                        //"BaseEntry" => $allocate['DocEntry'],
-                        //"BaseType" => 202,
-                        "BatchNumbers" => [
-                            [
-                                "BatchNumber" => now()->format('YmdHmi'),
-                                "Quantity" =>  $data->RejectQty,
-                                "ItemCode" =>   $data->ItemCode,
-                                "U_CDai" => $data->CDai,
-                                "U_CRong" => $data->CRong,
-                                "U_CDay" =>  $data->CDay,
-                                "U_Status" => "HL",
-                                "U_TO"=> $data->Team,
-                                "U_LSX"=> $data->LSX
-                            ]
-                        ]
+                    "U_BaseEntry" =>$data->notiID,
+                    "U_FatherCode" => $data->FatherCode,
+                    "U_TO" =>  $data->Team,
+                    "U_GRID" =>  $data->LSX,
+                    "U_NM"=> auth()->user()->plant,
+                    "U_Type"=> "CBG",
+                    "U_Status"=> "Draft",
+                    "U_Error" => "Y",
+                    "V_DGP1Collection" => [[
+                        "U_ItemCode" => $data->ItemCode,
+                        "U_Qty" => $data->CompleQty,
                     ]]
                 ];
                 $response = Http::withOptions([
@@ -573,14 +549,12 @@ class ProductionController extends Controller
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
                     'Authorization' => 'Basic ' . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
                 $res = $response->json();
                 if ($response->successful()) {
                     SanLuong::where('id', $data->id)->update(
                         [
                             'Status' => 1,
-                            // 'ObjType' =>   59,
-                            // 'DocEntry' => $res['DocEntry']
                         ]
                     );
                     notireceipt::where('id', $request->id)->
@@ -601,10 +575,7 @@ class ProductionController extends Controller
                     ], 500);
                 }
             }
-
-
             // receiptProductionAlocate::dispatch($body, $data->id, 202);
-
 
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
@@ -689,5 +660,612 @@ class ProductionController extends Controller
         $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
 
         return array_values($filteredData);
+    }
+    // function accept_OLD (Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id' => 'required',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     try {
+    //         DB::beginTransaction();
+    //         // to bình thường
+
+
+    //         $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+    //             ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+    //             ->where('a.id', $request->id)
+    //             //->where('b.Status', 0)
+    //            // ->where('a.type', 0)
+    //             ->where('a.confirm', 0)
+    //             ->first();
+    //         if (!$data) {
+    //             throw new \Exception('data không hợp lệ.');
+    //         }
+
+    //         if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
+    //         {
+    //             $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+    //             $allocates = $this->allocate($dataallocate, $data->CompleQty);
+
+    //             foreach ($allocates as $allocate) {
+
+    //                 $body = [
+    //                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+    //                     "DocumentLines" => [[
+    //                         "Quantity" => $allocate['Allocate'],
+    //                         "BaseLine" => 0,
+    //                         //"WarehouseCode" => $allocate['Warehouse'],
+    //                         "BaseEntry" => $allocate['DocEntry'],
+    //                         "BaseType" => 202,
+    //                         "BatchNumbers" => [
+    //                             [
+    //                                 "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
+    //                                 "Quantity" => $allocate['Allocate'],
+    //                                 "ItemCode" =>  $allocate['ItemChild'],
+    //                                 "U_CDai" => $allocate['CDai'],
+    //                                 "U_CRong" => $allocate['CRong'],
+    //                                 "U_CDay" => $allocate['CDay'],
+    //                                 "U_Status" => "HD"
+    //                             ]
+    //                         ]
+    //                     ]]
+    //                 ];
+    //                 $response = Http::withOptions([
+    //                     'verify' => false,
+    //                 ])->withHeaders([
+    //                     'Content-Type' => 'application/json',
+    //                     'Accept' => 'application/json',
+    //                     'Authorization' => 'Basic ' . BasicAuthToken(),
+    //                 ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+    //                 $res = $response->json();
+    //                 if ($response->successful()) {
+    //                     SanLuong::where('id', $data->id)->update(
+    //                         [
+    //                             'Status' => 1,
+    //                             // 'ObjType' =>   202,
+    //                             // 'DocEntry' => $res['DocEntry']
+    //                         ]
+    //                     );
+    //                     notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
+    //                     'ObjType' =>   202,
+    //                     'DocEntry' => $res['DocEntry'],
+    //                     'confirmBy' => Auth::user()->id,
+    //                     'confirm_at' => now()->format('YmdHmi')]);
+    //                     DB::commit();
+    //                     return response()->json('success', 200);
+
+    //                 } else {
+    //                     DB::rollBack();
+    //                     return response()->json([
+    //                         'message' => 'Failed receipt',
+    //                         'error' => $res['error'],
+    //                         'body' => $body
+    //                     ], 500);
+    //                 }
+    //             }
+    //         }
+    //         else
+    //         {
+
+    //             $body = [
+    //                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+    //                 "DocumentLines" => [[
+    //                     "Quantity" => $data->RejectQty,
+    //                     "ItemCode" =>   $data->ItemCode,
+    //                    // "BaseLine" => 0,
+    //                     "WarehouseCode" => 'W01.1.01',
+    //                     //"BaseEntry" => $allocate['DocEntry'],
+    //                     //"BaseType" => 202,
+    //                     "BatchNumbers" => [
+    //                         [
+    //                             "BatchNumber" => now()->format('YmdHmi'),
+    //                             "Quantity" =>  $data->RejectQty,
+    //                             "ItemCode" =>   $data->ItemCode,
+    //                             "U_CDai" => $data->CDai,
+    //                             "U_CRong" => $data->CRong,
+    //                             "U_CDay" =>  $data->CDay,
+    //                             "U_Status" => "HL",
+    //                             "U_TO"=> $data->Team,
+    //                             "U_LSX"=> $data->LSX
+    //                         ]
+    //                     ]
+    //                 ]]
+    //             ];
+    //             $response = Http::withOptions([
+    //                 'verify' => false,
+    //             ])->withHeaders([
+    //                 'Content-Type' => 'application/json',
+    //                 'Accept' => 'application/json',
+    //                 'Authorization' => 'Basic ' . BasicAuthToken(),
+    //             ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+    //             $res = $response->json();
+    //             if ($response->successful()) {
+    //                 SanLuong::where('id', $data->id)->update(
+    //                     [
+    //                         'Status' => 1,
+    //                         // 'ObjType' =>   59,
+    //                         // 'DocEntry' => $res['DocEntry']
+    //                     ]
+    //                 );
+    //                 notireceipt::where('id', $request->id)->
+    //                 update(['confirm' => 1,
+    //                 'ObjType' =>  59,
+    //                 'DocEntry' => $res['DocEntry'],
+    //                 'confirmBy' => Auth::user()->id,
+    //                 'confirm_at' => now()->format('YmdHmi')]);
+    //                 DB::commit();
+    //                 return response()->json('success', 200);
+
+    //             } else {
+    //                 DB::rollBack();
+    //                 return response()->json([
+    //                     'message' => 'Failed receipt',
+    //                     'error' => $res['error'],
+    //                     'body' => $body
+    //                 ], 500);
+    //             }
+    //         }
+
+
+    //         // receiptProductionAlocate::dispatch($body, $data->id, 202);
+
+
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+    function acceptVCN(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        try {
+            DB::beginTransaction();
+            // to bình thường
+
+
+            $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+                ->where('a.id', $request->id)
+                //->where('b.Status', 0)
+               // ->where('a.type', 0)
+                ->where('a.confirm', 0)
+                ->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
+
+            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
+            {
+                    $body = [
+                        "U_BaseEntry" =>$data->notiID,
+                        "U_FatherCode" => $data->FatherCode,
+                        "U_TO" =>  $data->Team,
+                        "U_GRID" =>  $data->LSX,
+                        "U_NM"=> auth()->user()->plant,
+                        "U_Type"=> "VCN",
+                        "U_Status"=> "Draft",
+                        "U_Error" => "N",
+                        "V_DGP1Collection" => [[
+                            "U_ItemCode" => $data->ItemCode,
+                            "U_Qty" => $data->RejectQty,
+                        ]]
+                    ];
+                    $response = Http::withOptions([
+                        'verify' => false,
+                    ])->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Basic ' . BasicAuthToken(),
+                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
+                    $res = $response->json();
+                    if ($response->successful()) {
+                        SanLuong::where('id', $data->id)->update(
+                            [
+                                'Status' => 1,
+                            ]
+                        );
+                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
+                        'ObjType' =>   202,
+                        'DocEntry' => $res['DocEntry'],
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi')]);
+                        DB::commit();
+                        return response()->json('success', 200);
+
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Failed receipt',
+                            'error' => $res['error'],
+                            'body' => $body
+                        ], 500);
+                    }
+            }
+            else
+            {
+
+                $body = [
+                    "U_BaseEntry" =>$data->notiID,
+                    "U_FatherCode" => $data->FatherCode,
+                    "U_TO" =>  $data->Team,
+                    "U_GRID" =>  $data->LSX,
+                    "U_NM"=> auth()->user()->plant,
+                    "U_Type"=> "CBG",
+                    "U_Status"=> "Draft",
+                    "U_Error" => "Y",
+                    "V_DGP1Collection" => [[
+                        "U_ItemCode" => $data->ItemCode,
+                        "U_Qty" => $data->CompleQty,
+                    ]]
+                ];
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
+                $res = $response->json();
+                if ($response->successful()) {
+                    SanLuong::where('id', $data->id)->update(
+                        [
+                            'Status' => 1,
+                        ]
+                    );
+                    notireceipt::where('id', $request->id)->
+                    update(['confirm' => 1,
+                    'ObjType' =>  59,
+                    'DocEntry' => $res['DocEntry'],
+                    'confirmBy' => Auth::user()->id,
+                    'confirm_at' => now()->format('YmdHmi')]);
+                    DB::commit();
+                    return response()->json('success', 200);
+
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed receipt',
+                        'error' => $res['error'],
+                        'body' => $body
+                    ], 500);
+                }
+            }
+            // receiptProductionAlocate::dispatch($body, $data->id, 202);
+
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function index_vcn(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'TO' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from UV_GHINHANSLVCN where "TO"=?';
+        $stmt = odbc_prepare($conDB, $query);
+
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        if (!odbc_execute($stmt, [$request->TO])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = [];
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $key = $row['SPDICH'];
+
+            if (!isset($results[$key])) {
+                $results[$key] = [
+                    'SPDICH' => $row['SPDICH'],
+                    'NameSPDich' => $row['NameSPDich'],
+                    'Details' => [],
+                ];
+            }
+
+            $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'];
+
+            $details = [
+                'ItemChild' => $row['ItemChild'],
+                'ChildName' => $row['ChildName'],
+                'CDay' => $row['CDay'],
+                'CRong' => $row['CRong'],
+                'CDai' => $row['CDai'],
+                'LSX' => [
+                    [
+                        'LSX' => $row['LSX'],
+                        'SanLuong' => $row['SanLuong'],
+                        'DaLam' => $row['DaLam'],
+                        'Loi' => $row['Loi'],
+                        'ConLai' => $row['ConLai'],
+                    ],
+                ],
+                'totalsanluong' => $row['SanLuong'],
+                'totalDaLam' => $row['DaLam'],
+                'totalLoi' => $row['Loi'],
+                'totalConLai' => $row['ConLai'],
+            ];
+
+            // Check if the composite key already exists
+            $compositeKeyExists = false;
+            foreach ($results[$key]['Details'] as &$existingDetails) {
+                $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'];
+                if ($existingKey === $detailsKey) {
+                    $existingDetails['LSX'][] = $details['LSX'][0];
+                    $existingDetails['totalsanluong'] += $row['SanLuong'];
+                    $existingDetails['totalDaLam'] += $row['DaLam'];
+                    $existingDetails['totalLoi'] += $row['Loi'];
+                    $existingDetails['totalConLai'] += $row['ConLai'];
+                    $compositeKeyExists = true;
+                    break;
+                }
+            }
+
+            if (!$compositeKeyExists) {
+                $results[$key]['Details'][] = array_merge($details, [
+                    'TO' => $row['TO'],
+                    'NameTO' => $row['NameTO'],
+                    'TOTT' => $row['TOTT'],
+                    'NameTOTT' => $row['NameTOTT']
+                ]);
+            }
+        }
+        // collect stock pending
+        $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
+            ->where('notireceipt.type', 0)
+            ->where('sanluong.Team', $request->TO)
+            ->where('sanluong.Status', '!=', 1)
+            ->where('notireceipt.deleted', '!=', 1)
+            ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
+            ->select(
+                'sanluong.FatherCode',
+                'sanluong.ItemCode',
+                'sanluong.Team',
+                'sanluong.NexTeam',
+                DB::raw('sum(Quantity) as Quantity')
+            )
+
+            ->get();
+        if ($stockpending !== null) {
+            foreach ($results as &$result) {
+
+                $SPDICH = $result['SPDICH'];
+                foreach ($result['Details'] as &$details) {
+                    $ItemChild = $details['ItemChild'];
+                    $TO = $details['TO'];
+
+                    // Find the corresponding stock pending entry
+                    $stockEntry = $stockpending->first(function ($entry) use ($SPDICH, $ItemChild, $TO) {
+                        return $entry['FatherCode'] == $SPDICH && $entry['ItemCode'] == $ItemChild && $entry['Team'] == $TO;
+                    });
+
+                    // Update totalConLai if the stock entry is found
+                    if ($stockEntry !== null) {
+                        $details['totalConLai'] = $details['totalConLai'] - $stockEntry['Quantity'];
+                    }
+                }
+            }
+        }
+        odbc_close($conDB);
+
+        $data = null;
+        $data2 = null;
+
+        //data need confirm
+        if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
+            $data =
+                DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    DB::raw('0 as type'),
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 1)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+        } else {
+            $data =
+                DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    'b.type',
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 0)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+            $data2
+                = DB::table('sanluong as a')
+                ->join('notireceipt as b', function ($join) {
+                    $join->on('a.id', '=', 'b.baseID')
+                        ->where('b.deleted', '=', 0);
+                })
+                ->join('users as c', 'a.create_by', '=', 'c.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'CDay',
+                    'CRong',
+                    'CDai',
+                    'b.Quantity',
+                    'a.created_at',
+                    'c.first_name',
+                    'c.last_name',
+                    'b.text',
+                    'b.id',
+                    'b.type',
+                    'b.confirm'
+                )
+                ->where('b.confirm', '=', 0)
+                ->where('b.type', 1)
+                ->where('b.team', '=', $request->TO)
+                ->get();
+        }
+
+        //data need handle
+
+        return response()->json([
+            'data' => $results,
+            'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
+        ], 200);
+    }
+    function viewdetailVCN(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'FatherCode' => 'required|string|max:254',
+            'ItemCode' => 'required|string|max:254',
+            'Team' => 'required|string|max:254',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        // COLLECT DATA SAP
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSLVCN where "ItemChild"=? and "TO"=?';
+        $stmt = odbc_prepare($conDB, $query);
+
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        if (!odbc_execute($stmt, [$request->ItemCode, $request->Team])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $row = odbc_fetch_array($stmt);
+        $quantity = (float)$row['Quantity'];
+        // collect stock pending
+        $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
+            ->where('notireceipt.type', 0)
+            ->where('sanluong.Team', $request->Team)
+            ->where('sanluong.ItemCode', $request->ItemCode)
+            ->where('sanluong.Status', '!=', 1)
+            ->where('notireceipt.deleted', '!=', 1)
+            ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
+            ->select(
+                'sanluong.FatherCode',
+                'sanluong.ItemCode',
+                'sanluong.Team',
+                'sanluong.NexTeam',
+                DB::raw('sum(Quantity) as Quantity')
+            )->get();
+
+        if ($stockpending->count() > 0) {
+            $quantity = $quantity - $stockpending->first()->Quantity;
+        }
+        $factory = [
+            [
+                'Factory' => '01',
+                'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+            ],
+            [
+                'Factory' => '02',
+                'FactoryName' => 'Nhà Máy CBG Yên sơn'
+            ],
+            [
+                'Factory' => '03',
+                'FactoryName' => 'Nhà Máy CBG Thái Bình'
+            ],
+        ];
+        // lấy dữ liệu chưa confirm
+        $notfication = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '!=', 1)
+            ->where('a.FatherCode', '=', $request->FatherCode)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->Team)
+            ->get();
+
+        return response()->json([
+            //'Data' => $results, 'SLPHOIDANHAN' => $data,
+            'Factorys' => $factory,
+            'notifications' => $notfication,
+            'maxQuantity' =>   $quantity,
+            'remainQty' =>   $quantity
+        ], 200);
     }
 }
