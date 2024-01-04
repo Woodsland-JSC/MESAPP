@@ -762,13 +762,13 @@ class ProductionController extends Controller
                 }
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "U_LSX"=> $data->LSX,
+                    "U_TO"=> $data->Team,
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
                         "ItemCode" =>   $data->ItemCode,
                        // "BaseLine" => 0,
                         "WarehouseCode" =>  $warehouse,
-                        "U_LSX"=> $data->LSX,
-                        "U_TO"=> $data->Team,
                         //"BaseEntry" => $allocate['DocEntry'],
                         //"BaseType" => 202,
                         "BatchNumbers" => [
