@@ -455,7 +455,7 @@ class ProductionController extends Controller
         return response()->json('success', 200);
     }
 
-    function accept(Request $request)
+    function accept_bk(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -661,167 +661,173 @@ class ProductionController extends Controller
 
         return array_values($filteredData);
     }
-    // function accept_OLD (Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'id' => 'required',
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
-    //     }
-    //     try {
-    //         DB::beginTransaction();
-    //         // to bình thường
+    function accept (Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        try {
+            DB::beginTransaction();
+            // to bình thường
 
 
-    //         $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-    //             ->select('b.*', 'a.id as notiID','a.team as NextTeam')
-    //             ->where('a.id', $request->id)
-    //             //->where('b.Status', 0)
-    //            // ->where('a.type', 0)
-    //             ->where('a.confirm', 0)
-    //             ->first();
-    //         if (!$data) {
-    //             throw new \Exception('data không hợp lệ.');
-    //         }
+            $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+                ->where('a.id', $request->id)
+                //->where('b.Status', 0)
+               // ->where('a.type', 0)
+                ->where('a.confirm', 0)
+                ->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
 
-    //         if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
-    //         {
-    //             $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
-    //             $allocates = $this->allocate($dataallocate, $data->CompleQty);
+            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
+            {
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+                $allocates = $this->allocate($dataallocate, $data->CompleQty);
+                foreach ($allocates as $allocate) {
 
-    //             foreach ($allocates as $allocate) {
+                    $body = [
+                        "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                        "DocumentLines" => [[
+                            "Quantity" => $allocate['Allocate'],
+                            "TransactionType"=>"C",
+                            "BaseEntry" => $allocate['DocEntry'],
+                            "BaseType" => 202,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                    "Quantity" => $allocate['Allocate'],
+                                    "ItemCode" =>  $allocate['ItemChild'],
+                                    "U_CDai" => $allocate['CDai'],
+                                    "U_CRong" => $allocate['CRong'],
+                                    "U_CDay" => $allocate['CDay'],
+                                    "U_Status" => "HD"
+                                ]
+                            ]
+                        ]]
+                    ];
+                    $response = Http::withOptions([
+                        'verify' => false,
+                    ])->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Basic ' . BasicAuthToken(),
+                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                    $res = $response->json();
+                    if ($response->successful()) {
+                        SanLuong::where('id', $data->id)->update(
+                            [
+                                'Status' => 1,
+                                // 'ObjType' =>   202,
+                                // 'DocEntry' => $res['DocEntry']
+                            ]
+                        );
+                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
+                        'ObjType' =>   202,
+                        'DocEntry' => $res['DocEntry'],
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi')]);
+                        DB::commit();
+                        return response()->json('success', 200);
 
-    //                 $body = [
-    //                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-    //                     "DocumentLines" => [[
-    //                         "Quantity" => $allocate['Allocate'],
-    //                         "BaseLine" => 0,
-    //                         //"WarehouseCode" => $allocate['Warehouse'],
-    //                         "BaseEntry" => $allocate['DocEntry'],
-    //                         "BaseType" => 202,
-    //                         "BatchNumbers" => [
-    //                             [
-    //                                 "BatchNumber" => now()->format('Ymd') . $allocate['DocEntry'],
-    //                                 "Quantity" => $allocate['Allocate'],
-    //                                 "ItemCode" =>  $allocate['ItemChild'],
-    //                                 "U_CDai" => $allocate['CDai'],
-    //                                 "U_CRong" => $allocate['CRong'],
-    //                                 "U_CDay" => $allocate['CDay'],
-    //                                 "U_Status" => "HD"
-    //                             ]
-    //                         ]
-    //                     ]]
-    //                 ];
-    //                 $response = Http::withOptions([
-    //                     'verify' => false,
-    //                 ])->withHeaders([
-    //                     'Content-Type' => 'application/json',
-    //                     'Accept' => 'application/json',
-    //                     'Authorization' => 'Basic ' . BasicAuthToken(),
-    //                 ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
-    //                 $res = $response->json();
-    //                 if ($response->successful()) {
-    //                     SanLuong::where('id', $data->id)->update(
-    //                         [
-    //                             'Status' => 1,
-    //                             // 'ObjType' =>   202,
-    //                             // 'DocEntry' => $res['DocEntry']
-    //                         ]
-    //                     );
-    //                     notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
-    //                     'ObjType' =>   202,
-    //                     'DocEntry' => $res['DocEntry'],
-    //                     'confirmBy' => Auth::user()->id,
-    //                     'confirm_at' => now()->format('YmdHmi')]);
-    //                     DB::commit();
-    //                     return response()->json('success', 200);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Failed receipt',
+                            'error' => $res['error'],
+                            'body' => $body
+                        ], 500);
+                    }
+                }
+            }
+            else
+            {
+                $warehouse="";
+                if($data->NextTeam='TH-QC')
+                {
+                    $warehouse='W07.1.01';
+                }
+                else if($data->NextTeam='TQ-QC')
+                {
+                    $warehouse='W06.1.01';
+                }
+                else
+                {
+                    $warehouse='W05.1.01';
+                }
+                $body = [
+                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "DocumentLines" => [[
+                        "Quantity" => $data->RejectQty,
+                        "ItemCode" =>   $data->ItemCode,
+                       // "BaseLine" => 0,
+                        "WarehouseCode" =>  $warehouse,
+                        //"BaseEntry" => $allocate['DocEntry'],
+                        //"BaseType" => 202,
+                        "BatchNumbers" => [
+                            [
+                                "BatchNumber" => now()->format('YmdHmi'),
+                                "Quantity" =>  $data->RejectQty,
+                                "ItemCode" =>   $data->ItemCode,
+                                "U_CDai" => $data->CDai,
+                                "U_CRong" => $data->CRong,
+                                "U_CDay" =>  $data->CDay,
+                                "U_Status" => "HL",
+                                "U_TO"=> $data->Team,
+                                "U_LSX"=> $data->LSX
+                            ]
+                        ]
+                    ]]
+                ];
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                $res = $response->json();
+                if ($response->successful()) {
+                    SanLuong::where('id', $data->id)->update(
+                        [
+                            'Status' => 1,
+                            // 'ObjType' =>   59,
+                            // 'DocEntry' => $res['DocEntry']
+                        ]
+                    );
+                    notireceipt::where('id', $request->id)->
+                    update(['confirm' => 1,
+                    'ObjType' =>  59,
+                    'DocEntry' => $res['DocEntry'],
+                    'confirmBy' => Auth::user()->id,
+                    'confirm_at' => now()->format('YmdHmi')]);
+                    DB::commit();
+                    return response()->json('success', 200);
 
-    //                 } else {
-    //                     DB::rollBack();
-    //                     return response()->json([
-    //                         'message' => 'Failed receipt',
-    //                         'error' => $res['error'],
-    //                         'body' => $body
-    //                     ], 500);
-    //                 }
-    //             }
-    //         }
-    //         else
-    //         {
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed receipt',
+                        'error' => $res['error'],
+                        'body' => $body
+                    ], 500);
+                }
+            }
 
-    //             $body = [
-    //                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-    //                 "DocumentLines" => [[
-    //                     "Quantity" => $data->RejectQty,
-    //                     "ItemCode" =>   $data->ItemCode,
-    //                    // "BaseLine" => 0,
-    //                     "WarehouseCode" => 'W01.1.01',
-    //                     //"BaseEntry" => $allocate['DocEntry'],
-    //                     //"BaseType" => 202,
-    //                     "BatchNumbers" => [
-    //                         [
-    //                             "BatchNumber" => now()->format('YmdHmi'),
-    //                             "Quantity" =>  $data->RejectQty,
-    //                             "ItemCode" =>   $data->ItemCode,
-    //                             "U_CDai" => $data->CDai,
-    //                             "U_CRong" => $data->CRong,
-    //                             "U_CDay" =>  $data->CDay,
-    //                             "U_Status" => "HL",
-    //                             "U_TO"=> $data->Team,
-    //                             "U_LSX"=> $data->LSX
-    //                         ]
-    //                     ]
-    //                 ]]
-    //             ];
-    //             $response = Http::withOptions([
-    //                 'verify' => false,
-    //             ])->withHeaders([
-    //                 'Content-Type' => 'application/json',
-    //                 'Accept' => 'application/json',
-    //                 'Authorization' => 'Basic ' . BasicAuthToken(),
-    //             ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
-    //             $res = $response->json();
-    //             if ($response->successful()) {
-    //                 SanLuong::where('id', $data->id)->update(
-    //                     [
-    //                         'Status' => 1,
-    //                         // 'ObjType' =>   59,
-    //                         // 'DocEntry' => $res['DocEntry']
-    //                     ]
-    //                 );
-    //                 notireceipt::where('id', $request->id)->
-    //                 update(['confirm' => 1,
-    //                 'ObjType' =>  59,
-    //                 'DocEntry' => $res['DocEntry'],
-    //                 'confirmBy' => Auth::user()->id,
-    //                 'confirm_at' => now()->format('YmdHmi')]);
-    //                 DB::commit();
-    //                 return response()->json('success', 200);
-
-    //             } else {
-    //                 DB::rollBack();
-    //                 return response()->json([
-    //                     'message' => 'Failed receipt',
-    //                     'error' => $res['error'],
-    //                     'body' => $body
-    //                 ], 500);
-    //             }
-    //         }
-
-
-    //         // receiptProductionAlocate::dispatch($body, $data->id, 202);
-
-
-    //     } catch (\Exception | QueryException $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'error' => false,
-    //             'status_code' => 500,
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
     function acceptVCN(Request $request)
     {
         $validator = Validator::make($request->all(), [
