@@ -442,8 +442,8 @@ class ProductionController extends Controller
         $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
             ->select('b.*')
             ->where('a.id', $request->id)
-            ->where('b.Status', 0)
-            ->where('a.type', 0)
+           // ->where('b.Status', 0)
+          //  ->where('a.type', 0)
             ->where('a.confirm', 0)
             ->first();
 
