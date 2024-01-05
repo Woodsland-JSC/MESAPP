@@ -609,6 +609,7 @@ function PlywoodFinishedGoodsReceipt() {
 
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupListOptions, setGroupListOptions] = useState([]);
+    const [groupList, setGroupList] = useState([]);
 
     // const [goodsReceiptList, setGoodsReceiptList] = useState([]);
     // const [goodsReceiptOptions, setGoodsReceiptOptions] = useState([]);
@@ -679,6 +680,7 @@ function PlywoodFinishedGoodsReceipt() {
     // };
 
     const [selectedGroup, setSelectedGroup] = useState(groupListOptions[0]);
+    const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -1326,6 +1328,7 @@ function PlywoodFinishedGoodsReceipt() {
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
                 }));
+                setGroupList(res);
                 setGroupListOptions(options);
                 // setSelectedGroup(options[0]);
                 groupSelectRef?.current?.setValue(options[0]);
@@ -1395,6 +1398,12 @@ function PlywoodFinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
+                const isQC = groupList.find((group) => group.Code == selectedGroup)?.QC;
+                if (isQC) {
+                    setIsQualityCheck(true);
+                } else {
+                    setIsQualityCheck(false);
+                }
                 // setLoadingData(true);
                 const params = {
                     TO: selectedGroup.value,
@@ -2031,7 +2040,7 @@ function PlywoodFinishedGoodsReceipt() {
 
                                 {/* Này là dữ liệu tạm nè*/}
 
-                                {loadingData ? (
+                                {/* {loadingData ? (
                                     <Stack>
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
@@ -2058,11 +2067,11 @@ function PlywoodFinishedGoodsReceipt() {
                                     <span className="text-center">
                                         Không có dữ liệu
                                     </span>
-                                )}
+                                )} */}
 
                                 {/* Này là đúng đắn nè*/}
 
-                                {/* {loadingData ? (
+                                {loadingData ? (
                                     <Stack>
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
@@ -2077,6 +2086,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
+                                            isQualityCheck={isQualityCheck}
                                             onReceiptFromChild={
                                                 handleReceiptFromChild
                                             }
@@ -2089,7 +2099,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     <span className="text-center">
                                         Không có dữ liệu
                                     </span>
-                                )} */}
+                                )}
 
                                 {/* Này của dữ liệu test */}
 
