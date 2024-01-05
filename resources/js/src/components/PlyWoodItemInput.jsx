@@ -37,6 +37,9 @@ import { AiTwotoneDelete } from "react-icons/ai";
 import productionApi from "../api/productionApi";
 import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
+import { formatNumber } from "../utils/numberFormat";
+import Loader from "./Loader";
+import moment from "moment";
 
 const factories = [
     {
@@ -75,24 +78,74 @@ const PlyWoodItemInput = ({
     } = useDisclosure();
 
     const {
+        isOpen: isDeleteProcessingDialogOpen,
+        onOpen: onDeleteProcessingDialogOpen,
+        onClose: onDeleteProcessingDialogClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isDeleteErrorDialogOpen,
+        onOpen: onDeleteErrorDialogOpen,
+        onClose: onDeleteErrorDialogClose,
+    } = useDisclosure();
+
+    const {
         isOpen: isModalOpen,
         onOpen: onModalOpen,
         onClose: onModalClose,
     } = useDisclosure();
+
+    const [loading, setLoading] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [deleteProcessingLoading, setDeleteProcessingLoading] =
+        useState(false);
+    const [deleteErrorLoading, setDeleteErrorLoading] = useState(false);
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(data);
     const [amount, setAmount] = useState(null);
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
     const [faultyAmount, setFaultyAmount] = useState(null);
+    const [selectedDelete, setSelectedDelete] = useState(null);
+    const [selectedError, setSelectedError] = useState(null);
 
-    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
-    const [solutionOptions, setSolutionOptions] = useState([]);
+    // const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    // const [solutionOptions, setSolutionOptions] = useState([]);
 
-    const openInputModal = () => {
-        onModalOpen();
-        console.log("Moe: ", selectedItemDetails);
-        setSelectedItemDetails(data);
+    const openInputModal = async (item) => {
+        // onModalOpen();
+        // console.log("Moe: ", selectedItemDetails);
+        // setSelectedItemDetails(data);
+
+        setLoading(true);
+        try {
+            // console.log("Hello: ", item);
+            const params = {
+                FatherCode: data.SPDICH,
+                ItemCode: item.ItemChild,
+                Team: item.TO,
+            };
+            // console.log("Hi: ", params);
+            const res = await productionApi.getFinishedPlywoodGoodsDetail(
+                params
+            );
+            console.log("Bye: ", res);
+            setSelectedItemDetails({
+                ...item,
+                stockQuantity: res.maxQuantity,
+                totalProcessing: res.remainQty,
+                factories: res.Factorys?.map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+            });
+            onModalOpen();
+        } catch (error) {
+            toast.error("Có lỗi khi lấy dữ liệu item.");
+            console.error(error);
+        }
+        setLoading(false);
     };
 
     const closeInputModal = () => {
@@ -104,8 +157,25 @@ const PlyWoodItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
+        setConfirmLoading(true);
         try {
+            const payload = {
+                FatherCode: data.SPDICH,
+                ItemCode: selectedItemDetails.ItemChild,
+                ItemName: selectedItemDetails.ChildName,
+                CDay: Number(selectedItemDetails.CDay),
+                CRong: Number(selectedItemDetails.CRong),
+                CDai: Number(selectedItemDetails.CDai),
+                Team: selectedItemDetails.TO,
+                CongDoan: selectedItemDetails.NameTO,
+                NexTeam: selectedItemDetails.TOTT,
+                Type: "CBG",
+                LSX: selectedItemDetails.LSX[0].LSX,
+                CompleQty: 0,
+                RejectQty: 0,
+            };
             if (amount && amount > 0) {
+                payload.CompleQty = Number(amount);
                 // onReceiptFromChild({
                 //     id: 70152702,
                 //     subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
@@ -126,61 +196,119 @@ const PlyWoodItemInput = ({
                 //     },
                 //     nextGroup: nextGroup
                 // });
-                onReceiptFromChild(
-                    {
-                        // id: selectedItemDetails.id,
-                        itemId: data?.id,
-                        itemName: data?.itemName,
-                        // command: selectedItemDetails.command,
-                        thickness: selectedItemDetails.thickness,
-                        width: selectedItemDetails.width,
-                        length: selectedItemDetails.length,
-                        amount: Number(amount),
-                        createdDate: new Date(),
-                        createdBy: {
-                            id: user.id,
-                            last_name: user.last_name,
-                            first_name: user.first_name,
-                        },
-                        fromGroup: fromGroup,
-                        nextGroup: nextGroup,
-                    },
-                    receipts
-                );
+                // onReceiptFromChild(
+                //     {
+                //         // id: selectedItemDetails.id,
+                //         itemId: data?.id,
+                //         itemName: data?.itemName,
+                //         // command: selectedItemDetails.command,
+                //         thickness: selectedItemDetails.thickness,
+                //         width: selectedItemDetails.width,
+                //         length: selectedItemDetails.length,
+                //         amount: Number(amount),
+                //         createdDate: new Date(),
+                //         createdBy: {
+                //             id: user.id,
+                //             last_name: user.last_name,
+                //             first_name: user.first_name,
+                //         },
+                //         fromGroup: fromGroup,
+                //         nextGroup: nextGroup,
+                //     },
+                //     receipts
+                // );
             }
             if (faultyAmount && faultyAmount > 0) {
-                const result = {
-                    id: selectedItemDetails.id,
-                    itemId: data?.id,
-                    subItemName: selectedItemDetails.subItemName,
-                    thickness: selectedItemDetails.thickness,
-                    width: selectedItemDetails.width,
-                    length: selectedItemDetails.length,
-                    amount: Number(faultyAmount),
-                    createdDate: new Date(),
-                    createdBy: {
-                        id: user.id,
-                        last_name: user.last_name,
-                        first_name: user.first_name,
-                    },
-                    fromGroup: fromGroup,
-                    previousGroup: nextGroup,
-                };
-                onRejectFromChild(result, faults);
+                payload.RejectQty = Number(faultyAmount);
+                // const result = {
+                //     id: selectedItemDetails.id,
+                //     itemId: data?.id,
+                //     subItemName: selectedItemDetails.subItemName,
+                //     thickness: selectedItemDetails.thickness,
+                //     width: selectedItemDetails.width,
+                //     length: selectedItemDetails.length,
+                //     amount: Number(faultyAmount),
+                //     createdDate: new Date(),
+                //     createdBy: {
+                //         id: user.id,
+                //         last_name: user.last_name,
+                //         first_name: user.first_name,
+                //     },
+                //     fromGroup: fromGroup,
+                //     previousGroup: nextGroup,
+                // };
+                // onRejectFromChild(result, faults);
             }
-            toast.success("Ghi nhận & chuyển tiếp thành công!");
+            if (payload.FatherCode && payload.ItemCode) {
+                if (payload.CompleQty || payload.RejectQty) {
+                    const res = await productionApi.enterFinishedGoodsAmountVCN(
+                        payload
+                    );
+                    toast.success("Ghi nhận & chuyển tiếp thành công!");
+                } else {
+                    toast("Chưa nhập bất kì số lượng nào.");
+                }
+            } else {
+                toast("Có lỗi xảy ra. Vui lòng thử lại");
+            }
         } catch (error) {
             // Xử lý lỗi (nếu có)
             console.error("Đã xảy ra lỗi:", error);
             toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
+        setConfirmLoading(false);
+        onReceiptFromChild();
         setFaults({});
         setReceipts({});
-        setAmount(null);
-        setFaultyAmount(null);
+        setAmount();
+        setFaultyAmount();
 
         onAlertDialogClose();
         closeInputModal();
+    };
+
+    const handleDeleteProcessingReceipt = async () => {
+        setDeleteProcessingLoading(true);
+        try {
+            const payload = {
+                id: selectedDelete,
+            };
+            const res = await productionApi.deleteReceiptCBG(payload);
+            toast.success("Thành công.");
+            setSelectedItemDetails((prev) => ({
+                ...prev,
+                notifications: prev.notifications.filter(
+                    (notification) => notification.id !== selectedDelete
+                ),
+            }));
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+        }
+        setSelectedDelete(null);
+        onDeleteProcessingDialogClose();
+        setDeleteProcessingLoading(false);
+    };
+
+    const handleDeleteErrorReceipt = async () => {
+        setDeleteErrorLoading(true);
+        try {
+            const payload = {
+                id: selectedError,
+            };
+            const res = await productionApi.deleteReceiptCBG(payload);
+            toast.success("Thành công.");
+            setSelectedItemDetails((prev) => ({
+                ...prev,
+                notifications: prev.notifications.filter(
+                    (notification) => notification.id !== selectedDelete
+                ),
+            }));
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+        }
+        setSelectedError(null);
+        onDeleteErrorDialogClose();
+        setDeleteErrorLoading(false);
     };
 
     useEffect(() => {
@@ -193,160 +321,198 @@ const PlyWoodItemInput = ({
                 checkElement.classList.add("hidden");
                 checkElement.classList.remove("block");
             }
+        } else {
+            checkElement?.classList?.add("hidden");
+            checkElement?.classList?.remove("block");
         }
     }, [faultyAmount]);
 
     useEffect(() => {
-        const getErrorTypeOptions = async () => {
-            try {
-                const res = await productionApi.getErrorTypes();
-                const errorTypes = res.map((error, index) => ({
-                    value: error?.id || "",
-                    label: error?.name || ""
-                }));
-                console.log("Other side: ", errorTypes);
-                setErrorTypeOptions(errorTypes);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        const getSolutionOptions = async () => {
-            try {
-                const res = await productionApi.getSolutions("VCN");
-                const solutions = res.map((solution, index) => ({
-                    value: solution?.id || "",
-                    label: solution?.name || ""
-                }));
-                console.log("Other side 2: ", solutions);
-                setSolutionOptions(solutions);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-        getErrorTypeOptions();
-        getSolutionOptions();
+        // const getErrorTypeOptions = async () => {
+        //     try {
+        //         const res = await productionApi.getErrorTypes();
+        //         const errorTypes = res.map((error, index) => ({
+        //             value: error?.id || "",
+        //             label: error?.name || "",
+        //         }));
+        //         console.log("Other side: ", errorTypes);
+        //         setErrorTypeOptions(errorTypes);
+        //     } catch (error) {
+        //         console.error(error);
+        //     }
+        // };
+        // const getSolutionOptions = async () => {
+        //     try {
+        //         const res = await productionApi.getSolutions("VCN");
+        //         const solutions = res.map((solution, index) => ({
+        //             value: solution?.id || "",
+        //             label: solution?.name || "",
+        //         }));
+        //         console.log("Other side 2: ", solutions);
+        //         setSolutionOptions(solutions);
+        //     } catch (error) {
+        //         console.error(error);
+        //     }
+        // };
+        // getErrorTypeOptions();
+        // getSolutionOptions();
     }, []);
 
     return (
-        <div className="cursor-pointer" onClick={() => openInputModal()}>
+        <>
             <div
-                className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
-                data-label={
-                    data.itemName +
-                    " (" +
-                    data.thickness +
-                    "x" +
-                    data.width +
-                    "x" +
-                    data.length +
-                    ")"
-                }
+                className="cursor-pointer"
+                onClick={() => {
+                    if (data.Details.length > 0 && data.Details[0]) {
+                        openInputModal(data.Details[0]);
+                    } else {
+                        toast("Có lỗi xảy ra");
+                        console.log("Lỗi không có data detail.");
+                    }
+                }}
             >
-                {/* <span className="font-semibold absolute top-0-left-0 bg-green-500"></span> */}
-                {/* <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-14 z-[999] bg-white"> */}
-                {/* <span className="font-semibold">
-                        TYBYN bar table 74x74x102 acacia/black
-                    </span> */}
-                {/* <div>
-                        Lệnh sản xuất
-                        <span className="bg-[#e4e4e4] rounded px-2 py-1 ml-2 font-semibold w-fit">
-                            {data.command}
-                        </span>
-                    </div> */}
-                {/* <div>
-                        Công đoạn số:{" "}
-                        <span className="bg-[#96bddf] rounded px-2 py-1 ml-2 font-semibold w-fit">
-                            {data.fromGroup.no + ". " + data.fromGroup.name}
-                        </span>{" "}
-                    </div> */}
-                <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 pt-14 mt-2 ">
-                    <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                            <tr>
-                                <th scope="col" className="px-2 py-2">
-                                    Lệnh sản xuất
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-2 py-2 text-right"
-                                >
-                                    Sản lượng
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-2 py-2 text-right"
-                                >
-                                    Đã làm
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-2 py-2 text-right"
-                                >
-                                    Bị lỗi
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-2 py-2 text-right"
-                                >
-                                    Còn thực hiện
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data.productionCommands?.length > 0 ? (
-                                data?.productionCommands.map(
-                                    (production, index) => (
-                                        <tr
-                                            className="bg-white border-b"
-                                            key={index}
-                                        >
-                                            <th
-                                                scope="row"
-                                                className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap text-[12px] sm:text-md"
+                <div
+                    className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
+                    data-label={
+                        data.NameSPDich ||
+                        data.Details[0]?.ChildName +
+                            " (" +
+                            data.Details[0]?.CDay +
+                            "x" +
+                            data.Details[0]?.CRong +
+                            "x" +
+                            data.Details[0]?.CDai +
+                            ")"
+                    }
+                >
+                    {/* <span className="font-semibold absolute top-0-left-0 bg-green-500"></span> */}
+                    {/* <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-14 z-[999] bg-white"> */}
+                    {/* <span className="font-semibold">
+                            TYBYN bar table 74x74x102 acacia/black
+                        </span> */}
+                    {/* <div>
+                            Lệnh sản xuất
+                            <span className="bg-[#e4e4e4] rounded px-2 py-1 ml-2 font-semibold w-fit">
+                                {data.command}
+                            </span>
+                        </div> */}
+                    {/* <div>
+                            Công đoạn số:{" "}
+                            <span className="bg-[#96bddf] rounded px-2 py-1 ml-2 font-semibold w-fit">
+                                {data.fromGroup.no + ". " + data.fromGroup.name}
+                            </span>{" "}
+                        </div> */}
+                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg pt-14 mt-2 ">
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                                <tr>
+                                    <th scope="col" className="px-2 py-2">
+                                        Lệnh sản xuất
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        className="px-2 py-2 text-right"
+                                    >
+                                        Sản lượng
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        className="px-2 py-2 text-right"
+                                    >
+                                        Đã làm
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        className="px-2 py-2 text-right"
+                                    >
+                                        Bị lỗi
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        className="px-2 py-2 text-right"
+                                    >
+                                        Còn thực hiện
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.Details[0]?.LSX?.length > 0 ? (
+                                    data.Details[0]?.LSX?.map(
+                                        (production, index) => (
+                                            <tr
+                                                className="bg-white border-b"
+                                                key={index}
                                             >
-                                                {production.command}
-                                            </th>
-                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
-                                                {production.quantity}
-                                            </td>
-                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
-                                                {production.done}
-                                            </td>
-                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
-                                                {production.faults}
-                                            </td>
-                                            <td className="px-2 py-2 text-right text-[12px] sm:text-md">
-                                                {production.processing}
-                                            </td>
-                                        </tr>
+                                                <th
+                                                    scope="row"
+                                                    className="px-2 py-1 font-medium text-gray-900 text-[12px] sm:text-md max-w-[20ch] overflow-hidden overflow-ellipsis"
+                                                >
+                                                    {production.LSX}
+                                                </th>
+                                                <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                    {formatNumber(
+                                                        Number(
+                                                            production.SanLuong
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                    {formatNumber(
+                                                        Number(production.DaLam)
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                    {formatNumber(
+                                                        Number(production.Loi)
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right text-[12px] sm:text-md">
+                                                    {formatNumber(
+                                                        Number(
+                                                            production.ConLai
+                                                        )
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )
                                     )
-                                )
-                            ) : (
-                                <span>Không có dữ liệu</span>
-                            )}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td className="px-2 py-2">Tổng</td>
-                                <td className="px-2 py-2 text-right font-bold">
-                                    {data.totalQuantity || 0}
-                                </td>
-                                <td className="px-2 py-2 text-right font-bold">
-                                    {data.totalDone || 0}
-                                </td>
-                                <td className="px-2 py-2 text-right font-bold">
-                                    {data.totalFaults || 0}
-                                </td>
-                                <td className="px-2 py-2 text-right font-bold">
-                                    {data.totalProcessing || 0}
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                ) : (
+                                    <span>Không có dữ liệu</span>
+                                )}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td className="px-2 py-2">Tổng</td>
+                                    <td className="px-2 py-2 text-right font-bold">
+                                        {formatNumber(
+                                            Number(
+                                                data.Details[0]?.totalsanluong
+                                            )
+                                        ) || 0}
+                                    </td>
+                                    <td className="px-2 py-2 text-right font-bold">
+                                        {formatNumber(
+                                            Number(data.Details[0]?.totalDaLam)
+                                        ) || 0}
+                                    </td>
+                                    <td className="px-2 py-2 text-right font-bold">
+                                        {formatNumber(
+                                            Number(data.Details[0]?.totalLoi)
+                                        ) || 0}
+                                    </td>
+                                    <td className="px-2 py-2 text-right font-bold">
+                                        {formatNumber(
+                                            Number(data.Details[0]?.totalConLai)
+                                        ) || 0}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {/* </div> */}
                 </div>
-                {/* </div> */}
             </div>
+
             <Modal
                 isCentered
                 isOpen={isModalOpen}
@@ -367,16 +533,16 @@ const PlyWoodItemInput = ({
                         <div className="flex flex-col justify-center ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
                                 {/* <Alert status="info">
-                                    <AlertDescription className="flex items-center gap-3">
-                                        <span className="text-center w-full">
-                                            Lệnh sản xuất:{" "}
-                                            <span className="font-semibold">
-                                                {selectedItemDetails?.command ||
-                                                    ""}
+                                        <AlertDescription className="flex items-center gap-3">
+                                            <span className="text-center w-full">
+                                                Lệnh sản xuất:{" "}
+                                                <span className="font-semibold">
+                                                    {selectedItemDetails?.command ||
+                                                        ""}
+                                                </span>
                                             </span>
-                                        </span>
-                                    </AlertDescription>
-                                </Alert> */}
+                                        </AlertDescription>
+                                    </Alert> */}
                                 {/* )} */}
                                 <div className="flex flex-col md:flex-row justify-between items-center">
                                     <div className="flex flex-col gap-4 w-full px-4">
@@ -384,7 +550,7 @@ const PlyWoodItemInput = ({
                                             Sản phẩm/Chi tiết
                                         </label>
                                         <span>
-                                            {selectedItemDetails?.itemName}
+                                            {selectedItemDetails?.ChildName}
                                         </span>
                                     </div>
                                     <img
@@ -399,8 +565,7 @@ const PlyWoodItemInput = ({
                                             Dày
                                         </label>
                                         <span>
-                                            {selectedItemDetails?.thickness ||
-                                                0}
+                                            {selectedItemDetails?.CDay || 0}
                                         </span>
                                     </div>
                                     <div className="flex flex-col justify-start">
@@ -408,7 +573,7 @@ const PlyWoodItemInput = ({
                                             Rộng
                                         </label>
                                         <span>
-                                            {selectedItemDetails?.width || 0}
+                                            {selectedItemDetails?.CRong || 0}
                                         </span>
                                     </div>
                                     <div className="flex flex-col justify-start">
@@ -416,41 +581,44 @@ const PlyWoodItemInput = ({
                                             Dài
                                         </label>
                                         <span>
-                                            {selectedItemDetails?.length || 0}
+                                            {selectedItemDetails?.CDai || 0}
                                         </span>
                                     </div>
                                 </div>
                                 {/* <div className="flex gap-2 items-center py-4 border-t px-4">
-                                    <Text className="font-semibold">
-                                        Số lượng phôi đã nhận và phôi tồn tại
-                                        tổ:
-                                    </Text>
-                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
-                                        {selectedItemDetails?.stockQuantity ||
-                                            0}
-                                    </span>
-                                </div> */}
-                                {/* <div className="flex flex-col py-4 bg-green-300 border-t-2 border-b-2 border-dashed">
-                                    <div className="flex items-center gap-4 px-4">
-                                        <span className="ml-2">
-                                            {selectedItemDetails?.subItemName} (
-                                            {selectedItemDetails?.thickness} *
-                                            {selectedItemDetails?.width} *
-                                            {selectedItemDetails?.length}) :{" "}
-                                        </span>
-                                        <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                        <Text className="font-semibold">
+                                            Số lượng phôi đã nhận và phôi tồn tại
+                                            tổ:
+                                        </Text>
+                                        <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                             {selectedItemDetails?.stockQuantity ||
                                                 0}
                                         </span>
-                                    </div>
-                                </div> */}
+                                    </div> */}
+                                {/* <div className="flex flex-col py-4 bg-green-300 border-t-2 border-b-2 border-dashed">
+                                        <div className="flex items-center gap-4 px-4">
+                                            <span className="ml-2">
+                                                {selectedItemDetails?.subItemName} (
+                                                {selectedItemDetails?.thickness} *
+                                                {selectedItemDetails?.width} *
+                                                {selectedItemDetails?.length}) :{" "}
+                                            </span>
+                                            <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                                {selectedItemDetails?.stockQuantity ||
+                                                    0}
+                                            </span>
+                                        </div>
+                                    </div> */}
                                 <div className="flex gap-2 items-center py-4 border-t px-4">
                                     <Text className="font-semibold">
                                         Số lượng phôi có thể xuất:
                                     </Text>
                                     <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
-                                        {selectedItemDetails?.stockQuantity ||
-                                            0}
+                                        {formatNumber(
+                                            Number(
+                                                selectedItemDetails?.stockQuantity
+                                            )
+                                        ) || 0}
                                     </span>
                                 </div>
                                 <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4 text-yellow-700">
@@ -459,8 +627,11 @@ const PlyWoodItemInput = ({
                                         nhất hiển thị:
                                     </Text>
                                     <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
-                                        {selectedItemDetails?.furthestQuantity ||
-                                            0}
+                                        {formatNumber(
+                                            Number(
+                                                selectedItemDetails?.totalProcessing
+                                            )
+                                        ) || 0}
                                     </span>
                                 </div>
                                 <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4 text-yellow-700">
@@ -469,8 +640,11 @@ const PlyWoodItemInput = ({
                                         sản xuất trên chuyền:
                                     </Text>
                                     <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
-                                        {selectedItemDetails?.allCommandQuantity ||
-                                            0}
+                                        {formatNumber(
+                                            Number(
+                                                selectedItemDetails?.totalProcessing
+                                            )
+                                        ) || 0}
                                     </span>
                                 </div>
                                 <Box className="px-4">
@@ -478,6 +652,7 @@ const PlyWoodItemInput = ({
                                         Số lượng ghi nhận sản phẩm
                                     </label>
                                     <NumberInput
+                                        ref={receiptInput}
                                         step={1}
                                         min={1}
                                         // max={
@@ -487,13 +662,32 @@ const PlyWoodItemInput = ({
                                         //             selectedItem.value
                                         //     )?.Qty || 0
                                         // }
+                                        value={amount}
                                         className="mt-4"
                                         onChange={(value) => {
-                                            setAmount(value);
-                                            setReceipts((prev) => ({
-                                                ...prev,
-                                                amount: value,
-                                            }));
+                                            if (
+                                                value >
+                                                selectedItemDetails.stockQuantity
+                                            ) {
+                                                // console.log("Dô: ", selectedItemDetails.stockQuantity);
+                                                // receipInput.current.querySelector(
+                                                //         "input"
+                                                //     ).value =
+                                                //         selectedItemDetails.stockQuantity;
+                                                setAmount(
+                                                    selectedItemDetails.stockQuantity
+                                                );
+                                                setReceipts((prev) => ({
+                                                    ...prev,
+                                                    amount: selectedItemDetails.stockQuantity,
+                                                }));
+                                            } else {
+                                                setAmount(value);
+                                                setReceipts((prev) => ({
+                                                    ...prev,
+                                                    amount: value,
+                                                }));
+                                            }
                                         }}
                                     >
                                         <NumberInputField />
@@ -510,15 +704,28 @@ const PlyWoodItemInput = ({
                                         colorScheme="blue"
                                         fontSize="1.2rem"
                                     >
-                                        {selectedItemDetails?.totalDone}
+                                        {formatNumber(
+                                            Number(data.Details[0]?.totalDaLam)
+                                        ) || 0}
                                     </Badge>
                                 </div>
-                                {selectedItemDetails?.pendingReceipts &&
-                                    selectedItemDetails?.pendingReceipts
-                                        .length > 0 &&
-                                    selectedItemDetails?.pendingReceipts.map(
-                                        (item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 border border-green-600 rounded">
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) =>
+                                            notif.confirm == 0 &&
+                                            notif.type == 0
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 0 &&
+                                                notif.type == 0
+                                        )
+                                        ?.map((item, index) => (
+                                            <div
+                                                key={"Processing_" + index}
+                                                className="flex justify-between items-center p-3 my-4 border border-green-600 rounded"
+                                            >
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
@@ -529,38 +736,71 @@ const PlyWoodItemInput = ({
                                                             colorScheme="green"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item?.Quantity
+                                                                )
+                                                            )}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Thời gian giao:{" "}
                                                         </Text>
                                                         <span className="ml-1 text-violet-700">
-                                                            30/11/2023 14:12:23
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "DD/MM/YYYY"
+                                                            ) || ""}{" "}
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "HH:mm:ss"
+                                                            ) || ""}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <button
-                                                        onClick={() =>
-                                                            toast(
-                                                                "Chức năng chưa phát triển"
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            onDeleteProcessingDialogOpen();
+                                                            setSelectedDelete(
+                                                                item?.id
+                                                            );
+                                                        }}
                                                         className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
                                                     >
                                                         <AiTwotoneDelete className="text-red-700 text-2xl" />
                                                     </button>
                                                 </div>
                                             </div>
+                                        ))}
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) =>
+                                            notif.confirm == 3 &&
+                                            notif.type == 2
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 3 &&
+                                                notif.type == 2
                                         )
-                                    )}
-                                {selectedItemDetails?.returns &&
-                                    selectedItemDetails?.returns.length > 0 &&
-                                    selectedItemDetails?.returns.map(
-                                        (item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 border border-red-600 rounded">
+                                        ?.map((item, index) => (
+                                            <div
+                                                key={"Return_" + index}
+                                                className="flex justify-between items-center p-3 my-4 border border-red-600 rounded"
+                                            >
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
@@ -570,38 +810,57 @@ const PlyWoodItemInput = ({
                                                             colorScheme="red"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item?.Quantity
+                                                                )
+                                                            )}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Lý do:{" "}
                                                         </Text>
                                                         <span className="ml-1">
-                                                            {item?.label}
+                                                            {item?.text}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <button
-                                                        onClick={() =>
-                                                            toast(
-                                                                "Chức năng chưa phát triển"
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            onDeleteErrorDialogOpen();
+                                                            setSelectedError(
+                                                                item?.id
+                                                            );
+                                                        }}
                                                         className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
                                                     >
                                                         <AiTwotoneDelete className="text-red-700 text-2xl" />
                                                     </button>
                                                 </div>
                                             </div>
+                                        ))}
+
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) =>
+                                            notif.confirm == 0 &&
+                                            notif.type == 1
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 0 &&
+                                                notif.type == 1
                                         )
-                                    )}
-                                {selectedItemDetails?.pendingErrors &&
-                                    selectedItemDetails?.pendingErrors.length >
-                                        0 &&
-                                    selectedItemDetails?.pendingErrors.map(
-                                        (item, index) => (
+                                        .map((item, index) => (
                                             <div
                                                 key={index}
                                                 className="flex justify-between items-center p-3 my-4 border border-red-600 rounded"
@@ -616,15 +875,36 @@ const PlyWoodItemInput = ({
                                                             colorScheme="red"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item?.Quantity
+                                                                )
+                                                            )}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Thời gian giao:{" "}
                                                         </Text>
                                                         <span className="ml-1 text-violet-700">
-                                                            30/11/2023 14:12:23
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "DD/MM/YYYY"
+                                                            ) || ""}{" "}
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "HH:mm:ss"
+                                                            ) || ""}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -641,8 +921,7 @@ const PlyWoodItemInput = ({
                                                     </button>
                                                 </div>
                                             </div>
-                                        )
-                                    )}
+                                        ))}
                                 <div className="px-3 flex flex-col gap-4 text-red-600 border-t border-b py-3 border-red-600 !my-4">
                                     <span>
                                         Lỗi báo từ công đoạn:{" "}
@@ -651,32 +930,32 @@ const PlyWoodItemInput = ({
                                             fontSize="1.2rem"
                                         >
                                             {
-                                                selectedItemDetails?.totalStageError
+                                                selectedItemDetails?.totalStageError || ''
                                             }
                                         </Badge>{" "}
                                     </span>
                                     {/* <span>
-                                        Lỗi chuyển về:{" "}
-                                        <Badge
-                                            colorScheme="red"
-                                            fontSize="1.2rem"
-                                        >
-                                            {
-                                                selectedItemDetails?.totalBackError
-                                            }
-                                        </Badge>{" "}
-                                    </span>
-                                    <span>
-                                        Lỗi loại:{" "}
-                                        <Badge
-                                            colorScheme="red"
-                                            fontSize="1.2rem"
-                                        >
-                                            {
-                                                selectedItemDetails?.totalTypeError
-                                            }
-                                        </Badge>{" "}
-                                    </span> */}
+                                            Lỗi chuyển về:{" "}
+                                            <Badge
+                                                colorScheme="red"
+                                                fontSize="1.2rem"
+                                            >
+                                                {
+                                                    selectedItemDetails?.totalBackError
+                                                }
+                                            </Badge>{" "}
+                                        </span>
+                                        <span>
+                                            Lỗi loại:{" "}
+                                            <Badge
+                                                colorScheme="red"
+                                                fontSize="1.2rem"
+                                            >
+                                                {
+                                                    selectedItemDetails?.totalTypeError
+                                                }
+                                            </Badge>{" "}
+                                        </span> */}
                                 </div>
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
@@ -693,12 +972,32 @@ const PlyWoodItemInput = ({
                                         //     )?.Qty || 0
                                         // }
                                         className="mt-4"
+                                        value={faultyAmount}
                                         onChange={(value) => {
-                                            setFaultyAmount(value);
-                                            setFaults((prev) => ({
-                                                ...prev,
-                                                amount: value,
-                                            }));
+                                            if (
+                                                value >
+                                                selectedItemDetails.stockQuantity
+                                            ) {
+                                                setFaultyAmount(
+                                                    selectedItemDetails.stockQuantity
+                                                );
+                                                setFaults((prev) => ({
+                                                    ...prev,
+                                                    amount: selectedItemDetails.stockQuantity,
+                                                }));
+                                            } else {
+                                                setFaultyAmount(value);
+                                                setFaults((prev) => ({
+                                                    ...prev,
+                                                    amount: value,
+                                                }));
+                                            }
+                                            if (value == 0 || !value) {
+                                                setFaults((prev) => ({
+                                                    ...prev,
+                                                    factory: null,
+                                                }));
+                                            }
                                         }}
                                     >
                                         <NumberInputField />
@@ -707,17 +1006,18 @@ const PlyWoodItemInput = ({
                                             <NumberDecrementStepper />
                                         </NumberInputStepper>
                                     </NumberInput>
-                                    {/* <RadioGroup
+                                    <RadioGroup
                                         ref={checkRef}
                                         className="hidden mt-4 ml-3"
+                                        value="1"
                                     >
                                         <Radio value="1">
-                                            {selectedItemDetails?.subItemName} (
-                                            {selectedItemDetails?.thickness} *
-                                            {selectedItemDetails?.width} *
-                                            {selectedItemDetails?.length}) :{" "}
+                                            {selectedItemDetails?.ChildName} (
+                                            {selectedItemDetails?.CDay} *
+                                            {selectedItemDetails?.CRong} *
+                                            {selectedItemDetails?.CDai}) :{" "}
                                         </Radio>
-                                    </RadioGroup> */}
+                                    </RadioGroup>
                                 </Box>
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
@@ -726,18 +1026,32 @@ const PlyWoodItemInput = ({
                                     <Select
                                         className="mt-4"
                                         placeholder="Lựa chọn"
-                                        options={factories}
+                                        options={selectedItemDetails?.factories}
                                         isClearable
                                         isSearchable
+                                        value={faults.factory}
                                         onChange={(value) => {
-                                            setFaults((prev) => ({
-                                                ...prev,
-                                                factory: value,
-                                            }));
+                                            if (
+                                                !faultyAmount ||
+                                                faultyAmount < 1
+                                            ) {
+                                                toast(
+                                                    "Vui lòng khai báo số lượng lỗi."
+                                                );
+                                                setFaults((prev) => ({
+                                                    ...prev,
+                                                    factory: null,
+                                                }));
+                                            } else {
+                                                setFaults((prev) => ({
+                                                    ...prev,
+                                                    factory: value,
+                                                }));
+                                            }
                                         }}
                                     />
                                 </Box>
-                                <Box className="px-3">
+                                {/* <Box className="px-3">
                                     <label className="font-semibold text-red-700">
                                         Loại lỗi
                                     </label>
@@ -754,8 +1068,8 @@ const PlyWoodItemInput = ({
                                             }));
                                         }}
                                     />
-                                </Box>
-                                <Box className="px-3">
+                                </Box> */}
+                                {/* <Box className="px-3">
                                     <label className="font-semibold text-red-700">
                                         Hướng xử lý
                                     </label>
@@ -772,7 +1086,7 @@ const PlyWoodItemInput = ({
                                             }));
                                         }}
                                     />
-                                </Box>
+                                </Box> */}
                             </div>
                         </div>
                     </ModalBody>
@@ -782,7 +1096,7 @@ const PlyWoodItemInput = ({
                             <AlertIcon />
                             Công đoạn tiếp theo:{" "}
                             <span className="font-bold ml-1">
-                                {nextGroup.no + ". " + nextGroup.name ||
+                                {selectedItemDetails?.TOTT ||
                                     "chưa có thông tin"}
                             </span>
                         </Alert>
@@ -817,36 +1131,139 @@ const PlyWoodItemInput = ({
                     <AlertDialogContent>
                         <AlertDialogHeader>Xác nhận ghi nhận</AlertDialogHeader>
                         <AlertDialogBody>
-                            {amount && (
+                            {amount && amount > 0 && (
                                 <div className="text-green-700">
                                     Ghi nhận sản lượng:{" "}
                                     <span className="font-bold">{amount}</span>{" "}
                                 </div>
                             )}
-                            {faultyAmount && (
+                            {faultyAmount && faultyAmount > 0 && (
                                 <div className="text-red-700">
                                     Ghi nhận lỗi:{" "}
                                     <span className="font-bold">
                                         {faultyAmount}
-                                    </span>
+                                    </span>{" "}
+                                    {faults &&
+                                        faults.factory &&
+                                        "từ " + faults.factory?.label}
                                 </div>
                             )}
                         </AlertDialogBody>
                         <AlertDialogFooter>
                             <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
-                            <Button
+                            {/* <Button
                                 colorScheme="red"
                                 onClick={handleSubmitQuantity}
                                 ml={3}
                                 backgroundColor="#c53030 !important"
                             >
                                 Xác nhận
-                            </Button>
+                            </Button> */}
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleSubmitQuantity}
+                            >
+                                {confirmLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
-        </div>
+
+            <AlertDialog
+                isOpen={isDeleteProcessingDialogOpen}
+                onClose={onDeleteProcessingDialogClose}
+                closeOnOverlayClick={false}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            Xác nhận xoá chờ xác nhận
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            <div className="text-red-700">
+                                Bạn chắc chắn muốn xoá số lượng đã giao chờ xác
+                                nhận?
+                            </div>
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button
+                                onClick={() => {
+                                    setSelectedDelete(null);
+                                    onDeleteProcessingDialogClose();
+                                }}
+                            >
+                                Huỷ bỏ
+                            </Button>
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleDeleteProcessingReceipt}
+                            >
+                                {deleteProcessingLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            <AlertDialog
+                isOpen={isDeleteErrorDialogOpen}
+                onClose={onDeleteErrorDialogClose}
+                closeOnOverlayClick={false}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            Xác nhận xoá phôi lỗi trả lại
+                        </AlertDialogHeader>
+                        <AlertDialogBody>
+                            <div className="text-red-700">
+                                Bạn chắc chắn muốn xoá số lượng phôi lỗi trả
+                                lại?
+                            </div>
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button
+                                onClick={() => {
+                                    setSelectedError(null);
+                                    onDeleteErrorDialogClose();
+                                }}
+                            >
+                                Huỷ bỏ
+                            </Button>
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleDeleteErrorReceipt}
+                            >
+                                {deleteErrorLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+            {loading && <Loader />}
+        </>
     );
 };
 

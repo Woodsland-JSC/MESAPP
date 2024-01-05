@@ -14,6 +14,19 @@ const productionApi = {
         const url = `/production/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
+    getFinishedPlywoodGoodsList: (params) => {
+        const queryStringParams = Object.keys(params)
+            .map(
+                (key) =>
+                    `${encodeURIComponent(key)}=${encodeURIComponent(
+                        params[key]
+                    )}`
+            )
+            .join("&");
+
+        const url = `/production/receipts-productions-vcn?${queryStringParams}`;
+        return axiosClient().get(url);
+    },
     getFinishedGoodsDetail: (params) => {
         const queryStringParams = Object.keys(params)
             .map(
@@ -27,7 +40,24 @@ const productionApi = {
         const url = `/production/receipts-productions-detail?${queryStringParams}`;
         return axiosClient().get(url);
     },
-    enterFinishedGoodsAmount: (data) => {
+    getFinishedPlywoodGoodsDetail: (params) => {
+        const queryStringParams = Object.keys(params)
+            .map(
+                (key) =>
+                    `${encodeURIComponent(key)}=${encodeURIComponent(
+                        params[key]
+                    )}`
+            )
+            .join("&");
+
+        const url = `/production/receipts-detail-vcn?${queryStringParams}`;
+        return axiosClient().get(url);
+    },
+    enterFinishedGoodsAmountCBG: (data) => {
+        const url = `/production/receipts-production`;
+        return axiosClient().post(url, data);
+    },
+    enterFinishedGoodsAmountVCN: (data) => {
         const url = `/production/receipts-production`;
         return axiosClient().post(url, data);
     },

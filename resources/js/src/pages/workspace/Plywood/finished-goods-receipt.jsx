@@ -61,6 +61,8 @@ import {
     Button,
     Box,
     Text,
+    Skeleton,
+    Stack,
     useDisclosure,
 } from "@chakra-ui/react";
 import { HiMiniBellAlert } from "react-icons/hi2";
@@ -72,6 +74,7 @@ import FinishedGoodsIllustration from "../../../assets/images/wood-receipt-illus
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import PlyWoodItemInput from "../../../components/PlyWoodItemInput";
+import ItemInput from "../../../components/ItemInput";
 import AwaitingReception from "../../../components/AwaitingReception";
 import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 
@@ -129,44 +132,44 @@ const groupList = [
     // },
 ];
 
-const groupListOptions = [
-    {
-        value: "CH-LVL-TV",
-        label: "1. Tạo ván (CH) - CH-LVL-TV",
-    },
-    {
-        value: "CH-PLY-XV",
-        label: "1. Xếp ván PLY (CH) - CH-PLY-XV",
-    },
-    {
-        value: "CH-LVL-HT",
-        label: "2. Hoàn thiện LVL (CH) - CH-LVL-HT",
-    },
-    {
-        value: "CH-PLY-LL",
-        label: "2. Lên lớp PLY (CH) - CH-PLY-LL",
-    },
-    {
-        value: "CH-PLY-TV",
-        label: "2. Tạo ván PLY (CH) - CH-PLY-TV",
-    },
-    {
-        value: "CH-LVL-KTP",
-        label: "3. Kho thành phẩm LVL (CH) - CH-LVL-KTP",
-    },
-    {
-        value: "CH-PLY-LV",
-        label: "3. Lọc ván PLY (CH) - CH-PLY-LV",
-    },
-    {
-        value: "CH-PLY-KVC",
-        label: "4. Kho ván cốt PLY (CH) - CH-PLY-KVC",
-    },
-    // {
-    //     value: "TH-X3ĐG",
-    //     label: "7. Tổ Đóng gói X3 - TH-X3ĐG",
-    // },
-];
+// const groupListOptions = [
+//     {
+//         value: "CH-LVL-TV",
+//         label: "1. Tạo ván (CH) - CH-LVL-TV",
+//     },
+//     {
+//         value: "CH-PLY-XV",
+//         label: "1. Xếp ván PLY (CH) - CH-PLY-XV",
+//     },
+//     {
+//         value: "CH-LVL-HT",
+//         label: "2. Hoàn thiện LVL (CH) - CH-LVL-HT",
+//     },
+//     {
+//         value: "CH-PLY-LL",
+//         label: "2. Lên lớp PLY (CH) - CH-PLY-LL",
+//     },
+//     {
+//         value: "CH-PLY-TV",
+//         label: "2. Tạo ván PLY (CH) - CH-PLY-TV",
+//     },
+//     {
+//         value: "CH-LVL-KTP",
+//         label: "3. Kho thành phẩm LVL (CH) - CH-LVL-KTP",
+//     },
+//     {
+//         value: "CH-PLY-LV",
+//         label: "3. Lọc ván PLY (CH) - CH-PLY-LV",
+//     },
+//     {
+//         value: "CH-PLY-KVC",
+//         label: "4. Kho ván cốt PLY (CH) - CH-PLY-KVC",
+//     },
+//     // {
+//     //     value: "TH-X3ĐG",
+//     //     label: "7. Tổ Đóng gói X3 - TH-X3ĐG",
+//     // },
+// ];
 
 var waitingReceiptNotifications = [
     {
@@ -503,7 +506,8 @@ var exampleData2 = [
 
 function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
-    const { loading, setLoading } = useAppContext();
+    const groupSelectRef = useRef();
+    // const { loading, setLoading } = useAppContext();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -538,6 +542,10 @@ function PlywoodFinishedGoodsReceipt() {
         "CH-PLY-LV": [],
         "CH-PLY-KVC": [],
     });
+
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(false);
 
     const [awaitingErrorReception, setAwaitingErrorReception] = useState({
         "CH-LVL-TV": [],
@@ -600,6 +608,7 @@ function PlywoodFinishedGoodsReceipt() {
     });
 
     const [currentData, setCurrentData] = useState(exampleData);
+    const [groupListOptions, setGroupListOptions] = useState([]);
 
     // const [goodsReceiptList, setGoodsReceiptList] = useState([]);
     // const [goodsReceiptOptions, setGoodsReceiptOptions] = useState([]);
@@ -672,222 +681,230 @@ function PlywoodFinishedGoodsReceipt() {
     const [selectedGroup, setSelectedGroup] = useState(groupListOptions[0]);
 
     const handleReceiptFromChild = (data, receipts) => {
-        const groupId = data?.nextGroup?.id;
-        if (groupId) {
-            setAwaitingReception((prev) => ({
-                ...prev,
-                [groupId]: [...prev[groupId], data],
-            }));
-        }
-        const currentGroupId = data?.fromGroup?.id;
+        const params = {
+            TO: selectedGroup.value,
+        };
+        getDataFollowingGroup(params);
+        // const groupId = data?.nextGroup?.id;
+        // if (groupId) {
+        //     setAwaitingReception((prev) => ({
+        //         ...prev,
+        //         [groupId]: [...prev[groupId], data],
+        //     }));
+        // }
+        // const currentGroupId = data?.fromGroup?.id;
 
-        switch (currentGroupId) {
-            case "CH-LVL-TV":
-                exampleData = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            // itemDetails: item.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingReceipts: [
-                            //                 ...detail.pendingReceipts,
-                            //                 receipts,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                            pendingReceipts: [
-                                ...item.pendingReceipts,
-                                receipts,
-                            ],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData);
-                break;
-            case "CH-LVL-HT":
-                exampleData1 = exampleData1.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            // itemDetails: item.itemDetails.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingReceipts: [
-                            //                 ...detail.pendingReceipts,
-                            //                 receipts,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                            pendingReceipts: [
-                                ...item.pendingReceipts,
-                                receipts,
-                            ],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                        };
-                    }
-                    return item;
-                });
-                console.log("Final: ", exampleData1);
-                setCurrentData(exampleData1);
-                break;
-            case "CH-LVL-KTP":
-                exampleData2 = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            // itemDetails: item.itemDetails.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingReceipts: [
-                            //                 ...detail.pendingReceipts,
-                            //                 receipts,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                            pendingReceipts: [
-                                ...item.pendingReceipts,
-                                receipts,
-                            ],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData2);
-                break;
-        }
-        console.log("Dữ liệu nhận từ con:", data);
+        // switch (currentGroupId) {
+        //     case "CH-LVL-TV":
+        //         exampleData = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     // itemDetails: item.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingReceipts: [
+        //                     //                 ...detail.pendingReceipts,
+        //                     //                 receipts,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                     pendingReceipts: [
+        //                         ...item.pendingReceipts,
+        //                         receipts,
+        //                     ],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData);
+        //         break;
+        //     case "CH-LVL-HT":
+        //         exampleData1 = exampleData1.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     // itemDetails: item.itemDetails.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingReceipts: [
+        //                     //                 ...detail.pendingReceipts,
+        //                     //                 receipts,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                     pendingReceipts: [
+        //                         ...item.pendingReceipts,
+        //                         receipts,
+        //                     ],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         console.log("Final: ", exampleData1);
+        //         setCurrentData(exampleData1);
+        //         break;
+        //     case "CH-LVL-KTP":
+        //         exampleData2 = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     // itemDetails: item.itemDetails.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingReceipts: [
+        //                     //                 ...detail.pendingReceipts,
+        //                     //                 receipts,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                     pendingReceipts: [
+        //                         ...item.pendingReceipts,
+        //                         receipts,
+        //                     ],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData2);
+        //         break;
+        // }
+        // console.log("Dữ liệu nhận từ con:", data);
         // setDataFromChild(data);
     };
 
     const handleRejectFromChild = (data, faults) => {
-        const currentGroupId = data?.fromGroup?.id;
+        const params = {
+            TO: selectedGroup.value,
+        };
+        getDataFollowingGroup(params);
+        // const currentGroupId = data?.fromGroup?.id;
 
-        switch (currentGroupId) {
-            case "CH-LVL-TV":
-                exampleData = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            pendingErrors: [...item.pendingErrors, faults],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                            // ...item,
-                            // itemDetails: item.itemDetails.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingErrors: [
-                            //                 ...detail.pendingErrors,
-                            //                 faults,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData);
-                // console.log("hm ra nhiều: ", exampleData);
-                break;
-            case "CH-LVL-HT":
-                exampleData1 = exampleData1.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            pendingErrors: [...item.pendingErrors, faults],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                            // ...item,
-                            // itemDetails: item.itemDetails.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingErrors: [
-                            //                 ...detail.pendingErrors,
-                            //                 faults,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                        };
-                    }
-                    return item;
-                });
-                console.log("Final: ", exampleData1);
-                setCurrentData(exampleData1);
-                break;
-            case "CH-LVL-KTP":
-                exampleData2 = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            pendingErrors: [...item.pendingErrors, faults],
-                            stockQuantity:
-                                Number(item.stockQuantity) -
-                                Number(data.amount),
-                            // itemDetails: item.itemDetails.map((detail) => {
-                            //     if (detail.id === data.id) {
-                            //         return {
-                            //             ...detail,
-                            //             pendingErrors: [
-                            //                 ...detail.pendingErrors,
-                            //                 faults,
-                            //             ],
-                            //             stockQuantity:
-                            //                 Number(detail.stockQuantity) -
-                            //                 Number(data.amount),
-                            //         };
-                            //     }
-                            //     return detail;
-                            // }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData2);
-                break;
-        }
-        console.log("Data nè: ", data);
-        console.log("Faults nè: ", faults);
+        // switch (currentGroupId) {
+        //     case "CH-LVL-TV":
+        //         exampleData = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     pendingErrors: [...item.pendingErrors, faults],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                     // ...item,
+        //                     // itemDetails: item.itemDetails.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingErrors: [
+        //                     //                 ...detail.pendingErrors,
+        //                     //                 faults,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData);
+        //         // console.log("hm ra nhiều: ", exampleData);
+        //         break;
+        //     case "CH-LVL-HT":
+        //         exampleData1 = exampleData1.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     pendingErrors: [...item.pendingErrors, faults],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                     // ...item,
+        //                     // itemDetails: item.itemDetails.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingErrors: [
+        //                     //                 ...detail.pendingErrors,
+        //                     //                 faults,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         console.log("Final: ", exampleData1);
+        //         setCurrentData(exampleData1);
+        //         break;
+        //     case "CH-LVL-KTP":
+        //         exampleData2 = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     pendingErrors: [...item.pendingErrors, faults],
+        //                     stockQuantity:
+        //                         Number(item.stockQuantity) -
+        //                         Number(data.amount),
+        //                     // itemDetails: item.itemDetails.map((detail) => {
+        //                     //     if (detail.id === data.id) {
+        //                     //         return {
+        //                     //             ...detail,
+        //                     //             pendingErrors: [
+        //                     //                 ...detail.pendingErrors,
+        //                     //                 faults,
+        //                     //             ],
+        //                     //             stockQuantity:
+        //                     //                 Number(detail.stockQuantity) -
+        //                     //                 Number(data.amount),
+        //                     //         };
+        //                     //     }
+        //                     //     return detail;
+        //                     // }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData2);
+        //         break;
+        // }
+        // console.log("Data nè: ", data);
+        // console.log("Faults nè: ", faults);
     };
 
     const handleConfirmReceipt = (index) => {
@@ -1301,6 +1318,24 @@ function PlywoodFinishedGoodsReceipt() {
         //     }
         // };
         // getFinishedGoods();
+        const getAllGroup = async () => {
+            setLoading(true);
+            try {
+                const res = await productionApi.getGroup();
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name + " - " + item.Code,
+                }));
+                setGroupListOptions(options);
+                // setSelectedGroup(options[0]);
+                groupSelectRef?.current?.setValue(options[0]);
+            } catch (error) {
+                toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+                console.error(error);
+            }
+            setLoading(false);
+        };
+        getAllGroup();
         document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
         return () => {
             document.title = "Woodsland";
@@ -1316,19 +1351,74 @@ function PlywoodFinishedGoodsReceipt() {
         }
     }, [loading]);
 
-    useEffect(() => {
-        if (selectedGroup) {
-            if (selectedGroup.value == "CH-LVL-TV") {
-                setCurrentData(exampleData);
-            } else if (selectedGroup.value == "CH-LVL-HT") {
-                setCurrentData(exampleData1);
-            } else if (selectedGroup.value == "CH-LVL-KTP") {
-                setCurrentData(exampleData2);
+    // useEffect(() => {
+    //     if (selectedGroup) {
+    //         if (selectedGroup.value == "CH-LVL-TV") {
+    //             setCurrentData(exampleData);
+    //         } else if (selectedGroup.value == "CH-LVL-HT") {
+    //             setCurrentData(exampleData1);
+    //         } else if (selectedGroup.value == "CH-LVL-KTP") {
+    //             setCurrentData(exampleData2);
+    //         } else {
+    //             setCurrentData([]);
+    //         }
+    //     }
+    // }, [selectedGroup]);
+
+    const getDataFollowingGroup = async (params) => {
+        setLoadingData(true);
+        try {
+            const res = await productionApi.getFinishedPlywoodGoodsList(params);
+
+            /** DÒNG NÀY NHỚ XOÁ */
+            // const res = await productionApi.getFinishedGoodsList(params);
+
+            console.log("Ra kết quả dùm: ", res);
+            if (typeof res?.data === "object") {
+                setData(Object.values(res.data));
             } else {
-                setCurrentData([]);
+                setData([]);
             }
+
+            if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
+                setAwaitingReception(res?.noti_choxacnhan);
+            } else {
+                setAwaitingReception([]);
+            }
+            // setData(res.data);
+        } catch (error) {
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
         }
+        setLoadingData(false);
+    };
+
+    useEffect(() => {
+        (async () => {
+            if (selectedGroup) {
+                // setLoadingData(true);
+                const params = {
+                    TO: selectedGroup.value,
+                };
+                getDataFollowingGroup(params);
+                if (selectedGroup.value == "CH-LVL-TV") {
+                    setCurrentData(exampleData);
+                } else if (selectedGroup.value == "CH-LVL-HT") {
+                    setCurrentData(exampleData1);
+                } else if (selectedGroup.value == "CH-LVL-KTP") {
+                    setCurrentData(exampleData2);
+                } else {
+                    setCurrentData([]);
+                }
+                // setLoadingData(false);
+            } else {
+                const params = {
+                    TO: "TH-X1SC",
+                };
+                getDataFollowingGroup(params);
+            }
+        })();
     }, [selectedGroup]);
+
 
     return (
         <Layout>
@@ -1708,8 +1798,10 @@ function PlywoodFinishedGoodsReceipt() {
                             </label>
                             <Select
                                 // isDisabled={true}
+                                ref={groupSelectRef}
                                 options={groupListOptions}
-                                defaultValue={groupListOptions[0]}
+                                // defaultValue={groupListOptions[0]}
+                                defaultValue={selectedGroup}
                                 onChange={(value) => setSelectedGroup(value)}
                                 placeholder="Tìm kiếm"
                                 className="mt-3 mb-8"
@@ -1937,7 +2029,71 @@ function PlywoodFinishedGoodsReceipt() {
                                     </div>
                                 </div> */}
 
-                                {currentData.length > 0 ? (
+                                {/* Này là dữ liệu tạm nè*/}
+
+                                {loadingData ? (
+                                    <Stack>
+                                        <Skeleton height="250px" />
+                                        <Skeleton height="250px" />
+                                    </Stack>
+                                ) : data.length > 0 ? (
+                                    data.map((item, index) => (
+                                        <ItemInput
+                                            data={item}
+                                            index={index}
+                                            key={index}
+                                            selectedGroup={selectedGroup}
+                                            // fatherCode={data}
+                                            nextGroup={item.nextGroup}
+                                            fromGroup={item.fromGroup}
+                                            onReceiptFromChild={
+                                                handleReceiptFromChild
+                                            }
+                                            onRejectFromChild={
+                                                handleRejectFromChild
+                                            }
+                                        />
+                                    ))
+                                ) : (
+                                    <span className="text-center">
+                                        Không có dữ liệu
+                                    </span>
+                                )}
+
+                                {/* Này là đúng đắn nè*/}
+
+                                {/* {loadingData ? (
+                                    <Stack>
+                                        <Skeleton height="250px" />
+                                        <Skeleton height="250px" />
+                                    </Stack>
+                                ) : data.length > 0 ? (
+                                    data.map((item, index) => (
+                                        <PlyWoodItemInput
+                                            data={item}
+                                            index={index}
+                                            key={index}
+                                            selectedGroup={selectedGroup}
+                                            // fatherCode={data}
+                                            nextGroup={item.nextGroup}
+                                            fromGroup={item.fromGroup}
+                                            onReceiptFromChild={
+                                                handleReceiptFromChild
+                                            }
+                                            onRejectFromChild={
+                                                handleRejectFromChild
+                                            }
+                                        />
+                                    ))
+                                ) : (
+                                    <span className="text-center">
+                                        Không có dữ liệu
+                                    </span>
+                                )} */}
+
+                                {/* Này của dữ liệu test */}
+
+                                {/* {currentData.length > 0 ? (
                                     currentData.map((item, index) => (
                                         <PlyWoodItemInput
                                             data={item}
@@ -1958,7 +2114,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     <span className="text-center">
                                         Không có dữ liệu
                                     </span>
-                                )}
+                                )} */}
 
                                 {/* <ItemInput />
                                 <ItemInput /> */}
@@ -1985,7 +2141,7 @@ function PlywoodFinishedGoodsReceipt() {
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalBody>
                         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center ">
-                            {selectedGroup &&
+                            {/* {selectedGroup &&
                                 awaitingReception[selectedGroup?.value]
                                     ?.length > 0 &&
                                 awaitingReception[selectedGroup?.value].map(
@@ -2003,7 +2159,27 @@ function PlywoodFinishedGoodsReceipt() {
                                             }
                                         />
                                     )
-                                )}
+                                )} */}
+                            {selectedGroup && awaitingReception?.length > 0 ? (
+                                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                    {awaitingReception.map((item, index) => (
+                                        <AwaitingReception
+                                            type="plywood"
+                                            data={item}
+                                            key={index}
+                                            index={index}
+                                            onConfirmReceipt={
+                                                handleConfirmReceipt
+                                            }
+                                            onRejectReceipt={
+                                                handleRejectReceipt
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex w-full h-full justify-center items-center">Không có dữ liệu</div>
+                            )}
                         </div>
                     </ModalBody>
                 </ModalContent>
