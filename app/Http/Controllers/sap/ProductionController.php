@@ -413,12 +413,12 @@ class ProductionController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         $query = 'select "VisResCode" "Code","ResName" "Name", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
-        join OHEM C ON B."EmpID"=C."empID" join OUSR d on c."userId"=d."USERID" where d."USER_CODE" =?';
+        join OHEM C ON B."EmpID"=C."empID" join OUSR d on c."userId"=d."USERID" where d."USER_CODE" =? AND "validFor"=?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id])) {
+        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id,'Y'])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
