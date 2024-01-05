@@ -412,19 +412,20 @@ class ProductionController extends Controller
     {
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'select "VisResCode" "Code","ResName" "Name" from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
+        $query = 'select "VisResCode" "Code","ResName" "Name", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
         join OHEM C ON B."EmpID"=C."empID" join OUSR d on c."userId"=d."USERID" where d."USER_CODE" =?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [Auth::user()->sap_id])) {
+        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
+            $row['QC'] = $row['QC'] === '0' ? false : true;
             $results[] = $row;
         }
         odbc_close($conDB);
@@ -693,6 +694,8 @@ class ProductionController extends Controller
 
                     $body = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                        "U_LSX"=> $data->LSX,
+                        "U_TO"=> $data->Team,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType"=>"C",
