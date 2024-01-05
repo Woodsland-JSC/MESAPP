@@ -99,9 +99,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'production'], function () {
         Route::get('/receipts-productions', [ProductionController::class, 'index'])->name('danh-sach-thanh-pham');
         Route::get('/receipts-productions-detail', [ProductionController::class, 'viewdetail'])->name('detail-thanh-pham');
+        Route::get('/receipts-productions-vcn', [ProductionController::class, 'index_vcn'])->name('danh-sach-vcn');
+        Route::get('/receipts-detail-vcn', [ProductionController::class, 'viewdetailVCN'])->name('detail-vcn');
         Route::post('/receipts-production', [ProductionController::class, 'receipts'])->name('nhap-thanh-pham');
         Route::delete('remove-receipt', [ProductionController::class, 'delete']);
         Route::post('/accept-receipts', [ProductionController::class, 'accept']);
+        Route::post('/accept-receipts-vcn', [ProductionController::class, 'acceptVCN']);
         Route::post('/reject-receipts', [ProductionController::class, 'reject']);
         Route::get('/danh-sach-phoi-cho-nhan', [ProductionController::class, 'dsphoipending']);
     });

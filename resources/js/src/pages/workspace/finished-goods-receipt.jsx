@@ -731,92 +731,97 @@ function FinishedGoodsReceipt() {
     };
 
     const handleRejectFromChild = (data, faults) => {
-        const currentGroupId = data?.fromGroup?.id;
+        const params = {
+            TO: selectedGroup.value,
+        };
+        getDataFollowingGroup(params);
 
-        switch (currentGroupId) {
-            case "TH-X3SC":
-                exampleData = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData);
-                // console.log("hm ra nhiều: ", exampleData);
-                break;
-            case "TH-X3TC1":
-                exampleData1 = exampleData1.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                console.log("Final: ", exampleData1);
-                setCurrentData(exampleData1);
-                break;
-            case "TH-X3TC2":
-                exampleData2 = exampleData.map((item) => {
-                    if (item.id === data.itemId) {
-                        return {
-                            ...item,
-                            itemDetails: item.itemDetails.map((detail) => {
-                                if (detail.id === data.id) {
-                                    return {
-                                        ...detail,
-                                        pendingErrors: [
-                                            ...detail.pendingErrors,
-                                            faults,
-                                        ],
-                                        stockQuantity:
-                                            Number(detail.stockQuantity) -
-                                            Number(data.amount),
-                                    };
-                                }
-                                return detail;
-                            }),
-                        };
-                    }
-                    return item;
-                });
-                setCurrentData(exampleData2);
-                break;
-        }
-        console.log("Data nè: ", data);
-        console.log("Faults nè: ", faults);
+        // const currentGroupId = data?.fromGroup?.id;
+
+        // switch (currentGroupId) {
+        //     case "TH-X3SC":
+        //         exampleData = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingErrors: [
+        //                                     ...detail.pendingErrors,
+        //                                     faults,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData);
+        //         // console.log("hm ra nhiều: ", exampleData);
+        //         break;
+        //     case "TH-X3TC1":
+        //         exampleData1 = exampleData1.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingErrors: [
+        //                                     ...detail.pendingErrors,
+        //                                     faults,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         console.log("Final: ", exampleData1);
+        //         setCurrentData(exampleData1);
+        //         break;
+        //     case "TH-X3TC2":
+        //         exampleData2 = exampleData.map((item) => {
+        //             if (item.id === data.itemId) {
+        //                 return {
+        //                     ...item,
+        //                     itemDetails: item.itemDetails.map((detail) => {
+        //                         if (detail.id === data.id) {
+        //                             return {
+        //                                 ...detail,
+        //                                 pendingErrors: [
+        //                                     ...detail.pendingErrors,
+        //                                     faults,
+        //                                 ],
+        //                                 stockQuantity:
+        //                                     Number(detail.stockQuantity) -
+        //                                     Number(data.amount),
+        //                             };
+        //                         }
+        //                         return detail;
+        //                     }),
+        //                 };
+        //             }
+        //             return item;
+        //         });
+        //         setCurrentData(exampleData2);
+        //         break;
+        // }
+        // console.log("Data nè: ", data);
+        // console.log("Faults nè: ", faults);
     };
 
     const handleConfirmReceipt = (id) => {

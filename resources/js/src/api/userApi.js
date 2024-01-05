@@ -35,6 +35,7 @@ const usersApi = {
         formData.append("last_name", userData.lastName);
         formData.append("gender", userData.gender);
         formData.append("email", userData.email);
+        formData.append("username", userData.username);
         formData.append("password", userData.password);
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);
@@ -52,7 +53,7 @@ const usersApi = {
         userData.authorization.forEach((role, index) => {
             formData.append(`roles[${index}]`, role);
         });
-    
+
 
         return axiosClient().post(url, formData);
     },
@@ -64,6 +65,7 @@ const usersApi = {
         formData.append("last_name", userData.lastName);
         formData.append("gender", userData.gender);
         formData.append("email", userData.email);
+        formData.append("username", userData.username);
         formData.append("password", userData.password);
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);

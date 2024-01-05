@@ -40,6 +40,7 @@ import useAppContext from "../store/AppContext";
 import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustration.png";
 import Loader from "./Loader";
 import moment from "moment";
+import { formatNumber } from "../utils/numberFormat";
 
 // const factories = [
 //     {
@@ -128,6 +129,16 @@ const ItemInput = ({
                 })),
                 notifications: res.notifications,
             });
+            console.log("Selected item details: ", {
+                ...item,
+                stockQuantity: res.maxQuantity,
+                totalProcessing: res.remainQty,
+                factories: res.Factorys?.map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+            });
             onModalOpen();
         } catch (error) {
             toast.error("Có lỗi khi lấy dữ liệu item.");
@@ -159,6 +170,7 @@ const ItemInput = ({
                 CongDoan: selectedItemDetails.NameTO,
                 NexTeam: selectedItemDetails.TOTT,
                 Type: "CBG",
+                LSX: selectedItemDetails.LSX[0].LSX,
                 CompleQty: 0,
                 RejectQty: 0,
             };
@@ -228,7 +240,7 @@ const ItemInput = ({
             }
             if (payload.FatherCode && payload.ItemCode) {
                 if (payload.CompleQty || payload.RejectQty) {
-                    const res = await productionApi.enterFinishedGoodsAmount(
+                    const res = await productionApi.enterFinishedGoodsAmountCBG(
                         payload
                     );
                     toast.success("Ghi nhận & chuyển tiếp thành công!");
@@ -367,7 +379,7 @@ const ItemInput = ({
                                       {index + 1}. {item.ChildName} ({item.CDay}
                                       *{item.CRong}*{item.CDai})
                                   </span>
-                                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 mt-2 ">
+                                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-0 mt-2 ">
                                       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
                                           <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                                               <tr>
@@ -420,23 +432,31 @@ const ItemInput = ({
                                                                   }
                                                               </th>
                                                               <td className="px-2 py-2 text-right">
-                                                                  {Number(
-                                                                      production.SanLuong
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.SanLuong
+                                                                      )
                                                                   )}
                                                               </td>
                                                               <td className="px-2 py-2 text-right">
-                                                                  {Number(
-                                                                      production.DaLam
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.DaLam
+                                                                      )
                                                                   )}
                                                               </td>
                                                               <td className="px-2 py-2 text-right">
-                                                                  {Number(
-                                                                      production.Loi
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.Loi
+                                                                      )
                                                                   )}
                                                               </td>
                                                               <td className="px-2 py-2 text-right">
-                                                                  {Number(
-                                                                      production.ConLai
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.ConLai
+                                                                      )
                                                                   )}
                                                               </td>
                                                           </tr>
@@ -452,18 +472,30 @@ const ItemInput = ({
                                                       Tổng
                                                   </td>
                                                   <td className="px-2 py-2 text-right font-bold">
-                                                      {Number(
-                                                          item.totalsanluong
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.totalsanluong
+                                                          )
                                                       )}
                                                   </td>
                                                   <td className="px-2 py-2 text-right font-bold">
-                                                      {Number(item.totalDaLam)}
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.totalDaLam
+                                                          )
+                                                      )}
                                                   </td>
                                                   <td className="px-2 py-2 text-right font-bold">
-                                                      {Number(item.totalLoi)}
+                                                      {formatNumber(
+                                                          Number(item.totalLoi)
+                                                      )}
                                                   </td>
                                                   <td className="px-2 py-2 text-right font-bold">
-                                                      {Number(item.totalConLai)}
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.totalConLai
+                                                          )
+                                                      )}
                                                   </td>
                                               </tr>
                                           </tfoot>
@@ -505,10 +537,14 @@ const ItemInput = ({
                                             colorScheme="red"
                                             fontSize="1.2rem"
                                         >
-                                            {selectedItemDetails?.pendingErrors?.reduce(
-                                                (total, item) =>
-                                                    total + item.amount,
-                                                0
+                                            {formatNumber(
+                                                Number(
+                                                    selectedItemDetails?.pendingErrors?.reduce(
+                                                        (total, item) =>
+                                                            total + item.amount,
+                                                        0
+                                                    )
+                                                )
                                             ) || 0}
                                         </Badge>
                                     </AlertDescription>
@@ -567,8 +603,11 @@ const ItemInput = ({
                                             {selectedItemDetails?.CDai}) :{" "}
                                         </span>
                                         <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
-                                            {selectedItemDetails?.stockQuantity ||
-                                                0}
+                                            {formatNumber(
+                                                Number(
+                                                    selectedItemDetails?.stockQuantity
+                                                )
+                                            ) || 0}
                                         </span>
                                     </div>
                                 </div>
@@ -577,8 +616,11 @@ const ItemInput = ({
                                         Số lượng tối đa có thể xuất
                                     </Text>
                                     <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
-                                        {selectedItemDetails?.stockQuantity ||
-                                            0}
+                                        {formatNumber(
+                                            Number(
+                                                selectedItemDetails?.stockQuantity
+                                            )
+                                        ) || 0}
                                     </span>
                                 </div>
                                 <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4">
@@ -586,8 +628,11 @@ const ItemInput = ({
                                         Số lượng còn phải sản xuất
                                     </Text>
                                     <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
-                                        {selectedItemDetails?.totalProcessing ||
-                                            0}
+                                        {formatNumber(
+                                            Number(
+                                                selectedItemDetails?.totalProcessing
+                                            )
+                                        ) || 0}
                                     </span>
                                 </div>
                                 <Box className="px-4">
@@ -648,10 +693,20 @@ const ItemInput = ({
                                 </Box>
                                 {selectedItemDetails?.notifications &&
                                     selectedItemDetails?.notifications.filter(
-                                        (notif) => notif.confirm == 0
+                                        (notif) =>
+                                            notif.confirm == 0 &&
+                                            notif.type == 0
                                     )?.length > 0 &&
                                     selectedItemDetails?.notifications
-                                        .filter((notif) => notif.confirm == 0)
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 0 &&
+                                                notif.type == 0
+                                        )
+                                        /** Type = 0: Ghi nhận giao chờ xác nhận (Ghi nhận gửi đi công đoạn trên)
+                                            Type = 1: Ghi nhận lỗi cho công đoạn trước chờ xác nhận (Reject gửi xuống công đoạn dưới thì phải)
+                                            Type = 2: Công đoạn trên trả lại với lý do gì đó (thì phải)
+                                         **/
                                         ?.map((item, index) => (
                                             <div
                                                 key={"Processing_" + index}
@@ -715,12 +770,21 @@ const ItemInput = ({
                                         ))}
                                 {selectedItemDetails?.notifications &&
                                     selectedItemDetails?.notifications.filter(
-                                        (notif) => notif.confirm == 3
+                                        (notif) =>
+                                            notif.confirm == 3 &&
+                                            notif.type == 2
                                     )?.length > 0 &&
                                     selectedItemDetails?.notifications
-                                        .filter((notif) => notif.confirm == 3)
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 3 &&
+                                                notif.type == 2
+                                        )
                                         ?.map((item, index) => (
-                                            <div className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded">
+                                            <div
+                                                key={"Return_" + index}
+                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded"
+                                            >
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex gap-4">
                                                         <Text className="font-semibold">
@@ -730,11 +794,17 @@ const ItemInput = ({
                                                             colorScheme="red"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {Number(
+                                                            {formatNumber(Number(
                                                                 item?.Quantity
-                                                            )}
+                                                            ))}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Lý do:{" "}
@@ -759,13 +829,21 @@ const ItemInput = ({
                                                 </div>
                                             </div>
                                         ))}
-                                {selectedItemDetails?.pendingErrors &&
-                                    selectedItemDetails?.pendingErrors.length >
-                                        0 &&
-                                    selectedItemDetails?.pendingErrors.map(
-                                        (item, index) => (
+                                {selectedItemDetails?.notifications &&
+                                    selectedItemDetails?.notifications.filter(
+                                        (notif) =>
+                                            notif.confirm == 0 &&
+                                            notif.type == 1
+                                    )?.length > 0 &&
+                                    selectedItemDetails?.notifications
+                                        .filter(
+                                            (notif) =>
+                                                notif.confirm == 0 &&
+                                                notif.type == 1
+                                        )
+                                        .map((item, index) => (
                                             <div
-                                                key={index}
+                                                key={"Error_" + index}
                                                 className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded"
                                             >
                                                 <div className="flex flex-col gap-2">
@@ -778,15 +856,32 @@ const ItemInput = ({
                                                             colorScheme="red"
                                                             fontSize="1.2rem"
                                                         >
-                                                            {item?.amount}
+                                                            {formatNumber(Number(item?.Quantity))}
                                                         </Badge>
                                                     </div>
+                                                    <Text>
+                                                        tạo bởi:{" "}
+                                                        {item?.last_name +
+                                                            " " +
+                                                            item?.first_name}
+                                                    </Text>
                                                     <div className="flex flex-col">
                                                         <Text className="font-semibold">
                                                             Thời gian giao:{" "}
                                                         </Text>
                                                         <span className="ml-1 text-violet-700">
-                                                            30/11/2023 14:12:23
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "DD/MM/YYYY"
+                                                            ) || ""}{" "}
+                                                            {moment(
+                                                                item?.created_at,
+                                                                "YYYY-MM-DD HH:mm:ss"
+                                                            ).format(
+                                                                "HH:mm:ss"
+                                                            ) || ""}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -803,8 +898,7 @@ const ItemInput = ({
                                                     </button>
                                                 </div>
                                             </div>
-                                        )
-                                    )}
+                                        ))}
                                 <Box className="px-3">
                                     <label className="font-semibold text-red-700">
                                         Khai báo số lượng lỗi
@@ -863,7 +957,7 @@ const ItemInput = ({
                                             {selectedItemDetails?.ChildName} (
                                             {selectedItemDetails?.CDay} *
                                             {selectedItemDetails?.CRong} *
-                                            {selectedItemDetails?.CDai}) :{" "}
+                                            {selectedItemDetails?.CDai}){" "}
                                         </Radio>
                                     </RadioGroup>
                                 </Box>
