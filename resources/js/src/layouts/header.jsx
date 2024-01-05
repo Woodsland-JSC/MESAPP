@@ -189,29 +189,6 @@ function Header(props) {
                                 </li>
                             )}
                         </NavLink>
-                        {/* )} */}
-                        {/* <NavLink to="/profile" className="flex items-center">
-                            {({ isActive }) => (
-                                <li
-                                    className={
-                                        isActive
-                                            ? "p-2 px-3 rounded-full bg-[#155979] cursor-pointer"
-                                            : "p-2 px-3 rounded-full hover:bg-gray-100 cursor-pointer active:scale-[.98] active:duration-75 transition-all"
-                                    }
-                                >
-                                    <div
-                                        className={
-                                            isActive
-                                                ? "flex items-center space-x-2 text-white"
-                                                : "flex items-center space-x-2"
-                                        }
-                                    >
-                                        <TbSettings className="text-2xl"/>
-                                        <p>Cài đặt</p>
-                                    </div>
-                                </li>
-                            )}
-                        </NavLink> */}
                     </ul>
                 </div>
 

@@ -764,7 +764,7 @@ function WoodSorting() {
 
                         <div className="xl:flex w-full justify-between items-center">
                             <div className="xl:my-0 my-2 text-gray-500">
-                                Tổng: <span>{palletCards.length}</span>
+                                  Tổng: <span>{palletCards.length}</span>
                             </div>
                             <button
                                 type="button"

@@ -116,7 +116,7 @@ function CheckListItem(props) {
     }, [fixedFanValues]);
 
     const handleCheckboxNo7Change = (value) => {
-        if (soLan === 0) {
+        if (soLan === 0 || soLan === "") {
             toast.error("Giá trị không được bỏ trống.");
         } else {
             onCheckboxChange(!localIsChecked);

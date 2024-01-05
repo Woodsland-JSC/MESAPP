@@ -99,7 +99,7 @@ function Login() {
             navigate("/");
         } catch (error) {
             toast.error("Đăng nhập thất bại");
-            // console.error("Login failed:", error);
+            console.error("Login failed:", error);
         }
         setLoading(false);
     };
@@ -181,7 +181,7 @@ function Login() {
                                         <span className="block mt-[8px] h-[14.55px]"></span>
                                     )}
                                 </div>
-                                <div className="flex items-center justify-between !mt-2">
+                                {/* <div className="flex items-center justify-between !mt-2">
                                     <div className="flex items-start">
                                         <div className="flex items-center h-5">
                                             <input
@@ -212,7 +212,7 @@ function Login() {
                                     >
                                         Quên mật khẩu
                                     </Link>
-                                </div>
+                                </div> */}
                                 <button
                                     type="submit"
                                     onClick={handleSubmit}

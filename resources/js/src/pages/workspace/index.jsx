@@ -261,50 +261,58 @@ function Workspace() {
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            <Link to="/workspace/wood-processing/finished-goods-receipt">
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            
-                                                        </div>
-                                                        <div>
-                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Nhập thành phẩm chế biến gỗ
-                                                            </h5>
-                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Nhập thành phẩm chế biến.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Nhập thành phẩm chế biến gỗ
-                                                </div>
-                                            </Link>
-
-                                            <Link to="/workspace/plywood/finished-goods-receipt">
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                        <div>
-                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Nhập thành phẩm ván công nghiệp
-                                                            </h5>
-                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Nhập thành phẩm ván.
-                                                            </p>
+                                            {user.permissions?.includes(
+                                                "CBG"
+                                            ) && (
+                                                <Link to="/workspace/wood-processing/finished-goods-receipt">
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                    Nhập thành phẩm chế biến gỗ
+                                                                </h5>
+                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                    Nhập thành phẩm chế biến.
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Nhập thành phẩm ván công nghiệp
-                                                </div>
-                                            </Link>
+                                                    <div className="flex xl:hidden justify-center text-center mt-2">
+                                                        Nhập thành phẩm chế biến gỗ
+                                                    </div>
+                                                </Link>
+                                            )}
+                                            
+                                            {user.permissions?.includes(
+                                                "VCN"
+                                            ) && (
+                                                <Link to="/workspace/plywood/finished-goods-receipt">
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                                <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                    Nhập thành phẩm ván công nghiệp
+                                                                </h5>
+                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                    Nhập thành phẩm ván.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex xl:hidden justify-center text-center mt-2">
+                                                        Nhập thành phẩm ván công nghiệp
+                                                    </div>
+                                                </Link>
+                                            )}
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
@@ -391,18 +399,32 @@ function Workspace() {
                                                 </div>
                                             </Link>
 
-                                            <div>
+                                            <Link to="/workspace/wood-producting-qc">
                                                 <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                            {/* <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/> */}
+                                                            <MdPlaylistAddCheckCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                Ván công nghiệp
+                                                            </h5>
+                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                Lorem ipsum
+                                                                dolor sit amet
+                                                                consectetur,
+                                                                adipisicing
+                                                                elit.
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
+
+                                                <div className="flex xl:hidden justify-center text-center mt-2">
+                                                    Ván công nghiệp
                                                 </div>
-                                            </div>
+                                            </Link>
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">

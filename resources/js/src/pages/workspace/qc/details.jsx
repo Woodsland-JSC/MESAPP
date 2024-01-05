@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Layout from "../../../layouts/layout";import { useLocation, useNavigate } from "react-router-dom";
+import Layout from "../../../layouts/layout";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
