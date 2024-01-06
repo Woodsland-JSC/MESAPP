@@ -747,7 +747,7 @@ class ProductionController extends Controller
                             ]
                         );
                         DB::commit();
-                        return response()->json('success', 200);
+                      
 
                     } else {
                         DB::rollBack();
@@ -758,6 +758,7 @@ class ProductionController extends Controller
                         ], 500);
                     }
                 }
+                return response()->json('success', 200);
             }
             else
             {
