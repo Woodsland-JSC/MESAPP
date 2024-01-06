@@ -561,6 +561,7 @@ function FinishedGoodsReceipt() {
 
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupListOptions, setGroupListOptions] = useState([]);
+    const [groupList, setGroupList] = useState([]);
     // const [goodsReceiptList, setGoodsReceiptList] = useState([]);
     // const [goodsReceiptOptions, setGoodsReceiptOptions] = useState([]);
 
@@ -630,6 +631,7 @@ function FinishedGoodsReceipt() {
     // };
 
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -1078,8 +1080,8 @@ function FinishedGoodsReceipt() {
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
                 }));
-                setGroupListOptions(options);
-                // setSelectedGroup(options[0]);
+                setGroupList(res);
+                setGroupListOptions(options);                // setSelectedGroup(options[0]);
                 groupSelectRef.current.setValue(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
@@ -1143,6 +1145,12 @@ function FinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
+                const isQC = groupList.find((group) => group.Code == selectedGroup)?.QC;
+                if (isQC) {
+                    setIsQualityCheck(true);
+                } else {
+                    setIsQualityCheck(false);
+                }
                 // setLoadingData(true);
                 const params = {
                     TO: selectedGroup.value,
@@ -1770,6 +1778,7 @@ function FinishedGoodsReceipt() {
                                             // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
+                                            isQualityCheck={isQualityCheck}
                                             onReceiptFromChild={
                                                 handleReceiptFromChild
                                             }

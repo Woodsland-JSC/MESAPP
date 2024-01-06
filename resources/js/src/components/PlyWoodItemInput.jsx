@@ -64,6 +64,7 @@ const PlyWoodItemInput = ({
     data,
     index,
     fromGroup,
+    isQualityCheck,
     nextGroup,
     onReceiptFromChild,
     onRejectFromChild,
@@ -169,7 +170,7 @@ const PlyWoodItemInput = ({
                 Team: selectedItemDetails.TO,
                 CongDoan: selectedItemDetails.NameTO,
                 NexTeam: selectedItemDetails.TOTT,
-                Type: "CBG",
+                Type: "VCN",
                 LSX: selectedItemDetails.LSX[0].LSX,
                 CompleQty: 0,
                 RejectQty: 0,
@@ -238,6 +239,13 @@ const PlyWoodItemInput = ({
                 //     previousGroup: nextGroup,
                 // };
                 // onRejectFromChild(result, faults);
+            }
+            if (isQualityCheck) {
+                payload.LoaiLoi = faults.errorType || null;
+                payload.HuongXuLy = faults.solution || null;
+            } else {
+                payload.LoaiLoi = null;
+                payload.HuongXuLy = null;
             }
             if (payload.FatherCode && payload.ItemCode) {
                 if (payload.CompleQty || payload.RejectQty) {
@@ -929,9 +937,8 @@ const PlyWoodItemInput = ({
                                             colorScheme="red"
                                             fontSize="1.2rem"
                                         >
-                                            {
-                                                selectedItemDetails?.totalStageError || ''
-                                            }
+                                            {selectedItemDetails?.totalStageError ||
+                                                ""}
                                         </Badge>{" "}
                                     </span>
                                     {/* <span>
@@ -1051,42 +1058,102 @@ const PlyWoodItemInput = ({
                                         }}
                                     />
                                 </Box>
-                                {/* <Box className="px-3">
-                                    <label className="font-semibold text-red-700">
-                                        Loại lỗi
-                                    </label>
-                                    <Select
-                                        className="mt-4"
-                                        placeholder="Lựa chọn"
-                                        options={errorTypeOptions}
-                                        isClearable
-                                        isSearchable
-                                        onChange={(value) => {
-                                            setFaults((prev) => ({
-                                                ...prev,
-                                                errorType: value,
-                                            }));
-                                        }}
-                                    />
-                                </Box> */}
-                                {/* <Box className="px-3">
-                                    <label className="font-semibold text-red-700">
-                                        Hướng xử lý
-                                    </label>
-                                    <Select
-                                        className="mt-4 mb-12"
-                                        placeholder="Lựa chọn"
-                                        options={solutionOptions}
-                                        isClearable
-                                        isSearchable
-                                        onChange={(value) => {
-                                            setFaults((prev) => ({
-                                                ...prev,
-                                                solution: value,
-                                            }));
-                                        }}
-                                    />
-                                </Box> */}
+                                {isQualityCheck && (
+                                    <>
+                                        <Box className="px-3">
+                                            <label className="font-semibold text-red-700">
+                                                Loại lỗi
+                                            </label>
+                                            <Select
+                                                className="mt-4"
+                                                placeholder="Lựa chọn"
+                                                options={errorTypeOptions}
+                                                isClearable
+                                                isSearchable
+                                                // onChange={(value) => {
+                                                //     setFaults((prev) => ({
+                                                //         ...prev,
+                                                //         errorType: value,
+                                                //     }));
+                                                // }}
+                                                value={faults.errorType}
+                                                onChange={(value) => {
+                                                    if (
+                                                        !faultyAmount ||
+                                                        faultyAmount < 1
+                                                    ) {
+                                                        toast(
+                                                            "Vui lòng khai báo số lượng lỗi."
+                                                        );
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            errorType: null,
+                                                        }));
+                                                    } else {
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            errorType: value,
+                                                        }));
+                                                    }
+                                                }}
+                                            />
+                                        </Box>
+                                        <Box className="px-3">
+                                            <label className="font-semibold text-red-700">
+                                                Hướng xử lý
+                                            </label>
+                                            <Select
+                                                className="mt-4 mb-12"
+                                                placeholder="Lựa chọn"
+                                                options={solutionOptions}
+                                                isClearable
+                                                isSearchable
+                                                // onChange={(value) => {
+                                                //     setFaults((prev) => ({
+                                                //         ...prev,
+                                                //         solution: value,
+                                                //     }));
+                                                // }}
+                                                value={faults.solution}
+                                                onChange={(value) => {
+                                                    if (
+                                                        !faultyAmount ||
+                                                        faultyAmount < 1
+                                                    ) {
+                                                        toast(
+                                                            "Vui lòng khai báo số lượng lỗi."
+                                                        );
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            solution: null,
+                                                        }));
+                                                    } else {
+                                                        if (faults.errorType) {
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    solution:
+                                                                        value,
+                                                                })
+                                                            );
+                                                        } else {
+                                                            toast(
+                                                                "Vui lòng chọn loại lỗi."
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    solution:
+                                                                        null,
+                                                                })
+                                                            );
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Box>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </ModalBody>
