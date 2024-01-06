@@ -7,13 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Jobs\receiptProductionAlocate;
 use App\Models\SanLuong;
+use App\Models\QCHandle;
+use App\Models\LoaiLoi;
 use App\Models\notireceipt;
-use Illuminate\Support\Facades\Redis;
+use App\Models\HistorySL;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
-use Predis\Command\Redis\AUTH as RedisAUTH;
 
 class ProductionController extends Controller
 {
@@ -732,9 +732,20 @@ class ProductionController extends Controller
                         );
                         notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
                         'ObjType' =>   202,
-                        'DocEntry' => $res['DocEntry'],
+                       // 'DocEntry' => $res['DocEntry'],
                         'confirmBy' => Auth::user()->id,
                         'confirm_at' => now()->format('YmdHmi')]);
+                        HistorySL::create(
+                            [
+                            'LSX'=>$data->LSX,
+                            'itemchild'=>$allocate['ItemChild'],
+                            'SPDich'=>$data->FatherCode,
+                            'to' => $data->Team,
+                            'quantity'=>$allocate['Allocate'],
+                            'ObjType'=>202,
+                            'DocEntry'=>$res['DocEntry']
+                            ]
+                        );
                         DB::commit();
                         return response()->json('success', 200);
 
@@ -763,10 +774,14 @@ class ProductionController extends Controller
                 {
                     $warehouse='W05.1.01';
                 }
+                $loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
+                $Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX"=> $data->LSX,
                     "U_TO"=> $data->Team,
+                    "U_LL"=> $loaiLoi,
+                    "U_HXL"=> $Hxl,
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
                         "ItemCode" =>   $data->ItemCode,
@@ -811,6 +826,19 @@ class ProductionController extends Controller
                     'DocEntry' => $res['DocEntry'],
                     'confirmBy' => Auth::user()->id,
                     'confirm_at' => now()->format('YmdHmi')]);
+                    HistorySL::create(
+                        [
+                        'LSX'=>$data->LSX,
+                        'itemchild'=>$data->ItemCode,
+                        'to' => $data->Team,
+                        'quantity'=>$data->RejectQty,
+                        'ObjType'=>59,
+                        'DocEntry'=>$res['DocEntry'],
+                        'SPDich'=>$data->FatherCode,
+                        'LL'=>$loaiLoi,
+                        'HXL'=>$Hxl,
+                        ]
+                    );
                     DB::commit();
                     return response()->json('success', 200);
 
