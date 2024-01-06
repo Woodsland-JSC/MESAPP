@@ -413,7 +413,7 @@ class ProductionController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         $query = 'select "VisResCode" "Code","ResName" "Name", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
-        join OHEM C ON B."EmpID"=C."empID" where ephp."empID" =? AND "validFor"=?';
+        join OHEM C ON B."EmpID"=C."empID" where c."empID" =? AND "validFor"=?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
