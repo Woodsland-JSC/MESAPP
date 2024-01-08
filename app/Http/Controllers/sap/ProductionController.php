@@ -836,8 +836,8 @@ class ProductionController extends Controller
                         'ObjType'=>59,
                         'DocEntry'=>$res['DocEntry'],
                         'SPDich'=>$data->FatherCode,
-                        'LL'=>$loaiLoi,
-                        'HXL'=>$Hxl,
+                        'LL'=> $request->loailoai['label'],
+                        'HXL'=>$request->huongxuly['label'],
                         ]
                     );
                     DB::commit();
