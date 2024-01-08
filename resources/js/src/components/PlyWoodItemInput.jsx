@@ -64,14 +64,14 @@ const PlyWoodItemInput = ({
     data,
     index,
     fromGroup,
-    isQualityCheck,
+    // isQualityCheck,
     nextGroup,
     onReceiptFromChild,
     onRejectFromChild,
 }) => {
     const checkRef = useRef(null);
     const { user } = useAppContext();
-    console.log("Ra nè: ", nextGroup);
+    // console.log("Ra nè: ", nextGroup);
     const {
         isOpen: isAlertDialogOpen,
         onOpen: onAlertDialogOpen,
@@ -130,7 +130,7 @@ const PlyWoodItemInput = ({
             const res = await productionApi.getFinishedPlywoodGoodsDetail(
                 params
             );
-            console.log("Bye: ", res);
+            // console.log("Bye: ", res);
             setSelectedItemDetails({
                 ...item,
                 stockQuantity: res.maxQuantity,
@@ -240,13 +240,13 @@ const PlyWoodItemInput = ({
                 // };
                 // onRejectFromChild(result, faults);
             }
-            if (isQualityCheck) {
-                payload.LoaiLoi = faults.errorType || null;
-                payload.HuongXuLy = faults.solution || null;
-            } else {
-                payload.LoaiLoi = null;
-                payload.HuongXuLy = null;
-            }
+            // if (isQualityCheck) {
+            //     payload.LoaiLoi = faults.errorType || null;
+            //     payload.HuongXuLy = faults.solution || null;
+            // } else {
+            //     payload.LoaiLoi = null;
+            //     payload.HuongXuLy = null;
+            // }
             if (payload.FatherCode && payload.ItemCode) {
                 if (payload.CompleQty || payload.RejectQty) {
                     const res = await productionApi.enterFinishedGoodsAmountVCN(
@@ -1058,7 +1058,7 @@ const PlyWoodItemInput = ({
                                         }}
                                     />
                                 </Box>
-                                {isQualityCheck && (
+                                {/* {isQualityCheck && (
                                     <>
                                         <Box className="px-3">
                                             <label className="font-semibold text-red-700">
@@ -1153,7 +1153,7 @@ const PlyWoodItemInput = ({
                                             />
                                         </Box>
                                     </>
-                                )}
+                                )} */}
                             </div>
                         </div>
                     </ModalBody>

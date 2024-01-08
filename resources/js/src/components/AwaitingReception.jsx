@@ -29,6 +29,7 @@ import {
     RadioGroup,
     useDisclosure,
 } from "@chakra-ui/react";
+import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -53,9 +54,13 @@ const AwaitingReception = ({
     data,
     type,
     index,
+    isQualityCheck,
     onConfirmReceipt,
     onRejectReceipt,
 }) => {
+    const errorTypeRef = useRef();
+    const solutionRef = useRef();
+
     const [selectedReason, setSelectedReason] = useState(null);
     const {
         isOpen: isInputAlertDialogOpen,
@@ -73,9 +78,18 @@ const AwaitingReception = ({
         try {
             const payload = {
                 id: data?.id,
+                loailoi: faults.errorType || null,
+                huongxuly: faults.solution || null
             };
             if (payload.id) {
-                const res = await productionApi.acceptReceiptsCBG(payload);
+                switch (type) {
+                    case 'plywood':
+                        const res1 = await productionApi.acceptReceiptsVCN(payload);
+                        break;
+                    default:
+                        const res2 = await productionApi.acceptReceiptsCBG(payload);
+                        break;
+                }
                 onConfirmReceipt(data?.id);
                 onInputAlertDialogClose();
                 // toast.success("Xác nhận thành công.");
@@ -84,6 +98,7 @@ const AwaitingReception = ({
             }
         } catch (error) {
             toast.error("Có lỗi xảy ra khi xác nhận.");
+            onInputAlertDialogClose();
         }
         setAcceptLoading(false);
     };
@@ -97,7 +112,7 @@ const AwaitingReception = ({
             };
             switch (selectedReason) {
                 case "1":
-                    console.log("Dô đây");
+                    // console.log("Dô đây");
                     payload.reason = reasonOfReturn.find(
                         (r) => r.value == 1
                     )?.label;
@@ -120,10 +135,18 @@ const AwaitingReception = ({
                 default:
                     break;
             }
-            console.log("Payload: ", payload);
+            // console.log("Payload: ", payload);
             if (payload?.id) {
                 if (payload?.reason) {
-                    const res = await productionApi.rejectReceiptsCBG(payload);
+                    switch (type) {
+                        case 'plywood':
+                            const res1 = await productionApi.rejectReceiptsCBG(payload);
+                            break;
+                        default:
+                            const res2 = await productionApi.rejectReceiptsVCN(payload);
+                            break;
+                    }
+                    
                     onRejectReceipt(payload?.id);
                     onDismissAlertDialogClose();
                 } else {
@@ -147,7 +170,15 @@ const AwaitingReception = ({
     const [acceptLoading, setAcceptLoading] = useState(false);
     const [rejectLoading, setRejectLoading] = useState(false);
 
-    console.log("Huhu: ", data);
+    const [isReturnSelect, setIsReturnSelect] = useState(false);
+
+    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    const [solutionOptions, setSolutionOptions] = useState([]);
+
+    const [faults, setFaults] = useState({
+        errorType: null,
+        solution: null,
+    });
 
     useEffect(() => {
         if (selectedReason != "3") {
@@ -155,10 +186,47 @@ const AwaitingReception = ({
         }
     }, [selectedReason]);
 
+    useEffect(() => {
+        if (!faults.errorType) {
+            setFaults((prev) => ({ ...prev, solution: null }));
+        }
+    }, [faults.errorType]);
+
+    useEffect(() => {
+        const getErrorTypeOptions = async () => {
+            try {
+                const res = await productionApi.getErrorTypes();
+                const errorTypes = res.map((error, index) => ({
+                    value: error?.id || "",
+                    label: error?.name || "",
+                }));
+                // console.log("Other side: ", errorTypes);
+                setErrorTypeOptions(errorTypes);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        const getSolutionOptions = async () => {
+            try {
+                const res = await productionApi.getSolutions("CBG");
+                const solutions = res.map((solution, index) => ({
+                    value: solution?.id || "",
+                    label: solution?.name || "",
+                }));
+                // console.log("Other side 2: ", solutions);
+                setSolutionOptions(solutions);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        getErrorTypeOptions();
+        getSolutionOptions();
+    }, []);
+
     return (
         <>
-            <Card maxW="sm">
-                <CardBody>
+            <Card maxW="sm" className="!shadow-[0_3px_10px_rgb(0,0,0,0.2)]">
+                <CardBody className="!px-4 !pb-3">
                     <Stack mt="2" spacing="2">
                         {type == "plywood" ? (
                             <>
@@ -259,8 +327,73 @@ const AwaitingReception = ({
                     </Stack>
                 </CardBody>
 
+                {isQualityCheck && !isReturnSelect && (
+                    <>
+                        <Box className="px-4">
+                            <label className="font-semibold text-red-700">
+                                Loại lỗi
+                            </label>
+                            <Select
+                                ref={errorTypeRef}
+                                className="mt-4"
+                                placeholder="Lựa chọn"
+                                options={errorTypeOptions}
+                                isClearable
+                                isSearchable
+                                // onChange={(value) => {
+                                //     setFaults((prev) => ({
+                                //         ...prev,
+                                //         errorType: value,
+                                //     }));
+                                // }}
+                                value={faults.errorType}
+                                onChange={(value) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        errorType: value,
+                                    }));
+                                }}
+                            />
+                        </Box>
+                        <Box className="px-4 mt-2 mb-4">
+                            <label className="font-semibold text-red-700">
+                                Hướng xử lý
+                            </label>
+                            <Select
+                                ref={solutionRef}
+                                className="mt-4"
+                                placeholder="Lựa chọn"
+                                options={solutionOptions}
+                                isClearable
+                                isSearchable
+                                // onChange={(value) => {
+                                //     setFaults((prev) => ({
+                                //         ...prev,
+                                //         solution: value,
+                                //     }));
+                                // }}
+                                value={faults.solution}
+                                onChange={(value) => {
+                                    if (!faults.errorType) {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            solution: null,
+                                        }));
+                                        toast("Vui lòng chọn loại lỗi.");
+                                    } else {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            solution: value,
+                                        }));
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </>
+                )}
+
                 <Divider />
-                <CardFooter>
+                <CardFooter className="!px-4">
                     <div className="flex flex-col">
                         <RadioGroup
                             onChange={(value) => {
@@ -268,7 +401,8 @@ const AwaitingReception = ({
                                 //     console.log("Dô 1: ", value);
                                 //     setSelectedReason(null);
                                 // } else {
-                                    setSelectedReason(value);
+                                setSelectedReason(value);
+                                setIsReturnSelect(true);
                                 // }
                             }}
                             value={selectedReason}
@@ -284,10 +418,10 @@ const AwaitingReception = ({
                                                 if (
                                                     item.value == selectedReason
                                                 ) {
-                                                    console.log(
-                                                        "Dô 2",
-                                                        selectedReason
-                                                    );
+                                                    // console.log(
+                                                    //     "Dô 2",
+                                                    //     selectedReason
+                                                    // );
                                                     setSelectedReason(null);
                                                 }
                                             }}
@@ -325,7 +459,7 @@ const AwaitingReception = ({
                         className={`${selectedReason ? "!block" : "!hidden"}`}
                         variant="ghost"
                         colorScheme="blue"
-                        onClick={() => setSelectedReason("")}
+                        onClick={() => {setSelectedReason(""); setIsReturnSelect(false)}}
                     >
                         <MdRefresh className="text-2xl" />
                     </Button>
@@ -367,7 +501,25 @@ const AwaitingReception = ({
                                 <span className="font-bold">
                                     {Number(data?.Quantity) || ""}
                                 </span>{" "}
-                                sản phẩm?
+                                sản phẩm
+                                {/* {faults &&
+                                    (
+                                        faults.errorType &&
+                                        ` với lý do ` + <b>{faults.errorType.label}</b>
+                                    )} */}
+                                {faults && faults.errorType && (
+                                    <span>
+                                        với lý do{" "}
+                                        <b>{faults.errorType.label}</b>
+                                    </span>
+                                )}
+                                {faults && faults.solution && (
+                                    <span>
+                                        {" "}và hướng xử lý{" "}
+                                        <b>{faults.solution.label}</b>
+                                    </span>
+                                )}
+                                ?
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter>
@@ -379,6 +531,7 @@ const AwaitingReception = ({
                                     Thoát
                                 </Button>
                                 <button
+                                    disabled={acceptLoading}
                                     className="w-fit bg-[#38a169] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                     onClick={handleConfirmReceipt}
                                 >
@@ -411,7 +564,7 @@ const AwaitingReception = ({
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
-                        <AlertDialogHeader>Xác nhận huỷ bỏ </AlertDialogHeader>
+                        <AlertDialogHeader>Xác nhận trả lại </AlertDialogHeader>
                         <AlertDialogBody>
                             <div className="text-red-700">
                                 Bạn có chắc chắn muốn trả lại:{" "}
@@ -439,6 +592,7 @@ const AwaitingReception = ({
                                     Thoát
                                 </Button>
                                 <button
+                                    disabled={rejectLoading}
                                     className="w-fit bg-[#e53e3e] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                     onClick={handleRejectReceipt}
                                 >

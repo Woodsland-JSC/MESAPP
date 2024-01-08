@@ -69,12 +69,18 @@ const productionApi = {
     rejectReceiptsCBG: (data) => {
         const url = `/production/reject-receipts`;
         return axiosClient().post(url, data);
-
+    },
+    rejectReceiptsVCN: (data) => {
+        const url = `/production/reject-receipts`;
+        return axiosClient().post(url, data);
     },
     acceptReceiptsCBG: (data) => {
         const url = `/production/accept-receipts`;
         return axiosClient().post(url, data);
-
+    },
+    acceptReceiptsVCN: (data) => {
+        const url = `/production/accept-receipts-vcn`;
+        return axiosClient().post(url, data);
     },
     getErrorTypes: () => {
         const url = `/loailoi`;
