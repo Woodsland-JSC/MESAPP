@@ -663,7 +663,7 @@ class ProductionController extends Controller
         return array_values($filteredData);
     }
     function accept (Request $request)
-    {
+    {  
         $validator = Validator::make($request->all(), [
             'id' => 'required',
         ]);
@@ -777,15 +777,14 @@ class ProductionController extends Controller
                 }
                 //$loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
                 //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
-                $loailoai= $request->loailoai['label'];
+                $loailoi= $request->loailoi['label'];
                 $huongxuly= $request->huongxuly['label'];
-                dd($loailoai);
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX"=> $data->LSX,
                     "U_TO"=> $data->Team,
-                    "U_LL"=> $request->loailoai['label'],
-                    "U_HXL"=>  $request->huongxuly['label'],
+                    "U_LL"=> $loailoi,
+                    "U_HXL"=> $huongxuly,
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
                         "ItemCode" =>   $data->ItemCode,
@@ -839,9 +838,10 @@ class ProductionController extends Controller
                         'ObjType'=>59,
                         'DocEntry'=>$res['DocEntry'],
                         'SPDich'=>$data->FatherCode,
-                        'LL'=> $request->loailoai['label'],
-                        'HXL'=>$request->huongxuly['label'],
-                        ]
+                        'LL'=> $loailoi,
+                        'HXL'=>$huongxuly
+                        ],
+                        
                     );
                     DB::commit();
                     return response()->json('success', 200);
