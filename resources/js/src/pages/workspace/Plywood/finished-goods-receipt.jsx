@@ -532,16 +532,7 @@ function PlywoodFinishedGoodsReceipt() {
     // });
     // const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [awaitingReception, setAwaitingReception] = useState({
-        "CH-LVL-TV": [],
-        "CH-PLY-XV": [],
-        "CH-LVL-HT": [],
-        "CH-PLY-LL": [],
-        "CH-PLY-TV": [],
-        "CH-LVL-KTP": [],
-        "CH-PLY-LV": [],
-        "CH-PLY-KVC": [],
-    });
+    const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -911,99 +902,94 @@ function PlywoodFinishedGoodsReceipt() {
 
     const handleConfirmReceipt = (index) => {
         if (selectedGroup) {
-            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
-            switch (selectedGroup.value) {
-                case "CH-LVL-TV":
-                    exampleData = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                // itemDetails: item.itemDetails.map((detail) => {
-                                //     if (detail.id === receiptSubItem.id) {
-                                //         return {
-                                //             ...detail,
-                                //             stockQuantity:
-                                //                 Number(detail.stockQuantity) +
-                                //                 Number(receiptSubItem.amount),
-                                //         };
-                                //     }
-                                //     return detail;
-                                // }),
-                                stockQuantity:
-                                    Number(item.stockQuantity) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-                        return item;
-                    });
-                    setCurrentData(exampleData);
-                    break;
-                case "CH-LVL-HT":
-                    exampleData1 = exampleData1.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                // itemDetails: item.itemDetails.map((detail) => {
-                                //     if (detail.id === receiptSubItem.id) {
-                                //         return {
-                                //             ...detail,
-                                //             stockQuantity:
-                                //                 Number(detail.stockQuantity) +
-                                //                 Number(receiptSubItem.amount),
-                                //         };
-                                //     }
-                                //     return detail;
-                                // }),
-                                stockQuantity:
-                                    Number(item.stockQuantity) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-                        return item;
-                    });
-                    console.log("Final: ", exampleData1);
-                    setCurrentData(exampleData1);
-                    break;
-                case "CH-LVL-KTP":
-                    exampleData2 = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                // itemDetails: item.itemDetails.map((detail) => {
-                                //     if (detail.id === receiptSubItem.id) {
-                                //         return {
-                                //             ...detail,
-                                //             stockQuantity:
-                                //                 Number(detail.stockQuantity) +
-                                //                 Number(receiptSubItem.amount),
-                                //         };
-                                //     }
-                                //     return detail;
-                                // }),
-                                stockQuantity:
-                                    Number(item.stockQuantity) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-                        return item;
-                    });
-                    setCurrentData(exampleData2);
-                    break;
-            }
-            setAwaitingReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
+            // switch (selectedGroup.value) {
+            //     case "CH-LVL-TV":
+            //         exampleData = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     // itemDetails: item.itemDetails.map((detail) => {
+            //                     //     if (detail.id === receiptSubItem.id) {
+            //                     //         return {
+            //                     //             ...detail,
+            //                     //             stockQuantity:
+            //                     //                 Number(detail.stockQuantity) +
+            //                     //                 Number(receiptSubItem.amount),
+            //                     //         };
+            //                     //     }
+            //                     //     return detail;
+            //                     // }),
+            //                     stockQuantity:
+            //                         Number(item.stockQuantity) +
+            //                         Number(receiptSubItem.amount),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         setCurrentData(exampleData);
+            //         break;
+            //     case "CH-LVL-HT":
+            //         exampleData1 = exampleData1.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     // itemDetails: item.itemDetails.map((detail) => {
+            //                     //     if (detail.id === receiptSubItem.id) {
+            //                     //         return {
+            //                     //             ...detail,
+            //                     //             stockQuantity:
+            //                     //                 Number(detail.stockQuantity) +
+            //                     //                 Number(receiptSubItem.amount),
+            //                     //         };
+            //                     //     }
+            //                     //     return detail;
+            //                     // }),
+            //                     stockQuantity:
+            //                         Number(item.stockQuantity) +
+            //                         Number(receiptSubItem.amount),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         console.log("Final: ", exampleData1);
+            //         setCurrentData(exampleData1);
+            //         break;
+            //     case "CH-LVL-KTP":
+            //         exampleData2 = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     // itemDetails: item.itemDetails.map((detail) => {
+            //                     //     if (detail.id === receiptSubItem.id) {
+            //                     //         return {
+            //                     //             ...detail,
+            //                     //             stockQuantity:
+            //                     //                 Number(detail.stockQuantity) +
+            //                     //                 Number(receiptSubItem.amount),
+            //                     //         };
+            //                     //     }
+            //                     //     return detail;
+            //                     // }),
+            //                     stockQuantity:
+            //                         Number(item.stockQuantity) +
+            //                         Number(receiptSubItem.amount),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         setCurrentData(exampleData2);
+            //         break;
+            // }
+            setAwaitingReception((prev) => (
+                prev.filter(item => item.id !== id)
+            ));
+            toast.success("Ghi nhận thành công.");
         }
-        toast.success("Ghi nhận thành công.");
-        onModalClose();
+        if (awaitingReception.length <= 0) {
+            onModalClose();
+        }
     };
 
     const handleConfirmErrorReceipt = (index) => {
@@ -1112,137 +1098,143 @@ function PlywoodFinishedGoodsReceipt() {
 
     const handleRejectReceipt = (index, reason) => {
         if (selectedGroup) {
-            let receiptSubItem = awaitingReception[selectedGroup.value][index];
+            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
 
-            switch (receiptSubItem?.fromGroup?.id) {
-                case "CH-LVL-TV":
-                    exampleData = exampleData.map((item) => {
-                        if (item?.id === receiptSubItem?.itemId) {
-                            return {
-                                ...item,
-                                returns: [
-                                    ...item.returns,
-                                    {
-                                        ...reason,
-                                        amount: Number(receiptSubItem.amount),
-                                    },
-                                ],
-                                // itemDetails: item.itemDetails.map((detail) => {
-                                //     if (detail.id === receiptSubItem.id) {
-                                //         return {
-                                //             ...detail,
-                                //             returns: [
-                                //                 ...detail.returns,
-                                //                 {
-                                //                     ...reason,
-                                //                     amount: Number(
-                                //                         receiptSubItem.amount
-                                //                     ),
-                                //                 },
-                                //             ],
-                                //         };
-                                //     }
-                                //     return detail;
-                                // }),
-                            };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData);
-                    break;
-                case "CH-LVL-HT":
-                    exampleData1 = exampleData1.map((item) => {
-                        if (item?.id === receiptSubItem?.itemId) {
-                            return {
-                                ...item,
-                                returns: [
-                                    ...item.returns,
-                                    {
-                                        ...reason,
-                                        amount: Number(receiptSubItem.amount),
-                                    },
-                                ],
-                            };
-                            // return {
-                            //     ...item,
-                            //     itemDetails: item.itemDetails.map((detail) => {
-                            //         if (detail.id === receiptSubItem.id) {
-                            //             return {
-                            //                 ...detail,
-                            //                 returns: [
-                            //                     ...detail.returns,
-                            //                     {
-                            //                         ...reason,
-                            //                         amount: Number(
-                            //                             receiptSubItem.amount
-                            //                         ),
-                            //                     },
-                            //                 ],
-                            //             };
-                            //         }
-                            //         return detail;
-                            //     }),
-                            // };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData1);
-                    break;
-                case "CH-LVL-KTP":
-                    exampleData2 = exampleData.map((item) => {
-                        if (item.id === receiptSubItem.itemId) {
-                            return {
-                                ...item,
-                                returns: [
-                                    ...item.returns,
-                                    {
-                                        ...reason,
-                                        amount: Number(receiptSubItem.amount),
-                                    },
-                                ],
-                            };
-                            // return {
-                            //     ...item,
-                            //     itemDetails: item.map((detail) => {
-                            //         if (detail.id === receiptSubItem.id) {
-                            //             return {
-                            //                 ...detail,
-                            //                 returns: [
-                            //                     ...detail.returns,
-                            //                     {
-                            //                         ...reason,
-                            //                         amount: Number(
-                            //                             receiptSubItem.amount
-                            //                         ),
-                            //                     },
-                            //                 ],
-                            //             };
-                            //         }
-                            //         return detail;
-                            //     }),
-                            // };
-                        }
-                        return item;
-                    });
-                    // setCurrentData(exampleData2);
-                    break;
-            }
-            setAwaitingReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
+            // switch (receiptSubItem?.fromGroup?.id) {
+            //     case "CH-LVL-TV":
+            //         exampleData = exampleData.map((item) => {
+            //             if (item?.id === receiptSubItem?.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     returns: [
+            //                         ...item.returns,
+            //                         {
+            //                             ...reason,
+            //                             amount: Number(receiptSubItem.amount),
+            //                         },
+            //                     ],
+            //                     // itemDetails: item.itemDetails.map((detail) => {
+            //                     //     if (detail.id === receiptSubItem.id) {
+            //                     //         return {
+            //                     //             ...detail,
+            //                     //             returns: [
+            //                     //                 ...detail.returns,
+            //                     //                 {
+            //                     //                     ...reason,
+            //                     //                     amount: Number(
+            //                     //                         receiptSubItem.amount
+            //                     //                     ),
+            //                     //                 },
+            //                     //             ],
+            //                     //         };
+            //                     //     }
+            //                     //     return detail;
+            //                     // }),
+            //                 };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData);
+            //         break;
+            //     case "CH-LVL-HT":
+            //         exampleData1 = exampleData1.map((item) => {
+            //             if (item?.id === receiptSubItem?.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     returns: [
+            //                         ...item.returns,
+            //                         {
+            //                             ...reason,
+            //                             amount: Number(receiptSubItem.amount),
+            //                         },
+            //                     ],
+            //                 };
+            //                 // return {
+            //                 //     ...item,
+            //                 //     itemDetails: item.itemDetails.map((detail) => {
+            //                 //         if (detail.id === receiptSubItem.id) {
+            //                 //             return {
+            //                 //                 ...detail,
+            //                 //                 returns: [
+            //                 //                     ...detail.returns,
+            //                 //                     {
+            //                 //                         ...reason,
+            //                 //                         amount: Number(
+            //                 //                             receiptSubItem.amount
+            //                 //                         ),
+            //                 //                     },
+            //                 //                 ],
+            //                 //             };
+            //                 //         }
+            //                 //         return detail;
+            //                 //     }),
+            //                 // };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData1);
+            //         break;
+            //     case "CH-LVL-KTP":
+            //         exampleData2 = exampleData.map((item) => {
+            //             if (item.id === receiptSubItem.itemId) {
+            //                 return {
+            //                     ...item,
+            //                     returns: [
+            //                         ...item.returns,
+            //                         {
+            //                             ...reason,
+            //                             amount: Number(receiptSubItem.amount),
+            //                         },
+            //                     ],
+            //                 };
+            //                 // return {
+            //                 //     ...item,
+            //                 //     itemDetails: item.map((detail) => {
+            //                 //         if (detail.id === receiptSubItem.id) {
+            //                 //             return {
+            //                 //                 ...detail,
+            //                 //                 returns: [
+            //                 //                     ...detail.returns,
+            //                 //                     {
+            //                 //                         ...reason,
+            //                 //                         amount: Number(
+            //                 //                             receiptSubItem.amount
+            //                 //                         ),
+            //                 //                     },
+            //                 //                 ],
+            //                 //             };
+            //                 //         }
+            //                 //         return detail;
+            //                 //     }),
+            //                 // };
+            //             }
+            //             return item;
+            //         });
+            //         // setCurrentData(exampleData2);
+            //         break;
+            // }
+
+            // setAwaitingReception((prev) => {
+            //     const groupKey = selectedGroup.value;
+            //     const updatedGroup = awaitingReception[groupKey].filter(
+            //         (item, i) => i !== index
+            //     );
+            //     return {
+            //         ...prev,
+            //         [groupKey]: updatedGroup,
+            //     };
+            // });
+            setAwaitingReception((prev) => (
+                prev.filter(item => item.id !== id)
+            ));
+            toast.success("Huỷ bỏ & chuyển lại thành công.");
         }
-        toast.success("Huỷ bỏ & chuyển lại thành công.");
-        onModalClose();
+        if (awaitingReception.length <= 0) {
+            onModalClose();
+        }
         // console.log("Ra index: ", index);
         // console.log("Thực hiện reject: ", reason);
-        console.log("Ra example data: ", exampleData);
+        // console.log("Ra example data: ", exampleData);
     };
 
     const handleRejectErrorReceipt = (index) => {
@@ -1262,7 +1254,7 @@ function PlywoodFinishedGoodsReceipt() {
         onModalClose();
         // console.log("Ra index: ", index);
         // console.log("Thực hiện reject: ", reason);
-        console.log("Ra example data: ", exampleData);
+        // console.log("Ra example data: ", exampleData);
     };
 
     const onFilterTextBoxChanged = async (e) => {
@@ -1376,7 +1368,7 @@ function PlywoodFinishedGoodsReceipt() {
             /** DÒNG NÀY NHỚ XOÁ */
             // const res = await productionApi.getFinishedGoodsList(params);
 
-            console.log("Ra kết quả dùm: ", res);
+            // console.log("Ra kết quả dùm: ", res);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {
@@ -1398,7 +1390,7 @@ function PlywoodFinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                const isQC = groupList.find((group) => group.Code == selectedGroup)?.QC;
+                const isQC = groupList.find((group) => group.Code == selectedGroup.value)?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
@@ -1787,9 +1779,8 @@ function PlywoodFinishedGoodsReceipt() {
                                             </div>
                                         </button>
                                     )}
-                                {selectedGroup &&
-                                    awaitingReception[selectedGroup?.value]
-                                        ?.length > 0 && (
+                                {selectedGroup && !loadingData && 
+                                    awaitingReception?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
                                             className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
@@ -2086,7 +2077,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
-                                            isQualityCheck={isQualityCheck}
+                                            // isQualityCheck={isQualityCheck}
                                             onReceiptFromChild={
                                                 handleReceiptFromChild
                                             }
@@ -2178,6 +2169,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             data={item}
                                             key={index}
                                             index={index}
+                                            isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
                                                 handleConfirmReceipt
                                             }

@@ -1081,7 +1081,8 @@ function FinishedGoodsReceipt() {
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
-                setGroupListOptions(options);                // setSelectedGroup(options[0]);
+                setGroupListOptions(options);                
+                // setSelectedGroup(options[0]);
                 groupSelectRef.current.setValue(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
@@ -1123,7 +1124,7 @@ function FinishedGoodsReceipt() {
         setLoadingData(true);
         try {
             const res = await productionApi.getFinishedGoodsList(params);
-            console.log("Ra kết quả dùm: ", res);
+            // console.log("Ra kết quả dùm: ", res);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {
@@ -1145,7 +1146,7 @@ function FinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                const isQC = groupList.find((group) => group.Code == selectedGroup)?.QC;
+                const isQC = groupList.find((group) => group.Code == selectedGroup.value)?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
@@ -1515,7 +1516,7 @@ function FinishedGoodsReceipt() {
                                         />
                                     </div>
                                 </div>
-                                {selectedGroup &&
+                                {selectedGroup && !loadingData && 
                                     awaitingReception?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
@@ -1851,6 +1852,7 @@ function FinishedGoodsReceipt() {
                                             data={item}
                                             key={index}
                                             index={index}
+                                            isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
                                                 handleConfirmReceipt
                                             }

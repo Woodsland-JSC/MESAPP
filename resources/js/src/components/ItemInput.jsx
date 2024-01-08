@@ -57,7 +57,7 @@ const ItemInput = ({
     data,
     index,
     fromGroup,
-    isQualityCheck,
+    // isQualityCheck,
     nextGroup,
     onReceiptFromChild,
     onRejectFromChild,
@@ -105,8 +105,8 @@ const ItemInput = ({
     const [selectedDelete, setSelectedDelete] = useState(null);
     const [selectedError, setSelectedError] = useState(null);
 
-    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
-    const [solutionOptions, setSolutionOptions] = useState([]);
+    // const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    // const [solutionOptions, setSolutionOptions] = useState([]);
 
     const openInputModal = async (item) => {
         setLoading(true);
@@ -119,18 +119,8 @@ const ItemInput = ({
             };
             // console.log("Hi: ", params);
             const res = await productionApi.getFinishedGoodsDetail(params);
-            console.log("Bye: ", res);
+            // console.log("Bye: ", res);
             setSelectedItemDetails({
-                ...item,
-                stockQuantity: res.maxQuantity,
-                totalProcessing: res.remainQty,
-                factories: res.Factorys?.map((item) => ({
-                    value: item.Factory,
-                    label: item.FactoryName,
-                })),
-                notifications: res.notifications,
-            });
-            console.log("Selected item details: ", {
                 ...item,
                 stockQuantity: res.maxQuantity,
                 totalProcessing: res.remainQty,
@@ -159,7 +149,7 @@ const ItemInput = ({
     const handleSubmitQuantity = async () => {
         setConfirmLoading(true);
         try {
-            console.log("Làm ơn đi: ", selectedItemDetails);
+            // console.log("Làm ơn đi: ", selectedItemDetails);
             const payload = {
                 FatherCode: data.SPDICH,
                 ItemCode: selectedItemDetails.ItemChild,
@@ -239,13 +229,15 @@ const ItemInput = ({
                 // };
                 // onRejectFromChild(result, faults);
             }
-            if (isQualityCheck) {
-                payload.LoaiLoi = faults.errorType || null;
-                payload.HuongXuLy = faults.solution || null;
-            } else{
-                payload.LoaiLoi = null;
-                payload.HuongXuLy = null;
-            }
+
+            // if (isQualityCheck) {
+            //     payload.LoaiLoi = faults.errorType || null;
+            //     payload.HuongXuLy = faults.solution || null;
+            // } else{
+            //     payload.LoaiLoi = null;
+            //     payload.HuongXuLy = null;
+            // }
+
             if (payload.FatherCode && payload.ItemCode) {
                 if (payload.CompleQty || payload.RejectQty) {
                     const res = await productionApi.enterFinishedGoodsAmountCBG(
@@ -334,36 +326,36 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
-    useEffect(() => {
-        const getErrorTypeOptions = async () => {
-            try {
-                const res = await productionApi.getErrorTypes();
-                const errorTypes = res.map((error, index) => ({
-                    value: error?.id || "",
-                    label: error?.name || "",
-                }));
-                console.log("Other side: ", errorTypes);
-                setErrorTypeOptions(errorTypes);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const getSolutionOptions = async () => {
-            try {
-                const res = await productionApi.getSolutions("CBG");
-                const solutions = res.map((solution, index) => ({
-                    value: solution?.id || "",
-                    label: solution?.name || "",
-                }));
-                console.log("Other side 2: ", solutions);
-                setSolutionOptions(solutions);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        getErrorTypeOptions();
-        getSolutionOptions();
-    }, []);
+    // useEffect(() => {
+    //     const getErrorTypeOptions = async () => {
+    //         try {
+    //             const res = await productionApi.getErrorTypes();
+    //             const errorTypes = res.map((error, index) => ({
+    //                 value: error?.id || "",
+    //                 label: error?.name || "",
+    //             }));
+    //             console.log("Other side: ", errorTypes);
+    //             setErrorTypeOptions(errorTypes);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
+    //     const getSolutionOptions = async () => {
+    //         try {
+    //             const res = await productionApi.getSolutions("CBG");
+    //             const solutions = res.map((solution, index) => ({
+    //                 value: solution?.id || "",
+    //                 label: solution?.name || "",
+    //             }));
+    //             console.log("Other side 2: ", solutions);
+    //             setSolutionOptions(solutions);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
+    //     getErrorTypeOptions();
+    //     getSolutionOptions();
+    // }, []);
 
     return (
         <>
@@ -1007,7 +999,7 @@ const ItemInput = ({
                                         }}
                                     />
                                 </Box>
-                                {isQualityCheck && (
+                                {/* {isQualityCheck && (
                                     <>
                                         <Box className="px-3">
                                             <label className="font-semibold text-red-700">
@@ -1096,7 +1088,7 @@ const ItemInput = ({
                                             />
                                         </Box>
                                     </>
-                                )}
+                                )} */}
                             </div>
                         </div>
                     </ModalBody>
@@ -1104,8 +1096,8 @@ const ItemInput = ({
                     <ModalFooter className="flex flex-col !p-0">
                         <Alert status="info">
                             <AlertIcon />
-                            Công đoạn sản xuất tiếp theo:{" "}
-                            <span className="font-bold ml-1">
+                            <span className="text-[14px] sm:text-base">Công đoạn sản xuất tiếp theo:{" "}</span>
+                            <span className="text-[14px] sm:text-base font-bold ml-1">
                                 {selectedItemDetails?.TOTT || "chưa rõ"}
                             </span>
                         </Alert>
@@ -1175,6 +1167,7 @@ const ItemInput = ({
                                 Xác nhận
                             </Button> */}
                             <button
+                                disabled={confirmLoading}
                                 className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 onClick={handleSubmitQuantity}
                             >
