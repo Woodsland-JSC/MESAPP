@@ -775,14 +775,14 @@ class ProductionController extends Controller
                 {
                     $warehouse='W05.1.01';
                 }
-                $loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
-                $Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
+                //$loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
+                //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX"=> $data->LSX,
                     "U_TO"=> $data->Team,
-                    "U_LL"=> $loaiLoi,
-                    "U_HXL"=> $Hxl,
+                    "U_LL"=> $request->loailoai['label'],
+                    "U_HXL"=>  $request->huongxuly['label'],
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
                         "ItemCode" =>   $data->ItemCode,
