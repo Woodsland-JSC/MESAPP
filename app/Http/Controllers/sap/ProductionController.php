@@ -777,6 +777,9 @@ class ProductionController extends Controller
                 }
                 //$loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
                 //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
+                $loailoai= $request->loailoai['label'];
+                $huongxuly= $request->huongxuly['label'];
+                dd($loailoai);
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX"=> $data->LSX,
