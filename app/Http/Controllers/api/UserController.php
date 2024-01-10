@@ -66,7 +66,7 @@ class UserController extends Controller
             'first_name' => 'required',
             'last_name' => 'required',
             'gender' => 'required',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'nullable|email|unique:users,email',
             'username' => 'required|unique:users,username',
             'password' => 'required',
             'plant' => 'required',
@@ -88,7 +88,9 @@ class UserController extends Controller
         $input = $validator->validated();
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
-
+        if($input['email'] == null){
+            $input['email'] = $input['username'].'@wl.com';
+        };
         $user = User::create($input);
         $user->assignRole([$request->input('roles')]);
 

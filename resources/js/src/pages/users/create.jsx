@@ -36,9 +36,9 @@ const validationSchema = Yup.object().shape({
         .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Tên không được quá 30 kí tự")
         .required("Tên là bắt buộc"),
-    email: Yup.string()
-        .email("Email không hợp lệ")
-        .required("Email là bắt buộc"),
+    // email: Yup.string()
+    //     .email("Email không hợp lệ")
+    //     .required("Email là bắt buộc"),
     gender: Yup.string()
         .oneOf(["male", "female"], "Giá trị không hợp lệ")
         .required("Giới tính là bắt buộc"),
@@ -714,9 +714,6 @@ function CreateUser() {
                                                     <div className="w-full">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Email{" "}
-                                                            <span className="text-red-600">
-                                                                *
-                                                            </span>
                                                         </label>
                                                         <Field
                                                             name="email"
