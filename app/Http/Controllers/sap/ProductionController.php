@@ -779,7 +779,7 @@ class ProductionController extends Controller
                 //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
                 $loailoi= $request->loailoi['label'];
                 $huongxuly= $request->huongxuly['label'];
-                $HistorySL=HistorySL::where('ObjType',59)->count();
+                $HistorySL=HistorySL::where('ObjType',59)->get()->count();
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX"=> $data->LSX,
@@ -787,7 +787,7 @@ class ProductionController extends Controller
                     "U_LL"=> $loailoi,
                     "U_HXL"=> $huongxuly,
                     "U_QCC"=> $huongxuly,
-                    "U_QCN"=> $data->SPDich."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+                    "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
                         "ItemCode" =>   $data->ItemCode,
