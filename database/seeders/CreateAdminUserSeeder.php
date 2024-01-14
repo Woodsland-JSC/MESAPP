@@ -23,7 +23,8 @@ class CreateAdminUserSeeder extends Seeder
             'password' => Hash::make('admin@123'),
             'plant' => 'TH',
             'branch' => 1,
-            'sap_id' => 'manager',
+            'sap_id' => '2',
+            'username' => 'admin',
             'role' => 'admin'
         ]);
 
