@@ -34,6 +34,7 @@ import { MdRefresh } from "react-icons/md";
 import toast from "react-hot-toast";
 import moment from "moment";
 import productionApi from "../api/productionApi";
+import { Input } from "postcss";
 
 const reasonOfReturn = [
     {
@@ -60,7 +61,8 @@ const AwaitingReception = ({
 }) => {
     const errorTypeRef = useRef();
     const solutionRef = useRef();
-
+    const teamBackRef = useRef();
+    const rootCauseRef = useRef();
     const [selectedReason, setSelectedReason] = useState(null);
     const {
         isOpen: isInputAlertDialogOpen,
@@ -79,7 +81,10 @@ const AwaitingReception = ({
             const payload = {
                 id: data?.id,
                 loailoi: faults.errorType || null,
-                huongxuly: faults.solution || null
+                huongxuly: faults.solution || null,
+                teamBack: faults.teamBack || null,
+                rootCause: faults.rootCause || null,
+                subCode: faults.subCode || null,
             };
             if (payload.id) {
                 switch (type) {
@@ -174,10 +179,15 @@ const AwaitingReception = ({
 
     const [errorTypeOptions, setErrorTypeOptions] = useState([]);
     const [solutionOptions, setSolutionOptions] = useState([]);
+    const [teamBackOptions, setTeamBackOptions] = useState([]);
+    const [rootCauseOptions, setRootCauseOptions] = useState([]);
 
     const [faults, setFaults] = useState({
         errorType: null,
         solution: null,
+        teamBack: null,
+        rootCause: null,
+        subCode: null,
     });
 
     useEffect(() => {
@@ -219,8 +229,36 @@ const AwaitingReception = ({
                 console.error(error);
             }
         };
+        const getTeamBackOptions = async () => {
+            try {
+                const res = await productionApi.getTeamBacks();
+                const teamBacks = res.map((teamBack, index) => ({
+                   
+                    value: teamBack?.Code || "",
+                    label: teamBack?.Name || "",
+                }));
+                setTeamBackOptions(teamBacks);
+            }catch (error) {
+            console.error(error);
+            }
+        };
+        const getRootCauseOptions = async () => {
+            try {
+                const res = await productionApi.getRootCauses();
+                const rootCauses = res.map((rootCause, index) => ({
+                    value: rootCause?.id || "",
+                    label: rootCause?.name || "",
+                }));
+                setRootCauseOptions(rootCauses);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         getErrorTypeOptions();
         getSolutionOptions();
+        getTeamBackOptions();
+        getRootCauseOptions();
     }, []);
 
     return (
@@ -389,6 +427,65 @@ const AwaitingReception = ({
                                 }}
                             />
                         </Box>
+                        <Box className="px-4 mt-2 mb-4">
+                            <label className="font-semibold text-red-700">
+                                Tổ chuyển về.
+                            </label>
+                            <Select
+                                ref={teamBackRef}
+                                className="mt-4"
+                                placeholder="Lựa chọn"
+                                options={teamBackOptions}
+                                isClearable
+                                isSearchable
+                                value={faults.teamBack}
+                                onChange={(value) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        teamBack: value,
+                                    }));
+                                }}
+                            />
+                        </Box>
+                        <Box className="px-4 mt-2 mb-4" 
+                                style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <label className="font-semibold text-red-700">
+                                    Nguồn lỗi.
+                                </label>
+                                <label className="font-semibold text-red-700">
+                                    Mã hạ cấp.
+                                </label>
+                             </div>
+                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Select
+                                ref={rootCauseRef}
+                                className="mt-4 w-4/6"
+                                placeholder="Lựa chọn"
+                                options={rootCauseOptions}
+                                isClearable
+                                isSearchable
+                                value={faults.rootCause}
+                                onChange={(value) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        rootCause: value,
+                                    }));
+                                }}
+                            />
+                            <input
+                                className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-2/5 mt-5"
+                                placeholder="Mã hạ cấp"
+                                value={faults.subCode}
+                                onChange={(e) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        subCode: e.target.value,
+                                    }));
+                                }}
+                            />
+                        </div>
+                    </Box>
                     </>
                 )}
 

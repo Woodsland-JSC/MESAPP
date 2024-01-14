@@ -107,6 +107,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/accept-receipts-vcn', [ProductionController::class, 'acceptVCN']);
         Route::post('/reject-receipts', [ProductionController::class, 'reject']);
         Route::get('/danh-sach-phoi-cho-nhan', [ProductionController::class, 'dsphoipending']);
+        Route::get('/allteam', [ProductionController::class, 'getAllTeam']);
+        Route::get('/rootCause', [ProductionController::class, 'getRootCause']);
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');

@@ -779,6 +779,10 @@ class ProductionController extends Controller
                 //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
                 $loailoi= $request->loailoi['label'];
                 $huongxuly= $request->huongxuly['label'];
+                $teamBack= $request->teamBack['value'];
+                $rootCause= $request->rootCause['value'];
+                $subCode= $request->subCode;
+
                 $HistorySL=HistorySL::where('ObjType',59)->get()->count();
                 $body = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
@@ -787,6 +791,10 @@ class ProductionController extends Controller
                     "U_LL"=> $loailoi,
                     "U_HXL"=> $huongxuly,
                     "U_QCC"=> $huongxuly,
+                    "U_TOCD"=> $teamBack,
+                    "U_source"=>$rootCause,
+                    "U_ItemHC"=>$subCode,
+
                     "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
                     "DocumentLines" => [[
                         "Quantity" => $data->RejectQty,
@@ -1313,5 +1321,41 @@ class ProductionController extends Controller
             'maxQuantity' =>   $quantity,
             'remainQty' =>   $quantity
         ], 200);
+    }
+    function getAllTeam()
+    {
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'select "VisResCode" "Code","ResName" "Name" 
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['N','Y',Auth::user()->plant])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        odbc_close($conDB);
+        return response()->json($results, 200);
+    }
+    function getRootCause()
+    {
+        $results =[
+            [
+                'id' => 'C',
+                'name' => 'Lỗi đầu vào (Mã con)'
+            ],
+            [
+                'id' => 'P',
+                'name' => 'Lỗi đầu ra (Mã cha)'
+            ],
+        ];
+        return response()->json($results, 200);
     }
 }

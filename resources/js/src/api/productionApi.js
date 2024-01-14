@@ -94,6 +94,16 @@ const productionApi = {
     getGroup: () => {
         const url = `/danhsachto`;
         return axiosClient().get(url);
+    },
+    getTeamBacks: () =>
+    {
+        const url =`/production/allteam`
+        return axiosClient().get(url);
+    },
+    getRootCauses: () =>
+    {
+        const url =`/production/rootCause`
+        return axiosClient().get(url);
     }
 };
 
