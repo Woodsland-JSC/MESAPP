@@ -67,6 +67,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/change-password/{UserId}', [UserController::class, 'changePassword'])->name('users.password');
         Route::patch('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
         Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');
+        Route::post('/upload',[UserController::class, 'importuser']);
+        Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
     });
     /**
      * Pallet Routes

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\api\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
+
 Route::get('/{any}', function () {
     return view('index');
 })->where('any', '^(?!api).*');
+

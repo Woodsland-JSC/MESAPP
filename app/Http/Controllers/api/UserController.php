@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
 
@@ -318,4 +319,49 @@ class UserController extends Controller
 
     //     return response()->json(['message' => 'User deleted successfully'], 200);
     // }
+    function importuser(Request $request)
+    {
+        
+        $data = Excel::toArray([], $request->file);
+        $headerRow = $data[0][0];
+
+        $responseData=[];
+        try
+        { // Process the data rows
+            db::beginTransaction();
+            for ($i = 1; $i < count($data[0]); $i++) {
+                $rowData = $data[0][$i];
+                // Extract the CustCode value
+                $input['first_name'] = $rowData[0];
+                $input['last_name'] = $rowData[1];
+                $input['username']= $rowData[2];
+                $input['email']=$rowData[3];
+    
+                $input['password'] = Hash::make($rowData[4]);
+                if($input['email'] == null){
+                    $input['email'] = $input['username'].'@wl.com';
+                };
+                $input['sap_id']=$rowData[5];
+                $input['branch']=$rowData[7];
+                $input['plant']=$rowData[8];
+                $user = User::create($input);
+                $user->assignRole([$rowData[6]]);
+              
+            }
+            db::commit();
+            return response()->json(['message' => 'import users successfully'], 200); // 20 Created status code
+
+        } catch (\Exception $e) {
+            db::rollback();
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+       
+       
+    }
+    function viewimportuser()
+    {
+        // $user = User::find(1);
+        dd( Auth::user()->first_name);
+        return view('importuser');
+    }
 }
