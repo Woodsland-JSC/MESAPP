@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\SanLuong;
 use App\Models\QCHandle;
+use App\Models\Warehouse;
 use App\Models\LoaiLoi;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
@@ -765,18 +766,20 @@ class ProductionController extends Controller
                 $warehouse="";
                 if($data->NextTeam='TH-QC')
                 {
-                    $warehouse='W07.1.01';
+                    $warehouse= $this ->getQCWarehouseByUser('TH');
                 }
                 else if($data->NextTeam='TQ-QC')
                 {
-                    $warehouse='W06.1.01';
+                    $warehouse= $this ->getQCWarehouseByUser('TQ');
                 }
                 else
                 {
-                    $warehouse='W05.1.01';
+                    $warehouse= $this ->getQCWarehouseByUser('HG');
                 }
-                //$loaiLoi = LoaiLoi::where('id', $request->LoaiLoi)->first();
-                //$Hxl = QCHandle::where('id', $request->HuongXuLy)->first();
+                if($warehouse==99)
+                {
+                    throw new \Exception('Không tìm thấy kho QC');
+                }
                 $loailoi= $request->loailoi['label'];
                 $huongxuly= $request->huongxuly['label'];
                 $teamBack= $request->teamBack['value'];
@@ -1357,5 +1360,14 @@ class ProductionController extends Controller
             ],
         ];
         return response()->json($results, 200);
+    }
+    function getQCWarehouseByUser($plant)
+    {
+        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
+        ->where('FAC',$plant)
+        ->first();
+        
+        $WHS=  $WHS? $WHS->WhsCode: 99;
+        return $WHS;
     }
 }

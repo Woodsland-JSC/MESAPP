@@ -10,5 +10,5 @@ class Warehouse extends Model
 
     use HasFactory;
     protected $table = 'warehouse';
-    protected $fillable = ['WhsCode', 'WhsName', 'branch', 'flag'];
+    protected $fillable = ['WhsCode', 'WhsName', 'branch', 'flag','FAC'];
 }

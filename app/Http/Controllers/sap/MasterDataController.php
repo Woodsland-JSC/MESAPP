@@ -477,8 +477,8 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
             DB::beginTransaction();
-            $query = 'select "WhsCode","WhsName","BPLid" "Location","U_Flag"
-            from OWHS a join OLCT b on a."Location"=b."Code"
+            $query = 'select "WhsCode","WhsName","BPLid" "Location","U_Flag","U_FAC"
+            from OWHS a 
             WHERE "U_Flag" in(?,?,?,?);';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
@@ -499,7 +499,8 @@ class MasterDataController extends Controller
                         'WhsCode' => $row['WhsCode'],
                         'WhsName' => $row['WhsName'],
                         'branch' => $row['Location'],
-                        'flag' => $row['U_Flag']
+                        'flag' => $row['U_Flag'],
+                        'FAC' => $row['U_FAC']
                     ]
                 );
             }
@@ -540,6 +541,7 @@ class MasterDataController extends Controller
                 $flag = 'TS';
             }
             $warehouse = Warehouse::where('branch', Auth::user()->branch)->where('flag', $flag)
+            ->where('FAC', Auth::user()->plant)
                 ->first()->WhsCode;
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .

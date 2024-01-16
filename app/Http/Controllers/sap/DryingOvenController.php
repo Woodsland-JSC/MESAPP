@@ -156,7 +156,10 @@ class DryingOvenController extends Controller
         try {
             DB::beginTransaction();
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap']);
-            $towarehouse = Warehouse::where('flag', 'CS')->WHERE('branch', Auth::user()->branch)->first()->WhsCode;
+            $towarehouse = Warehouse::where('flag', 'CS')
+            ->WHERE('branch', Auth::user()->branch)
+            ->where('FAC',Auth::user()->plant)
+            ->first()->WhsCode;
             $pallet = Pallet::create($palletData);
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('Details', []);

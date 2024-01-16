@@ -134,6 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
     Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
+    Route::get('/nguyentest', [ProductionController::class, 'getQCWarehouseByUser'])->name('create.kilnhistorydetail');
 });
 
 
