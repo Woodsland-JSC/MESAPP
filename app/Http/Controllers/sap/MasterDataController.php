@@ -165,7 +165,7 @@ class MasterDataController extends Controller
             if ($request->reason == 'SL') {
                 $filter = 'T1."U_Status" != ?';
             } else {
-                $filter = 'T1."U_Status"= ?';
+                $filter = 'ifnull(T1."U_Status",?)= ?';
             }
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
@@ -176,7 +176,7 @@ class MasterDataController extends Controller
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [$id, Auth::user()->branch, 'TS'])) {
+            if (!odbc_execute($stmt, [$id, Auth::user()->branch,'TS','TS'])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
