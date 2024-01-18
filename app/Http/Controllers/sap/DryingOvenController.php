@@ -176,9 +176,9 @@ class DryingOvenController extends Controller
                 $datainsert['ItemCode'] = $detailData['ItemCode'];
                 $datainsert['WhsCode'] = $detailData['WhsCode'];
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
-                $datainsert['CDai'] = $detailData['CDai'];
-                $datainsert['CDay'] = $detailData['CDay'];
-                $datainsert['CRong'] = $detailData['CRong'];
+                $datainsert['CDai'] = $detailData['CDai']?$detailData['CDai']:1;
+                $datainsert['CDay'] = $detailData['CDay']?$detailData['CDay']:1;
+                $datainsert['CRong'] = $detailData['CRong']?$detailData['CRong']:1;
                 $datainsert['Qty'] = $detailData['Qty'];
                 pallet_details::create($datainsert);
                 $ldt[] = [
