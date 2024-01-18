@@ -198,9 +198,9 @@ class DryingOvenController extends Controller
                 ];
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
-                    "U_CRong" => $detailData['CRong'],
-                    "U_CDay" => $detailData['CDay'],
-                    "U_CDai" => $detailData['CDai'],
+                    "U_CRong" => $detailData['CRong']?$detailData['CRong']:1,
+                    "U_CDay" => $detailData['CDay']?$detailData['CDay']:1,
+                    "U_CDai" => $detailData['CDai']?$detailData['CDai']:1,
                     "U_Batch" => $detailData['BatchNum'],
                     "U_Quant" => $detailData['Qty'],
                 ];
