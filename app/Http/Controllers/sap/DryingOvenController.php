@@ -286,7 +286,8 @@ class DryingOvenController extends Controller
             DB::rollBack();
 
             // Log or handle the exception as needed
-            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage(), 'res1'=>$res,
+            'res2'=>$res2,], 500);
         }
     }
 }
