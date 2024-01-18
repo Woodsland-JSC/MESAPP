@@ -267,8 +267,8 @@ class DryingOvenController extends Controller
                     'message' => 'Pallet created successfully',
                     'data' => [
                         'pallet' => $pallet,
-                        // 'details' => $res,
-                        // 'details2' => $res2,
+                        'res1'=>$res,
+                        'res2'=>$res2,
                     ]
                 ]);
             }
@@ -279,8 +279,7 @@ class DryingOvenController extends Controller
                 'data' => [
                     'pallet' => $pallet,
                 ],
-                'res1'=>$res,
-                'res2'=>$res2,
+                
             ]);
         } catch (\Exception | QueryException $e) {
             // Rollback in case of an exception
