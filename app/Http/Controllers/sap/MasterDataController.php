@@ -32,8 +32,8 @@ class MasterDataController extends Controller
                 Inner join OITM T2 on T0."ItemCode" = T2."ItemCode"
                 inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode"
                 where T1."Quantity" >0  and
-                t3."U_Flag" IN (?,?) AND "BPLid"=?
-                and T2."Series"=74';
+                t3."U_Flag" IN (?,?) AND "BPLid"=?;
+               -- and T2."Series"=74';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
