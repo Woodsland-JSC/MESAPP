@@ -43,7 +43,7 @@ class DryingOvenController extends Controller
                 "ItemNo" => $palletDetails[0]['ItemCode'],
                 "ProductionOrderType" => "bopotSpecial",
                 "PlannedQuantity" => array_sum(array_column($request->input('details', []), 'Qty')),
-                "U_CreateBy" => Auth::user()->sap_id,
+                //"U_CreateBy" => Auth::user()->sap_id,
                 //"U_Pallet" => $pallet->Code,
                 "Remarks" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "ProductionOrderLines" => [
