@@ -537,7 +537,7 @@ class MasterDataController extends Controller
                 $filter = 'T1."U_Status" != ?';
                 $flag = 'SS';
             } else {
-                $filter = 'T1."U_Status"= ?';
+                $filter = '(T1."U_Status" is null or T1."U_Status"= ?)';
                 $flag = 'TS';
             }
             $warehouse = Warehouse::where('branch', Auth::user()->branch)->where('flag', $flag)
