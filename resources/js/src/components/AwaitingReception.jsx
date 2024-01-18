@@ -368,7 +368,7 @@ const AwaitingReception = ({
                 {isQualityCheck && !isReturnSelect && (
                     <>
                         <Box className="px-4">
-                            <label className="font-semibold text-red-700">
+                            <label htmlFor="errorType" className="font-semibold text-red-700">
                                 Loại lỗi
                             </label>
                             <Select
@@ -394,7 +394,7 @@ const AwaitingReception = ({
                             />
                         </Box>
                         <Box className="px-4 mt-2 mb-4">
-                            <label className="font-semibold text-red-700">
+                            <label htmlFor="solution" className="font-semibold text-red-700">
                                 Hướng xử lý
                             </label>
                             <Select
@@ -428,7 +428,7 @@ const AwaitingReception = ({
                             />
                         </Box>
                         <Box className="px-4 mt-2 mb-4">
-                            <label className="font-semibold text-red-700">
+                            <label htmlFor="teamBack" className="font-semibold text-red-700">
                                 Tổ chuyển về.
                             </label>
                             <Select
@@ -450,12 +450,12 @@ const AwaitingReception = ({
                         <Box className="px-4 mt-2 mb-4" 
                                 style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <label className="font-semibold text-red-700">
+                                <div className="font-semibold text-red-700">
                                     Nguồn lỗi.
-                                </label>
-                                <label className="font-semibold text-red-700">
+                                </div>
+                                <div className="font-semibold text-red-700">
                                     Mã hạ cấp.
-                                </label>
+                                </div>
                              </div>
                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Select
@@ -508,7 +508,7 @@ const AwaitingReception = ({
                                 {reasonOfReturn &&
                                     reasonOfReturn?.length > 0 &&
                                     reasonOfReturn.map((item, index) => (
-                                        <label
+                                        <div
                                             className="flex gap-2 cursor-pointer"
                                             key={index + item.value}
                                             onClick={() => {
@@ -532,7 +532,7 @@ const AwaitingReception = ({
                                                 borderColor="darkgrey !important"
                                             />
                                             {item.label}
-                                        </label>
+                                        </div>
                                         // <Radio onClick={() => console.log("Dô")} value={item.value}>{item.label}</Radio>
                                     ))}
                             </Stack>

@@ -888,16 +888,16 @@ function WoodProcessingKilnStackingReport() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-transparent h-screen ">
+            <div className="flex justify-center bg-transparent h-screen mb-2 ">
                 {/* Section */}
-                <div className="w-screen p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
+                <div className="w-screen pb-12 p-6 px-5 xl:p-12 xl:py-6 xl:px-32 ">
                     {/* Header */}
                     <div className="text-xl md:text-3xl font-bold mb-6">
                         Báo cáo xếp sấy khối chế biến gỗ
                     </div>
 
                     {/* Main content */}
-                    <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 h-[calc(100%-129px)]">
+                    <section className="bg-white rounded-lg border-2 mb-2 p-4 border-gray-200 ">
                         {/* Controller */}
                         <section className="flex gap-2 md:gap-4">
                             <div className="flex gap-2 md:gap-4 items-center">
@@ -973,6 +973,7 @@ function WoodProcessingKilnStackingReport() {
                                 </div>
                             </div>
                         </div>
+                        {/* Data table */}
                         <div className="ag-theme-alpine py-4 h-[85%] sm:h-[90%] w-full">
                             <AgGridReact
                                 ref={reportGridRef}
@@ -996,6 +997,9 @@ function WoodProcessingKilnStackingReport() {
                                 gridOptions={gridOptions}
                             />
                         </div>
+
+                        {/* Space */}
+                        <div className="my-2"></div>
                     </section>
                 </div>
             </div>

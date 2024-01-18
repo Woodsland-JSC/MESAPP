@@ -517,7 +517,7 @@ function ControllerCard(props) {
                 <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-6">
                     <div className="pt-0 xl:w-[75%] w-full md:w-[85%]">
                         <label
-                            for="company"
+                            htmlFor="company"
                             className="block mb-2 text-md font-medium text-gray-900 "
                         >
                             Chọn pallet
@@ -557,7 +557,7 @@ function ControllerCard(props) {
                     <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
                         <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
                             <label
-                                for="company"
+                                htmlFor="company"
                                 className="block mb-2 text-md font-medium text-gray-900 "
                             >
                                 Chọn pallet
