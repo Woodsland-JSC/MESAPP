@@ -710,7 +710,9 @@ class ProductionController extends Controller
                                     "U_CDai" => $allocate['CDai'],
                                     "U_CRong" => $allocate['CRong'],
                                     "U_CDay" => $allocate['CDay'],
-                                    "U_Status" => "HD"
+                                    "U_Status" => "HD",
+                                    "U_Year"=> $request->year??now()->format('y'),
+                                    "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                                 ]
                             ]
                         ]]
@@ -816,7 +818,9 @@ class ProductionController extends Controller
                                 "U_CDay" =>  $data->CDay,
                                 "U_Status" => "HL",
                                 "U_TO"=> $data->Team,
-                                "U_LSX"=> $data->LSX
+                                "U_LSX"=> $data->LSX,
+                                "U_Year"=> $request->year??now()->format('y'),
+                                "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                             ]
                         ]
                     ]]
