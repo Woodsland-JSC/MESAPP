@@ -344,6 +344,7 @@ class UserController extends Controller
                 $input['sap_id']=$rowData[5];
                 $input['branch']=$rowData[7];
                 $input['plant']=$rowData[8];
+                $input['integration_id']=1;
                 $user = User::create($input);
                 $user->assignRole([$rowData[6]]);
               

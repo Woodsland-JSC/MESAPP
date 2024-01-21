@@ -19,13 +19,14 @@ class CreateAdminUserSeeder extends Seeder
     {
         $user = User::create([
             'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'admin@admin.com',
             'password' => Hash::make('admin@123'),
             'plant' => 'TH',
             'branch' => 1,
             'sap_id' => '2',
             'username' => 'admin',
-            'role' => 'admin'
+           // 'role' => 'admin'
         ]);
 
         // $role = Role::create(['name' => 'admin']);
@@ -34,6 +35,6 @@ class CreateAdminUserSeeder extends Seeder
 
         // $role->syncPermissions($permissions);
 
-        $user->assignRole(["admin"]);
+        $user->assignRole(['admin']);
     }
 }

@@ -51,6 +51,24 @@ const reasonOfReturn = [
     },
 ];
 
+const weeks = [];
+
+for (let i = 1; i <= 52; i++) {
+    weeks.push({
+        value: i,
+        label: `Tuần ${i}`,
+    });
+}
+
+const getCurrentWeekNumber = () => {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear;
+    const oneWeekInMilliseconds = 1000 * 60 * 60 * 24 * 7;
+    const currentWeek = Math.floor(diff / oneWeekInMilliseconds);
+
+    return currentWeek;
+};
 const AwaitingReception = ({
     data,
     type,
@@ -63,6 +81,7 @@ const AwaitingReception = ({
     const solutionRef = useRef();
     const teamBackRef = useRef();
     const rootCauseRef = useRef();
+    const [weekRef, setSelectedweekRef] = useState(null);
     const [selectedReason, setSelectedReason] = useState(null);
     const {
         isOpen: isInputAlertDialogOpen,
@@ -85,6 +104,8 @@ const AwaitingReception = ({
                 teamBack: faults.teamBack || null,
                 rootCause: faults.rootCause || null,
                 subCode: faults.subCode || null,
+                year: faults.year || null,
+                week: faults.week?.value || null,
             };
             if (payload.id) {
                 switch (type) {
@@ -181,6 +202,7 @@ const AwaitingReception = ({
     const [solutionOptions, setSolutionOptions] = useState([]);
     const [teamBackOptions, setTeamBackOptions] = useState([]);
     const [rootCauseOptions, setRootCauseOptions] = useState([]);
+    const [weekOptions, setWeekOptions] = useState(weeks);
 
     const [faults, setFaults] = useState({
         errorType: null,
@@ -188,6 +210,8 @@ const AwaitingReception = ({
         teamBack: null,
         rootCause: null,
         subCode: null,
+        year: new Date().getFullYear(),
+        week: { value: getCurrentWeekNumber(), label: `Tuần ${getCurrentWeekNumber()}` },
     });
 
     useEffect(() => {
@@ -363,6 +387,47 @@ const AwaitingReception = ({
                             </Text>
                         </div>
                     </Stack>
+                         <div  className="flex gap-2">
+                        <Text
+                                color="blue.600"
+                                fontSize="md"
+                            >
+                                Năm:
+                            </Text>
+                            <input
+                                className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-1/5"
+                                id="yearInput"
+                                placeholder="2024"
+                                value={faults.year}
+                                onChange={(e) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        year: e.target.value,
+                                    }));
+                                }}
+                            />
+                            <Text
+                                color="blue.600"
+                                fontSize="md"
+                            >
+                                Tuần:
+                            </Text>
+                             <Select
+                                ref={rootCauseRef}
+                                className="w-3/5"
+                                placeholder="Lựa chọn"
+                                options={weekOptions}
+                                isClearable
+                                isSearchable
+                                value={faults.week}
+                                onChange={(value) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        week: value,
+                                    }));
+                                }}
+                            />
+                        </div>
                 </CardBody>
 
                 {isQualityCheck && !isReturnSelect && (
@@ -484,9 +549,9 @@ const AwaitingReception = ({
                                     }));
                                 }}
                             />
-                        </div>
-                    </Box>
-                    </>
+                         </div>
+                        </Box>
+                </>
                 )}
 
                 <Divider />

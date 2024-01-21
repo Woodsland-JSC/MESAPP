@@ -20,7 +20,10 @@ class ConnectController extends Controller
             } else {
                 $driver = '/usr/sap/hdbclient/libodbcHDB.so';
             }
-
+            if (! extension_loaded('odbc'))
+            {
+                die('ODBC extension not enabled / loaded');
+            }
             $db_name = config('sap.DB_NAME');
             $username = 'SYSTEM';
             // Password
