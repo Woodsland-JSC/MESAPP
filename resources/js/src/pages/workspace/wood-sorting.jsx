@@ -15,14 +15,23 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../assets/styles/datepicker.css";
 import { format } from "date-fns";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/src/sweetalert2.scss";
 import BigSelect from "../../components/Select/BigSelect";
 import Loader from "../../components/Loader";
+import useAppContext from "../../store/AppContext";
 
 function WoodSorting() {
+
+    const { user } = useAppContext();
+
+    // States
     const [loading, setLoading] = useState(false);
+    const [createPalletLoading, setCreatePalletLoading] = useState(false);
     const [woodTypes, setWoodTypes] = useState([]);
     const [dryingMethods, setDryingMethods] = useState([]);
     const [dryingReasons, setDryingReasons] = useState([]);
+    const [palletCode, setPalletCode] = useState(null);
 
     // Date picker
     const [startDate, setStartDate] = useState(new Date());
@@ -117,94 +126,6 @@ function WoodSorting() {
         return true;
     };
 
-    // const handleAddToList = async () => {
-    //     if (validateData()) {
-    //         try {
-    //             setIsLoading(true);
-
-    //             const data = {
-    //                 woodType: selectedWoodType,
-    //                 batchId: batchId,
-    //                 dryingReason: selectedDryingReason,
-    //                 dryingMethod: selectedDryingMethod,
-    //                 startDate: formattedStartDate,
-    //             };
-    //             console.log("1.Dữ liệu từ form:", data);
-
-    //             const response = await palletsApi.getStockByItem(
-    //                 selectedDryingMethod.code,
-    //                 selectedDryingReason.value,
-    //                 selectedDryingMethod.batchNum
-    //             );
-
-    //             console.log("2. Get thông tin từ ItemCode:", response);
-
-    //             if (response && response.length > 0) {
-    //                 // Filter out existing items
-    //                 const newItems = response.filter(
-    //                     (item) =>
-    //                         !isPalletCardExists(
-    //                             item.WhsCode + item.BatchNum,
-    //                             palletCards
-    //                         )
-    //                 );
-
-    //                 // Check if any new items were found
-    //                 if (newItems.length > 0) {
-    //                     const newPalletCards = newItems.map((item) => (
-    //                         <PalletCard
-    //                             key={item.WhsCode + item.BatchNum}
-    //                             itemCode={selectedDryingMethod.code}
-    //                             itemName={selectedDryingMethod.label}
-    //                             batchNum={item.BatchNum}
-    //                             inStock={item.Quantity}
-    //                             whsCode={item.WhsCode}
-    //                             height={item.CDai}
-    //                             width={item.CRong}
-    //                             thickness={item.CDay}
-    //                             isInvalidQuantity={isInvalidQuantity}
-    //                             onDelete={() =>
-    //                                 handleDeletePalletCard(
-    //                                     item.WhsCode + item.BatchNum
-    //                                 )
-    //                             }
-    //                             onQuantityChange={(quantity) => {
-    //                                 handlePalletQuantityChange(
-    //                                     item.WhsCode + item.BatchNum,
-    //                                     quantity
-    //                                 );
-    //                             }}
-    //                         />
-    //                     ));
-
-    //                     // Find the index to insert new items
-    //                     const insertionIndex = palletCards.findIndex(
-    //                         (card) => !isPalletCardExists(card.key, newItems)
-    //                     );
-
-    //                     // Insert new items at the calculated index
-    //                     setPalletCards((prevPalletCards) => [
-    //                         ...prevPalletCards,
-    //                         ...newPalletCards,
-    //                     ]);
-
-    //                     toast.success("Đã thêm vào danh sách");
-    //                 } else {
-    //                     toast("Item đã tồn tại trong danh sách.");
-    //                 }
-    //             } else {
-    //                 toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-    //                 return;
-    //             }
-    //         } catch (error) {
-    //             console.error("Error fetching stock by item:", error);
-    //             toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     }
-    // };
-
     const handleAddToList = async () => {
         if (validateData()) {
             try {
@@ -281,172 +202,6 @@ function WoodSorting() {
         }
     };
 
-    //     if (validateData()) {
-    //         try {
-    //             setIsLoading(true);
-
-    //             const data = {
-    //                 woodType: selectedWoodType,
-    //                 batchId: batchId,
-    //                 dryingReason: selectedDryingReason,
-    //                 dryingMethod: selectedDryingMethod,
-    //                 startDate: formattedStartDate,
-    //             };
-    //             console.log("1.Dữ liệu từ form:", data);
-
-    //             const response = await palletsApi.getStockByItem(
-    //                 selectedDryingMethod.code,
-    //                 selectedDryingReason.value,
-    //                 selectedDryingMethod.batchNum
-    //             );
-
-    //             console.log("2. Get thông tin từ ItemCode:", response);
-
-    //             if (response && response.length > 0) {
-    //                 const newPalletCards = response
-    //                     .filter(
-    //                         (item) =>
-    //                             !isPalletCardExists(
-    //                                 item.WhsCode + item.BatchNum,
-    //                                 palletCards
-    //                             )
-    //                     )
-    //                     .map((item) => (
-    //                         <PalletCard
-    //                             key={item.WhsCode + item.BatchNum}
-    //                             itemCode={selectedDryingMethod.code}
-    //                             itemName={selectedDryingMethod.label}
-    //                             batchNum={item.BatchNum}
-    //                             inStock={item.Quantity}
-    //                             whsCode={item.WhsCode}
-    //                             height={item.CDai}
-    //                             width={item.CRong}
-    //                             thickness={item.CDay}
-    //                             isInvalidQuantity={isInvalidQuantity}
-    //                             onDelete={() =>
-    //                                 handleDeletePalletCard(
-    //                                     item.WhsCode + item.BatchNum
-    //                                 )
-    //                             }
-    //                             onQuantityChange={(quantity) => {
-    //                                 handlePalletQuantityChange(
-    //                                     item.WhsCode + item.BatchNum,
-    //                                     quantity
-    //                                 );
-    //                             }}
-    //                         />
-    //                     ));
-
-    //                 setPalletCards((prevPalletCards) => [
-    //                     ...prevPalletCards,
-    //                     ...newPalletCards,
-    //                 ]);
-    //             } else {
-    //                 toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-    //                 return;
-    //             }
-
-    //             toast.success("Đã thêm vào danh sách");
-    //         } catch (error) {
-    //             console.error("Error fetching stock by item:", error);
-    //             toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     }
-    // };
-
-    // const handleAddToList = async () => {
-    //     if (validateData()) {
-    //         try {
-    //             setIsLoading(true);
-
-    //             const data = {
-    //                 woodType: selectedWoodType,
-    //                 batchId: batchId,
-    //                 dryingReason: selectedDryingReason,
-    //                 dryingMethod: selectedDryingMethod,
-    //                 startDate: formattedStartDate,
-    //             };
-    //             console.log("1.Dữ liệu từ form:", data);
-
-    //             const response = await palletsApi.getStockByItem(
-    //                 selectedDryingMethod.code,
-    //                 selectedDryingReason.value,
-    //                 selectedDryingMethod.batchNum
-    //             );
-
-    //             console.log("2. Get thông tin từ ItemCode:", response);
-
-    //             if (response && response.length > 0) {
-    //                 const newPalletCards = response
-    //                     .filter(
-    //                         (item) =>
-    //                             !isPalletCardExists(
-    //                                 item.WhsCode + item.BatchNum,
-    //                                 palletCards
-    //                             )
-    //                     )
-    //                     .map((item) => (
-    //                         <PalletCard
-    //                             key={item.WhsCode + item.BatchNum}
-    //                             itemCode={selectedDryingMethod.code}
-    //                             itemName={selectedDryingMethod.label}
-    //                             batchNum={item.BatchNum}
-    //                             inStock={item.Quantity}
-    //                             whsCode={item.WhsCode}
-    //                             height={item.CDai}
-    //                             width={item.CRong}
-    //                             thickness={item.CDay}
-    //                             isInvalidQuantity={isInvalidQuantity}
-    //                             onDelete={() =>
-    //                                 handleDeletePalletCard(
-    //                                     item.WhsCode + item.BatchNum
-    //                                 )
-    //                             }
-    //                             onQuantityChange={(quantity) => {
-    //                                 handlePalletQuantityChange(
-    //                                     item.WhsCode + item.BatchNum,
-    //                                     quantity
-    //                                 );
-    //                             }}
-    //                         />
-    //                     ));
-
-    //                 setPalletCards((prevPalletCards) => {
-    //                     // Check if the card already exists in the array
-    //                     const newPalletCardKeys = newPalletCards.map(
-    //                         (card) => card.key
-    //                     );
-    //                     const updatedPalletCards = [
-    //                         ...prevPalletCards.filter(
-    //                             (card) => !newPalletCardKeys.includes(card.key)
-    //                         ),
-    //                         ...newPalletCards,
-    //                     ];
-
-    //                     // Display toast if any existing items are found
-    //                     if (updatedPalletCards.length !== prevPalletCards.length) {
-    //                         toast("Một số mục đã tồn tại trong danh sách.");
-    //                     }
-
-    //                     return updatedPalletCards;
-    //                 });
-    //             } else {
-    //                 toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-    //                 return;
-    //             }
-
-    //             toast.success("Đã thêm vào danh sách");
-    //         } catch (error) {
-    //             console.error("Error fetching stock by item:", error);
-    //             toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     }
-    // };
-
     const handleDeletePalletCard = (id) => {
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
@@ -486,6 +241,7 @@ function WoodSorting() {
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
             NgayNhap: formattedStartDate,
+            MaNhaMay: user.plant,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 WhsCode: card.props.whsCode,
@@ -517,7 +273,6 @@ function WoodSorting() {
 
             console.log("Lấy giá trị tồn kho:", inStock);
             console.log("Lấy giá trị số lượng:", quantity);
-            
 
             if (
                 quantity > inStock ||
@@ -533,44 +288,87 @@ function WoodSorting() {
         }
 
         if (hasInvalidQuantity) {
-            toast.error("Giá trị nhập vào không hợp lệ.");
+            toast.error("Giá trị số lượng không hợp lệ.");
             return;
         }
 
         const palletObject = createPalletObject();
         console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
 
+        setCreatePalletLoading(true);
+
         try {
-            const response = await toast.promise(
-                axios.post("/api/pallets/v2/create", palletObject),
-                {
-                    loading: "Đang tạo pallet...",
-                    success: <p>Tạo pallet thành công!</p>,
-                    error: <p>Có lỗi xảy ra, vui lòng thử lại</p>,
-                }
+            const response = await axios.post(
+                "/api/pallets/v2/create",
+                palletObject
             );
 
-            console.log("3. Thông tin pallet:", palletObject);
+            // if (response.data === "" || response.data === null){ {
+            //     console.log("4. Kết quả tạo pallet:", response);
+            //     Swal.fire({
+            //         title: response.data.data.pallet.Code,
+            //         text: "Mã pallet không là tạo!",
+            //         icon: "success",
+            //     });
+            // } else {
+            //     console.log("4. Kết quả tạo pallet:", response);
+            //     Swal.fire({
+            //         title: response.data.data.pallet.Code,
+            //         text: "Mã pallet đã được tạo!",
+            //         icon: "success",
+            //     });
 
-            if (woodTypeSelectRef) {
-                woodTypeSelectRef.clearValue();
-            }
-            if (dryingReasonSelectRef) {
-                dryingReasonSelectRef.clearValue();
-            }
-            if (dryingMethodSelectRef) {
-                dryingMethodSelectRef.clearValue();
-            }
+            //     if (woodTypeSelectRef) {
+            //         woodTypeSelectRef.clearValue();
+            //     }
+            //     if (dryingReasonSelectRef) {
+            //         dryingReasonSelectRef.clearValue();
+            //     }
+            //     if (dryingMethodSelectRef) {
+            //         dryingMethodSelectRef.clearValue();
+            //     }
 
-            setBatchId("");
-            setStartDate(new Date());
-            setPalletCards([]);
-            setIsInvalidQuantity(false);
-            setPalletQuantities({});
+            //     setBatchId("");
+            //     setStartDate(new Date());
+            //     setPalletCards([]);
+            //     setIsInvalidQuantity(false);
+            //     setPalletQuantities({});
+            // }
 
-            console.log("4. Kết quả tạo pallet:", response.data);
+            if (response.data === "" || response.data === null) {
+                toast.error("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+                setCreatePalletLoading(false);
+            } else {
+                console.log("4. Kết quả tạo pallet:", response);
+                Swal.fire({
+                    title: response.data.data.pallet.Code,
+                    text: "Mã pallet đã được tạo!",
+                    icon: "success",
+                });
+
+                if (woodTypeSelectRef) {
+                    woodTypeSelectRef.clearValue();
+                }
+                if (dryingReasonSelectRef) {
+                    dryingReasonSelectRef.clearValue();
+                }
+                if (dryingMethodSelectRef) {
+                    dryingMethodSelectRef.clearValue();
+                }
+
+                setCreatePalletLoading(false);
+
+                setBatchId("");
+                setStartDate(new Date());
+                setPalletCards([]);
+                setIsInvalidQuantity(false);
+                setPalletQuantities({});
+
+                
+            }
         } catch (error) {
             console.error("Error creating pallet:", error);
+            setCreatePalletLoading(false);
         }
     };
 
@@ -588,16 +386,16 @@ function WoodSorting() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Workspace
                                         </a>
                                     </div>
                                 </li>
                                 <li aria-current="page">
-                                    <div class="flex items-center">
+                                    <div className="flex items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -613,7 +411,7 @@ function WoodSorting() {
                                         </svg>
                                         <Link
                                             to="/workspace"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div>Quản lý sấy gỗ</div>
                                         </Link>
@@ -764,15 +562,25 @@ function WoodSorting() {
 
                         <div className="xl:flex w-full justify-between items-center">
                             <div className="xl:my-0 my-2 text-gray-500">
-                                  Tổng: <span>{palletCards.length}</span>
+                                Tổng: <span>{palletCards.length}</span>
                             </div>
                             <button
                                 type="button"
                                 onClick={handleCreatePallet}
                                 className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
-                                <HiPlus className="text-xl" />
-                                Tạo pallet
+                                
+                                {createPalletLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tạo pallet</div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <HiPlus className="text-xl" />
+                                        Tạo pallet
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

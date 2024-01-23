@@ -56,7 +56,7 @@ function Details() {
     });
     const [CT11Data, setCT11Data] = useState([]);
     const [CT12Data, setCT12Data] = useState([]);
-    const [loadedPalletList, setLoadedPalletList] = useState([]);
+    const [loadedPalletList, setLoadedPalletList] = useState([]);;
     const [palletData, setPalletData] = useState([]);
     
     const [reload, setReload] = useState(false);
@@ -204,7 +204,7 @@ function Details() {
                                                       )
                                                 : "Invalid Date"
                                         }
-                                        palletQty={BOWData.TotalPallet}
+                                        palletQty={loadedPalletList?.length}
                                         weight={BOWData.Mass}
                                     />
                                 </Skeleton>

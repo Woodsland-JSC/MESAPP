@@ -315,7 +315,7 @@ function Header(props) {
 
                             <div className="hidden xl:flex">
                                 <Menu>
-                                    <MenuButton rightIcon={<TbChevronDown />}>
+                                    <MenuButton righticon={<TbChevronDown />}>
                                         <Button
                                             variant="ghost"
                                             fontWeight="regular"

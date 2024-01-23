@@ -30,6 +30,7 @@ import {
     PopoverAnchor,
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
+import "../assets/styles/index.css";   
 
 function CheckListItem(props) {
     const {
@@ -118,6 +119,10 @@ function CheckListItem(props) {
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0 || soLan === "") {
             toast.error("Giá trị không được bỏ trống.");
+        } else if (soLan > 3) {
+            onSoLanChange(soLan);
+            toast("Dữ liệu đã được lưu.");
+            onNo7Close();
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
@@ -133,6 +138,11 @@ function CheckListItem(props) {
             toast.error("Số cảm biến lò không được bỏ trống.");
         } else if (doThucTe === 0) {
             toast.error("Số đo thực tế không được bỏ trống.");
+        } else if (Math.abs(CBL - doThucTe) > 3) {
+            onCBLChange(CBL);
+            onDoThucTeChange(doThucTe);
+            toast("Dữ liệu đã được lưu.");
+            onNo8Close();
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
@@ -142,6 +152,7 @@ function CheckListItem(props) {
             toast("Dữ liệu đã được lưu.");
             onNo8Close();
         }
+
     };
 
     const handleCheckboxNo11Change = () => {
@@ -217,11 +228,11 @@ function CheckListItem(props) {
                     // onChange={handleCheckboxChange}
                     size="lg"
                     colorScheme="blue"
-                    className="w-full"
+                    className="w-full disabled:text-gray-600"
                 >
                     <div
                         className={`tx-[#155979] text-[1.05rem] ml-1 font-semibold ${
-                            isDisabled ? "disabled:text-gray-700" : null
+                            isDisabled ? "disabled:text-gray-600" : null
                         }`}
                     >
                         {title}

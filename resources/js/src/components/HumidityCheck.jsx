@@ -64,9 +64,6 @@ import { Spinner } from "@chakra-ui/react";
 
 function HumidityCheck(props) {
     const { planID, code, oven, reason, humidList, onCallback } = props;
-
-    console.log("Hiển thị planID ở Humidity:", planID);
-    console.log("Danh sách độ ẩm:", humidList);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isCompleteOpen,
@@ -257,8 +254,8 @@ function HumidityCheck(props) {
     const handleComplete = () => {
         if (humidityRecords.length === 0) {
             toast.error("Hãy ghi nhận độ ẩm trước khi hoàn thành");
-        } else if (humidityRecords.length < 3) {
-            toast.error("Phải có ít nhất 3 mẫu thử trước khi hoàn thành.");
+        } else if (humidityRecords.length < 50) {
+            toast.error("Phải có ít nhất 50 mẫu thử trước khi hoàn thành.");
         } else {
             checkHumidityRequirement();
             onCompleteOpen();
@@ -626,7 +623,7 @@ function HumidityCheck(props) {
                                         </button>
                                     </div>
 
-                                    <div className="bg-white py-4 rounded-b-xl text-base font-medium  space-y-3">
+                                    <div className="bg-white my-4 rounded-b-xl text-base font-medium  space-y-3 max-h-[400px] overflow-auto">
                                         {loadCurrentRecord ? (
                                             <div className="text-center">
                                                 <Spinner
@@ -642,7 +639,7 @@ function HumidityCheck(props) {
                                                 {humidityRecords.map(
                                                     (record, index) => (
                                                         <div
-                                                            className="flex justify-between items-center px-6 xl:px-8 lg:px-8 md:px-8 p-2.5 mx-4 rounded-full bg-gray-100"
+                                                            className="flex justify-between items-center px-6 xl:px-8 lg:px-8 md:px-8 p-2 mx-4 rounded-full bg-gray-100"
                                                             key={record.id}
                                                         >
                                                             <div className="xl:w-[40%] lg:w-[40%]">
@@ -678,7 +675,7 @@ function HumidityCheck(props) {
                                             </>
                                         )}
                                     </div>
-                                    <div className="text-gray-500 px-6">
+                                    <div className="text-gray-500 mt-3a px-6">
                                         Tổng số lượng mẫu:{" "}
                                         <span>{humidityRecords.length}</span>
                                     </div>
@@ -1156,7 +1153,7 @@ function HumidityCheck(props) {
                                                 </div>
                                             </div>
                                             <div className=" mx-auto  mb-4  ">
-                                                <div className="bg-white py-4 rounded-b-xl text-base font-medium  space-y-3">
+                                                <div className="bg-white my-4 rounded-b-xl text-base font-medium  space-y-3 max-h-[400px] overflow-auto">
                                                     {selectedRecord.detail.map(
                                                         (record, index) => (
                                                             <div

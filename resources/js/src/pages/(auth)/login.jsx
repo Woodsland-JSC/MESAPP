@@ -75,7 +75,7 @@ function Login() {
             } = response;
             if (!avatar) {
                 const tempName =
-                    first_name.trim().charAt(0) + last_name.trim().charAt(0);
+                    first_name.trim().charAt(0) + (last_name ? (last_name.trim().charAt(0)) : '');
                 avatar = await getAutoAvatar(tempName);
             }
             const savedUserInfo = {

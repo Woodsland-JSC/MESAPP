@@ -85,7 +85,7 @@ function KilnChecking() {
                     </div>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full">
+                    {/* <div className=" my-4 mb-6 xl:w-full">
                         <label
                             for="search"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -103,9 +103,9 @@ function KilnChecking() {
                                 >
                                     <path
                                         stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
                                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                                     />
                                 </svg>
@@ -118,7 +118,7 @@ function KilnChecking() {
                                 required
                             />
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Content */}
                     {/* {(bowCards.Status === 1).length > 0 &&

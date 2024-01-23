@@ -109,11 +109,15 @@ const AwaitingReception = ({
             };
             if (payload.id) {
                 switch (type) {
-                    case 'plywood':
-                        const res1 = await productionApi.acceptReceiptsVCN(payload);
+                    case "plywood":
+                        const res1 = await productionApi.acceptReceiptsVCN(
+                            payload
+                        );
                         break;
                     default:
-                        const res2 = await productionApi.acceptReceiptsCBG(payload);
+                        const res2 = await productionApi.acceptReceiptsCBG(
+                            payload
+                        );
                         break;
                 }
                 onConfirmReceipt(data?.id);
@@ -165,14 +169,18 @@ const AwaitingReception = ({
             if (payload?.id) {
                 if (payload?.reason) {
                     switch (type) {
-                        case 'plywood':
-                            const res1 = await productionApi.rejectReceiptsCBG(payload);
+                        case "plywood":
+                            const res1 = await productionApi.rejectReceiptsCBG(
+                                payload
+                            );
                             break;
                         default:
-                            const res2 = await productionApi.rejectReceiptsVCN(payload);
+                            const res2 = await productionApi.rejectReceiptsVCN(
+                                payload
+                            );
                             break;
                     }
-                    
+
                     onRejectReceipt(payload?.id);
                     onDismissAlertDialogClose();
                 } else {
@@ -211,7 +219,10 @@ const AwaitingReception = ({
         rootCause: null,
         subCode: null,
         year: new Date().getFullYear(),
-        week: { value: getCurrentWeekNumber(), label: `Tuần ${getCurrentWeekNumber()}` },
+        week: {
+            value: getCurrentWeekNumber(),
+            label: `Tuần ${getCurrentWeekNumber()}`,
+        },
     });
 
     useEffect(() => {
@@ -257,13 +268,12 @@ const AwaitingReception = ({
             try {
                 const res = await productionApi.getTeamBacks();
                 const teamBacks = res.map((teamBack, index) => ({
-                   
                     value: teamBack?.Code || "",
                     label: teamBack?.Name || "",
                 }));
                 setTeamBackOptions(teamBacks);
-            }catch (error) {
-            console.error(error);
+            } catch (error) {
+                console.error(error);
             }
         };
         const getRootCauseOptions = async () => {
@@ -289,7 +299,7 @@ const AwaitingReception = ({
         <>
             <Card maxW="sm" className="!shadow-[0_3px_10px_rgb(0,0,0,0.2)]">
                 <CardBody className="!px-4 !pb-3">
-                    <Stack mt="2" spacing="2">
+                    <Stack mt="2" spacing="2.5">
                         {type == "plywood" ? (
                             <>
                                 <div className="flex gap-2">
@@ -343,7 +353,7 @@ const AwaitingReception = ({
                             </span>
                         </div>
 
-                        <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                        <span className="rounded-lg cursor-pointer px-2 py-2 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
                             Người tạo:{" "}
                             {data?.last_name + " " + data?.first_name}
                         </span>
@@ -386,18 +396,14 @@ const AwaitingReception = ({
                                 ).format("HH:mm:ss") || ""}
                             </Text>
                         </div>
-                    </Stack>
-                         <div  className="flex gap-2">
-                        <Text
-                                color="blue.600"
-                                fontSize="md"
-                            >
+                        <div className="flex items-center gap-x-4">
+                            <Text color="blue.600" fontSize="md">
                                 Năm:
                             </Text>
                             <input
-                                className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-1/5"
+                                className="border p-1 rounded-md border-indigo-600 focus:border-indigo-600 focus:outline-none w-2/5 px-3"
                                 id="yearInput"
-                                placeholder="2024"
+                                placeholder="yyyy"
                                 value={faults.year}
                                 onChange={(e) => {
                                     setFaults((prev) => ({
@@ -405,40 +411,43 @@ const AwaitingReception = ({
                                         year: e.target.value,
                                     }));
                                 }}
-                            />
-                            <Text
-                                color="blue.600"
-                                fontSize="md"
-                            >
-                                Tuần:
-                            </Text>
-                             <Select
-                                ref={rootCauseRef}
-                                className="w-3/5"
-                                placeholder="Lựa chọn"
-                                options={weekOptions}
-                                isClearable
-                                isSearchable
-                                value={faults.week}
-                                onChange={(value) => {
-                                    setFaults((prev) => ({
-                                        ...prev,
-                                        week: value,
-                                    }));
-                                }}
-                            />
+                            /> 
                         </div>
+                        <div className="flex items-center gap-x-4">
+                                <Text color="blue.600" fontSize="md">
+                                    Tuần:
+                                </Text>
+                                <Select
+                                    ref={rootCauseRef}
+                                    className="w-full"
+                                    placeholder="Lựa chọn"
+                                    options={weekOptions}
+                                    isClearable
+                                    isSearchable
+                                    value={faults.week}
+                                    onChange={(value) => {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            week: value,
+                                        }));
+                                    }}
+                                />
+                            </div>
+                    </Stack>
                 </CardBody>
 
                 {isQualityCheck && !isReturnSelect && (
                     <>
-                        <Box className="px-4">
-                            <label htmlFor="errorType" className="font-semibold text-red-700">
+                        <Box className="mt-2 px-4">
+                            <label
+                                htmlFor="errorType"
+                                className="font-semibold text-red-700"
+                            >
                                 Loại lỗi
                             </label>
                             <Select
                                 ref={errorTypeRef}
-                                className="mt-4"
+                                className="mt-2"
                                 placeholder="Lựa chọn"
                                 options={errorTypeOptions}
                                 isClearable
@@ -458,13 +467,16 @@ const AwaitingReception = ({
                                 }}
                             />
                         </Box>
-                        <Box className="px-4 mt-2 mb-4">
-                            <label htmlFor="solution" className="font-semibold text-red-700">
+                        <Box className="px-4 mt-4 mb-4">
+                            <label
+                                htmlFor="solution"
+                                className="font-semibold text-red-700"
+                            >
                                 Hướng xử lý
                             </label>
                             <Select
                                 ref={solutionRef}
-                                className="mt-4"
+                                className="mt-2"
                                 placeholder="Lựa chọn"
                                 options={solutionOptions}
                                 isClearable
@@ -493,12 +505,15 @@ const AwaitingReception = ({
                             />
                         </Box>
                         <Box className="px-4 mt-2 mb-4">
-                            <label htmlFor="teamBack" className="font-semibold text-red-700">
+                            <label
+                                htmlFor="teamBack"
+                                className="font-semibold text-red-700"
+                            >
                                 Tổ chuyển về.
                             </label>
                             <Select
                                 ref={teamBackRef}
-                                className="mt-4"
+                                className="mt-2"
                                 placeholder="Lựa chọn"
                                 options={teamBackOptions}
                                 isClearable
@@ -512,46 +527,49 @@ const AwaitingReception = ({
                                 }}
                             />
                         </Box>
-                        <Box className="px-4 mt-2 mb-4" 
-                                style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Box
+                            className="px-4 mt-2 mb-4"
+                            style={{ display: "flex", flexDirection: "column" }}
+                        >
+                            <div>
                                 <div className="font-semibold text-red-700">
                                     Nguồn lỗi.
                                 </div>
+                                <Select
+                                    ref={rootCauseRef}
+                                    className="mt-2 w-full"
+                                    placeholder="Lựa chọn"
+                                    options={rootCauseOptions}
+                                    isClearable
+                                    isSearchable
+                                    value={faults.rootCause}
+                                    onChange={(value) => {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            rootCause: value,
+                                        }));
+                                    }}
+                                />
+                            </div>
+                            <div className="mt-4">
+                                
                                 <div className="font-semibold text-red-700">
                                     Mã hạ cấp.
                                 </div>
-                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <Select
-                                ref={rootCauseRef}
-                                className="mt-4 w-4/6"
-                                placeholder="Lựa chọn"
-                                options={rootCauseOptions}
-                                isClearable
-                                isSearchable
-                                value={faults.rootCause}
-                                onChange={(value) => {
-                                    setFaults((prev) => ({
-                                        ...prev,
-                                        rootCause: value,
-                                    }));
-                                }}
-                            />
-                            <input
-                                className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-2/5 mt-5"
-                                placeholder="Mã hạ cấp"
-                                value={faults.subCode}
-                                onChange={(e) => {
-                                    setFaults((prev) => ({
-                                        ...prev,
-                                        subCode: e.target.value,
-                                    }));
-                                }}
-                            />
-                         </div>
+                                <input
+                                    className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-full p-1.5 px-3 rounded-lg mt-2"
+                                    placeholder="Mã hạ cấp"
+                                    value={faults.subCode}
+                                    onChange={(e) => {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            subCode: e.target.value,
+                                        }));
+                                    }}
+                                />
+                            </div>
                         </Box>
-                </>
+                    </>
                 )}
 
                 <Divider />
@@ -621,7 +639,10 @@ const AwaitingReception = ({
                         className={`${selectedReason ? "!block" : "!hidden"}`}
                         variant="ghost"
                         colorScheme="blue"
-                        onClick={() => {setSelectedReason(""); setIsReturnSelect(false)}}
+                        onClick={() => {
+                            setSelectedReason("");
+                            setIsReturnSelect(false);
+                        }}
                     >
                         <MdRefresh className="text-2xl" />
                     </Button>
@@ -677,7 +698,8 @@ const AwaitingReception = ({
                                 )}
                                 {faults && faults.solution && (
                                     <span>
-                                        {" "}và hướng xử lý{" "}
+                                        {" "}
+                                        và hướng xử lý{" "}
                                         <b>{faults.solution.label}</b>
                                     </span>
                                 )}

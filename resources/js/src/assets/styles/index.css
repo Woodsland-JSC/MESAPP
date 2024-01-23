@@ -205,3 +205,9 @@ body {
         @apply bg-[#42526e] text-white hover:bg-[#42526e];
     }
 }
+
+
+.css-r90m2q:disabled, .css-r90m2q[disabled], .css-r90m2q[aria-disabled=true], .css-r90m2q[data-disabled] {
+    opacity: 0.7 !important;
+    color: #333333 !important;
+}

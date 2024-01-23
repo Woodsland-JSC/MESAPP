@@ -284,28 +284,6 @@ function CreateDryingPlan() {
                                         </Link>
                                     </div>
                                 </li>
-                                {/* <li aria-current="page">
-                                    <div class="flex items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <div class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div className="w-[120px] flex-nowrap">Tạo kế hoạch sấy</div>
-                                        </div>
-                                    </div>
-                                </li> */}
                             </ol>
                         </nav>
                     </div>
@@ -432,7 +410,7 @@ function CreateDryingPlan() {
                     </Modal>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full">
+                    {/* <div className=" my-4 mb-6 xl:w-full">
                         <label
                             for="search"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -465,7 +443,7 @@ function CreateDryingPlan() {
                                 required
                             />
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* BOW Card List */}
                     {/* {createdBowCards || filteredBowCards.length > 0 ? ( */}

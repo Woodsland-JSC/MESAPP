@@ -42,18 +42,18 @@ function Workspace() {
                     {/* Card Fields */}
                     <div className="w-full overflow-x-hidden">
                         <Tabs
-                            className=""
+                            className="gap-x-1"
                             variant="soft-rounded"
                             colorScheme="blackAlpha"
                         >
-                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3">
-                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
-                                    <div className="w-[150px]">
+                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3 max-w-sm w-full">
+                                <Tab className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap ">
+                                    <div className="w-[135px]">
                                         Quản lý sấy gỗ
                                     </div>
                                 </Tab>
-                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
-                                    <div className="w-[150px]">
+                                <Tab className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit ">
+                                    <div className="w-[137px]">
                                         Quản lý sản xuất
                                     </div>
                                 </Tab>
@@ -62,11 +62,11 @@ function Workspace() {
                                         Quản lý bán hàng
                                     </div>
                                 </Tab> */}
-                                <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
+                                {/* <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
                                     <div className="w-[180px]">
                                         Kiểm định chất lượng
                                     </div>
-                                </Tab>
+                                </Tab> */}
                             </TabList>
 
                             <TabPanels px="0" className="w-full flex justify-center">

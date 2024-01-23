@@ -409,6 +409,7 @@ class ProductionController extends Controller
             'remainQty' =>   $quantity
         ], 200);
     }
+
     function listo(Request $request)
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -432,6 +433,7 @@ class ProductionController extends Controller
         odbc_close($conDB);
         return response()->json($results, 200);
     }
+    
     function reject(Request $request)
     {
         $validator = Validator::make($request->all(), [

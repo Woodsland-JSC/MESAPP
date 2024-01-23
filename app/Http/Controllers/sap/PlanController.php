@@ -66,6 +66,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
+    
     // danh sách kế hoạch sấy
     function listPlan(Request $request)
     {
@@ -77,6 +78,7 @@ class PlanController extends Controller
             ->get();
         return response()->json($pallets, 200);
     }
+
     //danh sách pallet chưa được assign
     function listpallet(Request $request)
     {
@@ -443,6 +445,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
+    
     // chi tiết mẻ
     function productionDetail($id)
     {

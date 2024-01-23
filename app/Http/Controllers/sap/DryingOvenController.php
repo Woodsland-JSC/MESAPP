@@ -99,13 +99,16 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage()], 500);
         }
     }
+
     // get pallet
     function index(Request $request)
     {
         $pallet = Pallet::orderBy('palletID', 'DESC')->get();
+        $details = $pallet->details;
 
         return response()->json($pallet, 200);
     }
+
     // Xem chi tiết pallet
     function showbyID($id)
     {
@@ -119,6 +122,7 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
         }
     }
+
     // danh sách lò xấy trống theo chi nhánh và nhà máy. hệ thống sẽ check theo user
     function ListOvenAvailiable(Request $request)
     {
@@ -150,17 +154,31 @@ class DryingOvenController extends Controller
             ], 500);
         }
     }
+
     function StorePalletNew(Request $request)
     {
-
         try {
             DB::beginTransaction();
-            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap']);
+            
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
+
+
+
             $towarehouse = Warehouse::where('flag', 'CS')
             ->WHERE('branch', Auth::user()->branch)
             ->where('FAC',Auth::user()->plant)
             ->first()->WhsCode;
-            $pallet = Pallet::create($palletData);
+
+            $current_week = now()->format('W');
+            $current_year = now()->year;
+
+            $recordCount = Pallet::whereYear('created_at', $current_year)
+                ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+                ->count() + 1;
+
+            // Tạo mới Pallet và thêm mã nhà máy vào 'Code'
+            $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT)]);
+            
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('Details', []);
             // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
