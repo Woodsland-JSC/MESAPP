@@ -45,6 +45,14 @@ const permissionsName = [
         value: "monitor",
         name: "Tích hợp",
     },
+    {
+        value: "CBG",
+        name: "Chế biến gỗ",
+    },
+    {
+        value: "VCN",
+        name: "Ván công nghiệp",
+    },
 ];
 
 function CreateRole() {
@@ -177,8 +185,7 @@ function CreateRole() {
                     <form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
                         <div className="flex gap-4">
                             <label className="whitespace-nowrap flex items-center text-md font-medium text-gray-900">
-                                Tên vai trò{" "}
-                                <span className="text-red-600 ml-1"> *</span>
+                                Tìm kiếm theo tên{" "}
                             </label>
                             <input
                                 ref={nameInputRef}
@@ -194,21 +201,21 @@ function CreateRole() {
                         </div>
 
                         <div className="my-4 border-b border-gray-200"></div>
-                        <h1 className="mb-4 text-xl text-center md:text-left">
+                        <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
                             Quyền hạn
                         </h1>
 
                         <div className="divide-y divide-slate-100 ...">
-                            <div className="flex py-3">
-                                <span className="w-1/12 text-bold">#</span>
-                                <span className="w-2/3 text-bold">
+                            <div className="flex px-6 bg-gray-50 py-3">
+                                <span className="w-1/12 font-bold">#</span>
+                                <span className="w-2/3 font-bold">
                                     Tên permission
                                 </span>
-                                <span className="text-bold">Lựa chọn</span>
+                                <span className="font-bold">Lựa chọn</span>
                             </div>
                             {permissions?.length > 0 &&
                                 permissions.map((item, index) => (
-                                    <div key={index} className="flex py-4">
+                                    <div key={index} className="flex px-6 py-4">
                                         <span className="w-1/12 sm:w-1/12">
                                             {index + 1}
                                         </span>
@@ -221,6 +228,7 @@ function CreateRole() {
                                         </span>
                                         <div className="flex justify-center w-[15%]">
                                             <Checkbox
+                                                size="lg"
                                                 onChange={(e) => {
                                                     const isExisted =
                                                         roleInfo.permission.includes(
