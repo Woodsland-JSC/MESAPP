@@ -15,6 +15,38 @@ use Illuminate\Support\Facades\Http;
 
 class DryingOvenController extends Controller
 {
+    // Get Pallet History
+    function getPalletHistory(Request $request)
+    {
+        $userId = $request->input('userID');
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+
+        $pallets = Pallet::with(['details'])
+            ->where('CreateBy', $userId)
+            ->whereBetween('NgayNhap', [$fromDate, $toDate])
+            ->get();
+
+        $result = [];
+
+        foreach ($pallets as $pallet) {
+            $sumQuantity = $pallet->details->sum('Qty');
+            $firstDetail = $pallet->details->first();
+
+            $result[] = [
+                'pallet_id' => $pallet->palletID,
+                'pallet_code' => $pallet->Code,
+                'created_date' => $pallet->NgayNhap,
+                'sum_quantity' => $sumQuantity,
+                'length' => $firstDetail ? $firstDetail->CDai : 0,
+                'width' => $firstDetail ? $firstDetail->CRong : null,
+                'thickness' => $firstDetail ? $firstDetail->CDay : null,
+            ];
+        }
+
+        return response()->json($result);
+    }
+
     // save pallet
     function StorePallet(Request $request)
     {
@@ -101,12 +133,24 @@ class DryingOvenController extends Controller
     }
 
     // get pallet
+    // function index(Request $request)
+    // {
+    //     $pallet = Pallet::orderBy('palletID', 'DESC')->get();
+    //     $details = $pallet->details;
+
+    //     return response()->json($pallet, 200);
+    // }
+
     function index(Request $request)
     {
-        $pallet = Pallet::orderBy('palletID', 'DESC')->get();
-        $details = $pallet->details;
-
-        return response()->json($pallet, 200);
+        $pallets = Pallet::orderBy('palletID', 'DESC')->get();
+    
+        $palletsWithDetails = $pallets->map(function ($pallet) {
+            $pallet->details = $pallet->details;
+            return $pallet;
+        });
+    
+        return response()->json($palletsWithDetails, 200);
     }
 
     // Xem chi tiết pallet
