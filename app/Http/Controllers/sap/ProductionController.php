@@ -786,9 +786,9 @@ class ProductionController extends Controller
                 }
                 $loailoi= $request->loailoi['label'];
                 $huongxuly= $request->huongxuly['label'];
-                $teamBack= $request->teamBack['value'];
-                $rootCause= $request->rootCause['value'];
-                $subCode= $request->subCode;
+                $teamBack= $request->teamBack['value']??'';
+                $rootCause= $request->rootCause['value']??'';
+                $subCode= $request->subCode ??'';
 
                 $HistorySL=HistorySL::where('ObjType',59)->get()->count();
                 $body = [
