@@ -84,56 +84,6 @@ const steps = [
     { title: "Bước 3", description: "Nhập số lượng sản phẩm" },
 ];
 
-const groupList = [
-    {
-        id: "TH-X3SC",
-        no: 3,
-        name: "Tổ Sơ chế X3",
-    },
-    {
-        id: "TH-X3TC1",
-        no: 4,
-        name: "Tổ Tinh chế 1 X3",
-    },
-    {
-        id: "TH-X3TC2",
-        no: 4,
-        name: "Tổ Tinh chế 2 X3",
-    },
-    {
-        id: "TH-X3S",
-        no: 6,
-        name: "Tổ Sơn X3",
-    },
-    // {
-    //     id: "TH-X3ĐG",
-    //     no: 7,
-    //     name: "Tổ Đóng gói X3",
-    // },
-];
-
-// const groupListOptions = [
-//     {
-//         value: "TH-X3SC",
-//         label: "3. Tổ Sơ chế X3 - TH-X3SC",
-//     },
-//     {
-//         value: "TH-X3TC1",
-//         label: "4. Tổ Tinh chế 1 X3 - TH-X3TC1",
-//     },
-//     {
-//         value: "TH-X3TC2",
-//         label: "4. Tổ Tinh chế 2 X3 - TH-X3TC2",
-//     },
-//     {
-//         value: "TH-X3S",
-//         label: "6. Tổ Sơn X3 - TH-X3S",
-//     },
-//     // {
-//     //     value: "TH-X3ĐG",
-//     //     label: "7. Tổ Đóng gói X3 - TH-X3ĐG",
-//     // },
-// ];
 
 var waitingReceiptNotifications = [
     {
@@ -556,6 +506,8 @@ function FinishedGoodsReceipt() {
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [finishedProductData, setFinishedProductData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingData, setLoadingData] = useState(false);
 
@@ -1067,10 +1019,6 @@ function FinishedGoodsReceipt() {
         }
     };
 
-    // useEffect(() => {
-    //     console.log("Log phôi chờ: ", awaitingReception);
-    // }, [awaitingReception]);
-
     useEffect(() => {
         const getAllGroup = async () => {
             setLoading(true);
@@ -1090,21 +1038,6 @@ function FinishedGoodsReceipt() {
             setLoading(false);
         };
         getAllGroup();
-        // const getFinishedGoods = async () => {
-        //     try {
-        //         const res = await productionApi.getFinishedGoodsList();
-        //         setGoodsReceiptList(res);
-        //         const options = res.map((item) => ({
-        //             value: item.ItemCode,
-        //             label: item.ItemCode + " - " + item.ItemName,
-        //         }));
-        //         // console.log("Ra options: ", options);
-        //         setGoodsReceiptOptions(options);
-        //     } catch (error) {
-        //         toast.error("Có lỗi xảy ra khi load danh sách sản phẩm.");
-        //     }
-        // };
-        // getFinishedGoods();
         document.title = "Woodsland - Nhập sản lượng chế biến gỗ";
         return () => {
             document.title = "Woodsland";
@@ -1124,12 +1057,11 @@ function FinishedGoodsReceipt() {
         setLoadingData(true);
         try {
             const res = await productionApi.getFinishedGoodsList(params);
-            // console.log("Ra kết quả dùm: ", res);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {
                 setData([]);
-            }
+            } 
 
             if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
                 setAwaitingReception(res?.noti_choxacnhan);
@@ -1156,7 +1088,8 @@ function FinishedGoodsReceipt() {
                 const params = {
                     TO: selectedGroup.value,
                 };
-                getDataFollowingGroup(params);
+                getDataFollowingGroup(params);         
+                
                 if (selectedGroup.value == "TH-X3SC") {
                     setCurrentData(exampleData);
                 } else if (selectedGroup.value == "TH-X3TC1") {
@@ -1170,6 +1103,8 @@ function FinishedGoodsReceipt() {
             }
         })();
     }, [selectedGroup]);
+
+    const filteredData = data.filter(item => item.NameSPDich.includes(searchTerm));
 
     return (
         <Layout>
@@ -1216,28 +1151,6 @@ function FinishedGoodsReceipt() {
                                         </Link>
                                     </div>
                                 </li>
-                                {/* <li aria-current="page">
-                                    <div class="flex items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <span class="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Nhập sản lượng</div>
-                                        </span>
-                                    </div>
-                                </li> */}
                             </ol>
                         </nav>
                     </div>
@@ -1248,29 +1161,6 @@ function FinishedGoodsReceipt() {
                             Nhập sản lượng chế biến gỗ
                         </div>
                     </div>
-
-                    {/* <Stepper index={activeStep}>
-                        {steps.map((step, index) => (
-                            <Step key={index}>
-                                <StepIndicator>
-                                    <StepStatus
-                                        complete={<StepIcon />}
-                                        incomplete={<StepNumber />}
-                                        active={<StepNumber />}
-                                    />
-                                </StepIndicator>
-
-                                <Box flexShrink="0">
-                                    <StepTitle>{step.title}</StepTitle>
-                                    <StepDescription className="hidden sm:block">
-                                        {step.description}
-                                    </StepDescription>
-                                </Box>
-
-                                <StepSeparator />
-                            </Step>
-                        ))}
-                    </Stepper> */}
 
                     {/* Controller */}
                     <div className="flex justify-between mb-6 items-center gap-4">
@@ -1509,9 +1399,10 @@ function FinishedGoodsReceipt() {
                                         <input
                                             type="search"
                                             id="search"
-                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            onInput={onFilterTextBoxChanged}
+                                            // onInput={onFilterTextBoxChanged}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
                                             required
                                         />
                                     </div>
@@ -1538,7 +1429,9 @@ function FinishedGoodsReceipt() {
                                 ref={groupSelectRef}
                                 options={groupListOptions}
                                 defaultValue={selectedGroup}
-                                onChange={(value) => setSelectedGroup(value)}
+                                onChange={(value) => {
+                                    setSelectedGroup(value);
+                                }}
                                 placeholder="Tìm kiếm"
                                 className="mt-3 mb-8"
                             />
@@ -1770,7 +1663,7 @@ function FinishedGoodsReceipt() {
                                         <Skeleton height="250px" />
                                     </Stack>
                                 ) : data.length > 0 ? (
-                                    data.map((item, index) => (
+                                    filteredData.map((item, index) => (
                                         <ItemInput
                                             data={item}
                                             index={index}

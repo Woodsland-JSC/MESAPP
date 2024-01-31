@@ -87,6 +87,7 @@ function WoodSorting() {
                     label: item.Name,
                 }));
                 setWoodTypes(woodTypesOptions);
+                console.log(woodTypes)
             } catch (error) {
                 console.error("Error fetching wood types:", error);
             }
@@ -99,7 +100,6 @@ function WoodSorting() {
                     batchNum: item.BatchNum,
                     code: item.ItemCode,
                 }));
-                console.log(dryingMethodsOptions);
                 setDryingMethods(dryingMethodsOptions);
             } catch (error) {
                 console.error("Error fetching drying methods:", error);
@@ -292,9 +292,6 @@ function WoodSorting() {
             var inStock = parseFloat(card.props.inStock);
             var quantity = parseFloat(palletQuantities[card.key] || 0);
 
-            console.log("Lấy giá trị tồn kho:", inStock);
-            console.log("Lấy giá trị số lượng:", quantity);
-
             if (
                 quantity > inStock ||
                 quantity === 0 ||
@@ -323,39 +320,6 @@ function WoodSorting() {
                 "/api/pallets/v2/create",
                 palletObject
             );
-
-            // if (response.data === "" || response.data === null){ {
-            //     console.log("4. Kết quả tạo pallet:", response);
-            //     Swal.fire({
-            //         title: response.data.data.pallet.Code,
-            //         text: "Mã pallet không là tạo!",
-            //         icon: "success",
-            //     });
-            // } else {
-            //     console.log("4. Kết quả tạo pallet:", response);
-            //     Swal.fire({
-            //         title: response.data.data.pallet.Code,
-            //         text: "Mã pallet đã được tạo!",
-            //         icon: "success",
-            //     });
-
-            //     if (woodTypeSelectRef) {
-            //         woodTypeSelectRef.clearValue();
-            //     }
-            //     if (dryingReasonSelectRef) {
-            //         dryingReasonSelectRef.clearValue();
-            //     }
-            //     if (dryingMethodSelectRef) {
-            //         dryingMethodSelectRef.clearValue();
-            //     }
-
-            //     setBatchId("");
-            //     setStartDate(new Date());
-            //     setPalletCards([]);
-            //     setIsInvalidQuantity(false);
-            //     setPalletQuantities({});
-            // }
-
             if (response.data === "" || response.data === null) {
                 toast.error("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                 setCreatePalletLoading(false);
@@ -723,12 +687,12 @@ function WoodSorting() {
                                         >
                                             Loại gỗ
                                         </label>
-
                                         <Select
                                             placeholder="Chọn loại gỗ"
                                             ref={(ref) => {
                                                 woodTypeSelectRef = ref;
                                             }}
+                                            defaultValue={{value: '01', label: 'Keo tai tượng - Acacia Magium'}}
                                             options={woodTypes}
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)

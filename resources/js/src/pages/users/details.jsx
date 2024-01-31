@@ -30,11 +30,6 @@ const genderOptions = [
     { value: "female", label: "Nữ" },
 ];
 
-// const authorizationOptions = [
-//     { value: "admin", label: "Admin" },
-//     { value: "client", label: "Client" },
-// ];
-
 const validationSchema = Yup.object().shape({
     lastName: Yup.string()
         .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
@@ -44,9 +39,6 @@ const validationSchema = Yup.object().shape({
         .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Tên không được quá 30 kí tự")
         .required("Tên là bắt buộc"),
-    // email: Yup.string()
-    //     .email("Email không hợp lệ")
-    //     .required("Email là bắt buộc"),
     gender: Yup.string()
         .oneOf(["male", "female"], "Giá trị không hợp lệ")
         .required("Giới tính là bắt buộc"),
@@ -447,91 +439,6 @@ function User() {
             return null;
         }
     };
-
-    // const loadBranches = (inputValue, callback) => {
-    //     usersApi
-    //         .getAllBranches()
-    //         .then((data) => {
-    //             const filteredOptions = data.filter((option) => {
-    //                 return (
-    //                     option.BPLName?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     ) ||
-    //                     option.BPLId?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     )
-    //                 );
-    //             });
-
-    //             const asyncOptions = filteredOptions.map((item) => ({
-    //                 value: item.BPLId,
-    //                 label: item.BPLName,
-    //             }));
-
-    //             callback(asyncOptions);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching branch:", error);
-    //             callback([]);
-    //         });
-    // };
-
-    // const loadRoles = (inputValue, callback) => {
-    //     roleApi
-    //         .getAllRole()
-    //         .then((data) => {
-    //             const filteredOptions = data.filter((option) => {
-    //                 return (
-    //                     option.name
-    //                         ?.toLowerCase()
-    //                         .includes(inputValue.toLowerCase()) ||
-    //                     option.id
-    //                         ?.toLowerCase()
-    //                         .includes(inputValue.toLowerCase())
-    //                 );
-    //             });
-
-    //             const asyncOptions = filteredOptions.map((item) => ({
-    //                 value: item.id,
-    //                 label:
-    //                     item.name.charAt(0).toUpperCase() + item.name.slice(1),
-    //             }));
-
-    //             callback(asyncOptions);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching roles:", error);
-    //             callback([]);
-    //         });
-    // };
-
-    // const loadSapId = (inputValue, callback) => {
-    //     usersApi
-    //         .getAllSapId()
-    //         .then((data) => {
-    //             const filteredOptions = data.filter((option) => {
-    //                 return (
-    //                     option.NAME?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     ) ||
-    //                     option.USER_CODE?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     )
-    //                 );
-    //             });
-
-    //             const asyncOptions = filteredOptions.map((item) => ({
-    //                 value: item.USER_CODE,
-    //                 label: item.NAME + " - " + item.USER_CODE,
-    //             }));
-
-    //             callback(asyncOptions);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching sap id:", error);
-    //             callback([]);
-    //         });
-    // };
 
     const getCurrentUser = useCallback(async () => {
         try {
@@ -1039,21 +946,6 @@ function User() {
                                                         }
                                                         setInput={setInput}
                                                     />
-                                                    {/* <AsyncMultiSelectField
-                                                            ref={authorizationInputRef}
-                                                            name="authorization"
-                                                            loadOptions={
-                                                                loadRoles
-                                                            }
-                                                            // defaultValue={
-                                                            //     roles.filter(
-                                                            //         (item) =>
-                                                            //             values.authorization.includes(item.name)
-                                                            //     ) || null
-                                                            // }
-                                                            options={roles}
-                                                            setInput={setInput}
-                                                        /> */}
                                                     {errors.authorization &&
                                                         touched.authorization ? (
                                                         <span className="text-xs text-red-600">
