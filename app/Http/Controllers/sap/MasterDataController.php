@@ -576,5 +576,24 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
+    function ItemByCD()
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select "ItemCode", "ItemName" from OITM where U_CDOAN IN (?,?)';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['TC','SC'])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        return response()->json($results, 200);
+    }
 
 }

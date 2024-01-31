@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     # route cho master data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
+    Route::get('/items-route', [MasterDataController::class, 'ItemByCD']);
     Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('danh sach kho');
     //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
     Route::get('/branch', [MasterDataController::class, 'branch'])->name('branch');
