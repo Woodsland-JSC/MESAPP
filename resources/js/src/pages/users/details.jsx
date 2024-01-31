@@ -572,7 +572,7 @@ function User() {
                 const rolesOptions = rolesRes.map((item) => ({
                     value: item.id,
                     label:
-                        item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                        item.name
                 }));
                 setRoles(rolesOptions);
 
@@ -899,6 +899,7 @@ function User() {
                                                         name="password"
                                                         type="password"
                                                         className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        placeholder="********"
                                                         onChange={(e) => {
                                                             setFieldValue(
                                                                 "password",
@@ -940,7 +941,7 @@ function User() {
                                                             roles.filter(
                                                                 (item) =>
                                                                     values.authorization.includes(
-                                                                        item.label?.toLowerCase()
+                                                                        item.label
                                                                     )
                                                             ) || null
                                                         }
