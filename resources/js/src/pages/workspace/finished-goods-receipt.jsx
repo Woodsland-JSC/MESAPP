@@ -826,7 +826,7 @@ function FinishedGoodsReceipt() {
                                         />
                                     </div>
                                 </div>
-                                <button onClick={handleSearch}>Search</button>
+                                {/* <button onClick={handleSearch}>Search</button> */}
                                 {selectedGroup && !loadingData && 
                                     awaitingReception?.length > 0 && (
                                         <button
