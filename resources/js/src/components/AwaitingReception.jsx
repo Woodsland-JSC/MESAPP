@@ -210,6 +210,7 @@ const AwaitingReception = ({
     const [solutionOptions, setSolutionOptions] = useState([]);
     const [teamBackOptions, setTeamBackOptions] = useState([]);
     const [rootCauseOptions, setRootCauseOptions] = useState([]);
+    const [returnCodes, setreturnCodes] = useState([]);
     const [weekOptions, setWeekOptions] = useState(weeks);
 
     const [faults, setFaults] = useState({
@@ -279,6 +280,18 @@ const AwaitingReception = ({
         const getRootCauseOptions = async () => {
             try {
                 const res = await productionApi.getRootCauses();
+                const rootCauses = res.map((rootCause, index) => ({
+                    value: rootCause?.id || "",
+                    label: rootCause?.name || "",
+                }));
+                setRootCauseOptions(rootCauses);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        const getReturnCode = async () => {
+            try {
+                const res = await productionApi.getReturnCode();
                 const rootCauses = res.map((rootCause, index) => ({
                     value: rootCause?.id || "",
                     label: rootCause?.name || "",
@@ -539,7 +552,7 @@ const AwaitingReception = ({
                                     ref={rootCauseRef}
                                     className="mt-2 w-full"
                                     placeholder="Lựa chọn"
-                                    options={rootCauseOptions}
+                                    options={teamBackOptions}
                                     isClearable
                                     isSearchable
                                     value={faults.rootCause}

@@ -104,6 +104,11 @@ const productionApi = {
     {
         const url =`/production/rootCause`
         return axiosClient().get(url);
+    },
+    getReturnCode: () =>
+    {
+        const url =`/items-route`
+        return axiosClient().get(url);
     }
 };
 

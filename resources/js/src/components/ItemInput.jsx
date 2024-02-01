@@ -57,6 +57,7 @@ const ItemInput = ({
     data,
     index,
     fromGroup,
+    searchTerm,
     // isQualityCheck,
     nextGroup,
     onReceiptFromChild,
@@ -64,6 +65,18 @@ const ItemInput = ({
 }) => {
     const checkRef = useRef(null);
     const receipInput = useRef(null);
+
+    const filteredData = Array.isArray(data)
+        ? data.filter(item =>
+            `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        )
+        : [];
+
+    console.log("Dữ liệu raw nhận từ component cha:", data)
+    console.log("Thông tin tìm kiếm từ user:", searchTerm)
+    console.log("Dữ liệu đã lọc:", filteredData)
 
     const { user } = useAppContext();
     // console.log("Ra input: ", data);
@@ -363,13 +376,15 @@ const ItemInput = ({
                 className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
                 data-label={data.NameSPDich}
             >
-                {/* <span className="font-semibold absolute top-0-left-0 bg-green-500"></span> */}
                 <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-1 pt-11 z-[999] bg-white">
-                    {/* <span className="font-semibold">
-                        TYBYN bar table 74x74x102 acacia/black
-                    </span> */}
                     {data.Details.length > 0
-                        ? data.Details.map((item, index) => (
+                        ? data.Details
+                            .filter(item => (
+                                `${index + 1}. ${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                            ))
+                            .map((item, index) => (
                               <section
                                   onClick={() => openInputModal(item)}
                                   className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
@@ -418,51 +433,49 @@ const ItemInput = ({
                                           <tbody>
                                               {item.LSX?.length > 0 ? (
                                                   item.LSX.map(
-                                                      (production, index) =>
-                                                          production.ConLai !==
-                                                              0 && (
-                                                              <tr
-                                                                  className="bg-white border-b"
-                                                                  key={index}
+                                                      (production, index) => (
+                                                          <tr
+                                                              className="bg-white border-b"
+                                                              key={index}
+                                                          >
+                                                              <th
+                                                                  scope="row"
+                                                                  className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
                                                               >
-                                                                  <th
-                                                                      scope="row"
-                                                                      className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
-                                                                  >
-                                                                      {
-                                                                          production.LSX
-                                                                      }
-                                                                  </th>
-                                                                  <td className="px-2 py-2 text-right">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.SanLuong
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.DaLam
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.Loi
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.ConLai
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                              </tr>
-                                                          )
+                                                                  {
+                                                                      production.LSX
+                                                                  }
+                                                              </th>
+                                                              <td className="px-2 py-2 text-right">
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.SanLuong
+                                                                      )
+                                                                  )}
+                                                              </td>
+                                                              <td className="px-2 py-2 text-right">
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.DaLam
+                                                                      )
+                                                                  )}
+                                                              </td>
+                                                              <td className="px-2 py-2 text-right">
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.Loi
+                                                                      )
+                                                                  )}
+                                                              </td>
+                                                              <td className="px-2 py-2 text-right">
+                                                                  {formatNumber(
+                                                                      Number(
+                                                                          production.ConLai
+                                                                      )
+                                                                  )}
+                                                              </td>
+                                                          </tr>
+                                                      )
                                                   )
                                               ) : (
                                                   <span>Không có dữ liệu</span>
@@ -527,8 +540,6 @@ const ItemInput = ({
                     <ModalBody px={0} py={0}>
                         <div className="flex flex-col justify-center ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
-                                {/* {selectedItemDetails?.pendingErrors && */}
-                                {/* selectedItemDetails?.pendingErrors.length > 0 && ( */}
                                 <Alert status="error">
                                     <AlertIcon />
                                     <AlertDescription className="flex items-center gap-3">

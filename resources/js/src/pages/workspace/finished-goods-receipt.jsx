@@ -1662,13 +1662,14 @@ function FinishedGoodsReceipt() {
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
                                     </Stack>
-                                ) : data.length > 0 ? (
+                                ) : filteredData.length > 0 ? (
                                     filteredData.map((item, index) => (
                                         <ItemInput
                                             data={item}
                                             index={index}
                                             key={index}
                                             selectedGroup={selectedGroup}
+                                            searchTerm={searchTerm}
                                             // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}

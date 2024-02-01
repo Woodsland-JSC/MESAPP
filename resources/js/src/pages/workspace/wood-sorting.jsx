@@ -78,6 +78,7 @@ function WoodSorting() {
     };
 
     useEffect(() => {
+        setSelectedWoodType({value: '01', label: 'Keo tai tượng - Acacia Magium'});
         const fetchData = async () => {
             setLoading(true);
             try {
@@ -351,6 +352,7 @@ function WoodSorting() {
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
+            toast.error("Có lỗi khi tạo pallet. Vui lòng thử lại sau.");
             setCreatePalletLoading(false);
         }
     };
@@ -689,10 +691,10 @@ function WoodSorting() {
                                         </label>
                                         <Select
                                             placeholder="Chọn loại gỗ"
+                                            defaultValue={{value: '01', label: 'Keo tai tượng - Acacia Magium'}}
                                             ref={(ref) => {
                                                 woodTypeSelectRef = ref;
                                             }}
-                                            defaultValue={{value: '01', label: 'Keo tai tượng - Acacia Magium'}}
                                             options={woodTypes}
                                             onChange={(value) =>
                                                 setSelectedWoodType(value)
