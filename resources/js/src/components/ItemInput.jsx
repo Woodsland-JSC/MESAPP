@@ -74,10 +74,6 @@ const ItemInput = ({
         )
         : [];
 
-    console.log("Dữ liệu raw nhận từ component cha:", data)
-    console.log("Thông tin tìm kiếm từ user:", searchTerm)
-    console.log("Dữ liệu đã lọc:", filteredData)
-
     const { user } = useAppContext();
     // console.log("Ra input: ", data);
     const {

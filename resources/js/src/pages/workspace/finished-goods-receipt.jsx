@@ -507,6 +507,7 @@ function FinishedGoodsReceipt() {
 
     const [data, setData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const [finishedProductData, setFinishedProductData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingData, setLoadingData] = useState(false);
@@ -514,174 +515,17 @@ function FinishedGoodsReceipt() {
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
-    // const [goodsReceiptList, setGoodsReceiptList] = useState([]);
-    // const [goodsReceiptOptions, setGoodsReceiptOptions] = useState([]);
 
-    // const [selectedItem, setSelectedItem] = useState(null);
-    // const [amount, setAmount] = useState(1);
-
-    // const loadGoodsReceipt = (inputValue, callback) => {
-    //     productionApi
-    //         .getFinishedGoodsList()
-    //         .then((data) => {
-    //             const filteredOptions = data.filter((option) => {
-    //                 return (
-    //                     option.ItemName?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     ) ||
-    //                     option.ItemCode?.toLowerCase().includes(
-    //                         inputValue.toLowerCase()
-    //                     )
-    //                 );
-    //             });
-
-    //             const asyncOptions = filteredOptions.map((item) => ({
-    //                 value: item.ItemCode,
-    //                 label: item.ItemCode + " - " + item.ItemName,
-    //             }));
-
-    //             callback(asyncOptions);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching sap id:", error);
-    //             callback([]);
-    //         });
-    // };
-
-    // const handleCompletion = () => {
-    //     console.log("Selected Kiln:", selectedKiln.value);
-    //     console.log(
-    //         "Selected Drying Reasons Plan:",
-    //         selectedDryingReasonsPlan.value
-    //     );
-    //     console.log("Selected Thickness:", selectedThickness);
-    // };
-
-    // const goBack = () => {
-    //     setActiveStep(activeStep - 1);
-    // };
-
-    // const handleSubmit = async () => {
-    //     if (selectedItem && amount) {
-    //         setLoading(true);
-    //         try {
-    //             const data = {
-    //                 ItemCode: selectedItem.value,
-    //                 Qty: amount,
-    //             };
-    //             const res = await productionApi.enterFinishedGoodsAmount(data);
-    //             toast.success("Ghi nhận thành công.");
-    //             navigate(0);
-    //             setLoading(false);
-    //         } catch (error) {
-    //             toast.error("Có lỗi xảy ra.");
-    //             setLoading(false);
-    //         }
-    //     } else {
-    //         toast("Vui lòng chọn sản phẩm.");
-    //     }
-    // };
 
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
+    
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
             TO: selectedGroup.value,
         };
         getDataFollowingGroup(params);
-        // const groupId = data?.nextGroup?.id;
-        // if (groupId) {
-        //     setAwaitingReception((prev) => ({
-        //         ...prev,
-        //         [groupId]: [...prev[groupId], data],
-        //     }));
-        // }
-        // const currentGroupId = data?.fromGroup?.id;
-
-        // switch (currentGroupId) {
-        //     case "TH-X3SC":
-        //         exampleData = exampleData.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingReceipts: [
-        //                                     ...detail.pendingReceipts,
-        //                                     receipts,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         setCurrentData(exampleData);
-        //         break;
-        //     case "TH-X3TC1":
-        //         exampleData1 = exampleData1.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingReceipts: [
-        //                                     ...detail.pendingReceipts,
-        //                                     receipts,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         console.log("Final: ", exampleData1);
-        //         setCurrentData(exampleData1);
-        //         break;
-        //     case "TH-X3TC2":
-        //         exampleData2 = exampleData.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingReceipts: [
-        //                                     ...detail.pendingReceipts,
-        //                                     receipts,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         setCurrentData(exampleData2);
-        //         break;
-        // }
-        // console.log("Dữ liệu nhận từ con:", data);
-        // setDataFromChild(data);
     };
 
     const handleRejectFromChild = (data, faults) => {
@@ -689,178 +533,10 @@ function FinishedGoodsReceipt() {
             TO: selectedGroup.value,
         };
         getDataFollowingGroup(params);
-
-        // const currentGroupId = data?.fromGroup?.id;
-
-        // switch (currentGroupId) {
-        //     case "TH-X3SC":
-        //         exampleData = exampleData.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingErrors: [
-        //                                     ...detail.pendingErrors,
-        //                                     faults,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         setCurrentData(exampleData);
-        //         // console.log("hm ra nhiều: ", exampleData);
-        //         break;
-        //     case "TH-X3TC1":
-        //         exampleData1 = exampleData1.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingErrors: [
-        //                                     ...detail.pendingErrors,
-        //                                     faults,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         console.log("Final: ", exampleData1);
-        //         setCurrentData(exampleData1);
-        //         break;
-        //     case "TH-X3TC2":
-        //         exampleData2 = exampleData.map((item) => {
-        //             if (item.id === data.itemId) {
-        //                 return {
-        //                     ...item,
-        //                     itemDetails: item.itemDetails.map((detail) => {
-        //                         if (detail.id === data.id) {
-        //                             return {
-        //                                 ...detail,
-        //                                 pendingErrors: [
-        //                                     ...detail.pendingErrors,
-        //                                     faults,
-        //                                 ],
-        //                                 stockQuantity:
-        //                                     Number(detail.stockQuantity) -
-        //                                     Number(data.amount),
-        //                             };
-        //                         }
-        //                         return detail;
-        //                     }),
-        //                 };
-        //             }
-        //             return item;
-        //         });
-        //         setCurrentData(exampleData2);
-        //         break;
-        // }
-        // console.log("Data nè: ", data);
-        // console.log("Faults nè: ", faults);
     };
 
     const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
-
-            // switch (selectedGroup.value) {
-            //     case "TH-X3SC":
-            //         exampleData = exampleData.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 stockQuantity:
-            //                                     Number(detail.stockQuantity) +
-            //                                     Number(receiptSubItem.amount),
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         setCurrentData(exampleData);
-            //         break;
-            //     case "TH-X3TC1":
-            //         exampleData1 = exampleData1.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 stockQuantity:
-            //                                     Number(detail.stockQuantity) +
-            //                                     Number(receiptSubItem.amount),
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         console.log("Final: ", exampleData1);
-            //         setCurrentData(exampleData1);
-            //         break;
-            //     case "TH-X3TC2":
-            //         exampleData2 = exampleData.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 stockQuantity:
-            //                                     Number(detail.stockQuantity) +
-            //                                     Number(receiptSubItem.amount),
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         setCurrentData(exampleData2);
-            //         break;
-            // }
-            // setAwaitingReception((prev) => {
-            //     const groupKey = selectedGroup.value;
-            //     const updatedGroup = awaitingReception[groupKey].filter(
-            //         (item, i) => i !== index
-            //     );
-            //     return {
-            //         ...prev,
-            //         [groupKey]: updatedGroup,
-            //     };
-            // });
             setAwaitingReception((prev) => (
                 prev.filter(item => item.id !== id)
             ));
@@ -873,94 +549,6 @@ function FinishedGoodsReceipt() {
 
     const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            // let receiptSubItem = awaitingReception[selectedGroup.value][index];
-
-            // switch (receiptSubItem?.fromGroup?.id) {
-            //     case "TH-X3SC":
-            //         exampleData = exampleData.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 returns: [
-            //                                     ...detail.returns,
-            //                                     {
-            //                                         ...reason,
-            //                                         amount: Number(
-            //                                             receiptSubItem.amount
-            //                                         ),
-            //                                     },
-            //                                 ],
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         // setCurrentData(exampleData);
-            //         break;
-            //     case "TH-X3TC1":
-            //         exampleData1 = exampleData1.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 returns: [
-            //                                     ...detail.returns,
-            //                                     {
-            //                                         ...reason,
-            //                                         amount: Number(
-            //                                             receiptSubItem.amount
-            //                                         ),
-            //                                     },
-            //                                 ],
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         // setCurrentData(exampleData1);
-            //         break;
-            //     case "TH-X3TC2":
-            //         exampleData2 = exampleData.map((item) => {
-            //             if (item.id === receiptSubItem.itemId) {
-            //                 return {
-            //                     ...item,
-            //                     itemDetails: item.itemDetails.map((detail) => {
-            //                         if (detail.id === receiptSubItem.id) {
-            //                             return {
-            //                                 ...detail,
-            //                                 returns: [
-            //                                     ...detail.returns,
-            //                                     {
-            //                                         ...reason,
-            //                                         amount: Number(
-            //                                             receiptSubItem.amount
-            //                                         ),
-            //                                     },
-            //                                 ],
-            //                             };
-            //                         }
-            //                         return detail;
-            //                     }),
-            //                 };
-            //             }
-            //             return item;
-            //         });
-            //         // setCurrentData(exampleData2);
-            //         break;
-            // }
             setAwaitingReception((prev) => (
                 prev.filter(item => item.id !== id)
             ));
@@ -1104,7 +692,43 @@ function FinishedGoodsReceipt() {
         })();
     }, [selectedGroup]);
 
-    const filteredData = data.filter(item => item.NameSPDich.includes(searchTerm));
+
+    // const filteredData = data.filter(item => item.NameSPDich.toLowerCase().includes(searchTerm.toLowerCase()));
+    // const searchResult = searchBySize(searchTerm, data);
+    // console.log(searchResults);
+    // console.log("1. Dữ liệu gốc:", data);
+    // console.log("2. Keyword người dùng tìm kiếm:", searchTerm);
+    // console.log("3. Dữ liệu lọc được ở Item:", filteredData);
+
+    const [searchInput, setSearchInput] = useState('');
+    const [searchResult, setSearchResult] = useState(null);
+  
+    const handleSearch = () => {
+      // Xử lý input từ người dùng
+      const [CDay, CRong, CDai] = searchInput.split('*').map(Number);
+  
+      // Lọc dữ liệu theo điều kiện
+      const filteredData = Object.values(data).reduce((result, item) => {
+        const filteredDetails = item.Details.filter(
+          (detail) => detail.CDay === CDay && detail.CRong === CRong && detail.CDai === CDai
+        );
+  
+        if (filteredDetails.length > 0) {
+          result.push({
+            SPDICH: item.SPDICH,
+            NameSPDich: item.NameSPDich,
+            Details: filteredDetails,
+          });
+        }
+  
+        return result;
+      }, []);
+  
+      // Hiển thị kết quả
+      setSearchResult(filteredData.length > 0 ? filteredData : null);
+    };
+
+    console.log(searchResult);
 
     return (
         <Layout>
@@ -1165,211 +789,6 @@ function FinishedGoodsReceipt() {
                     {/* Controller */}
                     <div className="flex justify-between mb-6 items-center gap-4">
                         <div className="my-4 mb-6 p-4 w-full border rounded-md bg-white z-0">
-                            {/* <Card className="my-8">
-                            <CardHeader className="flex items-center gap-4">
-                                {activeStep != 0 && (
-                                    <button
-                                        className="p-2 hover:bg-gray-200 rounded-full active:scale-[.95] active:duration-75 transition-all"
-                                        onClick={goBack}
-                                    >
-                                        <HiArrowLeft />
-                                    </button>
-                                )}
-                                {activeStep == 0 && (
-                                    <Heading size="md">
-                                        Chọn sản phẩm
-                                    </Heading>
-                                )}
-                                {activeStep == 1 && (
-                                    <Heading size="md">Kiểm tra thông tin</Heading>
-                                )}
-                                {activeStep == 2 && (
-                                    <Heading size="md">
-                                        Nhập sản lượng
-                                    </Heading>
-                                )}
-                            </CardHeader>
-
-                        {activeStep == 0 && (
-                            <>
-                                <CardBody>
-                                    <Stack
-                                        divider={<StackDivider />}
-                                        spacing="4"
-                                    >
-                                        <Box>
-                                            <Heading
-                                                size="xs"
-                                                textTransform="uppercase"
-                                            >
-                                                Tìm kiếm sản phẩm
-                                            </Heading>
-                                            <AsyncSelect
-                                                cacheOptions
-                                                options={goodsReceiptOptions}
-                                                defaultOptions
-                                                loadOptions={loadGoodsReceipt}
-                                                defaultValue={
-                                                    selectedItem || null
-                                                }
-                                                onChange={(value) =>
-                                                    setSelectedItem(value)
-                                                }
-                                                placeholder="Tìm kiếm"
-                                                className="mt-4"
-                                            />
-                                        </Box>
-                                    </Stack>
-                                </CardBody>
-                                <CardFooter className="text-bold justify-end">
-                                    <Button
-                                        isDisabled={!selectedItem}
-                                        onClick={() => setActiveStep(1)}
-                                        variant="solid"
-                                        colorScheme="blue"
-                                        backgroundColor="#2b6cb0 !important"
-
-                                    >
-                                        Tiếp tục
-                                    </Button>
-                                </CardFooter>
-                            </>
-                        )}
-                        {activeStep == 1 && selectedItem && (
-                            <>
-                                <CardBody>
-                                    <Stack
-                                        divider={<StackDivider />}
-                                        spacing="4"
-                                    >
-                                        <Box className="flex flex-col md:flex-row items-center justify-center gap-4">
-                                            <div>
-                                                <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold whitespace-nowrap">Mã sản phẩm</label>
-                                                    <input
-                                                        type="text"
-                                                        disabled
-                                                        value={
-                                                            goodsReceiptList.find(
-                                                                (item) =>
-                                                                    item.ItemCode ==
-                                                                    selectedItem.value
-                                                            )?.ItemCode || ""
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold whitespace-nowrap">
-                                                        Tên sản phẩm
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        disabled
-                                                        value={
-                                                            goodsReceiptList.find(
-                                                                (item) =>
-                                                                    item.ItemCode ==
-                                                                    selectedItem.value
-                                                            )?.ItemName || ""
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="flex items-center gap-4 py-2">
-                                                    <label className="font-semibold whitespace-nowrap">Tổng số lượng</label>
-                                                    <input
-                                                        type="text"
-                                                        disabled
-                                                        value={
-                                                            goodsReceiptList.find(
-                                                                (item) =>
-                                                                    item.ItemCode ==
-                                                                    selectedItem.value
-                                                            )?.Qty || ""
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-                                            <img alt="Hình minh hoạ sản phẩm gỗ" className="w-[400px] -mt-8" src={FinishedGoodsIllustration}/>
-                                        </Box>
-                                    </Stack>
-                                </CardBody>
-                                <CardFooter className="text-bold justify-end">
-                                    <Button
-                                        // isDisabled={!selectedItem}
-                                        onClick={() => setActiveStep(2)}
-                                        variant="solid"
-                                        colorScheme="blue"
-                                        backgroundColor="#2b6cb0 !important"
-                                    >
-                                        Tiếp tục
-                                    </Button>
-                                </CardFooter>
-                            </>
-                        )}
-                        {activeStep == 2 && (
-                            <>
-                                <CardBody>
-                                    <Stack
-                                        divider={<StackDivider />}
-                                        spacing="4"
-                                    >
-                                        <Box>
-                                            <label>
-                                                Số lượng ghi nhận sản phẩm
-                                            </label>
-                                            <NumberInput
-                                                step={1}
-                                                defaultValue={1}
-                                                min={1}
-                                                max={
-                                                    goodsReceiptList.find(
-                                                        (item) =>
-                                                            item.ItemCode ==
-                                                            selectedItem.value
-                                                    )?.Qty || 0
-                                                }
-                                                className="mt-4"
-                                                onChange={(value) => {
-                                                    setAmount(value);
-                                                }}
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
-                                        </Box>
-                                    </Stack>
-                                </CardBody>
-                                <CardFooter className="text-bold justify-end">
-                                    <Button
-                                        isDisabled={!selectedItem || !amount}
-                                        onClick={handleSubmit}
-                                        variant="solid"
-                                        colorScheme="blue"
-                                        backgroundColor="#2b6cb0 !important"
-                                    >
-                                        Hoàn thành
-                                    </Button>
-                                </CardFooter>
-                            </>
-                        )}
-                            </Card> */}
-
-                            {/* <label className="block mb-2 text-md font-medium text-gray-900">
-                                    Tìm kiếm loại sản phẩm{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <AsyncSelect
-                                    cacheOptions
-                                    options={goodsReceiptOptions}
-                                    defaultOptions
-                                    loadOptions={loadGoodsReceipt}
-                                    onChange={(value) => setSelectedItem(value)}
-                                    placeholder="Tìm kiếm"
-                                    className="mt-4"
-                            /> */}
                             <div className="flex flex-col sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
@@ -1407,6 +826,7 @@ function FinishedGoodsReceipt() {
                                         />
                                     </div>
                                 </div>
+                                <button onClick={handleSearch}>Search</button>
                                 {selectedGroup && !loadingData && 
                                     awaitingReception?.length > 0 && (
                                         <button
@@ -1437,233 +857,14 @@ function FinishedGoodsReceipt() {
                             />
 
                             <div className="flex flex-col gap-4 my-4">
-                                {/* <div
-                                    className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
-                                    data-label="TYBYN bar table 74x74x102 acacia/black"
-                                >
-                                    <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-4 pt-12 z-[999] bg-white">
-                                        <section className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80">
-                                            <span className="ml-1">
-                                                1. TYBYN Bàn bar 74 đen - Mặt
-                                                trên AD (15*367.5*740)
-                                            </span>
-                                            <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-3 mt-2">
-                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-                                                    <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                                        <tr>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3"
-                                                            >
-                                                                Lệnh sản xuất
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                Còn thực hiện
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-01
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-02
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-03
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </section>
-
-                                        <section className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80">
-                                            <span className="ml-1">
-                                                2. TYBYN Bàn bar 74 đen - Mặt
-                                                trên AD (15*367.5*740)
-                                            </span>
-                                            <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-6 mt-2">
-                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-                                                    <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                                        <tr>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3"
-                                                            >
-                                                                Lệnh sản xuất
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                (Tính tổng)
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-3 text-right"
-                                                            >
-                                                                Còn thực hiện
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-01
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-02
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                        <tr className="bg-white border-b">
-                                                            <th
-                                                                scope="row"
-                                                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                                            >
-                                                                TH2344TP-03
-                                                            </th>
-                                                            <td className="px-6 py-4 text-right">
-                                                                960
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                719
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                0
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                241
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </section>
-                                    </div>
-                                </div> */}
+                                
                                 {loadingData ? (
                                     <Stack>
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
                                     </Stack>
-                                ) : filteredData.length > 0 ? (
-                                    filteredData.map((item, index) => (
+                                ) : data.length > 0 ? (
+                                    data.map((item, index) => (
                                         <ItemInput
                                             data={item}
                                             index={index}
@@ -1687,33 +888,6 @@ function FinishedGoodsReceipt() {
                                         Không có dữ liệu
                                     </span>
                                 )}
-
-                                {/* {data.length > 0 ? (
-                                    data.map((item, index) => (
-                                        <ItemInput
-                                            data={item}
-                                            index={index}
-                                            key={index}
-                                            selectedGroup={selectedGroup}
-                                            // fatherCode={data}
-                                            nextGroup={item.nextGroup}
-                                            fromGroup={item.fromGroup}
-                                            onReceiptFromChild={
-                                                handleReceiptFromChild
-                                            }
-                                            onRejectFromChild={
-                                                handleRejectFromChild
-                                            }
-                                        />
-                                    ))
-                                ) : (
-                                    <span className="text-center">
-                                        Không có dữ liệu
-                                    </span>
-                                )} */}
-
-                                {/* <ItemInput />
-                                <ItemInput /> */}
                             </div>
                         </div>
                     </div>
