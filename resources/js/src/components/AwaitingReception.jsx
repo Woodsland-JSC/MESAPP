@@ -81,6 +81,7 @@ const AwaitingReception = ({
     const solutionRef = useRef();
     const teamBackRef = useRef();
     const rootCauseRef = useRef();
+    const returnCodeRef = useRef();
     const [weekRef, setSelectedweekRef] = useState(null);
     const [selectedReason, setSelectedReason] = useState(null);
     const {
@@ -210,7 +211,7 @@ const AwaitingReception = ({
     const [solutionOptions, setSolutionOptions] = useState([]);
     const [teamBackOptions, setTeamBackOptions] = useState([]);
     const [rootCauseOptions, setRootCauseOptions] = useState([]);
-    const [returnCodes, setreturnCodes] = useState([]);
+    const [returnCodeOptions, setReturnCodeOptions] = useState([]);
     const [weekOptions, setWeekOptions] = useState(weeks);
 
     const [faults, setFaults] = useState({
@@ -218,7 +219,7 @@ const AwaitingReception = ({
         solution: null,
         teamBack: null,
         rootCause: null,
-        subCode: null,
+        returnCode: null,
         year: new Date().getFullYear(),
         week: {
             value: getCurrentWeekNumber(),
@@ -292,11 +293,11 @@ const AwaitingReception = ({
         const getReturnCode = async () => {
             try {
                 const res = await productionApi.getReturnCode();
-                const rootCauses = res.map((rootCause, index) => ({
-                    value: rootCause?.id || "",
-                    label: rootCause?.name || "",
+                const returnCodes = res.map((returnCode, index) => ({
+                    value: returnCode?.ItemCode || "",
+                    label: returnCode?.ItemName || "",
                 }));
-                setRootCauseOptions(rootCauses);
+                setReturnCodeOptions(returnCodes);
             } catch (error) {
                 console.error(error);
             }
@@ -306,6 +307,7 @@ const AwaitingReception = ({
         getSolutionOptions();
         getTeamBackOptions();
         getRootCauseOptions();
+        getReturnCode();
     }, []);
 
     return (
@@ -569,15 +571,20 @@ const AwaitingReception = ({
                                 <div className="font-semibold text-red-700">
                                     Mã hạ cấp.
                                 </div>
-                                <input
-                                    className="border border-indigo-600 focus:border-indigo-600 focus:outline-none w-full p-1.5 px-3 rounded-lg mt-2"
-                                    placeholder="Mã hạ cấp"
-                                    value={faults.subCode}
-                                    onChange={(e) => {
+                                <Select
+                                    ref={returnCodeRef}
+                                    className="mt-2 w-full"
+                                    placeholder="Lựa chọn"
+                                    options={returnCodeOptions}
+                                    isClearable
+                                    isSearchable
+                                    value={faults.returnCode}
+                                    onChange={(value) => {
                                         setFaults((prev) => ({
                                             ...prev,
-                                            subCode: e.target.value,
+                                            returnCode: value,
                                         }));
+                                        console.log("Selected Return Code: ", value);
                                     }}
                                 />
                             </div>
