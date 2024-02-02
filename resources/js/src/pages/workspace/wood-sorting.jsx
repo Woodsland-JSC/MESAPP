@@ -352,7 +352,19 @@ function WoodSorting() {
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
-            toast.error("Có lỗi khi tạo pallet. Vui lòng thử lại sau.");
+            console.error("Chi tiết lỗi:", error.response.data.res1.error.message.value);
+            // toast.error("Có lỗi khi tạo pallet. Chi tiết: " + error.response.data.res1.error.message.value);
+            Swal.fire({
+                title: "Có lỗi khi tạo pallet.",
+                html: `
+                    <p>Chi tiết lỗi:<br></p>
+                    <p>
+                        ${error.response.data.res1.error.message.value ? "<li> Lỗi từ SAP: " + error.response.data.res1.error.message.value + "</li>" : ""}
+                        ${error.response.data.error ? "<li> Lỗi hệ thống: " + error.response.data.error + "</li>" : ""}
+                    </p>
+                `,
+                icon: "error",
+            });
             setCreatePalletLoading(false);
         }
     };

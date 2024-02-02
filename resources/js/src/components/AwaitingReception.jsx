@@ -33,7 +33,10 @@ import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
 import toast from "react-hot-toast";
 import moment from "moment";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/src/sweetalert2.scss";
 import productionApi from "../api/productionApi";
+import "../assets/styles/index.css";
 import { Input } from "postcss";
 
 const reasonOfReturn = [
@@ -128,8 +131,21 @@ const AwaitingReception = ({
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
             }
         } catch (error) {
-            toast.error("Có lỗi xảy ra khi xác nhận.");
+            // toast.error("Có lỗi xảy ra khi xác nhận.");
+            console.log("Error when confirming receipt:", error);
+            console.log("Chi tiết lỗi:", error.response.data.error.message.value);     
             onInputAlertDialogClose();
+            Swal.fire({
+                title: "Có lỗi khi xác nhận.",
+                html: `
+                <p>Chi tiết lỗi:<br></p>
+                    <p> 
+                        ${error.response.data.error.message.value ? "<li> Lỗi từ SAP: " + error.response.data.error.message.value + "</li>" : "<li> Lỗi từ SAP: " + error.response.data.message + "</li>"}
+                    </p>
+                `,
+                icon: "error",
+                zIndex: 50001,
+            });
         }
         setAcceptLoading(false);
     };
@@ -584,7 +600,6 @@ const AwaitingReception = ({
                                             ...prev,
                                             returnCode: value,
                                         }));
-                                        console.log("Selected Return Code: ", value);
                                     }}
                                 />
                             </div>
