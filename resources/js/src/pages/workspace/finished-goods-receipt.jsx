@@ -693,42 +693,33 @@ function FinishedGoodsReceipt() {
     }, [selectedGroup]);
 
 
-    // const filteredData = data.filter(item => item.NameSPDich.toLowerCase().includes(searchTerm.toLowerCase()));
-    // const searchResult = searchBySize(searchTerm, data);
-    // console.log(searchResults);
-    // console.log("1. Dữ liệu gốc:", data);
-    // console.log("2. Keyword người dùng tìm kiếm:", searchTerm);
-    // console.log("3. Dữ liệu lọc được ở Item:", filteredData);
-
-    const [searchInput, setSearchInput] = useState('');
-    const [searchResult, setSearchResult] = useState(null);
-  
-    const handleSearch = () => {
-      // Xử lý input từ người dùng
-      const [CDay, CRong, CDai] = searchInput.split('*').map(Number);
-  
-      // Lọc dữ liệu theo điều kiện
-      const filteredData = Object.values(data).reduce((result, item) => {
-        const filteredDetails = item.Details.filter(
-          (detail) => detail.CDay === CDay && detail.CRong === CRong && detail.CDai === CDai
-        );
-  
-        if (filteredDetails.length > 0) {
-          result.push({
-            SPDICH: item.SPDICH,
-            NameSPDich: item.NameSPDich,
-            Details: filteredDetails,
-          });
+    const searchItems = (data, searchTerm) => {
+        if (!searchTerm) {
+            return data;
         }
-  
-        return result;
-      }, []);
-  
-      // Hiển thị kết quả
-      setSearchResult(filteredData.length > 0 ? filteredData : null);
-    };
+    
+        const filteredData = [];
+    
+        for (const key in data) {
+            const item = data[key];
+            const filteredDetails = item.Details.filter(detail => {
+                const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+                return subitem.includes(searchTerm);
+            });
+    
+            if (filteredDetails.length > 0) {
+                filteredData[key] = { ...item, Details: filteredDetails };
+            }
+        }
+    
+        return filteredData;
+    }
 
-    console.log(searchResult);
+    const searchResult = searchItems(data, searchTerm);
+
+    console.log("1. Dữ liệu gốc:", data);
+    console.log("2. Keyword người dùng tìm kiếm:", searchTerm);
+    console.log("3. Dữ liệu lọc được ở Item:", searchResult);
 
     return (
         <Layout>
@@ -826,7 +817,6 @@ function FinishedGoodsReceipt() {
                                         />
                                     </div>
                                 </div>
-                                {/* <button onClick={handleSearch}>Search</button> */}
                                 {selectedGroup && !loadingData && 
                                     awaitingReception?.length > 0 && (
                                         <button
@@ -863,8 +853,8 @@ function FinishedGoodsReceipt() {
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
                                     </Stack>
-                                ) : data.length > 0 ? (
-                                    data.map((item, index) => (
+                                ) : searchResult.length > 0 ? (
+                                    searchResult.map((item, index) => (
                                         <ItemInput
                                             data={item}
                                             index={index}
