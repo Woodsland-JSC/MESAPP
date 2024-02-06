@@ -103,7 +103,7 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_GHINHANSL where "TO"=? order by ';
+        $query = 'select * from UV_GHINHANSL where "TO"=? order by "LSX" asc ';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
