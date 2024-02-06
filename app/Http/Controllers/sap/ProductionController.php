@@ -622,7 +622,7 @@ class ProductionController extends Controller
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "DocEntry" asc';
+        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "U_GRID" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
