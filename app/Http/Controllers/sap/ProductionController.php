@@ -103,7 +103,7 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_GHINHANSL where "TO"=?';
+        $query = 'select * from UV_GHINHANSL where "TO"=? order by ';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
@@ -622,7 +622,7 @@ class ProductionController extends Controller
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "U_GRID" asc';
+        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -1025,7 +1025,7 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_GHINHANSLVCN where "TO"=?';
+        $query = 'select * from UV_GHINHANSLVCN where "TO"=? ORDER BY "LSX" asc'  ;
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
