@@ -767,113 +767,11 @@ class ProductionController extends Controller
             }
             else
             {
-                $warehouse="";
-                if($data->NextTeam='TH-QC')
-                {
-                    $warehouse= $this ->getQCWarehouseByUser('TH');
-                }
-                else if($data->NextTeam='TQ-QC')
-                {
-                    $warehouse= $this ->getQCWarehouseByUser('TQ');
-                }
-                else
-                {
-                    $warehouse= $this ->getQCWarehouseByUser('HG');
-                }
-                if($warehouse==99)
-                {
-                    throw new \Exception('Không tìm thấy kho QC');
-                }
-                $loailoi= $request->loailoi['label'];
-                $huongxuly= $request->huongxuly['label'];
-                $teamBack= $request->teamBack['value']??'';
-                $rootCause= $request->rootCause['value']??'';
-                $subCode= $request->subCode ??'';
-
-                $HistorySL=HistorySL::where('ObjType',59)->get()->count();
-                $body = [
-                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "U_LSX"=> $data->LSX,
-                    "U_TO"=> $data->Team,
-                    "U_LL"=> $loailoi,
-                    "U_HXL"=> $huongxuly,
-                    "U_QCC"=> $huongxuly,
-                    "U_TOCD"=> $teamBack,
-                    "U_source"=>$rootCause,
-                    "U_ItemHC"=>$subCode,
-
-                    "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
-                    "DocumentLines" => [[
-                        "Quantity" => $data->RejectQty,
-                        "ItemCode" =>   $data->ItemCode,
-                       // "BaseLine" => 0,
-                        "WarehouseCode" =>  $warehouse,
-                        //"BaseEntry" => $allocate['DocEntry'],
-                        //"BaseType" => 202,
-                        "BatchNumbers" => [
-                            [
-                                "BatchNumber" => now()->format('YmdHmi'),
-                                "Quantity" =>  $data->RejectQty,
-                                "ItemCode" =>   $data->ItemCode,
-                                "U_CDai" => $data->CDai,
-                                "U_CRong" => $data->CRong,
-                                "U_CDay" =>  $data->CDay,
-                                "U_Status" => "HL",
-                                "U_TO"=> $data->Team,
-                                "U_LSX"=> $data->LSX,
-                                "U_Year"=> $request->year??now()->format('y'),
-                                "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
-                            ]
-                        ]
-                    ]]
-                ];
-                $response = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Basic ' . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
-                $res = $response->json();
-                if ($response->successful()) {
-                    SanLuong::where('id', $data->id)->update(
-                        [
-                            'Status' => 1,
-                            // 'ObjType' =>   59,
-                            // 'DocEntry' => $res['DocEntry']
-                        ]
-                    );
-                    notireceipt::where('id', $request->id)->
-                    update(['confirm' => 1,
-                    'ObjType' =>  59,
-                    'DocEntry' => $res['DocEntry'],
-                    'confirmBy' => Auth::user()->id,
-                    'confirm_at' => now()->format('YmdHmi')]);
-                    HistorySL::create(
-                        [
-                        'LSX'=>$data->LSX,
-                        'itemchild'=>$data->ItemCode,
-                        'to' => $data->Team,
-                        'quantity'=>$data->RejectQty,
-                        'ObjType'=>59,
-                        'DocEntry'=>$res['DocEntry'],
-                        'SPDich'=>$data->FatherCode,
-                        'LL'=> $loailoi,
-                        'HXL'=>$huongxuly
-                        ],
-                        
-                    );
-                    DB::commit();
-                    return response()->json('success', 200);
-
-                } else {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Failed receipt',
-                        'error' => $res['error'],
-                        'body' => $body
-                    ], 500);
-                }
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => "Tổ không hợp lệ."
+                ], 500);
             }
 
         } catch (\Exception | QueryException $e) {

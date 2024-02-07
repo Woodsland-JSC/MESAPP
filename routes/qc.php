@@ -18,4 +18,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::get('/loailoi', [QCController::class, 'loailoi']);
     Route::get('/huongxuly', [QCController::class, 'huongxuly']);
+    Route::get('/getlist-team-exclude-qc', [QCController::class, 'listToExclQC']);
+    route::get('/list-qc-cbg', [QCController::class, 'listConfirm']);
 });
