@@ -12,7 +12,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Validator;
 class DryingOvenController extends Controller
 {
     // Get Pallet History
@@ -351,5 +351,47 @@ class DryingOvenController extends Controller
             return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage(), 'res1'=>$res,
             'res2'=>$res2,], 500);
         }
+    }
+    function lifecyleDrying(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'palletID' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $data = Pallet::select(
+            'pallets.palletID',
+            'pallets.MaLo',
+            'pallets.LoaiGo',
+            'pallets.LyDo',
+            'pallets.NgayNhap',
+            'pallets.created_at as ngaytao',
+            'pallets.CreateBy',
+            'pallet_details.ItemCode',
+            'pallet_details.Qty',
+            'plandryings.Checked',
+            DB::raw("CONCAT(users.first_name, users.last_name) as checkby"),
+            'plandryings.DateChecked',
+            'plandryings.Review',
+            DB::raw("CONCAT(users2.first_name, users2.last_name) as ReviewBy"),
+            'plandryings.reviewDate',
+            DB::raw("CONCAT(users3.first_name, users3.last_name) as RunBy"),
+            'plandryings.runDate',
+            DB::raw("CONCAT(users4.first_name, users4.last_name) as CompletedBy"),
+            'plandryings.CompletedDate'
+        )
+        ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+        ->join('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
+        ->join('plandryings', 'plan_detail.PlanID', '=', 'plandryings.PlanID')
+        ->join('users', 'users.id', '=', 'plandryings.CheckedBy')
+        ->leftJoin('users as users2', 'users2.id', '=', 'plandryings.ReviewBy')
+        ->leftJoin('users as users3', 'users3.id', '=', 'plandryings.RunBy')
+        ->leftJoin('users as users4', 'users4.id', '=', 'plandryings.CompletedBy')
+        ->where('pallets.palletID', $request->palletID)
+        ->get();
+        return response()->json(['data'=>$data], 200);
     }
 }

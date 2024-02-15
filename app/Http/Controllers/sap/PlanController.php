@@ -279,7 +279,8 @@ class PlanController extends Controller
                 plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 3,
-                        'RunBy' => Auth::user()->id
+                        'RunBy' => Auth::user()->id,
+                        'runDate' => now()
                     ]
                 );
 
@@ -360,7 +361,8 @@ class PlanController extends Controller
                 plandryings::where('PlanID', $id)->update(
                     [
                         'Status' => 4,
-                        'CompletedBy' => Auth::user()->id
+                        'CompletedBy' => Auth::user()->id,
+                        'CompletedDate' => now(),
                     ]
                 );
                 $results = Plandryings::select(
@@ -582,4 +584,5 @@ class PlanController extends Controller
 
         return response()->json(['message' => 'success'], 200);
     }
+    
 }

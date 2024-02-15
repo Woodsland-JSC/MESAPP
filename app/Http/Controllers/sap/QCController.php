@@ -71,7 +71,10 @@ class QCController extends Controller
         humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->update(['refID'  => $record->id]);
         // $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         if ($req->option == 'RL') {
-            plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 0]);
+            plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1,
+            'ReviewBy'=>Auth::user()->id,
+            'reviewDate'=>now(),
+             'result' => 0]);
         }
         if ($req->option == 'SL') {
             plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 1]);
@@ -279,7 +282,7 @@ class QCController extends Controller
                     'CDay',
                     'CRong',
                     'CDai',
-                    'b.Quantity',
+                    'b.openQty Quantity',
                     'a.created_at',
                     'c.first_name',
                     'c.last_name',
@@ -344,6 +347,10 @@ class QCController extends Controller
         // check again data openQTy
         if ($data->OpenQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
+        }
+        $closed=0;
+        if ($data->OpenQty == $request->Qty) {
+            $closed=1;
         }
         //
         $warehouse="";
@@ -417,13 +424,13 @@ class QCController extends Controller
         if ($response->successful()) {
             SanLuong::where('id', $data->id)->update(
                 [
-                    'Status' => 1,
+                    'Status' =>  $closed,
                     'openQty' =>$data->RejectQty-$data->OpenQty-$request->Qty,
                     // 'DocEntry' => $res['DocEntry']
                 ]
             );
             notireceipt::where('id', $request->id)->
-            update(['confirm' => 1,
+            update(['confirm' =>  $closed,
             'ObjType' =>  59,
             'DocEntry' => $res['DocEntry'],
             'confirmBy' => Auth::user()->id,

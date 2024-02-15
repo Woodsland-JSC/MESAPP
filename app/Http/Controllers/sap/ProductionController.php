@@ -87,9 +87,6 @@ class ProductionController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
         }
-
-
-
         return response()->json([
             'message' => 'nhập sản lượng thành công'
         ], 200);
