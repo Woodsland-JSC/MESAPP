@@ -78,7 +78,8 @@ class ProductionController extends Controller
                     'team' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
-                    'type' => 1
+                    'type' => 1,
+                    'openQty' => $request->RejectQty
                 ]);
             }
             DB::commit();
@@ -217,35 +218,7 @@ class ProductionController extends Controller
 
         //data need confirm
         if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
-            $data =
-                DB::table('sanluong as a')
-                ->join('notireceipt as b', function ($join) {
-                    $join->on('a.id', '=', 'b.baseID')
-                        ->where('b.deleted', '=', 0);
-                })
-                ->join('users as c', 'a.create_by', '=', 'c.id')
-                ->select(
-                    'a.FatherCode',
-                    'a.ItemCode',
-                    'a.ItemName',
-                    'a.team',
-                    'a.CongDoan',
-                    'CDay',
-                    'CRong',
-                    'CDai',
-                    'b.Quantity',
-                    'a.created_at',
-                    'c.first_name',
-                    'c.last_name',
-                    'b.text',
-                    'b.id',
-                    DB::raw('0 as type'),
-                    'b.confirm'
-                )
-                ->where('b.confirm', '=', 0)
-                ->where('b.type', 1)
-                ->where('b.team', '=', $request->TO)
-                ->get();
+            $data = null;
         } else {
             $data =
                 DB::table('sanluong as a')

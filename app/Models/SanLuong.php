@@ -28,6 +28,7 @@ class SanLuong extends Model
         'DocEntry',
         'Type',
         'create_by',
-        'LSX'
+        'LSX',
+        'openQty',
     ];
 }
