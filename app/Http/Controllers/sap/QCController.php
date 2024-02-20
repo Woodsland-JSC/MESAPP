@@ -387,6 +387,7 @@ class QCController extends Controller
             "U_TOCD"=> $teamBack,
             "U_source"=>$rootCause,
             "U_ItemHC"=>$subCode,
+            "U_cmtQC"=> $request->note??"",
 
             "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
