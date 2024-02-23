@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../../layouts/layout";
 import { MdPlaylistAddCheckCircle } from "react-icons/md";
-import { FaPallet } from "react-icons/fa";
+import { FaPallet, FaCalendarCheck } from "react-icons/fa";
 import {
     HiSquare3Stack3D,
     HiMiniMagnifyingGlassCircle,
@@ -71,7 +71,7 @@ function Workspace() {
 
                             <TabPanels px="0" className="w-full flex justify-center">
                                 <TabPanel
-                                    className="w-full"
+                                    className=""
                                     style={{ padding: "1rem 1rem" }}
                                 >
                                     {/* Cards List */}
@@ -106,7 +106,7 @@ function Workspace() {
                                                 </Link>
                                             ) : (
                                                 <div>
-                                                    <div className="flex justify-center w-full xl:h-full md:h-full">
+                                                    <div className="flex justify-center w-fit xl:h-full md:h-full">
                                                         <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
                                                                 <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
@@ -378,6 +378,45 @@ function Workspace() {
                                                     </div>
                                                 </div>
                                             )}
+
+{user.permissions?.includes(
+                                                "CBG"
+                                            ) ? (
+                                                <Link to="/workspace/wood-producting-qc">
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                                <FaCalendarCheck className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                    Kiểm định chất lượng chế biến gỗ
+                                                                </h5>
+                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                    Kiểm định chất lượng thành phẩm chế biến gỗ.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex xl:hidden justify-center text-center mt-2">
+                                                        QC Ván công nghiệp
+                                                    </div>
+                                                </Link>
+                                            ):(
+                                                <div>
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                        Tạo kế hoạch sấy
+                                                    </div>
+                                                </div>
+                                            )}
                                             
                                             {user.permissions?.includes(
                                                 "VCN"
@@ -417,19 +456,6 @@ function Workspace() {
                                                     </div>
                                                 </div>
                                             )}
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">

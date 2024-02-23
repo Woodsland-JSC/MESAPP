@@ -84,7 +84,6 @@ const steps = [
     { title: "Bước 3", description: "Nhập số lượng sản phẩm" },
 ];
 
-
 var waitingReceiptNotifications = [
     {
         id: 70152702,
@@ -506,7 +505,7 @@ function FinishedGoodsReceipt() {
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [finishedProductData, setFinishedProductData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -516,10 +515,8 @@ function FinishedGoodsReceipt() {
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
 
-
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
-    
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -537,9 +534,9 @@ function FinishedGoodsReceipt() {
 
     const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            setAwaitingReception((prev) => (
-                prev.filter(item => item.id !== id)
-            ));
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
             toast.success("Ghi nhận thành công.");
         }
         if (awaitingReception.length <= 0) {
@@ -549,9 +546,9 @@ function FinishedGoodsReceipt() {
 
     const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            setAwaitingReception((prev) => (
-                prev.filter(item => item.id !== id)
-            ));
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
             toast.success("Huỷ bỏ & chuyển lại thành công.");
             // setAwaitingReception((prev) => {
             //     const groupKey = selectedGroup.value;
@@ -607,26 +604,55 @@ function FinishedGoodsReceipt() {
         }
     };
 
+    // useEffect(() => {
+    //     const getAllGroup = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const res = await productionApi.getGroup();
+    //             const options = res.map((item) => ({
+    //                 value: item.Code,
+    //                 label: item.Name + " - " + item.Code,
+    //             }));
+    //             setGroupList(res);
+    //             setGroupListOptions(options);
+    //             // setSelectedGroup(options[0]);
+    //             groupSelectRef.current.setValue(options[0]);
+    //         } catch (error) {
+    //             toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+    //         }
+    //         setLoading(false);
+    //     };
+    //     getAllGroup();
+    //     document.title = "Woodsland - Nhập sản lượng chế biến gỗ";
+    //     return () => {
+    //         document.title = "Woodsland";
+    //         document.body.classList.remove("body-no-scroll");
+    //     };
+    // }, []);
+
+    // New Get All Group
     useEffect(() => {
-        const getAllGroup = async () => {
+        const getAllGroupWithoutQC = async () => {
             setLoading(true);
             try {
-                const res = await productionApi.getGroup();
+                const res = await productionApi.getAllGroupWithoutQC();
                 const options = res.map((item) => ({
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
-                setGroupListOptions(options);                
+                setGroupListOptions(options);
+                console.log("New Get All Group: ", options);
                 // setSelectedGroup(options[0]);
-                groupSelectRef.current.setValue(options[0]);
+                groupSelectRef?.current?.setValue(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+                console.error(error);
             }
             setLoading(false);
         };
-        getAllGroup();
-        document.title = "Woodsland - Nhập sản lượng chế biến gỗ";
+        getAllGroupWithoutQC();
+        document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
         return () => {
             document.title = "Woodsland";
             document.body.classList.remove("body-no-scroll");
@@ -649,7 +675,7 @@ function FinishedGoodsReceipt() {
                 setData(Object.values(res.data));
             } else {
                 setData([]);
-            } 
+            }
 
             if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
                 setAwaitingReception(res?.noti_choxacnhan);
@@ -666,7 +692,9 @@ function FinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                const isQC = groupList.find((group) => group.Code == selectedGroup.value)?.QC;
+                const isQC = groupList.find(
+                    (group) => group.Code == selectedGroup.value
+                )?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
@@ -676,8 +704,8 @@ function FinishedGoodsReceipt() {
                 const params = {
                     TO: selectedGroup.value,
                 };
-                getDataFollowingGroup(params);         
-                
+                getDataFollowingGroup(params);
+
                 if (selectedGroup.value == "TH-X3SC") {
                     setCurrentData(exampleData);
                 } else if (selectedGroup.value == "TH-X3TC1") {
@@ -692,34 +720,30 @@ function FinishedGoodsReceipt() {
         })();
     }, [selectedGroup]);
 
-
+    // Search data
     const searchItems = (data, searchTerm) => {
         if (!searchTerm) {
             return data;
         }
-    
+
         const filteredData = [];
-    
+
         for (const key in data) {
             const item = data[key];
-            const filteredDetails = item.Details.filter(detail => {
+            const filteredDetails = item.Details.filter((detail) => {
                 const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
                 return subitem.includes(searchTerm);
             });
-    
+
             if (filteredDetails.length > 0) {
                 filteredData[key] = { ...item, Details: filteredDetails };
             }
         }
-    
+
         return filteredData;
-    }
+    };
 
     const searchResult = searchItems(data, searchTerm);
-
-    console.log("1. Dữ liệu gốc:", data);
-    console.log("2. Keyword người dùng tìm kiếm:", searchTerm);
-    console.log("3. Dữ liệu lọc được ở Item:", searchResult);
 
     return (
         <Layout>
@@ -812,12 +836,15 @@ function FinishedGoodsReceipt() {
                                             className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
                                             // onInput={onFilterTextBoxChanged}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onChange={(e) =>
+                                                setSearchTerm(e.target.value)
+                                            }
                                             required
                                         />
                                     </div>
                                 </div>
-                                {selectedGroup && !loadingData && 
+                                {selectedGroup &&
+                                    !loadingData &&
                                     awaitingReception?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
@@ -847,7 +874,6 @@ function FinishedGoodsReceipt() {
                             />
 
                             <div className="flex flex-col gap-4 my-4">
-                                
                                 {loadingData ? (
                                     <Stack>
                                         <Skeleton height="250px" />
@@ -921,7 +947,9 @@ function FinishedGoodsReceipt() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex w-full h-full justify-center items-center">Không có dữ liệu</div>
+                                <div className="flex w-full h-full justify-center items-center">
+                                    Không có dữ liệu
+                                </div>
                             )}
                         </div>
                     </ModalBody>

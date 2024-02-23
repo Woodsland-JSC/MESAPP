@@ -432,7 +432,7 @@ const AwaitingReception = ({
                                 Năm:
                             </Text>
                             <input
-                                className="border p-1 rounded-md border-indigo-600 focus:border-indigo-600 focus:outline-none w-2/5 px-3"
+                                className="border p-1 rounded-md border-indigo-600 focus:border-indigo-600 focus:outline-none w-full px-3"
                                 id="yearInput"
                                 placeholder="yyyy"
                                 value={faults.year}

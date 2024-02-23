@@ -245,6 +245,7 @@ class QCController extends Controller
         $data = QCHandle::where('type', $request->type)->get(['id', 'name']);
         return response()->json($data, 200);
     }
+
     // DANH SÁCH CHỜ XÁC NHẬN CỦA TỔ QC filter theo tổ báo lỗi.
     function listConfirm(Request $request)
     {
@@ -252,7 +253,7 @@ class QCController extends Controller
             'TO' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
         }
         $toQC = "";
         switch (Auth()->user()->plant) {
@@ -300,6 +301,7 @@ class QCController extends Controller
                     'data' => $data,
                 ], 200);
     }
+    
     // danh sách tổ không bao gồm tổ QC thể hiện ở màn hình danh sách xác nhận QC
     function listToExcludeQC()
     {
@@ -324,6 +326,7 @@ class QCController extends Controller
         odbc_close($conDB);
         return response()->json($results, 200);
     }
+
     // accept từ tổ QC
     function acceptTeamQCCBG(Request $request)
     {

@@ -14,6 +14,19 @@ const productionApi = {
         const url = `/production/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
+    getFinishedGoodsListByGroup: (params) => {
+        const queryStringParams = Object.keys(params)
+            .map(
+                (key) =>
+                    `${encodeURIComponent(key)}=${encodeURIComponent(
+                        params[key]
+                    )}`
+            )
+            .join("&");
+
+        const url = `/production/receipts-productions?${queryStringParams}`;
+        return axiosClient().get(url);
+    },
     getFinishedPlywoodGoodsList: (params) => {
         const queryStringParams = Object.keys(params)
             .map(
@@ -93,6 +106,10 @@ const productionApi = {
     },
     getGroup: () => {
         const url = `/danhsachto`;
+        return axiosClient().get(url);
+    },
+    getAllGroupWithoutQC: () => {
+        const url = `/getlist-team-exclude-qc`;
         return axiosClient().get(url);
     },
     getTeamBacks: () =>

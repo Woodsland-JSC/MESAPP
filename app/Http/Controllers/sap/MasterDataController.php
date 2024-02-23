@@ -403,6 +403,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
+    
     function settings(Request $request)
     {
         $response = Http::withOptions([
