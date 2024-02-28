@@ -222,15 +222,15 @@ const AwaitingReception = ({
             onInputAlertDialogClose();
         };
     
-        if (!faults.Qty || faults.Qty <= 0) {
+        if (!faults.Qty || faults.Qty <= 0 && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
-        } else if (faults.Qty > data?.Quantity) {
+        } else if (faults.Qty > data?.Quantity && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
-        } else if (!faults.errorType) {
+        } else if (!faults.errorType && variant === "QC") {
             checkAndDisplayError("Loại lỗi không được bỏ trống.");
-        } else if (!faults.solution) {
+        } else if (!faults.solution && variant === "QC") {
             checkAndDisplayError("Hướng xử lý không được bỏ trống.");
-        } else if (!faults.teamBack) {
+        } else if (!faults.teamBack && variant === "QC") {
             checkAndDisplayError("Tổ chuyển về không được bỏ trống.");
         } else {
             setAcceptLoading(true);

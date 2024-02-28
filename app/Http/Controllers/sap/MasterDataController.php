@@ -405,13 +405,10 @@ class MasterDataController extends Controller
     function UserSAPAssign()
     {
         try {
-            // Kết nối đến cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
     
-            // Lấy danh sách sap_id của tất cả người dùng trong hệ thống (không bao gồm người dùng hiện tại)
             $userData = User::where('sap_id', '<>', null)->where('id', '<>', Auth::id())->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
     
-            // Tạo truy vấn SQL để lấy danh sách người dùng từ bảng UV_OHEM loại bỏ các người dùng đã gán (không có trong danh sách sap_id đã lấy được ở bước trước), trừ người dùng hiện tại
             $query = 'SELECT "USER_CODE", "NAME" FROM "UV_OHEM" WHERE "USER_CODE" NOT IN (' . $userData . ')';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
