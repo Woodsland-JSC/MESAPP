@@ -1115,7 +1115,7 @@ const ItemInput = ({
                                 Công đoạn sản xuất tiếp theo:{" "}
                             </span>
                             <span className="text-[14px] sm:text-base font-bold ml-1">
-                                {selectedItemDetails?.TOTT || "chưa rõ"}
+                                {selectedItemDetails?.NameTOTT || "Chưa được thiết lập ở SAP"}
                             </span>
                         </Alert>
                         <div className="border-b-2 border-gray-100"></div>

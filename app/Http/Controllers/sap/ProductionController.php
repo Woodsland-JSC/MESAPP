@@ -56,7 +56,10 @@ class ProductionController extends Controller
             DB::beginTransaction();
             $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type','LSX']);
             $SLData['create_by'] = Auth::user()->id;
+            $SLData['openQty'] = 0;
+           
             $SanLuong = SanLuong::create($SLData);
+          
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
                     'text' => 'Số lượng đã giao chờ xác nhận',
@@ -66,7 +69,8 @@ class ProductionController extends Controller
                     'team' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
-                    'type' => 0
+                    'type' => 0,
+                    'openQty' => 0
                 ]);
             }
             if ($request->RejectQty > 0) {

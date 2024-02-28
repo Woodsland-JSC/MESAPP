@@ -66,7 +66,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
-    
+
     // danh sách kế hoạch sấy
     function listPlan(Request $request)
     {
@@ -140,11 +140,67 @@ class PlanController extends Controller
             ->get();
         return response()->json($pallets, 200);
     }
+
     //vào lò
+    // function productionBatch(Request $request)
+    // {
+    //     $id = $request->input('PlanID');
+    //     $pallet = $request->input('PalletID');
+    //     DB::beginTransaction();
+    //     try {
+    //         // Check if the referenced PlanID exists in the plandryings table
+    //         $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+
+    //         if (!$existingPlan) {
+    //             throw new \Exception('Lò không hợp lệ.');
+    //         }
+    //         $existingPallet = plandetail::where('pallet', $pallet)->count();
+    //         if ($existingPallet > 1) {
+    //             throw new \Exception('Pallet đã được assign.');
+    //         }
+    //         $data = pallet_details::where('palletID', $pallet)->first();
+
+    //         plandetail::create([
+    //             'PlanID' => $id,
+    //             'pallet' => $pallet,
+    //             'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
+    //             'Qty' => $data->Qty,
+    //             'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
+    //         ]);
+
+    //         DB::commit();
+    //         $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
+    //             ->selectRaw('COUNT(*) as count, SUM(Mass) as sumMass')->first();
+
+    //         plandryings::where('PlanID', $id)->update([
+    //             'Status' => 1,
+    //             'TotalPallet' => $aggregateData->count,
+    //             'Mass' => $aggregateData->sumMass ?: 0,
+    //         ]);
+
+    //         return response()->json([
+    //             'message' => 'successfully',
+    //             [
+    //                 'data' => $existingPlan,
+    //             ],
+
+    //         ], 200);
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     function productionBatch(Request $request)
     {
         $id = $request->input('PlanID');
         $pallet = $request->input('PalletID');
+        $userID = Auth::user()->id;
+        $currentTime = Carbon::now()->format('Y-m-d H:i:s');
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
@@ -159,7 +215,6 @@ class PlanController extends Controller
             }
             $data = pallet_details::where('palletID', $pallet)->first();
 
-
             plandetail::create([
                 'PlanID' => $id,
                 'pallet' => $pallet,
@@ -168,6 +223,11 @@ class PlanController extends Controller
                 'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
             ]);
 
+            // Update Pallet table
+            Pallet::where('palletID', $pallet)->update([
+                'LoadedBy' => $userID,
+                'LoadedIntoKilnDate' => $currentTime,
+            ]);
 
             DB::commit();
             $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
@@ -183,9 +243,7 @@ class PlanController extends Controller
                 'message' => 'successfully',
                 [
                     'data' => $existingPlan,
-
                 ],
-
 
             ], 200);
         } catch (\Exception | QueryException $e) {
@@ -197,6 +255,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
+
     //hoàn thành đánh giá
     function checkOven(Request $request)
     {
@@ -354,8 +413,8 @@ class PlanController extends Controller
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
             // Lấy kho sấy
             $towarehouse = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)
-            ->where('FAC', Auth::user()->plant)
-            ->first()->WhsCode;
+                ->where('FAC', Auth::user()->plant)
+                ->first()->WhsCode;
 
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
@@ -447,7 +506,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
-    
+
     // chi tiết mẻ
     function productionDetail($id)
     {
@@ -558,6 +617,34 @@ class PlanController extends Controller
             'CT12Detail' => $CT12Detail
         ], 200);
     }
+
+    // function removePallet(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'PlanID' => 'required', // new UniqueOvenStatusRule
+    //         'PalletID' => 'integer|required',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+    //     }
+
+    //     // Check if the oven is valid
+    //     $check = plandryings::where('PlanID', $request->PlanID)->first();
+
+    //     if ($check) {
+    //         if ($check->Status == 1) {
+    //             plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
+    //         } else {
+    //             return response()->json(['error' => 'Trạng thái lò không hợp lệ'], 501);
+    //         }
+    //     } else {
+    //         return response()->json(['error' => 'Lò không tồn tại'], 501);
+    //     }
+
+    //     return response()->json(['message' => 'success'], 200);
+    // }
+
     function removePallet(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -574,7 +661,17 @@ class PlanController extends Controller
 
         if ($check) {
             if ($check->Status == 1) {
-                plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
+                // Set 'LoadedBy' and 'LoadedIntoKilnDate' to null
+                Pallet::where('palletID', $request->PalletID)
+                    ->update([
+                        'LoadedBy' => null,
+                        'LoadedIntoKilnDate' => null,
+                    ]);
+
+                // Delete pallet detail
+                plandetail::where('pallet', $request->PalletID)
+                    ->where('PlanID', $request->PlanID)
+                    ->delete();
             } else {
                 return response()->json(['error' => 'Trạng thái lò không hợp lệ'], 501);
             }
@@ -584,5 +681,4 @@ class PlanController extends Controller
 
         return response()->json(['message' => 'success'], 200);
     }
-    
 }

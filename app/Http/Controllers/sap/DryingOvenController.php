@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+
+
 class DryingOvenController extends Controller
 {
     // Get Pallet History
@@ -144,12 +147,12 @@ class DryingOvenController extends Controller
     function index(Request $request)
     {
         $pallets = Pallet::orderBy('palletID', 'DESC')->get();
-    
+
         $palletsWithDetails = $pallets->map(function ($pallet) {
             $pallet->details = $pallet->details;
             return $pallet;
         });
-    
+
         return response()->json($palletsWithDetails, 200);
     }
 
@@ -165,6 +168,27 @@ class DryingOvenController extends Controller
             // Handle the exception (e.g., pallet not found)
             return response()->json(['message' => 'Failed to retrieve pallet details', 'error' => $e->getMessage()], 404);
         }
+    }
+
+    public function getPalletsByYearAndWeek(Request $request)
+    {
+        $year = $request->input('year');
+        $week = $request->input('week');
+
+        $startDate = Carbon::now()->setISODate($year, $week, 1)->startOfDay();
+        
+        $endDate = Carbon::now()->setISODate($year, $week, 7)->endOfDay();
+        
+        $pallets = Pallet::whereBetween('created_at', [$startDate, $endDate])->get();
+        
+        $palletsData = $pallets->map(function($pallet) {
+            return [
+                'palletID' => $pallet->palletID,
+                'Code' => $pallet->Code,
+            ];
+        })->toArray();
+        
+        return $palletsData;
     }
 
     // danh sách lò xấy trống theo chi nhánh và nhà máy. hệ thống sẽ check theo user
@@ -203,15 +227,15 @@ class DryingOvenController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
 
 
 
             $towarehouse = Warehouse::where('flag', 'CS')
-            ->WHERE('branch', Auth::user()->branch)
-            ->where('FAC',Auth::user()->plant)
-            ->first()->WhsCode;
+                ->WHERE('branch', Auth::user()->branch)
+                ->where('FAC', Auth::user()->plant)
+                ->first()->WhsCode;
 
             $current_week = now()->format('W');
             $current_year = now()->year;
@@ -222,7 +246,7 @@ class DryingOvenController extends Controller
 
             // Tạo mới Pallet và thêm mã nhà máy vào 'Code'
             $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT)]);
-            
+
             // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('Details', []);
             // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
@@ -238,9 +262,9 @@ class DryingOvenController extends Controller
                 $datainsert['ItemCode'] = $detailData['ItemCode'];
                 $datainsert['WhsCode'] = $detailData['WhsCode'];
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
-                $datainsert['CDai'] = $detailData['CDai']?$detailData['CDai']:1;
-                $datainsert['CDay'] = $detailData['CDay']?$detailData['CDay']:1;
-                $datainsert['CRong'] = $detailData['CRong']?$detailData['CRong']:1;
+                $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 1;
+                $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 1;
+                $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 1;
                 $datainsert['Qty'] = $detailData['Qty'];
                 pallet_details::create($datainsert);
                 $ldt[] = [
@@ -260,9 +284,9 @@ class DryingOvenController extends Controller
                 ];
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
-                    "U_CRong" => $detailData['CRong']?$detailData['CRong']:1,
-                    "U_CDay" => $detailData['CDay']?$detailData['CDay']:1,
-                    "U_CDai" => $detailData['CDai']?$detailData['CDai']:1,
+                    "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 1,
+                    "U_CDay" => $detailData['CDay'] ? $detailData['CDay'] : 1,
+                    "U_CDai" => $detailData['CDai'] ? $detailData['CDai'] : 1,
                     "U_Batch" => $detailData['BatchNum'],
                     "U_Quant" => $detailData['Qty'],
                 ];
@@ -316,7 +340,7 @@ class DryingOvenController extends Controller
                 ], 500);
             } else {
 
-                Pallet::where('palletID',$pallet->palletID)->update([
+                Pallet::where('palletID', $pallet->palletID)->update([
                     'DocNum' => $res['DocNum'],
                     'DocEntry' => $res['DocEntry'],
                     'palletSAP' => $res2['DocEntry'],
@@ -329,8 +353,8 @@ class DryingOvenController extends Controller
                     'message' => 'Pallet created successfully',
                     'data' => [
                         'pallet' => $pallet,
-                        'res1'=>$res,
-                        'res2'=>$res2,
+                        'res1' => $res,
+                        'res2' => $res2,
                     ]
                 ]);
             }
@@ -341,17 +365,20 @@ class DryingOvenController extends Controller
                 'data' => [
                     'pallet' => $pallet,
                 ],
-                
+
             ]);
         } catch (\Exception | QueryException $e) {
             // Rollback in case of an exception
             DB::rollBack();
 
             // Log or handle the exception as needed
-            return response()->json(['message' => 'Failed to create pallet and details', 'error' => $e->getMessage(), 'res1'=>$res,
-            'res2'=>$res2,], 500);
+            return response()->json([
+                'message' => 'Failed to create pallet and details', 'error' => $e->getMessage(), 'res1' => $res,
+                'res2' => $res2,
+            ], 500);
         }
     }
+
     function lifecyleDrying(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -369,29 +396,39 @@ class DryingOvenController extends Controller
             'pallets.LyDo',
             'pallets.NgayNhap',
             'pallets.created_at as ngaytao',
-            'pallets.CreateBy',
+            'pallets.Code',
+            // 'pallets.LoadedBy',
+            'pallets.LoadedIntoKilnDate',
+            //'pallets.CreateBy',
+            DB::raw("CONCAT(COALESCE(users6.first_name,''), ' ', COALESCE(users6.last_name,'')) as LoadedBy"),
+            DB::raw("CONCAT(COALESCE(users5.first_name,''), ' ', COALESCE(users5.last_name,'')) as CreateBy"),
             'pallet_details.ItemCode',
             'pallet_details.Qty',
             'plandryings.Checked',
-            DB::raw("CONCAT(users.first_name, users.last_name) as checkby"),
+            DB::raw("CONCAT(users.first_name,' ', users.last_name) as checkby"),
             'plandryings.DateChecked',
             'plandryings.Review',
-            DB::raw("CONCAT(users2.first_name, users2.last_name) as ReviewBy"),
+            DB::raw("CONCAT(users2.first_name,' ', users2.last_name) as ReviewBy"),
             'plandryings.reviewDate',
-            DB::raw("CONCAT(users3.first_name, users3.last_name) as RunBy"),
+            DB::raw("CONCAT(users3.first_name,' ', users3.last_name) as RunBy"),
             'plandryings.runDate',
-            DB::raw("CONCAT(users4.first_name, users4.last_name) as CompletedBy"),
-            'plandryings.CompletedDate'
+            DB::raw("CONCAT(users4.first_name,' ', users4.last_name) as CompletedBy"),
+            'plandryings.CompletedDate',
+
         )
-        ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
-        ->join('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
-        ->join('plandryings', 'plan_detail.PlanID', '=', 'plandryings.PlanID')
-        ->join('users', 'users.id', '=', 'plandryings.CheckedBy')
-        ->leftJoin('users as users2', 'users2.id', '=', 'plandryings.ReviewBy')
-        ->leftJoin('users as users3', 'users3.id', '=', 'plandryings.RunBy')
-        ->leftJoin('users as users4', 'users4.id', '=', 'plandryings.CompletedBy')
-        ->where('pallets.palletID', $request->palletID)
-        ->get();
-        return response()->json(['data'=>$data], 200);
+            ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+            ->Join('users as users5', 'users5.id', '=', 'pallets.CreateBy')
+            ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
+            ->leftJoin('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
+            ->leftJoin('plandryings', 'plan_detail.PlanID', '=', 'plandryings.PlanID')
+            ->leftJoin('users', 'users.id', '=', 'plandryings.CheckedBy')
+            ->leftJoin('users as users2', 'users2.id', '=', 'plandryings.ReviewBy')
+            ->leftJoin('users as users3', 'users3.id', '=', 'plandryings.RunBy')
+            ->leftJoin('users as users4', 'users4.id', '=', 'plandryings.CompletedBy')
+
+
+            ->where('pallets.palletID', $request->palletID)
+            ->get();
+        return response()->json(['data' => $data], 200);
     }
 }

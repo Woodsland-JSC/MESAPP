@@ -28,9 +28,15 @@ import {
     Radio,
     RadioGroup,
     useDisclosure,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
 } from "@chakra-ui/react";
 import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
+import { TbCalendarFilled, TbClock } from "react-icons/tb";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -79,6 +85,7 @@ const AwaitingReception = ({
     isQualityCheck,
     onConfirmReceipt,
     onRejectReceipt,
+    variant,
 }) => {
     const errorTypeRef = useRef();
     const solutionRef = useRef();
@@ -98,57 +105,173 @@ const AwaitingReception = ({
         onClose: onDismissAlertDialogClose,
     } = useDisclosure();
 
+    const [faults, setFaults] = useState({
+        errorType: null,
+        solution: null,
+        teamBack: null,
+        rootCause: null,
+        returnCode: null,
+        Qty: null,
+        Note: null,
+        year: new Date().getFullYear(),
+        week: {
+            value: getCurrentWeekNumber(),
+            label: `Tuần ${getCurrentWeekNumber()}`,
+        },
+    });
+
+    // const handleConfirmReceipt = async () => {  
+    //     if (faults.Qty === 0 || faults.Qty === "" || faults.Qty === null) {
+    //         toast.error("Số lượng lỗi không được bỏ trống.");
+    //         onInputAlertDialogClose();
+    //     } else if (faults.Qty <= 0) {
+    //         toast.error("Số lượng lỗi phải lớn hơn 0.");
+    //         onInputAlertDialogClose();
+    //     } else if (faults.Qty > data?.Quantity) {
+    //         toast.error("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
+    //         onInputAlertDialogClose();
+    //     } else if (faults.errorType === "" || faults.errorType === null) {
+    //         toast.error("Loại lỗi không được bỏ trống.");
+    //         onInputAlertDialogClose();
+    //     } else if (faults.solution === "" || faults.solution === null) {
+    //         toast.error("H không được bỏ trống");
+    //         onInputAlertDialogClose();
+    //     } else if (faults.teamBack === "" || faults.teamBack === null) {
+    //         toast.error("Tổ chuyển về không được bỏ trống.");
+    //         onInputAlertDialogClose();
+    //     } else {
+    //         setAcceptLoading(true);
+    //         try {
+    //             const payload = {
+    //                 id: data?.id,
+    //                 loailoi: faults.errorType || null,
+    //                 huongxuly: faults.solution || null,
+    //                 teamBack: faults.teamBack || null,
+    //                 rootCause: faults.rootCause || null,
+    //                 subCode: faults.subCode || null,
+    //                 Note: faults.Note || null,
+    //                 Qty: faults.Qty || null,
+    //                 year: faults.year || null,
+    //                 week: faults.week?.value || null,
+    //             };
+    //             if (payload.id) {
+    //                 switch (type) {
+    //                     case "plywood":
+    //                         const res1 = await productionApi.acceptReceiptsVCN(payload);
+    //                         break;
+    //                     default:
+    //                         if (variant === "QC") {
+    //                             const res2 = await productionApi.acceptReceiptsCBGQC(payload);
+    //                         } else {
+    //                             const res2 = await productionApi.acceptReceiptsCBG(payload);
+    //                         }
+    //                         break;
+    //                 }
+    //                 onConfirmReceipt(data?.id);
+    //                 onInputAlertDialogClose();
+    //             } else {
+    //                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+    //             }
+    //         } catch (error) {
+    //             // toast.error("Có lỗi xảy ra khi xác nhận.");
+    //             Swal.fire({
+    //                 title: "Có lỗi khi xác nhận.",
+    //                 html: `
+    //                 <p>Chi tiết lỗi:<br></p>
+    //                     <p> 
+    //                         ${
+    //                             error.response.data.error.message.value
+    //                                 ? "<li> Lỗi từ SAP: " +
+    //                                   error.response.data.error.message.value +
+    //                                   "</li>"
+    //                                 : "<li> Lỗi từ SAP: " +
+    //                                   error.response.data.message +
+    //                                   "</li>"
+    //                         }
+    //                     </p>
+    //                 `,
+    //                 icon: "error",
+    //                 zIndex: 50001,
+    //             });
+    //             console.log("Error when confirming receipt:", error);
+    //             console.log(
+    //                 "Chi tiết lỗi:",
+    //                 error.response.data.error.message.value
+    //             );
+    //             setAcceptLoading(false);
+    //             onInputAlertDialogClose();
+    //         }
+    //     }  
+    // };
+
     const handleConfirmReceipt = async () => {
-        setAcceptLoading(true);
-        try {
-            const payload = {
-                id: data?.id,
-                loailoi: faults.errorType || null,
-                huongxuly: faults.solution || null,
-                teamBack: faults.teamBack || null,
-                rootCause: faults.rootCause || null,
-                subCode: faults.subCode || null,
-                year: faults.year || null,
-                week: faults.week?.value || null,
-            };
-            if (payload.id) {
-                switch (type) {
-                    case "plywood":
-                        const res1 = await productionApi.acceptReceiptsVCN(
-                            payload
-                        );
-                        break;
-                    default:
-                        const res2 = await productionApi.acceptReceiptsCBG(
-                            payload
-                        );
-                        break;
-                }
-                onConfirmReceipt(data?.id);
-                onInputAlertDialogClose();
-                // toast.success("Xác nhận thành công.");
-            } else {
-                toast.error("Có lỗi xảy ra. Vui lòng thử lại");
-            }
-        } catch (error) {
-            // toast.error("Có lỗi xảy ra khi xác nhận.");
-            console.log("Error when confirming receipt:", error);
-            console.log("Chi tiết lỗi:", error.response.data.error.message.value);     
-            onInputAlertDialogClose();
+        const showErrorAlert = (message) => {
             Swal.fire({
                 title: "Có lỗi khi xác nhận.",
                 html: `
-                <p>Chi tiết lỗi:<br></p>
-                    <p> 
-                        ${error.response.data.error.message.value ? "<li> Lỗi từ SAP: " + error.response.data.error.message.value + "</li>" : "<li> Lỗi từ SAP: " + error.response.data.message + "</li>"}
-                    </p>
+                    <p>Chi tiết lỗi:<br></p>
+                    <p>${message}</p>
                 `,
                 icon: "error",
                 zIndex: 50001,
             });
+        };
+    
+        const checkAndDisplayError = (errorMessage) => {
+            toast.error(errorMessage);
+            onInputAlertDialogClose();
+        };
+    
+        if (!faults.Qty || faults.Qty <= 0) {
+            checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
+        } else if (faults.Qty > data?.Quantity) {
+            checkAndDisplayError("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
+        } else if (!faults.errorType) {
+            checkAndDisplayError("Loại lỗi không được bỏ trống.");
+        } else if (!faults.solution) {
+            checkAndDisplayError("Hướng xử lý không được bỏ trống.");
+        } else if (!faults.teamBack) {
+            checkAndDisplayError("Tổ chuyển về không được bỏ trống.");
+        } else {
+            setAcceptLoading(true);
+            try {
+                const payload = {
+                    id: data?.id,
+                    loailoi: faults.errorType,
+                    huongxuly: faults.solution,
+                    teamBack: faults.teamBack,
+                    rootCause: faults.rootCause || null,
+                    subCode: faults.subCode || null,
+                    Note: faults.Note || null,
+                    Qty: faults.Qty,
+                    year: faults.year || null,
+                    week: faults.week?.value || null,
+                };
+                let res;
+                if (payload.id) {
+                    switch (type) {
+                        case "plywood":
+                            res = await productionApi.acceptReceiptsVCN(payload);
+                            break;
+                        default:
+                            res = await (variant === "QC" ? productionApi.acceptReceiptsCBGQC(payload) : productionApi.acceptReceiptsCBG(payload));
+                            break;
+                    }
+                    onConfirmReceipt(data?.id);
+                    onInputAlertDialogClose();
+                } else {
+                    showErrorAlert("Có lỗi xảy ra. Vui lòng thử lại");
+                }
+            } catch (error) {
+                const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message;
+                showErrorAlert(`Lỗi từ SAP: ${errorMessage}`);
+                console.error("Error when confirming receipt:", error);
+                setAcceptLoading(false);
+                onInputAlertDialogClose();
+            }
         }
-        setAcceptLoading(false);
     };
+    
 
     const handleRejectReceipt = async () => {
         setRejectLoading(true);
@@ -206,15 +329,10 @@ const AwaitingReception = ({
             } else {
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
             }
-            // onInputAlertDialogClose();
         } catch (error) {
             toast.error("Có lỗi xảy ra khi từ chối.");
         }
         setRejectLoading(false);
-        // const reason = reasonOfReturn.find(
-        //     (item) => item.value == selectedReason
-        // );
-        // onRejectReceipt(index, reason);
     };
 
     const [reason, setReason] = useState("");
@@ -229,19 +347,6 @@ const AwaitingReception = ({
     const [rootCauseOptions, setRootCauseOptions] = useState([]);
     const [returnCodeOptions, setReturnCodeOptions] = useState([]);
     const [weekOptions, setWeekOptions] = useState(weeks);
-
-    const [faults, setFaults] = useState({
-        errorType: null,
-        solution: null,
-        teamBack: null,
-        rootCause: null,
-        returnCode: null,
-        year: new Date().getFullYear(),
-        week: {
-            value: getCurrentWeekNumber(),
-            label: `Tuần ${getCurrentWeekNumber()}`,
-        },
-    });
 
     useEffect(() => {
         if (selectedReason != "3") {
@@ -328,9 +433,30 @@ const AwaitingReception = ({
 
     return (
         <>
-            <Card maxW="sm" className="!shadow-[0_3px_10px_rgb(0,0,0,0.2)]">
-                <CardBody className="!px-4 !pb-3">
-                    <Stack mt="2" spacing="2.5">
+            <div
+                className={`rounded-lg ${
+                    variant === "QC"
+                        ? " border-2 border-gray-200 shadow-md"
+                        : " border-2 border-gray-200 !shadow-[0_3px_10px_rgb(0,0,0,0.2)]}"
+                } `}
+            >
+                <div className="!px-4 !py-3">
+                    <Stack mt="2" spacing="2">
+                        <div className="flex gap-2">
+                            {/* <span>Tên: </span> */}
+                            <span className="font-bold text-[19px] text-[#155979]">
+                                {/* {type == "plywood" ? data.itemName : data.data?.ItemName || ""} */}
+                                {data?.ItemName || ""} (
+                                {data?.CDay +
+                                    "x" +
+                                    data?.CRong +
+                                    "x" +
+                                    data?.CDai || ""}
+                                )
+                            </span>
+                            <span></span>
+                        </div>
+
                         {type == "plywood" ? (
                             <>
                                 <div className="flex gap-2">
@@ -352,21 +478,13 @@ const AwaitingReception = ({
                         )}
 
                         <div className="flex gap-2">
-                            <span>Tên: </span>
-                            <span className="font-bold">
-                                {/* {type == "plywood" ? data.itemName : data.data?.ItemName || ""} */}
-                                {data?.ItemName || ""}
-                            </span>
-                        </div>
-
-                        <div className="flex gap-2">
                             <span>Công đoạn giao: </span>
                             <span className="font-bold">
                                 {data?.CongDoan || ""}
                             </span>
                         </div>
 
-                        <div className="flex gap-2">
+                        {/* <div className="flex gap-2">
                             <span>Quy cách: </span>
                             <span className="font-bold">
                                 {data?.CDay +
@@ -375,7 +493,7 @@ const AwaitingReception = ({
                                     " x " +
                                     data?.CDai || ""}
                             </span>
-                        </div>
+                        </div> */}
 
                         <div className="flex gap-2">
                             <span>Số lượng: </span>
@@ -386,10 +504,41 @@ const AwaitingReception = ({
 
                         <span className="rounded-lg cursor-pointer px-2 py-2 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
                             Người tạo:{" "}
-                            {data?.last_name + " " + data?.first_name}
+                            <span className="font-medium">
+                                {data?.last_name + " " + data?.first_name}
+                            </span>
                         </span>
 
-                        <div className="flex">
+                        <div className="grid grid-cols-2">
+                            <div className="flex grid-cols-1 items-center space-x-2">
+                                <TbCalendarFilled className="w-5 h-5 text-" />
+                                <Text
+                                    color="gray.700"
+                                    fontWeight="700"
+                                    fontSize="md"
+                                >
+                                    {moment(
+                                        data?.created_at,
+                                        "YYYY-MM-DD HH:mm:ss"
+                                    ).format("DD/MM/YYYY") || ""}
+                                </Text>
+                            </div>
+
+                            <div className="flex grid-cols-1 items-center space-x-2">
+                                <TbClock className="w-5 h-5 text-" />
+                                <Text
+                                    color="gray.700"
+                                    fontWeight="700"
+                                    fontSize="md"
+                                >
+                                    {moment(
+                                        data?.created_at,
+                                        "YYYY-MM-DD HH:mm:ss"
+                                    ).format("HH:mm:ss") || ""}
+                                </Text>
+                            </div>
+                        </div>
+                        {/* <div className="flex">
                             <Text
                                 className="w-2/5"
                                 color="blue.600"
@@ -426,34 +575,41 @@ const AwaitingReception = ({
                                     "YYYY-MM-DD HH:mm:ss"
                                 ).format("HH:mm:ss") || ""}
                             </Text>
-                        </div>
-                        <div className="flex items-center gap-x-4">
-                            <Text color="blue.600" fontSize="md">
-                                Năm:
-                            </Text>
-                            <input
-                                className="border p-1 rounded-md border-indigo-600 focus:border-indigo-600 focus:outline-none w-full px-3"
-                                id="yearInput"
-                                placeholder="yyyy"
-                                value={faults.year}
-                                onChange={(e) => {
-                                    setFaults((prev) => ({
-                                        ...prev,
-                                        year: e.target.value,
-                                    }));
-                                }}
-                            /> 
-                        </div>
-                        <div className="flex items-center gap-x-4">
-                                <Text color="blue.600" fontSize="md">
-                                    Tuần:
-                                </Text>
+                        </div> */}
+
+                        <div className="grid grid-cols-2 space-x-3">
+                            <div className="items-center gap-x-4">
+                                <label
+                                    htmlFor="errorType"
+                                    className="font-semibold"
+                                >
+                                    Năm
+                                </label>
+                                <input
+                                    className="mt-1 border p-1.5 rounded-md border-gray-300 focus:border-indigo-600 focus:outline-none w-full px-3"
+                                    id="yearInput"
+                                    placeholder="yyyy"
+                                    value={faults.year}
+                                    onChange={(e) => {
+                                        setFaults((prev) => ({
+                                            ...prev,
+                                            year: e.target.value,
+                                        }));
+                                    }}
+                                />
+                            </div>
+                            <div className="items-center gap-x-4">
+                                <label
+                                    htmlFor="errorType"
+                                    className="font-semibold"
+                                >
+                                    Tuần
+                                </label>
                                 <Select
                                     ref={rootCauseRef}
-                                    className="w-full"
+                                    className="w-full mt-1"
                                     placeholder="Lựa chọn"
                                     options={weekOptions}
-                                    isClearable
                                     isSearchable
                                     value={faults.week}
                                     onChange={(value) => {
@@ -464,12 +620,34 @@ const AwaitingReception = ({
                                     }}
                                 />
                             </div>
+                        </div>
                     </Stack>
-                </CardBody>
+                </div>
 
                 {isQualityCheck && !isReturnSelect && (
                     <>
-                        <Box className="mt-2 px-4">
+                        <Box className=" px-4">
+                            <label
+                                htmlFor="errorType"
+                                className="font-semibold text-red-700"
+                            >
+                                QC ghi nhận số lượng lỗi
+                            </label>
+                            <input
+                                className="mt-1 border p-1.5 rounded-md border-gray-300 focus:border-indigo-600 focus:outline-none w-full px-3"
+                                id="Qty"
+                                type="number"
+                                placeholder="Nhập số lượng"
+                                onChange={(e) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        Qty: e.target.value,
+                                    }));
+                                    console.log("Giá trị số lượng lỗi", e.target.value);
+                                }}
+                            />
+                        </Box>
+                        <Box className="mt-3 px-4">
                             <label
                                 htmlFor="errorType"
                                 className="font-semibold text-red-700"
@@ -478,7 +656,7 @@ const AwaitingReception = ({
                             </label>
                             <Select
                                 ref={errorTypeRef}
-                                className="mt-2"
+                                className="mt-1"
                                 placeholder="Lựa chọn"
                                 options={errorTypeOptions}
                                 isClearable
@@ -498,6 +676,25 @@ const AwaitingReception = ({
                                 }}
                             />
                         </Box>
+                        <Box className="mt-3 px-4">
+                            <label
+                                htmlFor="errorType"
+                                className="font-semibold text-red-700"
+                            >
+                                Ghi chú
+                            </label>
+                            <input
+                                className="mt-1 border p-1.5 rounded-md border-gray-300 focus:border-indigo-600 focus:outline-none w-full px-3"
+                                id="Note"
+                                placeholder="Nhập ghi chú"
+                                onChange={(e) => {
+                                    setFaults((prev) => ({
+                                        ...prev,
+                                        Note: e.target.value,
+                                    }));
+                                }}
+                            />
+                        </Box>
                         <Box className="px-4 mt-4 mb-4">
                             <label
                                 htmlFor="solution"
@@ -507,17 +704,11 @@ const AwaitingReception = ({
                             </label>
                             <Select
                                 ref={solutionRef}
-                                className="mt-2"
+                                className="mt-1"
                                 placeholder="Lựa chọn"
                                 options={solutionOptions}
                                 isClearable
                                 isSearchable
-                                // onChange={(value) => {
-                                //     setFaults((prev) => ({
-                                //         ...prev,
-                                //         solution: value,
-                                //     }));
-                                // }}
                                 value={faults.solution}
                                 onChange={(value) => {
                                     if (!faults.errorType) {
@@ -544,7 +735,7 @@ const AwaitingReception = ({
                             </label>
                             <Select
                                 ref={teamBackRef}
-                                className="mt-2"
+                                className="mt-1"
                                 placeholder="Lựa chọn"
                                 options={teamBackOptions}
                                 isClearable
@@ -568,7 +759,7 @@ const AwaitingReception = ({
                                 </div>
                                 <Select
                                     ref={rootCauseRef}
-                                    className="mt-2 w-full"
+                                    className="mt-1 w-full"
                                     placeholder="Lựa chọn"
                                     options={teamBackOptions}
                                     isClearable
@@ -583,13 +774,12 @@ const AwaitingReception = ({
                                 />
                             </div>
                             <div className="mt-4">
-                                
                                 <div className="font-semibold text-red-700">
                                     Mã hạ cấp.
                                 </div>
                                 <Select
                                     ref={returnCodeRef}
-                                    className="mt-2 w-full"
+                                    className="mt-1 w-full"
                                     placeholder="Lựa chọn"
                                     options={returnCodeOptions}
                                     isClearable
@@ -608,7 +798,7 @@ const AwaitingReception = ({
                 )}
 
                 <Divider />
-                <CardFooter className="!px-4">
+                <div className="!px-4 py-3">
                     <div className="flex flex-col">
                         <RadioGroup
                             onChange={(value) => {
@@ -633,10 +823,6 @@ const AwaitingReception = ({
                                                 if (
                                                     item.value == selectedReason
                                                 ) {
-                                                    // console.log(
-                                                    //     "Dô 2",
-                                                    //     selectedReason
-                                                    // );
                                                     setSelectedReason(null);
                                                 }
                                             }}
@@ -666,10 +852,10 @@ const AwaitingReception = ({
                             />
                         )}
                     </div>
-                </CardFooter>
+                </div>
 
                 <Divider />
-                <ButtonGroup spacing="2" className="flex justify-end p-[20px]">
+                <div className="flex space-x-3 justify-end p-[20px]">
                     <Button
                         className={`${selectedReason ? "!block" : "!hidden"}`}
                         variant="ghost"
@@ -701,8 +887,8 @@ const AwaitingReception = ({
                     >
                         Xác nhận
                     </Button>
-                </ButtonGroup>
-            </Card>
+                </div>
+            </div>
             <AlertDialog
                 isOpen={isInputAlertDialogOpen}
                 onClose={onInputAlertDialogClose}
@@ -719,15 +905,10 @@ const AwaitingReception = ({
                                 <span className="font-bold">
                                     {Number(data?.Quantity) || ""}
                                 </span>{" "}
-                                sản phẩm
-                                {/* {faults &&
-                                    (
-                                        faults.errorType &&
-                                        ` với lý do ` + <b>{faults.errorType.label}</b>
-                                    )} */}
+                                sản phẩm <span className="font-bold">{data?.ItemName}</span>
                                 {faults && faults.errorType && (
                                     <span>
-                                        với lý do{" "}
+                                         {" "}với lý do{" "}
                                         <b>{faults.errorType.label}</b>
                                     </span>
                                 )}

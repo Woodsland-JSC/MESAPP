@@ -283,7 +283,7 @@ class QCController extends Controller
                     'CDay',
                     'CRong',
                     'CDai',
-                    'b.openQty Quantity',
+                    DB::raw('b.openQty as Quantity'),
                     'a.created_at',
                     'c.first_name',
                     'c.last_name',
@@ -338,21 +338,19 @@ class QCController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-        ->select('b.*', 'a.id as notiID','a.team as NextTeam')
-        ->where('a.id', $request->id)
-        ->where('a.confirm', 0)
-        ->first();
+        $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
+        ->select('a.*', 'b.id as notiID','b.team as NextTeam','b.openQty')
+        ->where('b.id', $request->id)
+        ->where('b.confirm', 0)->first();
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
-       
-        // check again data openQTy
-        if ($data->OpenQty < $request->Qty) {
+        // check again data openQTy -> Line 351
+        if ($data->openQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
         }
         $closed=0;
-        if ($data->OpenQty == $request->Qty) {
+        if ($data->openQty == $request->Qty) {
             $closed=1;
         }
         //
@@ -464,5 +462,14 @@ class QCController extends Controller
                 'body' => $body
             ], 500);
         }
+    }
+    function getQCWarehouseByUser($plant)
+    {
+        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
+        ->where('FAC',$plant)
+        ->first();
+        
+        $WHS=  $WHS? $WHS->WhsCode: 99;
+        return $WHS;
     }
 }

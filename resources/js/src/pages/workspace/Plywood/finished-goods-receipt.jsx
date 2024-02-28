@@ -135,6 +135,7 @@ function PlywoodFinishedGoodsReceipt() {
         "CH-PLY-KVC": [],
     });
 
+    const [isQC, setIsQC] = useState([]);
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
@@ -348,10 +349,6 @@ function PlywoodFinishedGoodsReceipt() {
         try {
             const res = await productionApi.getFinishedPlywoodGoodsList(params);
 
-            /** DÒNG NÀY NHỚ XOÁ */
-            // const res = await productionApi.getFinishedGoodsList(params);
-
-            // console.log("Ra kết quả dùm: ", res);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {

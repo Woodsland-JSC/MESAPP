@@ -422,6 +422,9 @@ var exampleData2 = [
 function WoodProductingQC() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
+
+    const [isQC, setIsQC] = useState(true);
 
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupList, setGroupList] = useState([]);
@@ -434,7 +437,7 @@ function WoodProductingQC() {
     // New Get All Group
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
-            setLoading(true);
+            // setLoading(true);
             try {
                 const res = await productionApi.getAllGroupWithoutQC();
                 const options = res.map((item) => ({
@@ -443,13 +446,13 @@ function WoodProductingQC() {
                 }));
                 setGroupList(res);
                 setGroupListOptions(options);
-                console.log("New Get All Group: ", options);
+                console.log("1. Get all group: ", options);
                 // setSelectedGroup(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
                 console.error(error);
             }
-            setLoading(false);
+            // setLoading(false);
         };
         getAllGroupWithoutQC();
         document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
@@ -459,21 +462,18 @@ function WoodProductingQC() {
         };
     }, []);
 
-    const getDataFollowingGroup = async (params) => {
+    const getDataFollowingGroup = async (param) => {
         setLoadingData(true);
         try {
-            const res = await productionApi.getFinishedGoodsList(params);
+            const res = await productionApi.getFinishedGoodsListByGroup(param);
             if (typeof res?.data === "object") {
-                setData(Object.values(res.data));
-            } else {
-                setData([]);
-            }
-
-            if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
-                setAwaitingReception(res?.noti_choxacnhan);
+                setAwaitingReception(Object.values(res.data));
             } else {
                 setAwaitingReception([]);
             }
+
+            console.log("3.Dữ liệu QC: ", res.data);
+
             // setData(res.data);
         } catch (error) {
             toast.error("Có lỗi trong quá trình lấy dữ liệu.");
@@ -484,29 +484,29 @@ function WoodProductingQC() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                const isQC = groupList.find(
-                    (group) => group.Code == selectedGroup.value
-                )?.QC;
+                // const isQC = groupList.find(
+                //     (group) => group.Code == selectedGroup.value
+                // )?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
                     setIsQualityCheck(false);
                 }
                 // setLoadingData(true);
-                const params = {
+                const param = {
                     TO: selectedGroup.value,
                 };
-                getDataFollowingGroup(params);
+                getDataFollowingGroup(param);
 
-                if (selectedGroup.value == "TH-X3SC") {
-                    setCurrentData(exampleData);
-                } else if (selectedGroup.value == "TH-X3TC1") {
-                    setCurrentData(exampleData1);
-                } else if (selectedGroup.value == "TH-X3TC2") {
-                    setCurrentData(exampleData2);
-                } else {
-                    setCurrentData([]);
-                }
+                // if (selectedGroup.value == "TH-X3SC") {
+                //     setCurrentData(exampleData);
+                // } else if (selectedGroup.value == "TH-X3TC1") {
+                //     setCurrentData(exampleData1);
+                // } else if (selectedGroup.value == "TH-X3TC2") {
+                //     setCurrentData(exampleData2);
+                // } else {
+                //     setCurrentData([]);
+                // }
                 // setLoadingData(false);
             }
         })();
@@ -591,12 +591,12 @@ function WoodProductingQC() {
                     {/* Header */}
                     <div className="flex justify-between mb-6 items-center">
                         <div className="text-3xl font-bold ">
-                            Kiểm định chất lượng chế biến gỗ 
+                            Kiểm định chất lượng chế biến gỗ
                         </div>
                     </div>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border rounded-md bg-white z-0">
+                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-lg bg-white z-0">
                         {/* Search */}
                         <div className="w-full">
                             <label
@@ -646,7 +646,8 @@ function WoodProductingQC() {
                                 defaultValue={selectedGroup}
                                 onChange={(value) => {
                                     setSelectedGroup(value);
-                                    console.log("Selected Group: ", value);
+                                    // getDataFollowingGroup(value.value);
+                                    console.log("2. Selected Group: ", value);
                                 }}
                                 placeholder="Chọn tổ, xưởng sản xuất"
                                 className=""
@@ -654,37 +655,66 @@ function WoodProductingQC() {
                         </div>
 
                         {/* Selection Review */}
-                        <div className="mt-3">Selected Group: <strong>{selectedGroup !== null ? selectedGroup.value : ''}</strong></div>
+                        {/* <div className="mt-3">
+                            Selected Group:{" "}
+                            <strong>
+                                {selectedGroup !== null
+                                    ? selectedGroup.value
+                                    : ""}
+                            </strong>
+                        </div>
+                        <div className="mt-3">
+                            Số lượng item QC:{" "}
+                            <strong>{awaitingReception.length}</strong>
+                        </div> */}
 
                         {/* Data */}
-                    <div className="flex gap-4 justify-center h-full">
-                            {selectedGroup && awaitingReception?.length > 0 ? (
-                                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                    {awaitingReception.map((item, index) => (
-                                        <AwaitingReception
-                                            type="wood-processing"
-                                            data={item}
-                                            key={index}
-                                            index={index}
-                                            isQualityCheck={isQualityCheck}
-                                            onConfirmReceipt={
-                                                handleConfirmReceipt
-                                            }
-                                            onRejectReceipt={
-                                                handleRejectReceipt
-                                            }
-                                        />
-                                    ))}
+                        <div className="flex my-5 gap-4 justify-center h-full">
+                            {loadingData ? (
+                                <div className="text-center mt-8">
+                                    <Spinner
+                                        thickness="4px"
+                                        speed="0.65s"
+                                        emptyColor="gray.200"
+                                        color="#155979"
+                                        size="xl"
+                                    />
                                 </div>
                             ) : (
-                                <div className="flex w-full h-full justify-center items-center">
-                                    Không có dữ liệu
-                                </div>
+                                <>
+                                    {selectedGroup &&
+                                    awaitingReception?.length > 0 ? (
+                                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                            {awaitingReception.map(
+                                                (item, index) => (
+                                                    <AwaitingReception
+                                                        type="wood-processing"
+                                                        data={item}
+                                                        key={index}
+                                                        index={index}
+                                                        variant="QC"
+                                                        isQualityCheck={
+                                                            isQualityCheck
+                                                        }
+                                                        onConfirmReceipt={
+                                                            handleConfirmReceipt
+                                                        }
+                                                        onRejectReceipt={
+                                                            handleRejectReceipt
+                                                        }
+                                                    />
+                                                )
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="flex w-full h-full justify-center items-center">
+                                            Không có dữ liệu
+                                        </div>
+                                    )}
+                                </>
                             )}
+                        </div>
                     </div>
-                    </div>
-
-                    
                 </div>
             </div>
         </Layout>

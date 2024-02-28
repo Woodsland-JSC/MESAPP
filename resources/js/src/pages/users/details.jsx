@@ -261,6 +261,8 @@ function User() {
         branch: "",
     });
 
+    const [currentUser, setCurrentUser] = useState([]);
+
     const [originalInfo, setOriginalInfo] = useState(null);
 
     const [signature, setSignature] = useState(null);
@@ -477,7 +479,8 @@ function User() {
                 branch: branch || "",
             };
 
-            // console.log("User: ", userData);
+            setCurrentUser(data.user);
+            console.log("Current User Data: ", currentUser);
 
             if (branch) {
                 const res = await usersApi.getFactoriesByBranchId(branch);
@@ -645,6 +648,21 @@ function User() {
             document.body.classList.remove("body-no-scroll");
         }
     }, [loading]);
+
+    const [selectedSapUser, setSelectedSapUser] = useState(null);
+
+    console.log("Current Id: ", currentUser.sap_id);
+    console.log("SAP List: ", sapId);
+
+    useEffect(() => {
+        if (currentUser && sapId.length > 0) {
+          const defaultUser = sapId.find(id => id.USER_CODE === currentUser.sap_id);
+          if (defaultUser) {
+            setSelectedSapUser(defaultUser);
+          }
+        }
+      }, [currentUser, sapId]);
+    
 
     return (
         <Layout>
@@ -1083,10 +1101,9 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            {/* <AsyncSelectField
+                                            <Select
                                                 innerRef={sapIdSelectRef}
                                                 name="sapId"
-                                                loadOptions={loadSapId}
                                                 defaultValue={
                                                     sapId.find(
                                                         (item) =>
@@ -1094,20 +1111,9 @@ function User() {
                                                             values.sapId
                                                     ) || null
                                                 }
-                                                options={sapId}
-                                                setInput={setInput}
-                                            /> */}
-                                            <SelectField
-                                                innerRef={sapIdSelectRef}
-                                                name="sapId"
-                                                // loadOptions={loadSapId}
-                                                defaultValue={
-                                                    sapId.find(
-                                                        (item) =>
-                                                            item.value ==
-                                                            values.sapId
-                                                    ) || null
-                                                }
+                                                // deffaultValue={
+                                                //     selectedSapId
+                                                // }
                                                 options={sapId}
                                                 setInput={setInput}
                                             />

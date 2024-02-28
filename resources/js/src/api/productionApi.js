@@ -14,18 +14,13 @@ const productionApi = {
         const url = `/production/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
-    getFinishedGoodsListByGroup: (params) => {
-        const queryStringParams = Object.keys(params)
-            .map(
-                (key) =>
-                    `${encodeURIComponent(key)}=${encodeURIComponent(
-                        params[key]
-                    )}`
-            )
-            .join("&");
-
-        const url = `/production/receipts-productions?${queryStringParams}`;
-        return axiosClient().get(url);
+    getFinishedGoodsListByGroup: (param) => {
+        const url = `/list-qc-cbg`;
+        return axiosClient().get(url, {
+            params: {
+                TO: param,
+            },
+        });
     },
     getFinishedPlywoodGoodsList: (params) => {
         const queryStringParams = Object.keys(params)
@@ -89,6 +84,10 @@ const productionApi = {
     },
     acceptReceiptsCBG: (data) => {
         const url = `/production/accept-receipts`;
+        return axiosClient().post(url, data);
+    },
+    acceptReceiptsCBGQC: (data) => {
+        const url = `/confirm-qc-cbg`;
         return axiosClient().post(url, data);
     },
     acceptReceiptsVCN: (data) => {

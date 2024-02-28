@@ -34,6 +34,10 @@ const palletsApi = {
         const url = `ovens/`;
         return axiosClient().get(url, {});
     },
+    getPalletByWeekAndYear: () => {
+        const url = `/pallets/get-pallet-by-year-week`;
+        return axiosClient().get(url, {});
+    },
     getThickness: (reason) => {
         const url = `/dryingmethod`;
         return axiosClient().get(url, {
