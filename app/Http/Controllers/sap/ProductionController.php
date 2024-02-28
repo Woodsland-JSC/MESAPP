@@ -650,8 +650,6 @@ class ProductionController extends Controller
         try {
             DB::beginTransaction();
             // to bình thường
-
-
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
                 ->select('b.*', 'a.id as notiID','a.team as NextTeam')
                 ->where('a.id', $request->id)
@@ -667,6 +665,16 @@ class ProductionController extends Controller
             {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
+                if (count($allocates) == 0) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:".
+                         $data->Team." sản phẩm: ".
+                         $data->ItemCode." sản phẩm đích: ".
+                         $data->FatherCode." LSX.".$data->LSX
+                    ], 500);
+                }
                 foreach ($allocates as $allocate) {
 
                     $body = [
