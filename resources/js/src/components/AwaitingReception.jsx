@@ -204,6 +204,7 @@ const AwaitingReception = ({
     //     }  
     // };
 
+    console.log("data: ", variant);
     const handleConfirmReceipt = async () => {
         const showErrorAlert = (message) => {
             Swal.fire({
@@ -222,9 +223,9 @@ const AwaitingReception = ({
             onInputAlertDialogClose();
         };
     
-        if (!faults.Qty || faults.Qty <= 0 && variant === "QC") {
+        if ((!faults.Qty || faults.Qty <= 0) && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
-        } else if (faults.Qty > data?.Quantity && variant === "QC") {
+        } else if ((faults.Qty > data?.Quantity) && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
         } else if (!faults.errorType && variant === "QC") {
             checkAndDisplayError("Loại lỗi không được bỏ trống.");

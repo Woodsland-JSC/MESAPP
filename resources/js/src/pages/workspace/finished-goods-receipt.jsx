@@ -935,6 +935,7 @@ function FinishedGoodsReceipt() {
                                             type="wood-processing"
                                             data={item}
                                             key={index}
+                                            variant="CBG"
                                             index={index}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
