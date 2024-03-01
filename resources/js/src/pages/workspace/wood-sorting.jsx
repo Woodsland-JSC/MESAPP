@@ -290,6 +290,7 @@ function WoodSorting() {
                         ...prevPalletCards,
                         ...newPalletCards,
                     ]);
+                    console.log("Danh sách pallet card: ", newpalletCards);
                 } else {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                     return;
@@ -347,6 +348,7 @@ function WoodSorting() {
             MaNhaMay: user.plant,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
+                ItemName: card.props.itemName,
                 WhsCode: card.props.whsCode,
                 BatchNum: card.props.batchNum,
                 Qty: parseInt(palletQuantities[card.key]),
@@ -361,6 +363,108 @@ function WoodSorting() {
     let woodTypeSelectRef = null;
     let dryingReasonSelectRef = null;
     let dryingMethodSelectRef = null;
+
+    // const handleCreatePallet = async () => {
+    //     if (palletCards.length === 0) {
+    //         toast.error("Danh sách không được để trống.");
+    //         return;
+    //     }
+
+    //     let hasInvalidQuantity = false;
+
+    //     for (const card of palletCards) {
+    //         var inStock = parseFloat(card.props.inStock);
+    //         var quantity = parseFloat(palletQuantities[card.key] || 0);
+
+    //         if (
+    //             quantity > inStock ||
+    //             quantity === 0 ||
+    //             quantity < 0 ||
+    //             quantity == "" ||
+    //             quantity == null
+    //         ) {
+    //             console.log("Giá trị Invalid Quantity:", isInvalidQuantity);
+    //             hasInvalidQuantity = true;
+    //             break;
+    //         }
+    //     }
+
+    //     if (hasInvalidQuantity) {
+    //         toast.error("Giá trị số lượng không hợp lệ.");
+    //         return;
+    //     }
+
+    //     const palletObject = createPalletObject();
+    //     console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
+
+    //     setCreatePalletLoading(true);
+
+    //     try {
+    //         const response = await axios.post(
+    //             "/api/pallets/v2/create",
+    //             palletObject
+    //         );
+    //         if (response.data === "" || response.data === null) {
+    //             toast.error("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+    //             setCreatePalletLoading(false);
+    //         } else {
+    //             console.log("4. Kết quả tạo pallet:", response);
+    //             Swal.fire({
+    //                 title: response.data.data.pallet.Code,
+    //                 text: "Mã pallet đã được tạo!",
+    //                 icon: "success",
+    //             });
+
+    //             if (woodTypeSelectRef) {
+    //                 woodTypeSelectRef.clearValue();
+    //             }
+    //             if (dryingReasonSelectRef) {
+    //                 dryingReasonSelectRef.clearValue();
+    //             }
+    //             if (dryingMethodSelectRef) {
+    //                 dryingMethodSelectRef.clearValue();
+    //             }
+
+    //             setCreatePalletLoading(false);
+
+    //             setBatchId("");
+    //             setStartDate(new Date());
+    //             setPalletCards([]);
+    //             setIsInvalidQuantity(false);
+    //             setPalletQuantities({});
+    //         }
+    //     } catch (error) {
+    //         console.error("Error creating pallet:", error);
+    //         console.error(
+    //             "Chi tiết lỗi:",
+    //             error.response.data.res1.error.message.value
+    //         );
+    //         Swal.fire({
+    //             title: "Có lỗi khi tạo pallet.",
+    //             html: `
+    //                 <p>Chi tiết lỗi:<br></p>
+    //                 <p>
+    //                     ${
+    //                         error.response.data.res1.error.message.value
+    //                             ? "<li> Lỗi từ SAP: " +
+    //                               error.response.data.res1.error.message.value +
+    //                               "</li>"
+    //                             : ""
+    //                     }
+    //                     ${
+    //                         error.response.data.error
+    //                             ? "<li> Lỗi hệ thống: " +
+    //                               error.response.data.error +
+    //                               "</li>"
+    //                             : ""
+    //                     }
+    //                 </p>
+    //             `,
+    //             icon: "error",
+    //         });
+    //         setCreatePalletLoading(false);
+    //     }
+    // };
 
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
@@ -433,35 +537,24 @@ function WoodSorting() {
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
-            console.error(
-                "Chi tiết lỗi:",
-                error.response.data.res1.error.message.value
-            );
-            // toast.error("Có lỗi khi tạo pallet. Chi tiết: " + error.response.data.res1.error.message.value);
+            const errorMessage = error?.response?.data?.res1?.error?.message?.value;
+            const systemError = error?.response?.data?.error;
+            const displayError = errorMessage ? errorMessage : systemError ? systemError : "";
+            setCreatePalletLoading(false);
             Swal.fire({
                 title: "Có lỗi khi tạo pallet.",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
                     <p>
                         ${
-                            error.response.data.res1.error.message.value
-                                ? "<li> Lỗi từ SAP: " +
-                                  error.response.data.res1.error.message.value +
-                                  "</li>"
-                                : ""
+                            displayError ? "<li>" + displayError + "</li>" : ""
                         }
-                        ${
-                            error.response.data.error
-                                ? "<li> Lỗi hệ thống: " +
-                                  error.response.data.error +
-                                  "</li>"
-                                : ""
-                        }
+
                     </p>
                 `,
                 icon: "error",
             });
-            setCreatePalletLoading(false);
+            
         }
     };
 
@@ -605,14 +698,25 @@ function WoodSorting() {
                             </button>
                         </div>
                     </div>
+
                     {/* History In Mobile View */}
-                    <button
-                        className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white xl:hidden items-center md:hidden flex w-full justify-center active:scale-[.95] active:duration-75 transition-all"
-                        onClick={onOpen}
-                    >
-                        <HiOutlineSearch className="text-xl mr-2" />
-                        Tra cứu lịch sử
-                    </button>
+                    <div className="xl:hidden lg:hidden md:hidden">
+                        <button
+                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all"
+                            onClick={onOpen}
+                        >
+                            <HiOutlineSearch className="text-xl mr-2" />
+                            Lịch sử xếp pallet
+                        </button>
+                        <button
+                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all"
+                            onClick={onPalletTracingOpen}
+                        >
+                            <HiOutlineClock className="text-xl mr-2" />
+                            Truy nguyên
+                        </button>
+                    </div>
+                    
 
                     {/*Pallets Loading History Modals */}
                     <Modal
@@ -873,9 +977,9 @@ function WoodSorting() {
                                         <div className="text-lg font-medium mb-4 ">
                                             Tra cứu pallet{" "}
                                         </div>
-                                        <div className="flex w-full gap-x-3">
+                                        <div className="xl:flex lg:flex md:flex sm:block w-full gap-x-3 ">
                                             {/* Select Filter */}
-                                            <div className="w-full grid grid-cols-4 gap-x-3">
+                                            <div className="w-full xl:grid lg:grid md:grid grid-cols-4 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-3 gap-x-3">
                                                 <div>
                                                     <Select
                                                         placeholder="Chọn năm"
@@ -914,7 +1018,7 @@ function WoodSorting() {
                                                         }
                                                     />
                                                 </div>
-                                                <div className="col-span-2">
+                                                <div className="col-span-2 3">
                                                 <AsyncSelect
                                                     placeholder="Chọn pallet"
                                                     key={asyncSelectKey}
@@ -931,7 +1035,7 @@ function WoodSorting() {
                                                 </div>
                                             </div>
                                             <button
-                                                className="max-w-md bg-[#155979] p-2 rounded-xl xl:w-[20%] lg:w-[20%] md:w-[20%]  sm:w-[20%] w-full text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                                className="xl:mt-0 lg:mt-0 md:mt-0  max-w-md bg-[#155979] p-2 rounded-xl xl:w-[20%] lg:w-[20%] md:w-[20%]  sm:w-[20%] w-full text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all mt-3"
                                                 onClick={handleCheckPallet}
                                             >
                                                 Kiểm tra
@@ -964,12 +1068,15 @@ function WoodSorting() {
                                             <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
 
                                             <div className="space-y-2">
-                                                <div className="w-full flex">
-                                                    <div className="w-1/4 font-semibold">
+                                                <div className="w-full xl:flex lg:flex md:flex">
+                                                    <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
                                                         Quy cách:
                                                     </div>
-                                                    <div className="w-3/4">
-                                                        {palletTracingData.ItemName} (QC: {palletTracingData.CDay}x{palletTracingData.CRong}x{palletTracingData.CDai})
+                                                    <div className="xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
+                                                        {palletTracingData.ItemName} ({parseInt(palletTracingData.CDay)}x{parseInt(palletTracingData.CRong)}x{parseInt(palletTracingData.CDai)})
+                                                    </div>
+                                                    <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
+                                                        {palletTracingData.ItemName} ({parseInt(palletTracingData.CDay)}x{parseInt(palletTracingData.CRong)}x{parseInt(palletTracingData.CDai)})
                                                     </div>
                                                 </div>
                                                 <div className="w-full flex">
@@ -1027,15 +1134,15 @@ function WoodSorting() {
                                                 <div className="my-3 mb-4 px-3 font-semibold">
                                                     Lịch sử pallet
                                                 </div>
-                                                <ol className="px-8">
+                                                <ol className="xl:px-8 lg:px-8 md:px-8 px-4 ">
                                                     <li className="border-l-2 border-blue-600">
                                                         <div className="md:flex flex-start">
-                                                            <div className="bg-blue-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
+                                                            <div className="bg-blue-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
                                                                 <svg
                                                                     aria-hidden="true"
                                                                     focusable="false"
                                                                     data-prefix="fas"
-                                                                    className="text-white w-4 h-4"
+                                                                    className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
                                                                     role="img"
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     viewBox="0 0 448 512"
@@ -1046,21 +1153,21 @@ function WoodSorting() {
                                                                     ></path>
                                                                 </svg>
                                                             </div>
-                                                            <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
+                                                            <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
                                                                 <div className="flex  items-center justify-between mb-2">
                                                                     <a className="font-semibold text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-lg">
                                                                         Chờ sấy
                                                                     </a>
                                                                     <a
                                                                         href="#!"
-                                                                        className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-sm"
+                                                                        className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
                                                                         Số lượng: {parseInt(palletTracingData.Qty)}
                                                                         {" "}(T)
                                                                     </a>
                                                                 </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="grid grid-cols-2">
+                                                                <div className="space-y-1 max-w-lg ">
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
                                                                             Ngày làm
                                                                             việc:
@@ -1069,7 +1176,7 @@ function WoodSorting() {
                                                                         {palletTracingData.ngaytao}
                                                                         </div>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2">
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
                                                                             Người thực
                                                                             hiện:
@@ -1078,7 +1185,7 @@ function WoodSorting() {
                                                                         {palletTracingData.CreateBy}
                                                                         </div>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2">
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
                                                                             Xuất đến:
                                                                         </div>
@@ -1086,7 +1193,7 @@ function WoodSorting() {
                                                                             Kho sấy
                                                                         </div>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2">
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
                                                                             Ngày nhận:
                                                                         </div>
@@ -1098,15 +1205,15 @@ function WoodSorting() {
                                                             </div>
                                                         </div>
                                                     </li>
-                                                    {palletTracingData.LoadedIntoKilnDate && (
+                                                    {/* {palletTracingData.LoadedIntoKilnDate && ( */}
                                                         <li className="border-l-2 border-purple-600">
                                                             <div className="md:flex flex-start">
-                                                                <div className="bg-purple-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
+                                                                <div className="bg-purple-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
                                                                     <svg
                                                                         aria-hidden="true"
                                                                         focusable="false"
                                                                         data-prefix="fas"
-                                                                        className="text-white w-4 h-4"
+                                                                        className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
                                                                         role="img"
                                                                         xmlns="http://www.w3.org/2000/svg"
                                                                         viewBox="0 0 448 512"
@@ -1117,55 +1224,52 @@ function WoodSorting() {
                                                                         ></path>
                                                                     </svg>
                                                                 </div>
-                                                                <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
+                                                                <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
                                                                     <div className="flex items-center justify-between mb-2">
                                                                         <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
-                                                                            Đã vào lò chưa
-                                                                            sấy
+                                                                            Đã vào lò
                                                                         </a>
                                                                         <a
                                                                             href="#!"
-                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-sm"
+                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng: 1270
-                                                                            (T)
+                                                                            Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                        {" "}(T)
                                                                         </a>
                                                                     </div>
                                                                     <div className="space-y-1 max-w-lg">
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Ngày làm
                                                                                 việc:
                                                                             </div>
                                                                             <div>
-                                                                                2024-01-08
-                                                                                09:50:53
+                                                                                {palletTracingData.LoadedIntoKlinDate}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Người thực
                                                                                 hiện:
                                                                             </div>
                                                                             <div>
-                                                                                Nguyễn Thị
-                                                                                Hạnh
+                                                                            {palletTracingData.LoadedBy}
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                    )}
-                                                    {palletTracingData.runDate && (
+                                                    {/* )} */}
+                                                    {/* {palletTracingData.runDate && ( */}
                                                         <li className="border-l-2 border-red-600">
                                                             <div className="md:flex flex-start">
-                                                                <div className="bg-red-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
+                                                                <div className="bg-red-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
                                                                     <svg
                                                                         aria-hidden="true"
                                                                         focusable="false"
                                                                         data-prefix="fas"
-                                                                        className="text-white w-4 h-4"
+                                                                        className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
                                                                         role="img"
                                                                         xmlns="http://www.w3.org/2000/svg"
                                                                         viewBox="0 0 448 512"
@@ -1176,41 +1280,39 @@ function WoodSorting() {
                                                                         ></path>
                                                                     </svg>
                                                                 </div>
-                                                                <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
+                                                                <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
                                                                     <div className="flex items-center justify-between mb-2">
                                                                         <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
                                                                             Đang sấy
                                                                         </a>
                                                                         <a
                                                                             href="#!"
-                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out text-sm"
+                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng: 1270
-                                                                            (T)
+                                                                                Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                        {" "}(T)
                                                                         </a>
                                                                     </div>
                                                                     <div className="space-y-1 max-w-lg">
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Ngày làm
                                                                                 việc:
                                                                             </div>
                                                                             <div>
-                                                                                2024-01-08
-                                                                                09:50:53
+                                                                                {palletTracingData.runDate}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Người thực
                                                                                 hiện:
                                                                             </div>
                                                                             <div>
-                                                                                Nguyễn Thị
-                                                                                Hạnh
+                                                                            {palletTracingData.RunBy}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Xuất đến:
                                                                             </div>
@@ -1218,20 +1320,19 @@ function WoodSorting() {
                                                                                 Kho sấy
                                                                             </div>
                                                                         </div>
-                                                                        <div className="grid grid-cols-2">
+                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                             <div className="font-semibold">
                                                                                 Ngày nhận:
                                                                             </div>
                                                                             <div>
-                                                                                2024-01-08
-                                                                                09:50:53
+                                                                                {palletTracingData.CompletedDate}
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                    )}
+                                                    {/* )} */}
                                                     
                                                 </ol>
                                             </div>

@@ -259,6 +259,7 @@ class DryingOvenController extends Controller
                 $datainsert['palletID'] = $pallet->palletID;
                 $datainsert['WhsCode2'] = $towarehouse;
                 $datainsert['ItemCode'] = $detailData['ItemCode'];
+                $datainsert['ItemName'] = $detailData['ItemName'];
                 $datainsert['WhsCode'] = $detailData['WhsCode'];
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
                 $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 1;

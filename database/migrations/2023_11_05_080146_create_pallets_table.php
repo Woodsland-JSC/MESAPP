@@ -24,8 +24,6 @@ return new class extends Migration
             $table->string('DocNum')->nullable();
             $table->string('DocEntry')->nullable();
             $table->string('CreateBy')->nullable();
-            $table->string('LoadedBy')->nullable();
-            $table->timestamp('LoadedIntoKilnDate')->nullable();
             $table->float('IssueNumber', 14)->default(0)->nullable();
             $table->float('ReceiptNumber', 14)->default(0)->nullable();
             $table->integer('flag')->default(0)->nullable();
