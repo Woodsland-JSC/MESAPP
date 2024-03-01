@@ -1,3 +1,4 @@
+import { useRangeSliderContext } from "@chakra-ui/react";
 import axiosClient from "./axiosClient";
 
 const usersApi = {
@@ -116,9 +117,13 @@ const usersApi = {
         const url = `/branch`;
         return axiosClient().get(url);
     },
-    getAllSapId: () => {
+    getAllSapId: (userId) => {
         const url = `/user-sap`;
-        return axiosClient().get(url);
+        return axiosClient().get(url, {
+            params:{
+                userId: userId
+            }
+        });
     },
     getFactoriesByBranchId: (branchId) => {
         const url = `/factorybybranch/${branchId}`;

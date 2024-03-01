@@ -402,14 +402,64 @@ class MasterDataController extends Controller
     //     }
     // }
 
-    function UserSAPAssign()
+    // function UserSAPAssign()
+    // {
+    //     try {
+    //         $conDB = (new ConnectController)->connect_sap();
+
+    //         $userData = User::where('sap_id', '<>', null)->where('id', '<>', Auth::id())->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
+
+    //         $query = 'SELECT "USER_CODE", "NAME" FROM "UV_OHEM" WHERE "USER_CODE" NOT IN (' . $userData . ')';
+    //         $stmt = odbc_prepare($conDB, $query);
+    //         if (!$stmt) {
+    //             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+    //         if (!odbc_execute($stmt)) {
+    //             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+
+    //         $results = array();
+    //         while ($row = odbc_fetch_array($stmt)) {
+    //             $results[] = $row;
+    //         }
+
+    //         odbc_close($conDB);
+
+    //         // Trả về kết quả dưới dạng JSON với mã trạng thái 200
+    //         return response()->json($results, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    function UserSAPAssign(Request $request)
     {
         try {
+            $userId = $request->input('userId');
+    
+            // Kiểm tra người dùng có id = userId xem trường sap_id có rỗng không
+            $user = User::findOrFail($userId);
+            $sapId = $user->sap_id;
+    
+            // Xây dựng câu truy vấn SQL dựa trên trạng thái của sap_id
+            if ($sapId === null) {
+                $userData = User::whereNotNull('sap_id')->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
+    
+                $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+            } else {
+                $userData = User::whereNotNull('sap_id')->where('id', '!=', $userId)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
+    
+                $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+            }
+    
+            // Kết nối đến cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
     
-            $userData = User::where('sap_id', '<>', null)->where('id', '<>', Auth::id())->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-    
-            $query = 'SELECT "USER_CODE", "NAME" FROM "UV_OHEM" WHERE "USER_CODE" NOT IN (' . $userData . ')';
+            // Chuẩn bị và thực thi truy vấn SQL
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -418,19 +468,17 @@ class MasterDataController extends Controller
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
     
-            // Lưu kết quả vào một mảng
+            // Lấy kết quả và đóng kết nối
             $results = array();
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
-    
-            // Đóng kết nối đến cơ sở dữ liệu SAP
             odbc_close($conDB);
     
-            // Trả về kết quả dưới dạng JSON với mã trạng thái 200
+            // Trả về kết quả dưới dạng JSON
             return response()->json($results, 200);
         } catch (\Exception $e) {
-            // Trả về thông báo lỗi nếu có lỗi xảy ra
+            // Xử lý ngoại lệ và trả về thông báo lỗi
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
@@ -438,7 +486,6 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    
 
     function getAllSAPUser()
     {
@@ -546,12 +593,12 @@ class MasterDataController extends Controller
             DB::beginTransaction();
             $query = 'select "WhsCode","WhsName","BPLid" "Location","U_Flag","U_FAC"
             from OWHS a 
-            WHERE "U_Flag" in(?,?,?,?) and "validFor"=?;';
+            WHERE "U_Flag" in(?,?,?,?) and "Inactive"=?;';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, ['TS', 'CS', 'SS', 'QC', 'Y'])) {
+            if (!odbc_execute($stmt, ['TS', 'CS', 'SS', 'QC', 'N'])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -612,6 +659,7 @@ class MasterDataController extends Controller
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
                 'where T1."Quantity" >0 and T0."ItemCode"= ? and t3."WhsCode"=? and T1."BatchNum" =? and "BPLid" = ? and ' . $filter;
+                
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -627,7 +675,6 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
 
-
             odbc_close($conDB);
             $results = array_filter($results, fn ($item) => (float) $item['Quantity'] > 0);
             return response()->json($results, 200);
@@ -639,6 +686,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
+
     function ItemByCD()
     {
         $conDB = (new ConnectController)->connect_sap();

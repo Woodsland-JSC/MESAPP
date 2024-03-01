@@ -558,7 +558,7 @@ function User() {
 
                 const branchesPromise = usersApi.getAllBranches();
                 const rolesPromise = roleApi.getAllRole();
-                const sapIdPromise = usersApi.getAllSapId();
+                const sapIdPromise = usersApi.getAllSapId(userId);
 
                 const [branchesRes, rolesRes, sapIdRes] = await Promise.all([
                     branchesPromise,
@@ -652,7 +652,7 @@ function User() {
     const [selectedSapUser, setSelectedSapUser] = useState(null);
 
     console.log("Current Id: ", currentUser.sap_id);
-    console.log("SAP List: ", sapId);
+    // console.log("SAP List: ", sapId);
 
     useEffect(() => {
         if (currentUser && sapId.length > 0) {
@@ -710,7 +710,7 @@ function User() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-12">
+                    <div className="text-3xl font-bold mb-6">
                         Thông tin người dùng
                     </div>
                     {/* Main content */}

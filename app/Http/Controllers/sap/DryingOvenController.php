@@ -227,10 +227,9 @@ class DryingOvenController extends Controller
     {
         try {
             DB::beginTransaction();
-
+            $res=null;
+            $res2=null;
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
-
-
 
             $towarehouse = Warehouse::where('flag', 'CS')
                 ->WHERE('branch', Auth::user()->branch)
@@ -311,7 +310,7 @@ class DryingOvenController extends Controller
                 "U_USER" => Auth::user()->sap_id,
                 "G_PALLETLCollection" => $ldt2
             ];
-
+            
             // Make a request to the service layer
             $response = Http::withOptions([
                 'verify' => false,
@@ -379,6 +378,37 @@ class DryingOvenController extends Controller
         }
     }
 
+    function getLoaiGo()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'select * from "@G_SAY1"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return $results;
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     function lifecyleDrying(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -397,13 +427,15 @@ class DryingOvenController extends Controller
             'pallets.NgayNhap',
             'pallets.created_at as ngaytao',
             'pallets.Code',
-            // 'pallets.LoadedBy',
             'pallets.LoadedIntoKilnDate',
-            //'pallets.CreateBy',
             DB::raw("CONCAT(COALESCE(users6.first_name,''), ' ', COALESCE(users6.last_name,'')) as LoadedBy"),
             DB::raw("CONCAT(COALESCE(users5.first_name,''), ' ', COALESCE(users5.last_name,'')) as CreateBy"),
             'pallet_details.ItemCode',
+            'pallet_details.ItemName',
             'pallet_details.Qty',
+            'pallet_details.CDai',
+            'pallet_details.CRong',
+            'pallet_details.CDay',
             'plandryings.Checked',
             DB::raw("CONCAT(users.first_name,' ', users.last_name) as checkby"),
             'plandryings.DateChecked',
@@ -429,6 +461,11 @@ class DryingOvenController extends Controller
 
             ->where('pallets.palletID', $request->palletID)
             ->get();
+            $loaigo= $this->getLoaiGo();
+            $data = collect($data)->map(function ($item) use ($loaigo) {
+                $item['LoaiGo'] = collect($loaigo)->where('Code', $item['LoaiGo'])->first();
+                return $item;
+            });
         return response()->json(['data' => $data], 200);
     }
 }

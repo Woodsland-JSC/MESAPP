@@ -63,10 +63,10 @@ function WoodSorting() {
     const years = [];
     const currentYear = moment().year();
     for (let year = currentYear - 10; year <= currentYear; year++) {
-        years.push({ value: year, label: year.toString() });
+        years.push({ value: year, label: `Năm ${year.toString()}` });
     }
     years.reverse();
-    const defaultYear = { value: currentYear, label: currentYear.toString() };
+    const defaultYear = { value: currentYear, label: `Năm ${currentYear.toString()}` };
 
     const weeks = [];
     const currentWeek = moment().isoWeek();
@@ -78,9 +78,6 @@ function WoodSorting() {
 
     const [selectedWeek, setSelectedWeek] = useState(defaultWeek);
     const [selectedYear, setSelectedYear] = useState(defaultYear);
-
-    console.log("1. Default Year: ", selectedYear);
-    console.log("1. Default Week: ", selectedWeek);
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
@@ -102,10 +99,7 @@ function WoodSorting() {
                         value: item.palletID,
                         label: item.Code,
                     }));
-                    console.log("2. Kết quả gọi api: ", options)
                     setPalletOptions(options);
-                    console.log("3. Kết quả gọi api: ", options)
-                    // callback(options);
                     
                     if (callback) {
                         callback(options);
@@ -526,7 +520,7 @@ function WoodSorting() {
                 } else {
                     console.log("Kết quả truy xuất lịch sử pallet :", response);
                     toast.success("Tra cứu thành công.");
-                    setPalletTracingData(response.data);
+                    setPalletTracingData(response.data.data[0]);
                     console.log("Kết quả truy xuất lịch sử pallet :", palletTracingData);
                     setPalletTracingLoading(false);
                 }
@@ -961,12 +955,10 @@ function WoodSorting() {
                                             size="xl"
                                         />
                                     </div>
-                                ) : (
-                                    <>
-                                    {palletTracingData !== "" ? (
-                                        <div className=" shadow-md my-1 p-3 border border-gray-300 rounded-lg">
+                                ) : palletTracingData.Code ? (
+                                    <div className=" shadow-md my-1 p-3 border border-gray-300 rounded-lg">
                                             <div className="uppercase font-semibold">
-                                                Thông tin pallet <span>{palletTracingData.ItemCode}</span>
+                                                Thông tin pallet <span>{palletTracingData.Code}</span>
                                             </div>
 
                                             <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
@@ -977,8 +969,7 @@ function WoodSorting() {
                                                         Quy cách:
                                                     </div>
                                                     <div className="w-3/4">
-                                                        Nackanas Bàn 180_Bàn 140_bàn
-                                                        tròn 80- Tấm mặt (QC: 31x55x730)
+                                                        {palletTracingData.ItemName} (QC: {palletTracingData.CDay}x{palletTracingData.CRong}x{palletTracingData.CDai})
                                                     </div>
                                                 </div>
                                                 <div className="w-full flex">
@@ -986,7 +977,7 @@ function WoodSorting() {
                                                         Số lượng:
                                                     </div>
                                                     <div className="w-3/4">
-                                                        1270 (T)
+                                                        <span>{parseInt(palletTracingData.Qty)}</span> (T)
                                                     </div>
                                                 </div>
                                             </div>
@@ -1012,12 +1003,6 @@ function WoodSorting() {
                                                                 >
                                                                     Mã lô gỗ
                                                                 </th>
-                                                                <th
-                                                                    scope="col"
-                                                                    className="px-6 py-2.5"
-                                                                >
-                                                                    Lệnh sản xuất
-                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="text-[15px] text-gray-900 font-medium  ">
@@ -1026,14 +1011,10 @@ function WoodSorting() {
                                                                     scope="row"
                                                                     className="px-6 py-3 whitespace-nowrap "
                                                                 >
-                                                                    Keo tai tượng -
-                                                                    Acacia Magium
+                                                                    {palletTracingData.LoaiGo.Name}
                                                                 </td>
                                                                 <td className="px-6 py-3">
-                                                                    23-110-S07
-                                                                </td>
-                                                                <td className="px-6 py-3">
-                                                                    TH-202401274
+                                                                    {palletTracingData.MaLo}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -1074,8 +1055,8 @@ function WoodSorting() {
                                                                         href="#!"
                                                                         className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-sm"
                                                                     >
-                                                                        Số lượng: 1270
-                                                                        (T)
+                                                                        Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                        {" "}(T)
                                                                     </a>
                                                                 </div>
                                                                 <div className="space-y-1 max-w-lg">
@@ -1085,8 +1066,7 @@ function WoodSorting() {
                                                                             việc:
                                                                         </div>
                                                                         <div>
-                                                                            2024-01-08
-                                                                            09:50:53
+                                                                        {palletTracingData.ngaytao}
                                                                         </div>
                                                                     </div>
                                                                     <div className="grid grid-cols-2">
@@ -1095,8 +1075,7 @@ function WoodSorting() {
                                                                             hiện:
                                                                         </div>
                                                                         <div>
-                                                                            Nguyễn Thị
-                                                                            Hạnh
+                                                                        {palletTracingData.CreateBy}
                                                                         </div>
                                                                     </div>
                                                                     <div className="grid grid-cols-2">
@@ -1112,153 +1091,155 @@ function WoodSorting() {
                                                                             Ngày nhận:
                                                                         </div>
                                                                         <div>
-                                                                            2024-01-08
-                                                                            09:50:53
+                                                                        {palletTracingData.LoadedIntoKilnDate}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </li>
-                                                    <li className="border-l-2 border-purple-600">
-                                                        <div className="md:flex flex-start">
-                                                            <div className="bg-purple-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    focusable="false"
-                                                                    data-prefix="fas"
-                                                                    className="text-white w-4 h-4"
-                                                                    role="img"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 448 512"
-                                                                >
-                                                                    <path
-                                                                        fill="currentColor"
-                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                    ></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
-                                                                        Đã vào lò chưa
-                                                                        sấy
-                                                                    </a>
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-sm"
+                                                    {palletTracingData.LoadedIntoKilnDate && (
+                                                        <li className="border-l-2 border-purple-600">
+                                                            <div className="md:flex flex-start">
+                                                                <div className="bg-purple-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
+                                                                    <svg
+                                                                        aria-hidden="true"
+                                                                        focusable="false"
+                                                                        data-prefix="fas"
+                                                                        className="text-white w-4 h-4"
+                                                                        role="img"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 448 512"
                                                                     >
-                                                                        Số lượng: 1270
-                                                                        (T)
-                                                                    </a>
+                                                                        <path
+                                                                            fill="currentColor"
+                                                                            d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                                                                        ></path>
+                                                                    </svg>
                                                                 </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày làm
-                                                                            việc:
-                                                                        </div>
-                                                                        <div>
-                                                                            2024-01-08
-                                                                            09:50:53
-                                                                        </div>
+                                                                <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
+                                                                            Đã vào lò chưa
+                                                                            sấy
+                                                                        </a>
+                                                                        <a
+                                                                            href="#!"
+                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-sm"
+                                                                        >
+                                                                            Số lượng: 1270
+                                                                            (T)
+                                                                        </a>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Người thực
-                                                                            hiện:
+                                                                    <div className="space-y-1 max-w-lg">
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Ngày làm
+                                                                                việc:
+                                                                            </div>
+                                                                            <div>
+                                                                                2024-01-08
+                                                                                09:50:53
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            Nguyễn Thị
-                                                                            Hạnh
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Người thực
+                                                                                hiện:
+                                                                            </div>
+                                                                            <div>
+                                                                                Nguyễn Thị
+                                                                                Hạnh
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </li>
-                                                    <li className="border-l-2 border-red-600">
-                                                        <div className="md:flex flex-start">
-                                                            <div className="bg-red-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    focusable="false"
-                                                                    data-prefix="fas"
-                                                                    className="text-white w-4 h-4"
-                                                                    role="img"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 448 512"
-                                                                >
-                                                                    <path
-                                                                        fill="currentColor"
-                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                    ></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
-                                                                        Đang sấy
-                                                                    </a>
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out text-sm"
+                                                        </li>
+                                                    )}
+                                                    {palletTracingData.runDate && (
+                                                        <li className="border-l-2 border-red-600">
+                                                            <div className="md:flex flex-start">
+                                                                <div className="bg-red-600 w-9 h-9 flex items-center justify-center rounded-full -ml-4">
+                                                                    <svg
+                                                                        aria-hidden="true"
+                                                                        focusable="false"
+                                                                        data-prefix="fas"
+                                                                        className="text-white w-4 h-4"
+                                                                        role="img"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 448 512"
                                                                     >
-                                                                        Số lượng: 1270
-                                                                        (T)
-                                                                    </a>
+                                                                        <path
+                                                                            fill="currentColor"
+                                                                            d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                                                                        ></path>
+                                                                    </svg>
                                                                 </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày làm
-                                                                            việc:
-                                                                        </div>
-                                                                        <div>
-                                                                            2024-01-08
-                                                                            09:50:53
-                                                                        </div>
+                                                                <div className="block px-6 py-4 rounded-lg shadow-lg bg-gray-100 w-full ml-6 mb-8">
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
+                                                                            Đang sấy
+                                                                        </a>
+                                                                        <a
+                                                                            href="#!"
+                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out text-sm"
+                                                                        >
+                                                                            Số lượng: 1270
+                                                                            (T)
+                                                                        </a>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Người thực
-                                                                            hiện:
+                                                                    <div className="space-y-1 max-w-lg">
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Ngày làm
+                                                                                việc:
+                                                                            </div>
+                                                                            <div>
+                                                                                2024-01-08
+                                                                                09:50:53
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            Nguyễn Thị
-                                                                            Hạnh
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Người thực
+                                                                                hiện:
+                                                                            </div>
+                                                                            <div>
+                                                                                Nguyễn Thị
+                                                                                Hạnh
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Xuất đến:
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Xuất đến:
+                                                                            </div>
+                                                                            <div>
+                                                                                Kho sấy
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            Kho sấy
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày nhận:
-                                                                        </div>
-                                                                        <div>
-                                                                            2024-01-08
-                                                                            09:50:53
+                                                                        <div className="grid grid-cols-2">
+                                                                            <div className="font-semibold">
+                                                                                Ngày nhận:
+                                                                            </div>
+                                                                            <div>
+                                                                                2024-01-08
+                                                                                09:50:53
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </li>
+                                                        </li>
+                                                    )}
+                                                    
                                                 </ol>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col justify-center text-center text-gray-400">
-                                            <div>Không có thông tin để hiển thị.</div>
-                                        </div>
-                                    )}
-                                    </>
+                                    </div> 
+                                ) : (
+                                    <div className="flex flex-col justify-center text-center text-gray-400">
+                                        <div>Không có thông tin để hiển thị.</div>
+                                    </div>
                                 )}
                             </ModalBody>
                             <ModalFooter className="border-t shadow-md border-gray-300">

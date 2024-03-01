@@ -258,6 +258,7 @@ const AwaitingReception = ({
                             res = await (variant === "QC" ? productionApi.acceptReceiptsCBGQC(payload) : productionApi.acceptReceiptsCBG(payload));
                             break;
                     }
+                    setAcceptLoading(false);
                     onConfirmReceipt(data?.id);
                     onInputAlertDialogClose();
                 } else {

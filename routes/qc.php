@@ -20,5 +20,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/huongxuly', [QCController::class, 'huongxuly']);
     Route::get('/getlist-team-exclude-qc', [QCController::class, 'listToExcludeQC']);
     route::get('/list-qc-cbg', [QCController::class, 'listConfirm']);
-    route::post('/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBG']);
+    route::post('/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBG'])->name('confirm-qc-cbg');
 });
