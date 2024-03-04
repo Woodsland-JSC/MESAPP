@@ -84,6 +84,24 @@ function Users() {
             headerCheckboxSelection: headerCheckboxSelection,
         },
         {
+            headerName: "Hidden Column",
+            field: "hiddenField",
+            minWidth: 210,
+            // hide: true, 
+            cellRenderer: (params) => {
+                return (
+                    <p>
+                        {(params.data.first_name
+                            ? params.data.first_name + " "
+                            : "") +
+                            (params.data.last_name
+                                ? params.data.last_name
+                                : "")}
+                    </p>
+                );
+            },
+        },
+        {
             headerName: "Giới tính",
             valueGetter: function (params) {
                 return params.data.gender == "male"
@@ -336,7 +354,7 @@ function Users() {
 
     // Role Actions
     const deleteRole = async (data) => {
-        toast("Chưa biết có phát triển không.");
+        toast("Chức năng đang trong quá trình phát triển.");
     };
 
     const handleTabClick = (isRoleTab) => {
