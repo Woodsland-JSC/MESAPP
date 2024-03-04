@@ -28,9 +28,9 @@ class ProductionController extends Controller
             'ItemName' => 'required|string|max:254',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
-            'CDay' => 'required|integer',
-            'CRong' => 'required|integer',
-            'CDai' => 'required|integer',
+            'CDay' => 'required|numeric',
+            'CRong' => 'required|numeric',
+            'CDai' => 'required|numeric',
             'Team' => 'required|string|max:254',
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
@@ -176,6 +176,7 @@ class ProductionController extends Controller
                 ]);
             }
         }
+        
         // collect stock pending
         $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
             ->where('notireceipt.type', 0)
@@ -288,6 +289,7 @@ class ProductionController extends Controller
             'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
         ], 200);
     }
+
     function viewdetail(Request $request)
     {
         $validator = Validator::make($request->all(), [

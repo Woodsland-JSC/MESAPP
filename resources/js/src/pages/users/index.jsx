@@ -6,7 +6,7 @@ import React, {
     useEffect,
 } from "react";
 import { Link } from "react-router-dom";
-import { AgGridReact } from "ag-grid-react";
+import { AgGridReact, AgGridColumn } from "ag-grid-react";
 import { FaPlus } from "react-icons/fa";
 import Select from "react-select";
 import { dateToDateTime } from "../../utils/convertDatetime";
@@ -48,7 +48,7 @@ function Users() {
 
     const userTab = useRef();
     const roleTab = useRef();
-    const userGridRef = useRef();
+    const userGridRef = useRef(null);
     const roleGridRef = useRef();
 
     const containerStyle = useMemo(
@@ -87,19 +87,11 @@ function Users() {
             headerName: "Hidden Column",
             field: "hiddenField",
             minWidth: 210,
-            // hide: true, 
-            cellRenderer: (params) => {
-                return (
-                    <p>
-                        {(params.data.first_name
-                            ? params.data.first_name + " "
-                            : "") +
-                            (params.data.last_name
-                                ? params.data.last_name
-                                : "")}
-                    </p>
-                );
-            },
+            hide: true, 
+            valueGetter: (params) => (
+                (params.data.first_name ? params.data.first_name + " " : "") +
+                (params.data.last_name ? params.data.last_name : "")
+            ),
         },
         {
             headerName: "Giới tính",
@@ -533,6 +525,7 @@ function Users() {
                                             }
                                             suppressRowVirtualisation={true}
                                             localeText={localeText}
+                                            includeHiddenColumnsInQuickFilter={true}
                                         />
                                     </div>
                                 </TabPanel>

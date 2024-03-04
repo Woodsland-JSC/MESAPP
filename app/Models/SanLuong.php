@@ -31,4 +31,46 @@ class SanLuong extends Model
         'LSX',
         'openQty',
     ];
+
+    public function getCDaiAttribute($value)
+    {
+        if (floor($value) == $value) {
+            return (int) $value;
+        } else {
+            return number_format($value, 1);
+        }
+    }
+
+    public function setCDaiAttribute($value)
+    {
+        $this->attributes['CDai'] = (float) $value; 
+    }
+
+    public function getCRongAttribute($value)
+    {
+        if (floor($value) == $value) {
+            return (int) $value;
+        } else {
+            return number_format($value, 1);
+        }
+    }
+
+    public function setCRongAttribute($value)
+    {
+        $this->attributes['CRong'] = (float) $value;
+    }
+
+    public function getCDayAttribute($value)
+    {
+        if (floor($value) == $value) {
+            return (int) $value;
+        } else {
+            return number_format($value, 1);
+        }
+    }
+
+    public function setCDayAttribute($value)
+    {
+        $this->attributes['CDay'] = (float) $value; 
+    }
 }

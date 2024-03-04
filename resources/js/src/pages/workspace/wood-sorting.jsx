@@ -290,7 +290,7 @@ function WoodSorting() {
                         ...prevPalletCards,
                         ...newPalletCards,
                     ]);
-                    console.log("Danh sách pallet card: ", newpalletCards);
+                    // console.log("Danh sách pallet card: ", newpalletCards);chs 
                 } else {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                     return;
