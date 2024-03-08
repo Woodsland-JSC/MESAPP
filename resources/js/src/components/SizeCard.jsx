@@ -205,7 +205,6 @@ function SizeCard(props) {
                                         pallet={item.pallet}
                                         Qty={item.Qty}
                                         weight={item.Mass}
-                                        // onDelete={handleDelete}
                                         onDelete={loadSizeData}
                                     />
                                 ))}

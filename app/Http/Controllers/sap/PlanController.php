@@ -550,6 +550,7 @@ class PlanController extends Controller
             return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }
     }
+
     function singlecheckOven(Request $request)
     {
         $data = $request->only(
@@ -617,33 +618,6 @@ class PlanController extends Controller
             'CT12Detail' => $CT12Detail
         ], 200);
     }
-
-    // function removePallet(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'PlanID' => 'required', // new UniqueOvenStatusRule
-    //         'PalletID' => 'integer|required',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-    //     }
-
-    //     // Check if the oven is valid
-    //     $check = plandryings::where('PlanID', $request->PlanID)->first();
-
-    //     if ($check) {
-    //         if ($check->Status == 1) {
-    //             plandetail::where('pallet', $request->PalletID)->where('PlanID', $request->PlanID)->delete();
-    //         } else {
-    //             return response()->json(['error' => 'Trạng thái lò không hợp lệ'], 501);
-    //         }
-    //     } else {
-    //         return response()->json(['error' => 'Lò không tồn tại'], 501);
-    //     }
-
-    //     return response()->json(['message' => 'success'], 200);
-    // }
 
     function removePallet(Request $request)
     {

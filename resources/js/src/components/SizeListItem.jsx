@@ -24,6 +24,15 @@ function SizeListItem(props) {
 
     const type = searchParams.get("type");
 
+    const formatSizeQty = (sizeQty) => {
+        const dimensions = sizeQty.split("*");
+        const formattedDimensions = dimensions.map((dimension) => {
+          const number = parseFloat(dimension);
+          return number % 1 === 0 ? number.toFixed(0) : number.toFixed(1);
+        });
+        return formattedDimensions.join("*");
+    }
+
     const handleDelete = () => {
       const deleteData  = {
           PlanID: planID,
@@ -90,9 +99,10 @@ function SizeListItem(props) {
                 </ModalContent>
             </Modal>
             <div className="hidden">{id}</div>
+
             <div className="flex text-left font-medium p-4 py-3 border-b border-gray-200 w-full">
                 <div>KT:</div>
-                <div>{size}</div>
+                <div>{formatSizeQty(size)}</div>
             </div>
 
             <div className="text-gray-600 space-y-2 py-3 p-4">

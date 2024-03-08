@@ -10,6 +10,7 @@ function BOWCard(props) {
         kilnNumber,
         thickness,
         height,
+        width,
         purpose,
         finishedDate,
         palletQty,
@@ -38,6 +39,8 @@ function BOWCard(props) {
     } else if (location.pathname === "/workspace/kiln") {
         detailLink = `/workspace/details?id=${planID}&type=ls`;
     }
+
+    console.log("Giá trị số lượng tổng: ", palletQty)
 
     const getStatusContent = () => {
         return status === 0 ? (
