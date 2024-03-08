@@ -338,6 +338,8 @@ function WoodSorting() {
         });
     };
 
+    
+
     // Creating pallets
     const createPalletObject = () => {
         const palletObject = {
@@ -364,108 +366,6 @@ function WoodSorting() {
     let dryingReasonSelectRef = null;
     let dryingMethodSelectRef = null;
 
-    // const handleCreatePallet = async () => {
-    //     if (palletCards.length === 0) {
-    //         toast.error("Danh sách không được để trống.");
-    //         return;
-    //     }
-
-    //     let hasInvalidQuantity = false;
-
-    //     for (const card of palletCards) {
-    //         var inStock = parseFloat(card.props.inStock);
-    //         var quantity = parseFloat(palletQuantities[card.key] || 0);
-
-    //         if (
-    //             quantity > inStock ||
-    //             quantity === 0 ||
-    //             quantity < 0 ||
-    //             quantity == "" ||
-    //             quantity == null
-    //         ) {
-    //             console.log("Giá trị Invalid Quantity:", isInvalidQuantity);
-    //             hasInvalidQuantity = true;
-    //             break;
-    //         }
-    //     }
-
-    //     if (hasInvalidQuantity) {
-    //         toast.error("Giá trị số lượng không hợp lệ.");
-    //         return;
-    //     }
-
-    //     const palletObject = createPalletObject();
-    //     console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
-
-    //     setCreatePalletLoading(true);
-
-    //     try {
-    //         const response = await axios.post(
-    //             "/api/pallets/v2/create",
-    //             palletObject
-    //         );
-    //         if (response.data === "" || response.data === null) {
-    //             toast.error("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-    //             setCreatePalletLoading(false);
-    //         } else {
-    //             console.log("4. Kết quả tạo pallet:", response);
-    //             Swal.fire({
-    //                 title: response.data.data.pallet.Code,
-    //                 text: "Mã pallet đã được tạo!",
-    //                 icon: "success",
-    //             });
-
-    //             if (woodTypeSelectRef) {
-    //                 woodTypeSelectRef.clearValue();
-    //             }
-    //             if (dryingReasonSelectRef) {
-    //                 dryingReasonSelectRef.clearValue();
-    //             }
-    //             if (dryingMethodSelectRef) {
-    //                 dryingMethodSelectRef.clearValue();
-    //             }
-
-    //             setCreatePalletLoading(false);
-
-    //             setBatchId("");
-    //             setStartDate(new Date());
-    //             setPalletCards([]);
-    //             setIsInvalidQuantity(false);
-    //             setPalletQuantities({});
-    //         }
-    //     } catch (error) {
-    //         console.error("Error creating pallet:", error);
-    //         console.error(
-    //             "Chi tiết lỗi:",
-    //             error.response.data.res1.error.message.value
-    //         );
-    //         Swal.fire({
-    //             title: "Có lỗi khi tạo pallet.",
-    //             html: `
-    //                 <p>Chi tiết lỗi:<br></p>
-    //                 <p>
-    //                     ${
-    //                         error.response.data.res1.error.message.value
-    //                             ? "<li> Lỗi từ SAP: " +
-    //                               error.response.data.res1.error.message.value +
-    //                               "</li>"
-    //                             : ""
-    //                     }
-    //                     ${
-    //                         error.response.data.error
-    //                             ? "<li> Lỗi hệ thống: " +
-    //                               error.response.data.error +
-    //                               "</li>"
-    //                             : ""
-    //                     }
-    //                 </p>
-    //             `,
-    //             icon: "error",
-    //         });
-    //         setCreatePalletLoading(false);
-    //     }
-    // };
-
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
             toast.error("Danh sách không được để trống.");
@@ -476,24 +376,29 @@ function WoodSorting() {
 
         for (const card of palletCards) {
             var inStock = parseFloat(card.props.inStock);
+            var height = parseFloat(card.props.height);
+            var width = parseFloat(card.props.width);
+            var thickness = parseFloat(card.props.thickness);
             var quantity = parseFloat(palletQuantities[card.key] || 0);
 
             if (
-                quantity > inStock ||
+                quantity > Math.floor(inStock*1000000000/(height*width*thickness)) ||
                 quantity === 0 ||
                 quantity < 0 ||
                 quantity == "" ||
                 quantity == null
             ) {
-                console.log("Giá trị Invalid Quantity:", isInvalidQuantity);
                 hasInvalidQuantity = true;
                 break;
             }
         }
 
         if (hasInvalidQuantity) {
+            setIsInvalidQuantity(true);
             toast.error("Giá trị số lượng không hợp lệ.");
             return;
+        } else {
+            setIsInvalidQuantity(false);
         }
 
         const palletObject = createPalletObject();
@@ -532,7 +437,7 @@ function WoodSorting() {
                 setBatchId("");
                 setStartDate(new Date());
                 setPalletCards([]);
-                setIsInvalidQuantity(false);
+                
                 setPalletQuantities({});
             }
         } catch (error) {
@@ -912,9 +817,7 @@ function WoodSorting() {
                                                                     Số lượng:{" "}
                                                                 </div>
                                                                 <div className="font-semibold">
-                                                                    {
-                                                                        pallet.sum_quantity
-                                                                    }
+                                                                    {parseInt(Math.floor(pallet.sum_quantity*1000000000/(pallet.thickness*pallet.width*pallet.length)))}
                                                                 </div>
                                                             </div>
                                                             <div className="grid grid-cols-2">
@@ -1072,7 +975,7 @@ function WoodSorting() {
                                                     <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
                                                         Quy cách:
                                                     </div>
-                                                    <div className="xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
+                                                    <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
                                                         {palletTracingData.ItemName} ({parseInt(palletTracingData.CDay)}x{parseInt(palletTracingData.CRong)}x{parseInt(palletTracingData.CDai)})
                                                     </div>
                                                     <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
@@ -1084,7 +987,7 @@ function WoodSorting() {
                                                         Số lượng:
                                                     </div>
                                                     <div className="w-3/4">
-                                                        <span>{parseInt(palletTracingData.Qty)}</span> (T)
+                                                        <span>{parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}</span> (T)
                                                     </div>
                                                 </div>
                                             </div>
@@ -1162,7 +1065,7 @@ function WoodSorting() {
                                                                         href="#!"
                                                                         className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
-                                                                        Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                        Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
                                                                         {" "}(T)
                                                                     </a>
                                                                 </div>
@@ -1205,7 +1108,7 @@ function WoodSorting() {
                                                             </div>
                                                         </div>
                                                     </li>
-                                                    {/* {palletTracingData.LoadedIntoKilnDate && ( */}
+                                                    {palletTracingData.LoadedIntoKilnDate && (
                                                         <li className="border-l-2 border-purple-600">
                                                             <div className="md:flex flex-start">
                                                                 <div className="bg-purple-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
@@ -1233,7 +1136,7 @@ function WoodSorting() {
                                                                             href="#!"
                                                                             className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                            Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
                                                                         {" "}(T)
                                                                         </a>
                                                                     </div>
@@ -1260,8 +1163,8 @@ function WoodSorting() {
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                    {/* )} */}
-                                                    {/* {palletTracingData.runDate && ( */}
+                                                    )}
+                                                    {palletTracingData.runDate && (
                                                         <li className="border-l-2 border-red-600">
                                                             <div className="md:flex flex-start">
                                                                 <div className="bg-red-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
@@ -1289,7 +1192,7 @@ function WoodSorting() {
                                                                             href="#!"
                                                                             className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                                Số lượng: {parseInt(palletTracingData.Qty)}
+                                                                                Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
                                                                         {" "}(T)
                                                                         </a>
                                                                     </div>
@@ -1332,8 +1235,7 @@ function WoodSorting() {
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                    {/* )} */}
-                                                    
+                                                    )}  
                                                 </ol>
                                             </div>
                                     </div> 

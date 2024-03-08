@@ -328,6 +328,143 @@ class QCController extends Controller
     }
 
     // accept từ tổ QC
+    // function acceptTeamQCCBG(Request $request)
+    // {
+    //     // check dữ liệu đầu vào
+    //     $validator = Validator::make($request->all(), [
+    //         'Qty' => 'required|numeric|min:1',
+    //         'id' => 'required',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
+    //     ->select('a.*', 'b.id as notiID','b.team as NextTeam','b.openQty')
+    //     ->where('b.id', $request->id)
+    //     ->where('b.confirm', 0)->first();
+    //     if (!$data) {
+    //         throw new \Exception('data không hợp lệ.');
+    //     }
+    //     dd($data);
+    //     // check again data openQTy -> Line 351
+    //     if ($data->openQty < $request->Qty) {
+    //         throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
+    //     }
+    //     $closed=0;
+    //     if ($data->openQty == $request->Qty) {
+    //         $closed=1;
+    //     }
+    //     //
+    //     $warehouse="";
+    //     if($data->NextTeam='TH-QC')
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('TH');
+    //     }
+    //     else if($data->NextTeam='TQ-QC')
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('TQ');
+    //     }
+    //     else
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('HG');
+    //     }
+    //     if($warehouse==99)
+    //     {
+    //         throw new \Exception('Không tìm thấy kho QC');
+    //     }
+    //     $loailoi= $request->loailoi['label'];
+    //     $huongxuly= $request->huongxuly['label'];
+    //     $teamBack= $request->teamBack['value']??'';
+    //     $rootCause= $request->rootCause['value']??'';
+    //     $subCode= $request->subCode ??'';
+
+    //     $HistorySL=HistorySL::where('ObjType',59)->get()->count();
+    //     $body = [
+    //         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+    //         "U_LSX"=> $data->LSX,
+    //         "U_TO"=> $data->Team,
+    //         "U_LL"=> $loailoi,
+    //         "U_HXL"=> $huongxuly,
+    //         "U_QCC"=> $huongxuly,
+    //         "U_TOCD"=> $teamBack,
+    //         "U_source"=>$rootCause,
+    //         "U_ItemHC"=>$subCode,
+    //         "U_cmtQC"=> $request->note??"",
+
+    //         "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+    //         "DocumentLines" => [[
+    //             "Quantity" => $request->Qty,
+    //             "ItemCode" =>   $data->ItemCode,
+    //             // "BaseLine" => 0,
+    //             "WarehouseCode" =>  $warehouse,
+    //             //"BaseEntry" => $allocate['DocEntry'],
+    //             //"BaseType" => 202,
+    //             "BatchNumbers" => [
+    //                 [
+    //                     "BatchNumber" => now()->format('YmdHmi'),
+    //                     "Quantity" => $request->Qty,
+    //                     "ItemCode" =>   $data->ItemCode,
+    //                     "U_CDai" => $data->CDai,
+    //                     "U_CRong" => $data->CRong,
+    //                     "U_CDay" =>  $data->CDay,
+    //                     "U_Status" => "HL",
+    //                     "U_TO"=> $data->Team,
+    //                     "U_LSX"=> $data->LSX,
+    //                     "U_Year"=> $request->year??now()->format('y'),
+    //                     "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+    //                 ]
+    //             ]
+    //         ]]
+    //     ];
+    //     $response = Http::withOptions([
+    //         'verify' => false,
+    //     ])->withHeaders([
+    //         'Content-Type' => 'application/json',
+    //         'Accept' => 'application/json',
+    //         'Authorization' => 'Basic ' . BasicAuthToken(),
+    //     ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+    //     $res = $response->json();
+    //     if ($response->successful()) {
+    //         SanLuong::where('id', $data->id)->update(
+    //             [
+    //                 'Status' =>  $closed,
+    //                 'openQty' =>$data->RejectQty-$data->OpenQty-$request->Qty,
+    //                 // 'DocEntry' => $res['DocEntry']
+    //             ]
+    //         );
+    //         notireceipt::where('id', $request->id)->
+    //         update(['confirm' =>  $closed,
+    //         'ObjType' =>  59,
+    //         'DocEntry' => $res['DocEntry'],
+    //         'confirmBy' => Auth::user()->id,
+    //         'confirm_at' => now()->format('YmdHmi')]);
+    //         HistorySL::create(
+    //             [
+    //             'LSX'=>$data->LSX,
+    //             'itemchild'=>$data->ItemCode,
+    //             'to' => $data->Team,
+    //             'quantity'=>$request->Qty,
+    //             'ObjType'=>59,
+    //             'DocEntry'=>$res['DocEntry'],
+    //             'SPDich'=>$data->FatherCode,
+    //             'LL'=> $loailoi,
+    //             'HXL'=>$huongxuly
+    //             ],
+                
+    //         );
+    //         DB::commit();
+    //         return response()->json('success', 200);
+
+    //     } else {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'message' => 'Failed receipt',
+    //             'error' => $res['error'],
+    //             'body' => $body
+    //         ], 500);
+    //     }
+    // }
+
     function acceptTeamQCCBG(Request $request)
     {
         // check dữ liệu đầu vào
@@ -345,7 +482,6 @@ class QCController extends Controller
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
-        // check again data openQTy -> Line 351
         if ($data->openQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
         }
@@ -427,7 +563,7 @@ class QCController extends Controller
             SanLuong::where('id', $data->id)->update(
                 [
                     'Status' =>  $closed,
-                    'openQty' =>$data->RejectQty-$data->OpenQty-$request->Qty,
+                    'openQty' =>$data->RejectQty-$data->openQty-$request->Qty,
                     // 'DocEntry' => $res['DocEntry']
                 ]
             );
@@ -463,6 +599,7 @@ class QCController extends Controller
             ], 500);
         }
     }
+    
     function getQCWarehouseByUser($plant)
     {
         $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)

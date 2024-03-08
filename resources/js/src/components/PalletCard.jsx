@@ -25,48 +25,30 @@ function PalletCard(props) {
         // isInvalidQuantity
     } = props;
 
-    // const [isQuantityExceedingStock, setIsQuantityExceedingStock] = useState(false);
-    // const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
-    // const [quantity, setQuantity] = useState(null);
-    // const [isQuantityEmpty, setIsQuantityEmpty] = useState(false);
+    const [quantity, setQuantity] = useState(0);
+    const [isInvalid, setIsInvalid] = useState(false);
 
-    // const handleQuantityChange = (value) => {
-    //     var quantity = parseFloat(value);
-    //     var inStock = parseFloat(props.inStock);
+    const handleQuantityChange = (value) => {
+        setQuantity(value);
 
-    //     if (quantity > inStock) {
-    //         setIsInvalidQuantity(true);
-    //     } else if (quantity === 0) {
-    //         setIsInvalidQuantity(true);
-    //     } else if (quantity == null || quantity == "") {
-    //         setIsInvalidQuantity(true);
-    //     } else {
-    //         setIsInvalidQuantity(false);
-    //     }
+        if (value < 0 || value === 0 || value > Math.floor(inStock*1000000000/(height*width*thickness))) {
+            setIsInvalid(true);
+        } else {
+            setIsInvalid(false);
+        }
 
-    //     props.onQuantityChange(value);
-    // };
-
-    
-    // Check Invalid
-    const [quantity, setQuantity] = useState(null);
-    const [isInvalidQuantity, setIsInvalidQuantity] = useState(props.isInvalidQuantity);
-
-    useEffect(() => {
-        setIsInvalidQuantity(props.isInvalidQuantity);
-    }, [props.isInvalidQuantity]);
-
-    console.log("Giá trị Invalid Quantity ở PalletCard:", isInvalidQuantity);
+        onQuantityChange(value);
+    }
 
     return (
         <div className="border-2 border-[#c6d3da] rounded-xl">
             <div className="flex items-center justify-between px-2 pr-4 bg-[#F6F8F9] rounded-t-xl ">
-                <div className="text-[#17506B] xl:text-xl font-semibold text-lg px-4 py-3">
+                <div className="text-[#17506B] xl:text-xl font-semibold text-lg px-4 py-3 w-[85%]">
                     <span>{itemCode} - </span>
                     {itemName}
                 </div>
                 <div
-                    className="text-[#17506B] text-3xl cursor-pointer"
+                    className="flex justify-end text-[#17506B] text-3xl cursor-pointer w-fit"
                     onClick={onDelete}
                 >
                     <AiFillCloseCircle />
@@ -109,14 +91,13 @@ function PalletCard(props) {
                         required
                         value={batchNum}
                     />
-                </div>
-
+                </div>   
                 <div>
                     <label
                         htmlFor="company"
                         className="block mb-2 text-md font-medium text-gray-900 "
                     >
-                        Tồn kho
+                        Tồn kho (T)
                     </label>
                     <input
                         type="text"
@@ -125,10 +106,9 @@ function PalletCard(props) {
                         placeholder="0"
                         readOnly={true}
                         required
-                        value={inStock}
+                        value={Math.floor(inStock*1000000000/(height*width*thickness))}
                     />
                 </div>
-
                 <div>
                     <label
                         htmlFor="quantity"
@@ -138,12 +118,14 @@ function PalletCard(props) {
                     </label>
                     <NumberInput
                         defaultValue={0}
-                        isInvalid={isInvalidQuantity}
+                        // isInvalid={isInvalidQuantity}
+                        isInvalid={isInvalid}
+                        onChange={handleQuantityChange}
                         // onChange={onQuantityChange}
-                        onChange={(value) => {
-                            setQuantity(value);
-                            onQuantityChange(value);
-                        }}
+                        // onChange={(value) => {
+                        //     setQuantity(value);
+                        //     onQuantityChange(value);
+                        // }}
                     >
                         <NumberInputField/>
                         <NumberInputStepper>

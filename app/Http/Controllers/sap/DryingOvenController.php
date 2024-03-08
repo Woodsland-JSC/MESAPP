@@ -253,6 +253,7 @@ class DryingOvenController extends Controller
             $ldt2 = [];
             $totalkl = 0;
             $toQty = 0;
+            
             foreach ($palletDetails as $detailData) {
 
                 $datainsert = [];
@@ -262,21 +263,21 @@ class DryingOvenController extends Controller
                 $datainsert['ItemName'] = $detailData['ItemName'];
                 $datainsert['WhsCode'] = $detailData['WhsCode'];
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
-                $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 1;
-                $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 1;
-                $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 1;
-                $datainsert['Qty'] = $detailData['Qty'];
+                $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
+                $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
+                $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
+                $datainsert['Qty'] = (float)$detailData['Qty']* (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
                 pallet_details::create($datainsert);
                 $ldt[] = [
 
                     "ItemCode" => $detailData['ItemCode'],
                     "WarehouseCode" =>  $towarehouse,
                     "FromWarehouseCode" => $detailData['WhsCode'],
-                    "Quantity" =>  $detailData['Qty'],
+                    "Quantity" =>  $datainsert['Qty'] ,
                     "BatchNumbers" => [
                         [
                             "BatchNumber" => $detailData['BatchNum'],
-                            "Quantity" => $detailData['Qty']
+                            "Quantity" => $datainsert['Qty'] 
                         ]
 
                     ]
@@ -284,14 +285,14 @@ class DryingOvenController extends Controller
                 ];
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
-                    "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 1,
-                    "U_CDay" => $detailData['CDay'] ? $detailData['CDay'] : 1,
-                    "U_CDai" => $detailData['CDai'] ? $detailData['CDai'] : 1,
+                    "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
+                    "U_CDay" => $detailData['CDay'] ? $detailData['CDay'] : 0,
+                    "U_CDai" => $detailData['CDai'] ? $detailData['CDai'] : 0,
                     "U_Batch" => $detailData['BatchNum'],
-                    "U_Quant" => $detailData['Qty'],
+                    "U_Quant" => $datainsert['Qty'],
                 ];
-                $toQty += (float)$detailData['Qty'];
-                $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'];
+                $toQty += (float)$datainsert['Qty'];
+                $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty']/ 1000000000;
             }
 
             // Data body
@@ -311,6 +312,7 @@ class DryingOvenController extends Controller
                 "U_USER" => Auth::user()->sap_id,
                 "G_PALLETLCollection" => $ldt2
             ];
+            
             
             // Make a request to the service layer
             $response = Http::withOptions([
