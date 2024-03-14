@@ -312,7 +312,7 @@ class ProductionController extends Controller
         }
         // COLLECT DATA SAP
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select ifnull(sum("ConLai"),0) "Quantity", from UV_GHINHANSL where "ItemChild"=? and "TO"=?';
+        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSL where "ItemChild"=? and "TO"=?';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
