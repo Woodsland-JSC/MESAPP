@@ -741,7 +741,7 @@ function User() {
                                                     </label>
                                                     <Field
                                                         name="lastName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         value={values.lastName}
                                                         onChange={(e) => {
                                                             setFieldValue(
@@ -776,7 +776,7 @@ function User() {
                                                     </label>
                                                     <Field
                                                         name="firstName"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         onChange={(e) => {
                                                             setFieldValue(
                                                                 "firstName",
@@ -814,7 +814,7 @@ function User() {
                                                     <Field
                                                         name="email"
                                                         type="email"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         onChange={(e) => {
                                                             setFieldValue(
                                                                 "email",
@@ -852,7 +852,7 @@ function User() {
                                                     <Field
                                                         name="username"
                                                         type="text"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                         onChange={(e) => {
                                                             setFieldValue(
                                                                 "username",

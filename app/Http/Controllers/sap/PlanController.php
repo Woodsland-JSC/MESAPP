@@ -218,9 +218,10 @@ class PlanController extends Controller
             plandetail::create([
                 'PlanID' => $id,
                 'pallet' => $pallet,
+                'palletCode' => $data->ItemCode,
                 'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
                 'Qty' => $data->Qty,
-                'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
+                'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty / 1000000000,
             ]);
 
             // Update Pallet table

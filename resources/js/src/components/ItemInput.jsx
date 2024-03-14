@@ -163,6 +163,7 @@ const ItemInput = ({
                 FatherCode: data.SPDICH,
                 ItemCode: selectedItemDetails.ItemChild,
                 ItemName: selectedItemDetails.ChildName,
+                MaThiTruong: selectedItemDetails.MaThiTruong,
                 CDay: Number(selectedItemDetails.CDay),
                 CRong: Number(selectedItemDetails.CRong),
                 CDai: Number(selectedItemDetails.CDai),

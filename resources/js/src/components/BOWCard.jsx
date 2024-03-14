@@ -149,7 +149,7 @@ function BOWCard(props) {
                 </div>
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Khối lượng mẻ:</div>
-                    <div className="font-medium ">{weight}</div>
+                    <div className="font-medium ">{weight} (m3)</div>
                 </div>
             </div>
 

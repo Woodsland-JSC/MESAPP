@@ -223,6 +223,7 @@ class DryingOvenController extends Controller
         }
     }
 
+    // 
     function StorePalletNew(Request $request)
     {
         try {

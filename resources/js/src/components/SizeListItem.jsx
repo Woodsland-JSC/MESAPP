@@ -56,7 +56,7 @@ function SizeListItem(props) {
   };
 
     return (
-        <div className="relative bg-[#F9FAFB] border border-gray-200 rounded-xl h-[10rem] w-[12rem]">
+        <div className="relative bg-[#F9FAFB] border border-gray-200 rounded-xl h-[10rem] w-[13rem]">
             <div
                 className={`absolute -top-1 -right-2.5 bg-gray-800 text-white w-6 h-6 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all ${
                     type === "kt" || type === "vl" ? "flex" : "hidden"
@@ -100,14 +100,14 @@ function SizeListItem(props) {
             </Modal>
             <div className="hidden">{id}</div>
 
-            <div className="flex text-left font-medium p-4 py-3 border-b border-gray-200 w-full">
-                <div>KT:</div>
-                <div>{formatSizeQty(size)}</div>
+            <div className="text-left space-y-1 font-medium p-4 py-3 border-b border-gray-200 w-full">
+                {/* <div className="font-semibold"><span>{formatSizeQty(size)}</span></div> */}
+                <div>KT: <span>{formatSizeQty(size)}</span></div>
             </div>
 
             <div className="text-gray-600 space-y-2 py-3 p-4">
-                <div className="w-fit">Pallet: {pallet}</div>
-                <div className="">SL: {Qty} (t)</div>
+                <div className="">Pallet: {pallet}</div>
+                <div className="">SL: {Qty} (T)</div>
                 <div className="">KL: {weight} (m³)</div>
             </div>
         </div>

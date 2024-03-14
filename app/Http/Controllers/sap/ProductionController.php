@@ -28,6 +28,7 @@ class ProductionController extends Controller
             'ItemName' => 'required|string|max:254',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
+            // 'MaThiTruong',
             'CDay' => 'required|numeric',
             'CRong' => 'required|numeric',
             'CDai' => 'required|numeric',
@@ -66,6 +67,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->CompleQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
+                    // 'MaThiTruong' => $request->MaThiTruong,
                     'team' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
@@ -79,6 +81,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
+                    // 'MaThiTruong' => $request->MaThiTruong,
                     'team' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
@@ -98,12 +101,15 @@ class ProductionController extends Controller
 
     function index(Request $request)
     {
+        // 1. Nhận vào tham số "TO", nếu không nhận được tham số sẽ báo lỗi
         $validator = Validator::make($request->all(), [
             'TO' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
         }
+
+        // 2. Kết nối SAP và lấy dữ liệu từ bảng UV_GHINHANSL dựa trên "TO" và lấy ra tất cả các kết quả có TO bằng với TO trong tham số truyền vào
         $conDB = (new ConnectController)->connect_sap();
         $query = 'select * from UV_GHINHANSL where "TO"=? order by "LSX" asc ';
         $stmt = odbc_prepare($conDB, $query);
@@ -116,19 +122,23 @@ class ProductionController extends Controller
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
+        // 3. Tạo mảng results[] và trà về dữ liệu
         $results = [];
 
+        // 3.1. Tạo một key có giá trị là 'SPDICH' và lọc qua toàn bộ kết quả tìm được, sau đó gom nhóm các sản phẩm có cùng SPDICH
         while ($row = odbc_fetch_array($stmt)) {
             $key = $row['SPDICH'];
 
+            //Đối với các kết quả key tìm được, tạo một mảng có các trường sau
             if (!isset($results[$key])) {
                 $results[$key] = [
                     'SPDICH' => $row['SPDICH'],
                     'NameSPDich' => $row['NameSPDich'],
+                    'MaThiTruong' => $row['MaThiTruong'],
                     'Details' => [],
                 ];
             }
-
+            // 3.2. Tạo key có giá trị hỗn hợp là ItemChild.TO.TOTT
             $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'];
 
             $details = [
@@ -302,7 +312,7 @@ class ProductionController extends Controller
         }
         // COLLECT DATA SAP
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSL where "ItemChild"=? and "TO"=?';
+        $query = 'select ifnull(sum("ConLai"),0) "Quantity", from UV_GHINHANSL where "ItemChild"=? and "TO"=?';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
@@ -314,6 +324,7 @@ class ProductionController extends Controller
         }
         $row = odbc_fetch_array($stmt);
         $quantity = (float)$row['Quantity'];
+
         // collect stock pending
         $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
             ->where('notireceipt.type', 0)
