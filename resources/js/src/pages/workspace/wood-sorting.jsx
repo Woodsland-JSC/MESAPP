@@ -1147,7 +1147,7 @@ function WoodSorting() {
                                                                                 việc:
                                                                             </div>
                                                                             <div>
-                                                                                {palletTracingData.LoadedIntoKlinDate}
+                                                                                {palletTracingData.LoadedIntoKilnDate}
                                                                             </div>
                                                                         </div>
                                                                         <div className="xl:grid lg:grid md:grid grid-cols-2">

@@ -426,6 +426,9 @@ function WoodProductingQC() {
 
     const [isQC, setIsQC] = useState(true);
 
+    const [searchTerm, setSearchTerm] = useState(null);
+    // const [filteredData, setFilteredData] = useState(null);
+
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupList, setGroupList] = useState([]);
     const [groupListOptions, setGroupListOptions] = useState([]);
@@ -484,30 +487,16 @@ function WoodProductingQC() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                // const isQC = groupList.find(
-                //     (group) => group.Code == selectedGroup.value
-                // )?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
                     setIsQualityCheck(false);
                 }
-                // setLoadingData(true);
                 const param = {
                     TO: selectedGroup.value,
                 };
                 getDataFollowingGroup(param);
 
-                // if (selectedGroup.value == "TH-X3SC") {
-                //     setCurrentData(exampleData);
-                // } else if (selectedGroup.value == "TH-X3TC1") {
-                //     setCurrentData(exampleData1);
-                // } else if (selectedGroup.value == "TH-X3TC2") {
-                //     setCurrentData(exampleData2);
-                // } else {
-                //     setCurrentData([]);
-                // }
-                // setLoadingData(false);
             }
         })();
     }, [selectedGroup]);
@@ -536,6 +525,17 @@ function WoodProductingQC() {
         }
     };
 
+    console.log("1. Danh sách QC của tổ: ", awaitingReception);
+
+    const filteredData = searchTerm && typeof searchTerm === 'string' ?
+    awaitingReception.filter(item => {
+        const searchString = `${item.ItemName} (${item.CDay}x${item.CRong}x${item.CDai})`;
+        return searchString.toLowerCase().includes(searchTerm.toLowerCase());
+    }) :
+    awaitingReception;
+
+    console.log("3. Kết quả lọc data: ", filteredData);
+
     return (
         <Layout>
             <div className="flex justify-center bg-transparent ">
@@ -549,16 +549,16 @@ function WoodProductingQC() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Workspace
                                         </a>
                                     </div>
                                 </li>
                                 <li aria-current="page">
-                                    <div class="flex  items-center">
+                                    <div className="flex  items-center">
                                         <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
+                                            className="w-3 h-3 text-gray-400 mx-1"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -574,7 +574,7 @@ function WoodProductingQC() {
                                         </svg>
                                         <Link
                                             to="/workspace"
-                                            class="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div className="">
                                                 <div className="xl:w-full lg:w-full md:w-full w-[205px]">
@@ -628,6 +628,10 @@ function WoodProductingQC() {
                                     id="search"
                                     className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Tìm kiếm"
+                                    onChange={(value) => {
+                                        setSearchTerm(value.target.value);
+                                        console.log("2. Tìm kiếm: ", searchTerm);
+                                    }}
                                     required
                                 />
                             </div>
@@ -654,20 +658,6 @@ function WoodProductingQC() {
                             />
                         </div>
 
-                        {/* Selection Review */}
-                        {/* <div className="mt-3">
-                            Selected Group:{" "}
-                            <strong>
-                                {selectedGroup !== null
-                                    ? selectedGroup.value
-                                    : ""}
-                            </strong>
-                        </div>
-                        <div className="mt-3">
-                            Số lượng item QC:{" "}
-                            <strong>{awaitingReception.length}</strong>
-                        </div> */}
-
                         {/* Data */}
                         <div className="flex my-5 gap-4 justify-center h-full">
                             {loadingData ? (
@@ -685,7 +675,7 @@ function WoodProductingQC() {
                                     {selectedGroup &&
                                     awaitingReception?.length > 0 ? (
                                         <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                            {awaitingReception.map(
+                                            {filteredData.map(
                                                 (item, index) => (
                                                     <AwaitingReception
                                                         type="wood-processing"

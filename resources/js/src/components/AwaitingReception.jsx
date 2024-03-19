@@ -120,91 +120,6 @@ const AwaitingReception = ({
         },
     });
 
-    // const handleConfirmReceipt = async () => {  
-    //     if (faults.Qty === 0 || faults.Qty === "" || faults.Qty === null) {
-    //         toast.error("Số lượng lỗi không được bỏ trống.");
-    //         onInputAlertDialogClose();
-    //     } else if (faults.Qty <= 0) {
-    //         toast.error("Số lượng lỗi phải lớn hơn 0.");
-    //         onInputAlertDialogClose();
-    //     } else if (faults.Qty > data?.Quantity) {
-    //         toast.error("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
-    //         onInputAlertDialogClose();
-    //     } else if (faults.errorType === "" || faults.errorType === null) {
-    //         toast.error("Loại lỗi không được bỏ trống.");
-    //         onInputAlertDialogClose();
-    //     } else if (faults.solution === "" || faults.solution === null) {
-    //         toast.error("H không được bỏ trống");
-    //         onInputAlertDialogClose();
-    //     } else if (faults.teamBack === "" || faults.teamBack === null) {
-    //         toast.error("Tổ chuyển về không được bỏ trống.");
-    //         onInputAlertDialogClose();
-    //     } else {
-    //         setAcceptLoading(true);
-    //         try {
-    //             const payload = {
-    //                 id: data?.id,
-    //                 loailoi: faults.errorType || null,
-    //                 huongxuly: faults.solution || null,
-    //                 teamBack: faults.teamBack || null,
-    //                 rootCause: faults.rootCause || null,
-    //                 subCode: faults.subCode || null,
-    //                 Note: faults.Note || null,
-    //                 Qty: faults.Qty || null,
-    //                 year: faults.year || null,
-    //                 week: faults.week?.value || null,
-    //             };
-    //             if (payload.id) {
-    //                 switch (type) {
-    //                     case "plywood":
-    //                         const res1 = await productionApi.acceptReceiptsVCN(payload);
-    //                         break;
-    //                     default:
-    //                         if (variant === "QC") {
-    //                             const res2 = await productionApi.acceptReceiptsCBGQC(payload);
-    //                         } else {
-    //                             const res2 = await productionApi.acceptReceiptsCBG(payload);
-    //                         }
-    //                         break;
-    //                 }
-    //                 onConfirmReceipt(data?.id);
-    //                 onInputAlertDialogClose();
-    //             } else {
-    //                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
-    //             }
-    //         } catch (error) {
-    //             // toast.error("Có lỗi xảy ra khi xác nhận.");
-    //             Swal.fire({
-    //                 title: "Có lỗi khi xác nhận.",
-    //                 html: `
-    //                 <p>Chi tiết lỗi:<br></p>
-    //                     <p> 
-    //                         ${
-    //                             error.response.data.error.message.value
-    //                                 ? "<li> Lỗi từ SAP: " +
-    //                                   error.response.data.error.message.value +
-    //                                   "</li>"
-    //                                 : "<li> Lỗi từ SAP: " +
-    //                                   error.response.data.message +
-    //                                   "</li>"
-    //                         }
-    //                     </p>
-    //                 `,
-    //                 icon: "error",
-    //                 zIndex: 50001,
-    //             });
-    //             console.log("Error when confirming receipt:", error);
-    //             console.log(
-    //                 "Chi tiết lỗi:",
-    //                 error.response.data.error.message.value
-    //             );
-    //             setAcceptLoading(false);
-    //             onInputAlertDialogClose();
-    //         }
-    //     }  
-    // };
-
-    console.log("data: ", variant);
     const handleConfirmReceipt = async () => {
         const showErrorAlert = (message) => {
             Swal.fire({
@@ -903,10 +818,20 @@ const AwaitingReception = ({
                         </AlertDialogHeader>
                         <AlertDialogBody>
                             <div className="text-green-700">
-                                Bạn có chắc chắn muốn xác nhận:{" "}
-                                <span className="font-bold">
-                                    {Number(data?.Quantity) || ""}
-                                </span>{" "}
+                                Bạn có chắc chắn muốn:{" "}
+                                {variant == "QC" ? (
+                                    <>
+                                        ghi nhận <span className="font-bold">
+                                        {Number(faults?.Qty) || ""}
+                                        </span>{" "} lỗi từ {" "}
+                                    </>
+                                ) : (
+                                    <>
+                                        xác nhận<span className="font-bold">
+                                            {Number(data?.Quantity) || ""}
+                                        </span>{" "}
+                                    </> 
+                                )}
                                 sản phẩm <span className="font-bold">{data?.ItemName}</span>
                                 {faults && faults.errorType && (
                                     <span>
