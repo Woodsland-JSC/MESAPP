@@ -19,6 +19,87 @@ use Illuminate\Support\Facades\Http;
 class ProductionController extends Controller
 {
 
+    // Ghi nhận sản lượng
+    // function receipts(Request $request)
+    // {
+
+    //     $validator = Validator::make($request->all(), [
+    //         'FatherCode' => 'required|string|max:254',
+    //         'ItemCode' => 'required|string|max:254',
+    //         'ItemName' => 'required|string|max:254',
+    //         'CompleQty' => 'required|numeric',
+    //         'RejectQty' => 'required|numeric',
+    //         // 'MaThiTruong',
+    //         'CDay' => 'required|numeric',
+    //         'CRong' => 'required|numeric',
+    //         'CDai' => 'required|numeric',
+    //         'Team' => 'required|string|max:254',
+    //         'CongDoan' => 'required|string|max:254',
+    //         'NexTeam' => 'required|string|max:254',
+    //         'Type' => 'required|string|max:254',
+    //         //'LSX' => 'required|string|max:254',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     $toqc="";
+    //     if (Auth::user()->plant=='TH')
+    //     {
+    //         $toqc='TH-QC';
+    //     }
+    //     else if (Auth::user()->plant=='TQ')
+    //     {
+    //         $toqc='TQ-QC';
+    //     }
+    //     else {
+    //         $toqc='HG-QC';
+    //     }
+    //     try {
+    //         DB::beginTransaction();
+    //         $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type','LSX']);
+    //         $SLData['create_by'] = Auth::user()->id;
+    //         $SLData['openQty'] = 0;
+
+    //         $SanLuong = SanLuong::create($SLData);
+
+    //         if ($request->CompleQty > 0) {
+    //             $notifi = notireceipt::create([
+    //                 'text' => 'Số lượng đã giao chờ xác nhận',
+    //                 'Quantity' => $request->CompleQty,
+    //                 'baseID' =>  $SanLuong->id,
+    //                 'SPDich' => $request->FatherCode,
+    //                 // 'MaThiTruong' => $request->MaThiTruong,
+    //                 'team' => $request->NexTeam,
+    //                 'CongDoan' => $request->CongDoan,
+    //                 'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
+    //                 'type' => 0,
+    //                 'openQty' => 0
+    //             ]);
+    //         }
+    //         if ($request->RejectQty > 0) {
+    //             $notifi = notireceipt::create([
+    //                 'text' => 'Số lượng lỗi chờ xác nhận',
+    //                 'Quantity' => $request->RejectQty,
+    //                 'baseID' =>  $SanLuong->id,
+    //                 'SPDich' => $request->FatherCode,
+    //                 // 'MaThiTruong' => $request->MaThiTruong,
+    //                 'team' => $toqc,
+    //                 'CongDoan' => $request->CongDoan,
+    //                 'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
+    //                 'type' => 1,
+    //                 'openQty' => $request->RejectQty
+    //             ]);
+    //         }
+    //         DB::commit();
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
+    //     }
+    //     return response()->json([
+    //         'message' => 'nhập sản lượng thành công'
+    //     ], 200);
+    // }
+
     function receipts(Request $request)
     {
 
@@ -41,53 +122,50 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $toqc="";
-        if (Auth::user()->plant=='TH')
-        {
-            $toqc='TH-QC';
-        }
-        else if (Auth::user()->plant=='TQ')
-        {
-            $toqc='TQ-QC';
-        }
-        else {
-            $toqc='HG-QC';
+        $toqc = "";
+        if (Auth::user()->plant == 'TH') {
+            $toqc = 'TH-QC';
+        } else if (Auth::user()->plant == 'TQ') {
+            $toqc = 'TQ-QC';
+        } else {
+            $toqc = 'HG-QC';
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type','LSX']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type', 'LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SLData['openQty'] = 0;
-           
+
             $SanLuong = SanLuong::create($SLData);
-          
+
+            $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
-                    'text' => 'Số lượng đã giao chờ xác nhận',
+                    'text' => 'Production information waiting for confirmation',
                     'Quantity' => $request->CompleQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
-                    // 'MaThiTruong' => $request->MaThiTruong,
-                    'team' => $request->NexTeam,
+                    'ToXacNhan' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 0,
                     'openQty' => 0
                 ]);
+                $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
             if ($request->RejectQty > 0) {
                 $notifi = notireceipt::create([
-                    'text' => 'Số lượng lỗi chờ xác nhận',
+                    'text' => 'Error information sent to QC',
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
-                    // 'MaThiTruong' => $request->MaThiTruong,
-                    'team' => $toqc,
+                    'ToXacNhan' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1,
                     'openQty' => $request->RejectQty
                 ]);
+                $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
             DB::commit();
         } catch (\Exception | QueryException $e) {
@@ -95,7 +173,8 @@ class ProductionController extends Controller
             return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
         }
         return response()->json([
-            'message' => 'nhập sản lượng thành công'
+            'message' => 'Successful',
+            'changedData' => $changedData 
         ], 200);
     }
 
@@ -106,7 +185,7 @@ class ProductionController extends Controller
             'TO' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
         // 2. Kết nối SAP và lấy dữ liệu từ bảng UV_GHINHANSL dựa trên "TO" và lấy ra tất cả các kết quả có TO bằng với TO trong tham số truyền vào
@@ -186,7 +265,7 @@ class ProductionController extends Controller
                 ]);
             }
         }
-        
+
         // collect stock pending
         $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
             ->where('notireceipt.type', 0)
@@ -407,7 +486,7 @@ class ProductionController extends Controller
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id,'Y'])) {
+        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id, 'Y'])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -420,7 +499,7 @@ class ProductionController extends Controller
         odbc_close($conDB);
         return response()->json($results, 200);
     }
-    
+
     function reject(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -433,8 +512,8 @@ class ProductionController extends Controller
         $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
             ->select('b.*')
             ->where('a.id', $request->id)
-           // ->where('b.Status', 0)
-          //  ->where('a.type', 0)
+            // ->where('b.Status', 0)
+            //  ->where('a.type', 0)
             ->where('a.confirm', 0)
             ->first();
 
@@ -460,74 +539,72 @@ class ProductionController extends Controller
 
 
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+                ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
                 ->where('a.id', $request->id)
                 //->where('b.Status', 0)
-               // ->where('a.type', 0)
+                // ->where('a.type', 0)
                 ->where('a.confirm', 0)
                 ->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
 
-            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
-            {
-                    $body = [
-                        "U_BaseEntry" =>$data->notiID,
-                        "U_FatherCode" => $data->FatherCode,
-                        "U_TO" =>  $data->Team,
-                        "U_GRID" =>  $data->LSX,
-                        "U_NM"=> auth()->user()->plant,
-                        "U_Type"=> "CBG",
-                        "U_Status"=> "Draft",
-                        "U_Error" => "N",
-                        "V_DGP1Collection" => [[
-                            "U_ItemCode" => $data->ItemCode,
-                            "U_Qty" => $data->RejectQty,
-                        ]]
-                    ];
-                    $response = Http::withOptions([
-                        'verify' => false,
-                    ])->withHeaders([
-                        'Content-Type' => 'application/json',
-                        'Accept' => 'application/json',
-                        'Authorization' => 'Basic ' . BasicAuthToken(),
-                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
-                    $res = $response->json();
-                    if ($response->successful()) {
-                        SanLuong::where('id', $data->id)->update(
-                            [
-                                'Status' => 1,
-                            ]
-                        );
-                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
-                        'ObjType' =>   202,
-                        'DocEntry' => $res['DocEntry'],
-                        'confirmBy' => Auth::user()->id,
-                        'confirm_at' => now()->format('YmdHmi')]);
-                        DB::commit();
-                        return response()->json('success', 200);
-
-                    } else {
-                        DB::rollBack();
-                        return response()->json([
-                            'message' => 'Failed receipt',
-                            'error' => $res['error'],
-                            'body' => $body
-                        ], 500);
-                    }
-            }
-            else
-            {
-
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $body = [
-                    "U_BaseEntry" =>$data->notiID,
+                    "U_BaseEntry" => $data->notiID,
                     "U_FatherCode" => $data->FatherCode,
                     "U_TO" =>  $data->Team,
                     "U_GRID" =>  $data->LSX,
-                    "U_NM"=> auth()->user()->plant,
-                    "U_Type"=> "CBG",
-                    "U_Status"=> "Draft",
+                    "U_NM" => auth()->user()->plant,
+                    "U_Type" => "CBG",
+                    "U_Status" => "Draft",
+                    "U_Error" => "N",
+                    "V_DGP1Collection" => [[
+                        "U_ItemCode" => $data->ItemCode,
+                        "U_Qty" => $data->RejectQty,
+                    ]]
+                ];
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
+                $res = $response->json();
+                if ($response->successful()) {
+                    SanLuong::where('id', $data->id)->update(
+                        [
+                            'Status' => 1,
+                        ]
+                    );
+                    notireceipt::where('id', $data->notiID)->update([
+                        'confirm' => 1,
+                        'ObjType' =>   202,
+                        'DocEntry' => $res['DocEntry'],
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi')
+                    ]);
+                    DB::commit();
+                    return response()->json('success', 200);
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed receipt',
+                        'error' => $res['error'],
+                        'body' => $body
+                    ], 500);
+                }
+            } else {
+
+                $body = [
+                    "U_BaseEntry" => $data->notiID,
+                    "U_FatherCode" => $data->FatherCode,
+                    "U_TO" =>  $data->Team,
+                    "U_GRID" =>  $data->LSX,
+                    "U_NM" => auth()->user()->plant,
+                    "U_Type" => "CBG",
+                    "U_Status" => "Draft",
                     "U_Error" => "Y",
                     "V_DGP1Collection" => [[
                         "U_ItemCode" => $data->ItemCode,
@@ -548,15 +625,15 @@ class ProductionController extends Controller
                             'Status' => 1,
                         ]
                     );
-                    notireceipt::where('id', $request->id)->
-                    update(['confirm' => 1,
-                    'ObjType' =>  59,
-                    'DocEntry' => $res['DocEntry'],
-                    'confirmBy' => Auth::user()->id,
-                    'confirm_at' => now()->format('YmdHmi')]);
+                    notireceipt::where('id', $request->id)->update([
+                            'confirm' => 1,
+                            'ObjType' =>  59,
+                            'DocEntry' => $res['DocEntry'],
+                            'confirmBy' => Auth::user()->id,
+                            'confirm_at' => now()->format('YmdHmi')
+                        ]);
                     DB::commit();
                     return response()->json('success', 200);
-
                 } else {
                     DB::rollBack();
                     return response()->json([
@@ -652,8 +729,8 @@ class ProductionController extends Controller
 
         return array_values($filteredData);
     }
-    function accept (Request $request)
-    {  
+    function accept(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
         ]);
@@ -664,39 +741,38 @@ class ProductionController extends Controller
             DB::beginTransaction();
             // to bình thường
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+                ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
                 ->where('a.id', $request->id)
                 //->where('b.Status', 0)
-               // ->where('a.type', 0)
+                // ->where('a.type', 0)
                 ->where('a.confirm', 0)
                 ->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
 
-            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
-            {
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
                 if (count($allocates) == 0) {
                     return response()->json([
                         'error' => false,
                         'status_code' => 500,
-                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:".
-                         $data->Team." sản phẩm: ".
-                         $data->ItemCode." sản phẩm đích: ".
-                         $data->FatherCode." LSX.".$data->LSX
+                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+                            $data->Team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
                 foreach ($allocates as $allocate) {
 
                     $body = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "U_LSX"=> $data->LSX,
-                        "U_TO"=> $data->Team,
+                        "U_LSX" => $data->LSX,
+                        "U_TO" => $data->Team,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
-                            "TransactionType"=>"C",
+                            "TransactionType" => "C",
                             "BaseEntry" => $allocate['DocEntry'],
                             "BaseType" => 202,
                             "BatchNumbers" => [
@@ -708,8 +784,8 @@ class ProductionController extends Controller
                                     "U_CRong" => $allocate['CRong'],
                                     "U_CDay" => $allocate['CDay'],
                                     "U_Status" => "HD",
-                                    "U_Year"=> $request->year??now()->format('y'),
-                                    "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                                    "U_Year" => $request->year ?? now()->format('y'),
+                                    "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                                 ]
                             ]
                         ]]
@@ -730,25 +806,25 @@ class ProductionController extends Controller
                                 // 'DocEntry' => $res['DocEntry']
                             ]
                         );
-                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
-                        'ObjType' =>   202,
-                       // 'DocEntry' => $res['DocEntry'],
-                        'confirmBy' => Auth::user()->id,
-                        'confirm_at' => now()->format('YmdHmi')]);
+                        notireceipt::where('id', $data->notiID)->update([
+                            'confirm' => 1,
+                            'ObjType' =>   202,
+                            // 'DocEntry' => $res['DocEntry'],
+                            'confirmBy' => Auth::user()->id,
+                            'confirm_at' => now()->format('YmdHmi')
+                        ]);
                         HistorySL::create(
                             [
-                            'LSX'=>$data->LSX,
-                            'itemchild'=>$allocate['ItemChild'],
-                            'SPDich'=>$data->FatherCode,
-                            'to' => $data->Team,
-                            'quantity'=>$allocate['Allocate'],
-                            'ObjType'=>202,
-                            'DocEntry'=>$res['DocEntry']
+                                'LSX' => $data->LSX,
+                                'itemchild' => $allocate['ItemChild'],
+                                'SPDich' => $data->FatherCode,
+                                'to' => $data->Team,
+                                'quantity' => $allocate['Allocate'],
+                                'ObjType' => 202,
+                                'DocEntry' => $res['DocEntry']
                             ]
                         );
                         DB::commit();
-                      
-
                     } else {
                         DB::rollBack();
                         return response()->json([
@@ -759,16 +835,13 @@ class ProductionController extends Controller
                     }
                 }
                 return response()->json('success', 200);
-            }
-            else
-            {
+            } else {
                 return response()->json([
                     'error' => false,
                     'status_code' => 500,
                     'message' => "Tổ không hợp lệ."
                 ], 500);
             }
-
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
             return response()->json([
@@ -792,74 +865,72 @@ class ProductionController extends Controller
 
 
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
-                ->select('b.*', 'a.id as notiID','a.team as NextTeam')
+                ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
                 ->where('a.id', $request->id)
                 //->where('b.Status', 0)
-               // ->where('a.type', 0)
+                // ->where('a.type', 0)
                 ->where('a.confirm', 0)
                 ->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
 
-            if( $data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC")
-            {
-                    $body = [
-                        "U_BaseEntry" =>$data->notiID,
-                        "U_FatherCode" => $data->FatherCode,
-                        "U_TO" =>  $data->Team,
-                        "U_GRID" =>  $data->LSX,
-                        "U_NM"=> auth()->user()->plant,
-                        "U_Type"=> "VCN",
-                        "U_Status"=> "Draft",
-                        "U_Error" => "N",
-                        "V_DGP1Collection" => [[
-                            "U_ItemCode" => $data->ItemCode,
-                            "U_Qty" => $data->RejectQty,
-                        ]]
-                    ];
-                    $response = Http::withOptions([
-                        'verify' => false,
-                    ])->withHeaders([
-                        'Content-Type' => 'application/json',
-                        'Accept' => 'application/json',
-                        'Authorization' => 'Basic ' . BasicAuthToken(),
-                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
-                    $res = $response->json();
-                    if ($response->successful()) {
-                        SanLuong::where('id', $data->id)->update(
-                            [
-                                'Status' => 1,
-                            ]
-                        );
-                        notireceipt::where('id', $data->notiID)->update(['confirm' => 1,
-                        'ObjType' =>   202,
-                        'DocEntry' => $res['DocEntry'],
-                        'confirmBy' => Auth::user()->id,
-                        'confirm_at' => now()->format('YmdHmi')]);
-                        DB::commit();
-                        return response()->json('success', 200);
-
-                    } else {
-                        DB::rollBack();
-                        return response()->json([
-                            'message' => 'Failed receipt',
-                            'error' => $res['error'],
-                            'body' => $body
-                        ], 500);
-                    }
-            }
-            else
-            {
-
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $body = [
-                    "U_BaseEntry" =>$data->notiID,
+                    "U_BaseEntry" => $data->notiID,
                     "U_FatherCode" => $data->FatherCode,
                     "U_TO" =>  $data->Team,
                     "U_GRID" =>  $data->LSX,
-                    "U_NM"=> auth()->user()->plant,
-                    "U_Type"=> "CBG",
-                    "U_Status"=> "Draft",
+                    "U_NM" => auth()->user()->plant,
+                    "U_Type" => "VCN",
+                    "U_Status" => "Draft",
+                    "U_Error" => "N",
+                    "V_DGP1Collection" => [[
+                        "U_ItemCode" => $data->ItemCode,
+                        "U_Qty" => $data->RejectQty,
+                    ]]
+                ];
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . '/b1s/v1/DGPO', $body);
+                $res = $response->json();
+                if ($response->successful()) {
+                    SanLuong::where('id', $data->id)->update(
+                        [
+                            'Status' => 1,
+                        ]
+                    );
+                    notireceipt::where('id', $data->notiID)->update([
+                        'confirm' => 1,
+                        'ObjType' =>   202,
+                        'DocEntry' => $res['DocEntry'],
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi')
+                    ]);
+                    DB::commit();
+                    return response()->json('success', 200);
+                } else {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Failed receipt',
+                        'error' => $res['error'],
+                        'body' => $body
+                    ], 500);
+                }
+            } else {
+
+                $body = [
+                    "U_BaseEntry" => $data->notiID,
+                    "U_FatherCode" => $data->FatherCode,
+                    "U_TO" =>  $data->Team,
+                    "U_GRID" =>  $data->LSX,
+                    "U_NM" => auth()->user()->plant,
+                    "U_Type" => "CBG",
+                    "U_Status" => "Draft",
                     "U_Error" => "Y",
                     "V_DGP1Collection" => [[
                         "U_ItemCode" => $data->ItemCode,
@@ -880,15 +951,15 @@ class ProductionController extends Controller
                             'Status' => 1,
                         ]
                     );
-                    notireceipt::where('id', $request->id)->
-                    update(['confirm' => 1,
-                    'ObjType' =>  59,
-                    'DocEntry' => $res['DocEntry'],
-                    'confirmBy' => Auth::user()->id,
-                    'confirm_at' => now()->format('YmdHmi')]);
+                    notireceipt::where('id', $request->id)->update([
+                            'confirm' => 1,
+                            'ObjType' =>  59,
+                            'DocEntry' => $res['DocEntry'],
+                            'confirmBy' => Auth::user()->id,
+                            'confirm_at' => now()->format('YmdHmi')
+                        ]);
                     DB::commit();
                     return response()->json('success', 200);
-
                 } else {
                     DB::rollBack();
                     return response()->json([
@@ -918,7 +989,7 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_GHINHANSLVCN where "TO"=? ORDER BY "LSX" asc'  ;
+        $query = 'select * from UV_GHINHANSLVCN where "TO"=? ORDER BY "LSX" asc';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
@@ -1234,7 +1305,7 @@ class ProductionController extends Controller
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['N','Y',Auth::user()->plant])) {
+        if (!odbc_execute($stmt, ['N', 'Y', Auth::user()->plant])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -1248,7 +1319,7 @@ class ProductionController extends Controller
     }
     function getRootCause()
     {
-        $results =[
+        $results = [
             [
                 'id' => 'C',
                 'name' => 'Lỗi đầu vào (Mã con)'
@@ -1262,11 +1333,11 @@ class ProductionController extends Controller
     }
     function getQCWarehouseByUser($plant)
     {
-        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
-        ->where('FAC',$plant)
-        ->first();
-        
-        $WHS=  $WHS? $WHS->WhsCode: 99;
+        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)
+            ->where('FAC', $plant)
+            ->first();
+
+        $WHS =  $WHS ? $WHS->WhsCode : 99;
         return $WHS;
     }
 }

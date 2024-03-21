@@ -525,16 +525,12 @@ function WoodProductingQC() {
         }
     };
 
-    console.log("1. Danh sách QC của tổ: ", awaitingReception);
-
     const filteredData = searchTerm && typeof searchTerm === 'string' ?
     awaitingReception.filter(item => {
         const searchString = `${item.ItemName} (${item.CDay}x${item.CRong}x${item.CDai})`;
         return searchString.toLowerCase().includes(searchTerm.toLowerCase());
     }) :
     awaitingReception;
-
-    console.log("3. Kết quả lọc data: ", filteredData);
 
     return (
         <Layout>
@@ -630,7 +626,6 @@ function WoodProductingQC() {
                                     placeholder="Tìm kiếm"
                                     onChange={(value) => {
                                         setSearchTerm(value.target.value);
-                                        console.log("2. Tìm kiếm: ", searchTerm);
                                     }}
                                     required
                                 />

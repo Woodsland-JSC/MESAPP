@@ -818,7 +818,7 @@ const AwaitingReception = ({
                         </AlertDialogHeader>
                         <AlertDialogBody>
                             <div className="text-green-700">
-                                Bạn có chắc chắn muốn:{" "}
+                                Bạn có chắc muốn:{" "}
                                 {variant == "QC" ? (
                                     <>
                                         ghi nhận <span className="font-bold">
@@ -871,14 +871,6 @@ const AwaitingReception = ({
                                         "Xác nhận"
                                     )}
                                 </button>
-                                {/* <Button
-                                colorScheme="green"
-                                onClick={handleConfirmReceipt}
-                                ml={3}
-                                className="bg-[#38a169]"
-                            >
-                                Xác nhận
-                            </Button> */}
                             </div>
                         </AlertDialogFooter>
                     </AlertDialogContent>
