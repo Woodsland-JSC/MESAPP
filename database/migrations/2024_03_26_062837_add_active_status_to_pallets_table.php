@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notireceipt', function (Blueprint $table) {
-            $table->float('openQty');
+        Schema::table('pallets', function (Blueprint $table) {
+            $table->integer('activeStatus')->nullable()->default(0);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notireceipt', function (Blueprint $table) {
-            $table->dropColumn('openQty');
+        Schema::table('pallets', function (Blueprint $table) {
+            $table->dropColumn('notiId');
         });
     }
 };

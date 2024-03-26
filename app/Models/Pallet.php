@@ -30,7 +30,8 @@ class Pallet extends Model
         'CreateBy',
         'palletSAP',
         'LoadedBy',
-        'LoadedIntoKilnDate'
+        'LoadedIntoKilnDate',
+        'activeStatus',
     ];
     // Sự kiện trước khi tạo mới record
     // protected static function boot()

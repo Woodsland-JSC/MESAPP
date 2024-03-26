@@ -31,7 +31,7 @@ class MasterDataController extends Controller
                 and T0."ItemCode" = T1."ItemCode"
                 Inner join OITM T2 on T0."ItemCode" = T2."ItemCode"
                 inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode"
-                where T1."Quantity" >0  and
+                where T1."Quantity" > 0  and
                 t3."U_Flag" IN (?,?) AND "BPLid"=?
                 and T2."Series"=72';
             $stmt = odbc_prepare($conDB, $query);
@@ -48,6 +48,9 @@ class MasterDataController extends Controller
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
+
+            dd($results);
+
             odbc_close($conDB);
             return response()->json($results, 200);
         } catch (\Exception $e) {

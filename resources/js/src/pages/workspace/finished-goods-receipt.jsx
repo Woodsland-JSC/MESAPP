@@ -721,25 +721,51 @@ function FinishedGoodsReceipt() {
     }, [selectedGroup]);
 
     // Search data
+    // const searchItems = (data, searchTerm) => {
+    //     if (!searchTerm) {
+    //         return data;
+    //     }
+
+    //     const filteredData = [];
+
+    //     for (const key in data) {
+    //         const item = data[key];
+    //         const filteredDetails = item.Details.filter((detail) => {
+    //             const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+    //             return subitem.includes(searchTerm);
+    //         });
+
+    //         if (filteredDetails.length > 0) {
+    //             filteredData[key] = { ...item, Details: filteredDetails };
+    //         }
+    //     }
+
+    //     return filteredData;
+    // };
     const searchItems = (data, searchTerm) => {
         if (!searchTerm) {
             return data;
         }
-
+    
         const filteredData = [];
-
+    
         for (const key in data) {
             const item = data[key];
             const filteredDetails = item.Details.filter((detail) => {
                 const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
-                return subitem.includes(searchTerm);
+    
+                // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
+                const searchTermLower = searchTerm.toLowerCase();
+                const subitemLower = subitem.toLowerCase();
+    
+                return subitemLower.includes(searchTermLower);
             });
-
+    
             if (filteredDetails.length > 0) {
                 filteredData[key] = { ...item, Details: filteredDetails };
             }
         }
-
+    
         return filteredData;
     };
 
@@ -835,7 +861,6 @@ function FinishedGoodsReceipt() {
                                             id="search"
                                             className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            // onInput={onFilterTextBoxChanged}
                                             onChange={(e) =>
                                                 setSearchTerm(e.target.value)
                                             }

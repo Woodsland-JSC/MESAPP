@@ -19,6 +19,8 @@ class HistorySL extends Model
         'LL',
         'HXL',
         'SPDich',
+        'isQualityCheck',
+        'notiId',
     ];
 
 }

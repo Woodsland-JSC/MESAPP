@@ -268,38 +268,79 @@ class QCController extends Controller
                 break;
         }
 
-        $data =DB::table('sanluong as a')
-                ->join('notireceipt as b', function ($join) {
-                    $join->on('a.id', '=', 'b.baseID')
-                        ->where('b.deleted', '=', 0);
-                })
-                ->join('users as c', 'a.create_by', '=', 'c.id')
-                ->select(
-                    'a.FatherCode',
-                    'a.ItemCode',
-                    'a.ItemName',
-                    'a.team',
-                    'a.CongDoan',
-                    'CDay',
-                    'CRong',
-                    'CDai',
-                    DB::raw('b.openQty as Quantity'),
-                    'a.created_at',
-                    'c.first_name',
-                    'c.last_name',
-                    'b.text',
-                    'b.id',
-                    DB::raw('0 as type'),
-                    'b.confirm'
-                )
-                ->where('b.confirm', '=', 0)
-                ->where('b.type', 1)
-                ->where('b.team', '=',  $toQC)
-                ->where('a.team', '=',  $request->TO)
-                ->get();
-                return response()->json([
-                    'data' => $data,
-                ], 200);
+        // $data =DB::table('sanluong as a')
+        //         ->join('notireceipt as b', function ($join) {
+        //             $join->on('a.id', '=', 'b.baseID')
+        //                 ->where('b.deleted', '=', 0);
+        //         })
+        //         ->join('users as c', 'a.create_by', '=', 'c.id')
+        //         ->select(
+        //             'a.FatherCode',
+        //             'a.ItemCode',
+        //             'a.ItemName',
+        //             'a.team',
+        //             'a.CongDoan',
+        //             'CDay',
+        //             'CRong',
+        //             'CDai',
+        //             DB::raw('b.openQty + a.openQty as Quantity'),
+        //             'a.created_at',
+        //             'c.first_name',
+        //             'c.last_name',
+        //             'b.text',
+        //             'b.id',
+        //             DB::raw('0 as type'),
+        //             'b.confirm'
+        //         )
+        //         ->where('b.confirm', '=', 0)
+        //         ->where('b.type', 1)
+        //         ->where('b.team', '=',  $toQC)
+        //         ->where('a.team', '=',  $request->TO)
+        //         ->get();
+        //         return response()->json([
+        //             'data' => $data,
+        //         ], 200);
+
+        $data = DB::table('sanluong as a')
+        ->join('notireceipt as b', function ($join) {
+            $join->on('a.id', '=', 'b.baseID')
+                ->where('b.deleted', '=', 0);
+        })
+        ->join('users as c', 'a.create_by', '=', 'c.id')
+        ->select(
+            'a.FatherCode',
+            'a.ItemCode',
+            'a.ItemName',
+            'a.team',
+            'a.CongDoan',
+            'a.CDay',
+            'a.CRong',
+            'a.CDai',
+            DB::raw('(b.openQty - (
+                SELECT COALESCE(SUM(quantity), 0) 
+                FROM historysl 
+                WHERE itemchild = a.ItemCode 
+                AND isQualityCheck = 1 
+                
+            )) as Quantity'),
+            'a.created_at',
+            'c.first_name',
+            'c.last_name',
+            'b.text',
+            'b.id',
+            DB::raw('0 as type'),
+            'b.confirm'
+        )
+        ->where('b.confirm', '=', 0)
+        ->where('b.type', 1)
+        ->where('b.team', '=',  $toQC)
+        ->where('a.team', '=',  $request->TO)
+        ->get();
+        // AND notiId = b.id
+
+    return response()->json([
+        'data' => $data,
+    ], 200);
     }
     
     // danh sách tổ không bao gồm tổ QC thể hiện ở màn hình danh sách xác nhận QC
@@ -442,21 +483,21 @@ class QCController extends Controller
             'confirm_at' => now()->format('YmdHmi')]);
             HistorySL::create(
                 [
-                'LSX'=>$data->LSX,
-                'itemchild'=>$data->ItemCode,
-                'to' => $data->Team,
-                'quantity'=>$request->Qty,
-                'ObjType'=>59,
-                'DocEntry'=>$res['DocEntry'],
-                'SPDich'=>$data->FatherCode,
-                'LL'=> $loailoi,
-                'HXL'=>$huongxuly
-                ],
-                
+                    'LSX'=>$data->LSX,
+                    'itemchild'=>$data->ItemCode,
+                    'to' => $data->Team,
+                    'quantity'=>$request->Qty,
+                    'ObjType'=>59,
+                    'DocEntry'=>$res['DocEntry'],
+                    'SPDich'=>$data->FatherCode,
+                    'LL'=> $loailoi,
+                    'HXL'=>$huongxuly,
+                    'isQualityCheck'=>1,
+                    'notiId' => $request->id,
+                ], 
             );
             DB::commit();
             return response()->json('success', 200);
-
         } else {
             DB::rollBack();
             return response()->json([

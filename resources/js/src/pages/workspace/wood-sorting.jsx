@@ -338,8 +338,6 @@ function WoodSorting() {
         });
     };
 
-    
-
     // Creating pallets
     const createPalletObject = () => {
         const palletObject = {
@@ -357,6 +355,7 @@ function WoodSorting() {
                 CDai: card.props.height,
                 CDay: card.props.thickness,
                 CRong: card.props.width,
+                QuyCach: card.props.thickness + "x" + card.props.width + "x" + card.props.height,
             })),
         };
         return palletObject;
@@ -417,8 +416,9 @@ function WoodSorting() {
             } else {
                 console.log("4. Kết quả tạo pallet:", response);
                 Swal.fire({
+                    
                     title: response.data.data.pallet.Code,
-                    text: "Mã pallet đã được tạo!",
+                    text: response.data.data.isDuplicate ? "Số lượng đã được thêm vào pallet" : "Mã pallet đã được tạo!",
                     icon: "success",
                 });
 

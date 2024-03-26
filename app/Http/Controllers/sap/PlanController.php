@@ -70,13 +70,15 @@ class PlanController extends Controller
     // danh sách kế hoạch sấy
     function listPlan(Request $request)
     {
-        $pallets = DB::table('planDryings as a')
+        $plans = DB::table('planDryings as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->select('a.*')
-            ->where('b.plant', '=', Auth::user()->plant)
+            ->where('b.branch', '=', Auth::user()->branch)
+            ->where('b.plant', '=', Auth::user()->plant) 
             ->where('a.Status', '<>', '4')
             ->get();
-        return response()->json($pallets, 200);
+
+        return response()->json($plans, 200);
     }
 
     //danh sách pallet chưa được assign
@@ -214,20 +216,22 @@ class PlanController extends Controller
                 throw new \Exception('Pallet đã được assign.');
             }
             $data = pallet_details::where('palletID', $pallet)->first();
+            $totalQty = pallet_details::where('palletID', $pallet)->sum('Qty');
 
             plandetail::create([
                 'PlanID' => $id,
                 'pallet' => $pallet,
                 'palletCode' => $data->ItemCode,
                 'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
-                'Qty' => $data->Qty * 1000000000 / ($data->CDay * $data->CRong * $data->CDai),
-                'Mass' => $data->Qty,
+                'Qty' => $totalQty * 1000000000 / ($data->CDay * $data->CRong * $data->CDai),
+                'Mass' => $totalQty,
             ]);
 
             // Update Pallet table
             Pallet::where('palletID', $pallet)->update([
                 'LoadedBy' => $userID,
                 'LoadedIntoKilnDate' => $currentTime,
+                'activStatus' => 1,
             ]);
 
             DB::commit();
@@ -641,6 +645,7 @@ class PlanController extends Controller
                     ->update([
                         'LoadedBy' => null,
                         'LoadedIntoKilnDate' => null,
+                        'activeStatus' => 0,
                     ]);
 
                 // Delete pallet detail

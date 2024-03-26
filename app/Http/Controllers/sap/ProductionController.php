@@ -1200,6 +1200,7 @@ class ProductionController extends Controller
             'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
         ], 200);
     }
+
     function viewdetailVCN(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1295,6 +1296,7 @@ class ProductionController extends Controller
             'remainQty' =>   $quantity
         ], 200);
     }
+
     function getAllTeam()
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -1317,6 +1319,7 @@ class ProductionController extends Controller
         odbc_close($conDB);
         return response()->json($results, 200);
     }
+
     function getRootCause()
     {
         $results = [
@@ -1331,6 +1334,7 @@ class ProductionController extends Controller
         ];
         return response()->json($results, 200);
     }
+    
     function getQCWarehouseByUser($plant)
     {
         $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)

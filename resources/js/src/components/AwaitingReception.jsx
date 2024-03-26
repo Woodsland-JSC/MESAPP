@@ -560,7 +560,6 @@ const AwaitingReception = ({
                                         ...prev,
                                         Qty: e.target.value,
                                     }));
-                                    console.log("Giá trị số lượng lỗi", e.target.value);
                                 }}
                             />
                         </Box>
