@@ -145,7 +145,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->CompleQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
-                    'ToXacNhan' => $request->NexTeam,
+                    'team' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 0,

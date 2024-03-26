@@ -49,8 +49,6 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
 
-            dd($results);
-
             odbc_close($conDB);
             return response()->json($results, 200);
         } catch (\Exception $e) {
