@@ -8,10 +8,13 @@ import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import moment from "moment";
 import Loader from "../../components/Loader";
+import useAppContext from "../../store/AppContext";
 
 function KilnChecking() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
+
+    const { user } = useAppContext();
 
     useEffect(() => {
         palletsApi
@@ -129,9 +132,9 @@ function KilnChecking() {
                             bowCards
                                 ?.map(
                                     (bowCard, index) =>
-                                        (bowCard.Status === 0 ||
+                                        ((bowCard.Status === 0 ||
                                             bowCard.Status === 1 ||
-                                            bowCard.Status === 2) && (
+                                            bowCard.Status === 2) && bowCard.plant === user.plant) && (
                                             <BOWCard
                                                 key={index}
                                                 planID={bowCard.PlanID}

@@ -29,7 +29,8 @@ class plandryings extends Model
         'CT9', 'CT10',
         'CT11', 'CT12',
         'DateChecked', 'NoCheck',
-        'result','runDate','reviewDate','CompletedDate'
+        'result','runDate','reviewDate','CompletedDate',
+        'plant',
     ];
     // Sự kiện trước khi tạo mới record
     protected static function boot()

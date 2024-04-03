@@ -7,10 +7,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Loader from "../../components/Loader";
+import useAppContext from "../../store/AppContext";
 
 function Kiln() {
     const [loading, setLoading] = useState(true);
-    const [bowCards, setBowCards] = useState([]);
+    const [bowCards, setBowCards] = useState([])
+    
+    const { user } = useAppContext();
 
     useEffect(() => {
         palletsApi
@@ -123,9 +126,9 @@ function Kiln() {
                         {bowCards
                             ?.map(
                                 (bowCard, index) =>
-                                    (bowCard.Status === 2 ||
+                                    ((bowCard.Status === 2 ||
                                         (bowCard.Status === 3 &&
-                                            bowCard.Review === 0)) && (
+                                            bowCard.Review === 0))&& bowCard.plant === user.plant) && (
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}

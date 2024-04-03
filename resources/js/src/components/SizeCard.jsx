@@ -32,7 +32,7 @@ import {
 } from "@chakra-ui/react";
 
 function SizeCard(props) {
-    const { planID, reload, palletData } = props;
+    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason } = props;
     console.log("Giá trị planID nhận được:", planID);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -70,7 +70,9 @@ function SizeCard(props) {
 
     useEffect(() => {
         // setSizeData(palletData);
-        loadSizeData();
+        if(planID){
+            loadSizeData();
+        }
     }, [planID, props.reload ]);
 
     return (
@@ -200,12 +202,15 @@ function SizeCard(props) {
                                 {sizeData.map((item) => (
                                     <SizeListItem
                                         planID={planID}
+                                        reason={reason}
                                         id={item.pallet}
                                         size={item.size}
                                         pallet={item.pallet}
                                         Qty={item.Qty}
                                         weight={item.Mass}
                                         onDelete={loadSizeData}
+                                        onReload={onReload}
+                                        onReloadPalletList={onReloadPalletList}
                                     />
                                 ))}
                             </>

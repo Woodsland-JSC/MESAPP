@@ -66,7 +66,10 @@ function WoodSorting() {
         years.push({ value: year, label: `Năm ${year.toString()}` });
     }
     years.reverse();
-    const defaultYear = { value: currentYear, label: `Năm ${currentYear.toString()}` };
+    const defaultYear = {
+        value: currentYear,
+        label: `Năm ${currentYear.toString()}`,
+    };
 
     const weeks = [];
     const currentWeek = moment().isoWeek();
@@ -87,12 +90,15 @@ function WoodSorting() {
     const loadPalletCallback = async (inputValue, callback) => {
         if (selectedYear && selectedWeek) {
             try {
-                const response = await axios.get("/api/pallets/get-pallet-by-year-week", {
-                    params: {
-                        year: selectedYear.value,
-                        week: selectedWeek.value,
-                    },
-                });
+                const response = await axios.get(
+                    "/api/pallets/get-pallet-by-year-week",
+                    {
+                        params: {
+                            year: selectedYear.value,
+                            week: selectedWeek.value,
+                        },
+                    }
+                );
                 const data = response.data;
                 if (Array.isArray(data)) {
                     const options = data.map((item) => ({
@@ -100,7 +106,7 @@ function WoodSorting() {
                         label: item.Code,
                     }));
                     setPalletOptions(options);
-                    
+
                     if (callback) {
                         callback(options);
                     }
@@ -111,11 +117,11 @@ function WoodSorting() {
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
-                toast.error("Có lỗi trong quá trình load dữ liệu.")
+                toast.error("Có lỗi trong quá trình load dữ liệu.");
             }
         }
-    }
-    
+    };
+
     const loadPalletOptions = (inputValue, callback) => {
         loadPalletCallback(inputValue, callback);
     };
@@ -229,6 +235,85 @@ function WoodSorting() {
         return true;
     };
 
+    // const handleAddToList = async () => {
+    //     if (validateData()) {
+    //         try {
+    //             setIsLoading(true);
+
+    //             const data = {
+    //                 woodType: selectedWoodType,
+    //                 batchId: batchId,
+    //                 dryingReason: selectedDryingReason,
+    //                 dryingMethod: selectedDryingMethod,
+    //                 startDate: formattedStartDate,
+    //             };
+    //             console.log("1.Dữ liệu từ form:", data);
+
+    //             const response = await palletsApi.getStockByItem(
+    //                 selectedDryingMethod.code,
+    //                 selectedDryingReason.value,
+    //                 selectedDryingMethod.batchNum
+    //             );
+
+    //             console.log("2. Get thông tin từ ItemCode:", response);
+
+    //             if (response && response.length > 0) {
+    //                 const newPalletCards = response
+    //                     .filter(
+    //                         (item) =>
+    //                             !isPalletCardExists(
+    //                                 item.WhsCode + item.BatchNum,
+    //                                 palletCards
+    //                             )
+    //                     )
+    //                     .map((item) => (
+    //                         <PalletCard
+    //                             key={item.WhsCode + item.BatchNum}
+    //                             itemCode={selectedDryingMethod.code}
+    //                             itemName={selectedDryingMethod.label}
+    //                             batchNum={item.BatchNum}
+    //                             inStock={item.Quantity}
+    //                             whsCode={item.WhsCode}
+    //                             height={item.CDai}
+    //                             width={item.CRong}
+    //                             thickness={item.CDay}
+    //                             isInvalidQuantity={isInvalidQuantity}
+    //                             onDelete={() =>
+    //                                 handleDeletePalletCard(
+    //                                     item.WhsCode + item.BatchNum
+    //                                 )
+    //                             }
+    //                             onQuantityChange={(quantity) => {
+    //                                 handlePalletQuantityChange(
+    //                                     item.WhsCode + item.BatchNum,
+    //                                     quantity
+    //                                 );
+    //                             }}
+    //                         />
+    //                     ));
+
+    //                 setPalletCards((prevPalletCards) => [
+    //                     ...prevPalletCards,
+    //                     ...newPalletCards,
+    //                 ]);
+    //                 // console.log("Danh sách pallet card: ", newpalletCards);chs
+    //             } else {
+    //                 toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
+    //                 return;
+    //             }
+
+    //             toast.success("Đã thêm vào danh sách");
+    //         } catch (error) {
+    //             console.error("Error fetching stock by item:", error);
+    //             toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // };
+
+    const [quyCachList, setQuyCachList] = useState([]);
+
     const handleAddToList = async () => {
         if (validateData()) {
             try {
@@ -241,7 +326,7 @@ function WoodSorting() {
                     dryingMethod: selectedDryingMethod,
                     startDate: formattedStartDate,
                 };
-                console.log("1.Dữ liệu từ form:", data);
+                console.log("1. Dữ liệu từ form:", data);
 
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
@@ -252,66 +337,76 @@ function WoodSorting() {
                 console.log("2. Get thông tin từ ItemCode:", response);
 
                 if (response && response.length > 0) {
-                    const newPalletCards = response
-                        .filter(
-                            (item) =>
-                                !isPalletCardExists(
-                                    item.WhsCode + item.BatchNum,
-                                    palletCards
-                                )
-                        )
-                        .map((item) => (
-                            <PalletCard
-                                key={item.WhsCode + item.BatchNum}
-                                itemCode={selectedDryingMethod.code}
-                                itemName={selectedDryingMethod.label}
-                                batchNum={item.BatchNum}
-                                inStock={item.Quantity}
-                                whsCode={item.WhsCode}
-                                height={item.CDai}
-                                width={item.CRong}
-                                thickness={item.CDay}
-                                isInvalidQuantity={isInvalidQuantity}
-                                onDelete={() =>
-                                    handleDeletePalletCard(
-                                        item.WhsCode + item.BatchNum
-                                    )
-                                }
-                                onQuantityChange={(quantity) => {
-                                    handlePalletQuantityChange(
-                                        item.WhsCode + item.BatchNum,
-                                        quantity
-                                    );
-                                }}
-                            />
-                        ));
-
-                    setPalletCards((prevPalletCards) => [
-                        ...prevPalletCards,
-                        ...newPalletCards,
-                    ]);
-                    // console.log("Danh sách pallet card: ", newpalletCards);chs 
+                    response.forEach(item => {
+                        const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}`;
+                        if (!quyCachList.includes(quyCach)) {
+                            if (quyCachList.length >= 2) {
+                                toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
+                                return;
+                            } else {
+                                setQuyCachList(prevList => [...prevList, quyCach]);
+                                const newPalletCard = (
+                                    <PalletCard
+                                        key={item.WhsCode + item.BatchNum}
+                                        itemCode={selectedDryingMethod.code}
+                                        itemName={selectedDryingMethod.label}
+                                        batchNum={item.BatchNum}
+                                        inStock={item.Quantity}
+                                        whsCode={item.WhsCode}
+                                        height={item.CDai}
+                                        width={item.CRong}
+                                        thickness={item.CDay}
+                                        isInvalidQuantity={isInvalidQuantity}
+                                        onDelete={() =>
+                                            handleDeletePalletCard(
+                                                item.WhsCode + item.BatchNum,
+                                                `${item.CDay}x${item.CRong}x${item.CDai}`
+                                            )
+                                        }
+                                        onQuantityChange={(quantity) => {
+                                            handlePalletQuantityChange(
+                                                item.WhsCode + item.BatchNum,
+                                                quantity
+                                            );
+                                        }}
+                                    />
+                                );
+                                setPalletCards(prevPalletCards => [...prevPalletCards, newPalletCard]);
+                                toast.success("Đã thêm vào danh sách");
+                            }
+                        }
+                    });
+                    console.log("Danh sách Quy Cach: ", quyCachList);
                 } else {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                     return;
                 }
-
-                toast.success("Đã thêm vào danh sách");
             } catch (error) {
                 console.error("Error fetching stock by item:", error);
                 toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
             } finally {
                 setIsLoading(false);
+                
             }
         }
     };
 
-    const handleDeletePalletCard = (id) => {
+    const handleDeletePalletCard = (id, quyCach) => {
+        setQuyCachList(prevList => prevList.filter(item => item !== quyCach));
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
         toast("Đã xóa khỏi danh sách");
     };
+
+
+    // const handleDeletePalletCard = (id) => {
+    //     setPalletCards((prevPalletCards) =>
+    //         prevPalletCards.filter((card) => card.key !== id)
+    //     );
+    //     toast("Đã xóa khỏi danh sách");
+    // };
+
 
     const handlePalletQuantityChange = (id, quantity) => {
         setPalletQuantities((prevQuantities) => ({
@@ -355,7 +450,12 @@ function WoodSorting() {
                 CDai: card.props.height,
                 CDay: card.props.thickness,
                 CRong: card.props.width,
-                QuyCach: card.props.thickness + "x" + card.props.width + "x" + card.props.height,
+                QuyCach:
+                    card.props.thickness +
+                    "x" +
+                    card.props.width +
+                    "x" +
+                    card.props.height,
             })),
         };
         return palletObject;
@@ -381,7 +481,10 @@ function WoodSorting() {
             var quantity = parseFloat(palletQuantities[card.key] || 0);
 
             if (
-                quantity > Math.floor(inStock*1000000000/(height*width*thickness)) ||
+                quantity >
+                    Math.floor(
+                        (inStock * 1000000000) / (height * width * thickness)
+                    ) ||
                 quantity === 0 ||
                 quantity < 0 ||
                 quantity == "" ||
@@ -416,9 +519,10 @@ function WoodSorting() {
             } else {
                 console.log("4. Kết quả tạo pallet:", response);
                 Swal.fire({
-                    
                     title: response.data.data.pallet.Code,
-                    text: response.data.data.isDuplicate ? "Số lượng đã được thêm vào pallet" : "Mã pallet đã được tạo!",
+                    text: response.data.data.isDuplicate
+                        ? "Số lượng đã được thêm vào pallet"
+                        : "Mã pallet đã được tạo!",
                     icon: "success",
                 });
 
@@ -433,33 +537,35 @@ function WoodSorting() {
                 }
 
                 setCreatePalletLoading(false);
-
+                setQuyCachList([]);
                 setBatchId("");
                 setStartDate(new Date());
                 setPalletCards([]);
-                
+
                 setPalletQuantities({});
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
-            const errorMessage = error?.response?.data?.res1?.error?.message?.value;
+            const errorMessage =
+                error?.response?.data?.res1?.error?.message?.value;
             const systemError = error?.response?.data?.error;
-            const displayError = errorMessage ? errorMessage : systemError ? systemError : "";
+            const displayError = errorMessage
+                ? errorMessage
+                : systemError
+                ? systemError
+                : "";
             setCreatePalletLoading(false);
             Swal.fire({
                 title: "Có lỗi khi tạo pallet.",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
                     <p>
-                        ${
-                            displayError ? "<li>" + displayError + "</li>" : ""
-                        }
+                        ${displayError ? "<li>" + displayError + "</li>" : ""}
 
                     </p>
                 `,
                 icon: "error",
             });
-            
         }
     };
 
@@ -496,18 +602,27 @@ function WoodSorting() {
         }
     };
 
+    const [result, setResult] = useState({
+        totalQty_T: 0,
+        data: []
+    });
+    
+    // Hàm handleCheckPallet
     const handleCheckPallet = async () => {
-        if(!selectedPallet){
+        if (!selectedPallet) {
             toast.error("Xin hãy chọn một pallet");
             return;
         } else {
             setPalletTracingLoading(true);
             try {
-                const response = await axios.get("/api/pallets/pallet-lifecyle", {
-                    params: {
-                        palletID: selectedPallet.value,
-                    },
-                });
+                const response = await axios.get(
+                    "/api/pallets/pallet-lifecyle",
+                    {
+                        params: {
+                            palletID: selectedPallet.value,
+                        },
+                    }
+                );
                 if (
                     response.data === "" ||
                     response.data === null ||
@@ -519,7 +634,33 @@ function WoodSorting() {
                     console.log("Kết quả truy xuất lịch sử pallet :", response);
                     toast.success("Tra cứu thành công.");
                     setPalletTracingData(response.data.data[0]);
-                    console.log("Kết quả truy xuất lịch sử pallet :", palletTracingData);
+                    const updatedResult = {
+                        totalQty_T: 0,
+                        data: []
+                    };
+                    const itemInfo = {};
+                    response.data.data.forEach(item => {
+                        updatedResult.totalQty_T += item.Qty_T;
+                        const key = `${item.ItemName}_${Math.floor(item.CDay)}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`;
+                        if (itemInfo[key]) {
+                            itemInfo[key].Qty_T += item.Qty_T;
+                        } else {
+                            itemInfo[key] = {
+                                ItemName: item.ItemName,
+                                Qty_T: item.Qty_T,
+                                QuyCach: `${Math.floor(item.CDay)}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`
+                            };
+                        }
+                    });
+    
+                    updatedResult.data = Object.values(itemInfo);
+                    setResult(updatedResult);
+    
+                    console.log(result);
+                    console.log(
+                        "Kết quả truy xuất lịch sử pallet :",
+                        palletTracingData
+                    );
                     setPalletTracingLoading(false);
                 }
             } catch (error) {
@@ -528,7 +669,6 @@ function WoodSorting() {
                 setPalletTracingLoading(false);
             }
         }
-
     };
 
     return (
@@ -621,7 +761,6 @@ function WoodSorting() {
                             Truy nguyên
                         </button>
                     </div>
-                    
 
                     {/*Pallets Loading History Modals */}
                     <Modal
@@ -785,24 +924,8 @@ function WoodSorting() {
                                                 )
                                                 .map((pallet) => (
                                                     <div className="border-gray-300 bg-gray-100 max-h-[14rem]  border-2 rounded-xl">
-                                                        <div className="p-4 pb-0">
-                                                            <div className="text-xl font-semibold">
-                                                                Quy cách:{" "}
-                                                                <span>
-                                                                    {parseInt(
-                                                                        pallet.thickness
-                                                                    )}
-                                                                    *
-                                                                    {parseInt(
-                                                                        pallet.width
-                                                                    )}
-                                                                    *
-                                                                    {parseInt(
-                                                                        pallet.length
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                            <div className="rounded-md p-1 my-2 w-fit px-3 text-white bg-[#335b6f]">
+                                                        <div className="p-4 pt-2 pb-0">
+                                                            <div className="rounded-md my-2 w-fit px-3 text-white bg-[#335b6f]">
                                                                 Pallet:{" "}
                                                                 <span>
                                                                     {
@@ -810,6 +933,13 @@ function WoodSorting() {
                                                                     }
                                                                 </span>
                                                             </div>
+                                                            <div className="text-lg font-semibold">
+                                                                Quy cách:{" "}
+                                                                <span>
+                                                                    {pallet.QuyCach}
+                                                                </span>
+                                                            </div>
+                                                            
                                                         </div>
                                                         <div className="p-4 pt-2 space-y-1">
                                                             <div className="grid grid-cols-2">
@@ -817,7 +947,7 @@ function WoodSorting() {
                                                                     Số lượng:{" "}
                                                                 </div>
                                                                 <div className="font-semibold">
-                                                                    {parseInt(Math.floor(pallet.sum_quantity*1000000000/(pallet.thickness*pallet.width*pallet.length)))}
+                                                                    {pallet.sum_quantity}
                                                                 </div>
                                                             </div>
                                                             <div className="grid grid-cols-2">
@@ -898,7 +1028,10 @@ function WoodSorting() {
                                                             setSelectedYear(
                                                                 value
                                                             );
-                                                            setReloadAsyncSelectKey((prevKey) => prevKey + 1);
+                                                            setReloadAsyncSelectKey(
+                                                                (prevKey) =>
+                                                                    prevKey + 1
+                                                            );
                                                         }}
                                                     />
                                                 </div>
@@ -914,7 +1047,10 @@ function WoodSorting() {
                                                             setSelectedWeek(
                                                                 value
                                                             );
-                                                            setReloadAsyncSelectKey((prevKey) => prevKey + 1);
+                                                            setReloadAsyncSelectKey(
+                                                                (prevKey) =>
+                                                                    prevKey + 1
+                                                            );
                                                         }}
                                                         defaultValue={
                                                             selectedWeek
@@ -922,19 +1058,28 @@ function WoodSorting() {
                                                     />
                                                 </div>
                                                 <div className="col-span-2 3">
-                                                <AsyncSelect
-                                                    placeholder="Chọn pallet"
-                                                    key={asyncSelectKey}
-                                                    loadingMessage={() => "Đang tải..."}
-                                                    // id="pallet"
-                                                    defaultOptions
-                                                    // options={palletOptions}
-                                                    loadOptions={loadPalletOptions}
-                                                    onChange={(value) => {
-                                                        console.log("Selected Pallet:", value);
-                                                        setSelectedPallet(value);
-                                                    }}
-                                                />
+                                                    <AsyncSelect
+                                                        placeholder="Chọn pallet"
+                                                        key={asyncSelectKey}
+                                                        loadingMessage={() =>
+                                                            "Đang tải..."
+                                                        }
+                                                        // id="pallet"
+                                                        defaultOptions
+                                                        // options={palletOptions}
+                                                        loadOptions={
+                                                            loadPalletOptions
+                                                        }
+                                                        onChange={(value) => {
+                                                            console.log(
+                                                                "Selected Pallet:",
+                                                                value
+                                                            );
+                                                            setSelectedPallet(
+                                                                value
+                                                            );
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                             <button
@@ -964,83 +1109,180 @@ function WoodSorting() {
                                     </div>
                                 ) : palletTracingData.Code ? (
                                     <div className=" shadow-md my-1 p-3 border border-gray-300 rounded-lg">
-                                            <div className="uppercase font-semibold">
-                                                Thông tin pallet <span>{palletTracingData.Code}</span>
-                                            </div>
+                                        <div className="uppercase font-semibold">
+                                            Thông tin pallet{" "}
+                                            <span>
+                                                {palletTracingData.Code}
+                                            </span>
+                                        </div>
 
-                                            <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
+                                        <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
 
-                                            <div className="space-y-2">
-                                                <div className="w-full xl:flex lg:flex md:flex">
-                                                    <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
-                                                        Quy cách:
-                                                    </div>
-                                                    <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
-                                                        {palletTracingData.ItemName} ({parseInt(palletTracingData.CDay)}x{parseInt(palletTracingData.CRong)}x{parseInt(palletTracingData.CDai)})
-                                                    </div>
-                                                    <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
-                                                        {palletTracingData.ItemName} ({parseInt(palletTracingData.CDay)}x{parseInt(palletTracingData.CRong)}x{parseInt(palletTracingData.CDai)})
-                                                    </div>
+                                        {result.data.map((item, index) =>
+                                        <div className="space-y-1 mb-3">
+                                            <div className="w-full xl:flex lg:flex md:flex">
+                                                <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
+                                                    Quy cách:
                                                 </div>
-                                                <div className="w-full flex">
-                                                    <div className="w-1/4 font-semibold">
-                                                        Số lượng:
-                                                    </div>
-                                                    <div className="w-3/4">
-                                                        <span>{parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}</span> (T)
-                                                    </div>
+                                                <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
+                                                    {item.ItemName}{" "}
+                                                    ({item.QuyCach})
+                                                </div>
+                                                <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
+                                                    {item.ItemName}{" "}
+                                                    ({item.QuyCach})
                                                 </div>
                                             </div>
-
-                                            {/* COC Information */}
-                                            <div className="my-1 mt-4 border border-gray-300 shadow-sm rounded-lg">
-                                                <div className="my-2 px-3 font-semibold">
-                                                    Thông tin COC
+                                            <div className="w-full flex">
+                                                <div className="w-1/4 font-semibold">
+                                                    Số lượng:
                                                 </div>
-                                                <div className="relative overflow-x-auto sm:rounded-b-md border border-gray-200">
-                                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                                                        <thead className="text-xs text-gray-700 uppercase bg-[#E5E7EB] ">
-                                                            <tr>
-                                                                <th
-                                                                    scope="col"
-                                                                    className="px-6 py-2.5"
-                                                                >
-                                                                    Loại Gỗ
-                                                                </th>
-                                                                <th
-                                                                    scope="col"
-                                                                    className="px-6 py-2.5"
-                                                                >
-                                                                    Mã lô gỗ
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="text-[15px] text-gray-900 font-medium  ">
-                                                            <tr className="text-md odd:bg-white even:bg-gray-50 border-b ">
-                                                                <td
-                                                                    scope="row"
-                                                                    className="px-6 py-3 whitespace-nowrap "
-                                                                >
-                                                                    {palletTracingData.LoaiGo.Name}
-                                                                </td>
-                                                                <td className="px-6 py-3">
-                                                                    {palletTracingData.MaLo}
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
+                                                <div className="w-3/4">
+                                                    <span>
+                                                        {item.Qty_T}
+                                                    </span>{" "}
+                                                    (T)
                                                 </div>
                                             </div>
+                                        </div>
+                                        )}
 
-                                            {/* History Tracing */}
-                                            <div className="my-4  mt-4 border border-gray-200 rounded-lg">
-                                                <div className="my-3 mb-4 px-3 font-semibold">
-                                                    Lịch sử pallet
-                                                </div>
-                                                <ol className="xl:px-8 lg:px-8 md:px-8 px-4 ">
-                                                    <li className="border-l-2 border-blue-600">
+                                        {/* COC Information */}
+                                        <div className="my-1 mt-4 border border-gray-300 shadow-sm rounded-lg">
+                                            <div className="my-2 px-3 font-semibold">
+                                                Thông tin COC
+                                            </div>
+                                            <div className="relative overflow-x-auto sm:rounded-b-md border border-gray-200">
+                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                                                    <thead className="text-xs text-gray-700 uppercase bg-[#E5E7EB] ">
+                                                        <tr>
+                                                            <th
+                                                                scope="col"
+                                                                className="px-6 py-2.5"
+                                                            >
+                                                                Loại Gỗ
+                                                            </th>
+                                                            <th
+                                                                scope="col"
+                                                                className="px-6 py-2.5"
+                                                            >
+                                                                Mã lô gỗ
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="text-[15px] text-gray-900 font-medium  ">
+                                                        <tr className="text-md odd:bg-white even:bg-gray-50 border-b ">
+                                                            <td
+                                                                scope="row"
+                                                                className="px-6 py-3 whitespace-nowrap "
+                                                            >
+                                                                {
+                                                                    palletTracingData
+                                                                        .LoaiGo
+                                                                        .Name
+                                                                }
+                                                            </td>
+                                                            <td className="px-6 py-3">
+                                                                {
+                                                                    palletTracingData.MaLo
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* History Tracing */}
+                                        <div className="my-4  mt-4 border border-gray-200 rounded-lg">
+                                            <div className="my-3 mb-4 px-3 font-semibold">
+                                                Lịch sử pallet
+                                            </div>
+                                            <ol className="xl:px-8 lg:px-8 md:px-8 px-4 ">
+                                                <li className="border-l-2 border-blue-600">
+                                                    <div className="md:flex flex-start">
+                                                        <div className="bg-blue-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
+                                                            <svg
+                                                                aria-hidden="true"
+                                                                focusable="false"
+                                                                data-prefix="fas"
+                                                                className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
+                                                                role="img"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 448 512"
+                                                            >
+                                                                <path
+                                                                    fill="currentColor"
+                                                                    d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                                                                ></path>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
+                                                            <div className="flex  items-center justify-between mb-2">
+                                                                <a className="font-semibold text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-lg">
+                                                                    Chờ sấy
+                                                                </a>
+                                                                <a
+                                                                    href="#!"
+                                                                    className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
+                                                                >
+                                                                    Số lượng:{" "}
+                                                                    {result.totalQty_T}{" "}
+                                                                    (T)
+                                                                </a>
+                                                            </div>
+                                                            <div className="space-y-1 max-w-lg ">
+                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                    <div className="font-semibold">
+                                                                        Ngày làm
+                                                                        việc:
+                                                                    </div>
+                                                                    <div>
+                                                                        {
+                                                                            palletTracingData.ngaytao
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                    <div className="font-semibold">
+                                                                        Người
+                                                                        thực
+                                                                        hiện:
+                                                                    </div>
+                                                                    <div>
+                                                                        {
+                                                                            palletTracingData.CreateBy
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                    <div className="font-semibold">
+                                                                        Xuất
+                                                                        đến:
+                                                                    </div>
+                                                                    <div>
+                                                                        Kho sấy
+                                                                    </div>
+                                                                </div>
+                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                    <div className="font-semibold">
+                                                                        Ngày
+                                                                        nhận:
+                                                                    </div>
+                                                                    <div>
+                                                                        {
+                                                                            palletTracingData.LoadedIntoKilnDate
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                {palletTracingData.LoadedIntoKilnDate && (
+                                                    <li className="border-l-2 border-purple-600">
                                                         <div className="md:flex flex-start">
-                                                            <div className="bg-blue-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
+                                                            <div className="bg-purple-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
                                                                 <svg
                                                                     aria-hidden="true"
                                                                     focusable="false"
@@ -1057,191 +1299,144 @@ function WoodSorting() {
                                                                 </svg>
                                                             </div>
                                                             <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                <div className="flex  items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-lg">
-                                                                        Chờ sấy
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
+                                                                        Đã vào
+                                                                        lò
                                                                     </a>
                                                                     <a
                                                                         href="#!"
-                                                                        className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
+                                                                        className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
-                                                                        Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
-                                                                        {" "}(T)
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {result.totalQty_T}{" "}
+                                                                        (T)
                                                                     </a>
                                                                 </div>
-                                                                <div className="space-y-1 max-w-lg ">
+                                                                <div className="space-y-1 max-w-lg">
                                                                     <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
-                                                                            Ngày làm
+                                                                            Ngày
+                                                                            làm
                                                                             việc:
                                                                         </div>
                                                                         <div>
-                                                                        {palletTracingData.ngaytao}
+                                                                            {
+                                                                                palletTracingData.LoadedIntoKilnDate
+                                                                            }
                                                                         </div>
                                                                     </div>
                                                                     <div className="xl:grid lg:grid md:grid grid-cols-2">
                                                                         <div className="font-semibold">
-                                                                            Người thực
+                                                                            Người
+                                                                            thực
                                                                             hiện:
                                                                         </div>
                                                                         <div>
-                                                                        {palletTracingData.CreateBy}
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Xuất đến:
-                                                                        </div>
-                                                                        <div>
-                                                                            Kho sấy
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày nhận:
-                                                                        </div>
-                                                                        <div>
-                                                                        {palletTracingData.LoadedIntoKilnDate}
+                                                                            {
+                                                                                palletTracingData.LoadedBy
+                                                                            }
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </li>
-                                                    {palletTracingData.LoadedIntoKilnDate && (
-                                                        <li className="border-l-2 border-purple-600">
-                                                            <div className="md:flex flex-start">
-                                                                <div className="bg-purple-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                                    <svg
-                                                                        aria-hidden="true"
-                                                                        focusable="false"
-                                                                        data-prefix="fas"
-                                                                        className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                        role="img"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        viewBox="0 0 448 512"
+                                                )}
+                                                {palletTracingData.runDate && (
+                                                    <li className="border-l-2 border-red-600">
+                                                        <div className="md:flex flex-start">
+                                                            <div className="bg-red-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
+                                                                <svg
+                                                                    aria-hidden="true"
+                                                                    focusable="false"
+                                                                    data-prefix="fas"
+                                                                    className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
+                                                                    role="img"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 448 512"
+                                                                >
+                                                                    <path
+                                                                        fill="currentColor"
+                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                                                                    ></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
+                                                                        Đang sấy
+                                                                    </a>
+                                                                    <a
+                                                                        href="#!"
+                                                                        className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
-                                                                        <path
-                                                                            fill="currentColor"
-                                                                            d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                        ></path>
-                                                                    </svg>
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {result.totalQty_T}{" "}
+                                                                        (T)
+                                                                    </a>
                                                                 </div>
-                                                                <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
-                                                                            Đã vào lò
-                                                                        </a>
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
-                                                                        {" "}(T)
-                                                                        </a>
-                                                                    </div>
-                                                                    <div className="space-y-1 max-w-lg">
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Ngày làm
-                                                                                việc:
-                                                                            </div>
-                                                                            <div>
-                                                                                {palletTracingData.LoadedIntoKilnDate}
-                                                                            </div>
+                                                                <div className="space-y-1 max-w-lg">
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                        <div className="font-semibold">
+                                                                            Ngày
+                                                                            làm
+                                                                            việc:
                                                                         </div>
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Người thực
-                                                                                hiện:
-                                                                            </div>
-                                                                            <div>
-                                                                            {palletTracingData.LoadedBy}
-                                                                            </div>
+                                                                        <div>
+                                                                            {
+                                                                                palletTracingData.runDate
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                        <div className="font-semibold">
+                                                                            Người
+                                                                            thực
+                                                                            hiện:
+                                                                        </div>
+                                                                        <div>
+                                                                            {
+                                                                                palletTracingData.RunBy
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                        <div className="font-semibold">
+                                                                            Xuất
+                                                                            đến:
+                                                                        </div>
+                                                                        <div>
+                                                                            Kho
+                                                                            sấy
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
+                                                                        <div className="font-semibold">
+                                                                            Ngày
+                                                                            nhận:
+                                                                        </div>
+                                                                        <div>
+                                                                            {
+                                                                                palletTracingData.CompletedDate
+                                                                            }
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </li>
-                                                    )}
-                                                    {palletTracingData.runDate && (
-                                                        <li className="border-l-2 border-red-600">
-                                                            <div className="md:flex flex-start">
-                                                                <div className="bg-red-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                                    <svg
-                                                                        aria-hidden="true"
-                                                                        focusable="false"
-                                                                        data-prefix="fas"
-                                                                        className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                        role="img"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        viewBox="0 0 448 512"
-                                                                    >
-                                                                        <path
-                                                                            fill="currentColor"
-                                                                            d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                        ></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                    <div className="flex items-center justify-between mb-2">
-                                                                        <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
-                                                                            Đang sấy
-                                                                        </a>
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                                Số lượng: {parseInt(Math.floor(palletTracingData.Qty*1000000000/(palletTracingData.CDai*palletTracingData.CRong*palletTracingData.CDay)))}
-                                                                        {" "}(T)
-                                                                        </a>
-                                                                    </div>
-                                                                    <div className="space-y-1 max-w-lg">
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Ngày làm
-                                                                                việc:
-                                                                            </div>
-                                                                            <div>
-                                                                                {palletTracingData.runDate}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Người thực
-                                                                                hiện:
-                                                                            </div>
-                                                                            <div>
-                                                                            {palletTracingData.RunBy}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Xuất đến:
-                                                                            </div>
-                                                                            <div>
-                                                                                Kho sấy
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                            <div className="font-semibold">
-                                                                                Ngày nhận:
-                                                                            </div>
-                                                                            <div>
-                                                                                {palletTracingData.CompletedDate}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    )}  
-                                                </ol>
-                                            </div>
-                                    </div> 
+                                                        </div>
+                                                    </li>
+                                                )}
+                                            </ol>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col justify-center text-center text-gray-400">
-                                        <div>Không có thông tin để hiển thị.</div>
+                                        <div>
+                                            Không có thông tin để hiển thị.
+                                        </div>
                                     </div>
                                 )}
                             </ModalBody>

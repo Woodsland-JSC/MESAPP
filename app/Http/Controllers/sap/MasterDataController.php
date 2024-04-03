@@ -26,19 +26,22 @@ class MasterDataController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'SELECT distinct T0."ItemCode",T2."ItemName"||?||T1."BatchNum" "ItemName",T1."BatchNum" FROM OITW T0
-                INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode"
-                and T0."ItemCode" = T1."ItemCode"
-                Inner join OITM T2 on T0."ItemCode" = T2."ItemCode"
-                inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode"
-                where T1."Quantity" > 0  and
-                t3."U_Flag" IN (?,?) AND "BPLid"=?
-                and T2."Series"=72';
+            $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
+            INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+            INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+            INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+            WHERE T1."Quantity" > 0 AND
+            T3."U_Flag" IN (?, ?) AND 
+            T3."BPLid" = ? AND 
+            T3."U_FAC" = ? AND 
+            T2."Series" = 72';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [' ', 'TS', 'SS', Auth::user()->branch])) {
+            $branch = Auth::user()->branch;
+            $plant = Auth::user()->plant;
+            if (!odbc_execute($stmt, [' ', 'TS', 'SS', $branch, $plant])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -378,25 +381,25 @@ class MasterDataController extends Controller
     // {
     //     try {
     //         $userId = $request->input('userId');
-    
+
     //         // Kiểm tra người dùng có id = userId xem trường sap_id có rỗng không
     //         $user = User::findOrFail($userId);
     //         $sapId = $user->sap_id;
-    
+
     //         // Xây dựng câu truy vấn SQL dựa trên trạng thái của sap_id
     //         if ($sapId === null) {
     //             $userData = User::whereNotNull('sap_id')->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-    
+
     //             $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
     //         } else {
     //             $userData = User::whereNotNull('sap_id')->where('id', '!=', $userId)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-    
+
     //             $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
     //         }
-    
+
     //         // Kết nối đến cơ sở dữ liệu SAP
     //         $conDB = (new ConnectController)->connect_sap();
-    
+
     //         // Chuẩn bị và thực thi truy vấn SQL
     //         $stmt = odbc_prepare($conDB, $query);
     //         if (!$stmt) {
@@ -405,14 +408,14 @@ class MasterDataController extends Controller
     //         if (!odbc_execute($stmt)) {
     //             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
     //         }
-    
+
     //         // Lấy kết quả và đóng kết nối
     //         $results = array();
     //         while ($row = odbc_fetch_array($stmt)) {
     //             $results[] = $row;
     //         }
     //         odbc_close($conDB);
-    
+
     //         // Trả về kết quả dưới dạng JSON
     //         return response()->json($results, 200);
     //     } catch (\Exception $e) {
@@ -430,7 +433,7 @@ class MasterDataController extends Controller
         try {
             $userId = $request->input('userId');
             $query = '';
-    
+
             if ($userId) {
                 // Kiểm tra người dùng có id = userId xem trường sap_id có rỗng không
                 $user = User::find($userId);
@@ -439,21 +442,21 @@ class MasterDataController extends Controller
                     throw new \Exception('User with ID ' . $userId . ' not found.');
                 }
                 $sapId = $user->sap_id;
-    
+
                 // Xây dựng câu truy vấn SQL dựa trên trạng thái của sap_id
                 $userData = User::whereNotNull('sap_id')->where('id', '!=', $userId)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-    
+
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             } else {
                 // Trường hợp không có userId được cung cấp
                 $userData = User::whereNotNull('sap_id')->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-    
+
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             }
-    
+
             // Kết nối đến cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
-    
+
             // Chuẩn bị và thực thi truy vấn SQL
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
@@ -462,14 +465,14 @@ class MasterDataController extends Controller
             if (!odbc_execute($stmt)) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
-    
+
             // Lấy kết quả và đóng kết nối
             $results = array();
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
             odbc_close($conDB);
-    
+
             // Trả về kết quả dưới dạng JSON
             return response()->json($results, 200);
         } catch (\Exception $e) {
@@ -481,7 +484,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-    
+
 
     function getAllSAPUser()
     {
@@ -627,6 +630,7 @@ class MasterDataController extends Controller
         }
     }
 
+    // Xóa các quy cách trả về 0
     function getStockByItemnew($id, Request $request)
     {
         try {
@@ -635,7 +639,8 @@ class MasterDataController extends Controller
                 'batchnum' => 'required'
             ]);
             if ($validator->fails()) {
-                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+                // Return validation errors with a 422 Unprocessable Entity status code
             }
             $conDB = (new ConnectController)->connect_sap();
             $filter = "";
@@ -650,19 +655,21 @@ class MasterDataController extends Controller
             $warehouse = Warehouse::where('branch', Auth::user()->branch)->where('flag', $flag)
                 ->where('FAC', Auth::user()->plant)
                 ->first()->WhsCode;
+            // T0 OITW is Warehouse Table from SAP (WhsCode)
+            // T1 OIBT là bảng lưu thành phẩm ghi nhận
+            // T2 OITM là bảng lưu Item
+            // 
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
-                'where T1."Quantity" >0 and T0."ItemCode"= ? and t3."WhsCode"=? and T1."BatchNum" =? and "BPLid" = ? and ' . $filter;
-                
+                'where T1."Quantity" > 0 and T0."ItemCode"= ? and t3."WhsCode"=? and T1."BatchNum" =? and "BPLid" = ? and ' . $filter;
             $stmt = odbc_prepare($conDB, $query);
+
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
             if (!odbc_execute($stmt, [$id, $warehouse, $request->batchnum, Auth::user()->branch, 'TS'])) {
-                // Handle execution error
-                // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
@@ -670,6 +677,8 @@ class MasterDataController extends Controller
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
+
+            // dd($results); 
 
             odbc_close($conDB);
             $results = array_filter($results, fn ($item) => (float) $item['Quantity'] > 0);

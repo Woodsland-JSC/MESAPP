@@ -121,6 +121,9 @@ function ControllerCard(props) {
         loadedPalletList,
         onReload,
         onCallback,
+        onReloadPalletList,
+        palletOptions,
+        palletListLoading
     } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -284,7 +287,10 @@ function ControllerCard(props) {
 
     // Get data Select
     useEffect(() => {
-        loadPallets();
+        // if(reason){
+        //     loadPallets();
+        // }
+        
         setCheckboxStates({
             CT1: checkboxData.CT1 || 0,
             CT2: checkboxData.CT2 || 0,
@@ -300,8 +306,7 @@ function ControllerCard(props) {
             CT12: checkboxData.CT12 || 0,
         });
         // loadBOWData();
-        console.log();
-    }, []);
+    }, [reason]);
 
     const handleSave = async () => {
         console.log("02. Dữ liệu checkbox: ", checkboxStates);
@@ -366,18 +371,6 @@ function ControllerCard(props) {
         console.log(checkedCount === 12 ? "Đạt" : "Không đạt");
     }, [checkboxStates]);
 
-    const loadPallets = async () => {
-        setPalletLoading(true);
-        const data = await palletsApi.getPalletList(reason);
-        const options = data.map((item) => ({
-            value: item.palletID,
-            label: `${item.Code}-${item.MaLo}-${item.LyDo}`,
-        }));
-        console.log("Danh sách pallet:", data);
-        setPalletData(options);
-        setPalletLoading(false);
-    };
-
     const handleLoadIntoKiln = async (reason, callback) => {
         try {
             if (!selectedPallet || !selectedPallet.value) {
@@ -399,7 +392,7 @@ function ControllerCard(props) {
             setSelectedPallet(null);
 
             // // Reload pallets
-            await loadPallets();
+            onReloadPalletList(reason);
             if (typeof onCallback === "function") {
                 onCallback();
             }
@@ -522,16 +515,27 @@ function ControllerCard(props) {
                         >
                             Chọn pallet
                         </label>
-                        <Select
+                        {/* <Select
                             placeholder="Chọn pallet"
-                            value={selectedPallet}
-                            loadOptions={loadPallets}
-                            options={palletData}
+                            // value={selectedPallet}
+                            loadOptions={onReloadPalletList}
+                            options={palletOptions}
                             onChange={(value) => {
                                 console.log("Selected Pallet:", value);
                                 setSelectedPallet(value);
                             }}
-                            isLoading={isPalletLoading}
+                            isLoading={palletListLoading}
+                        /> */}
+                        <Select
+                            placeholder="Chọn pallet"
+                            // value={selectedPallet}
+                            loadOptions={onReloadPalletList}
+                            options={palletOptions}
+                            onChange={(value) => {
+                                console.log("Selected Pallet:", value);
+                                setSelectedPallet(value);
+                            }}
+                            isLoading={palletListLoading}
                         />
                     </div>
                     <button
@@ -564,14 +568,14 @@ function ControllerCard(props) {
                             </label>
                             <Select
                                 placeholder="Chọn pallet"
-                                value={selectedPallet}
-                                loadOptions={loadPallets}
-                                options={palletData}
+                                // value={selectedPallet}
+                                loadOptions={onReloadPalletList}
+                                options={palletOptions}
                                 onChange={(value) => {
                                     console.log("Selected Pallet:", value);
                                     setSelectedPallet(value);
                                 }}
-                                isLoading={isPalletLoading}
+                                isLoading={palletListLoading}
                             />
                         </div>
                         <button

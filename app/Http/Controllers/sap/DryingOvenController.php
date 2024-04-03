@@ -33,13 +33,14 @@ class DryingOvenController extends Controller
         $result = [];
 
         foreach ($pallets as $pallet) {
-            $sumQuantity = $pallet->details->sum('Qty');
+            $sumQuantity = $pallet->details->sum('Qty_T');
             $firstDetail = $pallet->details->first();
 
             $result[] = [
                 'pallet_id' => $pallet->palletID,
                 'pallet_code' => $pallet->Code,
                 'created_date' => $pallet->NgayNhap,
+                'QuyCach' => $pallet->QuyCach,
                 'sum_quantity' => $sumQuantity,
                 'length' => $firstDetail ? $firstDetail->CDai : 0,
                 'width' => $firstDetail ? $firstDetail->CRong : null,
@@ -386,6 +387,7 @@ class DryingOvenController extends Controller
     //         $res = null;
     //         $res2 = null;
     //         $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
+    //         $quyCach = $request->input('Details.0.QuyCach');
 
     //         $towarehouse = Warehouse::where('flag', 'CS')
     //             ->WHERE('branch', Auth::user()->branch)
@@ -395,22 +397,31 @@ class DryingOvenController extends Controller
     //         $current_week = now()->format('W');
     //         $current_year = now()->year;
 
-    //         $recordCount = Pallet::whereYear('created_at', $current_year)
-    //             ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-    //             ->count() + 1;
+    //         // Kiểm tra xem QuyCach đã tồn tại trong bảng pallet hay chưa
+    //         $existingPallet = Pallet::where('QuyCach', $quyCach)->where('activeStatus', 0)->latest()->first();
+    //         // Modify so it will only takes some serveral fields
 
-    //         // Tạo mới Pallet và thêm mã nhà máy vào 'Code'
-    //         $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT)]);
+    //         if ($existingPallet) {
+    //             $pallet = $existingPallet;
+    //             $isDuplicate = true;
+    //         } else {
+    //             $recordCount = Pallet::whereYear('created_at', $current_year)
+    //                 ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+    //                 ->count() + 1;
+
+    //             // Tạo mới Pallet và thêm mã nhà máy vào 'Code'
+    //             $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT)]);
+    //             $isDuplicate = false;
+    //         }
 
     //         // Lấy danh sách chi tiết pallet từ request
     //         $palletDetails = $request->input('Details', []);
 
-    //         // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo
+    //         // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo hoặc pallet đã tồn tại
     //         $ldt = [];
     //         $ldt2 = [];
     //         $totalkl = 0;
     //         $toQty = 0;
-    //         $quyCach = '';
 
     //         foreach ($palletDetails as $detailData) {
     //             $datainsert = [];
@@ -447,9 +458,6 @@ class DryingOvenController extends Controller
     //             ];
     //             $toQty += (float)$datainsert['Qty'];
     //             $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'] / 1000000000;
-
-    //             // Add new QuyCach fields
-    //             $quyCach .= $detailData['CDay'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDai'];
     //         }
 
     //         // Data body
@@ -496,40 +504,38 @@ class DryingOvenController extends Controller
     //                 'error' => $res['error'],
     //             ], 500);
     //         } else {
-
-    //             Pallet::where('palletID', $pallet->palletID)->update([
-    //                 'DocNum' => $res['DocNum'],
-    //                 'DocEntry' => $res['DocEntry'],
-    //                 'palletSAP' => $res2['DocEntry'],
-    //                 'CreateBy' => auth()->id(),
-    //                 'QuyCach' => $quyCach
-    //             ]);
+    //             if (!$isDuplicate) {
+    //                 Pallet::where('palletID', $pallet->palletID)->update([
+    //                     'DocNum' => $res['DocNum'],
+    //                     'DocEntry' => $res['DocEntry'],
+    //                     'palletSAP' => $res2['DocEntry'],
+    //                     'CreateBy' => auth()->id(),
+    //                     'QuyCach' => $quyCach,
+    //                     'activeStatus' => 0,
+    //                 ]);
+    //             }
     //             DB::commit();
+
+    //             // Trả về thông tin pallet và các phản hồi từ SAP
     //             return response()->json([
     //                 'message' => 'Pallet created successfully',
     //                 'data' => [
+    //                     'isDuplicate' => $isDuplicate,
     //                     'pallet' => $pallet,
     //                     'res1' => $res,
     //                     'res2' => $res2,
     //                 ]
     //             ]);
     //         }
-    //         DB::commit();
-    //         // Trả về thông tin Pallet và chi tiết đã tạo
-    //         return response()->json([
-    //             'message' => 'Pallet created successfully',
-    //             'data' => [
-    //                 'pallet' => $pallet,
-    //             ],
-
-    //         ]);
     //     } catch (\Exception | QueryException $e) {
     //         // Rollback in case of an exception
     //         DB::rollBack();
 
     //         // Log or handle the exception as needed
     //         return response()->json([
-    //             'message' => 'Failed to create pallet and details', 'error' => $e->getMessage(), 'res1' => $res,
+    //             'message' => 'Failed to create pallet and details',
+    //             'error' => $e->getMessage(),
+    //             'res1' => $res,
     //             'res2' => $res2,
     //         ], 500);
     //     }
@@ -543,7 +549,7 @@ class DryingOvenController extends Controller
             $res = null;
             $res2 = null;
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
-            $quyCach = $request->input('Details.0.QuyCach');
+            $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->toArray();
 
             $towarehouse = Warehouse::where('flag', 'CS')
                 ->WHERE('branch', Auth::user()->branch)
@@ -553,9 +559,14 @@ class DryingOvenController extends Controller
             $current_week = now()->format('W');
             $current_year = now()->year;
 
-            // Kiểm tra xem QuyCach đã tồn tại trong bảng pallet hay chưa
-            $existingPallet = Pallet::where('QuyCach', $quyCach)->where('activeStatus', 0)->latest()->first();
-            // Modify so it will only takes some serveral fields
+            $existingPallet = Pallet::where('activeStatus', 0)
+                ->where(function ($query) use ($quyCachList) {
+                    foreach ($quyCachList as $quyCach) {
+                        $query->orWhere('QuyCach', 'like', '%' . $quyCach . '%');
+                    }
+                })
+                ->latest()
+                ->first();
 
             if ($existingPallet) {
                 $pallet = $existingPallet;
@@ -565,15 +576,13 @@ class DryingOvenController extends Controller
                     ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
                     ->count() + 1;
 
-                // Tạo mới Pallet và thêm mã nhà máy vào 'Code'
-                $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT)]);
+                $combinedQuyCach = implode('_', $quyCachList);
+                $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT), 'QuyCach' => $combinedQuyCach]);
                 $isDuplicate = false;
             }
 
-            // Lấy danh sách chi tiết pallet từ request
             $palletDetails = $request->input('Details', []);
 
-            // Tạo các chi tiết pallet và liên kết chúng với Pallet mới tạo hoặc pallet đã tồn tại
             $ldt = [];
             $ldt2 = [];
             $totalkl = 0;
@@ -591,6 +600,7 @@ class DryingOvenController extends Controller
                 $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
                 $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
                 $datainsert['Qty'] = (float)$detailData['Qty'] * (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
+                $datainsert['Qty_T'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
                 pallet_details::create($datainsert);
                 $ldt[] = [
                     "ItemCode" => $detailData['ItemCode'],
@@ -616,7 +626,6 @@ class DryingOvenController extends Controller
                 $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'] / 1000000000;
             }
 
-            // Data body
             $body = [
                 "U_Pallet" => $pallet->Code,
                 "U_CreateBy" => Auth::user()->sap_id,
@@ -633,7 +642,6 @@ class DryingOvenController extends Controller
                 "G_PALLETLCollection" => $ldt2
             ];
 
-            // Make a request to the service layer
             $response = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
@@ -652,7 +660,6 @@ class DryingOvenController extends Controller
             $res = $response->json();
             $res2 = $response2->json();
 
-            // update data
             if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();
                 return response()->json([
@@ -666,13 +673,11 @@ class DryingOvenController extends Controller
                         'DocEntry' => $res['DocEntry'],
                         'palletSAP' => $res2['DocEntry'],
                         'CreateBy' => auth()->id(),
-                        'QuyCach' => $quyCach,
                         'activeStatus' => 0,
                     ]);
                 }
                 DB::commit();
 
-                // Trả về thông tin pallet và các phản hồi từ SAP
                 return response()->json([
                     'message' => 'Pallet created successfully',
                     'data' => [
@@ -684,10 +689,8 @@ class DryingOvenController extends Controller
                 ]);
             }
         } catch (\Exception | QueryException $e) {
-            // Rollback in case of an exception
             DB::rollBack();
 
-            // Log or handle the exception as needed
             return response()->json([
                 'message' => 'Failed to create pallet and details',
                 'error' => $e->getMessage(),
@@ -696,6 +699,8 @@ class DryingOvenController extends Controller
             ], 500);
         }
     }
+
+
 
     function getLoaiGo()
     {
@@ -752,6 +757,7 @@ class DryingOvenController extends Controller
             'pallet_details.ItemCode',
             'pallet_details.ItemName',
             'pallet_details.Qty',
+            'pallet_details.Qty_T',
             'pallet_details.CDai',
             'pallet_details.CRong',
             'pallet_details.CDay',

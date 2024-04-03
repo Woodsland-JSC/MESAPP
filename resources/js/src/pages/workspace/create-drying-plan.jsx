@@ -23,11 +23,14 @@ import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import moment from "moment";
 import Loader from "../../components/Loader";
+import useAppContext from "../../store/AppContext";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(true);
     const [isKilnLoading, setIsKilnLoading] = useState(false);
+
+    const { user } = useAppContext();
 
     const [kiln, setKiln] = useState([]);
     const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
@@ -113,7 +116,7 @@ function CreateDryingPlan() {
         setIsKilnLoading(false);
     };
 
-    const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0);
+    const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0 && bowCard.plant === user.plant);
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,

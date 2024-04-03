@@ -7,10 +7,12 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Loader from "../../components/Loader";
+import useAppContext from "../../store/AppContext";
 
 function DryingWoodChecking() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
+    const { user } = useAppContext();
 
     useEffect(() => {
         palletsApi
@@ -125,8 +127,8 @@ function DryingWoodChecking() {
                         {bowCards
                             ?.map(
                                 (bowCard, index) =>
-                                    (bowCard.Status === 3 ||
-                                        bowCard.Status === 4) && (
+                                    ((bowCard.Status === 3 ||
+                                        bowCard.Status === 4) && bowCard.plant === usersApi.plant) && (
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}

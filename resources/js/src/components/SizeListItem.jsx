@@ -15,7 +15,7 @@ import palletsApi from "../api/palletsApi";
 import toast from "react-hot-toast";
 
 function SizeListItem(props) {
-    const { id, size, pallet, Qty, weight, onDelete, planID } = props;
+    const { id, size, reason, pallet, Qty, weight, onDelete, planID, onReload, onReloadPalletList } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -24,14 +24,7 @@ function SizeListItem(props) {
 
     const type = searchParams.get("type");
 
-    const formatSizeQty = (sizeQty) => {
-        const dimensions = sizeQty.split("*");
-        const formattedDimensions = dimensions.map((dimension) => {
-          const number = parseFloat(dimension);
-          return number % 1 === 0 ? number.toFixed(0) : number.toFixed(1);
-        });
-        return formattedDimensions.join("*");
-    }
+    const [size1, size2] = size.split('_')
 
     const handleDelete = () => {
       const deleteData  = {
@@ -41,9 +34,11 @@ function SizeListItem(props) {
 
       try{
         palletsApi
-          .deletePallet(deleteData )
+          .deletePallet(deleteData)
           .then((response) => {
               toast.success("Xóa thành công.");
+              onReload(planID);
+              onReloadPalletList(reason);
               onClose();
               onDelete();
           })
@@ -100,13 +95,14 @@ function SizeListItem(props) {
             </Modal>
             <div className="hidden">{id}</div>
 
-            <div className="text-left space-y-1 font-medium p-4 py-3 border-b border-gray-200 w-full">
+            <div className="font-medium p-4 py-3 border-b border-gray-200 w-full">
                 {/* <div className="font-semibold"><span>{formatSizeQty(size)}</span></div> */}
-                <div>KT: <span>{formatSizeQty(size)}</span></div>
+                <div className="w-full"><span className="w-1/4">KT: </span> <span className="w-full">{size1}</span></div>
+                {size2?<div className="w-full "><span className="w-1/4 text-transparent">KT: </span> <span className="w-full">{size2}</span></div>:null}
             </div>
 
             <div className="text-gray-600 space-y-2 py-3 p-4">
-                <div className="">Pallet: {pallet}</div>
+                {/* <div className="">Pallet: {pallet}</div> */}
                 <div className="">SL: {Qty} (T)</div>
                 <div className="">KL: {weight} (m³)</div>
             </div>

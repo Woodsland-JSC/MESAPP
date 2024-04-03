@@ -42,6 +42,7 @@ class PlanController extends Controller
             DB::beginTransaction();
             $PlanData = $request->only(['Oven', 'Reason', 'Method', 'Time']);
             $PlanData['CreateBy'] = Auth::user()->id;
+            $PlanData['plant'] = Auth::user()->plant;
             // $PlanData['PlanDate'] = Carbon::now()->addDays($request->input('Time'));
             $plandryings = plandryings::create($PlanData);
 
@@ -74,7 +75,7 @@ class PlanController extends Controller
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->select('a.*')
             ->where('b.branch', '=', Auth::user()->branch)
-            ->where('b.plant', '=', Auth::user()->plant) 
+            ->where('b.plant', '=', Auth::user()->plant)
             ->where('a.Status', '<>', '4')
             ->get();
 
@@ -144,59 +145,6 @@ class PlanController extends Controller
     }
 
     //vào lò
-    // function productionBatch(Request $request)
-    // {
-    //     $id = $request->input('PlanID');
-    //     $pallet = $request->input('PalletID');
-    //     DB::beginTransaction();
-    //     try {
-    //         // Check if the referenced PlanID exists in the plandryings table
-    //         $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
-
-    //         if (!$existingPlan) {
-    //             throw new \Exception('Lò không hợp lệ.');
-    //         }
-    //         $existingPallet = plandetail::where('pallet', $pallet)->count();
-    //         if ($existingPallet > 1) {
-    //             throw new \Exception('Pallet đã được assign.');
-    //         }
-    //         $data = pallet_details::where('palletID', $pallet)->first();
-
-    //         plandetail::create([
-    //             'PlanID' => $id,
-    //             'pallet' => $pallet,
-    //             'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
-    //             'Qty' => $data->Qty,
-    //             'Mass' => $data->CDay * $data->CRong * $data->CDai * $data->Qty,
-    //         ]);
-
-    //         DB::commit();
-    //         $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
-    //             ->selectRaw('COUNT(*) as count, SUM(Mass) as sumMass')->first();
-
-    //         plandryings::where('PlanID', $id)->update([
-    //             'Status' => 1,
-    //             'TotalPallet' => $aggregateData->count,
-    //             'Mass' => $aggregateData->sumMass ?: 0,
-    //         ]);
-
-    //         return response()->json([
-    //             'message' => 'successfully',
-    //             [
-    //                 'data' => $existingPlan,
-    //             ],
-
-    //         ], 200);
-    //     } catch (\Exception | QueryException $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'error' => false,
-    //             'status_code' => 500,
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     function productionBatch(Request $request)
     {
         $id = $request->input('PlanID');
@@ -216,23 +164,36 @@ class PlanController extends Controller
                 throw new \Exception('Pallet đã được assign.');
             }
             $data = pallet_details::where('palletID', $pallet)->first();
-            $totalQty = pallet_details::where('palletID', $pallet)->sum('Qty');
+            $quyCach = Pallet::where('PalletID', $pallet)->pluck('QuyCach')->first();
+            $totalQty = pallet_details::where('palletID', $pallet)->sum('Qty_T');
+            $totalMass = pallet_details::where('palletID', $pallet)->sum('Qty');
 
             plandetail::create([
                 'PlanID' => $id,
                 'pallet' => $pallet,
                 'palletCode' => $data->ItemCode,
-                'size' => "{$data->CDay}*{$data->CRong}*{$data->CDai}",
-                'Qty' => $totalQty * 1000000000 / ($data->CDay * $data->CRong * $data->CDai),
-                'Mass' => $totalQty,
+                'size' => $quyCach,
+                'Qty' => $totalQty,
+                'Mass' => $totalMass,
             ]);
 
             // Update Pallet table
             Pallet::where('palletID', $pallet)->update([
                 'LoadedBy' => $userID,
                 'LoadedIntoKilnDate' => $currentTime,
-                'activStatus' => 1,
+                'activeStatus' => 1,
             ]);
+
+            $totalMass = plandetail::where('PlanID', $request->PlanID)
+                ->sum('Mass');
+            $totalPallet = plandetail::where('PlanID', $request->PlanID)
+                ->count();
+
+            plandryings::where('PlanID', $request->PlanID)
+                ->update([
+                    'Mass' => $totalMass,
+                    'TotalPallet' => $totalPallet
+                ]);
 
             DB::commit();
             $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
@@ -638,6 +599,7 @@ class PlanController extends Controller
         // Check if the oven is valid
         $check = plandryings::where('PlanID', $request->PlanID)->first();
 
+
         if ($check) {
             if ($check->Status == 1) {
                 // Set 'LoadedBy' and 'LoadedIntoKilnDate' to null
@@ -652,6 +614,17 @@ class PlanController extends Controller
                 plandetail::where('pallet', $request->PalletID)
                     ->where('PlanID', $request->PlanID)
                     ->delete();
+
+                $totalMass = plandetail::where('PlanID', $request->PlanID)
+                    ->sum('Mass');
+                $totalPallet = plandetail::where('PlanID', $request->PlanID)
+                    ->count();
+
+                plandryings::where('PlanID', $request->PlanID)
+                    ->update([
+                        'Mass' => $totalMass,
+                        'TotalPallet' => $totalPallet
+                    ]);
             } else {
                 return response()->json(['error' => 'Trạng thái lò không hợp lệ'], 501);
             }

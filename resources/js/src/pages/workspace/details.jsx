@@ -56,6 +56,11 @@ function Details() {
     });
     const [CT11Data, setCT11Data] = useState([]);
     const [CT12Data, setCT12Data] = useState([]);
+
+    // State vào lò
+    const [palletOptions, setPalletOptions] = useState([]);
+    const [palletListLoading, setPalletListLoading] = useState(true);
+
     const [loadedPalletList, setLoadedPalletList] = useState([]);;
     const [palletData, setPalletData] = useState([]);
     
@@ -108,6 +113,23 @@ function Details() {
             });
     }, []);
 
+    useEffect(() => {
+        if(BOWData.Reason){
+            loadPallets(BOWData.Reason);
+        }
+    }, [BOWData.Reason]);
+
+    const loadPallets = async (reason) => {
+        setPalletListLoading(true);
+        const data = await palletsApi.getPalletList(BOWData.Reason);
+        const options = data.map((item) => ({
+            value: item.palletID,
+            label: `${item.Code}-${item.MaLo}-${item.LyDo}`,
+        }));
+        setPalletOptions(options);
+        setPalletListLoading(false);
+    };
+
     const updateData = async () => {
         palletsApi
         .getBOWById(id)
@@ -146,7 +168,8 @@ function Details() {
         })
     };
 
-    // return id ? (
+    // const totalMass = BOWData.details.reduce((acc, detail) => acc + parseFloat(detail.Mass), 0);
+
     return (
         <Layout>
             <div>
@@ -204,8 +227,8 @@ function Details() {
                                                       )
                                                 : "Invalid Date"
                                         }
-                                        palletQty={loadedPalletList?.length}
-                                        weight={BOWData.Mass}
+                                        palletQty={BOWData.details?.length}
+                                        weight={BOWData.Mass} 
                                     />
                                 </Skeleton>
                                 <div className="col-span-2">
@@ -224,8 +247,12 @@ function Details() {
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     loadedPalletList={loadedPalletList}
+                                                    reload={reload}
                                                     CT11Data={CT11Data}
-                                                    CT12Data={CT12Data} 
+                                                    CT12Data={CT12Data}
+                                                    onReloadPalletList={loadPallets}
+                                                    palletOptions={palletOptions}
+                                                    palletListLoading={palletListLoading} 
                                                 />
                                             </Skeleton>
                                         </div>
@@ -249,7 +276,11 @@ function Details() {
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
-                                                    CT12Data={CT12Data} 
+                                                    CT12Data={CT12Data}
+                                                    reload={reload}
+                                                    onReloadPalletList={loadPallets}
+                                                    palletOptions={palletOptions}
+                                                    palletListLoading={palletListLoading}  
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -258,7 +289,10 @@ function Details() {
                                             >
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
                                                     reload={reload}
+                                                    onReloadPalletList={loadPallets}
+                                                    onReload={updateData}
                                                     palletData={palletData}
                                                 />
                                             </Skeleton>
@@ -283,7 +317,10 @@ function Details() {
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
-                                                    CT12Data={CT12Data} 
+                                                    CT12Data={CT12Data}
+                                                    onReloadPalletList={loadPallets}
+                                                    palletOptions={palletOptions}
+                                                    palletListLoading={palletListLoading}  
                                                 />
                                             </Skeleton>
                                                 <Skeleton
@@ -304,7 +341,10 @@ function Details() {
                                             >
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
+                                                    reason={BOWData.Reason}
                                                     reload={reload}
+                                                    onReload={updateData}
+                                                    onReloadPalletList={loadPallets}
                                                     palletData={palletData}
                                                 />
                                             </Skeleton>
