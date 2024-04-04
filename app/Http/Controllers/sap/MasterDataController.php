@@ -570,7 +570,6 @@ class MasterDataController extends Controller
                 ]);
             }
 
-
             DB::commit();
             return response()->json([
                 'message' => 'success'
