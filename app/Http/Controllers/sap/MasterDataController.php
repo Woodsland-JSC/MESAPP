@@ -31,7 +31,7 @@ class MasterDataController extends Controller
             INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
             INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
             WHERE T1."Quantity" > 0 AND
-            T3."U_Flag" IN (?, ?) AND 
+            T3."U_Flag" IN (?) AND 
             T3."BPLid" = ? AND 
             T3."U_FAC" = ? AND 
             T2."Series" = 72';
@@ -41,7 +41,7 @@ class MasterDataController extends Controller
             }
             $branch = Auth::user()->branch;
             $plant = Auth::user()->plant;
-            if (!odbc_execute($stmt, [' ', 'TS', 'SS', $branch, $plant])) {
+            if (!odbc_execute($stmt, [' ', 'TS', $branch, $plant])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
