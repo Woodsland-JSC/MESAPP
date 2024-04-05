@@ -128,7 +128,7 @@ function DryingWoodChecking() {
                             ?.map(
                                 (bowCard, index) =>
                                     ((bowCard.Status === 3 ||
-                                        bowCard.Status === 4) && bowCard.plant === usersApi.plant) && (
+                                        bowCard.Status === 4) && bowCard.plant === user.plant) && (
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}
