@@ -336,60 +336,16 @@ function WoodSorting() {
 
                 console.log("2. Get thông tin từ ItemCode:", response);
 
-                // if (response && response.length > 0) {
-                //     response.forEach(item => {
-                //         const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}`;
-                //         if (!quyCachList.includes(quyCach)) {
-                //             if (quyCachList.length >= 2) {
-                //                 toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
-                //                 return;
-                //             } else {
-                //                 setQuyCachList(prevList => [...prevList, quyCach]);
-                //                 const newPalletCard = (
-                //                     <PalletCard
-                //                         key={item.WhsCode + item.BatchNum}
-                //                         itemCode={selectedDryingMethod.code}
-                //                         itemName={selectedDryingMethod.label}
-                //                         batchNum={item.BatchNum}
-                //                         inStock={item.Quantity}
-                //                         whsCode={item.WhsCode}
-                //                         height={item.CDai}
-                //                         width={item.CRong}
-                //                         thickness={item.CDay}
-                //                         isInvalidQuantity={isInvalidQuantity}
-                //                         onDelete={() =>
-                //                             handleDeletePalletCard(
-                //                                 item.WhsCode + item.BatchNum,
-                //                                 `${item.CDay}x${item.CRong}x${item.CDai}`
-                //                             )
-                //                         }
-                //                         onQuantityChange={(quantity) => {
-                //                             handlePalletQuantityChange(
-                //                                 item.WhsCode + item.BatchNum,
-                //                                 quantity
-                //                             );
-                //                         }}
-                //                     />
-                //                 );
-                //                 setPalletCards(prevPalletCards => [...prevPalletCards, newPalletCard]);
-                //                 toast.success("Đã thêm vào danh sách");
-                //             }
-                //         }
-                //     });
-                //     console.log("Danh sách Quy Cach: ", quyCachList);
-                // } else {
-                //     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-                //     return;
-                // }
                 if (response && response.length > 0) {
                     response.forEach(item => {
                         const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}`;
-                        if (quyCachList.length >= 2) {
+                        if (!quyCachList.includes(quyCach)) {
+                            setQuyCachList(prevList => [...prevList, quyCach]);    
+                        }
+                        if ((quyCachList.length >= 2) && (!quyCachList.includes(quyCach))) {
                             toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
                             return;
-                        }
-                        if (!quyCachList.includes(quyCach)) {
-                            setQuyCachList(prevList => [...prevList, quyCach]);
+                        } else {
                             const newPalletCard = (
                                 <PalletCard
                                     key={item.WhsCode + item.BatchNum}
@@ -417,6 +373,7 @@ function WoodSorting() {
                                 />
                             );
                             setPalletCards(prevPalletCards => [...prevPalletCards, newPalletCard]);
+                            console.log("Danh sách item trong pallet: ", palletCards);
                             toast.success("Đã thêm vào danh sách");
                         }
                     });
@@ -438,10 +395,12 @@ function WoodSorting() {
 
     const handleDeletePalletCard = (id, quyCach) => {
         setQuyCachList(prevList => prevList.filter(item => item !== quyCach));
+        console.log("Danh sách Quy Cach: ", quyCachList);
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
         toast("Đã xóa khỏi danh sách");
+        
     };
 
 
