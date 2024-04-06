@@ -126,11 +126,11 @@ function Kiln() {
                         {bowCards
                             ?.map(
                                 (bowCard, index) =>
-                                    (bowCard.Status === 2 ||
+                                    (bowCard.Status === 2 || bowCard.Status === 3 ||
                                         (bowCard.Status === 3 &&
                                             bowCard.Review === 0) ||
                                         (bowCard.Status === 3 &&
-                                            bowCard.Review === 1) || bowCard.Status === 4 ) &&
+                                            bowCard.Review === 1)) &&
                                     bowCard.plant === user.plant && (
                                         <BOWCard
                                             key={index}
