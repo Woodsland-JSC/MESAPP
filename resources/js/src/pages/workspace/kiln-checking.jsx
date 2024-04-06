@@ -134,7 +134,7 @@ function KilnChecking() {
                                     (bowCard, index) =>
                                         ((bowCard.Status === 0 ||
                                             bowCard.Status === 1 ||
-                                            bowCard.Status === 2) && bowCard.plant === user.plant) && (
+                                            bowCard.Status === 2 ) && bowCard.plant === user.plant) && (
                                             <BOWCard
                                                 key={index}
                                                 planID={bowCard.PlanID}
