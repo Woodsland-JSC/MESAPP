@@ -361,6 +361,7 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
+                                                    isReviewed={BOWData.Review}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}
                                                     loadedPalletList={loadedPalletList}

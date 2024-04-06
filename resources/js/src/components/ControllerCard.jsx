@@ -665,7 +665,7 @@ function ControllerCard(props) {
                             </div>
                         </div>
                     )
-                ) : status === 3 || dryingInProgress ? (
+                ) : status === 3 && isReviewed === 0 ? (
                         <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
                                 <div className="font-semibold">Chú ý:</div>
