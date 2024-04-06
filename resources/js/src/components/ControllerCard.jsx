@@ -662,13 +662,15 @@ function ControllerCard(props) {
                                     </div>
                                 </div>
                                 <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                                <div className="font-medium">Đang sấy...</div>
+                                    <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                    <div className="font-medium">
+                                        Đang sấy...
+                                    </div>
                                 </div>
-                            </div>   
+                            </div>
                         )
                     ) : (
-                        (status === 3 || dryingInProgress) &&(
+                        (status === 3 || dryingInProgress) && (
                             <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
                                 <div className="space-y-1 xl:w-[75%]">
                                     <div className="font-semibold">Chú ý:</div>
@@ -678,30 +680,31 @@ function ControllerCard(props) {
                                     </div>
                                 </div>
                                 <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                                <div className="font-medium">Đang sấy...</div>
+                                    <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                    <div className="font-medium">
+                                        Đang sấy...
+                                    </div>
                                 </div>
                             </div>
-                            
                         )
-                        (isReviewed === 1 && status === 3) && (
-                            <>
-                                <div className=" space-y-1 w-full xl:w-[75%]">
-                                    <div className="font-semibold">
-                                        Tình trạng mẻ sấy:
-                                    </div>
-                                    <div className="text-green-500">
-                                        Mẻ sấy đã đủ điều kiện ra lò.
-                                    </div>
+                    )}
+                    {isReviewed === 1 && status === 3 && (
+                        <>
+                            <div className=" space-y-1 w-full xl:w-[75%]">
+                                <div className="font-semibold">
+                                    Tình trạng mẻ sấy:
                                 </div>
-                                <button
-                                    className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                    onClick={onFinalOpen}
-                                >
-                                    Xác nhận ra lò
-                                </button>
-                            </>
-                        )
+                                <div className="text-green-500">
+                                    Mẻ sấy đã đủ điều kiện ra lò.
+                                </div>
+                            </div>
+                            <button
+                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                onClick={onFinalOpen}
+                            >
+                                Xác nhận ra lò
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
