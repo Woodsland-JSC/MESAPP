@@ -632,79 +632,72 @@ function ControllerCard(props) {
                 </div>
             </div>
         ) : progress === "ls" ? (
-<div className="">
-    {status === 2 ? (
-        !dryingInProgress ? (
-            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                <div className="space-y-1 xl:w-[75%]">
-                    <div className="font-semibold">Chú ý:</div>
-                    <div>
-                        Thời gian sẽ bắt đầu được tính khi bấm
-                        bắt đầu sấy.
-                    </div>
-                </div>
-                <button
-                    className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full"
-                    onClick={onKilnOpen}
-                >
-                    Bắt đầu sấy
-                </button>
+            <div className="">
+                {status === 2 ? (
+                    !dryingInProgress ? (
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                            <div className="space-y-1 xl:w-[75%]">
+                                <div className="font-semibold">Chú ý:</div>
+                                <div>
+                                    Thời gian sẽ bắt đầu được tính khi bấm bắt
+                                    đầu sấy.
+                                </div>
+                            </div>
+                            <button
+                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end xl:w-[25%] w-full"
+                                onClick={onKilnOpen}
+                            >
+                                Bắt đầu sấy
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                            <div className="space-y-1 xl:w-[75%]">
+                                <div className="font-semibold">Chú ý:</div>
+                                <div>
+                                    Thời gian sẽ bắt đầu được tính khi bấm bắt
+                                    đầu sấy.
+                                </div>
+                            </div>
+                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                <div className="font-medium">Đang sấy...</div>
+                            </div>
+                        </div>
+                    )
+                ) : status === 3 || dryingInProgress ? (
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                            <div className="space-y-1 xl:w-[75%]">
+                                <div className="font-semibold">Chú ý:</div>
+                                <div>
+                                    Thời gian sẽ bắt đầu được tính khi bấm bắt
+                                    đầu sấy.
+                                </div>
+                            </div>
+                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                                <div className="font-medium">Đang sấy...</div>
+                            </div>
+                        </div>
+                ) : status === 3 && isReviewed === 1 ? (
+                    <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                            <div className=" space-y-1 w-full xl:w-[75%]">
+                                <div className="font-semibold">
+                                    Tình trạng mẻ sấy:
+                                </div>
+                                <div className="text-green-500">
+                                    Mẻ sấy đã đủ điều kiện ra lò.
+                                </div>
+                            </div>
+                            <button
+                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                onClick={onFinalOpen}
+                            >
+                                Xác nhận ra lò
+                            </button>
+                        </div>
+                ) : null}
             </div>
-        ) : (
-            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                <div className="space-y-1 xl:w-[75%]">
-                    <div className="font-semibold">Chú ý:</div>
-                    <div>
-                        Thời gian sẽ bắt đầu được tính khi bấm
-                        bắt đầu sấy.
-                    </div>
-                </div>
-                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                    <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                    <div className="font-medium">
-                        Đang sấy...
-                    </div>
-                </div>
-            </div>
-        )
-    ) : status === 3 ? (
-        dryingInProgress ? (
-            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                <div className="space-y-1 xl:w-[75%]">
-                    <div className="font-semibold">Chú ý:</div>
-                    <div>
-                        Thời gian sẽ bắt đầu được tính khi bấm
-                        bắt đầu sấy.
-                    </div>
-                </div>
-                <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                    <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                    <div className="font-medium">
-                        Đang sấy...
-                    </div>
-                </div>
-            </div>
-        ) : isReviewed === 1 ? (
-            <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
-                <div className=" space-y-1 w-full xl:w-[75%]">
-                    <div className="font-semibold">
-                        Tình trạng mẻ sấy:
-                    </div>
-                    <div className="text-green-500">
-                        Mẻ sấy đã đủ điều kiện ra lò.
-                    </div>
-                </div>
-                <button
-                    className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                    onClick={onFinalOpen}
-                >
-                    Xác nhận ra lò
-                </button>
-            </div>
-        ) : null
-    ) : null }
-</div>
-
         ) : progress === "dg" ? (
             <div className="">
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
