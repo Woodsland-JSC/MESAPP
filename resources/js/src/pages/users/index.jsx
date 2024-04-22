@@ -27,6 +27,18 @@ import roleApi from "../../api/roleApi";
 import useAppContext from "../../store/AppContext";
 import Loader from "../../components/Loader";
 import AG_GRID_LOCALE_VI from "../../utils/locale.vi";
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
+    Button,
+} from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 
 const sizeOptions = [
     { value: "20", label: "20" },
@@ -45,6 +57,15 @@ var headerCheckboxSelection = function (params) {
 
 function Users() {
     const { loading, setLoading } = useAppContext();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [deleteRoleLoading, setDeleteRoleLoading] = useState(false);
+
+    const [modalParam, setModalParam] = useState(null);
+
+    const handleOpenModal = (params) => {
+        setModalParam(params);
+        onOpen();
+    };
 
     const userTab = useRef();
     const roleTab = useRef();
@@ -87,11 +108,10 @@ function Users() {
             headerName: "Hidden Column",
             field: "hiddenField",
             minWidth: 210,
-            hide: true, 
-            valueGetter: (params) => (
+            hide: true,
+            valueGetter: (params) =>
                 (params.data.first_name ? params.data.first_name + " " : "") +
-                (params.data.last_name ? params.data.last_name : "")
-            ),
+                (params.data.last_name ? params.data.last_name : ""),
         },
         {
             headerName: "Giới tính",
@@ -162,7 +182,7 @@ function Users() {
             minWidth: 100,
             cellRenderer: (params) => {
                 return (
-                    <Link to={"/role/" + params.data.id}>
+                    <Link to={"/roles/" + params.data.id}>
                         {params.data.name}
                     </Link>
                 );
@@ -187,12 +207,14 @@ function Users() {
             cellRenderer: (params) => {
                 return (
                     <div className="flex gap-2 items-center h-full">
-                        <Link to={"/role/" + params.data.id}>
+                        <Link to={"/roles/" + params.data.id}>
                             <LiaEditSolid className="cursor-pointer text-yellow-700 text-[20px]" />
                         </Link>
                         <RiDeleteBin6Line
                             className="cursor-pointer text-red-700 text-[18px]"
-                            onClick={() => deleteRole(params.data)}
+                            onClick={() => {
+                                handleOpenModal(params.data.id);
+                            }}
                         />
                     </div>
                 );
@@ -250,7 +272,12 @@ function Users() {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
         showLoadingRole();
         const res = await roleApi.getAllRole();
-        setRoleData(res.map(item => ({...item, name: item.name.charAt(0).toUpperCase() + item.name.slice(1)})));
+        setRoleData(
+            res.map((item) => ({
+                ...item,
+                name: item.name.charAt(0).toUpperCase() + item.name.slice(1),
+            }))
+        );
         hideLoadingRole();
     }, []);
 
@@ -300,33 +327,6 @@ function Users() {
         roleGridRef?.current?.api?.hideOverlay();
     }, []);
 
-    // User Actions
-    // const deleteUser = async (data) => {
-    //     const randomNum = Math.floor(Math.random() * 90 + 10);
-
-    //     const userInput = prompt(
-    //         `Nhập ${randomNum} để xác nhận xoá người dùng ${data.first_name}.\nLưu ý: Không thể hoàn tác xoá dữ liệu người dùng.`
-    //     );
-
-    //     if (userInput && parseInt(userInput) === randomNum) {
-    //         if (data.id) {
-    //             setLoading(true);
-    //             try {
-    //                 const res = await usersApi.deleteUser(data.id);
-    //                 console.log("Result xoá: ", res);
-    //                 toast.success("Xoá người dùng thành công.");
-    //                 setUserData(userData.filter((item) => item.id != data.id));
-    //             } catch (error) {
-    //                 console.error(error);
-    //                 toast.error("Có lỗi xảy ra.");
-    //             }
-    //             setLoading(false);
-    //         }
-    //     } else if (userInput && parseInt(userInput) !== randomNum) {
-    //         toast.error("Đã huỷ xoá người dùng.");
-    //     }
-    // };
-
     const toggleBlockUser = async (e, data) => {
         try {
             const res = await usersApi.blockUser(data.id);
@@ -345,8 +345,19 @@ function Users() {
     };
 
     // Role Actions
-    const deleteRole = async (data) => {
-        toast("Chức năng đang trong quá trình phát triển.");
+    const deleteRole = async (roleId) => {
+        setDeleteRoleLoading(true);
+        try {
+            const res = await roleApi.deleteRole(roleId);
+            toast.success("Xóa role thành công.");
+            setDeleteRoleLoading(false);
+            onClose();
+            onRoleGridReady();
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Hãy thử lại sau.");
+            onClose();
+            setDeleteRoleLoading(false);
+        }
     };
 
     const handleTabClick = (isRoleTab) => {
@@ -382,24 +393,6 @@ function Users() {
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
-                    {/* Breadcrumb */}
-                    {/* <div className="mb-4">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <Link
-                                            to="/users"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            Quản lý người dùng
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div> */}
-
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">
                         Quản lý người dùng
@@ -525,7 +518,9 @@ function Users() {
                                             }
                                             suppressRowVirtualisation={true}
                                             localeText={localeText}
-                                            includeHiddenColumnsInQuickFilter={true}
+                                            includeHiddenColumnsInQuickFilter={
+                                                true
+                                            }
                                         />
                                     </div>
                                 </TabPanel>
@@ -630,6 +625,51 @@ function Users() {
                             </TabPanels>
                         </Tabs>
                     </section>
+                    <Modal
+                        closeOnOverlayClick={false}
+                        isOpen={isOpen}
+                        onClose={onClose}
+                        isCentered
+                        size="sm"
+                    >
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>
+                                Bạn chắc chắn muốn xóa role?
+                            </ModalHeader>
+                            <ModalBody pb={6}>
+                                Sau khi bấm xác nhận sẽ không thể thu hồi hành
+                                động.
+                            </ModalBody>
+
+                            <ModalFooter>
+                                <div className="flex w-full xl:justify-end lg:justify-end md:justify-end gap-x-3">
+                                    <button
+                                        onClick={onClose}
+                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        className="flex justify-center items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                        onClick={() => deleteRole(modalParam)}
+                                    >
+                                        {deleteRoleLoading ? (
+                                            <div className="flex justify-center items-center space-x-4">
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
+                                                <div>Đang tải</div>
+                                            </div>
+                                        ) : (
+                                            "Xác nhận"
+                                        )}
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
                     <div className="py-4"></div>
                 </div>
             </div>

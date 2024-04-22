@@ -41,23 +41,17 @@ import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustratio
 import Loader from "./Loader";
 import moment from "moment";
 import { formatNumber } from "../utils/numberFormat";
-
-// const factories = [
-//     {
-//         value: "YS1",
-//         label: "Nhà máy chế biến gỗ Yên Sơn 1",
-//     },
-//     {
-//         value: "TB",
-//         label: "Nhà máy chế biến gỗ Thái Bình",
-//     },
-// ];
+import { FaCircleRight } from "react-icons/fa6";
+import { FaExclamationCircle } from "react-icons/fa";
+import { TbPlayerTrackNextFilled } from "react-icons/tb";
+import { MdDangerous } from "react-icons/md";
 
 const ItemInput = ({
     data,
     index,
     fromGroup,
     searchTerm,
+    MaThiTruong,
     // isQualityCheck,
     nextGroup,
     onReceiptFromChild,
@@ -94,6 +88,13 @@ const ItemInput = ({
         onClose: onDeleteErrorDialogClose,
     } = useDisclosure();
 
+    // Xóa ghi nhận QC
+    const {
+        isOpen: isDeleteQCLoggingOpen,
+        onOpen: onDeleteQCLoggingOpen,
+        onClose: onDeleteQCLoggingClose,
+    } = useDisclosure();
+
     const {
         isOpen: isModalOpen,
         onOpen: onModalOpen,
@@ -108,27 +109,27 @@ const ItemInput = ({
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
     const [amount, setAmount] = useState("");
+    const [faultyAmount, setFaultyAmount] = useState("");
+    const [choosenItem, setChoosenItem] = useState(null);
     const [faults, setFaults] = useState({});
     const [receipts, setReceipts] = useState({});
-    const [faultyAmount, setFaultyAmount] = useState("");
     const [selectedDelete, setSelectedDelete] = useState(null);
     const [selectedError, setSelectedError] = useState(null);
-
-    // const [errorTypeOptions, setErrorTypeOptions] = useState([]);
-    // const [solutionOptions, setSolutionOptions] = useState([]);
+    const [dialogType, setDialogType] = useState(null);
+    const [selectedQCLogging, setSelectedQCLogging] = useState(null);
 
     const openInputModal = async (item) => {
         setLoading(true);
         try {
             // console.log("Hello: ", item);
             const params = {
-                FatherCode: data.SPDICH,
+                SPDICH: data.SPDICH,
                 ItemCode: item.ItemChild,
-                Team: item.TO,
+                TO: item.TO,
             };
             // console.log("Hi: ", params);
             const res = await productionApi.getFinishedGoodsDetail(params);
-            // console.log("Bye: ", res);
+            console.log("Chi tiết thành phẩm: ", res);
             setSelectedItemDetails({
                 ...item,
                 stockQuantity: res.maxQuantity,
@@ -138,6 +139,10 @@ const ItemInput = ({
                     label: item.FactoryName,
                 })),
                 notifications: res.notifications,
+                stock: res.stock,
+                maxQty: res.maxQty,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                CongDoan: res.CongDoan,
             });
             onModalOpen();
         } catch (error) {
@@ -156,139 +161,91 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
-        setConfirmLoading(true);
-        try {
-            // console.log("Làm ơn đi: ", selectedItemDetails);
-            const payload = {
-                FatherCode: data.SPDICH,
-                ItemCode: selectedItemDetails.ItemChild,
-                ItemName: selectedItemDetails.ChildName,
-                MaThiTruong: selectedItemDetails.MaThiTruong,
-                CDay: Number(selectedItemDetails.CDay),
-                CRong: Number(selectedItemDetails.CRong),
-                CDai: Number(selectedItemDetails.CDai),
-                Team: selectedItemDetails.TO,
-                CongDoan: selectedItemDetails.NameTO,
-                NexTeam: selectedItemDetails.TOTT,
-                Type: "CBG",
-                LSX: selectedItemDetails.LSX[0].LSX,
-                CompleQty: 0,
-                RejectQty: 0,
-            };
-            if (amount && amount > 0) {
-                payload.CompleQty = Number(amount);
-                // onReceiptFromChild({
-                //     id: 70152702,
-                //     subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                //     thickness: 15,
-                //     width: 367.5,
-                //     length: 740,
-                //     amount: amount,
-                //     createdDate: new Date(),
-                //     createdBy: {
-                //         id: 54,
-                //         last_name: "Nguyen",
-                //         first_name: "An",
-                //     },
-                //     fromGroup: {
-                //         id: "TH-X3SC",
-                //         no: 3,
-                //         name: "Tổ Sơ chế X3",
-                //     },
-                //     nextGroup: nextGroup
-                // });
-                // onReceiptFromChild(
-                //     {
-                //         id: selectedItemDetails.id,
-                //         itemId: data?.id,
-                //         subItemName: selectedItemDetails.subItemName,
-                //         thickness: selectedItemDetails.thickness,
-                //         width: selectedItemDetails.width,
-                //         length: selectedItemDetails.length,
-                //         amount: Number(amount),
-                //         createdDate: new Date(),
-                //         createdBy: {
-                //             id: user.id,
-                //             last_name: user.last_name,
-                //             first_name: user.first_name,
-                //         },
-                //         fromGroup: fromGroup,
-                //         nextGroup: nextGroup,
-                //     },
-                //     receipts
-                // );
-            }
-            if (faultyAmount && faultyAmount > 0) {
-                payload.RejectQty = Number(faultyAmount);
-                // const result = {
-                //     id: selectedItemDetails.id,
-                //     itemId: data?.id,
-                //     subItemName: selectedItemDetails.subItemName,
-                //     thickness: selectedItemDetails.thickness,
-                //     width: selectedItemDetails.width,
-                //     length: selectedItemDetails.length,
-                //     amount: Number(faultyAmount),
-                //     createdDate: new Date(),
-                //     createdBy: {
-                //         id: user.id,
-                //         last_name: user.last_name,
-                //         first_name: user.first_name,
-                //     },
-                //     fromGroup: fromGroup,
-                //     previousGroup: nextGroup,
-                // };
-                // onRejectFromChild(result, faults);
-            }
-
-            // if (isQualityCheck) {
-            //     payload.LoaiLoi = faults.errorType || null;
-            //     payload.HuongXuLy = faults.solution || null;
-            // } else{
-            //     payload.LoaiLoi = null;
-            //     payload.HuongXuLy = null;
-            // }
-
-            if (payload.FatherCode && payload.ItemCode) {
-                if (payload.CompleQty || payload.RejectQty) {
-                    const res = await productionApi.enterFinishedGoodsAmountCBG(
-                        payload
-                    );
-                    toast.success("Ghi nhận & chuyển tiếp thành công!");
-                } else {
-                    toast("Chưa nhập bất kì số lượng nào.");
+        if (amount < 0) {
+            toast.error("Số lượng ghi nhận phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        } else if (
+            amount >
+            selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty
+        ) {
+            toast.error("Đã vượt quá số lượng có thể ghi nhận");
+            onAlertDialogClose();
+            return;
+        } else {
+            setConfirmLoading(true);
+            try {
+                // console.log("Làm ơn đi: ", selectedItemDetails);
+                const payload = {
+                    FatherCode: data.SPDICH,
+                    ItemCode: selectedItemDetails.ItemChild,
+                    ItemName: selectedItemDetails.ChildName,
+                    MaThiTruong: MaThiTruong,
+                    CDay: Number(selectedItemDetails.CDay),
+                    CRong: Number(selectedItemDetails.CRong),
+                    CDai: Number(selectedItemDetails.CDai),
+                    Team: selectedItemDetails.TO,
+                    CongDoan: selectedItemDetails.NameTO,
+                    NexTeam: selectedItemDetails.TOTT,
+                    Type: "CBG",
+                    LSX: selectedItemDetails.LSX[0].LSX,
+                    CompleQty: 0,
+                    RejectQty: 0,
+                };
+                if (amount && amount > 0) {
+                    payload.CompleQty = Number(amount);
                 }
-            } else {
-                toast("Có lỗi xảy ra. Vui lòng thử lại");
-            }
-        } catch (error) {
-            // Xử lý lỗi (nếu có)
-            console.error("Đã xảy ra lỗi:", error);
-            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
-        }
-        setConfirmLoading(false);
-        onReceiptFromChild();
-        setFaults({});
-        setReceipts({});
-        setAmount();
-        setFaultyAmount();
+                if (faultyAmount && faultyAmount > 0) {
+                    payload.RejectQty = Number(faultyAmount);
+                }
 
-        onAlertDialogClose();
-        closeInputModal();
+                if (payload.FatherCode && payload.ItemCode) {
+                    if (payload.CompleQty || payload.RejectQty) {
+                        const res =
+                            await productionApi.enterFinishedGoodsAmountCBG(
+                                payload
+                            );
+                        toast.success("Ghi nhận & chuyển tiếp thành công!");
+                    } else {
+                        toast("Chưa nhập bất kì số lượng nào.");
+                    }
+                } else {
+                    toast("Có lỗi xảy ra. Vui lòng thử lại");
+                }
+            } catch (error) {
+                // Xử lý lỗi (nếu có)
+                console.error("Đã xảy ra lỗi:", error);
+                toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            }
+            setConfirmLoading(false);
+            onReceiptFromChild();
+            setFaults({});
+            setReceipts({});
+            setAmount();
+            setFaultyAmount();
+
+            onAlertDialogClose();
+            closeInputModal();
+        }
     };
 
-    const handleDeleteProcessingReceipt = async () => {
+    const handleDeleteProcessingReceipt = async (item) => {
         setDeleteProcessingLoading(true);
         try {
             const payload = {
                 id: selectedDelete,
+                SPDICH: data.SPDICH,
+                ItemCode: choosenItem.ItemChild,
+                TO: choosenItem.TO,
             };
             const res = await productionApi.deleteReceiptCBG(payload);
-            toast.success("Thành công.");
+            toast.success("Thao tác thành công.");
             setSelectedItemDetails((prev) => ({
                 ...prev,
                 notifications: prev.notifications.filter(
                     (notification) => notification.id !== selectedDelete
                 ),
+                WaitingConfirmQty: res.WaitingConfirmQty,
             }));
         } catch (error) {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -336,37 +293,6 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
-    // useEffect(() => {
-    //     const getErrorTypeOptions = async () => {
-    //         try {
-    //             const res = await productionApi.getErrorTypes();
-    //             const errorTypes = res.map((error, index) => ({
-    //                 value: error?.id || "",
-    //                 label: error?.name || "",
-    //             }));
-    //             console.log("Other side: ", errorTypes);
-    //             setErrorTypeOptions(errorTypes);
-    //         } catch (error) {
-    //             console.error(error);
-    //         }
-    //     };
-    //     const getSolutionOptions = async () => {
-    //         try {
-    //             const res = await productionApi.getSolutions("CBG");
-    //             const solutions = res.map((solution, index) => ({
-    //                 value: solution?.id || "",
-    //                 label: solution?.name || "",
-    //             }));
-    //             console.log("Other side 2: ", solutions);
-    //             setSolutionOptions(solutions);
-    //         } catch (error) {
-    //             console.error(error);
-    //         }
-    //     };
-    //     getErrorTypeOptions();
-    //     getSolutionOptions();
-    // }, []);
-
     return (
         <>
             <div
@@ -375,207 +301,191 @@ const ItemInput = ({
             >
                 <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-1 pt-11 z-[999] bg-white">
                     {data.Details.length > 0
-                        ? data.Details
-                              //   .filter((item) =>
-                              //       `${index + 1}. ${item.ChildName} (${item.CDay}*${
-                              //           item.CRong
-                              //       }*${item.CDai})`
-                              //           .toLowerCase()
-                              //           .includes(searchTerm.toLowerCase())
-                              //   )
-                              .map((item, index) => (
-                                  <section
-                                      onClick={() => openInputModal(item)}
-                                      className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
-                                      key={index}
-                                  >
-                                      <span className="ml-1">
-                                          {index + 1}. {item.ChildName} (
-                                          {item.CDay}*{item.CRong}*{item.CDai})
-                                      </span>
-                                      <div className="relative overflow-x-auto shadow-md sm:rounded-lg ml-0 mt-2 ">
-                                          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                                              <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                                                  <tr>
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2"
-                                                      >
-                                                          Lệnh sản xuất
-                                                      </th>
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2 text-right"
-                                                      >
-                                                          Sản lượng
-                                                      </th>
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2 text-right"
-                                                      >
-                                                          Đã làm
-                                                      </th>
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2 text-right"
-                                                      >
-                                                          Bị lỗi
-                                                      </th>
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2 text-right"
-                                                      >
-                                                          Còn thực hiện
-                                                      </th>
-                                                  </tr>
-                                              </thead>
-                                              <tbody>
-                                                  {item.LSX?.length > 0 ? (
-                                                      item.LSX.filter(
-                                                          (production) =>
-                                                              production.ConLai >
-                                                              0
-                                                      )
-                                                          .sort((a, b) => {
-                                                              return a.LSX.localeCompare(
-                                                                  b.LSX
-                                                              );
-                                                          })
-                                                          .map(
-                                                              (
-                                                                  production,
-                                                                  index
-                                                              ) => (
-                                                                  <tr
-                                                                      className="bg-white border-b"
-                                                                      key={
-                                                                          index
-                                                                      }
+                        ? data.Details.map((item, index) => (
+                              <section
+                                  onClick={() => {
+                                      openInputModal(item);
+                                      setChoosenItem(item);
+                                      console.log("Item đã chọn:", item);
+                                      console.log(
+                                          "Mã Thị Trường của item:" +
+                                              item.ChildName,
+                                          MaThiTruong
+                                      );
+                                  }}
+                                  className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                  key={index}
+                              >
+                                  <span className="ml-1">
+                                      {index + 1}. {item.ChildName} ({item.CDay}
+                                      *{item.CRong}*{item.CDai})
+                                  </span>
+                                  <div className="relative overflow-x-auto shadow-md sm:rounded-sm ml-0 mt-2 ">
+                                      <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                                          <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                                              <tr>
+                                                  <th
+                                                      scope="col"
+                                                      className="px-2 py-2"
+                                                  >
+                                                      Lệnh sản xuất
+                                                  </th>
+                                                  <th
+                                                      scope="col"
+                                                      className="px-2 py-2 text-right"
+                                                  >
+                                                      Sản lượng
+                                                  </th>
+                                                  <th
+                                                      scope="col"
+                                                      className="px-2 py-2 text-right"
+                                                  >
+                                                      Đã làm
+                                                  </th>
+                                                  <th
+                                                      scope="col"
+                                                      className="px-2 py-2 text-right"
+                                                  >
+                                                      Bị lỗi
+                                                  </th>
+                                                  <th
+                                                      scope="col"
+                                                      className="px-2 py-2 text-right"
+                                                  >
+                                                      Còn thực hiện
+                                                  </th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>
+                                              {item.LSX?.length > 0 ? (
+                                                  item.LSX.filter(
+                                                      (production) =>
+                                                          production.ConLai > 0
+                                                  )
+                                                      .sort((a, b) => {
+                                                          return a.LSX.localeCompare(
+                                                              b.LSX
+                                                          );
+                                                      })
+                                                      .map(
+                                                          (
+                                                              production,
+                                                              index
+                                                          ) => (
+                                                              <tr
+                                                                  className="bg-white border-b"
+                                                                  key={index}
+                                                              >
+                                                                  <th
+                                                                      scope="row"
+                                                                      className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
                                                                   >
-                                                                      <th
-                                                                          scope="row"
-                                                                          className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
-                                                                      >
-                                                                          {
-                                                                              production.LSX
-                                                                          }
-                                                                      </th>
-                                                                      <td className="px-2 py-2 text-right">
-                                                                          {formatNumber(
-                                                                              Number(
-                                                                                  production.SanLuong
-                                                                              )
-                                                                          )}
-                                                                      </td>
-                                                                      <td className="px-2 py-2 text-right">
-                                                                          {formatNumber(
-                                                                              Number(
-                                                                                  production.DaLam
-                                                                              )
-                                                                          )}
-                                                                      </td>
-                                                                      <td className="px-2 py-2 text-right">
-                                                                          {formatNumber(
-                                                                              Number(
-                                                                                  production.Loi
-                                                                              )
-                                                                          )}
-                                                                      </td>
-                                                                      <td className="px-2 py-2 text-right">
-                                                                          {formatNumber(
-                                                                              Number(
-                                                                                  production.ConLai
-                                                                              )
-                                                                          )}
-                                                                      </td>
-                                                                  </tr>
+                                                                      {
+                                                                          production.LSX
+                                                                      }
+                                                                  </th>
+                                                                  <td className="px-2 py-2 text-right">
+                                                                      {formatNumber(
+                                                                          Number(
+                                                                              production.SanLuong
+                                                                          )
+                                                                      )}
+                                                                  </td>
+                                                                  <td className="px-2 py-2 text-right">
+                                                                      {formatNumber(
+                                                                          Number(
+                                                                              production.DaLam
+                                                                          )
+                                                                      )}
+                                                                  </td>
+                                                                  <td className="px-2 py-2 text-right">
+                                                                      {formatNumber(
+                                                                          Number(
+                                                                              production.Loi
+                                                                          )
+                                                                      )}
+                                                                  </td>
+                                                                  <td className="px-2 py-2 text-right">
+                                                                      {formatNumber(
+                                                                          Number(
+                                                                              production.ConLai
+                                                                          )
+                                                                      )}
+                                                                  </td>
+                                                              </tr>
+                                                          )
+                                                      )
+                                              ) : (
+                                                  <span>Không có dữ liệu</span>
+                                              )}
+                                          </tbody>
+                                          <tfoot>
+                                              <tr>
+                                                  <td className="px-2 py-2">
+                                                      Tổng
+                                                  </td>
+                                                  <td className="px-2 py-2 text-right font-bold">
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.LSX.reduce(
+                                                                  (acc, curr) =>
+                                                                      acc +
+                                                                      Number(
+                                                                          curr.SanLuong
+                                                                      ),
+                                                                  0
                                                               )
                                                           )
-                                                  ) : (
-                                                      <span>
-                                                          Không có dữ liệu
-                                                      </span>
-                                                  )}
-                                              </tbody>
-                                              <tfoot>
-                                                  <tr>
-                                                      <td className="px-2 py-2">
-                                                          Tổng
-                                                      </td>
-                                                      <td className="px-2 py-2 text-right font-bold">
-                                                          {formatNumber(
-                                                              Number(
-                                                                  item.LSX.reduce(
-                                                                      (
-                                                                          acc,
-                                                                          curr
-                                                                      ) =>
-                                                                          acc +
-                                                                          Number(
-                                                                              curr.SanLuong
-                                                                          ),
-                                                                      0
-                                                                  )
+                                                      )}
+                                                  </td>
+                                                  <td className="px-2 py-2 text-right font-bold">
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.LSX.reduce(
+                                                                  (acc, curr) =>
+                                                                      acc +
+                                                                      Number(
+                                                                          curr.DaLam
+                                                                      ),
+                                                                  0
                                                               )
-                                                          )}
-                                                      </td>
-                                                      <td className="px-2 py-2 text-right font-bold">
-                                                          {formatNumber(
-                                                              Number(
-                                                                  item.LSX.reduce(
-                                                                      (
-                                                                          acc,
-                                                                          curr
-                                                                      ) =>
-                                                                          acc +
-                                                                          Number(
-                                                                              curr.DaLam
-                                                                          ),
-                                                                      0
-                                                                  )
+                                                          )
+                                                      )}
+                                                  </td>
+                                                  <td className="px-2 py-2 text-right font-bold">
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.LSX.reduce(
+                                                                  (acc, curr) =>
+                                                                      acc +
+                                                                      Number(
+                                                                          curr.Loi
+                                                                      ),
+                                                                  0
                                                               )
-                                                          )}
-                                                      </td>
-                                                      <td className="px-2 py-2 text-right font-bold">
-                                                          {formatNumber(
-                                                              Number(
-                                                                  item.LSX.reduce(
-                                                                      (
-                                                                          acc,
-                                                                          curr
-                                                                      ) =>
-                                                                          acc +
-                                                                          Number(
-                                                                              curr.Loi
-                                                                          ),
-                                                                      0
-                                                                  )
+                                                          )
+                                                      )}
+                                                  </td>
+                                                  <td className="px-2 py-2 text-right font-bold">
+                                                      {formatNumber(
+                                                          Number(
+                                                              item.LSX.reduce(
+                                                                  (acc, curr) =>
+                                                                      acc +
+                                                                      Number(
+                                                                          curr.ConLai
+                                                                      ),
+                                                                  0
                                                               )
-                                                          )}
-                                                      </td>
-                                                      <td className="px-2 py-2 text-right font-bold">
-                                                          {formatNumber(
-                                                              Number(
-                                                                  item.LSX.reduce(
-                                                                      (
-                                                                          acc,
-                                                                          curr
-                                                                      ) =>
-                                                                          acc +
-                                                                          Number(
-                                                                              curr.ConLai
-                                                                          ),
-                                                                      0
-                                                                  )
-                                                              )
-                                                          )}
-                                                      </td>
-                                                  </tr>
-                                              </tfoot>
-                                          </table>
-                                      </div>
-                                  </section>
-                              ))
+                                                          )
+                                                      )}
+                                                  </td>
+                                              </tr>
+                                          </tfoot>
+                                      </table>
+                                  </div>
+                              </section>
+                          ))
                         : null}
                 </div>
             </div>
@@ -589,506 +499,560 @@ const ItemInput = ({
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent className="!px-0">
                     <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-center text-bold text-[#17506B]">
+                        <div class="xl:ml-6 uppercase xl:text-xl ">
                             Ghi nhận sản lượng
-                        </h1>
+                        </div>
                     </ModalHeader>
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
                     <ModalBody px={0} py={0}>
-                        <div className="flex flex-col justify-center ">
+                        <div className="flex flex-col justify-center mb-4 ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
-                                <Alert status="error">
-                                    <AlertIcon />
-                                    <AlertDescription className="flex items-center gap-3">
-                                        <span className="">
-                                            Lỗi báo từ công đoạn trước:{" "}
-                                        </span>
-                                        <Badge
-                                            colorScheme="red"
-                                            fontSize="1.2rem"
-                                        >
-                                            {formatNumber(
-                                                Number(
-                                                    selectedItemDetails?.pendingErrors?.reduce(
-                                                        (total, item) =>
-                                                            total + item.amount,
-                                                        0
-                                                    )
-                                                )
-                                            ) || 0}
-                                        </Badge>
-                                    </AlertDescription>
-                                </Alert>
                                 {/* )} */}
-                                <div className="flex flex-col md:flex-row justify-between items-center">
-                                    <div className="flex flex-col gap-4 w-full px-4">
-                                        <label className="font-semibold">
+                                <div className="flex flex-col md:flex-row justify-between pt-4 items-center xl:px-0 md:px-0 lg:px-0 px-4">
+                                    <div className="flex flex-col  w-full">
+                                        <label className="font-medium">
                                             Sản phẩm/Chi tiết
                                         </label>
-                                        <span>
+                                        <span className="text-[#17506B] text-2xl font-bold">
                                             {selectedItemDetails?.ChildName}
                                         </span>
                                     </div>
-                                    <img
-                                        alt="Hình minh hoạ sản phẩm gỗ"
-                                        className="w-[350px] -mt-8"
-                                        src={FinishedGoodsIllustration}
-                                    />
                                 </div>
-                                <div className="flex justify-between py-4 border-t-2 border-b-2 border-dashed px-4">
-                                    <div className="flex flex-col justify-start">
-                                        <label className="font-semibold">
-                                            Dày
+                                <div className="flex justify-between py-3 border-2 divide-x-2 border-gray-200 rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-4">
+                                    <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                        <label className="font-medium uppercase text-sm text-gray-400">
+                                            Chiều Dày
                                         </label>
-                                        <span>
+                                        <span className="text-[20px] font-bold">
                                             {selectedItemDetails?.CDay || 0}
                                         </span>
                                     </div>
-                                    <div className="flex flex-col justify-start">
-                                        <label className="font-semibold">
-                                            Rộng
+                                    <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                        <label className="font-medium uppercase text-sm text-gray-400 ">
+                                            Chiều Rộng
                                         </label>
-                                        <span>
+                                        <span className="text-[20px] font-bold">
                                             {selectedItemDetails?.CRong || 0}
                                         </span>
                                     </div>
-                                    <div className="flex flex-col justify-start">
-                                        <label className="font-semibold">
-                                            Dài
+                                    <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                        <label className="font-medium uppercase text-sm text-gray-400">
+                                            Chiều Dài
                                         </label>
-                                        <span>
+                                        <span className="text-[20px] font-bold">
                                             {selectedItemDetails?.CDai || 0}
                                         </span>
                                     </div>
                                 </div>
-                                <Text className="font-semibold px-4">
-                                    Số lượng phôi đã nhận và phôi tồn tại tổ
-                                </Text>
-                                <div className="flex flex-col py-4 bg-green-300 border-t-2 border-b-2 border-dashed">
-                                    <div className="flex items-center gap-4 px-4">
-                                        <span className="ml-2">
-                                            {selectedItemDetails?.ChildName} (
-                                            {selectedItemDetails?.CDay} *
-                                            {selectedItemDetails?.CRong} *
-                                            {selectedItemDetails?.CDai}) :{" "}
+
+                                <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 border-2 border-gray-200 rounded-xl space-y-2">
+                                    <div className="flex justify-between pb-3 ">
+                                        <div className="flex items-center space-x-2">
+                                            <FaCircleRight className="w-7 h-7 text-blue-700" />
+                                            <div className="font-semibold text-lg ">
+                                                Ghi nhận sản lượng
+                                            </div>
+                                        </div>
+                                        <div className="text-blue-600 p-1.5 px-4 bg-blue-50 rounded-full border-2 border-blue-200">
+                                            <span className="xl:inline-block lg:inline-block md:inline-block hidden">
+                                                Công đoạn:{" "}
+                                            </span>
+                                            <span>
+                                                {" "}
+                                                {selectedItemDetails?.CongDoan}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2 pb-3">
+                                        <Text className="font-semibold px-2">
+                                            Số lượng phôi đã nhận và phôi tồn
+                                            tại tổ:
+                                        </Text>
+                                        {/* BOM Item Group */}
+                                        {selectedItemDetails?.stock.map(
+                                            (item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`${
+                                                        item.OnHand <= 0
+                                                            ? "bg-gray-100"
+                                                            : "bg-blue-100"
+                                                    } flex flex-col py-2  mb-6 rounded-xl`}
+                                                >
+                                                    <div className="flex items-center justify-between gap-4 px-4">
+                                                        <div className="">
+                                                            <div className="text-xs text-[#647C9C]">
+                                                                <span className="mr-1">
+                                                                    [
+                                                                    {
+                                                                        item.BaseQty
+                                                                    }
+                                                                    {item.BaseQty.toString().includes(
+                                                                        "."
+                                                                    ) && (
+                                                                        <span>
+                                                                            {
+                                                                                "-"
+                                                                            }
+                                                                            {Math.ceil(
+                                                                                item.BaseQty
+                                                                            )}
+                                                                        </span>
+                                                                    )}
+                                                                    ]
+                                                                </span>
+                                                                {
+                                                                    item.SubItemCode
+                                                                }
+                                                            </div>
+                                                            <div className="font-medium text-[16px]">
+                                                                {item.SubItemName ===
+                                                                "Gỗ"
+                                                                    ? "Nguyên liệu gỗ"
+                                                                    : item.SubItemName}
+                                                            </div>
+                                                        </div>
+                                                        <span
+                                                            className={`${
+                                                                item.OnHand <= 0
+                                                                    ? "bg-gray-500"
+                                                                    : "bg-[#155979]"
+                                                            } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
+                                                        >
+                                                            {item.OnHand.toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+
+                                    <div className="flex gap-2 items-center justify-between py-3 border-t px-2 pr-4">
+                                        <Text className="font-semibold">
+                                            Số lượng tối đa có thể xuất:
+                                        </Text>
+                                        <span className="rounded-lg cursor-pointer px-3  py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                            {selectedItemDetails?.maxQty > 0
+                                                ? (
+                                                      selectedItemDetails?.maxQty -
+                                                      selectedItemDetails?.WaitingConfirmQty
+                                                  ).toLocaleString()
+                                                : 0}
                                         </span>
-                                        <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
+                                    </div>
+                                    <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-2 pr-4 justify-between">
+                                        <Text className="font-semibold">
+                                            Số lượng còn phải sản xuất:
+                                        </Text>
+                                        <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
                                             {formatNumber(
                                                 Number(
-                                                    selectedItemDetails?.stockQuantity
+                                                    selectedItemDetails?.totalProcessing
                                                 )
                                             ) || 0}
                                         </span>
                                     </div>
-                                </div>
-                                <div className="flex gap-2 items-center py-4 border-t px-4">
-                                    <Text className="font-semibold">
-                                        Số lượng tối đa có thể xuất
-                                    </Text>
-                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
-                                        {formatNumber(
-                                            Number(
-                                                selectedItemDetails?.stockQuantity
-                                            )
-                                        ) || 0}
-                                    </span>
-                                </div>
-                                <div className="flex gap-2 items-center py-4 border-t border-b !mt-0 px-4">
-                                    <Text className="font-semibold">
-                                        Số lượng còn phải sản xuất
-                                    </Text>
-                                    <span className="rounded-lg cursor-pointer px-2 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
-                                        {formatNumber(
-                                            Number(
-                                                selectedItemDetails?.totalProcessing
-                                            )
-                                        ) || 0}
-                                    </span>
-                                </div>
-                                <Box className="px-4">
-                                    <label className="font-semibold">
-                                        Số lượng ghi nhận sản phẩm
-                                    </label>
-                                    <NumberInput
-                                        ref={receipInput}
-                                        step={1}
-                                        min={1}
-                                        // max={
-                                        //     goodsReceiptList.find(
-                                        //         (item) =>
-                                        //             item.ItemCode ==
-                                        //             selectedItem.value
-                                        //     )?.Qty || 0
-                                        // }
-                                        value={amount}
-                                        className="mt-4"
-                                        // onInput={(value) => {
-                                        // if (value > selectedItemDetails.stockQuantity) {
-                                        //     setAmount(value)
-                                        // }
-                                        // console.log("Input: ", value);
-                                        // }}
-                                        onChange={(value) => {
-                                            if (
-                                                value >
-                                                selectedItemDetails.stockQuantity
-                                            ) {
-                                                // console.log("Dô: ", selectedItemDetails.stockQuantity);
-                                                // receipInput.current.querySelector(
-                                                //         "input"
-                                                //     ).value =
-                                                //         selectedItemDetails.stockQuantity;
-                                                setAmount(
-                                                    selectedItemDetails.stockQuantity
-                                                );
-                                                setReceipts((prev) => ({
-                                                    ...prev,
-                                                    amount: selectedItemDetails.stockQuantity,
-                                                }));
-                                            } else {
-                                                setAmount(value);
-                                                setReceipts((prev) => ({
-                                                    ...prev,
-                                                    amount: value,
-                                                }));
-                                            }
-                                        }}
-                                    >
-                                        <NumberInputField />
-                                        <NumberInputStepper>
-                                            <NumberIncrementStepper />
-                                            <NumberDecrementStepper />
-                                        </NumberInputStepper>
-                                    </NumberInput>
-                                </Box>
-                                {selectedItemDetails?.notifications &&
-                                    selectedItemDetails?.notifications.filter(
-                                        (notif) =>
-                                            notif.confirm == 0 &&
-                                            notif.type == 0
-                                    )?.length > 0 &&
-                                    selectedItemDetails?.notifications
-                                        .filter(
+                                    {/* Số lượng giao chờ xác nhận */}
+                                    {selectedItemDetails?.notifications &&
+                                        selectedItemDetails?.notifications.filter(
                                             (notif) =>
                                                 notif.confirm == 0 &&
                                                 notif.type == 0
-                                        )
-                                        /** Type = 0: Ghi nhận giao chờ xác nhận (Ghi nhận gửi đi công đoạn trên)
-                                            Type = 1: Ghi nhận lỗi cho công đoạn trước chờ xác nhận (Reject gửi xuống công đoạn dưới thì phải)
-                                            Type = 2: Công đoạn trên trả lại với lý do gì đó (thì phải)
-                                         **/
-                                        ?.map((item, index) => (
-                                            <div
-                                                key={"Processing_" + index}
-                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-green-600 rounded"
-                                            >
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex gap-4">
-                                                        <Text className="font-semibold">
-                                                            Số lượng đã giao chờ
-                                                            xác nhận:{" "}
-                                                        </Text>{" "}
-                                                        <Badge
-                                                            colorScheme="green"
-                                                            fontSize="1.2rem"
-                                                        >
-                                                            {Number(
-                                                                item?.Quantity
-                                                            )}
-                                                        </Badge>
-                                                    </div>
-                                                    <Text>
-                                                        tạo bởi:{" "}
-                                                        {item?.last_name +
-                                                            " " +
-                                                            item?.first_name}
-                                                    </Text>
+                                        )?.length > 0 && (
+                                        <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
+                                            <Text className="font-semibold">
+                                                Số lượng đã giao chờ xác nhận:{" "}
+                                            </Text>{" "}
+                                        </div>
+                                    )}
+                                    {selectedItemDetails?.notifications &&
+                                        selectedItemDetails?.notifications.filter(
+                                            (notif) =>
+                                                notif.confirm == 0 &&
+                                                notif.type == 0
+                                        )?.length > 0 &&
+                                        selectedItemDetails?.notifications
+                                            .filter(
+                                                (notif) =>
+                                                    notif.confirm == 0 &&
+                                                    notif.type == 0
+                                            )
+                                            ?.map((item, index) => (
+                                                <div className="border-b border-gray-200">
+                                                    <div
+                                                    key={"Processing_" + index}
+                                                    className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                >
+                                                    
                                                     <div className="flex flex-col">
-                                                        <Text className="font-semibold">
-                                                            Thời gian giao:{" "}
+                                                        <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
+                                                                    {Number(item?.Quantity)}
+                                                        </div>
+                                                        <Text className="font-semibold text-[15px] ">
+                                                            Người giao:{" "}
+                                                            <span className="text-green-700">
+                                                            {item?.last_name +
+                                                                " " +
+                                                                item?.first_name}
+                                                            </span>
+                                                            
                                                         </Text>
-                                                        <span className="ml-1 text-violet-700">
-                                                            {moment(
-                                                                item?.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD/MM/YYYY"
-                                                            ) || ""}{" "}
-                                                            {moment(
-                                                                item?.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "HH:mm:ss"
-                                                            ) || ""}
-                                                        </span>
+                                                        <div className="flex text-sm">
+                                                            <Text className=" font-medium text-gray-600">
+                                                                Thời gian giao:{" "}
+                                                            </Text>
+                                                            <span className="ml-1 text-gray-600">
+                                                                {moment(
+                                                                    item?.created_at,
+                                                                    "YYYY-MM-DD HH:mm:ss"
+                                                                ).format(
+                                                                    "DD/MM/YYYY"
+                                                                ) || ""}{" "}
+                                                                {moment(
+                                                                    item?.created_at,
+                                                                    "YYYY-MM-DD HH:mm:ss"
+                                                                ).format(
+                                                                    "HH:mm:ss"
+                                                                ) || ""}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex gap-x-6">
+                                                        <div className="xl:block lg;block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold">
+                                                                {Number(item?.Quantity)}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                onDeleteProcessingDialogOpen();
+                                                                setSelectedDelete(
+                                                                    item?.id
+                                                                );
+                                                                setDialogType(
+                                                                    "product"
+                                                                );
+                                                            }}
+                                                            className="rounded-full  duration-200 ease hover:bg-slate-100 px-2"
+                                                        >
+                                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                        </button>
                                                     </div>
                                                 </div>
+                                                </div>
+                                                
+                                            ))}
+                                    <Box className="px-2">
+                                        <label className="mt-6  font-semibold">
+                                            Số lượng ghi nhận sản phẩm:
+                                        </label>
+                                        {selectedItemDetails?.maxQty <= 0 ? (
+                                            <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
+                                                <MdDangerous className="w-6 h-6" />
                                                 <div>
-                                                    <button
-                                                        onClick={() => {
-                                                            onDeleteProcessingDialogOpen();
-                                                            setSelectedDelete(
-                                                                item?.id
-                                                            );
-                                                        }}
-                                                        className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
-                                                    >
-                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                    </button>
+                                                    Không đủ số lượng để ghi
+                                                    nhận
                                                 </div>
                                             </div>
-                                        ))}
-                                {selectedItemDetails?.notifications &&
-                                    selectedItemDetails?.notifications.filter(
-                                        (notif) =>
-                                            notif.confirm == 3 &&
-                                            notif.type == 2
-                                    )?.length > 0 &&
-                                    selectedItemDetails?.notifications
-                                        .filter(
+                                        ) : (
+                                            <NumberInput
+                                                ref={receipInput}
+                                                step={1}
+                                                min={1}
+                                                value={amount}
+                                                className="mt-4 mb-2"
+                                                onChange={(value) => {
+                                                    if (
+                                                        value >
+                                                        selectedItemDetails.stockQuantity
+                                                    ) {
+                                                        setAmount(
+                                                            selectedItemDetails.stockQuantity
+                                                        );
+                                                        setReceipts((prev) => ({
+                                                            ...prev,
+                                                            amount: selectedItemDetails.stockQuantity,
+                                                        }));
+                                                    } else {
+                                                        setAmount(value);
+                                                        setReceipts((prev) => ({
+                                                            ...prev,
+                                                            amount: value,
+                                                        }));
+                                                    }
+                                                }}
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        )}
+                                    </Box>
+
+                                    {selectedItemDetails?.notifications &&
+                                        selectedItemDetails?.notifications.filter(
                                             (notif) =>
                                                 notif.confirm == 3 &&
                                                 notif.type == 2
-                                        )
-                                        ?.map((item, index) => (
-                                            <div
-                                                key={"Return_" + index}
-                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded"
-                                            >
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex gap-4">
-                                                        <Text className="font-semibold">
-                                                            Phôi trả lại:{" "}
-                                                        </Text>{" "}
-                                                        <Badge
-                                                            colorScheme="red"
-                                                            fontSize="1.2rem"
-                                                        >
-                                                            {formatNumber(
-                                                                Number(
-                                                                    item?.Quantity
-                                                                )
-                                                            )}
-                                                        </Badge>
-                                                    </div>
-                                                    <Text>
-                                                        tạo bởi:{" "}
-                                                        {item?.last_name +
-                                                            " " +
-                                                            item?.first_name}
-                                                    </Text>
-                                                    <div className="flex flex-col">
-                                                        <Text className="font-semibold">
-                                                            Lý do:{" "}
+                                        )?.length > 0 &&
+                                        selectedItemDetails?.notifications
+                                            .filter(
+                                                (notif) =>
+                                                    notif.confirm == 3 &&
+                                                    notif.type == 2
+                                            )
+                                            ?.map((item, index) => (
+                                                <div
+                                                    key={"Return_" + index}
+                                                    className="flex justify-between items-center p-3 py-2 my-4 mx-3 border border-red-600 rounded"
+                                                >
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex gap-4">
+                                                            <Text className="font-semibold">
+                                                                Phôi trả lại:{" "}
+                                                            </Text>{" "}
+                                                            <Badge
+                                                                colorScheme="red"
+                                                                fontSize="1.2rem"
+                                                            >
+                                                                {formatNumber(
+                                                                    Number(
+                                                                        item?.Quantity
+                                                                    )
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+                                                        <Text>
+                                                            tạo bởi:{" "}
+                                                            {item?.last_name +
+                                                                " " +
+                                                                item?.first_name}
                                                         </Text>
-                                                        <span className="ml-1">
-                                                            {item?.text}
-                                                        </span>
+                                                        <div className="flex flex-col">
+                                                            <Text className="font-semibold">
+                                                                Lý do:{" "}
+                                                            </Text>
+                                                            <span className="ml-1">
+                                                                {item?.text}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <button
+                                                            onClick={() => {
+                                                                onDeleteErrorDialogOpen();
+                                                                setSelectedError(
+                                                                    item?.id
+                                                                );
+                                                            }}
+                                                            className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
+                                                        >
+                                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <button
-                                                        onClick={() => {
-                                                            onDeleteErrorDialogOpen();
-                                                            setSelectedError(
-                                                                item?.id
-                                                            );
-                                                        }}
-                                                        className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
-                                                    >
-                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                    </button>
-                                                </div>
+                                            ))}
+                                </div>
+                                {selectedItemDetails?.CongDoan === "SC" ? (
+                                    <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-gray-200 rounded-xl space-y-2">
+                                        <div className="text-center text-gray-400">
+                                            Công đoạn sơ chế không có ghi nhận
+                                            lỗi
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-gray-200 rounded-xl space-y-2">
+                                        <div className="flex space-x-2 pb-3 items-center">
+                                            <FaExclamationCircle className="w-7 h-7 text-red-700" />
+                                            <div className="font-semibold text-lg ">
+                                                Ghi nhận lỗi
                                             </div>
-                                        ))}
-                                {selectedItemDetails?.notifications &&
-                                    selectedItemDetails?.notifications.filter(
-                                        (notif) =>
-                                            notif.confirm == 0 &&
-                                            notif.type == 1
-                                    )?.length > 0 &&
-                                    selectedItemDetails?.notifications
-                                        .filter(
-                                            (notif) =>
-                                                notif.confirm == 0 &&
-                                                notif.type == 1
-                                        )
-                                        .map((item, index) => (
-                                            <div
-                                                key={"Error_" + index}
-                                                className="flex justify-between items-center p-3 my-4 mx-3 border border-red-600 rounded"
-                                            >
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex gap-4">
-                                                        <Text className="font-semibold">
-                                                            Số lượng ghi nhận
-                                                            lỗi chờ xác nhận:{" "}
-                                                        </Text>{" "}
-                                                        <Badge
-                                                            colorScheme="red"
-                                                            fontSize="1.2rem"
-                                                        >
-                                                            {formatNumber(
-                                                                Number(
-                                                                    item?.Quantity
-                                                                )
-                                                            )}
-                                                        </Badge>
-                                                    </div>
-                                                    <Text>
-                                                        tạo bởi:{" "}
-                                                        {item?.last_name +
-                                                            " " +
-                                                            item?.first_name}
-                                                    </Text>
-                                                    <div className="flex flex-col">
-                                                        <Text className="font-semibold">
-                                                            Thời gian giao:{" "}
-                                                        </Text>
-                                                        <span className="ml-1 text-violet-700">
-                                                            {moment(
-                                                                item?.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "DD/MM/YYYY"
-                                                            ) || ""}{" "}
-                                                            {moment(
-                                                                item?.created_at,
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ).format(
-                                                                "HH:mm:ss"
-                                                            ) || ""}
-                                                        </span>
-                                                    </div>
+                                        </div>
+                                        <Alert
+                                            status="error"
+                                            className="rounded-xl flex items-center"
+                                        >
+                                            <div className="w-full flex items-center justify-between gap-3 py-1">
+                                                <div className="">
+                                                    Lỗi báo từ công đoạn trước:{" "}
                                                 </div>
-                                                <div>
-                                                    <button
-                                                        onClick={() =>
-                                                            toast(
-                                                                "Chức năng chưa phát triển"
+                                                <div className="rounded-lg cursor-pointer px-3 py-1 text-white bg-red-800 hover:bg-red-500 duration-300">
+                                                    {formatNumber(
+                                                        Number(
+                                                            selectedItemDetails?.pendingErrors?.reduce(
+                                                                (total, item) =>
+                                                                    total +
+                                                                    item.amount,
+                                                                0
                                                             )
-                                                        }
-                                                        className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
-                                                    >
-                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                    </button>
+                                                        )
+                                                    ) || 0}
                                                 </div>
                                             </div>
-                                        ))}
-                                <Box className="px-3">
-                                    <label className="font-semibold text-red-700">
-                                        Khai báo số lượng lỗi
-                                    </label>
-                                    <NumberInput
-                                        step={1}
-                                        min={0}
-                                        // max={
-                                        //     goodsReceiptList.find(
-                                        //         (item) =>
-                                        //             item.ItemCode ==
-                                        //             selectedItem.value
-                                        //     )?.Qty || 0
-                                        // }
-                                        className="mt-4"
-                                        value={faultyAmount}
-                                        onChange={(value) => {
-                                            if (
-                                                value >
-                                                selectedItemDetails.stockQuantity
-                                            ) {
-                                                setFaultyAmount(
-                                                    selectedItemDetails.stockQuantity
-                                                );
-                                                setFaults((prev) => ({
-                                                    ...prev,
-                                                    amount: selectedItemDetails.stockQuantity,
-                                                }));
-                                            } else {
-                                                setFaultyAmount(value);
-                                                setFaults((prev) => ({
-                                                    ...prev,
-                                                    amount: value,
-                                                }));
-                                            }
-                                            if (value == 0 || !value) {
-                                                setFaults((prev) => ({
-                                                    ...prev,
-                                                    factory: null,
-                                                }));
-                                            }
-                                        }}
-                                    >
-                                        <NumberInputField />
-                                        <NumberInputStepper>
-                                            <NumberIncrementStepper />
-                                            <NumberDecrementStepper />
-                                        </NumberInputStepper>
-                                    </NumberInput>
-                                    <RadioGroup
-                                        ref={checkRef}
-                                        className="hidden mt-4 ml-3"
-                                        value="1"
-                                    >
-                                        <Radio value="1">
-                                            {selectedItemDetails?.ChildName} (
-                                            {selectedItemDetails?.CDay} *
-                                            {selectedItemDetails?.CRong} *
-                                            {selectedItemDetails?.CDai}){" "}
-                                        </Radio>
-                                    </RadioGroup>
-                                </Box>
-                                <Box className="px-3">
-                                    <label className="font-semibold text-red-700">
-                                        Lỗi phôi nhận từ nhà máy khác
-                                    </label>
-                                    <Select
-                                        className="mt-4 mb-8"
-                                        placeholder="Lựa chọn"
-                                        options={selectedItemDetails?.factories}
-                                        isClearable
-                                        isSearchable
-                                        value={faults.factory}
-                                        onChange={(value) => {
-                                            if (
-                                                !faultyAmount ||
-                                                faultyAmount < 1
-                                            ) {
-                                                toast(
-                                                    "Vui lòng khai báo số lượng lỗi."
-                                                );
-                                                setFaults((prev) => ({
-                                                    ...prev,
-                                                    factory: null,
-                                                }));
-                                            } else {
-                                                setFaults((prev) => ({
-                                                    ...prev,
-                                                    factory: value,
-                                                }));
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                                {/* {isQualityCheck && (
-                                    <>
-                                        <Box className="px-3">
+                                        </Alert>
+                                        {selectedItemDetails?.notifications &&
+                                            selectedItemDetails?.notifications.filter(
+                                                (notif) =>
+                                                    notif.confirm == 0 &&
+                                                    notif.type == 1
+                                            )?.length > 0 &&
+                                            selectedItemDetails?.notifications
+                                                .filter(
+                                                    (notif) =>
+                                                        notif.confirm == 0 &&
+                                                        notif.type == 1
+                                                )
+                                                .map((item, index) => (
+                                                    <div
+                                                        key={"Error_" + index}
+                                                        className="flex justify-between items-center p-3 my-4  border border-red-600 rounded-xl"
+                                                    >
+                                                        <div className="flex flex-col gap-2">
+                                                            <div className="flex gap-4">
+                                                                <Text className="font-semibold">
+                                                                    Số lượng ghi
+                                                                    nhận lỗi chờ
+                                                                    xác nhận:{" "}
+                                                                </Text>{" "}
+                                                                <Badge
+                                                                    colorScheme="red"
+                                                                    fontSize="1.2rem"
+                                                                >
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            item?.Quantity
+                                                                        )
+                                                                    )}
+                                                                </Badge>
+                                                            </div>
+                                                            <Text>
+                                                                Tạo bởi:{" "}
+                                                                {item?.last_name +
+                                                                    " " +
+                                                                    item?.first_name}
+                                                            </Text>
+                                                            <div className="flex flex-col">
+                                                                <Text className="font-semibold">
+                                                                    Thời gian
+                                                                    giao:{" "}
+                                                                </Text>
+                                                                <span className="ml-1 text-violet-700">
+                                                                    {moment(
+                                                                        item?.created_at,
+                                                                        "YYYY-MM-DD HH:mm:ss"
+                                                                    ).format(
+                                                                        "DD/MM/YYYY"
+                                                                    ) ||
+                                                                        ""}{" "}
+                                                                    {moment(
+                                                                        item?.created_at,
+                                                                        "YYYY-MM-DD HH:mm:ss"
+                                                                    ).format(
+                                                                        "HH:mm:ss"
+                                                                    ) || ""}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    onDeleteProcessingDialogOpen();
+                                                                    setSelectedDelete(
+                                                                        item?.id
+                                                                    );
+                                                                    setDialogType(
+                                                                        "qc"
+                                                                    );
+                                                                }}
+                                                                className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
+                                                            >
+                                                                <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                        <Box className="px-2 pt-2">
                                             <label className="font-semibold text-red-700">
-                                                Loại lỗi
+                                                Số lượng ghi nhận lỗi:
+                                            </label>
+                                            <NumberInput
+                                                step={1}
+                                                min={0}
+                                                // max={
+                                                //     goodsReceiptList.find(
+                                                //         (item) =>
+                                                //             item.ItemCode ==
+                                                //             selectedItem.value
+                                                //     )?.Qty || 0
+                                                // }
+                                                className="mt-2"
+                                                value={faultyAmount}
+                                                onChange={(value) => {
+                                                    if (
+                                                        value >
+                                                        selectedItemDetails.stockQuantity
+                                                    ) {
+                                                        setFaultyAmount(
+                                                            selectedItemDetails.stockQuantity
+                                                        );
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            amount: selectedItemDetails.stockQuantity,
+                                                        }));
+                                                    } else {
+                                                        setFaultyAmount(value);
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            amount: value,
+                                                        }));
+                                                    }
+                                                    if (value == 0 || !value) {
+                                                        setFaults((prev) => ({
+                                                            ...prev,
+                                                            factory: null,
+                                                        }));
+                                                    }
+                                                }}
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                            {!faultyAmount || faultyAmount > 0 && (
+                                                <>
+                                                {selectedItemDetails?.stock.map((item, index) => (
+                                                    <RadioGroup
+                                                        ref={checkRef}
+                                                        className="mt-4 ml-3"
+                                                        value={index === 0 ? "1" : ""} 
+                                                    >
+                                                        <Radio value="1" isChecked={index === 0}> 
+                                                            {item.SubItemName}
+                                                        </Radio>
+                                                    </RadioGroup>
+                                                ))}
+                                                </>
+                                            )}
+                                            
+                                        </Box>
+                                        <Box className="px-2 pt-2">
+                                            <label className="font-semibold text-red-700">
+                                                Lỗi phôi nhận từ nhà máy khác:
                                             </label>
                                             <Select
-                                                className="mt-4"
+                                                className="mt-2 mb-2"
                                                 placeholder="Lựa chọn"
-                                                options={errorTypeOptions}
+                                                options={
+                                                    selectedItemDetails?.factories
+                                                }
                                                 isClearable
                                                 isSearchable
-                                                // onChange={(value) => {
-                                                //     setFaults((prev) => ({
-                                                //         ...prev,
-                                                //         errorType: value,
-                                                //     }));
-                                                // }}
-                                                value={faults.errorType}
+                                                value={faults.factory}
                                                 onChange={(value) => {
                                                     if (
                                                         !faultyAmount ||
@@ -1099,83 +1063,43 @@ const ItemInput = ({
                                                         );
                                                         setFaults((prev) => ({
                                                             ...prev,
-                                                            errorType: null,
+                                                            factory: null,
                                                         }));
                                                     } else {
                                                         setFaults((prev) => ({
                                                             ...prev,
-                                                            errorType: value,
+                                                            factory: value,
                                                         }));
                                                     }
                                                 }}
                                             />
                                         </Box>
-                                        <Box className="px-3">
-                                            <label className="font-semibold text-red-700">
-                                                Hướng xử lý
-                                            </label>
-                                            <Select
-                                                className="mt-4 mb-12"
-                                                placeholder="Lựa chọn"
-                                                options={solutionOptions}
-                                                isClearable
-                                                isSearchable
-                                                // onChange={(value) => {
-                                                //     setFaults((prev) => ({
-                                                //         ...prev,
-                                                //         solution: value,
-                                                //     }));
-                                                // }}
-                                                value={faults.solution}
-                                                onChange={(value) => {
-                                                    if (
-                                                        !faultyAmount ||
-                                                        faultyAmount < 1
-                                                    ) {
-                                                        toast(
-                                                            "Vui lòng khai báo số lượng lỗi."
-                                                        );
-                                                        setFaults((prev) => ({
-                                                            ...prev,
-                                                            solution: null,
-                                                        }));
-                                                    } else {
-                                                        if (faults.errorType) {
-                                                            setFaults((prev) => ({
-                                                                ...prev,
-                                                                solution: value,
-                                                            }));
-                                                        } else {
-                                                            toast(
-                                                                "Vui lòng chọn loại lỗi."
-                                                            );
-                                                            setFaults((prev) => ({
-                                                                ...prev,
-                                                                solution: null,
-                                                            }));
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </Box>
-                                    </>
-                                )} */}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </ModalBody>
 
                     <ModalFooter className="flex flex-col !p-0">
                         <Alert status="info">
-                            <AlertIcon />
-                            <span className="text-[14px] sm:text-base">
-                                Công đoạn sản xuất tiếp theo:{" "}
-                            </span>
-                            <span className="text-[14px] sm:text-base font-bold ml-1">
-                                {selectedItemDetails?.NameTOTT ||
-                                    "Chưa được thiết lập ở SAP"}
-                            </span>
+                            <TbPlayerTrackNextFilled className="text-[#155979] xl:mr-2 lg:mr-2 md:mr-2 mr-4 xl:text-xl lg:text-xl md:text-xl text-2xl" />
+                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col">
+                                <span className="text-[15px] mr-1 sm:text-base">
+                                    Công đoạn sản xuất tiếp theo:{"  "}
+                                </span>
+                                <span className="xl:text-[15px] lg:text-[15px] md:text-[15px] text-[17px] sm:text-base font-bold ml-1">
+                                    {selectedItemDetails?.NameTOTT ||
+                                        "Chưa được thiết lập ở SAP"}{" "}
+                                    (
+                                    {selectedItemDetails?.TOTT?.split("-")[0] ||
+                                        ""}
+                                    )
+                                </span>
+                            </div>
                         </Alert>
+
                         <div className="border-b-2 border-gray-100"></div>
+
                         <div className="flex items-item justify-end p-4 w-full gap-4">
                             <Button
                                 className="bg-[#edf2f7]"
@@ -1232,14 +1156,6 @@ const ItemInput = ({
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
-                            {/* <Button
-                                colorScheme="red"
-                                onClick={handleSubmitQuantity}
-                                ml={3}
-                                backgroundColor="#c53030 !important"
-                            >
-                                Xác nhận
-                            </Button> */}
                             <button
                                 disabled={confirmLoading}
                                 className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
@@ -1259,6 +1175,7 @@ const ItemInput = ({
                 </AlertDialogOverlay>
             </AlertDialog>
 
+            {/* Xóa ghi nhận thành phẩm */}
             <AlertDialog
                 isOpen={isDeleteProcessingDialogOpen}
                 onClose={onDeleteProcessingDialogClose}
@@ -1266,13 +1183,12 @@ const ItemInput = ({
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
-                        <AlertDialogHeader>
-                            Xác nhận xoá chờ xác nhận
-                        </AlertDialogHeader>
+                        <AlertDialogHeader>Xác nhận xoá</AlertDialogHeader>
                         <AlertDialogBody>
                             <div className="text-red-700">
-                                Bạn chắc chắn muốn xoá số lượng đã giao chờ xác
-                                nhận?
+                                {dialogType === "product"
+                                    ? "Bạn chắc chắn muốn xoá số lượng đã giao chờ xác nhận?"
+                                    : "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"}
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">

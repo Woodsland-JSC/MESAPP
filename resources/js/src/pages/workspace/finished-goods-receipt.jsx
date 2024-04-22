@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react"; 
 import Layout from "../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
@@ -77,6 +77,7 @@ import Loader from "../../components/Loader";
 import useAppContext from "../../store/AppContext";
 import ItemInput from "../../components/ItemInput";
 import AwaitingReception from "../../components/AwaitingReception";
+
 
 const steps = [
     { title: "Bước 1", description: "Chọn loại sản phẩm" },
@@ -604,31 +605,19 @@ function FinishedGoodsReceipt() {
         }
     };
 
-    // useEffect(() => {
-    //     const getAllGroup = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const res = await productionApi.getGroup();
-    //             const options = res.map((item) => ({
-    //                 value: item.Code,
-    //                 label: item.Name + " - " + item.Code,
-    //             }));
-    //             setGroupList(res);
-    //             setGroupListOptions(options);
-    //             // setSelectedGroup(options[0]);
-    //             groupSelectRef.current.setValue(options[0]);
-    //         } catch (error) {
-    //             toast.error("Có lỗi xảy ra khi load danh sách tổ.");
-    //         }
-    //         setLoading(false);
-    //     };
-    //     getAllGroup();
-    //     document.title = "Woodsland - Nhập sản lượng chế biến gỗ";
-    //     return () => {
-    //         document.title = "Woodsland";
-    //         document.body.classList.remove("body-no-scroll");
-    //     };
-    // }, []);
+    const handleBackNavigation = (event) => {
+      if (event.type === 'popstate') {
+        navigate('/workspace?production=true');
+      }
+    };
+  
+    useEffect(() => {
+      window.addEventListener('popstate', handleBackNavigation);
+  
+      return () => {
+        window.removeEventListener('popstate', handleBackNavigation);
+      };
+    }, [navigate]);;
 
     // New Get All Group
     useEffect(() => {
@@ -642,7 +631,7 @@ function FinishedGoodsReceipt() {
                 }));
                 setGroupList(res);
                 setGroupListOptions(options);
-                console.log("New Get All Group: ", options);
+                // console.log("New Get All Group: ", options);
                 // setSelectedGroup(options[0]);
                 groupSelectRef?.current?.setValue(options[0]);
             } catch (error) {
@@ -682,6 +671,7 @@ function FinishedGoodsReceipt() {
             } else {
                 setAwaitingReception([]);
             }
+            console.log("Data: ", res?.data);
             // setData(res.data);
         } catch (error) {
             toast.error("Có lỗi trong quá trình lấy dữ liệu.");
@@ -720,28 +710,6 @@ function FinishedGoodsReceipt() {
         })();
     }, [selectedGroup]);
 
-    // Search data
-    // const searchItems = (data, searchTerm) => {
-    //     if (!searchTerm) {
-    //         return data;
-    //     }
-
-    //     const filteredData = [];
-
-    //     for (const key in data) {
-    //         const item = data[key];
-    //         const filteredDetails = item.Details.filter((detail) => {
-    //             const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
-    //             return subitem.includes(searchTerm);
-    //         });
-
-    //         if (filteredDetails.length > 0) {
-    //             filteredData[key] = { ...item, Details: filteredDetails };
-    //         }
-    //     }
-
-    //     return filteredData;
-    // };
     const searchItems = (data, searchTerm) => {
         if (!searchTerm) {
             return data;
@@ -778,7 +746,7 @@ function FinishedGoodsReceipt() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4 px-4">
+                    <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -809,7 +777,7 @@ function FinishedGoodsReceipt() {
                                             />
                                         </svg>
                                         <Link
-                                            to="/workspace"
+                                            to="/workspace?production=true"
                                             className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div>Quản lý sản xuất</div>
@@ -821,7 +789,7 @@ function FinishedGoodsReceipt() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center px-4">
+                    <div className="flex justify-between mb-4 items-center ">
                         <div className="text-3xl font-bold ">
                             Nhập sản lượng chế biến gỗ
                         </div>
@@ -883,9 +851,9 @@ function FinishedGoodsReceipt() {
                                     )}
                             </div>
 
-                            <label className="block mb-2 text-md font-medium text-gray-900 mt-4">
+                            <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
                                 Tổ & Xưởng sản xuất
-                            </label>
+                            </div>
                             <Select
                                 // isDisabled={true}
                                 ref={groupSelectRef}
@@ -908,6 +876,7 @@ function FinishedGoodsReceipt() {
                                     searchResult.map((item, index) => (
                                         <ItemInput
                                             data={item}
+                                            MaThiTruong={item.MaThiTruong}
                                             index={index}
                                             key={index}
                                             selectedGroup={selectedGroup}
@@ -951,7 +920,7 @@ function FinishedGoodsReceipt() {
                     </ModalHeader>
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody className="!px-2">
+                    <ModalBody className="!p-4">
                         <div className="flex gap-4 justify-center h-full">
                             {selectedGroup && awaitingReception?.length > 0 ? (
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">

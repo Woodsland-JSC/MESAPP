@@ -71,22 +71,33 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Role $role, Request $request)
+
+    public function update(Request $request, $id)
     {
+        $role = Role::findOrFail($id);
+
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:roles,name',
-            'permission' => 'required',
+            'name' => 'required',
+            'permission' => 'required|array',
         ]);
+
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
-        $role->update($request->only('name'));
+        $role->update(['name' => $request->name]);
 
-        $role->syncPermissions($request->get('permission'));
 
+        $permissions = $request->permission; 
+
+        $existingPermissions = Permission::whereIn('name', $permissions)->pluck('name');
+
+        $role->syncPermissions($existingPermissions);
+
+        // Trả về thông báo thành công
         return response()->json(['message' => 'Role updated successfully', 'user' => $role], 200);
     }
+
     public function detail($id)
     {
         $role = Role::find($id);
@@ -95,16 +106,25 @@ class RolesController extends Controller
             return response()->json(['error' => 'Role not found'], 404);
         }
 
-        $rolePermissions = $role->permissions->map(function ($permission) {
-            return [
-                'id' => $permission->id,
-                'name' => $permission->name
-            ];
-        });
+        $rolePermissions = [
+            'name' => $role->name,
+            'permissions' => $role->permissions->pluck('name')->toArray()
+        ];
 
         $allpermissions = Permission::all();
-        return response()->json(['rolePermissions' => $rolePermissions, 'allPermission' => $allpermissions], 200);
+        return response()->json(['details' => $rolePermissions, 'allPermission' => $allpermissions], 200);
     }
+
+    // Delete roles
+    public function delete($id)
+    {
+        $role = Role::findOrFail($id);
+        DB::table('role_has_permissions')->where('role_id', $id)->delete();
+        $role->delete();
+
+        return response()->json(['message' => 'Role deleted successfully'], 200);
+    }
+
 
     /**
      * Remove the specified resource from storage.

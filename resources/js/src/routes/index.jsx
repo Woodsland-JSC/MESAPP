@@ -16,6 +16,7 @@ import Users from "../pages/users/index";
 import User from "../pages/users/details";
 import CreateUser from "../pages/users/create";
 import CreateRole from "../pages/users/roles/create";
+import EditRole from "../pages/users/roles/edit";
 import Integration from "../pages/integration";
 
 // Workspace
@@ -110,10 +111,18 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/roles/:roleId"
+                        path="/roles/create"
                         element={
                         <ProtectedRoute permissionsRequired={['quanlyuser']}>
                             <CreateRole />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/roles/:roleId"
+                        element={
+                        <ProtectedRoute permissionsRequired={['quanlyuser']}>
+                            <EditRole />
                         </ProtectedRoute>
                         }
                     />

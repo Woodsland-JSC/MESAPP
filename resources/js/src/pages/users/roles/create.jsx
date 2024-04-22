@@ -11,11 +11,11 @@ import roleApi from "../../../api/roleApi";
 const permissionsName = [
     {
         value: "sepsay",
-        name: "Sếp sấy",
+        name: "Tạo pallet xếp sấy",
     },
     {
         value: "kehoachsay",
-        name: "Kế hoạch sấy",
+        name: "Tạo kế hoạch sấy",
     },
     {
         value: "vaolo",
@@ -23,7 +23,7 @@ const permissionsName = [
     },
     {
         value: "kiemtralo",
-        name: "Kiểm tra lò",
+        name: "Kiểm tra lò sấy",
     },
     {
         value: "losay",
@@ -31,7 +31,7 @@ const permissionsName = [
     },
     {
         value: "danhgiame",
-        name: "Đánh giá mẻ",
+        name: "Đánh giá mẻ sấy",
     },
     {
         value: "baocao",
@@ -39,7 +39,7 @@ const permissionsName = [
     },
     {
         value: "quanlyuser",
-        name: "Quản lý user",
+        name: "Quản lý người dùng",
     },
     {
         value: "monitor",
@@ -47,11 +47,19 @@ const permissionsName = [
     },
     {
         value: "CBG",
-        name: "Chế biến gỗ",
+        name: "Ghi nhận chế biến gỗ",
     },
     {
         value: "VCN",
-        name: "Ván công nghiệp",
+        name: "Ghi nhận ván công nghiệp",
+    },
+    {
+        value: "QCCBG",
+        name: "Kiểm định chế biến gỗ",
+    },
+    {
+        value: "QCVCN",
+        name: "Kiểm định ván công nghiệp",
     },
 ];
 
@@ -84,13 +92,14 @@ function CreateRole() {
         try {
             const res = await roleApi.createRole(roleInfo);
             toast.success("Tạo role thành công");
+            setRoleInfo({ name: "", permission: [] });
             setLoading(false);
             navigate("/users?roletab=true");
         } catch (error) {
             toast.error("Có lỗi xảy ra.");
             setLoading(false);
         }
-        
+
         console.log("Role info: ", roleInfo);
     };
 
@@ -122,21 +131,21 @@ function CreateRole() {
 
         return () => {
             document.title = "Woodsland";
-            document.body.classList.remove('body-no-scroll');
+            document.body.classList.remove("body-no-scroll");
         };
     }, []);
-    
+
     useEffect(() => {
         if (loading) {
-            document.body.classList.add('body-no-scroll');
+            document.body.classList.add("body-no-scroll");
         } else {
-            document.body.classList.remove('body-no-scroll');
+            document.body.classList.remove("body-no-scroll");
         }
     }, [loading]);
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#F8F9F7] h-screen ">
+            <div className="flex justify-center bg-[#F8F9F7] h-full">
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
@@ -180,12 +189,12 @@ function CreateRole() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Tạo mới role</div>
+                    <div className="text-3xl font-bold pb-6">Tạo mới role</div>
                     {/* Main content */}
-                    <form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
+                    <form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl mb-6">
                         <div className="flex gap-4">
                             <label className="whitespace-nowrap flex items-center text-md font-medium text-gray-900">
-                                Tìm kiếm theo tên{" "}
+                                Nhập tên role cần tạo:{" "}
                             </label>
                             <input
                                 ref={nameInputRef}
@@ -202,7 +211,7 @@ function CreateRole() {
 
                         <div className="my-4 border-b border-gray-200"></div>
                         <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
-                            Quyền hạn
+                            Danh sách permission
                         </h1>
 
                         <div className="divide-y divide-slate-100 ...">
@@ -229,35 +238,61 @@ function CreateRole() {
                                         <div className="flex justify-center w-[15%]">
                                             <Checkbox
                                                 size="lg"
-                                                onChange={(e) => {
-                                                    const isExisted =
-                                                        roleInfo.permission.includes(
-                                                            item.id
-                                                        );
+                                                // onChange={(e) => {
+                                                //     const isExisted =
+                                                //         roleInfo.permission.includes(
+                                                //             item.name
+                                                //         );
+                                                    
+                                                //     setRoleInfo((prev) => {
 
+                                                //         if (isExisted) {
+                                                //             return {
+                                                //                 ...prev,
+                                                //                 permission:
+                                                //                     prev.permission.filter(
+                                                //                         (
+                                                //                             data
+                                                //                         ) =>
+                                                //                             data ==
+                                                //                             item.name
+                                                //                     ),
+                                                //             };
+                                                //         } else {
+                                                //             return {
+                                                //                 ...prev,
+                                                //                 permission: [
+                                                //                     ...prev.permission,
+                                                //                     item.name,
+                                                //                 ],
+                                                //             };
+                                                //         }
+
+                                                        
+                                                //     });
+                                                    
+                                                // }}
+                                                onChange={(e) => {
+                                                    const isChecked = e.target.checked;
                                                     setRoleInfo((prev) => {
-                                                        if (isExisted) {
-                                                            return {
-                                                                ...prev,
-                                                                permission:
-                                                                    prev.permission.filter(
-                                                                        (
-                                                                            data
-                                                                        ) =>
-                                                                            data ==
-                                                                            item.name
-                                                                    ),
-                                                            };
+                                                        let updatedPermissions;
+                                                        if (isChecked) {
+                                                            updatedPermissions = [
+                                                                ...prev.permission,
+                                                                item.name,
+                                                            ];
                                                         } else {
-                                                            return {
-                                                                ...prev,
-                                                                permission: [
-                                                                    ...prev.permission,
-                                                                    item.name,
-                                                                ],
-                                                            };
+                                                            updatedPermissions = prev.permission.filter(
+                                                                (permission) =>
+                                                                    permission !== item.name
+                                                            );
                                                         }
+                                                        return {
+                                                            ...prev,
+                                                            permission: updatedPermissions,
+                                                        };
                                                     });
+                                                    console.log("roleInfo", roleInfo.permission);
                                                 }}
                                             />
                                         </div>
@@ -274,6 +309,7 @@ function CreateRole() {
                         </button>
                     </form>
                 </div>
+                <div className="py-3"></div>
             </div>
             {loading && <Loader />}
         </Layout>

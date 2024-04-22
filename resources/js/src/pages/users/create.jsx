@@ -580,7 +580,7 @@ function CreateUser() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen">
                 {/* Section */}
-                <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
+                <div className="w-screen xl:p-12 p-4 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -612,9 +612,6 @@ function CreateUser() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span className="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Tạo mới</div>
-                                        </span>
                                     </div>
                                 </li>
                             </ol>
@@ -623,6 +620,7 @@ function CreateUser() {
 
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">Tạo mới</div>
+
                     {/* Main content */}
                     <Formik
                         initialValues={input}
@@ -631,13 +629,13 @@ function CreateUser() {
                     >
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
-                                <div className="pb-8">
+                                <div className="pb-8 ">
                                     <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                        <h1 className="mb-4 text-xl text-center md:text-left">
+                                        <h1 className="mb-2 text-xl text-center font-semibold md:text-left">
                                             Thông tin cơ bản
                                         </h1>
                                         <section className="flex flex-col-reverse md:flex-row md:gap-4">
-                                            <div className="md:w-2/3 mb-6">
+                                            <div className="md:w-2/3 mb-4">
                                                 <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                     <div className="w-full">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
@@ -921,7 +919,7 @@ function CreateUser() {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex flex-col justify-center items-center md:w-1/3 mb-6">
+                                            <div className="flex flex-col justify-center items-center md:w-1/3 mb-4">
                                                 <span className="mb-4">
                                                     Ảnh đại diện
                                                 </span>
@@ -996,7 +994,7 @@ function CreateUser() {
                                             </div>
                                         </section>
                                         <div className="my-4 border-b border-gray-200"></div>
-                                        <h1 className="mb-4 text-xl text-center md:text-left">
+                                        <h1 className="mb-4 text-xl font-semibold text-center md:text-left">
                                             Đồng bộ và tích hợp
                                         </h1>
                                         <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
@@ -1139,7 +1137,7 @@ function CreateUser() {
                                         </div>
                                         <button
                                             type="submit"
-                                            className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                            className="mt-4 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
                                         >
                                             Lưu lại
                                         </button>
@@ -1148,7 +1146,9 @@ function CreateUser() {
                             );
                         }}
                     </Formik>
+                    <div className="pb-4"></div>
                 </div>
+                
             </div>
             {loading && <Loader />}
         </Layout>

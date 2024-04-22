@@ -19,15 +19,18 @@ const roleApi = {
         const url = `/roles/create`;
         return axiosClient().post(url, rolesData);
     },
-    // updateRole: (rolesId, rolesData) => {
-    //     const url = `/roless/update/${rolesId}`;
-    //     return axiosClient().patch(url, rolesData);
-    // },
-    // deleteRole: (roleId) => {
-    //     const url = `/roles/delete/${roleId}`;
-    //     return axiosClient().delete(url);
-
-    // }
+    updateRole: (rolesId, rolesData) => {
+        const url = `/roles/update/${rolesId}`;
+        return axiosClient().patch(url, rolesData);
+    },
+    getRoleById: (rolesId) => {
+        const url = `/roles/detail/${rolesId}`;
+        return axiosClient().get(url);
+    },
+    deleteRole: (roleId) => {
+        const url = `/roles/delete/${roleId}`;
+        return axiosClient().delete(url, {});
+    },
 };
 
 export default roleApi;

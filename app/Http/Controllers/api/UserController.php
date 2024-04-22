@@ -30,6 +30,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             $roles = Role::pluck('name', 'name')->all();
             $userRole = $user->getRoleNames();
+            $permissions = $user->roles->flatMap->permissions->pluck('name')->unique()->toArray();
 
             if ($user->avatar) {
                 $user->avatar = asset('storage/' . $user->avatar);
@@ -39,7 +40,7 @@ class UserController extends Controller
                 $user->imagesign = asset('storage/' . $user->imagesign);
             }
 
-            return response()->json(['user' => $user, 'UserRole' => $userRole, 'role' => $roles], 200);
+            return response()->json(['user' => $user, 'UserRole' => $userRole, 'role' => $roles, 'permissions' => $permissions], 200);
         } catch (\Exception $e) {
             // Trả về một response lỗi khi không tìm thấy user
             return response()->json(['error' => 'User not found'], 404);

@@ -70,7 +70,6 @@ const productionApi = {
         return axiosClient().post(url, data);
     },
     deleteReceiptCBG: (payload) => {
-        console.log("Đói quá: ", payload);
         const url = `/production/remove-receipt`;
         return axiosClient().delete(url, { data: payload });
     },

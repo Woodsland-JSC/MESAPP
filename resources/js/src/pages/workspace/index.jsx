@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { MdPlaylistAddCheckCircle } from "react-icons/md";
 import { FaPallet, FaCalendarCheck } from "react-icons/fa";
@@ -22,6 +22,37 @@ import "../../assets/styles/customTabs.css";
 function Workspace() {
     const { user, setUser, isAuthenticated, setIsAuthenticated } =
         useAppContext();
+
+    const FirstTab = useRef();
+    const SecondTab = useRef();
+
+    const handleTabClick = (isSecondTab) => {
+        const params = new URLSearchParams(window.location.search);
+
+        if (isSecondTab) {
+            params.set("production", "true");
+        } else {
+            params.delete("production");
+        }
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({}, "", newUrl);
+    };
+
+    useEffect(() => {
+        document.title = "Woodsland - Workspace";
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.get("production") === "true") {
+            setTimeout(() => {
+                SecondTab.current.click();
+            });
+        }
+
+        return () => {
+            document.title = "Woodsland";
+        };
+    }, []);
 
     return (
         <Layout>
@@ -47,26 +78,24 @@ function Workspace() {
                             colorScheme="blackAlpha"
                         >
                             <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3 max-w-sm w-full">
-                                <Tab className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap ">
+                                <Tab 
+                                    className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap "
+                                    ref={FirstTab}
+                                    onClick={() => handleTabClick(false)}
+                                >
                                     <div className="w-[135px]">
                                         Quản lý sấy gỗ
                                     </div>
                                 </Tab>
-                                <Tab className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit ">
+                                <Tab 
+                                    className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit "
+                                    ref={SecondTab}
+                                    onClick={() => handleTabClick(true)}
+                                >
                                     <div className="w-[137px]">
                                         Quản lý sản xuất
                                     </div>
                                 </Tab>
-                                {/* <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
-                                    <div className="w-[150px]">
-                                        Quản lý bán hàng
-                                    </div>
-                                </Tab> */}
-                                {/* <Tab className="xl:w-fit md:w-fit lg:w-fit xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit">
-                                    <div className="w-[180px]">
-                                        Kiểm định chất lượng
-                                    </div>
-                                </Tab> */}
                             </TabList>
 
                             <TabPanels px="0" className="w-full flex justify-center">
@@ -379,8 +408,8 @@ function Workspace() {
                                                 </div>
                                             )}
 
-{user.permissions?.includes(
-                                                "CBG"
+                                            {user.permissions?.includes(
+                                                "QCCBG"
                                             ) ? (
                                                 <Link to="/workspace/wood-producting-qc">
                                                     <div className="flex justify-center xl:h-full md:h-full">
@@ -400,7 +429,7 @@ function Workspace() {
                                                     </div>
 
                                                     <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        QC Ván công nghiệp
+                                                        QC Chế biến gỗ
                                                     </div>
                                                 </Link>
                                             ):(
@@ -421,7 +450,7 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "VCN"
                                             ) ? (
-                                                <Link to="/workspace/plywood/finished-goods-receipt">
+                                                <Link to="#">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
@@ -457,18 +486,44 @@ function Workspace() {
                                                 </div>
                                             )}
 
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                            {user.permissions?.includes(
+                                                "QCVCN"
+                                            ) ? (
+                                                <Link to="#">
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                                <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
+                                                                    Kiểm định chất lượng ván công nghiệp
+                                                                </h5>
+                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
+                                                                    Kiểm định ván công nghiệp
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
+
+                                                    <div className="flex xl:hidden justify-center text-center mt-2">
+                                                        QC VCN
+                                                    </div>
+                                                </Link>
+                                            ):(
+                                                <div>
+                                                    <div className="flex justify-center xl:h-full md:h-full">
+                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
+                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                        Tạo kế hoạch sấy
+                                                    </div>
                                                 </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
+                                            )}
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">

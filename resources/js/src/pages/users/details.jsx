@@ -39,9 +39,9 @@ const validationSchema = Yup.object().shape({
         .matches(/^[\p{L} ]+$/u, "Chỉ cho phép chữ cái và khoảng trắng")
         .max(30, "Tên không được quá 30 kí tự")
         .required("Tên là bắt buộc"),
-    gender: Yup.string()
-        .oneOf(["male", "female"], "Giá trị không hợp lệ")
-        .required("Giới tính là bắt buộc"),
+    // gender: Yup.string()
+    //     .oneOf(["male", "female"], "Giá trị không hợp lệ")
+    //     .required("Giới tính là bắt buộc"),
     password: Yup.string()
         .nullable()
         .transform((value) => {
@@ -381,6 +381,8 @@ function User() {
         const { password: oldPassword, ...oldInfo } = originalInfo;
         const isChanged = areObjectsEqual(updatedInfo, oldInfo);
 
+        console.log("Updated values: ", updatedValues);
+
         if (!isChanged || newPassword || originalAvatar != avatar.file) {
             setLoading(true);
             if (selectedFile) {
@@ -397,8 +399,6 @@ function User() {
                 updatedValues.avatar = -1;
             }
 
-            // console.log("Updated values: ", updatedValues);
-
             try {
                 const res = await usersApi.updateUser(userId, updatedValues);
                 // console.log("Thành công: ", res);
@@ -409,10 +409,11 @@ function User() {
                     // if (newPassword) {
                     handleSignOut();
                     setLoading(false);
+                    toast.success("Điều chỉnh thông tin thành công.");
                     return;
                     // }
                 }
-                toast.success("Điều chỉnh thông tin thành công.");
+                
                 getCurrentUser();
                 setLoading(false);
             } catch (error) {
@@ -605,7 +606,7 @@ function User() {
     }, []);
 
     useEffect(() => {
-        console.log("Hello");
+        // console.log("Hello");
         // if (isFirstLoading) {
         const selectedBranch = input.branch;
 
@@ -651,9 +652,6 @@ function User() {
 
     const [selectedSapUser, setSelectedSapUser] = useState(null);
 
-    console.log("Current Id: ", currentUser.sap_id);
-    // console.log("SAP List: ", sapId);
-
     useEffect(() => {
         if (currentUser && sapId.length > 0) {
           const defaultUser = sapId.find(id => id.USER_CODE === currentUser.sap_id);
@@ -668,7 +666,7 @@ function User() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen md:py-12 p-4 md:px-12 lg:px-40 border-t border-gray-200">
+                <div className="w-screen xl:p-12 p-4 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -700,9 +698,7 @@ function User() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        <span classNames="ml-1 text-sm font-medium text-[#17506B] md:ml-2">
-                                            <div>Người dùng</div>
-                                        </span>
+                                        
                                     </div>
                                 </li>
                             </ol>
@@ -722,12 +718,12 @@ function User() {
                     >
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
-                                <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
+                                <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl mb-6">
+                                    <h1 className="mb-2 text-xl text-center font-semibold md:text-left">
                                         Thông tin cơ bản
                                     </h1>
                                     <section className="flex flex-col-reverse md:flex-row md:gap-4">
-                                        <div className="md:w-2/3 mb-6">
+                                        <div className="md:w-2/3 mb-4">
                                             <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="w-full">
                                                     <label
@@ -883,9 +879,9 @@ function User() {
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
                                                         Giới tính{" "}
-                                                        <span className="text-red-600">
+                                                        {/* <span className="text-red-600">
                                                             *
-                                                        </span>
+                                                        </span> */}
                                                     </label>
                                                     <SelectField
                                                         name="gender"
@@ -952,7 +948,7 @@ function User() {
                                                             *
                                                         </span>
                                                     </label>
-                                                    <MultiSelectField
+                                                    <AsyncMultiSelectField
                                                         name="authorization"
                                                         options={roles}
                                                         defaultValue={
@@ -1028,7 +1024,7 @@ function User() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-6">
+                                        <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-4">
                                             <span className="mb-4">
                                                 Ảnh đại diện
                                             </span>
@@ -1062,7 +1058,7 @@ function User() {
                                             <div className="flex gap-2 justify-center">
                                                 <button
                                                     type="button"
-                                                    className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                                                    className="text-white cursor-pointer bg-gray-800 hover:bg-ray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg  w-full sm:w-auto px-5 py-2.5 text-center"
                                                     onClick={() =>
                                                         fileInputRef.current.click()
                                                     }
@@ -1087,7 +1083,7 @@ function User() {
                                         </div>
                                     </section>
                                     <div className="my-4 border-b border-gray-200"></div>
-                                    <h1 className="mb-4 text-xl text-center md:text-left">
+                                    <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
                                         Đồng bộ và tích hợp
                                     </h1>
                                     <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
@@ -1101,7 +1097,7 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            <Select
+                                            <SelectField
                                                 innerRef={sapIdSelectRef}
                                                 name="sapId"
                                                 defaultValue={
@@ -1111,10 +1107,15 @@ function User() {
                                                             values.sapId
                                                     ) || null
                                                 }
-                                                // deffaultValue={
-                                                //     selectedSapId
-                                                // }
                                                 options={sapId}
+                                                onChange={(value) => {
+                                                    console.log("Giá trị trước khi thay đổi:", values.sapId);
+                                                    console.log("Giá trị sau khi thay đổi:", value);
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        sapId: value
+                                                    }));
+                                                }}
                                                 setInput={setInput}
                                             />
                                             {errors.sapId && touched.sapId ? (
@@ -1131,26 +1132,12 @@ function User() {
                                                 className="block mb-2 text-md font-medium text-gray-900"
                                             >
                                                 INTEGRATION ID{" "}
-                                                {/* <span className="text-red-600">
-                                                    *
-                                                </span> */}
                                             </label>
                                             <Field
                                                 name="integrationId"
                                                 className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                 disabled
                                                 value="1"
-                                            // onChange={(e) => {
-                                            //     setFieldValue(
-                                            //         "integrationId",
-                                            //         e.target.value
-                                            //     );
-                                            //     setInput((prev) => ({
-                                            //         ...prev,
-                                            //         integrationId:
-                                            //             e.target.value,
-                                            //     }));
-                                            // }}
                                             />
                                             {errors.integrationId &&
                                                 touched.integrationId ? (
@@ -1171,24 +1158,9 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            {/* <AsyncSelectField
-                                                innerRef={branchSelectRef}
-                                                name="branch"
-                                                loadOptions={loadBranches}
-                                                options={branches}
-                                                defaultValue={
-                                                    branches.find(
-                                                        (item) =>
-                                                            item.value ==
-                                                            values.branch
-                                                    ) || null
-                                                }
-                                                setInput={setInput}
-                                            /> */}
                                             <SelectField
                                                 innerRef={branchSelectRef}
                                                 name="branch"
-                                                // loadOptions={loadBranches}
                                                 options={branches}
                                                 defaultValue={
                                                     branches.find(
@@ -1232,20 +1204,6 @@ function User() {
                                                 isLoading={factoryLoading}
                                                 setInput={setInput}
                                             />
-                                            {/* <Field
-                                                name="factory"
-                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                onChange={(e) => {
-                                                    setFieldValue(
-                                                        "factory",
-                                                        e.target.value
-                                                    );
-                                                    setInput((prev) => ({
-                                                        ...prev,
-                                                        factory: e.target.value,
-                                                    }));
-                                                }}
-                                            /> */}
                                             {errors.factory &&
                                                 touched.factory ? (
                                                 <span className="text-xs text-red-600">
@@ -1258,7 +1216,7 @@ function User() {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
+                                        className="mt-4 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
                                     >
                                         Lưu lại
                                     </button>
@@ -1266,6 +1224,7 @@ function User() {
                             );
                         }}
                     </Formik>
+                    <div className="pb-4"></div>
                 </div>
             </div>
             {loading && <Loader />}

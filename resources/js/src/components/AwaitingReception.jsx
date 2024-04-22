@@ -390,6 +390,7 @@ const AwaitingReception = ({
                                     <span className="font-bold">
                                         {data?.FatherCode || ""}
                                     </span>
+                                    <span className="font-bold">{data.MaThiTruong ? "-" + data?.MaThiTruong : ""}</span>
                                 </div>
                             </>
                         )}
@@ -400,17 +401,6 @@ const AwaitingReception = ({
                                 {data?.CongDoan || ""}
                             </span>
                         </div>
-
-                        {/* <div className="flex gap-2">
-                            <span>Quy cách: </span>
-                            <span className="font-bold">
-                                {data?.CDay +
-                                    " x " +
-                                    data?.CRong +
-                                    " x " +
-                                    data?.CDai || ""}
-                            </span>
-                        </div> */}
 
                         <div className="flex gap-2">
                             <span>Số lượng: </span>
@@ -455,44 +445,6 @@ const AwaitingReception = ({
                                 </Text>
                             </div>
                         </div>
-                        {/* <div className="flex">
-                            <Text
-                                className="w-2/5"
-                                color="blue.600"
-                                fontSize="md"
-                            >
-                                Ngày tạo:
-                            </Text>
-                            <Text
-                                color="blue.600"
-                                fontWeight="500"
-                                fontSize="md"
-                            >
-                                {moment(
-                                    data?.created_at,
-                                    "YYYY-MM-DD HH:mm:ss"
-                                ).format("DD/MM/YYYY") || ""}
-                            </Text>
-                        </div>
-                        <div className="flex">
-                            <Text
-                                className="w-2/5"
-                                color="blue.600"
-                                fontSize="md"
-                            >
-                                Thời gian tạo:
-                            </Text>
-                            <Text
-                                color="blue.600"
-                                fontWeight="500"
-                                fontSize="md"
-                            >
-                                {moment(
-                                    data?.created_at,
-                                    "YYYY-MM-DD HH:mm:ss"
-                                ).format("HH:mm:ss") || ""}
-                            </Text>
-                        </div> */}
 
                         <div className="grid grid-cols-2 space-x-3">
                             <div className="items-center gap-x-4">
@@ -817,7 +769,7 @@ const AwaitingReception = ({
                         </AlertDialogHeader>
                         <AlertDialogBody>
                             <div className="text-green-700">
-                                Bạn có chắc muốn:{" "}
+                                Bạn có chắc muốn{" "}
                                 {variant == "QC" ? (
                                     <>
                                         ghi nhận <span className="font-bold">
@@ -826,7 +778,7 @@ const AwaitingReception = ({
                                     </>
                                 ) : (
                                     <>
-                                        xác nhận<span className="font-bold">
+                                        xác nhận <span className="font-bold">
                                             {Number(data?.Quantity) || ""}
                                         </span>{" "}
                                     </> 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
 import CBGCheckCard from "../../../components/CBGCheckCard";
@@ -23,6 +24,7 @@ import moment from "moment";
 import productionApi from "../../../api/productionApi";
 import Loader from "../../../components/Loader";
 import AwaitingReception from "../../../components/AwaitingReception";
+
 
 const steps = [
     { title: "Bước 1", description: "Chọn loại sản phẩm" },
@@ -496,16 +498,32 @@ function WoodProductingQC() {
                     TO: selectedGroup.value,
                 };
                 getDataFollowingGroup(param);
-
             }
         })();
     }, [selectedGroup]);
 
+    const navigate = useNavigate();
+
+    const handleBackNavigation = (event) => {
+      if (event.type === 'popstate') {
+        navigate('/workspace?production=true');
+      }
+    };
+  
+    useEffect(() => {
+      window.addEventListener('popstate', handleBackNavigation);
+  
+      return () => {
+        window.removeEventListener('popstate', handleBackNavigation);
+      };
+    }, [navigate]);;
+
     const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            setAwaitingReception((prev) =>
-                prev.filter((item) => item.id !== id)
-            );
+            // setAwaitingReception((prev) =>
+            //     prev.filter((item) => item.id !== id)
+            // );
+            getDataFollowingGroup({ TO: selectedGroup.value });
             toast.success("Ghi nhận thành công.");
         }
         if (awaitingReception.length <= 0) {
@@ -515,9 +533,10 @@ function WoodProductingQC() {
 
     const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            setAwaitingReception((prev) =>
-                prev.filter((item) => item.id !== id)
-            );
+            // setAwaitingReception((prev) =>
+            //     prev.filter((item) => item.id !== id)
+            // );
+            getDataFollowingGroup({ TO: selectedGroup.value });
             toast.success("Huỷ bỏ & chuyển lại thành công.");
         }
         if (awaitingReception.length <= 0) {
@@ -525,12 +544,15 @@ function WoodProductingQC() {
         }
     };
 
-    const filteredData = searchTerm && typeof searchTerm === 'string' ?
-    awaitingReception.filter(item => {
-        const searchString = `${item.ItemName} (${item.CDay}x${item.CRong}x${item.CDai})`;
-        return searchString.toLowerCase().includes(searchTerm.toLowerCase());
-    }) :
-    awaitingReception;
+    const filteredData =
+        searchTerm && typeof searchTerm === "string"
+            ? awaitingReception.filter((item) => {
+                  const searchString = `${item.ItemName} (${item.CDay}x${item.CRong}x${item.CDai})`;
+                  return searchString
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase());
+              })
+            : awaitingReception;
 
     return (
         <Layout>
@@ -569,7 +591,7 @@ function WoodProductingQC() {
                                             />
                                         </svg>
                                         <Link
-                                            to="/workspace"
+                                            to="/workspace?production=true"
                                             className="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div className="">
@@ -670,26 +692,24 @@ function WoodProductingQC() {
                                     {selectedGroup &&
                                     awaitingReception?.length > 0 ? (
                                         <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                            {filteredData.map(
-                                                (item, index) => (
-                                                    <AwaitingReception
-                                                        type="wood-processing"
-                                                        data={item}
-                                                        key={index}
-                                                        index={index}
-                                                        variant="QC"
-                                                        isQualityCheck={
-                                                            isQualityCheck
-                                                        }
-                                                        onConfirmReceipt={
-                                                            handleConfirmReceipt
-                                                        }
-                                                        onRejectReceipt={
-                                                            handleRejectReceipt
-                                                        }
-                                                    />
-                                                )
-                                            )}
+                                            {filteredData.map((item, index) => (
+                                                <AwaitingReception
+                                                    type="wood-processing"
+                                                    data={item}
+                                                    key={index}
+                                                    index={index}
+                                                    variant="QC"
+                                                    isQualityCheck={
+                                                        isQualityCheck
+                                                    }
+                                                    onConfirmReceipt={
+                                                        handleConfirmReceipt
+                                                    }
+                                                    onRejectReceipt={
+                                                        handleRejectReceipt
+                                                    }
+                                                />
+                                            ))}
                                         </div>
                                     ) : (
                                         <div className="flex w-full h-full justify-center items-center">
