@@ -581,7 +581,7 @@ const ItemInput = ({
                                                     } flex flex-col py-2  mb-6 rounded-xl`}
                                                 >
                                                     <div className="flex items-center justify-between gap-4 px-4">
-                                                        <div className="">
+                                                        <div className="truncate">
                                                             <div className="text-xs text-[#647C9C]">
                                                                 <span className="mr-1">
                                                                     [
@@ -606,7 +606,7 @@ const ItemInput = ({
                                                                     item.SubItemCode
                                                                 }
                                                             </div>
-                                                            <div className="font-medium text-[16px]">
+                                                            <div className="font-medium text-[16px] truncate">
                                                                 {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === null || item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
                                                             </div>
                                                         </div>
