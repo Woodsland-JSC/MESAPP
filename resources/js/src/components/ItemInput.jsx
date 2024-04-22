@@ -607,10 +607,7 @@ const ItemInput = ({
                                                                 }
                                                             </div>
                                                             <div className="font-medium text-[16px]">
-                                                                {item.SubItemName ===
-                                                                "Gỗ"
-                                                                    ? "Nguyên liệu gỗ"
-                                                                    : item.SubItemName}
+                                                                {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName && item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
                                                             </div>
                                                         </div>
                                                         <span
