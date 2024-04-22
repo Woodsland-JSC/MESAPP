@@ -607,7 +607,7 @@ const ItemInput = ({
                                                                 }
                                                             </div>
                                                             <div className="font-medium text-[16px]">
-                                                                {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
+                                                                {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === null || item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
                                                             </div>
                                                         </div>
                                                         <span
@@ -1177,6 +1177,7 @@ const ItemInput = ({
                 isOpen={isDeleteProcessingDialogOpen}
                 onClose={onDeleteProcessingDialogClose}
                 closeOnOverlayClick={false}
+                isCentered
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
