@@ -373,10 +373,6 @@ function CreateDryingPlan() {
                                             loadOptions={loadThicknessOptions}
                                             defaultOptions
                                             onChange={(value) => {
-                                                console.log(
-                                                    "Selected Thickness:",
-                                                    value
-                                                );
                                                 setSelectedThickness(value);
                                             }}
                                         />

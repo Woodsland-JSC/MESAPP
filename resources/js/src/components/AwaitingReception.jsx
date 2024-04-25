@@ -181,7 +181,7 @@ const AwaitingReception = ({
                 }
             } catch (error) {
                 const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message;
-                showErrorAlert(`Lỗi từ SAP: ${errorMessage}`);
+                showErrorAlert(`Lỗi từ SAP: ${errorMessage? errorMessage : "Lỗi kết nối hệ thống"}`);
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
                 onInputAlertDialogClose();
@@ -362,14 +362,18 @@ const AwaitingReception = ({
                         <div className="flex gap-2">
                             {/* <span>Tên: </span> */}
                             <span className="font-bold text-[19px] text-[#155979]">
+                                {variant === "QC" ? (
+                                    data?.SubItemName || "Unknown Product"
+                                ):(
+                                    data?.ItemName || "" (
+                                        data?.CDay +
+                                            "x" +
+                                            data?.CRong +
+                                            "x" +
+                                            data?.CDai || ""
+                                    )
+                                )}
                                 {/* {type == "plywood" ? data.itemName : data.data?.ItemName || ""} */}
-                                {data?.ItemName || ""} (
-                                {data?.CDay +
-                                    "x" +
-                                    data?.CRong +
-                                    "x" +
-                                    data?.CDai || ""}
-                                )
                             </span>
                             <span></span>
                         </div>

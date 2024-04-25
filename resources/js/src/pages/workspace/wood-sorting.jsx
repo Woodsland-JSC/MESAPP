@@ -59,6 +59,7 @@ function WoodSorting() {
     const [selectedPallet, setSelectedPallet] = useState(null);
     const [palletOptions, setPalletOptions] = useState([]);
     const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
+    const [reloadDryingMethodsKey, setReloadDryingMethodsKey] = useState(0);
 
     const years = [];
     const currentYear = moment().year();
@@ -85,6 +86,11 @@ function WoodSorting() {
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
         [reloadAsyncSelectKey]
+    );
+
+    const asyncDryingMethodsKey = useMemo(
+        () => reloadDryingMethodsKey,
+        [reloadDryingMethodsKey]
     );
 
     const loadPalletCallback = async (inputValue, callback) => {
@@ -181,19 +187,6 @@ function WoodSorting() {
             }
 
             try {
-                const dryingMethodsData = await palletsApi.getDryingMethod();
-                const dryingMethodsOptions = dryingMethodsData.map((item) => ({
-                    value: item.ItemCode + "-" + item.BatchNum,
-                    label: item.ItemName,
-                    batchNum: item.BatchNum,
-                    code: item.ItemCode,
-                }));
-                setDryingMethods(dryingMethodsOptions);
-            } catch (error) {
-                console.error("Error fetching drying methods:", error);
-            }
-
-            try {
                 const dryingReasonsData = await palletsApi.getDryingReason();
                 const dryingReasonsOptions = dryingReasonsData.map((item) => ({
                     value: item.Code,
@@ -208,6 +201,28 @@ function WoodSorting() {
 
         fetchData();
     }, []);
+
+    const loadDryingMethodCallback = async (inputValue, callback) => {
+        try {
+            const dryingMethodsData = await palletsApi.getDryingMethod(selectedDryingReason.value);
+            const dryingMethodsOptions = dryingMethodsData.map((item) => ({
+                value: item.ItemCode + "-" + item.BatchNum,
+                label: item.ItemName,
+                batchNum: item.BatchNum,
+                code: item.ItemCode,
+            }));
+            if (callback) {
+                callback(dryingMethodsOptions);
+            }
+            // setDryingMethods(dryingMethodsOptions);
+        } catch (error) {
+            console.error("Error fetching drying methods:", error);
+        }
+    };
+    
+    const loadDryingMethods = (inputValue, callback) => {
+        loadDryingMethodCallback(inputValue, callback);
+    };
 
     // Validating
     const validateData = () => {
@@ -231,86 +246,8 @@ function WoodSorting() {
             toast.error("Ngày nhập gỗ không được bỏ trống");
             return false;
         }
-
         return true;
     };
-
-    // const handleAddToList = async () => {
-    //     if (validateData()) {
-    //         try {
-    //             setIsLoading(true);
-
-    //             const data = {
-    //                 woodType: selectedWoodType,
-    //                 batchId: batchId,
-    //                 dryingReason: selectedDryingReason,
-    //                 dryingMethod: selectedDryingMethod,
-    //                 startDate: formattedStartDate,
-    //             };
-    //             console.log("1.Dữ liệu từ form:", data);
-
-    //             const response = await palletsApi.getStockByItem(
-    //                 selectedDryingMethod.code,
-    //                 selectedDryingReason.value,
-    //                 selectedDryingMethod.batchNum
-    //             );
-
-    //             console.log("2. Get thông tin từ ItemCode:", response);
-
-    //             if (response && response.length > 0) {
-    //                 const newPalletCards = response
-    //                     .filter(
-    //                         (item) =>
-    //                             !isPalletCardExists(
-    //                                 item.WhsCode + item.BatchNum,
-    //                                 palletCards
-    //                             )
-    //                     )
-    //                     .map((item) => (
-    //                         <PalletCard
-    //                             key={item.WhsCode + item.BatchNum}
-    //                             itemCode={selectedDryingMethod.code}
-    //                             itemName={selectedDryingMethod.label}
-    //                             batchNum={item.BatchNum}
-    //                             inStock={item.Quantity}
-    //                             whsCode={item.WhsCode}
-    //                             height={item.CDai}
-    //                             width={item.CRong}
-    //                             thickness={item.CDay}
-    //                             isInvalidQuantity={isInvalidQuantity}
-    //                             onDelete={() =>
-    //                                 handleDeletePalletCard(
-    //                                     item.WhsCode + item.BatchNum
-    //                                 )
-    //                             }
-    //                             onQuantityChange={(quantity) => {
-    //                                 handlePalletQuantityChange(
-    //                                     item.WhsCode + item.BatchNum,
-    //                                     quantity
-    //                                 );
-    //                             }}
-    //                         />
-    //                     ));
-
-    //                 setPalletCards((prevPalletCards) => [
-    //                     ...prevPalletCards,
-    //                     ...newPalletCards,
-    //                 ]);
-    //                 // console.log("Danh sách pallet card: ", newpalletCards);chs
-    //             } else {
-    //                 toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
-    //                 return;
-    //             }
-
-    //             toast.success("Đã thêm vào danh sách");
-    //         } catch (error) {
-    //             console.error("Error fetching stock by item:", error);
-    //             toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     }
-    // };
 
     const [quyCachList, setQuyCachList] = useState([]);
 
@@ -402,15 +339,6 @@ function WoodSorting() {
         toast("Đã xóa khỏi danh sách");
         
     };
-
-
-    // const handleDeletePalletCard = (id) => {
-    //     setPalletCards((prevPalletCards) =>
-    //         prevPalletCards.filter((card) => card.key !== id)
-    //     );
-    //     toast("Đã xóa khỏi danh sách");
-    // };
-
 
     const handlePalletQuantityChange = (id, quantity) => {
         setPalletQuantities((prevQuantities) => ({
@@ -1514,9 +1442,14 @@ function WoodSorting() {
                                             }}
                                             placeholder="Chọn mục đích sấy"
                                             options={dryingReasons}
-                                            onChange={(value) =>
+                                            onChange={(value) => {
                                                 setSelectedDryingReason(value)
-                                            }
+                                                console.log("Selected Drying Reason:", value);
+                                                setReloadDryingMethodsKey(
+                                                    (prevKey) =>
+                                                        prevKey + 1
+                                                );
+                                            }}
                                             isDisabled={palletCards.length > 0}
                                         />
                                     </div>
@@ -1527,12 +1460,17 @@ function WoodSorting() {
                                         >
                                             Quy cách thô
                                         </label>
-                                        <Select
+                                        <AsyncSelect
+                                            key={reloadDryingMethodsKey}    
+                                            loadingMessage={() =>
+                                                "Đang tải..."
+                                            }
                                             ref={(ref) => {
                                                 dryingMethodSelectRef = ref;
                                             }}
+                                            defaultOptions
                                             placeholder="Chọn quy cách thô"
-                                            options={dryingMethods}
+                                            loadOptions={loadDryingMethods}
                                             onChange={(value) => {
                                                 setSelectedDryingMethod(value);
                                             }}

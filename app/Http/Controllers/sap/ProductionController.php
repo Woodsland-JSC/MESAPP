@@ -108,6 +108,8 @@ class ProductionController extends Controller
             'FatherCode' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
             'ItemName' => 'required|string|max:254',
+            'SubItemName',
+            'SubItemCode',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
             'MaThiTruong',
@@ -118,7 +120,6 @@ class ProductionController extends Controller
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
-            //'LSX' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -133,7 +134,7 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type', 'LSX']);
+            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'SubItemCode', 'SubItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type', 'LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SLData['openQty'] = 0;
 
@@ -161,6 +162,8 @@ class ProductionController extends Controller
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
+                    'SubItemCode' => $request->SubItemCode,
+                    'SubItemName' => $request->SubItemName,
                     'team' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
@@ -439,11 +442,9 @@ class ProductionController extends Controller
         foreach ($results as $result) {
             $U_CDOAN = $result['U_CDOAN'];
 
-            // Nếu $CongDoan chưa được gán giá trị, gán giá trị của U_CDOAN vào $CongDoan
             if ($CongDoan === null) {
                 $CongDoan = $U_CDOAN;
             } else {
-                // Nếu giá trị của U_CDOAN không bằng $CongDoan, báo lỗi cho người dùng
                 if ($U_CDOAN !== $CongDoan) {
                     return response()->json(['error' => 'Các giá trị của U_CDOAN không giống nhau!'], 422);
                 }
@@ -461,23 +462,6 @@ class ProductionController extends Controller
         $stock = [];
 
         $groupedResults = [];
-        // foreach ($results as $result) {
-        //     $subItemCode = $result['SubItemCode'];
-        //     $subItemName = $result['SubItemName'];
-        //     $onHand = (float) $result['OnHand'];
-        //     $baseQty = (float) $result['BaseQty'];
-
-        //     if (!array_key_exists($subItemCode, $groupedResults)) {
-        //         $groupedResults[$subItemCode] = [
-        //             'SubItemCode' => $subItemCode,
-        //             'SubItemName' => $subItemName,
-        //             'OnHand' => 0,
-        //             'BaseQty' => $baseQty,
-        //         ];
-        //     }
-
-        //     $groupedResults[$subItemCode]['OnHand'] += $onHand;
-        // }
 
         foreach ($results as $result) {
             $itemCode = $result['ItemCode'];
@@ -503,24 +487,22 @@ class ProductionController extends Controller
 
                 $groupedResults[$subItemCode]['OnHand'] = ceil($onHand - $quantity); // Làm tròn lên
             } else {
-                // Đối với các giá trị $CongDoan khác thì giữ nguyên cách tính
                 $groupedResults[$subItemCode]['OnHand'] = $onHand;
             }
         }
 
         $maxQuantities = [];
 
-        // Tính số lượng tối đa có thể sản xuất từng bộ phận
+
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
 
-            // Tính số lượng tối đa có thể sản xuất từ mỗi bộ phận
-            $maxQuantity = floor($onHand / $baseQty); // Làm tròn xuống để chỉ lấy số lượng nguyên sản phẩm có thể sản xuất
+            $maxQuantity = floor($onHand / $baseQty); 
             $maxQuantities[] = $maxQuantity;
         }
 
-        // Tìm số lượng tối thiểu của các bộ phận
+        // Tìm số lượng tối thiểu 
         $maxQty = min($maxQuantities);
 
         // Chuyển mảng kết quả về dạng danh sách
@@ -575,6 +557,8 @@ class ProductionController extends Controller
                 'a.FatherCode',
                 'a.ItemCode',
                 'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
                 'a.team',
                 'CDay',
                 'CRong',
@@ -589,12 +573,15 @@ class ProductionController extends Controller
                 'b.confirm'
             )
             ->where('b.confirm', '!=', 1)
+            // ->where('b.type', '!=', 1)
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO)
             ->get();
         
-        $WaitingConfirmQty = $notification->sum('Quantity');
+            // dd($notification);
+        
+            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([

@@ -276,8 +276,8 @@ class QCController extends Controller
         ->join('users as c', 'a.create_by', '=', 'c.id')
         ->select(
             'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
+            'b.SubItemName',
+            'b.SubItemCode',
             'a.team',
             'a.CongDoan',
             'a.CDay',
@@ -353,9 +353,10 @@ class QCController extends Controller
 
         // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
         $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
-        ->select('a.*', 'b.id as notiID','b.team as NextTeam','b.openQty')
+        ->select('a.*', 'b.id as notiID','b.SubItemCode as SubItemCode','b.team as NextTeam','b.openQty')
         ->where('b.id', $request->id)
         ->where('b.confirm', 0)->first();
+
         // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
@@ -409,13 +410,13 @@ class QCController extends Controller
             "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,
-                "ItemCode" =>   $data->ItemCode,
+                "ItemCode" =>   $data->SubItemCode,
                 "WarehouseCode" =>  $warehouse,
                 "BatchNumbers" => [
                     [
                         "BatchNumber" => now()->format('YmdHmi'),
                         "Quantity" => $request->Qty,
-                        "ItemCode" =>   $data->ItemCode,
+                        "ItemCode" =>   $data->SubItemCode,
                         "U_CDai" => $data->CDai,
                         "U_CRong" => $data->CRong,
                         "U_CDay" =>  $data->CDay,
@@ -454,7 +455,7 @@ class QCController extends Controller
             HistorySL::create(
                 [
                     'LSX'=>$data->LSX,
-                    'itemchild'=>$data->ItemCode,
+                    'itemchild'=>$data->SubItemCode,
                     'to' => $data->Team,
                     'quantity'=>$request->Qty,
                     'ObjType'=>59,

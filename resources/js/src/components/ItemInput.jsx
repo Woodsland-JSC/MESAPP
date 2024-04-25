@@ -108,6 +108,11 @@ const ItemInput = ({
     const [deleteErrorLoading, setDeleteErrorLoading] = useState(false);
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
+    const [selectedFaultItem, setSelectedFaultItem] = useState({
+        SubItemCode: "",
+        SubItemName: "",
+        OnHand: ""
+    });
     const [amount, setAmount] = useState("");
     const [faultyAmount, setFaultyAmount] = useState("");
     const [choosenItem, setChoosenItem] = useState(null);
@@ -172,6 +177,18 @@ const ItemInput = ({
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
             return;
+        } else if (faultyAmount < 0) {
+            toast.error("Số lượng lỗi phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        } else if (selectedFaultItem.SubItemCode === "" && faultyAmount) {
+            toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
+            onAlertDialogClose();
+            return;
+        }  else if (selectedFaultItem.SubItemCode !== "" && faultyAmount > selectedFaultItem.OnHand ) {
+            toast.error("Đã vượt quá số lượng có thể ghi nhận lỗi");
+            onAlertDialogClose();
+            return;
         } else {
             setConfirmLoading(true);
             try {
@@ -180,6 +197,8 @@ const ItemInput = ({
                     FatherCode: data.SPDICH,
                     ItemCode: selectedItemDetails.ItemChild,
                     ItemName: selectedItemDetails.ChildName,
+                    SubItemName: selectedFaultItem.SubItemName,
+                    SubItemCode: selectedFaultItem.SubItemCode,
                     MaThiTruong: MaThiTruong,
                     CDay: Number(selectedItemDetails.CDay),
                     CRong: Number(selectedItemDetails.CRong),
@@ -206,6 +225,11 @@ const ItemInput = ({
                                 payload
                             );
                         toast.success("Ghi nhận & chuyển tiếp thành công!");
+                        setSelectedFaultItem({
+                            SubItemCode: "",
+                            SubItemName: "",
+                            OnHand: "", 
+                        });
                     } else {
                         toast("Chưa nhập bất kì số lượng nào.");
                     }
@@ -292,6 +316,7 @@ const ItemInput = ({
             checkElement?.classList?.remove("block");
         }
     }, [faultyAmount]);
+
 
     return (
         <>
@@ -581,7 +606,7 @@ const ItemInput = ({
                                                     } flex flex-col py-2  mb-6 rounded-xl`}
                                                 >
                                                     <div className="flex items-center justify-between gap-4 px-4">
-                                                        <div className="truncate">
+                                                        <div className=" max-w-[90%]">
                                                             <div className="text-xs text-[#647C9C]">
                                                                 <span className="mr-1">
                                                                     [
@@ -606,7 +631,7 @@ const ItemInput = ({
                                                                     item.SubItemCode
                                                                 }
                                                             </div>
-                                                            <div className="font-medium text-[16px] truncate">
+                                                            <div className="font-medium text-[15px] ">
                                                                 {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === null || item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
                                                             </div>
                                                         </div>
@@ -678,66 +703,64 @@ const ItemInput = ({
                                             ?.map((item, index) => (
                                                 <div className="border-b border-gray-200">
                                                     <div
-                                                    key={"Processing_" + index}
-                                                    className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
-                                                >
-                                                    
-                                                    <div className="flex flex-col">
-                                                        <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
-                                                                    {Number(item?.Quantity)}
-                                                        </div>
-                                                        <Text className="font-semibold text-[15px] ">
-                                                            Người giao:{" "}
-                                                            <span className="text-green-700">
-                                                            {item?.last_name +
-                                                                " " +
-                                                                item?.first_name}
-                                                            </span>
-                                                            
-                                                        </Text>
-                                                        <div className="flex text-sm">
-                                                            <Text className=" font-medium text-gray-600">
-                                                                Thời gian giao:{" "}
+                                                        key={"Processing_" + index}
+                                                        className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                    >
+                                                        
+                                                        <div className="flex flex-col">
+                                                            <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
+                                                                        {Number(item?.Quantity)}
+                                                            </div>
+                                                            <Text className="font-semibold text-[15px] ">
+                                                                Người giao:{" "}
+                                                                <span className="text-green-700">
+                                                                {item?.last_name +
+                                                                    " " +
+                                                                    item?.first_name}
+                                                                </span>
+                                                                
                                                             </Text>
-                                                            <span className="ml-1 text-gray-600">
-                                                                {moment(
-                                                                    item?.created_at,
-                                                                    "YYYY-MM-DD HH:mm:ss"
-                                                                ).format(
-                                                                    "DD/MM/YYYY"
-                                                                ) || ""}{" "}
-                                                                {moment(
-                                                                    item?.created_at,
-                                                                    "YYYY-MM-DD HH:mm:ss"
-                                                                ).format(
-                                                                    "HH:mm:ss"
-                                                                ) || ""}
-                                                            </span>
+                                                            <div className="flex text-sm">
+                                                                <Text className=" font-medium text-gray-600">
+                                                                    Thời gian giao:{" "}
+                                                                </Text>
+                                                                <span className="ml-1 text-gray-600">
+                                                                    {moment(
+                                                                        item?.created_at,
+                                                                        "YYYY-MM-DD HH:mm:ss"
+                                                                    ).format(
+                                                                        "DD/MM/YYYY"
+                                                                    ) || ""}{" "}
+                                                                    {moment(
+                                                                        item?.created_at,
+                                                                        "YYYY-MM-DD HH:mm:ss"
+                                                                    ).format(
+                                                                        "HH:mm:ss"
+                                                                    ) || ""}
+                                                                </span>
+                                                            </div>
+                                                        </div>             
+                                                        <div className="flex gap-x-6">
+                                                            <div className="xl:block lg;block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold">
+                                                                    {Number(item?.Quantity)}
+                                                            </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    onDeleteProcessingDialogOpen();
+                                                                    setSelectedDelete(
+                                                                        item?.id
+                                                                    );
+                                                                    setDialogType(
+                                                                        "product"
+                                                                    );
+                                                                }}
+                                                                className="rounded-full  duration-200 ease hover:bg-slate-100 px-2"
+                                                            >
+                                                                <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <div className="flex gap-x-6">
-                                                        <div className="xl:block lg;block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold">
-                                                                {Number(item?.Quantity)}
-                                                        </div>
-                                                        <button
-                                                            onClick={() => {
-                                                                onDeleteProcessingDialogOpen();
-                                                                setSelectedDelete(
-                                                                    item?.id
-                                                                );
-                                                                setDialogType(
-                                                                    "product"
-                                                                );
-                                                            }}
-                                                            className="rounded-full  duration-200 ease hover:bg-slate-100 px-2"
-                                                        >
-                                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                        </button>
-                                                    </div>
                                                 </div>
-                                                </div>
-                                                
                                             ))}
                                     <Box className="px-2">
                                         <label className="mt-6  font-semibold">
@@ -803,7 +826,7 @@ const ItemInput = ({
                                             ?.map((item, index) => (
                                                 <div
                                                     key={"Return_" + index}
-                                                    className="flex justify-between items-center p-3 py-2 my-4 mx-3 border border-red-600 rounded"
+                                                    className="flex justify-between items-center p-3 py-2 my-4 mx-3 border bg-red-50 border-red-600 rounded-xl"
                                                 >
                                                     <div className="flex flex-col gap-2">
                                                         <div className="flex gap-4">
@@ -864,7 +887,7 @@ const ItemInput = ({
                                         <div className="flex space-x-2 pb-3 items-center">
                                             <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                             <div className="font-semibold text-lg ">
-                                                Ghi nhận lỗi
+                                                Ghi nhận lỗi <span className="xl:inline-block lg:inline-block md:inline-block hidden">từ công đoạn trước </span>
                                             </div>
                                         </div>
                                         <Alert
@@ -889,6 +912,26 @@ const ItemInput = ({
                                                 </div>
                                             </div>
                                         </Alert>
+                                        {/* Số lượng ghi nhận lỗi */}
+                                        {selectedItemDetails?.notifications &&
+                                            selectedItemDetails?.notifications.filter(
+                                                (notif) =>
+                                                    notif.confirm == 0 &&
+                                                    notif.type == 1
+                                            )?.length > 0 &&
+                                            selectedItemDetails?.notifications
+                                                .filter(
+                                                    (notif) =>
+                                                        notif.confirm == 0 &&
+                                                        notif.type == 1
+                                                ) && (
+                                            <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
+                                                <Text className="font-semibold">
+                                                    Số lượng lỗi đã ghi nhận:{" "}
+                                                </Text>{" "}
+                                            </div>
+                                        )}
+                                        <div className="border-b border-gray-200">
                                         {selectedItemDetails?.notifications &&
                                             selectedItemDetails?.notifications.filter(
                                                 (notif) =>
@@ -902,47 +945,38 @@ const ItemInput = ({
                                                         notif.type == 1
                                                 )
                                                 .map((item, index) => (
-                                                    <div
-                                                        key={"Error_" + index}
-                                                        className="flex justify-between items-center p-3 my-4  border border-red-600 rounded-xl"
-                                                    >
-                                                        <div className="flex flex-col gap-2">
-                                                            <div className="flex gap-4">
-                                                                <Text className="font-semibold">
-                                                                    Số lượng ghi
-                                                                    nhận lỗi chờ
-                                                                    xác nhận:{" "}
-                                                                </Text>{" "}
-                                                                <Badge
-                                                                    colorScheme="red"
-                                                                    fontSize="1.2rem"
-                                                                >
-                                                                    {formatNumber(
-                                                                        Number(
-                                                                            item?.Quantity
-                                                                        )
-                                                                    )}
-                                                                </Badge>
+                                                    
+                                                        <div
+                                                            key={"Error_" + index}
+                                                            className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
+                                                        >
+                                                            
+                                                            {/*  */}
+                                                            <div className="flex flex-col">
+                                                            <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
+                                                                        {Number(item?.Quantity)}
                                                             </div>
-                                                            <Text>
-                                                                Tạo bởi:{" "}
+                                                            <div className="text-[15px] ">{item.SubItemName}</div>
+                                                            <Text className="font-semibold text-[15px] ">
+                                                                Người giao:{" "}
+                                                                <span className="text-red-700">
                                                                 {item?.last_name +
                                                                     " " +
                                                                     item?.first_name}
+                                                                </span>
+                                                                
                                                             </Text>
-                                                            <div className="flex flex-col">
-                                                                <Text className="font-semibold">
-                                                                    Thời gian
-                                                                    giao:{" "}
+                                                            <div className="flex text-sm">
+                                                                <Text className=" font-medium text-gray-600">
+                                                                    Thời gian giao:{" "}
                                                                 </Text>
-                                                                <span className="ml-1 text-violet-700">
+                                                                <span className="ml-1 text-gray-600">
                                                                     {moment(
                                                                         item?.created_at,
                                                                         "YYYY-MM-DD HH:mm:ss"
                                                                     ).format(
                                                                         "DD/MM/YYYY"
-                                                                    ) ||
-                                                                        ""}{" "}
+                                                                    ) || ""}{" "}
                                                                     {moment(
                                                                         item?.created_at,
                                                                         "YYYY-MM-DD HH:mm:ss"
@@ -951,8 +985,11 @@ const ItemInput = ({
                                                                     ) || ""}
                                                                 </span>
                                                             </div>
-                                                        </div>
-                                                        <div>
+                                                        </div>             
+                                                        <div className="flex gap-x-6 items-center">
+                                                            <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit">
+                                                                    {Number(item?.Quantity)}
+                                                            </div>
                                                             <button
                                                                 onClick={() => {
                                                                     onDeleteProcessingDialogOpen();
@@ -963,14 +1000,15 @@ const ItemInput = ({
                                                                         "qc"
                                                                     );
                                                                 }}
-                                                                className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
+                                                                    className="rounded-full p-2 duration-200 ease hover:bg-red-100"
                                                             >
-                                                                <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                                    <AiTwotoneDelete className="text-red-700 text-2xl" />
                                                             </button>
                                                         </div>
-                                                    </div>
+                                                        </div>
+                                                    
                                                 ))}
-
+                                        </div>
                                         <Box className="px-2 pt-2">
                                             <label className="font-semibold text-red-700">
                                                 Số lượng ghi nhận lỗi:
@@ -978,13 +1016,6 @@ const ItemInput = ({
                                             <NumberInput
                                                 step={1}
                                                 min={0}
-                                                // max={
-                                                //     goodsReceiptList.find(
-                                                //         (item) =>
-                                                //             item.ItemCode ==
-                                                //             selectedItem.value
-                                                //     )?.Qty || 0
-                                                // }
                                                 className="mt-2"
                                                 value={faultyAmount}
                                                 onChange={(value) => {
@@ -1020,22 +1051,40 @@ const ItemInput = ({
                                                     <NumberDecrementStepper />
                                                 </NumberInputStepper>
                                             </NumberInput>
+                                            {/* {!faultyAmount || faultyAmount > 0 && (
+                                                <>
+                                                    {selectedItemDetails?.stock.map((item, index) => (
+                                                        <div className="mt-4 ml-3">
+                                                            <Radio ref={checkRef} isChecked={index === 0}> 
+                                                                {item.SubItemName}
+                                                            </Radio>   
+                                                        </div>      
+                                                    ))}
+                                                </>
+                                            )}  */}
                                             {!faultyAmount || faultyAmount > 0 && (
                                                 <>
-                                                {selectedItemDetails?.stock.map((item, index) => (
-                                                    <RadioGroup
-                                                        ref={checkRef}
-                                                        className="mt-4 ml-3"
-                                                        value={index === 0 ? "1" : ""} 
-                                                    >
-                                                        <Radio value="1" isChecked={index === 0}> 
-                                                            {item.SubItemName}
-                                                        </Radio>
-                                                    </RadioGroup>
-                                                ))}
+                                                    {selectedItemDetails?.stock.map((item, index) => (
+                                                        <div className={`mt-4 ml-3 ${selectedFaultItem.SubItemCode === item.SubItemCode ? 'font-semibold' : ''}`} key={index}>
+                                                            <Radio 
+                                                                ref={checkRef}
+                                                                value={item.SubItemCode} 
+                                                                isChecked={selectedFaultItem.SubItemCode === item.SubItemCode}
+                                                                onChange={() => {
+                                                                    setSelectedFaultItem({
+                                                                        SubItemCode:item.SubItemCode,
+                                                                        SubItemName:item.SubItemName,
+                                                                        OnHand:item.OnHand
+                                                                    });
+                                                                    console.log("Giá trị đã chọn: ", selectedFaultItem);
+                                                                }} 
+                                                            >
+                                                                {item.SubItemName}
+                                                            </Radio>   
+                                                        </div>      
+                                                    ))}
                                                 </>
                                             )}
-                                            
                                         </Box>
                                         <Box className="px-2 pt-2">
                                             <label className="font-semibold text-red-700">
@@ -1100,16 +1149,24 @@ const ItemInput = ({
                         <div className="flex items-item justify-end p-4 w-full gap-4">
                             <Button
                                 className="bg-[#edf2f7]"
-                                onClick={closeInputModal}
+                                onClick={() => {
+                                    closeInputModal()
+                                    setSelectedFaultItem({
+                                        SubItemName:"",
+                                        SubItemCode:"",
+                                        OnHand: "",
+                                    })
+                                    setFaultyAmount(null)
+                                }}
                             >
                                 Đóng
                             </Button>
                             <Button
                                 type="button"
                                 isDisabled={
-                                    !amount &&
+                                    !amount && amount==null &&
                                     amount <= 0 &&
-                                    !faultyAmount &&
+                                    !faultyAmount && faultyAmount ==null &&
                                     faultyAmount <= 0
                                 }
                                 className="bg-[#2f8558]"
@@ -1128,6 +1185,7 @@ const ItemInput = ({
                 isOpen={isAlertDialogOpen}
                 onClose={onAlertDialogClose}
                 closeOnOverlayClick={false}
+                isCentered
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
@@ -1155,7 +1213,7 @@ const ItemInput = ({
                             <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
                             <button
                                 disabled={confirmLoading}
-                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 onClick={handleSubmitQuantity}
                             >
                                 {confirmLoading ? (
@@ -1220,6 +1278,7 @@ const ItemInput = ({
                 isOpen={isDeleteErrorDialogOpen}
                 onClose={onDeleteErrorDialogClose}
                 closeOnOverlayClick={false}
+                isCentered
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>

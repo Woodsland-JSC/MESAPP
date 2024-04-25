@@ -5,9 +5,13 @@ const palletsApi = {
         const url = `/typeofwood`;
         return axiosClient().get(url, {});
     },
-    getDryingMethod: () => {
+    getDryingMethod: (reason) => {
         const url = `/items`;
-        return axiosClient().get(url, {});
+        return axiosClient().get(url, {
+            params: {
+                reason,
+            },
+        });
     },
     getDryingReason: () => {
         const url = `/reasons`;
