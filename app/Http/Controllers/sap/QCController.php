@@ -478,6 +478,131 @@ class QCController extends Controller
             ], 500);
         }
     }
+    //
+    function acceptTeamQCCBGV2(Request $request)
+    {
+        // 1. Check dữ liệu đầu vào
+        $validator = Validator::make($request->all(), [
+            'Qty' => 'required|numeric|min:1',
+            'id' => 'required',
+        ]);
+        // 1.1. Báo lỗi nếu dữ liệu không hợp lệ
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
+        $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
+        ->select('a.*', 'b.id as notiID','b.SubItemCode as SubItemCode','b.team as NextTeam','b.openQty')
+        ->where('b.id', $request->id)
+        ->where('b.confirm', 0)->first();
+
+        // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
+        if (!$data) {
+            throw new \Exception('data không hợp lệ.');
+        }
+        if ($data->openQty < $request->Qty) {
+            throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
+        }
+        $closed=0;
+        if ($data->openQty == $request->Qty) {
+            $closed=1;
+        }
+
+        //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
+        $warehouse="";
+        if($data->NextTeam='TH-QC')
+        {
+            $warehouse= $this ->getQCWarehouseByUser('TH');
+        }
+        else if($data->NextTeam='TQ-QC')
+        {
+            $warehouse= $this ->getQCWarehouseByUser('TQ');
+        }
+        else
+        {
+            $warehouse= $this ->getQCWarehouseByUser('HG');
+        }
+        if($warehouse==99)
+        {
+            throw new \Exception('Không tìm thấy kho QC');
+        }
+
+        //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
+        $loailoi= $request->loailoi['label'];
+        $huongxuly= $request->huongxuly['label'];
+        $teamBack= $request->teamBack['value']??'';
+        $rootCause= $request->rootCause['value']??'';
+        $subCode= $request->subCode ??'';
+
+        $HistorySL=HistorySL::where('ObjType',59)->get()->count();
+        $body = [
+            "U_BranchID" => Auth::user()->branch,
+            "U_LSX"=> $data->LSX,
+            "U_TO"=> $data->Team,
+            "U_LL"=> $loailoi,
+            "U_HXL"=> $huongxuly,
+            "U_TOE"=> $teamBack,
+            "U_source"=>$rootCause,
+            "U_ItemHC"=>$subCode,
+            "U_cmtQC"=> $request->note??"",
+            "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+            "V_IGN1Collection" => [[
+                "U_Quantity" => $request->Qty,
+                "U_ItemCode" =>   $data->SubItemCode,
+                "U_Whscode" =>  $warehouse,
+                "U_BaseType"=> 59
+            ]]
+        ];
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => 'Basic ' . BasicAuthToken(),
+        ])->post(UrlSAPServiceLayer() . '/b1s/v1/OIGN', $body);
+        $res = $response->json();
+
+        // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
+        if ($response->successful()) {
+            SanLuong::where('id', $data->id)->update(
+                [
+                    'Status' =>  $closed,
+                    'openQty' =>$data->RejectQty-$data->openQty-$request->Qty,
+                ]
+            ); 
+            notireceipt::where('id', $request->id)->
+            update(['confirm' =>  $closed,
+            'ObjType' =>  59,
+            'DocEntry' => $res['DocEntry'],
+            'confirmBy' => Auth::user()->id,
+            'confirm_at' => now()->format('YmdHmi')]);
+            HistorySL::create(
+                [
+                    'LSX'=>$data->LSX,
+                    'itemchild'=>$data->SubItemCode,
+                    'to' => $data->Team,
+                    'quantity'=>$request->Qty,
+                    'ObjType'=>59,
+                    'DocEntry'=>$res['DocEntry'],
+                    'SPDich'=>$data->FatherCode,
+                    'LL'=> $loailoi,
+                    'HXL'=>$huongxuly,
+                    'isQualityCheck'=>1,
+                    'notiId' => $request->id,
+                ], 
+            );
+            DB::commit();
+            return response()->json('success', 200);
+        } else {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed receipt',
+                'error' => $res['error'],
+                'body' => $body
+            ], 500);
+        }
+    }
     
     function getQCWarehouseByUser($plant)
     {
