@@ -422,7 +422,7 @@ class ProductionController extends Controller
         // dd($quantity);
 
         // Code mới (thêm "stock")
-        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
+        $querystock = 'SELECT * FROM UV_SOLUONGTON_V2 WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
         $stmtstock = odbc_prepare($conDB, $querystock);
 
         if (!$stmtstock) {
@@ -843,7 +843,7 @@ class ProductionController extends Controller
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DetailGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
+        $query = 'select * from UV_DETAILGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -1519,7 +1519,7 @@ class ProductionController extends Controller
 
         // 2. Kết nối SAP và lấy dữ liệu từ bảng UV_GHINHANSL dựa trên "TO" và lấy ra tất cả các kết quả có TO bằng với TO trong tham số truyền vào
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_GHINHANSLV2 where "TO"=? order by "LSX" asc ';
+        $query = 'select * from UV_GHINHANSL_V2 where "TO"=? order by "LSX" asc ';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
@@ -1709,7 +1709,7 @@ class ProductionController extends Controller
         ], 200);
     }
     // Load số lượng tồn
-    function viewdetail2(Request $request)
+    function viewdetailV2(Request $request)
     {
         // 1. Nhận vào giá trị "SPDICH", "ItemCode', "To" từ request
         $validator = Validator::make($request->all(), [
@@ -1726,7 +1726,7 @@ class ProductionController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         // Code cũ
-        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSLV2 where "ItemChild"=? and "TO"=? and "SPDICH"=?';
+        $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSL_V2 where "ItemChild"=? and "TO"=? and "SPDICH"=?';
         $stmt = odbc_prepare($conDB, $query);
 
         if (!$stmt) {
@@ -1744,7 +1744,7 @@ class ProductionController extends Controller
         // dd($quantity);
 
         // Code mới (thêm "stock")
-        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
+        $querystock = 'SELECT * FROM UV_SOLUONGTON_V2 WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
         $stmtstock = odbc_prepare($conDB, $querystock);
 
         if (!$stmtstock) {
@@ -1897,7 +1897,7 @@ class ProductionController extends Controller
     function collectdataV2($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DetailGHINHANSLV2 where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
+        $query = 'select * from UV_DETAILGHINHANSL_V2 where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -2005,7 +2005,7 @@ class ProductionController extends Controller
                         'Content-Type' => 'application/json',
                         'Accept' => 'application/json',
                         'Authorization' => 'Basic ' . BasicAuthToken(),
-                    ])->post(UrlSAPServiceLayer() . 'b1s/v1/OIGN', $body);
+                    ])->post(UrlSAPServiceLayer() . '/b1s/v1/OIGN', $body);
                     $res = $response->json();
                     if ($response->successful()) {
                         SanLuong::where('id', $data->id)->update(

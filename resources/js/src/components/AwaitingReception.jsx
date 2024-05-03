@@ -157,7 +157,7 @@ const AwaitingReception = ({
                     huongxuly: faults.solution,
                     teamBack: faults.teamBack,
                     rootCause: faults.rootCause || null,
-                    subCode: faults.subCode || null,
+                    subCode: faults.returnCode || null,
                     Note: faults.Note || null,
                     Qty: faults.Qty,
                     year: faults.year || null,

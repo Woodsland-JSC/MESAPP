@@ -18,6 +18,7 @@ function PalletCard(props) {
         inStock,
         batchNum,
         onDelete,
+        flag,
         width,
         height,
         thickness,
@@ -31,7 +32,9 @@ function PalletCard(props) {
     const handleQuantityChange = (value) => {
         setQuantity(value);
 
-        if (value < 0 || value === 0 || value > Math.floor(inStock*1000000000/(height*width*thickness))) {
+        if (flag === "SL" && (value < 0 || value === 0 || value > inStock)){
+            setIsInvalid(true);
+        } else if (flag !== "SL" && (value < 0 || value === 0 || value > Math.floor(inStock*1000000000/(height*width*thickness)))) {
             setIsInvalid(true);
         } else {
             setIsInvalid(false);
@@ -54,9 +57,6 @@ function PalletCard(props) {
                     <AiFillCloseCircle />
                 </div>
             </div>
-            {/* <div className="xl:block md:block hidden text-xs pt-3 text-gray-500 px-4">
-                Mã kho: {whsCode}
-            </div> */}
             <div className=" pallet-line grid xl:grid-cols-2 md:grid-cols-2 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">
                 <div className="hidden">
                     <label
@@ -91,24 +91,45 @@ function PalletCard(props) {
                         required
                         value={batchNum}
                     />
-                </div>   
-                <div>
-                    <label
-                        htmlFor="company"
-                        className="block mb-2 text-md font-medium text-gray-900 "
-                    >
-                        Tồn kho (T)
-                    </label>
-                    <input
-                        type="text"
-                        id="inStock"
-                        className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                        placeholder="0"
-                        readOnly={true}
-                        required
-                        value={Math.floor(inStock*1000000000/(height*width*thickness))}
-                    />
                 </div>
+                {flag === "SL" ? (
+                    <div>
+                        <label
+                            htmlFor="company"
+                            className="block mb-2 text-md font-medium text-gray-900 "
+                        >
+                            Tồn kho (m<sup className="">3</sup>)
+                        </label>
+                        <input
+                            type="text"
+                            id="inStock"
+                            className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                            placeholder="0"
+                            readOnly={true}
+                            required
+                            value={inStock}
+                        />
+                    </div>                    
+                ): (
+                    <div>
+                        <label
+                            htmlFor="company"
+                            className="block mb-2 text-md font-medium text-gray-900 "
+                        >
+                            Tồn kho (T)
+                        </label>
+                        <input
+                            type="text"
+                            id="inStock"
+                            className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                            placeholder="0"
+                            readOnly={true}
+                            required
+                            value={Math.floor(inStock*1000000000/(height*width*thickness))}
+                        />
+                    </div>
+                )}   
+                
                 <div>
                     <label
                         htmlFor="quantity"
@@ -118,14 +139,8 @@ function PalletCard(props) {
                     </label>
                     <NumberInput
                         defaultValue={0}
-                        // isInvalid={isInvalidQuantity}
                         isInvalid={isInvalid}
                         onChange={handleQuantityChange}
-                        // onChange={onQuantityChange}
-                        // onChange={(value) => {
-                        //     setQuantity(value);
-                        //     onQuantityChange(value);
-                        // }}
                     >
                         <NumberInputField/>
                         <NumberInputStepper>

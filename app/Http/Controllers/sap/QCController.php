@@ -287,7 +287,7 @@ class QCController extends Controller
             DB::raw('(b.openQty - (
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historysl 
-                WHERE itemchild = a.ItemCode
+                WHERE itemchild = b.SubItemCode
                 AND isQualityCheck = 1                 
             )) as Quantity'),
             'a.created_at',
@@ -478,7 +478,8 @@ class QCController extends Controller
             ], 500);
         }
     }
-    //
+
+    // Accept QC V2
     function acceptTeamQCCBGV2(Request $request)
     {
         // 1. Check dữ liệu đầu vào
@@ -533,7 +534,7 @@ class QCController extends Controller
         $huongxuly= $request->huongxuly['label'];
         $teamBack= $request->teamBack['value']??'';
         $rootCause= $request->rootCause['value']??'';
-        $subCode= $request->subCode ??'';
+        $subCode= $request->subCode['value'] ??'';
 
         $HistorySL=HistorySL::where('ObjType',59)->get()->count();
         $body = [
@@ -545,7 +546,7 @@ class QCController extends Controller
             "U_TOE"=> $teamBack,
             "U_source"=>$rootCause,
             "U_ItemHC"=>$subCode,
-            "U_cmtQC"=> $request->note??"",
+            "U_cmtQC"=> $request->Note??"",
             "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
             "V_IGN1Collection" => [[
                 "U_Quantity" => $request->Qty,

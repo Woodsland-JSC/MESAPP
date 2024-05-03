@@ -18,6 +18,7 @@ class Pallet extends Model
         'MaLo',
         'LyDo',
         'QuyCach',
+        'PalletType',
         'NgayNhap',
         'status',
         'is_active',

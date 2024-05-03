@@ -275,15 +275,18 @@ function WoodSorting() {
 
                 if (response && response.length > 0) {
                     response.forEach(item => {
-                        const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}`;
-                        if (!quyCachList.includes(quyCach)) {
-                            setQuyCachList(prevList => [...prevList, quyCach]);    
-                        }
-                        if ((quyCachList.length >= 2) && (!quyCachList.includes(quyCach))) {
+                        const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}-${item.BatchNum}`;
+                        if(!quyCachList.includes(quyCach)) {
+                            setQuyCachList(prevList => [...prevList, quyCach]);
+                        } 
+                        if (quyCachList.includes(quyCach)) {
+                            toast.error("Quy cách đã tồn tại trong danh sách.");
+                            return;
+                        } else if((quyCachList.length >= 2) && (!quyCachList.includes(quyCach))) {
                             toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
                             return;
                         } else {
-                            const newPalletCard = (
+                                const newPalletCard = (
                                 <PalletCard
                                     key={item.WhsCode + item.BatchNum}
                                     itemCode={selectedDryingMethod.code}
@@ -293,12 +296,13 @@ function WoodSorting() {
                                     whsCode={item.WhsCode}
                                     height={item.CDai}
                                     width={item.CRong}
+                                    flag={item.Flag}
                                     thickness={item.CDay}
                                     isInvalidQuantity={isInvalidQuantity}
                                     onDelete={() =>
                                         handleDeletePalletCard(
                                             item.WhsCode + item.BatchNum,
-                                            `${item.CDay}x${item.CRong}x${item.CDai}`
+                                            `${item.CDay}x${item.CRong}x${item.CDai}-${item.BatchNum}`
                                         )
                                     }
                                     onQuantityChange={(quantity) => {
@@ -412,16 +416,23 @@ function WoodSorting() {
             var thickness = parseFloat(card.props.thickness);
             var quantity = parseFloat(palletQuantities[card.key] || 0);
 
-            if (
-                quantity >
-                    Math.floor(
-                        (inStock * 1000000000) / (height * width * thickness)
-                    ) ||
+            if ( selectedDryingReason.value !== "SL" && (
+                quantity > Math.floor((inStock * 1000000000) / (height * width * thickness)) ||
                 quantity === 0 ||
                 quantity < 0 ||
                 quantity == "" ||
                 quantity == null
-            ) {
+            )) {
+                hasInvalidQuantity = true;
+                break;
+            }
+            if ( selectedDryingReason.value === "SL" && (
+                quantity > inStock ||
+                quantity === 0 ||
+                quantity < 0 ||
+                quantity == "" ||
+                quantity == null
+            )) {
                 hasInvalidQuantity = true;
                 break;
             }

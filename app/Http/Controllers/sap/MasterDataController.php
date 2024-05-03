@@ -75,26 +75,26 @@ class MasterDataController extends Controller
         try {
             // change request, add filter with reason
             $flag='TS';
- 	    $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
-            INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-            INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-            INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-            WHERE T1."Quantity" > 0 AND
-            T3."U_Flag" IN (?) AND 
-            T3."BPLid" = ? AND 
-            T3."U_FAC" = ? AND 
-            T2."Series" = 72';
+            $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
+                INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+                INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+                INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+                WHERE T1."Quantity" > 0 AND
+                T3."U_Flag" IN (?) AND 
+                T3."BPLid" = ? AND 
+                T3."U_FAC" = ? AND 
+                T2."Series" = 72';
             if ($request->reason =='SL')
             {
-            $flag='SL';
-	    $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
-            INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-            INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-            INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-            WHERE T1."Quantity" > 0 AND
-            T3."U_Flag" IN (?) AND 
-            T3."BPLid" = ? AND 
-            T3."U_FAC" = ? ';
+                $flag='SL';
+                $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
+                    INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+                    INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+                    INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+                    WHERE T1."Quantity" > 0 AND
+                    T3."U_Flag" IN (?) AND 
+                    T3."BPLid" = ? AND 
+                    T3."U_FAC" = ? ';
             }
 
             $conDB = (new ConnectController)->connect_sap();
@@ -231,7 +231,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
             $filter = "";
             if ($request->reason == 'SL') {
-                $filter = `T3."U_Flag" IN ('TS','SS')`;
+                $filter = `T3."U_Flag" IN ('SL')`;
             } else {
                 $filter = `(T3."U_Flag" IN ('TS')`;
             }
@@ -655,12 +655,12 @@ class MasterDataController extends Controller
             DB::beginTransaction();
             $query = 'select "WhsCode","WhsName","BPLid" "Location","U_Flag","U_FAC"
             from OWHS a 
-            WHERE "U_Flag" in(?,?,?,?) and "Inactive"=?;';
+            WHERE "U_Flag" in(?,?,?,?,?) and "Inactive"=?;';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, ['TS', 'CS', 'SS', 'QC', 'N'])) {
+            if (!odbc_execute($stmt, ['TS', 'CS', 'SS', 'QC','SL', 'N'])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -709,8 +709,8 @@ class MasterDataController extends Controller
             $filter = "";
             $flag = '';
             if ($request->reason == 'SL') {
-                $filter = 'T1."U_Status" != ?';
-                $flag = 'SS';
+                $filter = '(T1."U_Status" is null or T1."U_Status"= ?)';
+                $flag = 'SL';
             } else {
                 $filter = '(T1."U_Status" is null or T1."U_Status"= ?)';
                 $flag = 'TS';
@@ -722,7 +722,7 @@ class MasterDataController extends Controller
             // T1 OIBT là bảng lưu thành phẩm ghi nhận
             // T2 OITM là bảng lưu Item
             // 
-            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai" FROM OITW T0 ' .
+            $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai",? "Flag" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
@@ -732,19 +732,21 @@ class MasterDataController extends Controller
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [$id, $warehouse, $request->batchnum, Auth::user()->branch, 'TS'])) {
+            if (!odbc_execute($stmt, [$flag,$id, $warehouse, $request->batchnum, Auth::user()->branch, 'TS'])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
             $results = array();
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
+              
             }
 
             // dd($results); 
 
             odbc_close($conDB);
             $results = array_filter($results, fn ($item) => (float) $item['Quantity'] > 0);
+          
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([

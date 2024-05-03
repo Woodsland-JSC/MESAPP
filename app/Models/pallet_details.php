@@ -10,7 +10,7 @@ class pallet_details extends Model
 
     use HasFactory;
     protected $table = 'pallet_details';
-    protected $fillable = ['palletID', 'ItemCode', 'ItemName', 'WhsCode', 'WhsCode2', 'BatchNum', 'Qty', 'CDai', 'CDay', 'CRong', 'Qty_T'];
+    protected $fillable = ['palletID', 'ItemCode', 'ItemName', 'WhsCode', 'WhsCode2', 'BatchNum', 'Qty', 'CDai', 'CDay', 'CRong', 'QuyCachSite', 'Qty_T'];
 
     public function pallet()
     {
