@@ -29,7 +29,8 @@ class notireceipt extends Model
         'deleted_at',
         'ObjType',
         'DocEntry',
-        'openQty'
+        'openQty',
+        'MaThiTruong',
     ];
     public function getCreatedAtAttribute($value)
     {

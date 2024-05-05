@@ -121,6 +121,7 @@ class ProductionController extends Controller
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
@@ -146,13 +147,13 @@ class ProductionController extends Controller
                     'text' => 'Production information waiting for confirmation',
                     'Quantity' => $request->CompleQty,
                     'baseID' =>  $SanLuong->id,
+                    'MaThiTruong' => $request->MaThiTruong,
                     'SPDich' => $request->FatherCode,
                     'team' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 0,
                     'openQty' => 0,
-                    'MaThiTruong' => $request->MaThiTruong,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
@@ -1974,7 +1975,6 @@ class ProductionController extends Controller
                     ], 500);
                 }
                 foreach ($allocates as $allocate) {
-
                     $body = [
                         "U_BranchID" => Auth::user()->branch,
                         "U_LSX" => $data->LSX,

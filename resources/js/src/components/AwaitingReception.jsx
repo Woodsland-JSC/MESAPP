@@ -394,7 +394,7 @@ const AwaitingReception = ({
                                     <span className="font-bold">
                                         {data?.FatherCode || ""}
                                     </span>
-                                    <span className="font-bold">{data.MaThiTruong ? "-" + data?.MaThiTruong : ""}</span>
+                                    <span className="font-bold text-gray-500 pentagon-container">{data?.MaThiTruong? "- " + data.MaThiTruong : ""}</span>
                                 </div>
                             </>
                         )}

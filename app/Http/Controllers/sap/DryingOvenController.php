@@ -33,14 +33,25 @@ class DryingOvenController extends Controller
         $result = [];
 
         foreach ($pallets as $pallet) {
-            $sumQuantity = $pallet->details->sum('Qty_T');
+
             $firstDetail = $pallet->details->first();
+            $sumQuantity = 0;
+            $lyDo = '';
+            if ($firstDetail) {
+                if ($pallet->LyDo == "SL") {
+                    $sumQuantity = number_format($pallet->details->sum('Qty'), 6, '.', '');
+                } else {
+                    $sumQuantity = $pallet->details->sum('Qty_T');
+                }
+                $lyDo = $pallet->LyDo;
+            }
 
             $result[] = [
                 'pallet_id' => $pallet->palletID,
                 'pallet_code' => $pallet->Code,
                 'created_date' => $pallet->NgayNhap,
                 'QuyCach' => $pallet->QuyCach,
+                'LyDo' => $lyDo,
                 'sum_quantity' => $sumQuantity,
                 'length' => $firstDetail ? $firstDetail->CDai : 0,
                 'width' => $firstDetail ? $firstDetail->CRong : null,
@@ -409,7 +420,7 @@ class DryingOvenController extends Controller
                 })
                 ->latest()
                 ->first();
-            
+
             // Nếu chưa tồn tại thì tạo pallet mới
             if ($existingPallet) {
                 $pallet = $existingPallet;
@@ -421,7 +432,7 @@ class DryingOvenController extends Controller
 
                 $combinedQuyCach = implode('_', $quyCachList);
 
-                
+
                 $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT), 'QuyCach' => $combinedQuyCach]);
                 $isDuplicate = false;
             }
@@ -447,16 +458,20 @@ class DryingOvenController extends Controller
                 $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
                 $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
                 $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
-                $datainsert['Qty'] = (float)$detailData['Qty'] * (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
-                $datainsert['Qty_T'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
 
                 if ($palletData['LyDo'] === 'SL') {
-                    $quyCachSite = $detailData['CDai'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDay'];
+                    $quyCachSite = $detailData['CDay'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDai'];
                     $datainsert['QuyCachSite'] = $quyCachSite;
+                    // Save the Qty
+                    $datainsert['Qty'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
+                    $datainsert['Qty_T'] = 0;
+                } else {
+                    $datainsert['Qty'] = (float)$detailData['Qty'] * (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
+                    $datainsert['Qty_T'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
                 }
 
                 pallet_details::create($datainsert);
-                
+
                 // Các dữ liệu được lưu vào các biến trước khi gửi về SAP
                 $ldt[] = [
                     "ItemCode" => $detailData['ItemCode'],
@@ -516,7 +531,7 @@ class DryingOvenController extends Controller
 
             $res = $response->json();
             $res2 = $response2->json();
-            
+
             if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();
                 return response()->json([
@@ -611,8 +626,8 @@ class DryingOvenController extends Controller
             DB::raw("CONCAT(COALESCE(users5.first_name,''), ' ', COALESCE(users5.last_name,'')) as CreateBy"),
             'pallet_details.ItemCode',
             'pallet_details.ItemName',
-            'pallet_details.Qty',
-            'pallet_details.Qty_T',
+            // 'pallet_details.Qty',
+            // 'pallet_details.Qty_T',
             'pallet_details.CDai',
             'pallet_details.CRong',
             'pallet_details.CDay',
@@ -626,21 +641,32 @@ class DryingOvenController extends Controller
             'plandryings.runDate',
             DB::raw("CONCAT(users4.first_name,' ', users4.last_name) as CompletedBy"),
             'plandryings.CompletedDate',
+            'totals.Qty',
+            'totals.Qty_T',
 
         )
             ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
             ->Join('users as users5', 'users5.id', '=', 'pallets.CreateBy')
-            ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
+            
             ->leftJoin('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
             ->leftJoin('plandryings', 'plan_detail.PlanID', '=', 'plandryings.PlanID')
             ->leftJoin('users', 'users.id', '=', 'plandryings.CheckedBy')
             ->leftJoin('users as users2', 'users2.id', '=', 'plandryings.ReviewBy')
             ->leftJoin('users as users3', 'users3.id', '=', 'plandryings.RunBy')
             ->leftJoin('users as users4', 'users4.id', '=', 'plandryings.CompletedBy')
-
-
+            ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
+            ->leftJoinSub(function($query) {
+                $query->select('pallet_details.palletID', 
+                               DB::raw('SUM(pallet_details.Qty) AS Qty'), 
+                               DB::raw('SUM(pallet_details.Qty_T) AS Qty_T'))
+                      ->from('pallet_details')
+                      ->groupBy('pallet_details.palletID');
+            }, 'totals', function ($join) {
+                $join->on('pallets.palletID', '=', 'totals.palletID');
+            })
             ->where('pallets.palletID', $request->palletID)
             ->get();
+
         $loaigo = $this->getLoaiGo();
         $data = collect($data)->map(function ($item) use ($loaigo) {
             $item['LoaiGo'] = collect($loaigo)->where('Code', $item['LoaiGo'])->first();
