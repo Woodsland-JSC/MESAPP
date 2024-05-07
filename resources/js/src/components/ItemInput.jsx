@@ -371,7 +371,7 @@ const ItemInput = ({
                                                       scope="col"
                                                       className="px-2 py-2 text-right"
                                                   >
-                                                      Bị lỗi
+                                                      Lỗi
                                                   </th>
                                                   <th
                                                       scope="col"
