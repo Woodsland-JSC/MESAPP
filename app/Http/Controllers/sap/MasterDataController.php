@@ -776,4 +776,5 @@ class MasterDataController extends Controller
         }
         return response()->json($results, 200);
     }
+   
 }

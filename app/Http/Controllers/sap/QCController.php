@@ -242,7 +242,36 @@ class QCController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data = QCHandle::where('type', $request->type)->get(['id', 'name']);
+        if ($request->type == "CBG") {
+            $data = QCHandle::where('type', 'CBG')->get(['id', 'name']);
+        } else {
+            try {
+                $conDB = (new ConnectController)->connect_sap();
+                $query = 'select "Code", "Name" from "@V_HXLVCN"';
+                $stmt = odbc_prepare($conDB, $query);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt)) {
+                    // Handle execution error
+                    // die("Error executing SQL statement: " . odbc_errormsg());
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                $results = array();
+                while ($row = odbc_fetch_array($stmt)) {
+                    $results[] = $row;
+                }
+              $data = $results;
+                odbc_close($conDB);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        }
+       
         return response()->json($data, 200);
     }
 
@@ -614,4 +643,39 @@ class QCController extends Controller
         $WHS=  $WHS? $WHS->WhsCode: 99;
         return $WHS;
     }
+     // loại lỗi ván công nghiệp
+     function LoiLoaiVCN(Request $request)
+     {
+         $validator = Validator::make($request->all(), [
+             'type' => 'required',
+         ]);
+         if ($validator->fails()) {
+             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+             // Return validation errors with a 422 Unprocessable Entity status code
+         }
+         try {
+             $conDB = (new ConnectController)->connect_sap();
+             $query = 'select "Code", "Name" from "@V_LLVCN"  where "U_Type" = ?';
+             $stmt = odbc_prepare($conDB, $query);
+             if (!$stmt) {
+                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+             }
+             if (!odbc_execute($stmt, [$request->type])) {
+                 // Handle execution error
+                 // die("Error executing SQL statement: " . odbc_errormsg());
+                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+             }
+             $results = array();
+             while ($row = odbc_fetch_array($stmt)) {
+                 $results[] = $row;
+             }
+             return response()->json($results, 200);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'error' => false,
+                 'status_code' => 500,
+                 'message' => $e->getMessage()
+             ], 500);
+         }
+     }
 }

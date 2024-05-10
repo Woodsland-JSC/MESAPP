@@ -17,6 +17,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getdisabledlistbyid', [QCController::class, 'getDisabledListById']);
     });
     Route::get('/loailoi', [QCController::class, 'loailoi']);
+    Route::get('/loailoivcn', [QCController::class, 'LoiLoaiVCN']);
     Route::get('/huongxuly', [QCController::class, 'huongxuly']);
     Route::get('/getlist-team-exclude-qc', [QCController::class, 'listToExcludeQC']);
     route::get('/list-qc-cbg', [QCController::class, 'listConfirm']);
