@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
-use App\Models\Warehouse;
+// use App\Models\Warehouse;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -222,7 +222,6 @@ class DryingOvenController extends Controller
             ], 500);
         }
     }
-
     // Tạo pallet
     function StorePalletNew(Request $request)
     {
@@ -241,10 +240,12 @@ class DryingOvenController extends Controller
             // dd($quyCachList);
 
             // Lấy dữ liệu kho sẽ lưu trữ (CS)
-            $towarehouse = Warehouse::where('flag', 'CS')
-                ->WHERE('branch', Auth::user()->branch)
-                ->where('FAC', Auth::user()->plant)
-                ->first()->WhsCode;
+            // $towarehouse = Warehouse::where('flag', 'CS')
+            //     ->WHERE('branch', Auth::user()->branch)
+            //     ->where('FAC', Auth::user()->plant)
+            //     ->first()->WhsCode;
+            //new lấy dữ liệu kho sẽ lưu trữ (CS)
+            $towarehouse = WarehouseCS();
 
             // Kiểm tra xem quy cách đã tồn tại hay chưa, nếu đã tồn tại lấy thông tin pallet tồn tại
 

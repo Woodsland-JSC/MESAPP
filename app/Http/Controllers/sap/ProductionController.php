@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\SanLuong;
-use App\Models\QCHandle;
 use App\Models\Warehouse;
-use App\Models\LoaiLoi;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
 use Illuminate\Database\QueryException;
@@ -1049,11 +1047,10 @@ class ProductionController extends Controller
 
     function getQCWarehouseByUser($plant)
     {
-        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)
-            ->where('FAC', $plant)
-            ->first();
-
-        $WHS =  $WHS ? $WHS->WhsCode : 99;
+        // $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)
+        //     ->where('FAC', $plant)
+        //     ->first();
+        $WHS=GetWhsCode(Auth::user()->plant,'QC');
         return $WHS;
     }
     /*

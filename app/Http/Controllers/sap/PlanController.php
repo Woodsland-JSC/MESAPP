@@ -378,10 +378,10 @@ class PlanController extends Controller
             $id = $request->input('PlanID');
             $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
             // Lấy kho sấy
-            $towarehouse = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)
-                ->where('FAC', Auth::user()->plant)
-                ->first()->WhsCode;
-
+            // $towarehouseS = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)
+            //     ->where('FAC', Auth::user()->plant)
+            //     ->first()->WhsCode;
+            $towarehouse =  GetWhsCode(Auth::user()->plant,'SS');
             if ($record->count() > 0) {
                 plandryings::where('PlanID', $id)->update(
                     [

@@ -715,9 +715,10 @@ class MasterDataController extends Controller
                 $filter = '(T1."U_Status" is null or T1."U_Status"= ?)';
                 $flag = 'TS';
             }
-            $warehouse = Warehouse::where('branch', Auth::user()->branch)->where('flag', $flag)
-                ->where('FAC', Auth::user()->plant)
-                ->first()->WhsCode;
+            // $warehouse = Warehouse::where('branch', Auth::user()->branch)->where('flag', $flag)
+            //     ->where('FAC', Auth::user()->plant)
+            //     ->first()->WhsCode;
+            $warehouse= GetWhsCode(Auth::user()->plant,$flag);
             // T0 OITW is Warehouse Table from SAP (WhsCode)
             // T1 OIBT là bảng lưu thành phẩm ghi nhận
             // T2 OITM là bảng lưu Item

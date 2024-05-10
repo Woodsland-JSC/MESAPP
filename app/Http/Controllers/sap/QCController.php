@@ -13,12 +13,10 @@ use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
 use App\Models\plandryings;
 use App\Models\SanLuong;
-use App\Models\QCHandle;
 use App\Models\Warehouse;
-use App\Models\LoaiLoi;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
-use App\Models\qcreceipt;
+
 use Illuminate\Support\Facades\Http;
 class QCController extends Controller
 {
@@ -228,10 +226,35 @@ class QCController extends Controller
         ];
         return response()->json($header, 200);
     }
-    public function loailoi()
+    public function loailoi(Request $request)
     {
-        $data = LoaiLoi::get(['id', 'name']);
-        return response()->json($data, 200);
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            $query = 'select "Code" "id", "Name" "name" from "@V_LLVCN" where "U_ObjType" = ?';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,['CBG'])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            $data = $results;
+            odbc_close($conDB);
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+       
     }
     function huongxuly(Request $request)
     {
@@ -242,17 +265,15 @@ class QCController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        if ($request->type == "CBG") {
-            $data = QCHandle::where('type', 'CBG')->get(['id', 'name']);
-        } else {
+        
             try {
                 $conDB = (new ConnectController)->connect_sap();
-                $query = 'select "Code", "Name" from "@V_HXLVCN"';
+                $query = 'select "Code" "id", "Name" "name" from "@V_HXLVCN" where "U_ObjType" = ?';
                 $stmt = odbc_prepare($conDB, $query);
                 if (!$stmt) {
                     throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
                 }
-                if (!odbc_execute($stmt)) {
+                if (!odbc_execute($stmt, [$request->type])) {
                     // Handle execution error
                     // die("Error executing SQL statement: " . odbc_errormsg());
                     throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -270,7 +291,7 @@ class QCController extends Controller
                     'message' => $e->getMessage()
                 ], 500);
             }
-        }
+        
        
         return response()->json($data, 200);
     }
@@ -412,9 +433,12 @@ class QCController extends Controller
         {
             $warehouse= $this ->getQCWarehouseByUser('HG');
         }
-        if($warehouse==99)
+      
+        if($warehouse=="-1")
         {
-            throw new \Exception('Không tìm thấy kho QC');
+            return response()->json([
+                'error' => 'Không tìm thấy kho Q',
+            ], 500);
         }
 
         //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
@@ -553,9 +577,11 @@ class QCController extends Controller
         {
             $warehouse= $this ->getQCWarehouseByUser('HG');
         }
-        if($warehouse==99)
+        if($warehouse=="-1")
         {
-            throw new \Exception('Không tìm thấy kho QC');
+            return response()->json([
+                'error' => 'Không tìm thấy kho QC',
+            ], 500);
         }
 
         //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
@@ -636,11 +662,12 @@ class QCController extends Controller
     
     function getQCWarehouseByUser($plant)
     {
-        $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
-        ->where('FAC',$plant)
-        ->first();
-        
-        $WHS=  $WHS? $WHS->WhsCode: 99;
+        // $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
+        // ->where('FAC',$plant)
+        // ->first();
+
+        // $WHS=  $WHS? $WHS->WhsCode: 99;
+        $WHS= GetWhsCode($plant,'QC');
         return $WHS;
     }
      // loại lỗi ván công nghiệp
@@ -655,12 +682,12 @@ class QCController extends Controller
          }
          try {
              $conDB = (new ConnectController)->connect_sap();
-             $query = 'select "Code", "Name" from "@V_LLVCN"  where "U_Type" = ?';
+             $query = 'select "Code" "id", "Name" "name" from "@V_LLVCN"  where "U_Type" = ? and "U_ObjType" = ?';
              $stmt = odbc_prepare($conDB, $query);
              if (!$stmt) {
                  throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
              }
-             if (!odbc_execute($stmt, [$request->type])) {
+             if (!odbc_execute($stmt, [$request->type,'VCN'])) {
                  // Handle execution error
                  // die("Error executing SQL statement: " . odbc_errormsg());
                  throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));

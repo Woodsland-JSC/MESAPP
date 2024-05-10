@@ -94,3 +94,28 @@ function inforUserSAP()
     odbc_close($conDB);
     return $results;
 }
+if (!function_exists('GetWhsCode')) {
+    function GetWhsCode($FAC, $flag)
+    {
+       $conDB = (new ConnectController)->connect_sap();
+
+    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [Auth::user()->branch,$FAC, $flag])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $WhsCode = "";
+        if ($stmt && odbc_fetch_row($stmt)) {
+            $WhsCode = odbc_result($stmt, "WhsCode");
+        } else {
+            $WhsCode = "-1";
+        }
+        odbc_close($conDB);
+        return $WhsCode;
+    }
+}
