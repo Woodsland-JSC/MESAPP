@@ -191,9 +191,9 @@ function SizeCard(props) {
                     </div>
                 ) : (
                     <div className="grid w-full py-1 overflow-x-auto">
-                        <div className=" flex flex-row mb-2 space-x-4 w-full">
+                        <div className=" flex flex-row mb-1 mt-2 space-x-4 w-full">
                         {sizeData.length === 0 ? (
-                            <div className="h-[4.5rem] w-full flex flex-col justify-center items-center ">
+                            <div className="h-[4.3rem] w-full flex flex-col justify-center items-center ">
                                 <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2"/>
                                 <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
                             </div>

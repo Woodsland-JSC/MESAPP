@@ -13,6 +13,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import palletsApi from "../api/palletsApi";
 import toast from "react-hot-toast";
+import { GiPlainCircle } from "react-icons/gi";
 
 function SizeListItem(props) {
     const { id, size, reason, pallet, Qty, weight, onDelete, planID, onReload, onReloadPalletList } = props;
@@ -51,7 +52,7 @@ function SizeListItem(props) {
   };
 
     return (
-        <div className="relative bg-[#F9FAFB] border border-gray-200 rounded-xl h-[10rem] w-[13rem]">
+        <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl h-[9.7rem] w-[13rem]">
             <div
                 className={`absolute -top-1 -right-2.5 bg-gray-800 text-white w-6 h-6 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all ${
                     type === "kt" || type === "vl" ? "flex" : "hidden"
@@ -95,10 +96,11 @@ function SizeListItem(props) {
             </Modal>
             <div className="hidden">{id}</div>
 
-            <div className="font-medium p-4 py-3 border-b border-gray-200 w-full">
+            <div className="flex-col justify-center font-medium p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[72px] rounded-t-xl">
                 {/* <div className="font-semibold"><span>{formatSizeQty(size)}</span></div> */}
-                <div className="w-full"><span className="w-1/4">KT: </span> <span className="w-full">{size1}</span></div>
-                {size2?<div className="w-full "><span className="w-1/4 text-transparent">KT: </span> <span className="w-full">{size2}</span></div>:null}
+                {/* <div className="w-full"><span className="w-1/4">KT: </span> <span className="w-full">{size1}</span></div> */}
+                <div className="w-full flex items-center"><GiPlainCircle className="text-[#17506B] w-2 h-2 mr-2"/><span className="w-full">{size1}</span></div>
+                {size2?<div className="w-full flex items-center "><GiPlainCircle className="text-[#17506B] w-2 h-2 mr-2"/><span className="w-full">{size2}</span></div>:null}
             </div>
 
             <div className="text-gray-600 space-y-2 py-3 p-4">
