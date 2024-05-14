@@ -40,12 +40,12 @@ function WarehouseCS()
 
     $conDB = (new ConnectController)->connect_sap();
 
-    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_Flag"=?';
+    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_Flag"=? and "Inactive"=?;';
     $stmt = odbc_prepare($conDB, $query);
     if (!$stmt) {
         throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
     }
-    if (!odbc_execute($stmt, [Auth::user()->branch, 'CS'])) {
+    if (!odbc_execute($stmt, [Auth::user()->branch, 'CS','N'])) {
         // Handle execution error
         // die("Error executing SQL statement: " . odbc_errormsg());
         throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -99,12 +99,12 @@ if (!function_exists('GetWhsCode')) {
     {
        $conDB = (new ConnectController)->connect_sap();
 
-    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=?';
+    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=? and "Inactive"=?;';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [Auth::user()->branch,$FAC, $flag])) {
+        if (!odbc_execute($stmt, [Auth::user()->branch,$FAC, $flag,'N'])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
