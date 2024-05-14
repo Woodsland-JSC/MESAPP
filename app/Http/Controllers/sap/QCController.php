@@ -338,7 +338,8 @@ class QCController extends Controller
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historysl 
                 WHERE itemchild = b.SubItemCode
-                AND isQualityCheck = 1                 
+                AND isQualityCheck = 1
+                AND notiId = b.id                
             )) as Quantity'),
             'a.created_at',
             'c.first_name',
