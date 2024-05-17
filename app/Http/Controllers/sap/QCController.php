@@ -326,8 +326,10 @@ class QCController extends Controller
         ->join('users as c', 'a.create_by', '=', 'c.id')
         ->select(
             'a.FatherCode',
+            'a.ItemName',
             'b.SubItemName',
             'b.SubItemCode',
+            'b.ErrorData',
             'a.team',
             'a.CongDoan',
             'a.CDay',
@@ -337,7 +339,7 @@ class QCController extends Controller
             DB::raw('(b.openQty - (
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historysl 
-                WHERE itemchild = b.SubItemCode
+                WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.SPDich END
                 AND isQualityCheck = 1
                 AND notiId = b.id                
             )) as Quantity'),
@@ -403,10 +405,19 @@ class QCController extends Controller
         }
 
         // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
-        $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
-        ->select('a.*', 'b.id as notiID','b.SubItemCode as SubItemCode','b.team as NextTeam','b.openQty')
-        ->where('b.id', $request->id)
-        ->where('b.confirm', 0)->first();
+        $data = DB::table('sanluong AS a')
+            ->join('notireceipt as b', 'a.id', '=', 'b.baseID')
+            ->select(
+                'a.*',
+                'b.id as notiID',
+                'b.SPDich as ItemCode',
+                'b.SubItemCode as SubItemCode',
+                'b.team as NextTeam',
+                'b.openQty'
+            )
+            ->where('b.id', $request->id)
+            ->where('b.confirm', 0)
+            ->first();
 
         // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
         if (!$data) {
@@ -461,16 +472,16 @@ class QCController extends Controller
             "U_source"=>$rootCause,
             "U_ItemHC"=>$subCode,
             "U_cmtQC"=> $request->note??"",
-            "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+            "U_QCN"=> $data->ItemCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,
-                "ItemCode" =>   $data->SubItemCode,
+                "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,    
                 "WarehouseCode" =>  $warehouse,
                 "BatchNumbers" => [
                     [
                         "BatchNumber" => now()->format('YmdHmi'),
                         "Quantity" => $request->Qty,
-                        "ItemCode" =>   $data->SubItemCode,
+                        "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                         "U_CDai" => $data->CDai,
                         "U_CRong" => $data->CRong,
                         "U_CDay" =>  $data->CDay,
@@ -509,7 +520,7 @@ class QCController extends Controller
             HistorySL::create(
                 [
                     'LSX'=>$data->LSX,
-                    'itemchild'=>$data->SubItemCode,
+                    'itemchild'=>$data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     'to' => $data->Team,
                     'quantity'=>$request->Qty,
                     'ObjType'=>59,

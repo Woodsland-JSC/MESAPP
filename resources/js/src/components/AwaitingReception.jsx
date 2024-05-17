@@ -363,17 +363,10 @@ const AwaitingReception = ({
                             {/* <span>Tên: </span> */}
                             <span className="font-bold text-[19px] text-[#155979]">
                                 {variant === "QC" ? (
-                                    data?.SubItemName || "Unknown Product"
-                                ):(
-                                    data?.ItemName || "" (
-                                        data?.CDay +
-                                            "x" +
-                                            data?.CRong +
-                                            "x" +
-                                            data?.CDai || ""
-                                    )
+                                    data?.SubItemName || data?.ItemName || "Sản phẩm không xác định"
+                                ) : (
+                                    data?.ItemName || (data?.CDay + "x" + data?.CRong + "x" + data?.CDai) || "Sản phẩm không xác định"
                                 )}
-                                {/* {type == "plywood" ? data.itemName : data.data?.ItemName || ""} */}
                             </span>
                             <span></span>
                         </div>
@@ -390,10 +383,22 @@ const AwaitingReception = ({
                         ) : (
                             <>
                                 <div className="flex gap-2">
-                                    <span>Mã thành phẩm: </span>
-                                    <span className="font-bold">
-                                        {data?.FatherCode || ""}
-                                    </span>
+                                    {data?.SubItemName ? (
+                                        <>
+                                            <span>Mã bán thành phẩm: </span>
+                                            <span className="font-bold">
+                                                {data?.SubItemCode || "???"}
+                                            </span>
+                                        </>
+                                        
+                                    ) : (
+                                        <>
+                                            <span>Mã thành phẩm: </span>
+                                            <span className="font-bold">
+                                                {data?.FatherCode || "????"}
+                                            </span>
+                                        </>
+                                    )} 
                                     <span className="font-bold text-gray-500 pentagon-container">{data?.MaThiTruong? "- " + data.MaThiTruong : ""}</span>
                                 </div>
                             </>
@@ -497,6 +502,7 @@ const AwaitingReception = ({
                     </Stack>
                 </div>
 
+                {/*  */}
                 {isQualityCheck && !isReturnSelect && (
                     <>
                         <Box className=" px-4">
@@ -533,12 +539,6 @@ const AwaitingReception = ({
                                 options={errorTypeOptions}
                                 isClearable
                                 isSearchable
-                                // onChange={(value) => {
-                                //     setFaults((prev) => ({
-                                //         ...prev,
-                                //         errorType: value,
-                                //     }));
-                                // }}
                                 value={faults.errorType}
                                 onChange={(value) => {
                                     setFaults((prev) => ({
@@ -787,7 +787,7 @@ const AwaitingReception = ({
                                         </span>{" "}
                                     </> 
                                 )}
-                                sản phẩm <span className="font-bold">{data?.ItemName}</span>
+                                sản phẩm <span className="font-bold">{data?.SubItemName || data?.ItemName}</span>
                                 {faults && faults.errorType && (
                                     <span>
                                          {" "}với lý do{" "}

@@ -100,12 +100,13 @@ function Workspace() {
 
                             <TabPanels px="0" className="w-full flex justify-center">
                                 <TabPanel
-                                    className=""
-                                    style={{ padding: "1rem 1rem" }}
+                                    className="xl:p-4 lg:p-4 md:p-4 p-1 w-full"
+                                    // style={{ padding: "1rem 1rem" }}
                                 >
                                     {/* Cards List */}
                                     <div className="cusTabs w-full flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6 w-full">
+                                            {/* Xep say */}
                                             {user.permissions?.includes(
                                                 "sepsay"
                                             ) ? (
@@ -143,11 +144,11 @@ function Workspace() {
                                                         </div>
                                                     </div>
                                                     <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
                                                     </div>
                                                 </div>
                                             )}
 
+                                            {/* Tao ke hoach say */}
                                             {user.permissions?.includes(
                                                 "kehoachsay"
                                             ) ? (
@@ -155,7 +156,7 @@ function Workspace() {
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiClipboardDocumentList className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                <HiClipboardDocumentList className="xl:w-9 xl:h-9 lg:w-9 lg:h-9 md:w-9 md:h-9 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -190,7 +191,8 @@ function Workspace() {
                                                     </div>
                                                 </div>
                                             )}
-
+                                            
+                                            {/* Vao lo */}
                                             {user.permissions?.includes(
                                                 "vaolo"
                                             ) ? (
@@ -233,6 +235,7 @@ function Workspace() {
                                                 </div>
                                             )}
 
+                                            {/* Kiem tra lo say */}
                                             {user.permissions?.includes(
                                                 "kiemtralo"
                                             ) ? (

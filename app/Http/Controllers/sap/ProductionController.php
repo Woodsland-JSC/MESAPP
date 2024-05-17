@@ -108,6 +108,7 @@ class ProductionController extends Controller
             'ItemName' => 'required|string|max:254',
             'SubItemName',
             'SubItemCode',
+            'ErrorData',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
             'MaThiTruong',
@@ -140,6 +141,7 @@ class ProductionController extends Controller
             $SanLuong = SanLuong::create($SLData);
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
+            $errorData = json_encode($request->ErrorData);
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
                     'text' => 'Production information waiting for confirmation',
@@ -167,7 +169,8 @@ class ProductionController extends Controller
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1,
-                    'openQty' => $request->RejectQty
+                    'openQty' => $request->RejectQty,
+                    'ErrorData' => $errorData,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
@@ -437,6 +440,7 @@ class ProductionController extends Controller
             $results[] = $rowstock;
         }
 
+        // Lấy công đoạn hiện tại
         $CongDoan = null;
         foreach ($results as $result) {
             $U_CDOAN = $result['U_CDOAN'];
@@ -445,7 +449,21 @@ class ProductionController extends Controller
                 $CongDoan = $U_CDOAN;
             } else {
                 if ($U_CDOAN !== $CongDoan) {
-                    return response()->json(['error' => 'Các giá trị của U_CDOAN không giống nhau!'], 422);
+                    return response()->json(['error' => 'Các giá trị của U_CDOAN trong LSX không giống nhau!'], 422);
+                }
+            }
+        }
+
+        // Lấy kho của bán thành phẩm
+        $SubItemWhs = null;
+        foreach ($results as $result) {
+            $wareHouse = $result['wareHouse'];
+
+            if ($SubItemWhs === null) {
+                $SubItemWhs = $wareHouse;
+            } else {
+                if ($wareHouse !== $SubItemWhs) {
+                    return response()->json(['error' => 'Các giá trị của wareHouse trong LSX không giống nhau!'], 422);
                 }
             }
         }
@@ -508,26 +526,6 @@ class ProductionController extends Controller
         $groupedResults = array_values($groupedResults);
 
         // 3. Lấy số lượng còn lại phải sản xuất
-        // $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
-        //     ->where('notireceipt.type', 0)
-        //     ->where('sanluong.Team', $request->TO)
-        //     ->where('sanluong.ItemCode', $request->ItemCode)
-        //     ->where('sanluong.Status', '!=', 1)
-        //     ->where('notireceipt.deleted', '!=', 1)
-        //     ->groupBy('sanluong.FatherCode', 'sanluong.ItemCode', 'sanluong.Team', 'sanluong.NexTeam')
-        //     ->select(
-        //         'sanluong.FatherCode',
-        //         'sanluong.ItemCode',
-        //         'sanluong.Team',
-        //         'sanluong.NexTeam',
-        //         DB::raw('sum(Quantity) as Quantity')
-        //     )->get();
-        
-        // // dd($stockpending);    
-
-        // if ($stockpending->count() > 0) {
-        //     $quantity = $quantity - $stockpending->first()->Quantity;
-        // }
 
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
         $factory = [
@@ -544,6 +542,14 @@ class ProductionController extends Controller
                 'FactoryName' => 'Nhà Máy CBG Thái Bình'
             ],
         ];
+
+        $ItemInfo= DB::table('sanluong as a')
+        ->select(
+            'a.ItemCode',
+            'a.ItemName',
+        )
+        ->where('ItemCode',$request->ItemCode)
+        ->first();
 
         // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
         $notification = DB::table('sanluong as a')
@@ -572,25 +578,25 @@ class ProductionController extends Controller
                 'b.confirm'
             )
             ->where('b.confirm', '!=', 1)
-            // ->where('b.type', '!=', 1)
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO)
             ->get();
         
             // dd($notification);
-        
             $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([
-            'Factorys' => $factory,
+            'ItemInfo' => $ItemInfo,
+            'CongDoan'  =>  $CongDoan,
+            'SubItemWhs' => $SubItemWhs,
             'notifications' => $notification,
             'stock' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'remainQty' =>   $RemainQuantity,
-            'CongDoan'  =>  $CongDoan,
+            'Factorys' => $factory,
         ], 200);
     }
 

@@ -31,6 +31,7 @@ class notireceipt extends Model
         'DocEntry',
         'openQty',
         'MaThiTruong',
+        'ErrorData',
     ];
     public function getCreatedAtAttribute($value)
     {

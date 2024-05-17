@@ -58,6 +58,8 @@ const ItemInput = ({
     onRejectFromChild,
 }) => {
     const checkRef = useRef(null);
+    const itemCheckRef = useRef(null);
+    const subItemCheckRef = useRef(null);
     const receipInput = useRef(null);
 
     const filteredData = Array.isArray(data)
@@ -109,10 +111,13 @@ const ItemInput = ({
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
     const [selectedFaultItem, setSelectedFaultItem] = useState({
+        ItemCode: "",
+        ItemName: "",
         SubItemCode: "",
         SubItemName: "",
         OnHand: ""
     });
+    const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
     const [amount, setAmount] = useState("");
     const [faultyAmount, setFaultyAmount] = useState("");
     const [choosenItem, setChoosenItem] = useState(null);
@@ -137,8 +142,11 @@ const ItemInput = ({
             console.log("Chi tiết thành phẩm: ", res);
             setSelectedItemDetails({
                 ...item,
+                ItemInfo: res.ItemInfo,
                 stockQuantity: res.maxQuantity,
                 totalProcessing: res.remainQty,
+                CongDoan: res.CongDoan,
+                SubItemWhs: res.SubItemWhs,
                 factories: res.Factorys?.map((item) => ({
                     value: item.Factory,
                     label: item.FactoryName,
@@ -147,7 +155,7 @@ const ItemInput = ({
                 stock: res.stock,
                 maxQty: res.maxQty,
                 WaitingConfirmQty: res.WaitingConfirmQty,
-                CongDoan: res.CongDoan,
+                
             });
             onModalOpen();
         } catch (error) {
@@ -181,7 +189,7 @@ const ItemInput = ({
             toast.error("Số lượng lỗi phải lớn hơn 0");
             onAlertDialogClose();
             return;
-        } else if (selectedFaultItem.SubItemCode === "" && faultyAmount) {
+        } else if (selectedFaultItem.SubItemCode === "" && selectedFaultItem.ItemCode === "" && faultyAmount) {
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
@@ -191,8 +199,19 @@ const ItemInput = ({
             return;
         } else {
             setConfirmLoading(true);
+
+            // Object chứa dữ liệu lỗi 
+            const ErrorData = isItemCodeDetech
+            ? {
+                  SubItemWhs: selectedItemDetails.SubItemWhs,
+                  SubItemQty: selectedItemDetails.stock.map((item) => ({
+                      SubItemCode: item.SubItemCode,
+                      Qty: item.BaseQty * faultyAmount,
+                  })),
+              }
+            : null;
+
             try {
-                // console.log("Làm ơn đi: ", selectedItemDetails);
                 const payload = {
                     FatherCode: data.SPDICH,
                     ItemCode: selectedItemDetails.ItemChild,
@@ -206,6 +225,7 @@ const ItemInput = ({
                     Team: selectedItemDetails.TO,
                     CongDoan: selectedItemDetails.NameTO,
                     NexTeam: selectedItemDetails.TOTT,
+                    ErrorData: ErrorData, 
                     Type: "CBG",
                     LSX: selectedItemDetails.LSX[0].LSX,
                     CompleQty: 0,
@@ -226,10 +246,13 @@ const ItemInput = ({
                             );
                         toast.success("Ghi nhận & chuyển tiếp thành công!");
                         setSelectedFaultItem({
+                            ItemCode: "",
+                            ItemName: "",
                             SubItemCode: "",
                             SubItemName: "",
                             OnHand: "", 
                         });
+                        setIsItemCodeDetech(false);
                     } else {
                         toast("Chưa nhập bất kì số lượng nào.");
                     }
@@ -887,16 +910,16 @@ const ItemInput = ({
                                         <div className="flex space-x-2 pb-3 items-center">
                                             <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                             <div className="font-semibold text-lg ">
-                                                Ghi nhận lỗi <span className="xl:inline-block lg:inline-block md:inline-block hidden">từ công đoạn trước </span>
+                                                Ghi nhận lỗi
                                             </div>
                                         </div>
                                         <Alert
                                             status="error"
-                                            className="rounded-xl flex items-center"
+                                            className="rounded-xl flex items-center !mb-3"
                                         >
-                                            <div className="w-full flex items-center justify-between gap-3 py-1">
+                                            <div className="w-full flex items-center justify-between gap-3">
                                                 <div className="">
-                                                    Lỗi báo từ công đoạn trước:{" "}
+                                                    Tổng số lượng ghi nhận lỗi:{" "}
                                                 </div>
                                                 <div className="rounded-lg cursor-pointer px-3 py-1 text-white bg-red-800 hover:bg-red-500 duration-300">
                                                     {formatNumber(
@@ -912,6 +935,8 @@ const ItemInput = ({
                                                 </div>
                                             </div>
                                         </Alert>
+                                        <div className="border-b border-gray-200">
+
                                         {/* Số lượng ghi nhận lỗi */}
                                         {selectedItemDetails?.notifications &&
                                             selectedItemDetails?.notifications.filter(
@@ -925,13 +950,12 @@ const ItemInput = ({
                                                         notif.confirm == 0 &&
                                                         notif.type == 1
                                                 ) && (
-                                            <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
+                                            <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
                                                 <Text className="font-semibold">
                                                     Số lượng lỗi đã ghi nhận:{" "}
                                                 </Text>{" "}
                                             </div>
                                         )}
-                                        <div className="border-b border-gray-200">
                                         {selectedItemDetails?.notifications &&
                                             selectedItemDetails?.notifications.filter(
                                                 (notif) =>
@@ -1010,8 +1034,8 @@ const ItemInput = ({
                                                 ))}
                                         </div>
                                         <Box className="px-2 pt-2">
-                                            <label className="font-semibold text-red-700">
-                                                Số lượng ghi nhận lỗi:
+                                            <label className="font-semibold ">
+                                                Số lượng ghi nhận lỗi
                                             </label>
                                             <NumberInput
                                                 step={1}
@@ -1038,6 +1062,13 @@ const ItemInput = ({
                                                         }));
                                                     }
                                                     if (value == 0 || !value) {
+                                                        setSelectedFaultItem({
+                                                            ItemCode: "",
+                                                            ItemName: "",
+                                                            SubItemCode:"",
+                                                            SubItemName:"",
+                                                            OnHand: "",
+                                                        });
                                                         setFaults((prev) => ({
                                                             ...prev,
                                                             factory: null,
@@ -1051,31 +1082,48 @@ const ItemInput = ({
                                                     <NumberDecrementStepper />
                                                 </NumberInputStepper>
                                             </NumberInput>
-                                            {/* {!faultyAmount || faultyAmount > 0 && (
-                                                <>
-                                                    {selectedItemDetails?.stock.map((item, index) => (
-                                                        <div className="mt-4 ml-3">
-                                                            <Radio ref={checkRef} isChecked={index === 0}> 
-                                                                {item.SubItemName}
-                                                            </Radio>   
-                                                        </div>      
-                                                    ))}
-                                                </>
-                                            )}  */}
                                             {!faultyAmount || faultyAmount > 0 && (
                                                 <>
+                                                    <div className="my-3 font-medium text-[15px] text-red-700">Lỗi thành phẩm:</div>
+                                                        <div className={`mb-4 ml-3 text-gray-600 
+                                                        ${selectedFaultItem.ItemCode === choosenItem.ItemChild ? 'font-semibold text-gray-800 ' : 'text-gray-600'}`} key={index}>
+                                                            <Radio 
+                                                                ref={checkRef}
+                                                                value={choosenItem.ChildName} 
+                                                                isChecked={selectedFaultItem.ItemCode === choosenItem.ItemChild}
+                                                                onChange={() => {
+                                                                    setSelectedFaultItem({
+                                                                        ItemCode: choosenItem.ItemChild,
+                                                                        ItemName: choosenItem.ChildName,
+                                                                        SubItemCode:"",
+                                                                        SubItemName:"",
+                                                                        OnHand: "",
+                                                                    });
+                                                                    setIsItemCodeDetech(true);
+                                                                    console.log("Giá trị đã chọn: ", selectedFaultItem);
+                                                                }} 
+                                                            >
+                                                                {choosenItem.ChildName}
+                                                            </Radio>   
+                                                        </div>      
+                                                    
+                                                    <div className="my-3 font-medium text-[15px] text-red-700">Lỗi bán thành phẩm công đoạn trước:</div>
                                                     {selectedItemDetails?.stock.map((item, index) => (
-                                                        <div className={`mt-4 ml-3 ${selectedFaultItem.SubItemCode === item.SubItemCode ? 'font-semibold' : ''}`} key={index}>
+                                                        <div className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode === item.SubItemCode ? 'font-semibold text-gray-800 ' : 'text-gray-600'}`} key={index}>
+                                                            
                                                             <Radio 
                                                                 ref={checkRef}
                                                                 value={item.SubItemCode} 
                                                                 isChecked={selectedFaultItem.SubItemCode === item.SubItemCode}
                                                                 onChange={() => {
                                                                     setSelectedFaultItem({
+                                                                        ItemCode: "",
+                                                                        ItemName: "",
                                                                         SubItemCode:item.SubItemCode,
                                                                         SubItemName:item.SubItemName,
                                                                         OnHand:item.OnHand
                                                                     });
+                                                                    setIsItemCodeDetech(false);
                                                                     console.log("Giá trị đã chọn: ", selectedFaultItem);
                                                                 }} 
                                                             >
@@ -1087,7 +1135,7 @@ const ItemInput = ({
                                             )}
                                         </Box>
                                         <Box className="px-2 pt-2">
-                                            <label className="font-semibold text-red-700">
+                                            <label className="font-semibold">
                                                 Lỗi phôi nhận từ nhà máy khác:
                                             </label>
                                             <Select
@@ -1152,11 +1200,14 @@ const ItemInput = ({
                                 onClick={() => {
                                     closeInputModal()
                                     setSelectedFaultItem({
+                                        ItemName:"",
+                                        ItemCode:"",
                                         SubItemName:"",
                                         SubItemCode:"",
                                         OnHand: "",
                                     })
-                                    setFaultyAmount(null)
+                                    setFaultyAmount(null);
+                                    setIsItemCodeDetech(false);
                                 }}
                             >
                                 Đóng
@@ -1183,7 +1234,6 @@ const ItemInput = ({
 
             <AlertDialog
                 isOpen={isAlertDialogOpen}
-                onClose={onAlertDialogClose}
                 closeOnOverlayClick={false}
                 isCentered
             >
@@ -1203,6 +1253,11 @@ const ItemInput = ({
                                     <span className="font-bold">
                                         {faultyAmount}
                                     </span>{" "}
+                                    <span>
+                                    {faults &&
+                                        faults.ItemCode &&
+                                        "từ " + faults.factory?.label}
+                                    </span>
                                     {faults &&
                                         faults.factory &&
                                         "từ " + faults.factory?.label}
