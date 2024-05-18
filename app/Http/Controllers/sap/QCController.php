@@ -16,7 +16,7 @@ use App\Models\SanLuong;
 use App\Models\Warehouse;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
-
+use App\Jobs\issueProduction;
 use Illuminate\Support\Facades\Http;
 class QCController extends Controller
 {
@@ -532,6 +532,12 @@ class QCController extends Controller
                     'notiId' => $request->id,
                 ], 
             );
+            // Lấy dữ liệu  tu notireceipt
+            $dataerror = DB::table('notireceipt as a');
+            foreach ($dataerror as $key => $value) {
+                $this->IssueQC($data->SubItemCode,$request->Qty,$warehouse);
+            }
+            
             DB::commit();
             return response()->json('success', 200);
         } else {
@@ -716,5 +722,9 @@ class QCController extends Controller
                  'message' => $e->getMessage()
              ], 500);
          }
+     }
+     function IssueQC($ItemCode,$Quantity,$WarehouseCode)
+     {
+        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode);
      }
 }
