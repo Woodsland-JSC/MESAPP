@@ -209,7 +209,13 @@ const ItemInput = ({
                       Qty: item.BaseQty * faultyAmount,
                   })),
               }
-            : null;
+            : {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: {
+                    SubItemCode: selectedFaultItem.SubItemCode,
+                    Qty: faultyAmount,
+                }
+            };
 
             try {
                 const payload = {
