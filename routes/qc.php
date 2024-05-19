@@ -23,4 +23,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     route::get('/list-qc-cbg', [QCController::class, 'listConfirm']);
     route::post('/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBG'])->name('confirm-qc-cbg');
     route::post('/v2/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBGV2'])->name('confirm-qc-cbg-v2');
+    route::post('issueQC', [QCController::class, 'IssueQC'])->name('issueQC');
 });
