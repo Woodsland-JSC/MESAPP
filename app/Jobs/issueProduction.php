@@ -20,11 +20,13 @@ class issueProduction implements ShouldQueue
     protected $ItemCode;
     protected $WarehouseCode;
     protected $Qty;
-    public function __construct($ItemCode,$Qty,$WarehouseCode)
+    protected $BranchCode;
+    public function __construct($ItemCode,$Qty,$WarehouseCode,$BranchCode)
     {
         $this->ItemCode = $ItemCode;
         $this->Qty = $Qty;
         $this->WarehouseCode = $WarehouseCode;
+        $this->BranchCode = $BranchCode;
     }
 
     /**
@@ -32,16 +34,6 @@ class issueProduction implements ShouldQueue
      */
     public function handle(): void
     {
-            // $body =[
-        //     "DocumentLines"=> [
-        //         [
-        //             "ItemCode"=> "NTNTEST",
-        //             "Quantity"=> 1,
-        //             "WarehouseCode"=> "156.0101",
-        //         ]
-        //     ]
-        // ];
-
         //1.check item quản lý theo batch/serial/none và tồn kho hiện tại theo kho
         /*** 
         0 khong quan ly batch/serial
@@ -91,7 +83,7 @@ class issueProduction implements ShouldQueue
         }
         //3. create issue production
         if(count($results) == 0){
-            $this->fail('Error creating issue production');
+            $this->fail('Error creating issue production, type'.(int)$itemType);
             throw new \Exception('Error creating issue production');
         }
         $serial_batch=[];
@@ -111,6 +103,7 @@ class issueProduction implements ShouldQueue
         }
         if($itemType == 0){
             $body = [
+                "BPL_IDAssignedToInvoice" =>  $this->BranchCode,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $this->ItemCode,
@@ -122,6 +115,7 @@ class issueProduction implements ShouldQueue
         }
         else if ($itemType == 1){
             $body = [
+                "BPL_IDAssignedToInvoice" =>  $this->BranchCode,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $this->ItemCode,
@@ -134,6 +128,7 @@ class issueProduction implements ShouldQueue
         }
         else if ($itemType == 2){
             $body = [
+                "BPL_IDAssignedToInvoice" => 1,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $this->ItemCode,
@@ -150,8 +145,8 @@ class issueProduction implements ShouldQueue
         ])->withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-            'Authorization' => 'Basic eyJDb21wYW55REIiOiAiTFlHSUFWSUVOX0dPTElWRTIyIiwiVXNlck5hbWUiOiAibWFuYWdlciJ9OjEyMzQ=' , //BasicAuthToken(),
-        ])->post('https://nguyen.local:50000/b1s/v1/InventoryGenExits',$body);
+            'Authorization' => 'Basic '. BasicAuthToken() , //BasicAuthToken(),
+        ])->post(UrlSAPServiceLayer().'/b1s/v1/InventoryGenExits',$body);
         if (!$response->successful()) {
             $res = $response->json();
             $this->fail($res['error']);

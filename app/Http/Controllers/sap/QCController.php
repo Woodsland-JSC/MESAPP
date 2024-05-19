@@ -413,12 +413,12 @@ class QCController extends Controller
                 'b.SPDich as ItemCode',
                 'b.SubItemCode as SubItemCode',
                 'b.team as NextTeam',
-                'b.openQty'
+                'b.openQty',
+                'b.ErrorData as ErrorData'
             )
             ->where('b.id', $request->id)
             ->where('b.confirm', 0)
             ->first();
-
         // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
@@ -532,12 +532,15 @@ class QCController extends Controller
                     'notiId' => $request->id,
                 ], 
             );
-            // Lấy dữ liệu  tu notireceipt
-            $dataerror = DB::table('notireceipt as a');
-            foreach ($dataerror as $key => $value) {
-                $this->IssueQC($data->SubItemCode,$request->Qty,$warehouse);
-            }
-            
+            // check ErrorData not null để ap dung cho cac giao dich cu
+            if($data->ErrorData)
+            {
+                $dataIssues= json_decode($data->ErrorData, true);
+                // Lấy dữ liệu  tu notireceipt
+                foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+                    $this->IssueQC($dataIssue['SubItemCode'],$dataIssue['Qty'],$dataIssues['SubItemWhs'],Auth::user()->branch);
+                }
+            }    
             DB::commit();
             return response()->json('success', 200);
         } else {
