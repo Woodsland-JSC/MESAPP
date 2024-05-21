@@ -160,7 +160,7 @@ const ItemInput = ({
             });
             onModalOpen();
         } catch (error) {
-            toast.error("Có lỗi khi lấy dữ liệu item.");
+            toast.error(error.response.data.error || "Có lỗi khi lấy dữ liệu item.");
             console.error(error);
         }
         setLoading(false);

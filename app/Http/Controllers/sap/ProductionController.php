@@ -463,7 +463,7 @@ class ProductionController extends Controller
                 $SubItemWhs = $wareHouse;
             } else {
                 if ($wareHouse !== $SubItemWhs) {
-                    return response()->json(['error' => 'Các giá trị của wareHouse trong LSX không giống nhau!'], 422);
+                    return response()->json(['error' => 'Các giá trị warehouse trong LSX không đồng nhất nên không thể ghi nhận!'], 422);
                 }
             }
         }
