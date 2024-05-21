@@ -533,7 +533,7 @@ class QCController extends Controller
                 ], 
             );
             // check ErrorData not null để ap dung cho cac giao dich cu
-            if($data->ErrorData)
+            if($data->ErrorData != null)
             {
                 $dataIssues= json_decode($data->ErrorData, true);
                 // Lấy dữ liệu  tu notireceipt
