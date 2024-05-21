@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
-import PalletCard from "../../components/PalletCard";
+import PalletCard from "../../../components/PalletCard";
 import { HiPlus, HiOutlineSearch, HiOutlineClock } from "react-icons/hi";
 import { RiInboxArchiveFill } from "react-icons/ri";
 import axios from "axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
-import palletsApi from "../../api/palletsApi";
+import palletsApi from "../../../api/palletsApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import moment from "moment";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../../assets/styles/datepicker.css";
+import "../../../assets/styles/datepicker.css";
 import { format, startOfDay, endOfDay } from "date-fns";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/src/sweetalert2.scss";
-import BigSelect from "../../components/Select/BigSelect";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
+import BigSelect from "../../../components/Select/BigSelect";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
 import {
     Modal,
     ModalOverlay,

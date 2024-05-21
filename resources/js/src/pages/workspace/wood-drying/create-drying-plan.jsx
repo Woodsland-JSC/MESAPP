@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
-import BOWCard from "../../components/BOWCard";
+import BOWCard from "../../../components/BOWCard";
 import { HiPlus } from "react-icons/hi";
 import {
     Modal,
@@ -17,13 +17,13 @@ import {
 import { Spinner } from "@chakra-ui/react";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
-import palletsApi from "../../api/palletsApi";
+import palletsApi from "../../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import moment from "moment";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();

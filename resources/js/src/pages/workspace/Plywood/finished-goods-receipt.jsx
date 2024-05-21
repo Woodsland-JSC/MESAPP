@@ -309,33 +309,6 @@ function PlywoodFinishedGoodsReceipt() {
         }
     };
 
-    // useEffect(() => {
-    //     const getAllGroup = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const res = await productionApi.getGroup();
-    //             const options = res.map((item) => ({
-    //                 value: item.Code,
-    //                 label: item.Name + " - " + item.Code,
-    //             }));
-    //             setGroupList(res);
-    //             setGroupListOptions(options);
-    //             // setSelectedGroup(options[0]);
-    //             groupSelectRef?.current?.setValue(options[0]);
-    //         } catch (error) {
-    //             toast.error("Có lỗi xảy ra khi load danh sách tổ.");
-    //             console.error(error);
-    //         }
-    //         setLoading(false);
-    //     };
-    //     getAllGroup();
-    //     document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
-    //     return () => {
-    //         document.title = "Woodsland";
-    //         document.body.classList.remove("body-no-scroll");
-    //     };
-    // }, []);
-
     useEffect(() => {
         if (loading) {
             document.body.classList.add("body-no-scroll");

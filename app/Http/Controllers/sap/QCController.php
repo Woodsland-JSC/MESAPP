@@ -538,7 +538,7 @@ class QCController extends Controller
                 $dataIssues= json_decode($data->ErrorData, true);
                 // Lấy dữ liệu  tu notireceipt
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $this->IssueQC($dataIssue['SubItemCode'],$dataIssue['Qty'],$dataIssues['SubItemWhs'],Auth::user()->branch);
+                    $this->IssueQC($dataIssue['SubItemCode'],(float)$dataIssue['BaseQty']*(float)$request->Qty,$dataIssues['SubItemWhs'],Auth::user()->branch);
                 }
             }    
             DB::commit();
@@ -726,8 +726,8 @@ class QCController extends Controller
              ], 500);
          }
      }
-     function IssueQC($ItemCode,$Quantity,$WarehouseCode)
+     function IssueQC($ItemCode,$Quantity,$WarehouseCode,$branch)
      {
-        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode);
+        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode,$branch);
      }
 }

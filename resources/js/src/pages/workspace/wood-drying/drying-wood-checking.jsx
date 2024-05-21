@@ -1,19 +1,17 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
-import BOWCard from "../../components/BOWCard";
-import palletsApi from "../../api/palletsApi";
+import BOWCard from "../../../components/BOWCard";
+import palletsApi from "../../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { addDays, format, add } from "date-fns";
 import moment from "moment";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
 
-function KilnChecking() {
+function DryingWoodChecking() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
-
     const { user } = useAppContext();
 
     useEffect(() => {
@@ -36,9 +34,9 @@ function KilnChecking() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center bg-transparent ">
+            <div className="flex justify-center bg-transparent">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
+                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -63,10 +61,10 @@ function KilnChecking() {
                                             viewBox="0 0 6 10"
                                         >
                                             <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
+                                                  stroke="currentColor"
+                                                  strokeLinecap="round"
+                                                  strokeLinejoin="round"
+                                                  strokeWidth="2"
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
@@ -84,7 +82,7 @@ function KilnChecking() {
 
                     {/* Header */}
                     <div className="text-3xl font-bold mb-6">
-                        Kiểm tra lò sấy
+                        Đánh giá mẻ sấy
                     </div>
 
                     {/* Controller */}
@@ -124,45 +122,39 @@ function KilnChecking() {
                     </div> */}
 
                     {/* Content */}
-                    {/* {(bowCards.Status === 1).length > 0 &&
-                    (bowCards.Status === 2).length > 0 ? ( */}
+                    {/* {(bowCards.Status === 4).length > 0 && (bowCards.Status === 3).length > 0 ? ( */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards &&
-                            bowCards?.length > 0 &&
-                            bowCards
-                                ?.map(
-                                    (bowCard, index) =>
-                                        ((bowCard.Status === 0 ||
-                                            bowCard.Status === 1 ||
-                                            bowCard.Status === 2 ) && bowCard.plant === user.plant) && (
-                                            <BOWCard
-                                                key={index}
-                                                planID={bowCard.PlanID}
-                                                status={bowCard.Status}
-                                                batchNumber={bowCard.Code}
-                                                kilnNumber={bowCard.Oven}
-                                                thickness={bowCard.Method}
-                                                purpose={bowCard.Reason}
-                                                finishedDate={moment(
-                                                    bowCard?.created_at
-                                                )
-                                                    .add(bowCard?.Time, "days")
-                                                    .format(
-                                                        "YYYY-MM-DD HH:mm:ss"
-                                                    )}
-                                                palletQty={bowCard.TotalPallet}
-                                                weight={bowCard.Mass}
-                                                isChecked={bowCard.Checked}
-                                                isReviewed={bowCard.Review}
-                                            />
-                                        )
-                                )
-                                .reverse()}
+                        {bowCards
+                            ?.map(
+                                (bowCard, index) =>
+                                    ((bowCard.Status === 3 ||
+                                        bowCard.Status === 4) && bowCard.plant === user.plant) && (
+                                        <BOWCard
+                                            key={index}
+                                            planID={bowCard.PlanID}
+                                            status={bowCard.Status}
+                                            batchNumber={bowCard.Code}
+                                            kilnNumber={bowCard.Oven}
+                                            thickness={bowCard.Method}
+                                            purpose={bowCard.Reason}
+                                            finishedDate={moment(
+                                                bowCard?.created_at
+                                            )
+                                                .add(bowCard?.Time, "days")
+                                                .format("YYYY-MM-DD HH:mm:ss")}
+                                            palletQty={bowCard.TotalPallet}
+                                            weight={bowCard.Mass}
+                                            isChecked={bowCard.Checked}
+                                            isReviewed={bowCard.Review}
+                                        />
+                                    )
+                            )
+                            .reverse()}
                     </div>
                     {/* ) : (
                         <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">
-                            Tiến trình hiện tại không có hoạt động nào.
-                        </div>
+                             Tiến trình hiện tại không có hoạt động nào.
+                      </div>
                     )} */}
                 </div>
             </div>
@@ -171,4 +163,4 @@ function KilnChecking() {
     );
 }
 
-export default KilnChecking;
+export default DryingWoodChecking;

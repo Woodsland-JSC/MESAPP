@@ -1,39 +1,8 @@
 import React, { useEffect, useState, useRef } from "react"; 
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
 import {
-    // Step,
-    // StepDescription,
-    // StepIcon,
-    // StepIndicator,
-    // StepNumber,
-    // StepSeparator,
-    // StepStatus,
-    // StepTitle,
-    // Stepper,
-    // Box,
-    // Modal,
-    // ModalOverlay,
-    // ModalContent,
-    // ModalHeader,
-    // ModalFooter,
-    // ModalBody,
-    // ModalCloseButton,
-    // Button,
-    // Card,
-    // CardHeader,
-    // CardBody,
-    // CardFooter,
-    // Heading,
-    // Stack,
-    // StackDivider,
-    // NumberInput,
-    // NumberInputField,
-    // NumberInputStepper,
-    // NumberIncrementStepper,
-    // NumberDecrementStepper,
-    // useSteps,
     AlertDialog,
     AlertDialogBody,
     AlertDialogFooter,
@@ -71,12 +40,11 @@ import { HiMiniBellAlert } from "react-icons/hi2";
 import Select, { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import toast from "react-hot-toast";
-import productionApi from "../../api/productionApi";
-import FinishedGoodsIllustration from "../../assets/images/wood-receipt-illustration.png";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
-import ItemInput from "../../components/ItemInput";
-import AwaitingReception from "../../components/AwaitingReception";
+import productionApi from "../../../api/productionApi";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
+import ItemInput from "../../../components/ItemInput";
+import AwaitingReception from "../../../components/AwaitingReception";
 
 
 const steps = [

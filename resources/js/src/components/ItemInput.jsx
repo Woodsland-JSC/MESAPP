@@ -115,6 +115,7 @@ const ItemInput = ({
         ItemName: "",
         SubItemCode: "",
         SubItemName: "",
+        SubItemBaseQty:"",
         OnHand: ""
     });
     const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
@@ -206,14 +207,14 @@ const ItemInput = ({
                   SubItemWhs: selectedItemDetails.SubItemWhs,
                   SubItemQty: selectedItemDetails.stock.map((item) => ({
                       SubItemCode: item.SubItemCode,
-                      Qty: item.BaseQty * faultyAmount,
+                      BaseQty: item.BaseQty,
                   })),
               }
             : {
                 SubItemWhs: selectedItemDetails.SubItemWhs,
                 SubItemQty: {
                     SubItemCode: selectedFaultItem.SubItemCode,
-                    Qty: faultyAmount,
+                    BaseQty: selectedFaultItem.SubItemBaseQty,
                 }
             };
 
@@ -256,6 +257,7 @@ const ItemInput = ({
                             ItemName: "",
                             SubItemCode: "",
                             SubItemName: "",
+                            SubItemBaseQty: "",
                             OnHand: "", 
                         });
                         setIsItemCodeDetech(false);
@@ -1073,6 +1075,7 @@ const ItemInput = ({
                                                             ItemName: "",
                                                             SubItemCode:"",
                                                             SubItemName:"",
+                                                            SubItemBaseQty: "",
                                                             OnHand: "",
                                                         });
                                                         setFaults((prev) => ({
@@ -1103,6 +1106,7 @@ const ItemInput = ({
                                                                         ItemName: choosenItem.ChildName,
                                                                         SubItemCode:"",
                                                                         SubItemName:"",
+                                                                        SubItemBaseQty: "",
                                                                         OnHand: "",
                                                                     });
                                                                     setIsItemCodeDetech(true);
@@ -1127,6 +1131,7 @@ const ItemInput = ({
                                                                         ItemName: "",
                                                                         SubItemCode:item.SubItemCode,
                                                                         SubItemName:item.SubItemName,
+                                                                        SubItemBaseQty: item.BaseQty,
                                                                         OnHand:item.OnHand
                                                                     });
                                                                     setIsItemCodeDetech(false);
@@ -1210,6 +1215,7 @@ const ItemInput = ({
                                         ItemCode:"",
                                         SubItemName:"",
                                         SubItemCode:"",
+                                        SubItemBaseQty:"",
                                         OnHand: "",
                                     })
                                     setFaultyAmount(null);

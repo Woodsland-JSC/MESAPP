@@ -1,23 +1,19 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import Layout from "../../layouts/layout";
+import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
-import BOWCard from "../../components/BOWCard";
-import palletsApi from "../../api/palletsApi";
+import BOWCard from "../../../components/BOWCard";
+import palletsApi from "../../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { addDays, format, add } from "date-fns";
 import moment from "moment";
-import Loader from "../../components/Loader";
-import useAppContext from "../../store/AppContext";
+import Loader from "../../../components/Loader";
+import useAppContext from "../../../store/AppContext";
 
-function LoadIntoKiln() {
+function Kiln() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
 
     const { user } = useAppContext();
-
-    // Mini Loading When Loading Into Kiln
-    const [miniLoading, setMiniLoading] = useState(false);
 
     useEffect(() => {
         palletsApi
@@ -27,8 +23,6 @@ function LoadIntoKiln() {
                 console.log("1. Load danh sách BOWCard:", response);
 
                 setBowCards(response || []);
-
-                console.log("hello: ", bowCards);
             })
             .catch((error) => {
                 console.error("Error fetching BOWCard list:", error);
@@ -41,9 +35,9 @@ function LoadIntoKiln() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex justify-center bg-transparent">
+            <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
+                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -86,17 +80,16 @@ function LoadIntoKiln() {
                             </ol>
                         </nav>
                     </div>
-
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Vào lò</div>
+                    <div className="text-3xl font-bold mb-6">Lò sấy</div>
 
                     {/* Controller */}
                     {/* <div className=" my-4 mb-6 xl:w-full">
                         <label
-                            htmlFor="search"
+                            for="search"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
                         >
-                            Tìm kiếm
+                            Search
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -126,42 +119,45 @@ function LoadIntoKiln() {
                         </div>
                     </div> */}
 
-                    {/* BOWCard List */}
-                    {/* {(bowCards.Status === 0).length > 0 && (bowCards.Status === 1).length > 0 ? ( */}
+                    {/* Content */}
+                    {/* {(bowCards.Status === 2).length > 0 &&
+                    (bowCards.Status === 3).length > 0 ? ( */}
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards &&
-                            bowCards.length > 0 &&
-                            bowCards
-                                ?.map(
-                                    (bowCard, index) =>
-                                        ((bowCard.Status === 1 ||
-                                            bowCard.Status === 0) && bowCard.plant === user.plant) && (
-                                            <BOWCard
-                                                key={index}
-                                                planID={bowCard.PlanID}
-                                                status={bowCard.Status}
-                                                batchNumber={bowCard.Code}
-                                                kilnNumber={bowCard.Oven}
-                                                thickness={bowCard.Method}
-                                                purpose={bowCard.Reason}
-                                                finishedDate={moment(
-                                                    bowCard?.created_at
-                                                )
-                                                    .add(bowCard?.Time, "days")
-                                                    .format(
-                                                        "YYYY-MM-DD HH:mm:ss"
-                                                    )}
-                                                palletQty={bowCard.TotalPallet}
-                                                weight={bowCard.Mass}
-                                                isChecked={bowCard.Checked}
-                                                isReviewed={bowCard.Review}
-                                            />
-                                        )
-                                )
-                                .reverse()}
+                        {bowCards
+                            ?.map(
+                                (bowCard, index) =>
+                                    (bowCard.Status === 2 || bowCard.Status === 3 ||
+                                        (bowCard.Status === 3 &&
+                                            bowCard.Review === 0) ||
+                                        (bowCard.Status === 3 &&
+                                            bowCard.Review === 1)) &&
+                                    bowCard.plant === user.plant && (
+                                        <BOWCard
+                                            key={index}
+                                            planID={bowCard.PlanID}
+                                            status={bowCard.Status}
+                                            batchNumber={bowCard.Code}
+                                            kilnNumber={bowCard.Oven}
+                                            thickness={bowCard.Method}
+                                            purpose={bowCard.Reason}
+                                            finishedDate={moment(
+                                                bowCard?.created_at
+                                            )
+                                                .add(bowCard?.Time, "days")
+                                                .format("YYYY-MM-DD HH:mm:ss")}
+                                            palletQty={bowCard.TotalPallet}
+                                            weight={bowCard.Mass}
+                                            isChecked={bowCard.Checked}
+                                            isReviewed={bowCard.Review}
+                                        />
+                                    )
+                            )
+                            .reverse()}
                     </div>
-                    {/* ) : (
-                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>
+                    {/* ) : ( 
+                    <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">
+                        Tiến trình hiện tại không có hoạt động nào.
+                    </div>
                     )} */}
                 </div>
             </div>
@@ -170,4 +166,4 @@ function LoadIntoKiln() {
     );
 }
 
-export default LoadIntoKiln;
+export default Kiln;

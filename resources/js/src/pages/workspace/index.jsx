@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { MdPlaylistAddCheckCircle } from "react-icons/md";
-import { FaPallet, FaCalendarCheck } from "react-icons/fa";
+import { FaPallet} from "react-icons/fa";
+import { FaCalendarCheck } from "react-icons/fa6";
+import { HiSearchCircle, HiBadgeCheck } from "react-icons/hi";
 import {
     HiSquare3Stack3D,
     HiMiniMagnifyingGlassCircle,
-    HiMagnifyingGlassCircle,
+    HiClipboardDocumentList,
     HiHomeModern,
     HiRectangleStack,
     HiHandThumbUp,
-    HiClipboardDocumentList,
     HiMiniArchiveBoxArrowDown,
     HiMiniBanknotes,
     HiArchiveBoxArrowDown,
@@ -156,7 +157,7 @@ function Workspace() {
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiClipboardDocumentList className="xl:w-9 xl:h-9 lg:w-9 lg:h-9 md:w-9 md:h-9 w-10 h-10" />
+                                                                <HiClipboardDocumentList className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -243,7 +244,7 @@ function Workspace() {
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiMiniMagnifyingGlassCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                <HiSearchCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -374,7 +375,7 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "CBG"
                                             ) ? (
-                                                <Link to="/workspace/wood-processing/finished-goods-receipt">
+                                                <Link to="/workspace/wood-working/finished-goods-receipt">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
@@ -414,11 +415,11 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "QCCBG"
                                             ) ? (
-                                                <Link to="/workspace/wood-producting-qc">
+                                                <Link to="/workspace/wood-working/qc">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <FaCalendarCheck className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                <HiBadgeCheck className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
@@ -453,10 +454,10 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "VCN"
                                             ) ? (
-                                                <Link to="#">
+                                                <Link to="/workspace/plywood/finished-good-receipts">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#eae7ff] text-violet-600">
                                                                 <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
@@ -492,11 +493,11 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "QCVCN"
                                             ) ? (
-                                                <Link to="#">
+                                                <Link to="/workspace/plywood/qc">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#eae7ff] text-violet-600">
+                                                                <HiBadgeCheck  className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
                                                             </div>
                                                             <div>
                                                                 <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
