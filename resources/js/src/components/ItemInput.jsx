@@ -212,10 +212,10 @@ const ItemInput = ({
               }
             : {
                 SubItemWhs: selectedItemDetails.SubItemWhs,
-                SubItemQty: {
+                SubItemQty: [{
                     SubItemCode: selectedFaultItem.SubItemCode,
                     BaseQty: selectedFaultItem.SubItemBaseQty,
-                }
+                }]
             };
 
             try {
