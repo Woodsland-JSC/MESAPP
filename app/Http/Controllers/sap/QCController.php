@@ -13,10 +13,10 @@ use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
 use App\Models\plandryings;
 use App\Models\SanLuong;
-use App\Models\Warehouse;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
 use App\Jobs\issueProduction;
+use App\Jobs\HistoryQC;
 use Illuminate\Support\Facades\Http;
 class QCController extends Controller
 {
@@ -414,6 +414,7 @@ class QCController extends Controller
                 'b.SubItemCode as SubItemCode',
                 'b.team as NextTeam',
                 'b.openQty',
+                'b.IsPushSAP',
                 'b.ErrorData as ErrorData'
             )
             ->where('b.id', $request->id)
@@ -458,7 +459,7 @@ class QCController extends Controller
         $huongxuly= $request->huongxuly['label'];
         $teamBack= $request->teamBack['value']??'';
         $rootCause= $request->rootCause['value']??'';
-        $subCode= $request->subCode ??'';
+        $subCode= $request->subCode['value'] ??'';
 
         $HistorySL=HistorySL::where('ObjType',59)->get()->count();
         $body = [
@@ -505,6 +506,7 @@ class QCController extends Controller
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
+           
             SanLuong::where('id', $data->id)->update(
                 [
                     'Status' =>  $closed,
@@ -516,6 +518,7 @@ class QCController extends Controller
             'ObjType' =>  59,
             'DocEntry' => $res['DocEntry'],
             'confirmBy' => Auth::user()->id,
+            'isPushSAP' => 1,
             'confirm_at' => now()->format('YmdHmi')]);
             HistorySL::create(
                 [
@@ -540,6 +543,30 @@ class QCController extends Controller
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
                     $this->IssueQC($dataIssue['SubItemCode'],(float)$dataIssue['BaseQty']*(float)$request->Qty,$dataIssues['SubItemWhs'],Auth::user()->branch);
                 }
+                if ($data->IsPushSAP == 0) {
+                    $type='I';
+                    $qtypush=$data->RejectQty;
+                 }
+                 else
+                 {
+                     $type='U';
+                     $qtypush=$request->Qty;
+                 }
+                 HistoryQC::dispatch(
+                     $type,$request->id,
+                     $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                     $qtypush,
+                     $dataIssues['SubItemWhs'],
+                     $qtypush-$request->Qty,
+                     'CBG',
+                     $data->Team,
+                     $loailoi,
+                     $huongxuly,
+                     $rootCause,
+                     $subCode,
+                     $request->note,
+                     $teamBack 
+                 );
             }    
             DB::commit();
             return response()->json('success', 200);
@@ -727,6 +754,10 @@ class QCController extends Controller
          }
      }
      function IssueQC($ItemCode,$Quantity,$WarehouseCode,$branch)
+     {
+        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode,$branch);
+     }
+     function logToTableSAP($ItemCode,$Quantity,$WarehouseCode,$branch)
      {
         issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode,$branch);
      }
