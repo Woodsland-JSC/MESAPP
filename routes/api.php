@@ -146,3 +146,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
 include('qc.php');
 // include v2 che bien go
 include('v2/cbg.php');
+include('vcn.php');
