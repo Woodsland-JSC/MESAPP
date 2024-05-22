@@ -424,7 +424,7 @@ class ProductionController extends Controller
         // dd($quantity);
 
         // Code mới (thêm "stock")
-        $querystock = 'SELECT * FROM UV_SOLUONGTON_V2 WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
+        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
         $stmtstock = odbc_prepare($conDB, $querystock);
 
         if (!$stmtstock) {
