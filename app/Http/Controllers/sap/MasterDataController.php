@@ -517,7 +517,6 @@ class MasterDataController extends Controller
 
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             }
-
             // Kết nối đến cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
 
