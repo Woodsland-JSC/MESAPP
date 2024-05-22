@@ -454,7 +454,7 @@ function Workspace() {
                                             {user.permissions?.includes(
                                                 "VCN"
                                             ) ? (
-                                                <Link to="/workspace/plywood/finished-good-receipts">
+                                                <Link to="/workspace/plywood/finished-goods-receipt">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
                                                             <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#eae7ff] text-violet-600">

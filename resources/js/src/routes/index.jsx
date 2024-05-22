@@ -159,7 +159,7 @@ function AppRoutes() {
                     <Route
                         path="/workspace/plywood/finished-goods-receipt"
                         element={
-                            <ProtectedRoute>
+                            <ProtectedRoute permissionsRequired={['VCN']}>
                                 <PlywoodFinishedGoodsReceipt />
                             </ProtectedRoute>
                         }
@@ -168,7 +168,7 @@ function AppRoutes() {
                         path="/workspace/plywood/qc"
                         element={
                             <ProtectedRoute permissionsRequired={['QCVCN']}>
-                                <WoodProductingQC />
+                                <PlywoodQC />
                             </ProtectedRoute>
                         }
                     />

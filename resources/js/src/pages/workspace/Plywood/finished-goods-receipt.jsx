@@ -47,10 +47,405 @@ import ItemInput from "../../../components/ItemInput";
 import AwaitingReception from "../../../components/AwaitingReception";
 import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 
+const steps = [
+    { title: "Bước 1", description: "Chọn loại sản phẩm" },
+    { title: "Bước 2", description: "Kiểm tra thông tin" },
+    { title: "Bước 3", description: "Nhập số lượng sản phẩm" },
+];
+
+var waitingReceiptNotifications = [
+    {
+        id: 70152702,
+        subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
+        thickness: 15,
+        width: 367.5,
+        length: 740,
+        amount: 2,
+        createdDate: new Date(),
+        createdBy: {
+            id: 54,
+            last_name: "Nguyen",
+            first_name: "An",
+        },
+        fromGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
+    },
+];
+
+var exampleData = [
+    {
+        id: 1,
+        itemName: "TYBYN bar table 74x74x102 acacia/black",
+        previousGroup: null,
+        fromGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
+        nextGroup: {
+            id: "TH-X3TC1",
+            no: 4,
+            name: "Tổ Tinh chế 1 X3",
+        },
+        itemDetails: [
+            {
+                id: 70152702,
+                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
+                thickness: 15,
+                width: 367.5,
+                length: 740,
+                stockQuantity: 420,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2344TP-01",
+                        quantity: 960,
+                        done: 719,
+                        faults: 0,
+                        processing: 241,
+                    },
+                    {
+                        command: "TH2344TP-02",
+                        quantity: 800,
+                        done: 400,
+                        faults: 2,
+                        processing: 398,
+                    },
+                ],
+                totalQuantity: 1760,
+                totalDone: 1119,
+                totalFaults: 2,
+                totalProcessing: 641,
+            },
+            {
+                id: 70152703,
+                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
+                thickness: 30,
+                width: 35,
+                length: 40,
+                stockQuantity: 0,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2344TP-01",
+                        quantity: 500,
+                        done: 300,
+                        faults: 1,
+                        processing: 199,
+                    },
+                ],
+                totalQuantity: 500,
+                totalDone: 300,
+                totalFaults: 1,
+                totalProcessing: 199,
+            },
+        ],
+    },
+    {
+        id: 2,
+        itemName: "TJUSIG hanger 78",
+        previousGroup: null,
+        fromGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
+        nextGroup: {
+            id: "TH-X3TC2",
+            no: 4,
+            name: "Tổ Tinh chế 2 X3",
+        },
+        itemDetails: [
+            {
+                id: 70421102,
+                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
+                thickness: 30,
+                width: 35,
+                length: 40,
+                stockQuantity: 20,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2345TP-02",
+                        quantity: 10800,
+                        done: 4494,
+                        faults: 0,
+                        processing: 6306,
+                    },
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 4800,
+                        done: 0,
+                        faults: 0,
+                        processing: 4800,
+                    },
+                ],
+                totalQuantity: 15600,
+                totalDone: 4494,
+                totalFaults: 0,
+                totalProcessing: 11106,
+            },
+            {
+                id: 70421103,
+                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
+                thickness: 30,
+                width: 30,
+                length: 780,
+                stockQuantity: 630,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2345TP-02",
+                        quantity: 5400,
+                        done: 1107,
+                        faults: 0,
+                        processing: 4293,
+                    },
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 2400,
+                        done: 0,
+                        faults: 0,
+                        processing: 2400,
+                    },
+                ],
+                totalQuantity: 7800,
+                totalDone: 1107,
+                totalFaults: 0,
+                totalProcessing: 6693,
+            },
+            {
+                id: 70421104,
+                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
+                thickness: 26,
+                width: 26,
+                length: 115,
+                stockQuantity: 0,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 14400,
+                        done: 0,
+                        faults: 0,
+                        processing: 14400,
+                    },
+                ],
+                totalQuantity: 14400,
+                totalDone: 0,
+                totalFaults: 0,
+                totalProcessing: 14400,
+            },
+        ],
+    },
+];
+
+var exampleData1 = [
+    {
+        id: 1,
+        itemName: "TYBYN bar table 74x74x102 acacia/black",
+        previousGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
+        fromGroup: {
+            id: "TH-X3TC1",
+            no: 4,
+            name: "Tổ Tinh chế 1 X3",
+        },
+        nextGroup: {
+            id: "TH-X3S",
+            no: 6,
+            name: "Tổ Sơn X3",
+        },
+        itemDetails: [
+            {
+                id: 70152702,
+                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
+                thickness: 15,
+                width: 367.5,
+                length: 740,
+                stockQuantity: 1000,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2344TP-01",
+                        quantity: 960,
+                        done: 719,
+                        faults: 0,
+                        processing: 241,
+                    },
+                    {
+                        command: "TH2344TP-02",
+                        quantity: 800,
+                        done: 400,
+                        faults: 2,
+                        processing: 398,
+                    },
+                ],
+                totalQuantity: 1760,
+                totalDone: 1119,
+                totalFaults: 2,
+                totalProcessing: 641,
+            },
+            {
+                id: 70152703,
+                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
+                thickness: 15,
+                width: 367.5,
+                length: 740,
+                stockQuantity: 0,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2344TP-01",
+                        quantity: 500,
+                        done: 300,
+                        faults: 1,
+                        processing: 199,
+                    },
+                ],
+                totalQuantity: 500,
+                totalDone: 300,
+                totalFaults: 1,
+                totalProcessing: 199,
+            },
+        ],
+    },
+];
+
+var exampleData2 = [
+    {
+        id: 2,
+        itemName: "TJUSIG hanger 78",
+        previousGroup: {
+            id: "TH-X3SC",
+            no: 3,
+            name: "Tổ Sơ chế X3",
+        },
+        fromGroup: {
+            id: "TH-X3TC2",
+            no: 4,
+            name: "Tổ Tinh chế 2 X3",
+        },
+        nextGroup: {
+            id: "TH-X3S",
+            no: 6,
+            name: "Tổ Sơn X3",
+        },
+        itemDetails: [
+            {
+                id: 70421102,
+                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
+                thickness: 30,
+                width: 35,
+                length: 40,
+                stockQuantity: 1000,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2345TP-02",
+                        quantity: 10800,
+                        done: 4494,
+                        faults: 0,
+                        processing: 6306,
+                    },
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 4800,
+                        done: 0,
+                        faults: 0,
+                        processing: 4800,
+                    },
+                ],
+                totalQuantity: 15600,
+                totalDone: 4494,
+                totalFaults: 0,
+                totalProcessing: 11106,
+            },
+            {
+                id: 70421103,
+                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
+                thickness: 30,
+                width: 30,
+                length: 780,
+                stockQuantity: 630,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2345TP-02",
+                        quantity: 5400,
+                        done: 1107,
+                        faults: 0,
+                        processing: 4293,
+                    },
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 2400,
+                        done: 0,
+                        faults: 0,
+                        processing: 2400,
+                    },
+                ],
+                totalQuantity: 7800,
+                totalDone: 1107,
+                totalFaults: 0,
+                totalProcessing: 6693,
+            },
+            {
+                id: 70421104,
+                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
+                thickness: 26,
+                width: 26,
+                length: 115,
+                stockQuantity: 0,
+                pendingErrors: [],
+                pendingReceipts: [],
+                returns: [],
+                productionCommands: [
+                    {
+                        command: "TH2346TP-02",
+                        quantity: 14400,
+                        done: 0,
+                        faults: 0,
+                        processing: 14400,
+                    },
+                ],
+                totalQuantity: 14400,
+                totalDone: 0,
+                totalFaults: 0,
+                totalProcessing: 14400,
+            },
+        ],
+    },
+];
+
 function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
-    const groupSelectRef = useRef();
     // const { loading, setLoading } = useAppContext();
+    const groupSelectRef = useRef();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -63,84 +458,33 @@ function PlywoodFinishedGoodsReceipt() {
         onOpen: onModalOpen,
         onClose: onModalClose,
     } = useDisclosure();
-    const {
-        isOpen: isErrorModalOpen,
-        onOpen: onErrorModalOpen,
-        onClose: onErrorModalClose,
-    } = useDisclosure();
 
+    // const { activeStep, setActiveStep } = useSteps({
+    //     index: 0,
+    //     count: steps.length,
+    // });
+    // const { isOpen, onOpen, onClose } = useDisclosure();
+
+    // const [awaitingReception, setAwaitingReception] = useState({
+    //     "TH-X3SC": [],
+    //     "TH-X3TC1": [],
+    //     "TH-X3TC2": [],
+    //     "TH-X3S": [],
+    // });
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [finishedProductData, setFinishedProductData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingData, setLoadingData] = useState(false);
 
-    const [awaitingErrorReception, setAwaitingErrorReception] = useState({
-        "CH-LVL-TV": [],
-        "CH-PLY-XV": [],
-        "CH-LVL-HT": [
-            {
-                itemName: "Ván LVL 34",
-                command: "VCN-CH-LVL-04.5.23-LVL34.2m7",
-                thickness: 15.2,
-                width: 1220,
-                length: 2440,
-                amount: 1200,
-                type: "Hàng chờ sửa",
-                method: "Hàng chờ sửa",
-                createdDate: "2023-12-11T00:48:22.854Z",
-                createdBy: {
-                    id: 1,
-                    last_name: "Phạm Phương",
-                    first_name: "Thảo",
-                },
-            },
-            {
-                itemName: "Ván cốt WN",
-                command: "VCN-CH-WN-22.9.23-LVL34.2m7",
-                thickness: 15,
-                width: 1220,
-                length: 2440,
-                amount: 5,
-                type: "Tách lớp",
-                method: "Hạ cấp loại 2",
-                createdDate: "2023-12-11T00:48:22.854Z",
-                createdBy: {
-                    id: 1,
-                    last_name: "Hà Thị Bích",
-                    first_name: "Thuỳ",
-                },
-            },
-            {
-                itemName: "Ván LVL 34",
-                command: "VCN-CH-LVL-01.10.23-LVL34.2m7",
-                thickness: 15,
-                width: 1220,
-                length: 2440,
-                amount: 208,
-                type: "Hàng chờ sửa",
-                method: "Hàng chờ sửa",
-                createdDate: "2023-12-11T00:48:22.854Z",
-                createdBy: {
-                    id: 1,
-                    last_name: "Phạm Phương",
-                    first_name: "Thảo",
-                },
-            },
-        ],
-        "CH-PLY-LL": [],
-        "CH-PLY-TV": [],
-        "CH-LVL-KTP": [],
-        "CH-PLY-LV": [],
-        "CH-PLY-KVC": [],
-    });
-
-    const [isQC, setIsQC] = useState([]);
     const [currentData, setCurrentData] = useState(exampleData);
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
 
-    const [selectedGroup, setSelectedGroup] = useState(groupListOptions[0]);
+    const [selectedGroup, setSelectedGroup] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const handleReceiptFromChild = (data, receipts) => {
@@ -155,15 +499,13 @@ function PlywoodFinishedGoodsReceipt() {
             TO: selectedGroup.value,
         };
         getDataFollowingGroup(params);
-        
     };
 
-    const handleConfirmReceipt = (index) => {
+    const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            
-            setAwaitingReception((prev) => (
-                prev.filter(item => item.id !== id)
-            ));
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
             toast.success("Ghi nhận thành công.");
         }
         if (awaitingReception.length <= 0) {
@@ -171,118 +513,40 @@ function PlywoodFinishedGoodsReceipt() {
         }
     };
 
-    const handleConfirmErrorReceipt = (index) => {
+    const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            let receiptSubItem = awaitingErrorReception[selectedGroup.value][index];
-
-            switch (selectedGroup.value) {
-                case "CH-LVL-TV":
-                    exampleData = exampleData.map((item) => {
-                        if (item?.command === receiptSubItem?.command) {
-                            return {
-                                ...item,
-                                
-                                totalBackError:
-                                    Number(item.totalBackError) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-                        return item;
-                    });
-
-                    setCurrentData(exampleData);
-                    break;
-                case "CH-LVL-HT":
-                    exampleData1 = exampleData1.map((item) => {
-                        if (item?.command === receiptSubItem?.command) {
-                            return {
-                                ...item,
-                                
-                                totalBackError:
-                                    Number(item.totalBackError) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-
-                        return item;
-                    });
-                    console.log("Final: ", exampleData1);
-                    setCurrentData(exampleData1);
-                    break;
-                case "CH-LVL-KTP":
-                    exampleData2 = exampleData.map((item) => {
-                        if (item?.command === receiptSubItem?.command) {
-                            return {
-                                ...item,
-                                totalBackError:
-                                    Number(item.totalBackError) +
-                                    Number(receiptSubItem.amount),
-                            };
-                        }
-                        return item;
-                    });
-
-                    setCurrentData(exampleData2);
-                    break;
-            }
-
-            console.log("INdex: ", index)
-
-            setAwaitingErrorReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingErrorReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                console.log("Chỗ này ra gì nhỉ? ", updatedGroup);
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
-        }
-        toast.success("Xác nhận thành công.");
-        onModalClose();
-    };
-
-    const handleRejectReceipt = (index, reason) => {
-        if (selectedGroup) {
-            
-            setAwaitingReception((prev) => (
-                prev.filter(item => item.id !== id)
-            ));
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
             toast.success("Huỷ bỏ & chuyển lại thành công.");
+            // setAwaitingReception((prev) => {
+            //     const groupKey = selectedGroup.value;
+            //     const updatedGroup = awaitingReception[groupKey].filter(
+            //         (item, i) => i !== index
+            //     );
+            //     return {
+            //         ...prev,
+            //         [groupKey]: updatedGroup,
+            //     };
+            // });
         }
         if (awaitingReception.length <= 0) {
             onModalClose();
         }
-    };
-
-    const handleRejectErrorReceipt = (index) => {
-        if (selectedGroup) {
-            setAwaitingReception((prev) => {
-                const groupKey = selectedGroup.value;
-                const updatedGroup = awaitingErrorReception[groupKey].filter(
-                    (item, i) => i !== index
-                );
-                return {
-                    ...prev,
-                    [groupKey]: updatedGroup,
-                };
-            });
-        }
-        toast.success("Huỷ bỏ & chuyển lại thành công.");
-        onModalClose();
+        // console.log("Ra index: ", index);
+        // console.log("Thực hiện reject: ", reason);
+        // console.log("Ra example data: ", exampleData);
     };
 
     const onFilterTextBoxChanged = async (e) => {
         const input = e.target.value;
         if (!input) {
             if (selectedGroup) {
-                if (selectedGroup.value == "CH-LVL-TV") {
+                if (selectedGroup.value == "TH-X3SC") {
                     setCurrentData(exampleData);
-                } else if (selectedGroup.value == "CH-LVL-HT") {
+                } else if (selectedGroup.value == "TH-X3TC1") {
                     setCurrentData(exampleData1);
-                } else if (selectedGroup.value == "CH-LVL-KTP") {
+                } else if (selectedGroup.value == "TH-X3TC2") {
                     setCurrentData(exampleData2);
                 } else {
                     setCurrentData([]);
@@ -309,6 +573,49 @@ function PlywoodFinishedGoodsReceipt() {
         }
     };
 
+    const handleBackNavigation = (event) => {
+      if (event.type === 'popstate') {
+        navigate('/workspace?production=true');
+      }
+    };
+  
+    useEffect(() => {
+      window.addEventListener('popstate', handleBackNavigation);
+  
+      return () => {
+        window.removeEventListener('popstate', handleBackNavigation);
+      };
+    }, [navigate]);;
+
+    // New Get All Group
+    useEffect(() => {
+        const getAllGroupWithoutQC = async () => {
+            setLoading(true);
+            try {
+                const res = await productionApi.getAllGroupWithoutQC();
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name + " - " + item.Code,
+                }));
+                setGroupList(res);
+                setGroupListOptions(options);
+                // console.log("New Get All Group: ", options);
+                // setSelectedGroup(options[0]);
+                groupSelectRef?.current?.setValue(options[0]);
+            } catch (error) {
+                toast.error("Có lỗi xảy ra khi load danh sách tổ.");
+                console.error(error);
+            }
+            setLoading(false);
+        };
+        getAllGroupWithoutQC();
+        document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
+        return () => {
+            document.title = "Woodsland";
+            document.body.classList.remove("body-no-scroll");
+        };
+    }, []);
+
     useEffect(() => {
         if (loading) {
             document.body.classList.add("body-no-scroll");
@@ -320,8 +627,7 @@ function PlywoodFinishedGoodsReceipt() {
     const getDataFollowingGroup = async (params) => {
         setLoadingData(true);
         try {
-            const res = await productionApi.getFinishedPlywoodGoodsList(params);
-
+            const res = await productionApi.getFinishedGoodsList(params);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {
@@ -333,6 +639,7 @@ function PlywoodFinishedGoodsReceipt() {
             } else {
                 setAwaitingReception([]);
             }
+            console.log("Data: ", res?.data);
             // setData(res.data);
         } catch (error) {
             toast.error("Có lỗi trong quá trình lấy dữ liệu.");
@@ -343,7 +650,9 @@ function PlywoodFinishedGoodsReceipt() {
     useEffect(() => {
         (async () => {
             if (selectedGroup) {
-                const isQC = groupList.find((group) => group.Code == selectedGroup.value)?.QC;
+                const isQC = groupList.find(
+                    (group) => group.Code == selectedGroup.value
+                )?.QC;
                 if (isQC) {
                     setIsQualityCheck(true);
                 } else {
@@ -354,25 +663,49 @@ function PlywoodFinishedGoodsReceipt() {
                     TO: selectedGroup.value,
                 };
                 getDataFollowingGroup(params);
-                if (selectedGroup.value == "CH-LVL-TV") {
+
+                if (selectedGroup.value == "TH-X3SC") {
                     setCurrentData(exampleData);
-                } else if (selectedGroup.value == "CH-LVL-HT") {
+                } else if (selectedGroup.value == "TH-X3TC1") {
                     setCurrentData(exampleData1);
-                } else if (selectedGroup.value == "CH-LVL-KTP") {
+                } else if (selectedGroup.value == "TH-X3TC2") {
                     setCurrentData(exampleData2);
                 } else {
                     setCurrentData([]);
                 }
                 // setLoadingData(false);
-            } else {
-                const params = {
-                    TO: "TH-X1SC",
-                };
-                getDataFollowingGroup(params);
             }
         })();
     }, [selectedGroup]);
 
+    const searchItems = (data, searchTerm) => {
+        if (!searchTerm) {
+            return data;
+        }
+    
+        const filteredData = [];
+    
+        for (const key in data) {
+            const item = data[key];
+            const filteredDetails = item.Details.filter((detail) => {
+                const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+    
+                // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
+                const searchTermLower = searchTerm.toLowerCase();
+                const subitemLower = subitem.toLowerCase();
+    
+                return subitemLower.includes(searchTermLower);
+            });
+    
+            if (filteredDetails.length > 0) {
+                filteredData[key] = { ...item, Details: filteredDetails };
+            }
+        }
+    
+        return filteredData;
+    };
+
+    const searchResult = searchItems(data, searchTerm);
 
     return (
         <Layout>
@@ -381,7 +714,7 @@ function PlywoodFinishedGoodsReceipt() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4 px-4">
+                    <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -390,7 +723,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             href="#"
                                             className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
-                                            Workspace EDIT
+                                            Workspace
                                         </a>
                                     </div>
                                 </li>
@@ -412,7 +745,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             />
                                         </svg>
                                         <Link
-                                            to="/workspace"
+                                            to="/workspace?production=true"
                                             className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             <div>Quản lý sản xuất</div>
@@ -424,8 +757,8 @@ function PlywoodFinishedGoodsReceipt() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center px-4">
-                        <div className="text-3xl md:text-3xl font-bold">
+                    <div className="flex justify-between mb-4 items-center ">
+                        <div className="text-3xl font-bold ">
                             Nhập sản lượng ván công nghiệp
                         </div>
                     </div>
@@ -462,27 +795,17 @@ function PlywoodFinishedGoodsReceipt() {
                                         <input
                                             type="search"
                                             id="search"
-                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
-                                            onInput={onFilterTextBoxChanged}
+                                            onChange={(e) =>
+                                                setSearchTerm(e.target.value)
+                                            }
                                             required
                                         />
                                     </div>
                                 </div>
                                 {selectedGroup &&
-                                    awaitingErrorReception[selectedGroup?.value]
-                                        ?.length > 0 && (
-                                        <button
-                                            onClick={onErrorModalOpen}
-                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-red-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                        >
-                                            <HiMiniBellAlert className="text-xl" />
-                                            <div className="w-full whitespace-nowrap">
-                                                Thông báo: Có phôi lỗi chờ xử lý
-                                            </div>
-                                        </button>
-                                    )}
-                                {selectedGroup && !loadingData && 
+                                    !loadingData &&
                                     awaitingReception?.length > 0 && (
                                         <button
                                             onClick={onModalOpen}
@@ -490,22 +813,23 @@ function PlywoodFinishedGoodsReceipt() {
                                         >
                                             <HiMiniBellAlert className="text-xl" />
                                             <div className="w-full whitespace-nowrap">
-                                                Thông báo: Có phôi chờ nhận
+                                                Thông báo: Có phôi chờ xác nhận
                                             </div>
                                         </button>
                                     )}
                             </div>
 
-                            <label className="block mb-2 text-md font-medium text-gray-900 mt-4">
+                            <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
                                 Tổ & Xưởng sản xuất
-                            </label>
+                            </div>
                             <Select
                                 // isDisabled={true}
                                 ref={groupSelectRef}
                                 options={groupListOptions}
-                                // defaultValue={groupListOptions[0]}
                                 defaultValue={selectedGroup}
-                                onChange={(value) => setSelectedGroup(value)}
+                                onChange={(value) => {
+                                    setSelectedGroup(value);
+                                }}
                                 placeholder="Tìm kiếm"
                                 className="mt-3 mb-8"
                             />
@@ -516,17 +840,19 @@ function PlywoodFinishedGoodsReceipt() {
                                         <Skeleton height="250px" />
                                         <Skeleton height="250px" />
                                     </Stack>
-                                ) : data.length > 0 ? (
-                                    data.map((item, index) => (
-                                        <PlyWoodItemInput
+                                ) : searchResult.length > 0 ? (
+                                    searchResult.map((item, index) => (
+                                        <ItemInput
                                             data={item}
+                                            MaThiTruong={item.MaThiTruong}
                                             index={index}
                                             key={index}
                                             selectedGroup={selectedGroup}
+                                            searchTerm={searchTerm}
                                             // fatherCode={data}
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
-                                            // isQualityCheck={isQualityCheck}
+                                            isQualityCheck={isQualityCheck}
                                             onReceiptFromChild={
                                                 handleReceiptFromChild
                                             }
@@ -540,7 +866,6 @@ function PlywoodFinishedGoodsReceipt() {
                                         Không có dữ liệu
                                     </span>
                                 )}
-
                             </div>
                         </div>
                     </div>
@@ -549,7 +874,8 @@ function PlywoodFinishedGoodsReceipt() {
             <Modal
                 isCentered
                 isOpen={isModalOpen}
-                size="4xl"
+                size="full"
+                // size=""
                 onClose={onModalClose}
                 scrollBehavior="inside"
             >
@@ -562,15 +888,16 @@ function PlywoodFinishedGoodsReceipt() {
                     </ModalHeader>
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody>
-                        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center ">
+                    <ModalBody className="!p-4">
+                        <div className="flex gap-4 justify-center h-full">
                             {selectedGroup && awaitingReception?.length > 0 ? (
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
                                     {awaitingReception.map((item, index) => (
                                         <AwaitingReception
-                                            type="plywood"
+                                            type="wood-processing"
                                             data={item}
                                             key={index}
+                                            variant="CBG"
                                             index={index}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
@@ -583,49 +910,10 @@ function PlywoodFinishedGoodsReceipt() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex w-full h-full justify-center items-center">Không có dữ liệu</div>
+                                <div className="flex w-full h-full justify-center items-center">
+                                    Không có dữ liệu
+                                </div>
                             )}
-                        </div>
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
-            <Modal
-                isCentered
-                isOpen={isErrorModalOpen}
-                size="4xl"
-                onClose={onErrorModalClose}
-                scrollBehavior="inside"
-            >
-                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-                <ModalContent>
-                    <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
-                            Danh sách phôi lỗi chờ xử lý
-                        </h1>
-                    </ModalHeader>
-                    <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody>
-                        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center ">
-                            {selectedGroup &&
-                                awaitingErrorReception[selectedGroup?.value]
-                                    ?.length > 0 &&
-                                awaitingErrorReception[
-                                    selectedGroup?.value
-                                ].map((item, index) => (
-                                    <AwaitingErrorReception
-                                        type="plywood"
-                                        data={item}
-                                        key={index}
-                                        index={index}
-                                        onConfirmErrorReceipt={
-                                            handleConfirmErrorReceipt
-                                        }
-                                        onRejectErrorReceipt={
-                                            handleRejectErrorReceipt
-                                        }
-                                    />
-                                ))}
                         </div>
                     </ModalBody>
                 </ModalContent>
