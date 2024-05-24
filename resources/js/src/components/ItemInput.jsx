@@ -116,7 +116,8 @@ const ItemInput = ({
         SubItemCode: "",
         SubItemName: "",
         SubItemBaseQty:"",
-        OnHand: ""
+        OnHand: "",
+        WaitingQty: "",
     });
     const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
     const [amount, setAmount] = useState("");
@@ -156,6 +157,7 @@ const ItemInput = ({
                 stock: res.stock,
                 maxQty: res.maxQty,
                 WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
                 
             });
             onModalOpen();
@@ -175,13 +177,18 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
+        console.log((parseInt(selectedFaultItem.OnHand || 0) - ((parseInt(selectedItemDetails.WaitingConfirmQty) * parseInt(selectedFaultItem.SubItemBaseQty)) || 0) - parseInt(selectedFaultItem.WaitingQty || 0)));
+        console.log(selectedItemDetails.WaitingConfirmQty);
+        console.log(parseInt(selectedFaultItem.SubItemBaseQty));
+        console.log(selectedFaultItem.WaitingQty );
+        
         if (amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
             amount >
-            selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty
+            selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty - selectedItemDetails.WaitingQCItemQty
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
@@ -190,11 +197,15 @@ const ItemInput = ({
             toast.error("Số lượng lỗi phải lớn hơn 0");
             onAlertDialogClose();
             return;
+        } else if (selectedFaultItem.ItemCode !== "" && (faultyAmount > selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty - selectedItemDetails.WaitingQCItemQty)) {
+            toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
+            onAlertDialogClose();
+            return;
         } else if (selectedFaultItem.SubItemCode === "" && selectedFaultItem.ItemCode === "" && faultyAmount) {
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
-        }  else if (selectedFaultItem.SubItemCode !== "" && faultyAmount > selectedFaultItem.OnHand ) {
+        }  else if (selectedFaultItem.SubItemCode !== "" && (faultyAmount > (parseInt(selectedFaultItem.OnHand || 0) - ((parseInt(selectedItemDetails.WaitingQCItemQty) * parseInt(selectedFaultItem.SubItemBaseQty)) || 0) - parseInt(selectedFaultItem.WaitingQty || 0)))) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận lỗi");
             onAlertDialogClose();
             return;
@@ -259,6 +270,7 @@ const ItemInput = ({
                             SubItemName: "",
                             SubItemBaseQty: "",
                             OnHand: "", 
+                            WaitingQty: "",
                         });
                         setIsItemCodeDetech(false);
                     } else {
@@ -300,7 +312,9 @@ const ItemInput = ({
                 notifications: prev.notifications.filter(
                     (notification) => notification.id !== selectedDelete
                 ),
+                stock: res.stock,
                 WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
             }));
         } catch (error) {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -315,6 +329,9 @@ const ItemInput = ({
         try {
             const payload = {
                 id: selectedError,
+                SPDICH: data.SPDICH,
+                ItemCode: item.ItemChild,
+                TO: item.TO,
             };
             const res = await productionApi.deleteReceiptCBG(payload);
             toast.success("Thành công.");
@@ -323,6 +340,9 @@ const ItemInput = ({
                 notifications: prev.notifications.filter(
                     (notification) => notification.id !== selectedDelete
                 ),
+                stock: res.stock,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,  
             }));
         } catch (error) {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -673,7 +693,7 @@ const ItemInput = ({
                                                                     : "bg-[#155979]"
                                                             } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                         >
-                                                            {item.OnHand.toLocaleString()}
+                                                            {(item.OnHand - item.BaseQty*selectedItemDetails.WaitingQCItemQty - item.WaitingQty).toLocaleString()}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -689,7 +709,8 @@ const ItemInput = ({
                                             {selectedItemDetails?.maxQty > 0
                                                 ? (
                                                       selectedItemDetails?.maxQty -
-                                                      selectedItemDetails?.WaitingConfirmQty
+                                                      selectedItemDetails?.WaitingConfirmQty -
+                                                      selectedItemDetails?.WaitingQCItemQty
                                                   ).toLocaleString()
                                                 : 0}
                                         </span>
@@ -977,7 +998,6 @@ const ItemInput = ({
                                                         notif.type == 1
                                                 )
                                                 .map((item, index) => (
-                                                    
                                                         <div
                                                             key={"Error_" + index}
                                                             className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
@@ -988,7 +1008,7 @@ const ItemInput = ({
                                                             <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
                                                                         {Number(item?.Quantity)}
                                                             </div>
-                                                            <div className="text-[15px] ">{item.SubItemName}</div>
+                                                            <div className="text-[15px] ">{item.SubItemName || item.ItemName}</div>
                                                             <Text className="font-semibold text-[15px] ">
                                                                 Người giao:{" "}
                                                                 <span className="text-red-700">
@@ -1077,6 +1097,7 @@ const ItemInput = ({
                                                             SubItemName:"",
                                                             SubItemBaseQty: "",
                                                             OnHand: "",
+                                                            WaitingQty: "",
                                                         });
                                                         setFaults((prev) => ({
                                                             ...prev,
@@ -1108,6 +1129,7 @@ const ItemInput = ({
                                                                         SubItemName:"",
                                                                         SubItemBaseQty: "",
                                                                         OnHand: "",
+                                                                        WaitingQty: "",
                                                                     });
                                                                     setIsItemCodeDetech(true);
                                                                     console.log("Giá trị đã chọn: ", selectedFaultItem);
@@ -1132,7 +1154,8 @@ const ItemInput = ({
                                                                         SubItemCode:item.SubItemCode,
                                                                         SubItemName:item.SubItemName,
                                                                         SubItemBaseQty: item.BaseQty,
-                                                                        OnHand:item.OnHand
+                                                                        OnHand:item.OnHand,
+                                                                        WaitingQty: item.WaitingQty,
                                                                     });
                                                                     setIsItemCodeDetech(false);
                                                                     console.log("Giá trị đã chọn: ", selectedFaultItem);
@@ -1217,8 +1240,9 @@ const ItemInput = ({
                                         SubItemCode:"",
                                         SubItemBaseQty:"",
                                         OnHand: "",
+                                        WaitingQty: "",
                                     })
-                                    setFaultyAmount(null);
+                                    setFaultyAmount("");
                                     setIsItemCodeDetech(false);
                                 }}
                             >

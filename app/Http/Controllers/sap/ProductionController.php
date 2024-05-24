@@ -510,7 +510,6 @@ class ProductionController extends Controller
 
         $maxQuantities = [];
 
-
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
@@ -552,7 +551,7 @@ class ProductionController extends Controller
         ->first();
 
         // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
-        $notification = DB::table('sanluong as a')
+        $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
                     ->where('b.deleted', '=', 0);
@@ -578,13 +577,56 @@ class ProductionController extends Controller
                 'b.confirm'
             )
             ->where('b.confirm', '!=', 1)
+            ->where('b.type', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
-            ->where('a.Team', '=', $request->TO)
-            ->get();
+            ->where('a.Team', '=', $request->TO);
+            $dataqc=DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '!=', 1)
+            ->where('b.type', '=', 1)
+            ->where('b.isPushSAP', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+            $notification= $Datareceipt->unionAll($dataqc)->get();
+
+            foreach ($groupedResults as &$item) {
+                $waitingQty = 0; 
+                foreach ($notification as $notif) {
+                    if ($notif->SubItemCode === $item['SubItemCode']) {
+                        $waitingQty += (float) $notif->Quantity;
+                    }
+                }
+                $item['WaitingQty'] = $waitingQty;
+            }
         
             // dd($notification);
-            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
+            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
+            $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([
@@ -595,6 +637,7 @@ class ProductionController extends Controller
             'stock' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
+            'WaitingQCItemQty' => $WaitingQCItemQty,
             'remainQty' =>   $RemainQuantity,
             'Factorys' => $factory,
         ], 200);
@@ -800,6 +843,25 @@ class ProductionController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
+        $stmtstock = odbc_prepare($conDB, $querystock);
+
+        if (!$stmtstock) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $rowstock = odbc_fetch_array($stmtstock);
+        $results = array();
+        while ($rowstock = odbc_fetch_array($stmtstock)) {
+            $results[] = $rowstock;
+        }
+
         $data = DB::table('notireceipt as a')
             ->where('a.id', $request->id)
             ->where('a.deleted', 0)
@@ -809,7 +871,59 @@ class ProductionController extends Controller
         }
         notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
 
-        $notification = DB::table('sanluong as a')
+        $groupedResults = [];
+
+        foreach ($results as $result) {
+            $itemCode = $result['ItemCode'];
+            $subItemCode = $result['SubItemCode'];
+            $subItemName = $result['SubItemName'];
+            $onHand = (float) $result['OnHand'];
+            $baseQty = (float) $result['BaseQty'];
+
+            if (!array_key_exists($subItemCode, $groupedResults)) {
+                $groupedResults[$subItemCode] = [
+                    'SubItemCode' => $subItemCode,
+                    'SubItemName' => $subItemName,
+                    'OnHand' => 0,
+                    'BaseQty' => $baseQty,
+                ];
+
+                $groupedResults[$subItemCode]['OnHand'] = $onHand;
+            }
+        }
+
+        $groupedResults = array_values($groupedResults);
+
+        // $notification = DB::table('sanluong as a')
+        // ->join('notireceipt as b', function ($join) {
+        //     $join->on('a.id', '=', 'b.baseID')
+        //         ->where('b.deleted', '=', 0);
+        // })
+        // ->join('users as c', 'a.create_by', '=', 'c.id')
+        // ->select(
+        //     'a.FatherCode',
+        //     'a.ItemCode',
+        //     'a.ItemName',
+        //     'a.team',
+        //     'CDay',
+        //     'CRong',
+        //     'CDai',
+        //     'b.Quantity',
+        //     'a.created_at',
+        //     'c.first_name',
+        //     'c.last_name',
+        //     'b.text',
+        //     'b.id',
+        //     'b.type',
+        //     'b.confirm'
+        // )
+        // ->where('b.confirm', '!=', 1)
+        // ->where('a.FatherCode', '=', $request->SPDICH)
+        // ->where('a.ItemCode', '=', $request->ItemCode)
+        // ->where('a.Team', '=', $request->TO)
+        // ->get();
+
+        $Datareceipt = DB::table('sanluong as a')
         ->join('notireceipt as b', function ($join) {
             $join->on('a.id', '=', 'b.baseID')
                 ->where('b.deleted', '=', 0);
@@ -819,6 +933,8 @@ class ProductionController extends Controller
             'a.FatherCode',
             'a.ItemCode',
             'a.ItemName',
+            'b.SubItemName',
+            'b.SubItemCode',
             'a.team',
             'CDay',
             'CRong',
@@ -833,16 +949,65 @@ class ProductionController extends Controller
             'b.confirm'
         )
         ->where('b.confirm', '!=', 1)
+        ->where('b.type', '=', 0)
         ->where('a.FatherCode', '=', $request->SPDICH)
         ->where('a.ItemCode', '=', $request->ItemCode)
-        ->where('a.Team', '=', $request->TO)
-        ->get();
+        ->where('a.Team', '=', $request->TO);
+        $dataqc=DB::table('sanluong as a')
+        ->join('notireceipt as b', function ($join) {
+            $join->on('a.id', '=', 'b.baseID')
+                ->where('b.deleted', '=', 0);
+        })
+        ->join('users as c', 'a.create_by', '=', 'c.id')
+        ->select(
+            'a.FatherCode',
+            'a.ItemCode',
+            'a.ItemName',
+            'b.SubItemName',
+            'b.SubItemCode',
+            'a.team',
+            'CDay',
+            'CRong',
+            'CDai',
+            'b.Quantity',
+            'a.created_at',
+            'c.first_name',
+            'c.last_name',
+            'b.text',
+            'b.id',
+            'b.type',
+            'b.confirm'
+        )
+        ->where('b.confirm', '!=', 1)
+        ->where('b.type', '=', 1)
+        ->where('b.isPushSAP', '=', 0)
+        ->where('a.FatherCode', '=', $request->SPDICH)
+        ->where('a.ItemCode', '=', $request->ItemCode)
+        ->where('a.Team', '=', $request->TO);
+        $notification= $Datareceipt->unionAll($dataqc)->get();
+
+        foreach ($groupedResults as &$item) {
+            $waitingQty = 0; 
+            foreach ($notification as $notif) {
+                if ($notif->SubItemCode === $item['SubItemCode']) {
+                    $waitingQty += (float) $notif->Quantity;
+                }
+            }
+            $item['WaitingQty'] = $waitingQty;
+        }
     
-        $WaitingConfirmQty = $notification->sum('Quantity');
+        // dd($notification);
+        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
+        $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
+    
+        // $WaitingConfirmQty = $notification->sum('Quantity');
+        // $WaitingQCItemQty = $notification->where('SubItemCode', '!=', null)->sum('Quantity');
 
         return response()->json([
             'message' => 'success',
             'WaitingConfirmQty' => $WaitingConfirmQty,
+            'WaitingQCItemQty' => $WaitingQCItemQty,
+            'stock' => $groupedResults,
         ], 200);
     }
     function collectdata($spdich, $item, $to)
