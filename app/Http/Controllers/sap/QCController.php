@@ -460,6 +460,7 @@ class QCController extends Controller
         $teamBack= $request->teamBack['value']??'';
         $rootCause= $request->rootCause['value']??'';
         $subCode= $request->subCode['value'] ??'';
+        $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
 
         $HistorySL=HistorySL::where('ObjType',59)->get()->count();
         $body = [
@@ -470,6 +471,8 @@ class QCController extends Controller
             "U_HXL"=> $huongxuly,
             "U_QCC"=> $huongxuly,
             "U_TOCD"=> $teamBack,
+            "U_Giao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
+            "U_Nhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
             "U_source"=>$rootCause,
             "U_ItemHC"=>$subCode,
             "U_cmtQC"=> $request->note??"",

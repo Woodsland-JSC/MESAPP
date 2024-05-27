@@ -13,7 +13,6 @@ use App\Models\notireceipt;
 use App\Models\HistorySL;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
-
 class ProductionController extends Controller
 {
 
@@ -112,6 +111,8 @@ class ProductionController extends Controller
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
             'MaThiTruong',
+            'N_GIAO',
+            'N_NHAN',
             'CDay' => 'required|numeric',
             'CRong' => 'required|numeric',
             'CDai' => 'required|numeric',
@@ -1073,6 +1074,8 @@ class ProductionController extends Controller
                 ->where('a.id', $request->id)
                 ->where('a.confirm', 0)
                 ->first();
+
+            $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
@@ -1096,6 +1099,8 @@ class ProductionController extends Controller
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "U_LSX" => $data->LSX,
                         "U_TO" => $data->Team,
+                        "U_NGiao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
+                        "U_NNhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
