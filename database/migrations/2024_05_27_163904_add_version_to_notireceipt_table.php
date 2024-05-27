@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notireceipt', function (Blueprint $table) {
-            $table->stat('version')->default(0);
+        Schema::table('notireceiptVCN', function (Blueprint $table) {
+            $table->string('version')->default(0);
             $table->integer('isPushSAP')->default(0);
         });
     }
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notireceipt', function (Blueprint $table) {
+        Schema::table('notireceiptVCN', function (Blueprint $table) {
             $table->dropColumn('version');
             $table->dropColumn('isPushSAP');
         });

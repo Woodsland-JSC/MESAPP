@@ -147,13 +147,13 @@ class VCNController extends Controller
                 'ItemChild' => $row['ItemChild'],
                 'ChildName' => $row['ChildName'],
                 'Version'=>$row['Version'],
+                'ProdType'=> $row['ProType'],
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],
                 'LSX' => [
                     [
                         'LSX' => $row['LSX'],
-                        'ProType'=> $row['ProType'],
                         'SanLuong' => $row['SanLuong'],
                         'DaLam' => $row['DaLam'],
                         'Loi' => $row['Loi'],

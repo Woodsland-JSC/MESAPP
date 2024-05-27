@@ -60,7 +60,7 @@ const productionApi = {
             )
             .join("&");
 
-        const url = `/vcn/receipts-detail-vcn?${queryStringParams}`;
+        const url = `/vcn/receipts-productions-detail?${queryStringParams}`;
         return axiosClient().get(url);
     },
     enterFinishedGoodsAmountCBG: (data) => {

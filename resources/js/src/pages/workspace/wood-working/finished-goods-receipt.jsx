@@ -849,7 +849,7 @@ function FinishedGoodsReceipt() {
                                             key={index}
                                             selectedGroup={selectedGroup}
                                             searchTerm={searchTerm}
-                                            // fatherCode={data}
+                                            variant="CBG"
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
                                             isQualityCheck={isQualityCheck}

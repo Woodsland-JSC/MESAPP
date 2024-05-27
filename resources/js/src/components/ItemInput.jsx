@@ -52,7 +52,7 @@ const ItemInput = ({
     fromGroup,
     searchTerm,
     MaThiTruong,
-    // isQualityCheck,
+    variant,
     nextGroup,
     onReceiptFromChild,
     onRejectFromChild,
@@ -115,7 +115,7 @@ const ItemInput = ({
         ItemName: "",
         SubItemCode: "",
         SubItemName: "",
-        SubItemBaseQty:"",
+        SubItemBaseQty: "",
         OnHand: "",
         WaitingQty: "",
     });
@@ -131,41 +131,80 @@ const ItemInput = ({
     const [selectedQCLogging, setSelectedQCLogging] = useState(null);
 
     const openInputModal = async (item) => {
-        setLoading(true);
-        try {
-            // console.log("Hello: ", item);
+        console.log("Variant: ", variant);
+        console.log("Selected item: ", item);
+        if (variant === "CBG") {
+            setLoading(true);
             const params = {
                 SPDICH: data.SPDICH,
                 ItemCode: item.ItemChild,
                 TO: item.TO,
             };
-            // console.log("Hi: ", params);
-            const res = await productionApi.getFinishedGoodsDetail(params);
-            console.log("Chi tiết thành phẩm: ", res);
-            setSelectedItemDetails({
-                ...item,
-                ItemInfo: res.ItemInfo,
-                stockQuantity: res.maxQuantity,
-                totalProcessing: res.remainQty,
-                CongDoan: res.CongDoan,
-                SubItemWhs: res.SubItemWhs,
-                factories: res.Factorys?.map((item) => ({
-                    value: item.Factory,
-                    label: item.FactoryName,
-                })),
-                notifications: res.notifications,
-                stock: res.stock,
-                maxQty: res.maxQty,
-                WaitingConfirmQty: res.WaitingConfirmQty,
-                WaitingQCItemQty: res.WaitingQCItemQty,
-                
-            });
-            onModalOpen();
-        } catch (error) {
-            toast.error(error.response.data.error || "Có lỗi khi lấy dữ liệu item.");
-            console.error(error);
+            try {
+                const res = await productionApi.getFinishedGoodsDetail(params);
+                console.log("Chi tiết thành phẩm: ", res);
+                setSelectedItemDetails({
+                    ...item,
+                    ItemInfo: res.ItemInfo,
+                    stockQuantity: res.maxQuantity,
+                    totalProcessing: res.remainQty,
+                    CongDoan: res.CongDoan,
+                    SubItemWhs: res.SubItemWhs,
+                    factories: res.Factorys?.map((item) => ({
+                        value: item.Factory,
+                        label: item.FactoryName,
+                    })),
+                    notifications: res.notifications,
+                    stock: res.stock,
+                    maxQty: res.maxQty,
+                    WaitingConfirmQty: res.WaitingConfirmQty,
+                    WaitingQCItemQty: res.WaitingQCItemQty,
+                });
+                onModalOpen();
+            } catch (error) {
+                toast.error(
+                    error.response.data.error || "Có lỗi khi lấy dữ liệu item."
+                );
+                console.error(error);
+            }
+            setLoading(false);
+        } else {
+            setLoading(true);
+            const params = {
+                SPDICH: data.SPDICH,
+                ItemCode: item.ItemChild,
+                TO: item.TO,
+                Version: item.Version,
+            };
+            try {
+                const res = await productionApi.getFinishedPlywoodGoodsDetail(params);
+                console.log("Chi tiết thành phẩm: ", res);
+                setSelectedItemDetails({
+                    ...item,
+                    ItemInfo: res.ItemInfo,
+                    stockQuantity: res.maxQuantity,
+                    totalProcessing: res.remainQty,
+                    CongDoan: res.CongDoan,
+                    SubItemWhs: res.SubItemWhs,
+                    factories: res.Factorys?.map((item) => ({
+                        value: item.Factory,
+                        label: item.FactoryName,
+                    })),
+                    notifications: res.notifications,
+                    stock: res.stock,
+                    maxQty: res.maxQty,
+                    WaitingConfirmQty: res.WaitingConfirmQty,
+                    WaitingQCItemQty: res.WaitingQCItemQty,
+                });
+                onModalOpen();
+            } catch (error) {
+                toast.error(
+                    error.response.data.error || "Có lỗi khi lấy dữ liệu item."
+                );
+                console.error(error);
+            }
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const closeInputModal = () => {
@@ -177,18 +216,15 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
-        console.log((parseInt(selectedFaultItem.OnHand || 0) - ((parseInt(selectedItemDetails.WaitingConfirmQty) * parseInt(selectedFaultItem.SubItemBaseQty)) || 0) - parseInt(selectedFaultItem.WaitingQty || 0)));
-        console.log(selectedItemDetails.WaitingConfirmQty);
-        console.log(parseInt(selectedFaultItem.SubItemBaseQty));
-        console.log(selectedFaultItem.WaitingQty );
-        
         if (amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
             amount >
-            selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty - selectedItemDetails.WaitingQCItemQty
+            selectedItemDetails.maxQty -
+                selectedItemDetails.WaitingConfirmQty -
+                selectedItemDetails.WaitingQCItemQty
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
@@ -197,37 +233,56 @@ const ItemInput = ({
             toast.error("Số lượng lỗi phải lớn hơn 0");
             onAlertDialogClose();
             return;
-        } else if (selectedFaultItem.ItemCode !== "" && (faultyAmount > selectedItemDetails.maxQty - selectedItemDetails.WaitingConfirmQty - selectedItemDetails.WaitingQCItemQty)) {
+        } else if (
+            selectedFaultItem.ItemCode !== "" &&
+            faultyAmount >
+                selectedItemDetails.maxQty -
+                    selectedItemDetails.WaitingConfirmQty -
+                    selectedItemDetails.WaitingQCItemQty
+        ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
-        } else if (selectedFaultItem.SubItemCode === "" && selectedFaultItem.ItemCode === "" && faultyAmount) {
+        } else if (
+            selectedFaultItem.SubItemCode === "" &&
+            selectedFaultItem.ItemCode === "" &&
+            faultyAmount
+        ) {
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
-        }  else if (selectedFaultItem.SubItemCode !== "" && (faultyAmount > (parseInt(selectedFaultItem.OnHand || 0) - ((parseInt(selectedItemDetails.WaitingQCItemQty) * parseInt(selectedFaultItem.SubItemBaseQty)) || 0) - parseInt(selectedFaultItem.WaitingQty || 0)))) {
+        } else if (
+            selectedFaultItem.SubItemCode !== "" &&
+            faultyAmount >
+                parseInt(selectedFaultItem.OnHand || 0) -
+                    (parseInt(selectedItemDetails.WaitingQCItemQty) *
+                        parseInt(selectedFaultItem.SubItemBaseQty) || 0) -
+                    parseInt(selectedFaultItem.WaitingQty || 0)
+        ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận lỗi");
             onAlertDialogClose();
             return;
         } else {
             setConfirmLoading(true);
 
-            // Object chứa dữ liệu lỗi 
+            // Object chứa dữ liệu lỗi
             const ErrorData = isItemCodeDetech
-            ? {
-                  SubItemWhs: selectedItemDetails.SubItemWhs,
-                  SubItemQty: selectedItemDetails.stock.map((item) => ({
-                      SubItemCode: item.SubItemCode,
-                      BaseQty: item.BaseQty,
-                  })),
-              }
-            : {
-                SubItemWhs: selectedItemDetails.SubItemWhs,
-                SubItemQty: [{
-                    SubItemCode: selectedFaultItem.SubItemCode,
-                    BaseQty: selectedFaultItem.SubItemBaseQty,
-                }]
-            };
+                ? {
+                      SubItemWhs: selectedItemDetails.SubItemWhs,
+                      SubItemQty: selectedItemDetails.stock.map((item) => ({
+                          SubItemCode: item.SubItemCode,
+                          BaseQty: item.BaseQty,
+                      })),
+                  }
+                : {
+                      SubItemWhs: selectedItemDetails.SubItemWhs,
+                      SubItemQty: [
+                          {
+                              SubItemCode: selectedFaultItem.SubItemCode,
+                              BaseQty: selectedFaultItem.SubItemBaseQty,
+                          },
+                      ],
+                  };
 
             try {
                 const payload = {
@@ -243,8 +298,10 @@ const ItemInput = ({
                     Team: selectedItemDetails.TO,
                     CongDoan: selectedItemDetails.NameTO,
                     NexTeam: selectedItemDetails.TOTT,
-                    ErrorData: ErrorData, 
+                    ErrorData: ErrorData,
                     Type: "CBG",
+                    version: choosenItem.Version || "",
+                    ProdType: choosenItem.ProdType || "",
                     LSX: selectedItemDetails.LSX[0].LSX,
                     CompleQty: 0,
                     RejectQty: 0,
@@ -258,21 +315,40 @@ const ItemInput = ({
 
                 if (payload.FatherCode && payload.ItemCode) {
                     if (payload.CompleQty || payload.RejectQty) {
-                        const res =
+                        if (variant === "CBG") {
+                            const res =
                             await productionApi.enterFinishedGoodsAmountCBG(
                                 payload
                             );
-                        toast.success("Ghi nhận & chuyển tiếp thành công!");
-                        setSelectedFaultItem({
-                            ItemCode: "",
-                            ItemName: "",
-                            SubItemCode: "",
-                            SubItemName: "",
-                            SubItemBaseQty: "",
-                            OnHand: "", 
-                            WaitingQty: "",
-                        });
-                        setIsItemCodeDetech(false);
+                            toast.success("Ghi nhận & chuyển tiếp thành công!");
+                            setSelectedFaultItem({
+                                ItemCode: "",
+                                ItemName: "",
+                                SubItemCode: "",
+                                SubItemName: "",
+                                SubItemBaseQty: "",
+                                OnHand: "",
+                                WaitingQty: "",
+                            });
+                            setIsItemCodeDetech(false);
+                        } else {
+                            const res =
+                            await productionApi.enterFinishedGoodsAmountVCN(
+                                payload
+                            );
+                            toast.success("Ghi nhận & chuyển tiếp thành công!");
+                            setSelectedFaultItem({
+                                ItemCode: "",
+                                ItemName: "",
+                                SubItemCode: "",
+                                SubItemName: "",
+                                SubItemBaseQty: "",
+                                OnHand: "",
+                                WaitingQty: "",
+                            });
+                            setIsItemCodeDetech(false);
+                        }
+
                     } else {
                         toast("Chưa nhập bất kì số lượng nào.");
                     }
@@ -342,7 +418,7 @@ const ItemInput = ({
                 ),
                 stock: res.stock,
                 WaitingConfirmQty: res.WaitingConfirmQty,
-                WaitingQCItemQty: res.WaitingQCItemQty,  
+                WaitingQCItemQty: res.WaitingQCItemQty,
             }));
         } catch (error) {
             toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -368,7 +444,6 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
-
     return (
         <>
             <div
@@ -383,6 +458,7 @@ const ItemInput = ({
                                       openInputModal(item);
                                       setChoosenItem(item);
                                       console.log("Item đã chọn:", item);
+                                      console.log("Item:", choosenItem);
                                       console.log(
                                           "Mã Thị Trường của item:" +
                                               item.ChildName,
@@ -395,6 +471,11 @@ const ItemInput = ({
                                   <span className="ml-1">
                                       {index + 1}. {item.ChildName} ({item.CDay}
                                       *{item.CRong}*{item.CDai})
+                                      {item.Version && (
+                                          <span className="pl-2 font-medium text-[#2A7BA1]">
+                                              V.<span>{item.Version}</span>
+                                          </span>
+                                      )}
                                   </span>
                                   <div className="relative overflow-x-auto shadow-md sm:rounded-sm ml-0 mt-2 ">
                                       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
@@ -683,7 +764,15 @@ const ItemInput = ({
                                                                 }
                                                             </div>
                                                             <div className="font-medium text-[15px] ">
-                                                                {item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === null || item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName}
+                                                                {item.SubItemName ===
+                                                                "Gỗ"
+                                                                    ? "Nguyên liệu gỗ"
+                                                                    : item.SubItemName ===
+                                                                          null ||
+                                                                      item.SubItemName ===
+                                                                          ""
+                                                                    ? "Nguyên vật liệu chưa xác định"
+                                                                    : item.SubItemName}
                                                             </div>
                                                         </div>
                                                         <span
@@ -693,7 +782,12 @@ const ItemInput = ({
                                                                     : "bg-[#155979]"
                                                             } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                         >
-                                                            {(item.OnHand - item.BaseQty*selectedItemDetails.WaitingQCItemQty - item.WaitingQty).toLocaleString()}
+                                                            {(
+                                                                parseInt(item.OnHand || 0) -
+                                                                parseInt(item.BaseQty || 0) *
+                                                                    parseInt(selectedItemDetails.WaitingQCItemQty || 0) -
+                                                                parseInt(item.WaitingQty || 0)
+                                                            ).toLocaleString()}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -708,9 +802,9 @@ const ItemInput = ({
                                         <span className="rounded-lg cursor-pointer px-3  py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                             {selectedItemDetails?.maxQty > 0
                                                 ? (
-                                                      selectedItemDetails?.maxQty -
-                                                      selectedItemDetails?.WaitingConfirmQty -
-                                                      selectedItemDetails?.WaitingQCItemQty
+                                                      parseInt(selectedItemDetails?.maxQty || 0) -
+                                                      parseInt(selectedItemDetails?.WaitingConfirmQty || 0) -
+                                                      parseInt(selectedItemDetails?.WaitingQCItemQty || 0)
                                                   ).toLocaleString()
                                                 : 0}
                                         </span>
@@ -734,12 +828,13 @@ const ItemInput = ({
                                                 notif.confirm == 0 &&
                                                 notif.type == 0
                                         )?.length > 0 && (
-                                        <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
-                                            <Text className="font-semibold">
-                                                Số lượng đã giao chờ xác nhận:{" "}
-                                            </Text>{" "}
-                                        </div>
-                                    )}
+                                            <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
+                                                <Text className="font-semibold">
+                                                    Số lượng đã giao chờ xác
+                                                    nhận:{" "}
+                                                </Text>{" "}
+                                            </div>
+                                        )}
                                     {selectedItemDetails?.notifications &&
                                         selectedItemDetails?.notifications.filter(
                                             (notif) =>
@@ -755,26 +850,30 @@ const ItemInput = ({
                                             ?.map((item, index) => (
                                                 <div className="border-b border-gray-200">
                                                     <div
-                                                        key={"Processing_" + index}
+                                                        key={
+                                                            "Processing_" +
+                                                            index
+                                                        }
                                                         className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
                                                     >
-                                                        
                                                         <div className="flex flex-col">
                                                             <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
-                                                                        {Number(item?.Quantity)}
+                                                                {Number(
+                                                                    item?.Quantity
+                                                                )}
                                                             </div>
                                                             <Text className="font-semibold text-[15px] ">
                                                                 Người giao:{" "}
                                                                 <span className="text-green-700">
-                                                                {item?.last_name +
-                                                                    " " +
-                                                                    item?.first_name}
+                                                                    {item?.last_name +
+                                                                        " " +
+                                                                        item?.first_name}
                                                                 </span>
-                                                                
                                                             </Text>
                                                             <div className="flex text-sm">
                                                                 <Text className=" font-medium text-gray-600">
-                                                                    Thời gian giao:{" "}
+                                                                    Thời gian
+                                                                    giao:{" "}
                                                                 </Text>
                                                                 <span className="ml-1 text-gray-600">
                                                                     {moment(
@@ -782,7 +881,8 @@ const ItemInput = ({
                                                                         "YYYY-MM-DD HH:mm:ss"
                                                                     ).format(
                                                                         "DD/MM/YYYY"
-                                                                    ) || ""}{" "}
+                                                                    ) ||
+                                                                        ""}{" "}
                                                                     {moment(
                                                                         item?.created_at,
                                                                         "YYYY-MM-DD HH:mm:ss"
@@ -791,10 +891,12 @@ const ItemInput = ({
                                                                     ) || ""}
                                                                 </span>
                                                             </div>
-                                                        </div>             
+                                                        </div>
                                                         <div className="flex gap-x-6">
                                                             <div className="xl:block lg;block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold">
-                                                                    {Number(item?.Quantity)}
+                                                                {Number(
+                                                                    item?.Quantity
+                                                                )}
                                                             </div>
                                                             <button
                                                                 onClick={() => {
@@ -965,101 +1067,110 @@ const ItemInput = ({
                                             </div>
                                         </Alert>
                                         <div className="border-b border-gray-200">
-
-                                        {/* Số lượng ghi nhận lỗi */}
-                                        {selectedItemDetails?.notifications &&
-                                            selectedItemDetails?.notifications.filter(
-                                                (notif) =>
-                                                    notif.confirm == 0 &&
-                                                    notif.type == 1
-                                            )?.length > 0 &&
-                                            selectedItemDetails?.notifications
-                                                .filter(
+                                            {/* Số lượng ghi nhận lỗi */}
+                                            {selectedItemDetails?.notifications &&
+                                                selectedItemDetails?.notifications.filter(
+                                                    (notif) =>
+                                                        notif.confirm == 0 &&
+                                                        notif.type == 1
+                                                )?.length > 0 &&
+                                                selectedItemDetails?.notifications.filter(
                                                     (notif) =>
                                                         notif.confirm == 0 &&
                                                         notif.type == 1
                                                 ) && (
-                                            <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
-                                                <Text className="font-semibold">
-                                                    Số lượng lỗi đã ghi nhận:{" "}
-                                                </Text>{" "}
-                                            </div>
-                                        )}
-                                        {selectedItemDetails?.notifications &&
-                                            selectedItemDetails?.notifications.filter(
-                                                (notif) =>
-                                                    notif.confirm == 0 &&
-                                                    notif.type == 1
-                                            )?.length > 0 &&
-                                            selectedItemDetails?.notifications
-                                                .filter(
+                                                    <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
+                                                        <Text className="font-semibold">
+                                                            Số lượng lỗi đã ghi
+                                                            nhận:{" "}
+                                                        </Text>{" "}
+                                                    </div>
+                                                )}
+                                            {selectedItemDetails?.notifications &&
+                                                selectedItemDetails?.notifications.filter(
                                                     (notif) =>
                                                         notif.confirm == 0 &&
                                                         notif.type == 1
-                                                )
-                                                .map((item, index) => (
+                                                )?.length > 0 &&
+                                                selectedItemDetails?.notifications
+                                                    .filter(
+                                                        (notif) =>
+                                                            notif.confirm ==
+                                                                0 &&
+                                                            notif.type == 1
+                                                    )
+                                                    .map((item, index) => (
                                                         <div
-                                                            key={"Error_" + index}
+                                                            key={
+                                                                "Error_" + index
+                                                            }
                                                             className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
                                                         >
-                                                            
                                                             {/*  */}
                                                             <div className="flex flex-col">
-                                                            <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
-                                                                        {Number(item?.Quantity)}
-                                                            </div>
-                                                            <div className="text-[15px] ">{item.SubItemName || item.ItemName}</div>
-                                                            <Text className="font-semibold text-[15px] ">
-                                                                Người giao:{" "}
-                                                                <span className="text-red-700">
-                                                                {item?.last_name +
-                                                                    " " +
-                                                                    item?.first_name}
-                                                                </span>
-                                                                
-                                                            </Text>
-                                                            <div className="flex text-sm">
-                                                                <Text className=" font-medium text-gray-600">
-                                                                    Thời gian giao:{" "}
+                                                                <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
+                                                                    {Number(
+                                                                        item?.Quantity
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-[15px] ">
+                                                                    {item.SubItemName ||
+                                                                        item.ItemName}
+                                                                </div>
+                                                                <Text className="font-semibold text-[15px] ">
+                                                                    Người giao:{" "}
+                                                                    <span className="text-red-700">
+                                                                        {item?.last_name +
+                                                                            " " +
+                                                                            item?.first_name}
+                                                                    </span>
                                                                 </Text>
-                                                                <span className="ml-1 text-gray-600">
-                                                                    {moment(
-                                                                        item?.created_at,
-                                                                        "YYYY-MM-DD HH:mm:ss"
-                                                                    ).format(
-                                                                        "DD/MM/YYYY"
-                                                                    ) || ""}{" "}
-                                                                    {moment(
-                                                                        item?.created_at,
-                                                                        "YYYY-MM-DD HH:mm:ss"
-                                                                    ).format(
-                                                                        "HH:mm:ss"
-                                                                    ) || ""}
-                                                                </span>
+                                                                <div className="flex text-sm">
+                                                                    <Text className=" font-medium text-gray-600">
+                                                                        Thời
+                                                                        gian
+                                                                        giao:{" "}
+                                                                    </Text>
+                                                                    <span className="ml-1 text-gray-600">
+                                                                        {moment(
+                                                                            item?.created_at,
+                                                                            "YYYY-MM-DD HH:mm:ss"
+                                                                        ).format(
+                                                                            "DD/MM/YYYY"
+                                                                        ) ||
+                                                                            ""}{" "}
+                                                                        {moment(
+                                                                            item?.created_at,
+                                                                            "YYYY-MM-DD HH:mm:ss"
+                                                                        ).format(
+                                                                            "HH:mm:ss"
+                                                                        ) || ""}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        </div>             
-                                                        <div className="flex gap-x-6 items-center">
-                                                            <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit">
-                                                                    {Number(item?.Quantity)}
-                                                            </div>
-                                                            <button
-                                                                onClick={() => {
-                                                                    onDeleteProcessingDialogOpen();
-                                                                    setSelectedDelete(
-                                                                        item?.id
-                                                                    );
-                                                                    setDialogType(
-                                                                        "qc"
-                                                                    );
-                                                                }}
+                                                            <div className="flex gap-x-6 items-center">
+                                                                <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit">
+                                                                    {Number(
+                                                                        item?.Quantity
+                                                                    )}
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        onDeleteProcessingDialogOpen();
+                                                                        setSelectedDelete(
+                                                                            item?.id
+                                                                        );
+                                                                        setDialogType(
+                                                                            "qc"
+                                                                        );
+                                                                    }}
                                                                     className="rounded-full p-2 duration-200 ease hover:bg-red-100"
-                                                            >
+                                                                >
                                                                     <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                            </button>
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        </div>
-                                                    
-                                                ))}
+                                                    ))}
                                         </div>
                                         <Box className="px-2 pt-2">
                                             <label className="font-semibold ">
@@ -1093,8 +1204,8 @@ const ItemInput = ({
                                                         setSelectedFaultItem({
                                                             ItemCode: "",
                                                             ItemName: "",
-                                                            SubItemCode:"",
-                                                            SubItemName:"",
+                                                            SubItemCode: "",
+                                                            SubItemName: "",
                                                             SubItemBaseQty: "",
                                                             OnHand: "",
                                                             WaitingQty: "",
@@ -1112,61 +1223,126 @@ const ItemInput = ({
                                                     <NumberDecrementStepper />
                                                 </NumberInputStepper>
                                             </NumberInput>
-                                            {!faultyAmount || faultyAmount > 0 && (
-                                                <>
-                                                    <div className="my-3 font-medium text-[15px] text-red-700">Lỗi thành phẩm:</div>
-                                                        <div className={`mb-4 ml-3 text-gray-600 
-                                                        ${selectedFaultItem.ItemCode === choosenItem.ItemChild ? 'font-semibold text-gray-800 ' : 'text-gray-600'}`} key={index}>
-                                                            <Radio 
+                                            {!faultyAmount ||
+                                                (faultyAmount > 0 && (
+                                                    <>
+                                                        <div className="my-3 font-medium text-[15px] text-red-700">
+                                                            Lỗi thành phẩm:
+                                                        </div>
+                                                        <div
+                                                            className={`mb-4 ml-3 text-gray-600 
+                                                        ${
+                                                            selectedFaultItem.ItemCode ===
+                                                            choosenItem.ItemChild
+                                                                ? "font-semibold text-gray-800 "
+                                                                : "text-gray-600"
+                                                        }`}
+                                                            key={index}
+                                                        >
+                                                            <Radio
                                                                 ref={checkRef}
-                                                                value={choosenItem.ChildName} 
-                                                                isChecked={selectedFaultItem.ItemCode === choosenItem.ItemChild}
+                                                                value={
+                                                                    choosenItem.ChildName
+                                                                }
+                                                                isChecked={
+                                                                    selectedFaultItem.ItemCode ===
+                                                                    choosenItem.ItemChild
+                                                                }
                                                                 onChange={() => {
-                                                                    setSelectedFaultItem({
-                                                                        ItemCode: choosenItem.ItemChild,
-                                                                        ItemName: choosenItem.ChildName,
-                                                                        SubItemCode:"",
-                                                                        SubItemName:"",
-                                                                        SubItemBaseQty: "",
-                                                                        OnHand: "",
-                                                                        WaitingQty: "",
-                                                                    });
-                                                                    setIsItemCodeDetech(true);
-                                                                    console.log("Giá trị đã chọn: ", selectedFaultItem);
-                                                                }} 
+                                                                    setSelectedFaultItem(
+                                                                        {
+                                                                            ItemCode:
+                                                                                choosenItem.ItemChild,
+                                                                            ItemName:
+                                                                                choosenItem.ChildName,
+                                                                            SubItemCode:
+                                                                                "",
+                                                                            SubItemName:
+                                                                                "",
+                                                                            SubItemBaseQty:
+                                                                                "",
+                                                                            OnHand: "",
+                                                                            WaitingQty:
+                                                                                "",
+                                                                        }
+                                                                    );
+                                                                    setIsItemCodeDetech(
+                                                                        true
+                                                                    );
+                                                                    console.log(
+                                                                        "Giá trị đã chọn: ",
+                                                                        selectedFaultItem
+                                                                    );
+                                                                }}
                                                             >
-                                                                {choosenItem.ChildName}
-                                                            </Radio>   
-                                                        </div>      
-                                                    
-                                                    <div className="my-3 font-medium text-[15px] text-red-700">Lỗi bán thành phẩm công đoạn trước:</div>
-                                                    {selectedItemDetails?.stock.map((item, index) => (
-                                                        <div className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode === item.SubItemCode ? 'font-semibold text-gray-800 ' : 'text-gray-600'}`} key={index}>
-                                                            
-                                                            <Radio 
-                                                                ref={checkRef}
-                                                                value={item.SubItemCode} 
-                                                                isChecked={selectedFaultItem.SubItemCode === item.SubItemCode}
-                                                                onChange={() => {
-                                                                    setSelectedFaultItem({
-                                                                        ItemCode: "",
-                                                                        ItemName: "",
-                                                                        SubItemCode:item.SubItemCode,
-                                                                        SubItemName:item.SubItemName,
-                                                                        SubItemBaseQty: item.BaseQty,
-                                                                        OnHand:item.OnHand,
-                                                                        WaitingQty: item.WaitingQty,
-                                                                    });
-                                                                    setIsItemCodeDetech(false);
-                                                                    console.log("Giá trị đã chọn: ", selectedFaultItem);
-                                                                }} 
-                                                            >
-                                                                {item.SubItemName}
-                                                            </Radio>   
-                                                        </div>      
-                                                    ))}
-                                                </>
-                                            )}
+                                                                {
+                                                                    choosenItem.ChildName
+                                                                }
+                                                            </Radio>
+                                                        </div>
+
+                                                        <div className="my-3 font-medium text-[15px] text-red-700">
+                                                            Lỗi bán thành phẩm
+                                                            công đoạn trước:
+                                                        </div>
+                                                        {selectedItemDetails?.stock.map(
+                                                            (item, index) => (
+                                                                <div
+                                                                    className={`mb-4 ml-3  ${
+                                                                        selectedFaultItem.SubItemCode ===
+                                                                        item.SubItemCode
+                                                                            ? "font-semibold text-gray-800 "
+                                                                            : "text-gray-600"
+                                                                    }`}
+                                                                    key={index}
+                                                                >
+                                                                    <Radio
+                                                                        ref={
+                                                                            checkRef
+                                                                        }
+                                                                        value={
+                                                                            item.SubItemCode
+                                                                        }
+                                                                        isChecked={
+                                                                            selectedFaultItem.SubItemCode ===
+                                                                            item.SubItemCode
+                                                                        }
+                                                                        onChange={() => {
+                                                                            setSelectedFaultItem(
+                                                                                {
+                                                                                    ItemCode:
+                                                                                        "",
+                                                                                    ItemName:
+                                                                                        "",
+                                                                                    SubItemCode:
+                                                                                        item.SubItemCode,
+                                                                                    SubItemName:
+                                                                                        item.SubItemName,
+                                                                                    SubItemBaseQty:
+                                                                                        item.BaseQty,
+                                                                                    OnHand: item.OnHand,
+                                                                                    WaitingQty:
+                                                                                        item.WaitingQty,
+                                                                                }
+                                                                            );
+                                                                            setIsItemCodeDetech(
+                                                                                false
+                                                                            );
+                                                                            console.log(
+                                                                                "Giá trị đã chọn: ",
+                                                                                selectedFaultItem
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            item.SubItemName
+                                                                        }
+                                                                    </Radio>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </>
+                                                ))}
                                         </Box>
                                         <Box className="px-2 pt-2">
                                             <label className="font-semibold">
@@ -1232,16 +1408,16 @@ const ItemInput = ({
                             <Button
                                 className="bg-[#edf2f7]"
                                 onClick={() => {
-                                    closeInputModal()
+                                    closeInputModal();
                                     setSelectedFaultItem({
-                                        ItemName:"",
-                                        ItemCode:"",
-                                        SubItemName:"",
-                                        SubItemCode:"",
-                                        SubItemBaseQty:"",
+                                        ItemName: "",
+                                        ItemCode: "",
+                                        SubItemName: "",
+                                        SubItemCode: "",
+                                        SubItemBaseQty: "",
                                         OnHand: "",
                                         WaitingQty: "",
-                                    })
+                                    });
                                     setFaultyAmount("");
                                     setIsItemCodeDetech(false);
                                 }}
@@ -1251,9 +1427,11 @@ const ItemInput = ({
                             <Button
                                 type="button"
                                 isDisabled={
-                                    !amount && amount==null &&
+                                    !amount &&
+                                    amount == null &&
                                     amount <= 0 &&
-                                    !faultyAmount && faultyAmount ==null &&
+                                    !faultyAmount &&
+                                    faultyAmount == null &&
                                     faultyAmount <= 0
                                 }
                                 className="bg-[#2f8558]"
@@ -1290,9 +1468,9 @@ const ItemInput = ({
                                         {faultyAmount}
                                     </span>{" "}
                                     <span>
-                                    {faults &&
-                                        faults.ItemCode &&
-                                        "từ " + faults.factory?.label}
+                                        {faults &&
+                                            faults.ItemCode &&
+                                            "từ " + faults.factory?.label}
                                     </span>
                                     {faults &&
                                         faults.factory &&

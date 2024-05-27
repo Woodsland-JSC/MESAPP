@@ -53,29 +53,6 @@ const steps = [
     { title: "Bước 3", description: "Nhập số lượng sản phẩm" },
 ];
 
-var waitingReceiptNotifications = [
-    {
-        id: 70152702,
-        subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-        thickness: 15,
-        width: 367.5,
-        length: 740,
-        amount: 2,
-        createdDate: new Date(),
-        createdBy: {
-            id: 54,
-            last_name: "Nguyen",
-            first_name: "An",
-        },
-        fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-    },
-];
-
-
 function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
     // const { loading, setLoading } = useAppContext();
@@ -93,18 +70,6 @@ function PlywoodFinishedGoodsReceipt() {
         onClose: onModalClose,
     } = useDisclosure();
 
-    // const { activeStep, setActiveStep } = useSteps({
-    //     index: 0,
-    //     count: steps.length,
-    // });
-    // const { isOpen, onOpen, onClose } = useDisclosure();
-
-    // const [awaitingReception, setAwaitingReception] = useState({
-    //     "TH-X3SC": [],
-    //     "TH-X3TC1": [],
-    //     "TH-X3TC2": [],
-    //     "TH-X3S": [],
-    // });
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
@@ -482,7 +447,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             key={index}
                                             selectedGroup={selectedGroup}
                                             searchTerm={searchTerm}
-                                            // fatherCode={data}
+                                            variant="VCN"
                                             nextGroup={item.nextGroup}
                                             fromGroup={item.fromGroup}
                                             isQualityCheck={isQualityCheck}
