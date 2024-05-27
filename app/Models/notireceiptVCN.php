@@ -40,7 +40,8 @@ class notireceiptVCN extends Model
     'isQCConfirmed',
     'CreatedBy',
     'ProdType',
-        
+    'version',
+    'isPushSAP'   
     ];
     public function getCreatedAtAttribute($value)
     {
