@@ -106,7 +106,7 @@ function Workspace() {
                                 >
                                     {/* Cards List */}
                                     <div className="cusTabs w-full flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6 w-full">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
                                             {/* Xep say */}
                                             {user.permissions?.includes(
                                                 "sepsay"
@@ -368,7 +368,10 @@ function Workspace() {
                                         </div>
                                     </div>
                                 </TabPanel>
-                                <TabPanel style={{ padding: "1rem 1rem" }}>
+                                <TabPanel 
+                                    className="xl:p-4 lg:p-4 md:p-4 p-1 w-full"
+                                    // style={{ padding: "1rem 1rem" }}
+                                >
                                     {/* Cards List */}
                                     <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
                                         <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">

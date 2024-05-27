@@ -33,7 +33,7 @@ const productionApi = {
             )
             .join("&");
 
-        const url = `/production/receipts-productions-vcn?${queryStringParams}`;
+        const url = `/vcn/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
     getFinishedGoodsDetail: (params) => {
@@ -60,7 +60,7 @@ const productionApi = {
             )
             .join("&");
 
-        const url = `/production/receipts-detail-vcn?${queryStringParams}`;
+        const url = `/vcn/receipts-detail-vcn?${queryStringParams}`;
         return axiosClient().get(url);
     },
     enterFinishedGoodsAmountCBG: (data) => {
@@ -69,7 +69,7 @@ const productionApi = {
     },
     enterFinishedGoodsAmountVCN: (data) => {
         // const url = `/v2/production/receipts-production`;
-        const url = `/production/receipts-production`;
+        const url = `/vcn/receipts-production`;
         return axiosClient().post(url, data);
     },
     deleteReceiptCBG: (payload) => {
