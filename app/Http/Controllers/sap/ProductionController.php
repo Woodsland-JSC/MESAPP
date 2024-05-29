@@ -13,6 +13,7 @@ use App\Models\notireceipt;
 use App\Models\HistorySL;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
+
 class ProductionController extends Controller
 {
 
@@ -435,11 +436,15 @@ class ProductionController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $rowstock = odbc_fetch_array($stmtstock);
+
+        // dd($rowstock);
+
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
+
+        // dd($results);
 
         // Lấy công đoạn hiện tại
         $CongDoan = null;
@@ -515,17 +520,14 @@ class ProductionController extends Controller
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
 
-            $maxQuantity = floor($onHand / $baseQty); 
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
-        // Tìm số lượng tối thiểu 
+        // Tìm số lượng tối thiểu
         $maxQty = min($maxQuantities);
 
-        // Chuyển mảng kết quả về dạng danh sách
         $groupedResults = array_values($groupedResults);
-
-        // 3. Lấy số lượng còn lại phải sản xuất
 
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
         $factory = [
@@ -543,13 +545,13 @@ class ProductionController extends Controller
             ],
         ];
 
-        $ItemInfo= DB::table('sanluong as a')
-        ->select(
-            'a.ItemCode',
-            'a.ItemName',
-        )
-        ->where('ItemCode',$request->ItemCode)
-        ->first();
+        $ItemInfo = DB::table('sanluong as a')
+            ->select(
+                'a.ItemCode',
+                'a.ItemName',
+            )
+            ->where('ItemCode', $request->ItemCode)
+            ->first();
 
         // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
         $Datareceipt = DB::table('sanluong as a')
@@ -582,7 +584,7 @@ class ProductionController extends Controller
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
-            $dataqc=DB::table('sanluong as a')
+        $dataqc = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
                     ->where('b.deleted', '=', 0);
@@ -613,21 +615,21 @@ class ProductionController extends Controller
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
-            $notification= $Datareceipt->unionAll($dataqc)->get();
+        $notification = $Datareceipt->unionAll($dataqc)->get();
 
-            foreach ($groupedResults as &$item) {
-                $waitingQty = 0; 
-                foreach ($notification as $notif) {
-                    if ($notif->SubItemCode === $item['SubItemCode']) {
-                        $waitingQty += (float) $notif->Quantity;
-                    }
+        foreach ($groupedResults as &$item) {
+            $waitingQty = 0;
+            foreach ($notification as $notif) {
+                if ($notif->SubItemCode === $item['SubItemCode']) {
+                    $waitingQty += (float) $notif->Quantity;
                 }
-                $item['WaitingQty'] = $waitingQty;
             }
-        
-            // dd($notification);
-            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
-            $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
+            $item['WaitingQty'] = $waitingQty;
+        }
+
+        // dd($notification);
+        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
+        $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([
@@ -925,70 +927,70 @@ class ProductionController extends Controller
         // ->get();
 
         $Datareceipt = DB::table('sanluong as a')
-        ->join('notireceipt as b', function ($join) {
-            $join->on('a.id', '=', 'b.baseID')
-                ->where('b.deleted', '=', 0);
-        })
-        ->join('users as c', 'a.create_by', '=', 'c.id')
-        ->select(
-            'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
-            'b.SubItemName',
-            'b.SubItemCode',
-            'a.team',
-            'CDay',
-            'CRong',
-            'CDai',
-            'b.Quantity',
-            'a.created_at',
-            'c.first_name',
-            'c.last_name',
-            'b.text',
-            'b.id',
-            'b.type',
-            'b.confirm'
-        )
-        ->where('b.confirm', '!=', 1)
-        ->where('b.type', '=', 0)
-        ->where('a.FatherCode', '=', $request->SPDICH)
-        ->where('a.ItemCode', '=', $request->ItemCode)
-        ->where('a.Team', '=', $request->TO);
-        $dataqc=DB::table('sanluong as a')
-        ->join('notireceipt as b', function ($join) {
-            $join->on('a.id', '=', 'b.baseID')
-                ->where('b.deleted', '=', 0);
-        })
-        ->join('users as c', 'a.create_by', '=', 'c.id')
-        ->select(
-            'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
-            'b.SubItemName',
-            'b.SubItemCode',
-            'a.team',
-            'CDay',
-            'CRong',
-            'CDai',
-            'b.Quantity',
-            'a.created_at',
-            'c.first_name',
-            'c.last_name',
-            'b.text',
-            'b.id',
-            'b.type',
-            'b.confirm'
-        )
-        ->where('b.confirm', '!=', 1)
-        ->where('b.type', '=', 1)
-        ->where('b.isPushSAP', '=', 0)
-        ->where('a.FatherCode', '=', $request->SPDICH)
-        ->where('a.ItemCode', '=', $request->ItemCode)
-        ->where('a.Team', '=', $request->TO);
-        $notification= $Datareceipt->unionAll($dataqc)->get();
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '!=', 1)
+            ->where('b.type', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+        $dataqc = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '!=', 1)
+            ->where('b.type', '=', 1)
+            ->where('b.isPushSAP', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+        $notification = $Datareceipt->unionAll($dataqc)->get();
 
         foreach ($groupedResults as &$item) {
-            $waitingQty = 0; 
+            $waitingQty = 0;
             foreach ($notification as $notif) {
                 if ($notif->SubItemCode === $item['SubItemCode']) {
                     $waitingQty += (float) $notif->Quantity;
@@ -996,11 +998,11 @@ class ProductionController extends Controller
             }
             $item['WaitingQty'] = $waitingQty;
         }
-    
+
         // dd($notification);
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
         $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
-    
+
         // $WaitingConfirmQty = $notification->sum('Quantity');
         // $WaitingQCItemQty = $notification->where('SubItemCode', '!=', null)->sum('Quantity');
 
@@ -1075,7 +1077,7 @@ class ProductionController extends Controller
                 ->where('a.confirm', 0)
                 ->first();
 
-            $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
+            $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
@@ -1099,8 +1101,8 @@ class ProductionController extends Controller
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "U_LSX" => $data->LSX,
                         "U_TO" => $data->Team,
-                        "U_NGiao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
-                        "U_NNhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
+                        "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                        "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
@@ -1226,7 +1228,7 @@ class ProductionController extends Controller
         // $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)
         //     ->where('FAC', $plant)
         //     ->first();
-        $WHS=GetWhsCode(Auth::user()->plant,'QC');
+        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
         return $WHS;
     }
     /*
@@ -1548,7 +1550,7 @@ class ProductionController extends Controller
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
 
-            $maxQuantity = floor($onHand / $baseQty); 
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
@@ -1606,10 +1608,10 @@ class ProductionController extends Controller
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO)
             ->get();
-        
-            // dd($notification);
-        
-            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
+
+        // dd($notification);
+
+        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([
@@ -1787,7 +1789,7 @@ class ProductionController extends Controller
             ], 500);
         }
     }
-    
+
     /*
     **********
      END Version 2 CBG

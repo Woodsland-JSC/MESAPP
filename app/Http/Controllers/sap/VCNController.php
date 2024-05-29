@@ -65,6 +65,7 @@ class VCNController extends Controller
                     'openQty' => 0,
                     'ProdType'=> $request->ProdType,
                     'Version'=> $request->version,
+                    'CreateBy' => Auth::user()->id,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
@@ -86,6 +87,7 @@ class VCNController extends Controller
                     'ProdType'=> $request->ProdType,
                     'ErrorData' => $errorData,
                     'MaThiTruong' => $request->MaThiTruong,
+                    'CreateBy' => Auth::user()->id,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
