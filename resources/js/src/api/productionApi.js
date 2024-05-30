@@ -63,6 +63,19 @@ const productionApi = {
         const url = `/vcn/receipts-productions-detail?${queryStringParams}`;
         return axiosClient().get(url);
     },
+    getFinishedRongPlywoodGoodsDetail: (params) => {
+        const queryStringParams = Object.keys(params)
+            .map(
+                (key) =>
+                    `${encodeURIComponent(key)}=${encodeURIComponent(
+                        params[key]
+                    )}`
+            )
+            .join("&");
+
+        const url = `/vcn/receipts-detail-rong?${queryStringParams}`;
+        return axiosClient().get(url);
+    },
     enterFinishedGoodsAmountCBG: (data) => {
         const url = `/production/receipts-production`;
         return axiosClient().post(url, data);

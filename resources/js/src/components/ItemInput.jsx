@@ -169,41 +169,78 @@ const ItemInput = ({
             }
             setLoading(false);
         } else {
-            setLoading(true);
-            const params = {
-                SPDICH: data.SPDICH,
-                ItemCode: item.ItemChild,
-                TO: item.TO,
-                Version: item.Version,
-            };
-            try {
-                const res = await productionApi.getFinishedPlywoodGoodsDetail(params);
-                console.log("Chi tiết thành phẩm: ", res);
-                setSelectedItemDetails({
-                    ...item,
-                    ItemInfo: res.ItemInfo,
-                    stockQuantity: res.maxQuantity,
-                    totalProcessing: res.remainQty,
-                    CongDoan: res.CongDoan,
-                    SubItemWhs: res.SubItemWhs,
-                    factories: res.Factorys?.map((item) => ({
-                        value: item.Factory,
-                        label: item.FactoryName,
-                    })),
-                    notifications: res.notifications,
-                    stock: res.stock,
-                    maxQty: res.maxQty,
-                    WaitingConfirmQty: res.WaitingConfirmQty,
-                    WaitingQCItemQty: res.WaitingQCItemQty,
-                });
-                onModalOpen();
-            } catch (error) {
-                toast.error(
-                    error.response.data.error || "Có lỗi khi lấy dữ liệu item."
-                );
-                console.error(error);
+            setLoading(true);    
+            if (item.CDOAN === "RO"){
+                try {
+                    const params = {
+                        FatherCode: item.ItemChild,
+                        TO: item.TO,
+                        version: item.Version,
+                    };
+                    const res = await productionApi.getFinishedRongPlywoodGoodsDetail(params);
+                    console.log("Chi tiết thành phẩm: ", res);
+                    setSelectedItemDetails({
+                        ...item,
+                        ItemInfo: res.ItemInfo,
+                        stockQuantity: res.maxQuantity,
+                        totalProcessing: res.remainQty,
+                        CongDoan: res.CongDoan,
+                        SubItemWhs: res.SubItemWhs,
+                        factories: res.Factorys?.map((item) => ({
+                            value: item.Factory,
+                            label: item.FactoryName,
+                        })),
+                        notifications: res.notifications,
+                        stock: res.stock,
+                        maxQty: res.maxQty,
+                        WaitingConfirmQty: res.WaitingConfirmQty,
+                        WaitingQCItemQty: res.WaitingQCItemQty,
+                    });
+                    onModalOpen();
+                } catch (error) {
+                    toast.error(
+                        error.response.data.error || "Có lỗi khi lấy dữ liệu item."
+                    );
+                    console.error(error);
+                }
+                setLoading(false);
+            } else {
+                try {
+                    const params = {
+                        SPDICH: data.SPDICH,
+                        ItemCode: item.ItemChild,
+                        TO: item.TO,
+                        Version: item.Version,
+                    };
+                    const res = await productionApi.getFinishedPlywoodGoodsDetail(params);
+                    console.log("Chi tiết thành phẩm: ", res);
+                    setSelectedItemDetails({
+                        ...item,
+                        ItemInfo: res.ItemInfo,
+                        stockQuantity: res.maxQuantity,
+                        totalProcessing: res.remainQty,
+                        CongDoan: res.CongDoan,
+                        SubItemWhs: res.SubItemWhs,
+                        factories: res.Factorys?.map((item) => ({
+                            value: item.Factory,
+                            label: item.FactoryName,
+                        })),
+                        notifications: res.notifications,
+                        stock: res.stock,
+                        maxQty: res.maxQty,
+                        WaitingConfirmQty: res.WaitingConfirmQty,
+                        WaitingQCItemQty: res.WaitingQCItemQty,
+                    });
+                    onModalOpen();
+                } catch (error) {
+                    toast.error(
+                        error.response.data.error || "Có lỗi khi lấy dữ liệu item."
+                    );
+                    console.error(error);
+                }
+                setLoading(false);
             }
-            setLoading(false);
+
         }
     };
 

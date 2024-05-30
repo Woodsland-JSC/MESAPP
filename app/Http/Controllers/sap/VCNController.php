@@ -152,6 +152,7 @@ class VCNController extends Controller
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],
+                'CDOAN'=>$row['CDOAN'],
                 'LSX' => [
                     [
                         'LSX' => $row['LSX'],
@@ -808,7 +809,7 @@ class VCNController extends Controller
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'TO' => 'required|string|max:254',
-            'verison' => 'required|string|max:254',
+            'version' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
@@ -825,20 +826,35 @@ class VCNController extends Controller
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
     
-            if (!odbc_execute($stmt, [$request->FatherCode, $request->TO, $request->verison])) {
+            if (!odbc_execute($stmt, [$request->FatherCode, $request->TO, $request->version])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
             $results = [];
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
-           
+            // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
+            $factory = [
+                [
+                    'Factory' => '01',
+                    'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+                ],
+                [
+                    'Factory' => '02',
+                    'FactoryName' => 'Nhà Máy CBG Yên sơn'
+                ],
+                [
+                    'Factory' => '03',
+                    'FactoryName' => 'Nhà Máy CBG Thái Bình'
+                ],
+            ];
+
             // lấy data dở dàng 
             $data= notireceiptVCN::select('ItemCode', 'version')
             ->selectRaw('SUM(CASE WHEN type = 1 THEN openQty ELSE Quantity END) AS TotalQuantity')
             ->where('FatherCode', $request->FatherCode)
             ->where('Team', $request->TO)
-            ->where('version', $request->verison)
+            ->where('version', $request->version)
             ->where('confirm','=', 0)
             ->where('deleted','=', 0)
             ->groupBy('ItemCode', 'version')
@@ -860,7 +876,7 @@ class VCNController extends Controller
                 $notiData= notireceiptVCN::where('FatherCode', $request->FatherCode)
                 ->where('Team', $request->TO)
                 ->where('ItemCode', $itemCode)
-                ->where('version', $request->verison)
+                ->where('version', $request->version)
                 ->where('confirm','=', 0)
                 ->where('deleted','=', 0)
                 ->get();
@@ -874,13 +890,18 @@ class VCNController extends Controller
             }
             
             return response()->json([
-                    'data' => $results,
+                    'stocks' => $results,
+                    'Factorys' => $factory
                 ], 200);
            }
            else
            {
+            foreach ($results as &$item1) {
+                $item1['notifications']=[];
+            }
             return response()->json([
-                'data' => $results,
+                'stocks' => $results,
+                'Factorys' => $factory
             ], 200);
            }
 

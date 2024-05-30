@@ -386,7 +386,8 @@ class ProductionController extends Controller
 
         return response()->json([
             'data' => $results,
-            'noti_choxacnhan' => $data, 'noti_phoixuly' => $data2
+            'noti_choxacnhan' => $data, 
+            'noti_phoixuly' => $data2
         ], 200);
     }
 
@@ -502,16 +503,18 @@ class ProductionController extends Controller
                 ];
             }
 
-            if ($CongDoan === 'SC') {
-                // Tính toán giá trị OnHand dựa trên yêu cầu khi $CongDoan là 'SC'
-                $quantity = HistorySL::where('to', $request->TO)
-                    ->where('itemchild', $itemCode)
-                    ->sum(DB::raw('quantity * ' . $baseQty)); // Tính giá trị tổng quantity * baseQty
+            $groupedResults[$subItemCode]['OnHand'] = $onHand;
 
-                $groupedResults[$subItemCode]['OnHand'] = ceil($onHand - $quantity); // Làm tròn lên
-            } else {
-                $groupedResults[$subItemCode]['OnHand'] = $onHand;
-            }
+            // if ($CongDoan === 'SC') {
+            //     // Tính toán giá trị OnHand dựa trên yêu cầu khi $CongDoan là 'SC'
+            //     $quantity = HistorySL::where('to', $request->TO)
+            //         ->where('itemchild', $itemCode)
+            //         ->sum(DB::raw('quantity * ' . $baseQty)); // Tính giá trị tổng quantity * baseQty
+
+            //     $groupedResults[$subItemCode]['OnHand'] = ceil($onHand - $quantity); // Làm tròn lên
+            // } else {
+            //     $groupedResults[$subItemCode]['OnHand'] = $onHand;
+            // }
         }
 
         $maxQuantities = [];
