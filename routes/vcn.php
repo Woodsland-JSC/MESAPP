@@ -14,7 +14,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('remove-receipt', [VCNController::class, 'delete']);
         Route::post('/accept-receipts', [VCNController::class, 'accept']);
         Route::post('/reject-receipts', [VCNController::class, 'reject']);
-        Route::post('/accept-qc-receipts', [VCNController::class, 'AcceptQCVCN']);
+        Route::post('/accept-qc', [VCNController::class, 'AcceptQCVCN']);
         Route::get('/danh-sach-phoi-cho-nhan', [VCNController::class, 'dsphoipending']);
     });
 });
