@@ -1109,8 +1109,8 @@ function User() {
                                                 }
                                                 options={sapId}
                                                 onChange={(value) => {
-                                                    console.log("Giá trị trước khi thay đổi:", values.sapId);
-                                                    console.log("Giá trị sau khi thay đổi:", value);
+                                                    // console.log("Giá trị trước khi thay đổi:", values.sapId);
+                                                    // console.log("Giá trị sau khi thay đổi:", value);
                                                     setInput((prev) => ({
                                                         ...prev,
                                                         sapId: value

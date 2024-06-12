@@ -85,6 +85,11 @@ const productionApi = {
         const url = `/vcn/receipts-production`;
         return axiosClient().post(url, data);
     },
+    enterFinishedRongAmountVCN: (data) => {
+        // const url = `/v2/production/receipts-production`;
+        const url = `/vcn/receipts-productions-rong`;
+        return axiosClient().post(url, data);
+    },
     deleteReceiptCBG: (payload) => {
         const url = `/production/remove-receipt`;
         return axiosClient().delete(url, { data: payload });

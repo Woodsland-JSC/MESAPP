@@ -12,6 +12,7 @@ use App\Models\historySLVCN;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
 use App\Rules\AtLeastOneQty;
+
 class VCNController extends Controller
 {
     // Ghi nhận sản lượng
@@ -63,9 +64,9 @@ class VCNController extends Controller
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 0,
                     'openQty' => 0,
-                    'ProdType'=> $request->ProdType,
-                    'version'=> $request->version,
-                    'CreatedBy'=> Auth::user()->id,
+                    'ProdType' => $request->ProdType,
+                    'version' => $request->version,
+                    'CreatedBy' => Auth::user()->id,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
             }
@@ -76,15 +77,15 @@ class VCNController extends Controller
                     'ItemCode' => $request->ItemCode,
                     'ItemName' => $request->ItemName,
                     'Quantity' => $request->RejectQty,
-                    'SubItemCode' => $request->SubItemCode,//mã báo lỗi
-                    'SubItemName' => $request->SubItemName,//tên mã báo lỗi
+                    'SubItemCode' => $request->SubItemCode, //mã báo lỗi
+                    'SubItemName' => $request->SubItemName, //tên mã báo lỗi
                     'team' => $request->Team,
                     'NextTeam' => $toqc,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
                     'type' => 1,
                     'openQty' => $request->RejectQty,
-                    'ProdType'=> $request->ProdType,
+                    'ProdType' => $request->ProdType,
                     'ErrorData' => $errorData,
                     'MaThiTruong' => $request->MaThiTruong,
                 ]);
@@ -142,17 +143,17 @@ class VCNController extends Controller
                 ];
             }
             // 3.2. Tạo key có giá trị hỗn hợp là ItemChild.TO.TOTT
-            $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'].$row['Version'];
+            $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'] . $row['Version'];
 
             $details = [
                 'ItemChild' => $row['ItemChild'],
                 'ChildName' => $row['ChildName'],
-                'Version'=>$row['Version'],
-                'ProdType'=> $row['ProType'],
+                'Version' => $row['Version'],
+                'ProdType' => $row['ProType'],
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],
-                'CDOAN'=>$row['CDOAN'],
+                'CDOAN' => $row['CDOAN'],
                 'LSX' => [
                     [
                         'LSX' => $row['LSX'],
@@ -171,7 +172,7 @@ class VCNController extends Controller
             // Check if the composite key already exists
             $compositeKeyExists = false;
             foreach ($results[$key]['Details'] as &$existingDetails) {
-                $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'].$existingDetails['Version'];
+                $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'] . $existingDetails['Version'];
                 if ($existingKey === $detailsKey) {
                     $existingDetails['LSX'][] = $details['LSX'][0];
                     $existingDetails['totalsanluong'] += $row['SanLuong'];
@@ -193,7 +194,7 @@ class VCNController extends Controller
             }
         }
         // collect stock pending
-        $stockpending =notireceiptVCN::where('type', 0)
+        $stockpending = notireceiptVCN::where('type', 0)
             ->where('Team', $request->TO)
             ->where('deleted', '!=', 1)
             ->groupBy('FatherCode', 'ItemCode', 'Team', 'NextTeam')
@@ -208,7 +209,7 @@ class VCNController extends Controller
             ->get();
         if ($stockpending !== null) {
             foreach ($results as &$result) {
-                
+
                 $SPDICH = $result['SPDICH'];
                 foreach ($result['Details'] as &$details) {
                     $ItemChild = $details['ItemChild'];
@@ -225,7 +226,7 @@ class VCNController extends Controller
                     }
                 }
             }
-        }   
+        }
 
         $data = null;
         $datacxl = null;
@@ -234,8 +235,8 @@ class VCNController extends Controller
         if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
             $data = null;
         } else {
-            $data =notireceiptVCN::where('type','=', 0)->where('NextTeam', $request->TO)->where('confirm','=', 0)
-            ->where('deleted','=', 0)->get();
+            $data = notireceiptVCN::where('type', '=', 0)->where('NextTeam', $request->TO)->where('confirm', '=', 0)
+                ->where('deleted', '=', 0)->get();
             // $datacxl= notireceiptVCN::where('type','=', 1)->where('NextTeam', $request->TO)->where('confirm','=', 0)
             //     ->where('deleted','=', 0)->get();
         }
@@ -375,10 +376,10 @@ class VCNController extends Controller
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
 
-            $maxQuantity = floor($onHand / $baseQty); 
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
-   
+
         // Tìm số lượng tối thiểu 
         $maxQty = $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
 
@@ -403,12 +404,12 @@ class VCNController extends Controller
             ],
         ];
 
-        $ItemInfo=notireceiptVCN::where('ItemCode',$request->ItemCode)
-        ->select(
-            'ItemCode',
-            'ItemName',
-        )
-        ->first();
+        $ItemInfo = notireceiptVCN::where('ItemCode', $request->ItemCode)
+            ->select(
+                'ItemCode',
+                'ItemName',
+            )
+            ->first();
 
         // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
         $notification = DB::table('notireceiptVCN as a')
@@ -438,9 +439,9 @@ class VCNController extends Controller
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO)
             ->get();
-        
-            // dd($notification);
-            $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
+
+        // dd($notification);
+        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
 
         // 5. Trả về kết quả cho người dùng
         return response()->json([
@@ -448,7 +449,7 @@ class VCNController extends Controller
             'CongDoan'  =>  $CongDoan,
             'SubItemWhs' => $SubItemWhs,
             'notifications' => $notification,
-            'stock' => $groupedResults,
+            'stocks' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'remainQty' =>   $RemainQuantity,
@@ -464,7 +465,7 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data =notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
+        $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
@@ -493,38 +494,38 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        $data =notireceiptVCN::where('id', $request->id)->where('deleted', 0)->first();
+        $data = notireceiptVCN::where('id', $request->id)->where('deleted', 0)->first();
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
         notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
 
         $notification = DB::table('notireceiptVCN as a')
-        ->join('users as c', 'a.CreatedBy', '=', 'c.id')
-        ->select(
-            'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
-            'a.team',
-            'CDay',
-            'CRong',
-            'CDai',
-            'a.Quantity',
-            'a.created_at',
-            'c.first_name',
-            'c.last_name',
-            'a.text',
-            'a.id',
-            'a.type',
-            'a.confirm'
-        )
-        ->where('a.confirm', '!=', 1)
-        ->where('a.deleted', '=', 0)
-        ->where('a.FatherCode', '=', $request->SPDICH)
-        ->where('a.ItemCode', '=', $request->ItemCode)
-        ->where('a.Team', '=', $request->TO)
-        ->get();
-    
+            ->join('users as c', 'a.CreatedBy', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'a.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'a.text',
+                'a.id',
+                'a.type',
+                'a.confirm'
+            )
+            ->where('a.confirm', '!=', 1)
+            ->where('a.deleted', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO)
+            ->get();
+
         $WaitingConfirmQty = $notification->sum('Quantity');
 
         return response()->json([
@@ -590,7 +591,7 @@ class VCNController extends Controller
         try {
             DB::beginTransaction();
             // to bình thường
-            $data =notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
+            $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
@@ -689,7 +690,7 @@ class VCNController extends Controller
     }
     function getQCWarehouseByUser($plant)
     {
-        $WHS=GetWhsCode(Auth::user()->plant,'QC');
+        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
         return $WHS;
     }
     function AcceptQCVCN(Request $request)
@@ -704,7 +705,7 @@ class VCNController extends Controller
         try {
             DB::beginTransaction();
             // to bình thường
-            $data =notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
+            $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
@@ -815,17 +816,16 @@ class VCNController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
             // Return validation errors with a 422 Unprocessable Entity status code
         }
-        try
-        { // 2. Truy vấn cơ sở dữ liệu SAP
+        try { // 2. Truy vấn cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
-    
+
             $query = 'call "USP_ChiTietSLVCN_RONG"(?,?,?)';
             $stmt = odbc_prepare($conDB, $query);
-    
+
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-    
+
             if (!odbc_execute($stmt, [$request->FatherCode, $request->TO, $request->version])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
@@ -849,71 +849,89 @@ class VCNController extends Controller
                 ],
             ];
 
-            // lấy data dở dàng 
-            $data= notireceiptVCN::select('ItemCode', 'version')
-            ->selectRaw('SUM(CASE WHEN type = 1 THEN openQty ELSE Quantity END) AS TotalQuantity')
-            ->where('FatherCode', $request->FatherCode)
-            ->where('Team', $request->TO)
-            ->where('version', $request->version)
-            ->where('confirm','=', 0)
-            ->where('deleted','=', 0)
-            ->groupBy('ItemCode', 'version')
-            ->get();
-           
-           if($data->count()>0)
-           {
-            //** trừ đi giá trị đang dở dang ở webportal */
-           // Map mảng 2 theo ItemCode và version
-            $map = [];
-            foreach ($data as $item) {
-                $itemCode = $item['ItemCode'];
-                $map[$itemCode][$item['version']] = $item['TotalQuantity'];
-            }
-    
-            // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
-            foreach ($results as &$item1) {
-                $itemCode = $item1['ItemCode'];
-                $notiData= notireceiptVCN::where('FatherCode', $request->FatherCode)
-                ->where('Team', $request->TO)
-                ->where('ItemCode', $itemCode)
-                ->where('version', $request->version)
-                ->where('confirm','=', 0)
-                ->where('deleted','=', 0)
-                ->get();
-                if (isset($map[$itemCode])) {
-                    foreach ($map[$itemCode] as $version => $totalQuantity) {
-                        $item1['ConLai'] -= $totalQuantity;
+            // Lấy công đoạn hiện tại
+            $CongDoan = null;
+            foreach ($results as $result) {
+                $U_CDOAN = $result['U_CDOAN'];
+
+                if ($CongDoan === null) {
+                    $CongDoan = $U_CDOAN;
+                } else {
+                    if ($U_CDOAN !== $CongDoan) {
+                        return response()->json(['error' => 'Các giá trị của U_CDOAN trong LSX không giống nhau!'], 422);
                     }
                 }
-                $item1['ConLai'] = (float) $item1['ConLai'];
-                $item1['notifications']=$notiData;
             }
-            
-            return response()->json([
+
+            // lấy data dở dàng 
+            $data = notireceiptVCN::select('ItemCode', 'version')
+                ->selectRaw('SUM(CASE WHEN type = 1 THEN openQty ELSE Quantity END) AS TotalQuantity')
+                ->where('FatherCode', $request->FatherCode)
+                ->where('Team', $request->TO)
+                ->where('version', $request->version)
+                ->where('confirm', '=', 0)
+                ->where('deleted', '=', 0)
+                ->groupBy('ItemCode', 'version')
+                ->get();
+
+            if ($data->count() > 0) {
+                //** trừ đi giá trị đang dở dang ở webportal */
+                // Map mảng 2 theo ItemCode và version
+                $map = [];
+                foreach ($data as $item) {
+                    $itemCode = $item['ItemCode'];
+                    $map[$itemCode][$item['version']] = $item['TotalQuantity'];
+                }
+
+                // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
+                foreach ($results as &$item1) {
+                    $itemCode = $item1['ItemCode'];
+                    $notiData = notireceiptVCN::where('FatherCode', $request->FatherCode)
+                        ->where('Team', $request->TO)
+                        ->where('ItemCode', $itemCode)
+                        ->where('version', $request->version)
+                        ->where('confirm', '=', 0)
+                        ->where('deleted', '=', 0)
+                        ->get();
+                    if (isset($map[$itemCode])) {
+                        foreach ($map[$itemCode] as $version => $totalQuantity) {
+                            $item1['ConLai'] -= $totalQuantity;
+                        }
+                    }
+                    $item1['ConLai'] = (float) $item1['ConLai'];
+                    $item1['notifications'] = $notiData;
+                }
+
+
+
+                return response()->json([
+                    'CongDoan' => $CongDoan,
                     'stocks' => $results,
                     'Factorys' => $factory
                 ], 200);
-           }
-           else
-           {
-            foreach ($results as &$item1) {
-                $item1['notifications']=[];
+            } else {
+                foreach ($results as &$item1) {
+                    $item1['notifications'] = [];
+                }
+                // $stocks = [];
+                // foreach ($results as $result) {
+                //     unset($result['U_CDOAN']);
+                //     $stocks[] = $result;
+                // }
+                return response()->json([
+                    'CongDoan' => $CongDoan,
+                    // 'stocks' => $stocks,
+                    'stocks' => $results,
+                    'Factorys' => $factory
+                ], 200);
             }
-            return response()->json([
-                'stocks' => $results,
-                'Factorys' => $factory
-            ], 200);
-           }
-
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
                 'message' => $e->getMessage()
             ], 500);
         }
-       
     }
     function receiptRong(Request $request)
     {
@@ -948,14 +966,13 @@ class VCNController extends Controller
         try {
             DB::beginTransaction();
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
-            foreach($request->Data as $dt)
-            {
-                $errorData = json_encode($dt['ErrorData']);
-                if ($dt['CompleQty']> 0) {
+            foreach ($request->Data as $dt) {
+               
+                if ($dt['CompleQty'] > 0) {
                     $notifi = notireceiptVCN::create([
                         'text' => 'Production information waiting for confirmation',
                         'Quantity' => $dt['CompleQty'],
-                        'MaThiTruong' => $dt['MaThiTruong']??null,
+                        'MaThiTruong' => $dt['MaThiTruong'] ?? null,
                         'FatherCode' => $dt['FatherCode'],
                         'ItemCode' => $dt['ItemCode'],
                         'ItemName' => $dt['ItemName'],
@@ -965,9 +982,9 @@ class VCNController extends Controller
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
                         'type' => 0,
                         'openQty' => 0,
-                        'ProdType'=> $dt['ProdType'],
-                        'version'=> $dt['version'],
-                        'CreatedBy'=> Auth::user()->id,
+                        'ProdType' => $dt['ProdType'],
+                        'version' => $dt['version'],
+                        'CreatedBy' => Auth::user()->id,
                     ]);
                     $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
                 }
@@ -978,22 +995,23 @@ class VCNController extends Controller
                         'ItemCode' => $dt['ItemCode'],
                         'ItemName' => $dt['ItemName'],
                         'Quantity' => $dt['RejectQty'],
-                        'SubItemCode' => $dt['SubItemCode']??null,//mã báo lỗi
-                        'SubItemName' => $dt['SubItemName']??null,//tên mã báo lỗi
+                        'SubItemCode' => $dt['SubItemCode'] ?? null, //mã báo lỗi
+                        'SubItemName' => $dt['SubItemName'] ?? null, //tên mã báo lỗi
                         'team' => $dt['Team'],
                         'NextTeam' => $toqc,
                         'CongDoan' => $dt['CongDoan'],
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
                         'type' => 1,
                         'openQty' => $dt['RejectQty'],
-                        'ProdType'=> $dt['ProdType'],
-                        'ErrorData' => $errorData,
-                        'MaThiTruong' => $dt['MaThiTruong']??null,
+                        'ProdType' => $dt['ProdType'],
+                        'version' => $dt['version'],
+                        'CreatedBy' => Auth::user()->id,
+                        'MaThiTruong' => $dt['MaThiTruong'] ?? null,
                     ]);
                     $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
                 }
             }
-           
+
             DB::commit();
         } catch (\Exception | QueryException $e) {
             DB::rollBack();

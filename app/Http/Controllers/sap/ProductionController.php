@@ -640,7 +640,7 @@ class ProductionController extends Controller
             'CongDoan'  =>  $CongDoan,
             'SubItemWhs' => $SubItemWhs,
             'notifications' => $notification,
-            'stock' => $groupedResults,
+            'stocks' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'WaitingQCItemQty' => $WaitingQCItemQty,
@@ -1013,7 +1013,7 @@ class ProductionController extends Controller
             'message' => 'success',
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'WaitingQCItemQty' => $WaitingQCItemQty,
-            'stock' => $groupedResults,
+            'stocks' => $groupedResults,
         ], 200);
     }
     function collectdata($spdich, $item, $to)
@@ -1620,7 +1620,7 @@ class ProductionController extends Controller
         return response()->json([
             'Factorys' => $factory,
             'notifications' => $notification,
-            'stock' => $groupedResults,
+            'stocks' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'remainQty' =>   $RemainQuantity,

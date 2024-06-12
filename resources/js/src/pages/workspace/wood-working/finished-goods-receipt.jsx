@@ -459,18 +459,6 @@ function FinishedGoodsReceipt() {
         onClose: onModalClose,
     } = useDisclosure();
 
-    // const { activeStep, setActiveStep } = useSteps({
-    //     index: 0,
-    //     count: steps.length,
-    // });
-    // const { isOpen, onOpen, onClose } = useDisclosure();
-
-    // const [awaitingReception, setAwaitingReception] = useState({
-    //     "TH-X3SC": [],
-    //     "TH-X3TC1": [],
-    //     "TH-X3TC2": [],
-    //     "TH-X3S": [],
-    // });
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
@@ -519,23 +507,10 @@ function FinishedGoodsReceipt() {
                 prev.filter((item) => item.id !== id)
             );
             toast.success("Huỷ bỏ & chuyển lại thành công.");
-            // setAwaitingReception((prev) => {
-            //     const groupKey = selectedGroup.value;
-            //     const updatedGroup = awaitingReception[groupKey].filter(
-            //         (item, i) => i !== index
-            //     );
-            //     return {
-            //         ...prev,
-            //         [groupKey]: updatedGroup,
-            //     };
-            // });
         }
         if (awaitingReception.length <= 0) {
             onModalClose();
         }
-        // console.log("Ra index: ", index);
-        // console.log("Thực hiện reject: ", reason);
-        // console.log("Ra example data: ", exampleData);
     };
 
     const onFilterTextBoxChanged = async (e) => {
@@ -599,8 +574,6 @@ function FinishedGoodsReceipt() {
                 }));
                 setGroupList(res);
                 setGroupListOptions(options);
-                // console.log("New Get All Group: ", options);
-                // setSelectedGroup(options[0]);
                 groupSelectRef?.current?.setValue(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
@@ -663,17 +636,6 @@ function FinishedGoodsReceipt() {
                     TO: selectedGroup.value,
                 };
                 getDataFollowingGroup(params);
-
-                if (selectedGroup.value == "TH-X3SC") {
-                    setCurrentData(exampleData);
-                } else if (selectedGroup.value == "TH-X3TC1") {
-                    setCurrentData(exampleData1);
-                } else if (selectedGroup.value == "TH-X3TC2") {
-                    setCurrentData(exampleData2);
-                } else {
-                    setCurrentData([]);
-                }
-                // setLoadingData(false);
             }
         })();
     }, [selectedGroup]);
