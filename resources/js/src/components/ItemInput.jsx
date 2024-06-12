@@ -1001,7 +1001,7 @@ const ItemInput = ({
                                                         <label className="mt-6  font-semibold">
                                                             Số lượng ghi nhận sản phẩm:
                                                         </label>
-                                                        {selectedItemDetails?.maxQty <=
+                                                        {(selectedItemDetails?.maxQty) <=
                                                         0 ? (
                                                             <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                                 <MdDangerous className="w-6 h-6" />
@@ -1406,7 +1406,7 @@ const ItemInput = ({
                                             </div>
                                             <div className="space-y-2 pb-3">
                                                 <Text className="font-semibold px-2">
-                                                    Số lượng phôi đã nhận và
+                                                    Số phôi đã nhận và
                                                     phôi tồn tại tổ:
                                                 </Text>
                                                 {/* BOM Item Group */}
@@ -1415,7 +1415,7 @@ const ItemInput = ({
                                                         <div
                                                             key={index}
                                                             className={`${
-                                                                item.OnHand <= 0
+                                                                (item.OnHand - selectedItemDetails.WaitingQCItemQty - selectedItemDetails.WaitingConfirmQty) <= 0
                                                                     ? "bg-gray-100"
                                                                     : "bg-blue-100"
                                                             } flex flex-col py-2  mb-6 rounded-xl`}
@@ -1460,29 +1460,16 @@ const ItemInput = ({
                                                                 </div>
                                                                 <span
                                                                     className={`${
-                                                                        item.OnHand <=
+                                                                        (item.OnHand - selectedItemDetails.WaitingQCItemQty - selectedItemDetails.WaitingConfirmQty) <=
                                                                         0
                                                                             ? "bg-gray-500"
                                                                             : "bg-[#155979]"
                                                                     } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {(
-                                                                        parseInt(
-                                                                            item.OnHand ||
-                                                                                0
-                                                                        ) -
-                                                                        parseInt(
-                                                                            item.BaseQty ||
-                                                                                0
-                                                                        ) *
-                                                                            parseInt(
-                                                                                selectedItemDetails.WaitingQCItemQty ||
-                                                                                    0
-                                                                            ) -
-                                                                        parseInt(
-                                                                            item.WaitingQty ||
-                                                                                0
-                                                                        )
+                                                                        parseInt(item.OnHand ||0) -
+                                                                        parseInt( item.BaseQty ||0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0) -
+                                                                        parseInt(selectedItemDetails.WaitingConfirmQty || 0)
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>
@@ -1634,7 +1621,7 @@ const ItemInput = ({
                                                 <label className="mt-6  font-semibold">
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
-                                                {selectedItemDetails?.maxQty <=
+                                                {selectedItemDetails?.maxQty - selectedItemDetails?.WaitingConfirmQty - selectedItemDetails?.WaitingQCItemQty <=
                                                 0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
@@ -1919,189 +1906,136 @@ const ItemInput = ({
                                                 </div>
                                                 <Box className="px-2 pt-2">
                                                     <label className="font-semibold ">
-                                                        Số lượng ghi nhận lỗi
+                                                        Số lượng ghi nhận lỗi:
                                                     </label>
-                                                    <NumberInput
-                                                        step={1}
-                                                        min={0}
-                                                        className="mt-2"
-                                                        value={faultyAmount}
-                                                        onChange={(value) => {
-                                                            if (
-                                                                value >
-                                                                selectedItemDetails.stockQuantity
-                                                            ) {
-                                                                setFaultyAmount(
-                                                                    selectedItemDetails.stockQuantity
-                                                                );
-                                                                setFaults(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        amount: selectedItemDetails.stockQuantity,
-                                                                    })
-                                                                );
-                                                            } else {
-                                                                setFaultyAmount(
-                                                                    value
-                                                                );
-                                                                setFaults(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        amount: value,
-                                                                    })
-                                                                );
-                                                            }
-                                                            if (
-                                                                value == 0 ||
-                                                                !value
-                                                            ) {
-                                                                setSelectedFaultItem(
-                                                                    {
-                                                                        ItemCode:
-                                                                            "",
-                                                                        ItemName:
-                                                                            "",
-                                                                        SubItemCode:
-                                                                            "",
-                                                                        SubItemName:
-                                                                            "",
-                                                                        SubItemBaseQty:
-                                                                            "",
-                                                                        OnHand: "",
-                                                                        WaitingQty:
-                                                                            "",
+                                                    {/*  */}
+                                                    {selectedItemDetails?.maxQty - selectedItemDetails?.WaitingConfirmQty - selectedItemDetails?.WaitingQCItemQty <=
+                                                    0 ? (
+                                                        <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
+                                                            <MdDangerous className="w-6 h-6" />
+                                                            <div>
+                                                                Không đủ số lượng để
+                                                                ghi nhận
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <NumberInput
+                                                                step={1}
+                                                                min={0}
+                                                                className="mt-2"
+                                                                value={faultyAmount}
+                                                                onChange={(value) => {
+                                                                    if (
+                                                                        value >
+                                                                        selectedItemDetails.stockQuantity
+                                                                    ) {
+                                                                        setFaultyAmount(
+                                                                            selectedItemDetails.stockQuantity
+                                                                        );
+                                                                        setFaults(
+                                                                            (prev) => ({
+                                                                                ...prev,
+                                                                                amount: selectedItemDetails.stockQuantity,
+                                                                            })
+                                                                        );
+                                                                    } else {
+                                                                        setFaultyAmount(
+                                                                            value
+                                                                        );
+                                                                        setFaults(
+                                                                            (prev) => ({
+                                                                                ...prev,
+                                                                                amount: value,
+                                                                            })
+                                                                        );
                                                                     }
-                                                                );
-                                                                setFaults(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        factory:
-                                                                            null,
-                                                                    })
-                                                                );
-                                                            }
-                                                        }}
-                                                    >
-                                                        <NumberInputField />
-                                                        <NumberInputStepper>
-                                                            <NumberIncrementStepper />
-                                                            <NumberDecrementStepper />
-                                                        </NumberInputStepper>
-                                                    </NumberInput>
-                                                    {!faultyAmount ||
-                                                        (faultyAmount > 0 && (
-                                                            <>
-                                                                <div className="my-3 font-medium text-[15px] text-red-700">
-                                                                    Lỗi thành
-                                                                    phẩm:
-                                                                </div>
-                                                                <div
-                                                                    className={`mb-4 ml-3 text-gray-600 
-                                                        ${
-                                                            selectedFaultItem.ItemCode ===
-                                                            choosenItem.ItemChild
-                                                                ? "font-semibold text-gray-800 "
-                                                                : "text-gray-600"
-                                                        }`}
-                                                                    key={index}
-                                                                >
-                                                                    <Radio
-                                                                        ref={
-                                                                            checkRef
-                                                                        }
-                                                                        value={
-                                                                            choosenItem.ChildName
-                                                                        }
-                                                                        isChecked={
-                                                                            selectedFaultItem.ItemCode ===
-                                                                            choosenItem.ItemChild
-                                                                        }
-                                                                        onChange={() => {
-                                                                            setSelectedFaultItem(
-                                                                                {
-                                                                                    ItemCode:
-                                                                                        choosenItem.ItemChild,
-                                                                                    ItemName:
-                                                                                        choosenItem.ChildName,
-                                                                                    SubItemCode:
-                                                                                        "",
-                                                                                    SubItemName:
-                                                                                        "",
-                                                                                    SubItemBaseQty:
-                                                                                        "",
-                                                                                    OnHand: "",
-                                                                                    WaitingQty:
-                                                                                        "",
-                                                                                }
-                                                                            );
-                                                                            setIsItemCodeDetech(
-                                                                                true
-                                                                            );
-                                                                            console.log(
-                                                                                "Giá trị đã chọn: ",
-                                                                                selectedFaultItem
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        {
-                                                                            choosenItem.ChildName
-                                                                        }
-                                                                    </Radio>
-                                                                </div>
-
-                                                                <div className="my-3 font-medium text-[15px] text-red-700">
-                                                                    Lỗi bán
-                                                                    thành phẩm
-                                                                    công đoạn
-                                                                    trước:
-                                                                </div>
-                                                                {selectedItemDetails?.stock.map(
-                                                                    (
-                                                                        item,
-                                                                        index
-                                                                    ) => (
-                                                                        <div
-                                                                            className={`mb-4 ml-3  ${
-                                                                                selectedFaultItem.SubItemCode ===
-                                                                                item.SubItemCode
-                                                                                    ? "font-semibold text-gray-800 "
-                                                                                    : "text-gray-600"
-                                                                            }`}
-                                                                            key={
-                                                                                index
+                                                                    if (
+                                                                        value == 0 ||
+                                                                        !value
+                                                                    ) {
+                                                                        setSelectedFaultItem(
+                                                                            {
+                                                                                ItemCode:
+                                                                                    "",
+                                                                                ItemName:
+                                                                                    "",
+                                                                                SubItemCode:
+                                                                                    "",
+                                                                                SubItemName:
+                                                                                    "",
+                                                                                SubItemBaseQty:
+                                                                                    "",
+                                                                                OnHand: "",
+                                                                                WaitingQty:
+                                                                                    "",
                                                                             }
+                                                                        );
+                                                                        setFaults(
+                                                                            (prev) => ({
+                                                                                ...prev,
+                                                                                factory:
+                                                                                    null,
+                                                                            })
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <NumberInputField />
+                                                                <NumberInputStepper>
+                                                                    <NumberIncrementStepper />
+                                                                    <NumberDecrementStepper />
+                                                                </NumberInputStepper>
+                                                            </NumberInput>
+                                                            
+                                                            {!faultyAmount ||
+                                                                (faultyAmount > 0 && (
+                                                                    <>
+                                                                        <div className="my-3 font-medium text-[15px] text-red-700">
+                                                                            Lỗi thành
+                                                                            phẩm:
+                                                                        </div>
+                                                                        <div
+                                                                            className={`mb-4 ml-3 text-gray-600 
+                                                                ${
+                                                                    selectedFaultItem.ItemCode ===
+                                                                    choosenItem.ItemChild
+                                                                        ? "font-semibold text-gray-800 "
+                                                                        : "text-gray-600"
+                                                                }`}
+                                                                            key={index}
                                                                         >
                                                                             <Radio
                                                                                 ref={
                                                                                     checkRef
                                                                                 }
                                                                                 value={
-                                                                                    item.SubItemCode
+                                                                                    choosenItem.ChildName
                                                                                 }
                                                                                 isChecked={
-                                                                                    selectedFaultItem.SubItemCode ===
-                                                                                    item.SubItemCode
+                                                                                    selectedFaultItem.ItemCode ===
+                                                                                    choosenItem.ItemChild
                                                                                 }
                                                                                 onChange={() => {
                                                                                     setSelectedFaultItem(
                                                                                         {
                                                                                             ItemCode:
-                                                                                                "",
+                                                                                                choosenItem.ItemChild,
                                                                                             ItemName:
-                                                                                                "",
+                                                                                                choosenItem.ChildName,
                                                                                             SubItemCode:
-                                                                                                item.SubItemCode,
+                                                                                                "",
                                                                                             SubItemName:
-                                                                                                item.SubItemName,
+                                                                                                "",
                                                                                             SubItemBaseQty:
-                                                                                                item.BaseQty,
-                                                                                            OnHand: item.OnHand,
+                                                                                                "",
+                                                                                            OnHand: "",
                                                                                             WaitingQty:
-                                                                                                item.WaitingQty,
+                                                                                                "",
                                                                                         }
                                                                                     );
                                                                                     setIsItemCodeDetech(
-                                                                                        false
+                                                                                        true
                                                                                     );
                                                                                     console.log(
                                                                                         "Giá trị đã chọn: ",
@@ -2110,56 +2044,127 @@ const ItemInput = ({
                                                                                 }}
                                                                             >
                                                                                 {
-                                                                                    item.SubItemName
+                                                                                    choosenItem.ChildName
                                                                                 }
                                                                             </Radio>
                                                                         </div>
-                                                                    )
-                                                                )}
-                                                            </>
-                                                        ))}
+
+                                                                        <div className="my-3 font-medium text-[15px] text-red-700">
+                                                                            Lỗi bán
+                                                                            thành phẩm
+                                                                            công đoạn
+                                                                            trước:
+                                                                        </div>
+                                                                        {selectedItemDetails?.stocks.map(
+                                                                            (
+                                                                                item,
+                                                                                index
+                                                                            ) => (
+                                                                                <div
+                                                                                    className={`mb-4 ml-3  ${
+                                                                                        selectedFaultItem.SubItemCode ===
+                                                                                        item.SubItemCode
+                                                                                            ? "font-semibold text-gray-800 "
+                                                                                            : "text-gray-600"
+                                                                                    }`}
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                >
+                                                                                    <Radio
+                                                                                        ref={
+                                                                                            checkRef
+                                                                                        }
+                                                                                        value={
+                                                                                            item.SubItemCode
+                                                                                        }
+                                                                                        isChecked={
+                                                                                            selectedFaultItem.SubItemCode ===
+                                                                                            item.SubItemCode
+                                                                                        }
+                                                                                        onChange={() => {
+                                                                                            setSelectedFaultItem(
+                                                                                                {
+                                                                                                    ItemCode:
+                                                                                                        "",
+                                                                                                    ItemName:
+                                                                                                        "",
+                                                                                                    SubItemCode:
+                                                                                                        item.SubItemCode,
+                                                                                                    SubItemName:
+                                                                                                        item.SubItemName,
+                                                                                                    SubItemBaseQty:
+                                                                                                        item.BaseQty,
+                                                                                                    OnHand: item.OnHand,
+                                                                                                    WaitingQty:
+                                                                                                        item.WaitingQty,
+                                                                                                }
+                                                                                            );
+                                                                                            setIsItemCodeDetech(
+                                                                                                false
+                                                                                            );
+                                                                                            console.log(
+                                                                                                "Giá trị đã chọn: ",
+                                                                                                selectedFaultItem
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        {
+                                                                                            item.SubItemName
+                                                                                        }
+                                                                                    </Radio>
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                    </>
+                                                            ))}
+                                                        </>
+                                                    )}
                                                 </Box>
-                                                <Box className="px-2 pt-2">
-                                                    <label className="font-semibold">
-                                                        Lỗi phôi nhận từ nhà máy
-                                                        khác:
-                                                    </label>
-                                                    <Select
-                                                        className="mt-2 mb-2"
-                                                        placeholder="Lựa chọn"
-                                                        options={
-                                                            selectedItemDetails?.factories
-                                                        }
-                                                        isClearable
-                                                        isSearchable
-                                                        value={faults.factory}
-                                                        onChange={(value) => {
-                                                            if (
-                                                                !faultyAmount ||
-                                                                faultyAmount < 1
-                                                            ) {
-                                                                toast(
-                                                                    "Vui lòng khai báo số lượng lỗi."
-                                                                );
-                                                                setFaults(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        factory:
-                                                                            null,
-                                                                    })
-                                                                );
-                                                            } else {
-                                                                setFaults(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        factory:
-                                                                            value,
-                                                                    })
-                                                                );
-                                                            }
-                                                        }}
-                                                    />
-                                                </Box>
+                                                {(selectedItemDetails?.maxQty - selectedItemDetails?.   WaitingConfirmQty - selectedItemDetails?.WaitingQCItemQty >
+                                                    0) && (
+                                                    <Box className="px-2 pt-2">
+                                                            <label className="font-semibold">
+                                                                Lỗi phôi nhận từ nhà máy
+                                                                khác:
+                                                            </label>
+                                                            <Select
+                                                                className="mt-2 mb-2"
+                                                                placeholder="Lựa chọn"
+                                                                options={
+                                                                    selectedItemDetails?.factories
+                                                                }
+                                                                isClearable
+                                                                isSearchable
+                                                                value={faults.factory}
+                                                                onChange={(value) => {
+                                                                    if (
+                                                                        !faultyAmount ||
+                                                                        faultyAmount < 1
+                                                                    ) {
+                                                                        toast(
+                                                                            "Vui lòng khai báo số lượng lỗi."
+                                                                        );
+                                                                        setFaults(
+                                                                            (prev) => ({
+                                                                                ...prev,
+                                                                                factory:
+                                                                                    null,
+                                                                            })
+                                                                        );
+                                                                    } else {
+                                                                        setFaults(
+                                                                            (prev) => ({
+                                                                                ...prev,
+                                                                                factory:
+                                                                                    value,
+                                                                            })
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            />
+                                                    </Box> 
+                                                )}
                                             </div>
                                         )}
                                     </>
