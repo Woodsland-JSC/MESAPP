@@ -1580,8 +1580,8 @@ const ItemInput = ({
                                                                 >
                                                                     {(
                                                                         parseInt(item.OnHand ||0) -
-                                                                        parseInt( item.BaseQty ||0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0) -
-                                                                        parseInt(selectedItemDetails.WaitingConfirmQty || 0) - parseInt( item.WaitingQty ||0)
+                                                                        (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) -
+                                                                        (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty ||0)
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>
