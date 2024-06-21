@@ -627,7 +627,7 @@ class ProductionController extends Controller
             $baseQty = $result['BaseQty'];
             $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor($onHand - $waitingQty / $baseQty);
+            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
@@ -984,7 +984,7 @@ class ProductionController extends Controller
             $baseQty = $result['BaseQty'];
             $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor($onHand - $waitingQty / $baseQty);
+            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
@@ -1535,16 +1535,16 @@ class ProductionController extends Controller
 
         $maxQuantities = [];
 
-
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
+            $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor($onHand / $baseQty);
+            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
-        // Tìm số lượng tối thiểu 
+        // Tìm số lượng tối thiểu
         $maxQty = min($maxQuantities);
 
         // Chuyển mảng kết quả về dạng danh sách
