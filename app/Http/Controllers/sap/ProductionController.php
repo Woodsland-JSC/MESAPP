@@ -564,6 +564,7 @@ class ProductionController extends Controller
             )
             ->where('b.confirm', '!=', 1)
             ->where('b.type', '=', 0)
+            ->where('b.deleted', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
