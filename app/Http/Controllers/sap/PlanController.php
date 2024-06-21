@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
-use App\Models\plandryings;
+use App\Models\planDryings;
 use App\Models\plandetail;
 use App\Models\humiditys;
 use App\Models\Disability;
@@ -44,7 +44,7 @@ class PlanController extends Controller
             $PlanData['CreateBy'] = Auth::user()->id;
             $PlanData['plant'] = Auth::user()->plant;
             // $PlanData['PlanDate'] = Carbon::now()->addDays($request->input('Time'));
-            $plandryings = plandryings::create($PlanData);
+            $plandryings = planDryings::create($PlanData);
 
             // lock lò sấy
             $sql = 'Update  "@G_SAY3" set "U_status"=1 where "Code"=?';
@@ -154,7 +154,7 @@ class PlanController extends Controller
         DB::beginTransaction();
         try {
             // Check if the referenced PlanID exists in the plandryings table
-            $existingPlan = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+            $existingPlan = planDryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if (!$existingPlan) {
                 throw new \Exception('Lò không hợp lệ.');
@@ -189,7 +189,7 @@ class PlanController extends Controller
             $totalPallet = plandetail::where('PlanID', $request->PlanID)
                 ->count();
 
-            plandryings::where('PlanID', $request->PlanID)
+            planDryings::where('PlanID', $request->PlanID)
                 ->update([
                     'Mass' => $totalMass,
                     'TotalPallet' => $totalPallet
@@ -199,7 +199,7 @@ class PlanController extends Controller
             $aggregateData = DB::table('plan_detail')->where('PlanID', $id)
                 ->selectRaw('COUNT(*) as count, SUM(Mass) as sumMass')->first();
 
-            plandryings::where('PlanID', $id)->update([
+            planDryings::where('PlanID', $id)->update([
                 'Status' => 1,
                 'TotalPallet' => $aggregateData->count,
                 'Mass' => $aggregateData->sumMass ?: 0,
@@ -235,10 +235,10 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
 
             if ($record->count() > 0) {
-                plandryings::where('PlanID', $id)->update(
+                planDryings::where('PlanID', $id)->update(
                     [
                         'Status' => 2,
                         'Checked' => 1,
@@ -292,7 +292,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
+            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [3, 4])->get();
             $detailrecord = plandetail::where('PlanID', $id)->count();
             $test = [];
             if ($detailrecord == 0) {
@@ -301,7 +301,7 @@ class PlanController extends Controller
             if ($record->count() > 0) {
                 //chắc chắn lò có pallet
 
-                plandryings::where('PlanID', $id)->update(
+                planDryings::where('PlanID', $id)->update(
                     [
                         'Status' => 3,
                         'RunBy' => Auth::user()->id,
@@ -309,7 +309,7 @@ class PlanController extends Controller
                     ]
                 );
 
-                $results = Plandryings::select(
+                $results = planDryings::select(
                     'planDryings.Code as newbatch',
                     'pallets.palletID',
                     'pallets.DocEntry',
@@ -376,21 +376,21 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = plandryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
+            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
             // Lấy kho sấy
             // $towarehouseS = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)
             //     ->where('FAC', Auth::user()->plant)
             //     ->first()->WhsCode;
             $towarehouse =  GetWhsCode(Auth::user()->plant,'SS');
             if ($record->count() > 0) {
-                plandryings::where('PlanID', $id)->update(
+                planDryings::where('PlanID', $id)->update(
                     [
                         'Status' => 4,
                         'CompletedBy' => Auth::user()->id,
                         'CompletedDate' => now(),
                     ]
                 );
-                $results = Plandryings::select(
+                $results = planDryings::select(
                     'planDryings.Code as newbatch',
                     'planDryings.Oven',
                     'pallets.DocEntry',
@@ -478,7 +478,7 @@ class PlanController extends Controller
     {
 
         // Assuming Plandryings is your model for the plandryings table
-        $plandrying = Plandryings::with('details')
+        $plandrying = planDryings::with('details')
             ->where('PlanID', $id)
             ->first();
         $humiditys = humiditys::where('PlanID', $id)->get();
@@ -554,10 +554,10 @@ class PlanController extends Controller
             );
         }
 
-        plandryings::where('PlanID', $id)->update(
+        planDryings::where('PlanID', $id)->update(
             array_merge($data, ['CheckedBy' => Auth::user()->id])
         );
-        $plandrying = Plandryings::where('PlanID', $id)
+        $plandrying = planDryings::where('PlanID', $id)
             ->first();
         $CT11Detail = logchecked::where('PlanID', $id)->select(
             'M1',
@@ -597,7 +597,7 @@ class PlanController extends Controller
         }
 
         // Check if the oven is valid
-        $check = plandryings::where('PlanID', $request->PlanID)->first();
+        $check = planDryings::where('PlanID', $request->PlanID)->first();
 
 
         if ($check) {
@@ -620,7 +620,7 @@ class PlanController extends Controller
                 $totalPallet = plandetail::where('PlanID', $request->PlanID)
                     ->count();
 
-                plandryings::where('PlanID', $request->PlanID)
+                planDryings::where('PlanID', $request->PlanID)
                     ->update([
                         'Mass' => $totalMass,
                         'TotalPallet' => $totalPallet

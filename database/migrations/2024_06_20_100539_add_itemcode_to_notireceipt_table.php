@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('historySL', function (Blueprint $table) {
-            $table->integer('notiId')->nullable();
+        Schema::table('notireceipt', function (Blueprint $table) {
+            $table->string('ItemCode')->nullable()->after('SPDich');
         });
-    } 
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('historySL', function (Blueprint $table) {
-            $table->dropColumn('notiId');
+        Schema::table('notireceipt', function (Blueprint $table) {
+            $table->dropColumn('ItemCode');
         });
     }
 };

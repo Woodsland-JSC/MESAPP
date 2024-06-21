@@ -5,7 +5,7 @@ use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pallet;
 use App\Models\pallet_details;
-use App\Models\plandryings;
+use App\Models\planDryings;
 use App\Models\plandetail;
 use Illuminate\Support\Facades\DB;
 

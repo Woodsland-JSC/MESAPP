@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('historysl', function (Blueprint $table) {
+        Schema::table('historySL', function (Blueprint $table) {
             $table->unsignedInteger('isQualityCheck')->default(0);
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('historysl', function (Blueprint $table) {
+        Schema::table('historySL', function (Blueprint $table) {
             $table->dropColumn('isQualityCheck');
         });
     }

@@ -12,6 +12,6 @@ class worker extends Model
     protected $fillable = ['PlanID', 'UserID'];
     public function pallet()
     {
-        return $this->belongsTo(plandryings::class, 'PlanID', 'PlanID');
+        return $this->belongsTo(planDryings::class, 'PlanID', 'PlanID');
     }
 }

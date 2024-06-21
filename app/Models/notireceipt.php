@@ -16,6 +16,7 @@ class notireceipt extends Model
         'deleted',
         'baseID',
         'SPDich',
+        'ItemCode',
         'SubItemName',
         'SubItemCode',
         'QuyCach',

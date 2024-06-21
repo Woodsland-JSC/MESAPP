@@ -12,6 +12,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/receipts-productions-rong', [VCNController::class, 'receiptRong'])->name('nhap-thanh-pham-rong');
         Route::post('/receipts-production', [VCNController::class, 'receipts'])->name('nhap-thanh-pham-vcn');
         Route::delete('remove-receipt', [VCNController::class, 'delete']);
+        Route::delete('remove-receipt-rong', [VCNController::class, 'deleteRong']);
         Route::post('/accept-receipts', [VCNController::class, 'accept']);
         Route::post('/reject-receipts', [VCNController::class, 'reject']);
         Route::post('/accept-qc', [VCNController::class, 'AcceptQCVCN']);

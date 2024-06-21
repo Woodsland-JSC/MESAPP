@@ -488,16 +488,16 @@ class DryingOvenController extends Controller
             'pallet_details.CDai',
             'pallet_details.CRong',
             'pallet_details.CDay',
-            'plandryings.Checked',
+            'planDryings.Checked',
             DB::raw("CONCAT(users.first_name,' ', users.last_name) as checkby"),
-            'plandryings.DateChecked',
-            'plandryings.Review',
+            'planDryings.DateChecked',
+            'planDryings.Review',
             DB::raw("CONCAT(users2.first_name,' ', users2.last_name) as ReviewBy"),
-            'plandryings.reviewDate',
+            'planDryings.reviewDate',
             DB::raw("CONCAT(users3.first_name,' ', users3.last_name) as RunBy"),
-            'plandryings.runDate',
+            'planDryings.runDate',
             DB::raw("CONCAT(users4.first_name,' ', users4.last_name) as CompletedBy"),
-            'plandryings.CompletedDate',
+            'planDryings.CompletedDate',
             'totals.Qty',
             'totals.Qty_T',
 
@@ -506,11 +506,11 @@ class DryingOvenController extends Controller
             ->Join('users as users5', 'users5.id', '=', 'pallets.CreateBy')
             
             ->leftJoin('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
-            ->leftJoin('plandryings', 'plan_detail.PlanID', '=', 'plandryings.PlanID')
-            ->leftJoin('users', 'users.id', '=', 'plandryings.CheckedBy')
-            ->leftJoin('users as users2', 'users2.id', '=', 'plandryings.ReviewBy')
-            ->leftJoin('users as users3', 'users3.id', '=', 'plandryings.RunBy')
-            ->leftJoin('users as users4', 'users4.id', '=', 'plandryings.CompletedBy')
+            ->leftJoin('planDryings', 'plan_detail.PlanID', '=', 'planDryings.PlanID')
+            ->leftJoin('users', 'users.id', '=', 'planDryings.CheckedBy')
+            ->leftJoin('users as users2', 'users2.id', '=', 'planDryings.ReviewBy')
+            ->leftJoin('users as users3', 'users3.id', '=', 'planDryings.RunBy')
+            ->leftJoin('users as users4', 'users4.id', '=', 'planDryings.CompletedBy')
             ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
             ->leftJoinSub(function($query) {
                 $query->select('pallet_details.palletID', 

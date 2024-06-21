@@ -11,7 +11,7 @@ use App\Models\DisabilityDetail;
 use App\Models\humiditys;
 use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
-use App\Models\plandryings;
+use App\Models\planDryings;
 use App\Models\SanLuong;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
@@ -69,13 +69,13 @@ class QCController extends Controller
         humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->update(['refID'  => $record->id]);
         // $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         if ($req->option == 'RL') {
-            plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1,
+            planDryings::where('PlanID', $req->PlanID)->update(['Review' => 1,
             'ReviewBy'=>Auth::user()->id,
             'reviewDate'=>now(),
              'result' => 0]);
         }
         if ($req->option == 'SL') {
-            plandryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 1]);
+            planDryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 1]);
         }
         return response()->json(['message' => 'success', 'humiditys' => $record], 200);
     }
@@ -326,6 +326,7 @@ class QCController extends Controller
         ->join('users as c', 'a.create_by', '=', 'c.id')
         ->select(
             'a.FatherCode',
+            'a.ItemCode',
             'a.ItemName',
             'b.SubItemName',
             'b.SubItemCode',
@@ -339,7 +340,7 @@ class QCController extends Controller
             DB::raw('(b.openQty - (
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historysl 
-                WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.SPDich END
+                WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.ItemCode END
                 AND isQualityCheck = 1
                 AND notiId = b.id                
             )) as Quantity'),
@@ -410,7 +411,7 @@ class QCController extends Controller
             ->select(
                 'a.*',
                 'b.id as notiID',
-                'b.SPDich as ItemCode',
+                'b.ItemCode as ItemCode',
                 'b.SubItemCode as SubItemCode',
                 'b.team as NextTeam',
                 'b.openQty',
@@ -462,6 +463,8 @@ class QCController extends Controller
         $subCode= $request->subCode['value'] ??'';
         $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
 
+        // dd($U_GIAO);
+
         $HistorySL=HistorySL::where('ObjType',59)->get()->count();
         $body = [
             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
@@ -471,11 +474,11 @@ class QCController extends Controller
             "U_HXL"=> $huongxuly,
             "U_QCC"=> $huongxuly,
             "U_TOCD"=> $teamBack,
-            "U_Giao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
-            "U_Nhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
+            "U_NGiao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
+            "U_NNhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
             "U_source"=>$rootCause,
             "U_ItemHC"=>$subCode,
-            "U_cmtQC"=> $request->note??"",
+            "U_cmtQC"=> $request->Note??"",
             "U_QCN"=> $data->ItemCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,

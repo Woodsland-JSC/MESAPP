@@ -353,8 +353,8 @@ const AwaitingReception = ({
             <div
                 className={`rounded-lg ${
                     variant === "QC"
-                        ? " border-2 border-gray-200 shadow-md"
-                        : " border-2 border-gray-200 !shadow-[0_3px_10px_rgb(0,0,0,0.2)]}"
+                        ? " border-2 border-gray-200 !shadow-md"
+                        : " border-2 border-gray-200 !shadow-md"
                 } `}
             >
                 <div className="!px-4 !py-3">
@@ -395,7 +395,7 @@ const AwaitingReception = ({
                                         <>
                                             <span>Mã thành phẩm: </span>
                                             <span className="font-bold">
-                                                {data?.FatherCode || "????"}
+                                                {data?.ItemCode || "????"}
                                             </span>
                                         </>
                                     )} 

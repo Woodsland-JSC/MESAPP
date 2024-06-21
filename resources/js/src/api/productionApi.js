@@ -94,6 +94,14 @@ const productionApi = {
         const url = `/production/remove-receipt`;
         return axiosClient().delete(url, { data: payload });
     },
+    deleteReceiptVCN: (payload) => {
+        const url = `/vcn/remove-receipt`;
+        return axiosClient().delete(url, { data: payload });
+    },
+    deleteReceiptVCNRong: (payload) => {
+        const url = `/vcn/remove-receipt-rong`;
+        return axiosClient().delete(url, { data: payload });
+    },
     rejectReceiptsCBG: (data) => {
         const url = `/production/reject-receipts`;
         return axiosClient().post(url, data);

@@ -151,6 +151,7 @@ class ProductionController extends Controller
                     'baseID' =>  $SanLuong->id,
                     'MaThiTruong' => $request->MaThiTruong,
                     'SPDich' => $request->FatherCode,
+                    'ItemCode' => $request->ItemCode,
                     'team' => $request->NexTeam,
                     'CongDoan' => $request->CongDoan,
                     'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
@@ -165,6 +166,7 @@ class ProductionController extends Controller
                     'Quantity' => $request->RejectQty,
                     'baseID' =>  $SanLuong->id,
                     'SPDich' => $request->FatherCode,
+                    'ItemCode' => $request->ItemCode,
                     'SubItemCode' => $request->SubItemCode,
                     'SubItemName' => $request->SubItemName,
                     'team' => $toqc,
@@ -517,18 +519,6 @@ class ProductionController extends Controller
             // }
         }
 
-        $maxQuantities = [];
-
-        foreach ($groupedResults as $result) {
-            $onHand = $result['OnHand'];
-            $baseQty = $result['BaseQty'];
-
-            $maxQuantity = floor($onHand / $baseQty);
-            $maxQuantities[] = $maxQuantity;
-        }
-
-        // Tìm số lượng tối thiểu
-        $maxQty = min($maxQuantities);
 
         $groupedResults = array_values($groupedResults);
 
@@ -629,6 +619,20 @@ class ProductionController extends Controller
             }
             $item['WaitingQty'] = $waitingQty;
         }
+
+        $maxQuantities = [];
+
+        foreach ($groupedResults as $result) {
+            $onHand = $result['OnHand'];
+            $baseQty = $result['BaseQty'];
+            $waitingQty = $result['WaitingQty'];
+
+            $maxQuantity = floor($onHand - $waitingQty / $baseQty);
+            $maxQuantities[] = $maxQuantity;
+        }
+
+        // Tìm số lượng tối thiểu
+        $maxQty = min($maxQuantities);
 
         // dd($notification);
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
@@ -900,35 +904,6 @@ class ProductionController extends Controller
 
         $groupedResults = array_values($groupedResults);
 
-        // $notification = DB::table('sanluong as a')
-        // ->join('notireceipt as b', function ($join) {
-        //     $join->on('a.id', '=', 'b.baseID')
-        //         ->where('b.deleted', '=', 0);
-        // })
-        // ->join('users as c', 'a.create_by', '=', 'c.id')
-        // ->select(
-        //     'a.FatherCode',
-        //     'a.ItemCode',
-        //     'a.ItemName',
-        //     'a.team',
-        //     'CDay',
-        //     'CRong',
-        //     'CDai',
-        //     'b.Quantity',
-        //     'a.created_at',
-        //     'c.first_name',
-        //     'c.last_name',
-        //     'b.text',
-        //     'b.id',
-        //     'b.type',
-        //     'b.confirm'
-        // )
-        // ->where('b.confirm', '!=', 1)
-        // ->where('a.FatherCode', '=', $request->SPDICH)
-        // ->where('a.ItemCode', '=', $request->ItemCode)
-        // ->where('a.Team', '=', $request->TO)
-        // ->get();
-
         $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -1002,17 +977,29 @@ class ProductionController extends Controller
             $item['WaitingQty'] = $waitingQty;
         }
 
+        $maxQuantities = [];
+
+        foreach ($groupedResults as $result) {
+            $onHand = $result['OnHand'];
+            $baseQty = $result['BaseQty'];
+            $waitingQty = $result['WaitingQty'];
+
+            $maxQuantity = floor($onHand - $waitingQty / $baseQty);
+            $maxQuantities[] = $maxQuantity;
+        }
+
+        // Tìm số lượng tối thiểu
+        $maxQty = min($maxQuantities);
+
         // dd($notification);
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
-        $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
-
-        // $WaitingConfirmQty = $notification->sum('Quantity');
-        // $WaitingQCItemQty = $notification->where('SubItemCode', '!=', null)->sum('Quantity');
+        $WaitingQCItemQty = $notification->where('type', '=', 1)->where('confirm', '=', 0)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
 
         return response()->json([
             'message' => 'success',
             'WaitingConfirmQty' => $WaitingConfirmQty,
             'WaitingQCItemQty' => $WaitingQCItemQty,
+            'maxQty' =>   $maxQty,
             'stocks' => $groupedResults,
         ], 200);
     }
