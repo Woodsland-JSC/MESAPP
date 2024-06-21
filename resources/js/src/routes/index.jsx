@@ -33,14 +33,14 @@ import WoodSorting from "../pages/workspace/wood-drying/wood-sorting";
 
 // QC
 import WoodProductingQC from "../pages/workspace/wood-working/wood-producting-qc";
-import PlywoodQC from "../pages/workspace/plywood/plywood-qc";
+import PlywoodQC from "../pages/workspace/plywoods/plywood-qc";
 
 import Notfound from "../pages/errors/notfound";
 
 import ProtectedRoute from "./ProtectedRoute";
 
 import FinishedGoodsReceipt from "../pages/workspace/wood-working/finished-goods-receipt";
-import PlywoodFinishedGoodsReceipt from "../pages/workspace/plywood/finished-goods-receipt";
+import PlywoodFinishedGoodsReceipt from "../pages/workspace/plywoods/finished-goods-receipt";
 
 import Report from "../pages/reports/index";
 import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
