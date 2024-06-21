@@ -507,16 +507,6 @@ class ProductionController extends Controller
 
             $groupedResults[$subItemCode]['OnHand'] = $onHand;
 
-            // if ($CongDoan === 'SC') {
-            //     // Tính toán giá trị OnHand dựa trên yêu cầu khi $CongDoan là 'SC'
-            //     $quantity = HistorySL::where('to', $request->TO)
-            //         ->where('itemchild', $itemCode)
-            //         ->sum(DB::raw('quantity * ' . $baseQty)); // Tính giá trị tổng quantity * baseQty
-
-            //     $groupedResults[$subItemCode]['OnHand'] = ceil($onHand - $quantity); // Làm tròn lên
-            // } else {
-            //     $groupedResults[$subItemCode]['OnHand'] = $onHand;
-            // }
         }
 
 
@@ -602,7 +592,7 @@ class ProductionController extends Controller
                 'b.type',
                 'b.confirm'
             )
-            ->where('b.confirm', '!=', 1)
+            ->where('b.confirm', '=', 0)
             ->where('b.type', '=', 1)
             ->where('b.isPushSAP', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)
