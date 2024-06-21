@@ -471,7 +471,8 @@ class VCNController extends Controller
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
-        notireceiptVCN::where('id', $request->id)->update(['confirm' => 3, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+             // giá trị cột confirm bằng 2 là trả lại
+        notireceiptVCN::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
         return response()->json('success', 200);
     }
 

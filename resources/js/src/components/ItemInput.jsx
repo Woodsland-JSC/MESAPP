@@ -1522,7 +1522,7 @@ const ItemInput = ({
                                                 </Text>
                                                 {/* BOM Item Group */}
                                                 {selectedItemDetails?.stocks
-                                                // .sort((a, b) => a.SubItemCode.localeCompare(b.SubItemCode))
+                                                .sort((a, b) => a.SubItemCode.localeCompare(b.SubItemCode))
                                                 .map((item, index) => (
                                                         <div
                                                             key={index}
@@ -1579,9 +1579,7 @@ const ItemInput = ({
                                                                     } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {(
-                                                                        parseInt(item.OnHand ||0) -
-                                                                        (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) -
-                                                                        (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty ||0)
+                                                                        parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>

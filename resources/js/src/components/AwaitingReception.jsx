@@ -764,6 +764,7 @@ const AwaitingReception = ({
             <AlertDialog
                 isOpen={isInputAlertDialogOpen}
                 onClose={onInputAlertDialogClose}
+                isCentered={true}
                 closeOnOverlayClick={false}
             >
                 <AlertDialogOverlay>
@@ -834,6 +835,7 @@ const AwaitingReception = ({
             <AlertDialog
                 isOpen={isDismissAlertDialogOpen}
                 onClose={onDismissAlertDialogClose}
+                isCentered={true}
                 closeOnOverlayClick={false}
             >
                 <AlertDialogOverlay>

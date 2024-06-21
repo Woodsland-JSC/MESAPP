@@ -388,7 +388,7 @@ class ProductionController extends Controller
 
         return response()->json([
             'data' => $results,
-            'noti_choxacnhan' => $data, 
+            'noti_choxacnhan' => $data,
             'noti_phoixuly' => $data2
         ], 200);
     }
@@ -506,7 +506,6 @@ class ProductionController extends Controller
             }
 
             $groupedResults[$subItemCode]['OnHand'] = $onHand;
-
         }
 
 
@@ -562,12 +561,13 @@ class ProductionController extends Controller
                 'b.type',
                 'b.confirm'
             )
-            ->where('b.confirm', '!=', 1)
+            ->where('b.confirm', '=', 0)
             ->where('b.type', '=', 0)
             ->where('b.deleted', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
+
         $dataqc = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -688,8 +688,9 @@ class ProductionController extends Controller
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
+        // giá trị cột confirm bằng 2 là trả lại
         SanLuong::where('id', $data->id)->update(['Status' => 1]);
-        notireceipt::where('id', $request->id)->update(['confirm' => 3, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+        notireceipt::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
         return response()->json('success', 200);
     }
 
@@ -822,6 +823,7 @@ class ProductionController extends Controller
             ], 500);
         }
     }
+
     function dsphoipending(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -833,6 +835,7 @@ class ProductionController extends Controller
         $data = notireceipt::where('team', $request->team)->where('confirm', 0)->get();
         return response()->json($data, 200);
     }
+
     function delete(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -870,6 +873,8 @@ class ProductionController extends Controller
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
+
+        // Xóa số lượng giao chờ xác nhận
         notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
 
         $groupedResults = [];
@@ -920,6 +925,7 @@ class ProductionController extends Controller
                 'b.type',
                 'b.confirm'
             )
+            ->where('b.deleted', '=', 0)
             ->where('b.confirm', '!=', 1)
             ->where('b.type', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)
@@ -950,7 +956,155 @@ class ProductionController extends Controller
                 'b.type',
                 'b.confirm'
             )
+            ->where('b.deleted', '=', 0)
             ->where('b.confirm', '!=', 1)
+            ->where('b.type', '=', 1)
+            ->where('b.isPushSAP', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+        $notification = $Datareceipt->unionAll($dataqc)->get();
+
+        $ItemInfo = DB::table('sanluong as a')
+            ->select(
+                'a.ItemCode',
+                'a.ItemName',
+            )
+            ->where('ItemCode', $request->ItemCode)
+            ->first();
+
+        // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
+        $Datareceipt = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', '=', 0)
+            ->where('b.deleted', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+
+        $dataqc = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', '=', 1)
+            ->where('b.isPushSAP', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+        $notification = $Datareceipt->unionAll($dataqc)->get();
+
+        $ItemInfo = DB::table('sanluong as a')
+            ->select(
+                'a.ItemCode',
+                'a.ItemName',
+            )
+            ->where('ItemCode', $request->ItemCode)
+            ->first();
+
+        $Datareceipt = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', '=', 0)
+            ->where('b.deleted', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO);
+
+        $dataqc = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
             ->where('b.type', '=', 1)
             ->where('b.isPushSAP', '=', 0)
             ->where('a.FatherCode', '=', $request->SPDICH)

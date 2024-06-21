@@ -421,6 +421,7 @@ class QCController extends Controller
             ->where('b.id', $request->id)
             ->where('b.confirm', 0)
             ->first();
+
         // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
@@ -511,8 +512,7 @@ class QCController extends Controller
         $res = $response->json();
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
-        if ($response->successful()) {
-           
+        if ($response->successful()) {      
             SanLuong::where('id', $data->id)->update(
                 [
                     'Status' =>  $closed,
@@ -521,11 +521,11 @@ class QCController extends Controller
             ); 
             notireceipt::where('id', $request->id)->
             update(['confirm' =>  $closed,
-            'ObjType' =>  59,
-            'DocEntry' => $res['DocEntry'],
-            'confirmBy' => Auth::user()->id,
-            'isPushSAP' => 1,
-            'confirm_at' => now()->format('YmdHmi')]);
+                'ObjType' =>  59,
+                'DocEntry' => $res['DocEntry'],
+                'confirmBy' => Auth::user()->id,
+                'isPushSAP' => 1,
+                'confirm_at' => now()->format('YmdHmi')]);
             HistorySL::create(
                 [
                     'LSX'=>$data->LSX,
@@ -615,7 +615,7 @@ class QCController extends Controller
         $closed=0;
         if ($data->openQty == $request->Qty) {
             $closed=1;
-        }
+        } 
 
         //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
         $warehouse="";
