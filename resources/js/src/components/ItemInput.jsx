@@ -689,10 +689,11 @@ const ItemInput = ({
     return (
         <>
             <div
-                className="shadow-lg relative border bg-white border-indigo-100 z-1 before:absolute before:left-[-0.25rem] before:content-[''] before:h-7 before:w-7 before:rotate-[60deg] before:top-[2.6rem] before:bg-[#283593] before:z-[-1] after:absolute after:content-[attr(data-label)] after:w-fit after:text-[white] after:text-left after:shadow-[4px_4px_15px_rgba(26,35,126,0.2)] after:px-2 after:py-1.5 after:-left-2.5 after:top-[14.4px] after:bg-[#3949ab] after:whitespace-nowrap"
-                data-label={data.NameSPDich}
+                className="shadow-lg relative border-2 rounded-t-md bg-white border-indigo-100 z-1"
             >
-                <div className="w-full h-full flex flex-col gap-4 mb-4 mt-2 px-1 pt-11 z-[999] bg-white">
+                <div className=" pl-3 text-[18px] font-medium bg-[#1A222F] text-[white] p-2 py-1.5
+                 rounded-t-md">{data.NameSPDich}</div>
+                <div className="w-full h-full flex flex-col gap-4 pt-0 z-[999] bg-white">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
                               <section
@@ -707,19 +708,21 @@ const ItemInput = ({
                                           MaThiTruong
                                       );
                                   }}
-                                  className="my-2 cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                  className="cursor-pointer duration-200 ease-linear hover:opacity-80"
                                   key={index}
-                              >
-                                  <span className="ml-1">
-                                      {index + 1}. {item.ChildName} ({item.CDay}
-                                      *{item.CRong}*{item.CDai})
+                              >    
+                                     
+                                  <div className="py-2 pl-2 font-medium ">
+                                    {/* <span className="text-[#17506b] text-lg p-1 rounded-full font-semibold">{index + 1}.</span> */}
+                                       <span><div>({item.CDay}*{item.CRong}*{item.CDai})</div></span> 
+                                      {item.ChildName} 
                                       {item.Version && (
                                           <span className="pl-2 font-medium text-[#2A7BA1]">
                                               V.<span>{item.Version}</span>
                                           </span>
                                       )}
-                                  </span>
-                                  <div className="relative overflow-x-auto shadow-md sm:rounded-sm ml-0 mt-2 ">
+                                  </div>
+                                  <div className="relative overflow-x-auto shadow-md ml-0 ">
                                       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
                                           <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                                               <tr>
@@ -1527,7 +1530,7 @@ const ItemInput = ({
                                                         <div
                                                             key={index}
                                                             className={`${
-                                                                (item.OnHand - selectedItemDetails.WaitingQCItemQty - selectedItemDetails.WaitingConfirmQty - item.WaitingQty) <= 0
+                                                                (parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )) <= 0
                                                                     ? "bg-gray-200"
                                                                     : "bg-blue-100"
                                                             } flex flex-col py-2  mb-6 rounded-xl`}
@@ -1572,7 +1575,7 @@ const ItemInput = ({
                                                                 </div>
                                                                 <span
                                                                     className={`${
-                                                                        (item.OnHand - selectedItemDetails.WaitingQCItemQty - selectedItemDetails.WaitingConfirmQty - item.WaitingQty) <=
+                                                                        (parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )) <=
                                                                         0
                                                                             ? "bg-gray-500"
                                                                             : "bg-[#155979]"

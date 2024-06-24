@@ -612,6 +612,7 @@ class QCController extends Controller
         if ($data->openQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
         }
+        
         $closed=0;
         if ($data->openQty == $request->Qty) {
             $closed=1;
