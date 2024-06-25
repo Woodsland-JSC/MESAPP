@@ -12,6 +12,7 @@ use App\Models\humiditys;
 use App\Models\humidityDetails;
 use Illuminate\Support\Facades\Validator;
 use App\Models\planDryings;
+use App\Models\awaitingstocks;
 use App\Models\SanLuong;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
@@ -512,7 +513,8 @@ class QCController extends Controller
         $res = $response->json();
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
-        if ($response->successful()) {      
+        if ($response->successful()) {
+            awaitingstocks::where('notiId', $request->id)->delete();      
             SanLuong::where('id', $data->id)->update(
                 [
                     'Status' =>  $closed,
@@ -526,6 +528,7 @@ class QCController extends Controller
                 'confirmBy' => Auth::user()->id,
                 'isPushSAP' => 1,
                 'confirm_at' => now()->format('YmdHmi')]);
+            
             HistorySL::create(
                 [
                     'LSX'=>$data->LSX,

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\SanLuong;
+use App\Models\awaitingstocks;
 use App\Models\Warehouse;
 use App\Models\notireceipt;
 use App\Models\HistorySL;
@@ -16,18 +17,21 @@ use Illuminate\Support\Facades\Http;
 
 class ProductionController extends Controller
 {
-
     // Ghi nhận sản lượng
     // function receipts(Request $request)
     // {
-
     //     $validator = Validator::make($request->all(), [
     //         'FatherCode' => 'required|string|max:254',
     //         'ItemCode' => 'required|string|max:254',
     //         'ItemName' => 'required|string|max:254',
+    //         'SubItemName',
+    //         'SubItemCode',
+    //         'ErrorData',
     //         'CompleQty' => 'required|numeric',
     //         'RejectQty' => 'required|numeric',
-    //         // 'MaThiTruong',
+    //         'MaThiTruong',
+    //         'N_GIAO',
+    //         'N_NHAN',
     //         'CDay' => 'required|numeric',
     //         'CRong' => 'required|numeric',
     //         'CDai' => 'required|numeric',
@@ -35,58 +39,64 @@ class ProductionController extends Controller
     //         'CongDoan' => 'required|string|max:254',
     //         'NexTeam' => 'required|string|max:254',
     //         'Type' => 'required|string|max:254',
-    //         //'LSX' => 'required|string|max:254',
     //     ]);
+
     //     if ($validator->fails()) {
     //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
     //     }
-    //     $toqc="";
-    //     if (Auth::user()->plant=='TH')
-    //     {
-    //         $toqc='TH-QC';
-    //     }
-    //     else if (Auth::user()->plant=='TQ')
-    //     {
-    //         $toqc='TQ-QC';
-    //     }
-    //     else {
-    //         $toqc='HG-QC';
+    //     $toqc = "";
+    //     if (Auth::user()->plant == 'TH') {
+    //         $toqc = 'TH-QC';
+    //     } else if (Auth::user()->plant == 'TQ') {
+    //         $toqc = 'TQ-QC';
+    //     } else {
+    //         $toqc = 'HG-QC';
     //     }
     //     try {
     //         DB::beginTransaction();
-    //         $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type','LSX']);
+    //         $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'SubItemCode', 'SubItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type', 'LSX']);
     //         $SLData['create_by'] = Auth::user()->id;
     //         $SLData['openQty'] = 0;
 
     //         $SanLuong = SanLuong::create($SLData);
 
+    //         $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
+    //         $errorData = json_encode($request->ErrorData, true);
+
     //         if ($request->CompleQty > 0) {
     //             $notifi = notireceipt::create([
-    //                 'text' => 'Số lượng đã giao chờ xác nhận',
+    //                 'text' => 'Production information waiting for confirmation',
     //                 'Quantity' => $request->CompleQty,
     //                 'baseID' =>  $SanLuong->id,
+    //                 'MaThiTruong' => $request->MaThiTruong,
     //                 'SPDich' => $request->FatherCode,
-    //                 // 'MaThiTruong' => $request->MaThiTruong,
+    //                 'ItemCode' => $request->ItemCode,
     //                 'team' => $request->NexTeam,
     //                 'CongDoan' => $request->CongDoan,
     //                 'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
     //                 'type' => 0,
-    //                 'openQty' => 0
+    //                 'openQty' => 0,
     //             ]);
+    //             $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
     //         }
     //         if ($request->RejectQty > 0) {
     //             $notifi = notireceipt::create([
-    //                 'text' => 'Số lượng lỗi chờ xác nhận',
+    //                 'text' => 'Error information sent to QC',
     //                 'Quantity' => $request->RejectQty,
     //                 'baseID' =>  $SanLuong->id,
     //                 'SPDich' => $request->FatherCode,
-    //                 // 'MaThiTruong' => $request->MaThiTruong,
+    //                 'ItemCode' => $request->ItemCode,
+    //                 'SubItemCode' => $request->SubItemCode,
+    //                 'SubItemName' => $request->SubItemName,
     //                 'team' => $toqc,
     //                 'CongDoan' => $request->CongDoan,
     //                 'QuyCach' => $request->CDay . "*" . $request->CRong . "*" . $request->CDai,
     //                 'type' => 1,
-    //                 'openQty' => $request->RejectQty
+    //                 'openQty' => $request->RejectQty,
+    //                 'ErrorData' => $errorData,
     //             ]);
+    //             $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
     //         }
     //         DB::commit();
     //     } catch (\Exception | QueryException $e) {
@@ -94,14 +104,13 @@ class ProductionController extends Controller
     //         return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
     //     }
     //     return response()->json([
-    //         'message' => 'nhập sản lượng thành công'
+    //         'message' => 'Successful',
+    //         'data' => $changedData
     //     ], 200);
     // }
 
-    // Ghi nhận sản lượng
     function receipts(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
@@ -144,6 +153,7 @@ class ProductionController extends Controller
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
             $errorData = json_encode($request->ErrorData);
+
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
                     'text' => 'Production information waiting for confirmation',
@@ -159,6 +169,15 @@ class ProductionController extends Controller
                     'openQty' => 0,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                //Lưu thông tin awaitingstocks
+                foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                    awaitingstocks::create([
+                        'notiId' => $notifi->id,
+                        'SubItemCode' => $subItem['SubItemCode'],
+                        'AwaitingQty' => $request->CompleQty * $subItem['BaseQty'],
+                    ]);
+                }
             }
             if ($request->RejectQty > 0) {
                 $notifi = notireceipt::create([
@@ -177,6 +196,31 @@ class ProductionController extends Controller
                     'ErrorData' => $errorData,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                //Lưu thông tin awaitingstocks
+                if (empty($request->SubItemCode)) {
+                    // Lưu lỗi thành phẩm
+                    foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                        $awaitingStock = awaitingstocks::create([
+                            'notiId' => $notifi->id,
+                            'SubItemCode' => $subItem['SubItemCode'],
+                            'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                        ]);
+                    }
+                } else {
+                    // Lưu lỗi bán thành phẩm
+                    foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                        if ($subItem['SubItemCode'] == $request->SubItemCode) {
+                            $awaitingStock = awaitingstocks::create([
+                                'notiId' => $notifi->id,
+                                'SubItemCode' => $subItem['SubItemCode'],
+                                'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                            ]);
+                            break;
+                        }
+                    }
+                }
+
             }
             DB::commit();
         } catch (\Exception | QueryException $e) {
@@ -507,8 +551,11 @@ class ProductionController extends Controller
 
             $groupedResults[$subItemCode]['OnHand'] = $onHand;
         }
-
-
+         // Lấy thông tin từ awaitingstocks
+        foreach ($groupedResults as &$item) {
+            $awaitingQtySum = awaitingstocks::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
+            $item['OnHand'] -= $awaitingQtySum;
+        }
         $groupedResults = array_values($groupedResults);
 
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
@@ -601,31 +648,19 @@ class ProductionController extends Controller
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        foreach ($groupedResults as &$item) {
-            $waitingQty = 0;
-            foreach ($notification as $notif) {
-                if ($notif->SubItemCode === $item['SubItemCode']) {
-                    $waitingQty += (float) $notif->Quantity;
-                }
-            }
-            $item['WaitingQty'] = $waitingQty;
-        }
-
         $maxQuantities = [];
 
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
-            $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
         // Tìm số lượng tối thiểu
         $maxQty = min($maxQuantities);
-
-        // dd($notification);
+        
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
         $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
 
@@ -691,6 +726,7 @@ class ProductionController extends Controller
         // giá trị cột confirm bằng 2 là trả lại
         SanLuong::where('id', $data->id)->update(['Status' => 1]);
         notireceipt::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+        awaitingstocks::where('notiId', $request->id)->delete();
         return response()->json('success', 200);
     }
 
@@ -876,6 +912,7 @@ class ProductionController extends Controller
 
         // Xóa số lượng giao chờ xác nhận
         notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        awaitingstocks::where('notiId', $data->id)->delete();
 
         $groupedResults = [];
 
@@ -896,6 +933,10 @@ class ProductionController extends Controller
 
                 $groupedResults[$subItemCode]['OnHand'] = $onHand;
             }
+        }
+        foreach ($groupedResults as &$item) {
+            $awaitingQtySum = awaitingstocks::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
+            $item['OnHand'] -= $awaitingQtySum;
         }
 
         $groupedResults = array_values($groupedResults);
@@ -1112,24 +1153,13 @@ class ProductionController extends Controller
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        foreach ($groupedResults as &$item) {
-            $waitingQty = 0;
-            foreach ($notification as $notif) {
-                if ($notif->SubItemCode === $item['SubItemCode']) {
-                    $waitingQty += (float) $notif->Quantity;
-                }
-            }
-            $item['WaitingQty'] = $waitingQty;
-        }
-
         $maxQuantities = [];
 
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
-            $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 
@@ -1270,8 +1300,6 @@ class ProductionController extends Controller
                         SanLuong::where('id', $data->id)->update(
                             [
                                 'Status' => 1,
-                                // 'ObjType' =>   202,
-                                // 'DocEntry' => $res['DocEntry']
                             ]
                         );
                         notireceipt::where('id', $data->notiID)->update([
@@ -1281,6 +1309,7 @@ class ProductionController extends Controller
                             'confirmBy' => Auth::user()->id,
                             'confirm_at' => now()->format('YmdHmi')
                         ]);
+                        awaitingstocks::where('notiId', $data->notiID)->delete();
                         HistorySL::create(
                             [
                                 'LSX' => $data->LSX,
@@ -1683,9 +1712,8 @@ class ProductionController extends Controller
         foreach ($groupedResults as $result) {
             $onHand = $result['OnHand'];
             $baseQty = $result['BaseQty'];
-            $waitingQty = $result['WaitingQty'];
 
-            $maxQuantity = floor(($onHand - $waitingQty) / $baseQty);
+            $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
 

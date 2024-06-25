@@ -111,7 +111,6 @@ const ItemInput = ({
         SubItemName: "",
         SubItemBaseQty: "",
         OnHand: "",
-        WaitingQty: "",
     });
     const [rongData, setRongData] = useState(null);
     // const [selectedItem, setSelectedItem] = useState(null);
@@ -346,9 +345,7 @@ const ItemInput = ({
             return;
         } else if (
             (amount >
-            selectedItemDetails.maxQty -
-                selectedItemDetails.WaitingConfirmQty -
-                selectedItemDetails.WaitingQCItemQty)
+            selectedItemDetails.maxQty)
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
@@ -365,9 +362,7 @@ const ItemInput = ({
             return;
         } else if (
             (selectedFaultItem.ItemCode !== "" && (faultyAmount >
-              selectedItemDetails.maxQty -
-                selectedItemDetails.WaitingConfirmQty -
-                selectedItemDetails.WaitingQCItemQty))
+              selectedItemDetails.maxQty))
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
@@ -382,25 +377,16 @@ const ItemInput = ({
             return;
         } else if (
             selectedFaultItem.SubItemCode !== "" &&
-            faultyAmount >
-                parseInt(selectedFaultItem.OnHand || 0) -
-                    (parseInt(selectedItemDetails.WaitingQCItemQty) *
-                        parseInt(selectedFaultItem.SubItemBaseQty) || 0) -
-                    parseInt(selectedFaultItem.WaitingQty || 0)
+            faultyAmount > parseInt(selectedFaultItem.OnHand || 0)
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
             selectedFaultItem.ItemCode !== "" &&
-            (faultyAmount + amount > selectedItemDetails.maxQty -
-                selectedItemDetails.WaitingConfirmQty -
-                selectedItemDetails.WaitingQCItemQty)
+            ((parseInt(faultyAmount) + parseInt(amount)) > (parseInt(selectedItemDetails.maxQty)))
         ) {
-            toast.error(<span>Tổng số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{parseInt(faultyAmount) + parseInt(amount)}</span>) đã vượt quá số lượng tối đa có thể xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.maxQty -
-                selectedItemDetails.WaitingConfirmQty -
-                selectedItemDetails.WaitingQCItemQty}</span>)</span>);
-            onAlertDialogClose();
+            toast.error(<span>Tổng số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{parseInt(faultyAmount) + parseInt(amount)}</span>) đã vượt quá số lượng tối đa có thể xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.maxQty}</span>)</span>);
             return;
         } else {
             setConfirmLoading(true);
@@ -415,13 +401,18 @@ const ItemInput = ({
                       })),
                   }
                 : {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: [
-                          {
-                              SubItemCode: selectedFaultItem.SubItemCode,
-                              BaseQty: selectedFaultItem.SubItemBaseQty,
-                          },
-                      ],
+                    //   SubItemWhs: selectedItemDetails.SubItemWhs,
+                    //   SubItemQty: [
+                    //       {
+                    //           SubItemCode: selectedFaultItem.SubItemCode,
+                    //           BaseQty: selectedFaultItem.SubItemBaseQty,
+                    //       },
+                    //   ],
+                    SubItemWhs: selectedItemDetails.SubItemWhs,
+                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                          SubItemCode: item.SubItemCode,
+                          BaseQty: item.BaseQty,
+                      })),
                   };
 
             try {
@@ -468,7 +459,6 @@ const ItemInput = ({
                                 SubItemName: "",
                                 SubItemBaseQty: "",
                                 OnHand: "",
-                                WaitingQty: "",
                             });
                             setIsItemCodeDetech(false);
                         } else {
@@ -484,7 +474,6 @@ const ItemInput = ({
                                 SubItemName: "",
                                 SubItemBaseQty: "",
                                 OnHand: "",
-                                WaitingQty: "",
                             });
                             setIsItemCodeDetech(false);
                         }
@@ -714,8 +703,9 @@ const ItemInput = ({
                                      
                                   <div className="py-2 pl-2 font-medium ">
                                     {/* <span className="text-[#17506b] text-lg p-1 rounded-full font-semibold">{index + 1}.</span> */}
-                                       <span><div>({item.CDay}*{item.CRong}*{item.CDai})</div></span> 
-                                      {item.ChildName} 
+                                        
+                                      {item.ChildName}
+                                      <div><span>({item.CDay}*{item.CRong}*{item.CDai})</span></div> 
                                       {item.Version && (
                                           <span className="pl-2 font-medium text-[#2A7BA1]">
                                               V.<span>{item.Version}</span>
@@ -1365,30 +1355,7 @@ const ItemInput = ({
                                                                             value === 0 ||
                                                                             !value || value === NaN
                                                                         ) {
-                                                                            // setSelectedFaultItem(
-                                                                            //     {
-                                                                            //         ItemCode:
-                                                                            //             "",
-                                                                            //         ItemName:
-                                                                            //             "",
-                                                                            //         SubItemCode:
-                                                                            //             "",
-                                                                            //         SubItemName:
-                                                                            //             "",
-                                                                            //         SubItemBaseQty:
-                                                                            //             "",
-                                                                            //         OnHand: "",
-                                                                            //         WaitingQty:
-                                                                            //             "",
-                                                                            //     }
-                                                                            // );
-                                                                            // setFaults(
-                                                                            //     (prev) => ({
-                                                                            //         ...prev,
-                                                                            //         factory:
-                                                                            //             null,
-                                                                            //     })
-                                                                            // );
+                                                                            
                                                                             setRongData(prevData => {
                                                                                 const newData = [...prevData];
                                                                                 newData[stockIndex].RejectQty = "";
@@ -1530,7 +1497,7 @@ const ItemInput = ({
                                                         <div
                                                             key={index}
                                                             className={`${
-                                                                (parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )) <= 0
+                                                                (parseInt(item.OnHand || 0)) <= 0
                                                                     ? "bg-gray-200"
                                                                     : "bg-blue-100"
                                                             } flex flex-col py-2  mb-6 rounded-xl`}
@@ -1575,14 +1542,14 @@ const ItemInput = ({
                                                                 </div>
                                                                 <span
                                                                     className={`${
-                                                                        (parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )) <=
+                                                                        (parseInt(item.OnHand || 0 )) <=
                                                                         0
                                                                             ? "bg-gray-500"
                                                                             : "bg-[#155979]"
                                                                     } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {(
-                                                                        parseInt(item.OnHand || 0 ) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingQCItemQty || 0)) - (parseInt( item.BaseQty || 0) * parseInt(selectedItemDetails.WaitingConfirmQty || 0)) - parseInt( item.WaitingQty || 0 )
+                                                                        parseInt(item.OnHand || 0 )
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>
@@ -1602,15 +1569,7 @@ const ItemInput = ({
                                                               parseInt(
                                                                   selectedItemDetails?.maxQty ||
                                                                       0
-                                                              ) -
-                                                              parseInt(
-                                                                  selectedItemDetails?.WaitingConfirmQty ||
-                                                                      0
-                                                              ) -
-                                                              parseInt(
-                                                                  selectedItemDetails?.WaitingQCItemQty ||
-                                                                      0
-                                                              ) 
+                                                              )
                                                           ).toLocaleString()
                                                         : 0}
                                                 </span>
@@ -1734,7 +1693,7 @@ const ItemInput = ({
                                                 <label className="mt-6  font-semibold">
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
-                                                {selectedItemDetails?.maxQty - selectedItemDetails?.WaitingConfirmQty - selectedItemDetails?.WaitingQCItemQty <=
+                                                {selectedItemDetails?.maxQty <=
                                                 0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
@@ -2057,8 +2016,6 @@ const ItemInput = ({
                                                                                 SubItemBaseQty:
                                                                                     "",
                                                                                 OnHand: "",
-                                                                                WaitingQty:
-                                                                                    "",
                                                                             }
                                                                         );
                                                                         setFaults(
@@ -2120,8 +2077,6 @@ const ItemInput = ({
                                                                                             SubItemBaseQty:
                                                                                                 "",
                                                                                             OnHand: "",
-                                                                                            WaitingQty:
-                                                                                                "",
                                                                                         }
                                                                                     );
                                                                                     setIsItemCodeDetech(
@@ -2186,8 +2141,6 @@ const ItemInput = ({
                                                                                                     SubItemBaseQty:
                                                                                                         item.BaseQty,
                                                                                                     OnHand: item.OnHand,
-                                                                                                    WaitingQty:
-                                                                                                        item.WaitingQty,
                                                                                                 }
                                                                                             );
                                                                                             setIsItemCodeDetech(
@@ -2290,7 +2243,6 @@ const ItemInput = ({
                                         SubItemCode: "",
                                         SubItemBaseQty: "",
                                         OnHand: "",
-                                        WaitingQty: "",
                                     });
                                     setFaultyAmount("");
                                     setIsItemCodeDetech(false);
