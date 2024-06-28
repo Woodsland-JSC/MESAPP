@@ -708,7 +708,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="text-sm font-medium text-[#17506B] "
                                         >
                                             Workspace
                                         </a>
@@ -744,7 +744,7 @@ function PlywoodFinishedGoodsReceipt() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-4 items-center ">
+                    <div className="flex justify-between items-center">
                         <div className="text-3xl font-bold ">
                             Nhập sản lượng ván công nghiệp
                         </div>
@@ -752,8 +752,8 @@ function PlywoodFinishedGoodsReceipt() {
 
                     {/* Controller */}
                     <div className="flex justify-between mb-6 items-center gap-4">
-                        <div className="my-4 mb-6 p-4 w-full border rounded-md bg-white z-0">
-                            <div className="flex flex-col sm:flex-row w-full justify-end space-x-4">
+                        <div className="my-4 mb-6 w-full border-2 rounded-xl bg-white z-0">
+                            <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -806,22 +806,24 @@ function PlywoodFinishedGoodsReceipt() {
                                     )}
                             </div>
 
-                            <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
-                                Tổ & Xưởng sản xuất
+                            <div className="px-4">
+                                <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
+                                    Tổ & Xưởng sản xuất
+                                </div>
+                                <Select
+                                    // isDisabled={true}
+                                    ref={groupSelectRef}
+                                    options={groupListOptions}
+                                    defaultValue={selectedGroup}
+                                    onChange={(value) => {
+                                        setSelectedGroup(value);
+                                    }}
+                                    placeholder="Tìm kiếm"
+                                    className="mt-2 mb-6"
+                                />
                             </div>
-                            <Select
-                                // isDisabled={true}
-                                ref={groupSelectRef}
-                                options={groupListOptions}
-                                defaultValue={selectedGroup}
-                                onChange={(value) => {
-                                    setSelectedGroup(value);
-                                }}
-                                placeholder="Tìm kiếm"
-                                className="mt-3 mb-8"
-                            />
 
-                            <div className="flex flex-col gap-4 my-4">
+                            <div className="flex flex-col pb-2 gap-4 gap-y-6 my-4 xl:px-4 lg:px-4 md:px-2 sm:px-0">
                                 {loadingData ? (
                                     <Stack>
                                         <Skeleton height="250px" />
@@ -849,8 +851,8 @@ function PlywoodFinishedGoodsReceipt() {
                                         />
                                     ))
                                 ) : (
-                                    <span className="text-center">
-                                        Không có dữ liệu
+                                    <span className="text-gray-500 text-center">
+                                        Không có dữ liệu để hiển thị.
                                     </span>
                                 )}
                             </div>
@@ -897,8 +899,8 @@ function PlywoodFinishedGoodsReceipt() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex w-full h-full justify-center items-center">
-                                    Không có dữ liệu
+                                <div className="text-gray-500 flex w-full h-full justify-center items-center">
+                                    Không có dữ liệu để hiển thị.
                                 </div>
                             )}
                         </div>

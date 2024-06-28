@@ -339,52 +339,52 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
-        if (amount < 0) {
+        if (selectedItemDetails.CongDoan !=="SC" && amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
-            (amount >
-            selectedItemDetails.maxQty)
+            (selectedItemDetails.CongDoan !=="SC" && (amount >
+            selectedItemDetails.maxQty))
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
-           amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty 
+            selectedItemDetails.CongDoan !=="SC" && (amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty) 
         ) {
             toast.error(<span>Số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{amount}</span>) đã vượt quá số lượng còn lại phải sản xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty}</span>)</span>);
             onAlertDialogClose();
             return;
-        } else if (faultyAmount < 0) {
+        } else if (selectedItemDetails.CongDoan !=="SC" && faultyAmount < 0) {
             toast.error("Số lượng lỗi phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
-            (selectedFaultItem.ItemCode !== "" && (faultyAmount >
+            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.ItemCode !== "" && (faultyAmount >
               selectedItemDetails.maxQty))
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
         }  else if (
-            selectedFaultItem.SubItemCode === "" &&
+            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.SubItemCode === "" &&
             selectedFaultItem.ItemCode === "" &&
-            faultyAmount
+            faultyAmount)
         ) {
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
         } else if (
-            selectedFaultItem.SubItemCode !== "" &&
-            faultyAmount > parseInt(selectedFaultItem.OnHand || 0)
+            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.SubItemCode !== "" &&
+            faultyAmount > parseInt(selectedFaultItem.OnHand || 0))
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
-            selectedFaultItem.ItemCode !== "" &&
-            ((parseInt(faultyAmount) + parseInt(amount)) > (parseInt(selectedItemDetails.maxQty)))
+            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.ItemCode !== "" &&
+            ((parseInt(faultyAmount) + parseInt(amount)) > (parseInt(selectedItemDetails.maxQty))))
         ) {
             toast.error(<span>Tổng số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{parseInt(faultyAmount) + parseInt(amount)}</span>) đã vượt quá số lượng tối đa có thể xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.maxQty}</span>)</span>);
             return;
@@ -393,27 +393,21 @@ const ItemInput = ({
 
             // Object chứa dữ liệu lỗi
             const ErrorData = isItemCodeDetech
-                ? {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  }
-                : {
-                    //   SubItemWhs: selectedItemDetails.SubItemWhs,
-                    //   SubItemQty: [
-                    //       {
-                    //           SubItemCode: selectedFaultItem.SubItemCode,
-                    //           BaseQty: selectedFaultItem.SubItemBaseQty,
-                    //       },
-                    //   ],
-                    SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  };
+            ? {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+              }
+            : {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+
+              };
 
             try {
                 const payload = {
@@ -491,7 +485,6 @@ const ItemInput = ({
             setConfirmLoading(false);
             onReceiptFromChild();
             setFaults({});
-            // setReceipts({});
             setAmount();
             setFaultyAmount();
 
@@ -682,7 +675,7 @@ const ItemInput = ({
             >
                 <div className=" pl-3 text-[18px] font-medium bg-[#1A222F] text-[white] p-2 py-1.5
                  rounded-t-md">{data.NameSPDich}</div>
-                <div className="w-full h-full flex flex-col gap-4 pt-0 z-[999] bg-white">
+                <div className="w-full h-full rounded-t-lg flex flex-col gap-4 pt-0 z-[999] bg-white">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
                               <section
@@ -701,8 +694,8 @@ const ItemInput = ({
                                   key={index}
                               >    
                                      
-                                  <div className="py-2 pl-2 font-medium ">
-                                    {/* <span className="text-[#17506b] text-lg p-1 rounded-full font-semibold">{index + 1}.</span> */}
+                                  <div className="flex items-center pt-2 pb-1 pl-2 font-medium ">
+                                    <span className="text-[#17506b] p-1 rounded-full font-semibold">{index + 1}.</span>
                                         
                                       {item.ChildName}
                                       <div><span>({item.CDay}*{item.CRong}*{item.CDai})</span></div> 
@@ -713,7 +706,7 @@ const ItemInput = ({
                                       )}
                                   </div>
                                   <div className="relative overflow-x-auto shadow-md ml-0 ">
-                                      <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+                                      <table className=" w-full text-sm text-left rtl:text-right text-gray-500">
                                           <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                                               <tr>
                                                   <th
@@ -744,7 +737,7 @@ const ItemInput = ({
                                                       scope="col"
                                                       className="px-2 py-2 text-right"
                                                   >
-                                                      Còn thực hiện
+                                                      Còn lại
                                                   </th>
                                               </tr>
                                           </thead>
@@ -939,9 +932,6 @@ const ItemInput = ({
                                                 <label className="font-medium">
                                                     Thành phẩm công đoạn rong:
                                                 </label>
-                                                {/* <span className="font-medium p-0.5  mx-2 border-2 border-blue-300 px-3 rounded-full bg-blue-50 text-blue-500">
-                                                    {selectedItemDetails?.stocks.length}
-                                                </span> */}
                                             </div>    
                                         </div>
 
@@ -1134,30 +1124,14 @@ const ItemInput = ({
                                                                             const newData = [...prevData];
                                                                             newData[stockIndex].CompleQty = value;
                                                                             return newData;
-                                                                        });
-                                                                        console.log("dữ liệu cập nhật:", rongData);
-                                                                        // setRongData((prevStocks) =>
-                                                                        //     prevStocks.map((stock) =>
-                                                                        //       stock.id === id ? { ...stock, defective: newDefective } : stock
-                                                                        //     )
-                                                                        // );
-                                                                        
+                                                                        }); 
                                                                     } else {
-                                                                        // setAmount(
-                                                                        //     value
-                                                                        // );
                                                                         setRongData(prevData => {
                                                                             const newData = [...prevData];
                                                                             newData[stockIndex].CompleQty = value;
                                                                             return newData;
                                                                         });
                                                                         console.log("dữ liệu cập nhật:", rongData);
-                                                                        // setReceipts(
-                                                                        //     (prev) => ({
-                                                                        //         ...prev,
-                                                                        //         amount: value,
-                                                                        //     })
-                                                                        // );
                                                                     }
                                                                     if (
                                                                         value === 0 ||
@@ -1319,15 +1293,6 @@ const ItemInput = ({
                                                                             value >
                                                                             selectedItemDetails.stockQuantity
                                                                         ) {
-                                                                            // setFaultyAmount(
-                                                                            //     selectedItemDetails.stockQuantity
-                                                                            // );
-                                                                            // setFaults(
-                                                                            //     (prev) => ({
-                                                                            //         ...prev,
-                                                                            //         amount: selectedItemDetails.stockQuantity,
-                                                                            //     })
-                                                                            // );
                                                                             setRongData(prevData => {
                                                                                 const newData = [...prevData];
                                                                                 newData[stockIndex].RejectQty = value;
@@ -1335,15 +1300,6 @@ const ItemInput = ({
                                                                             });
                                                                             console.log("dữ liệu cập nhật:", rongData);
                                                                         } else {
-                                                                            // setFaultyAmount(
-                                                                            //     value
-                                                                            // );
-                                                                            // setFaults(
-                                                                            //     (prev) => ({
-                                                                            //         ...prev,
-                                                                            //         amount: value,
-                                                                            //     })
-                                                                            // );
                                                                             setRongData(prevData => {
                                                                                 const newData = [...prevData];
                                                                                 newData[stockIndex].RejectQty = value;
@@ -1693,7 +1649,8 @@ const ItemInput = ({
                                                 <label className="mt-6  font-semibold">
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
-                                                {selectedItemDetails?.maxQty <=
+                                                {/* selectedItemDetails.CongDoan != "SC" && */}
+                                                {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.maxQty <=
                                                 0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />

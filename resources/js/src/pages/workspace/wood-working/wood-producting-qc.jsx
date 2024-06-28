@@ -171,7 +171,7 @@ function WoodProductingQC() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="xl:ml-0 lg:ml-0 md:ml-0 ml-2 text-sm font-medium text-[#17506B]"
                                         >
                                             Workspace
                                         </a>
@@ -211,14 +211,14 @@ function WoodProductingQC() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center">
+                    <div className="flex justify-between items-center">
                         <div className="text-3xl font-bold ">
                             Kiểm định chất lượng chế biến gỗ
                         </div>
                     </div>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-lg bg-white z-0">
+                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-xl bg-white z-0">
                         {/* Search */}
                         <div className="w-full">
                             <label
@@ -271,7 +271,6 @@ function WoodProductingQC() {
                                 defaultValue={selectedGroup}
                                 onChange={(value) => {
                                     setSelectedGroup(value);
-                                    // getDataFollowingGroup(value.value);
                                     console.log("2. Selected Group: ", value);
                                 }}
                                 placeholder="Chọn tổ, xưởng sản xuất"

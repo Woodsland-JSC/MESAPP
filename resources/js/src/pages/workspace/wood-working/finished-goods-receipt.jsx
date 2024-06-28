@@ -683,7 +683,7 @@ function FinishedGoodsReceipt() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="text-sm font-medium text-[#17506B] "
                                         >
                                             Workspace
                                         </a>
@@ -727,7 +727,7 @@ function FinishedGoodsReceipt() {
 
                     {/* Controller */}
                     <div className="flex justify-between mb-6 items-center gap-4">
-                        <div className="my-4 mb-6 w-full border-2 rounded-md bg-white z-0">
+                        <div className="my-4 mb-6 w-full border-2 rounded-xl bg-white z-0">
                             <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label

@@ -484,15 +484,12 @@ class ProductionController extends Controller
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        // dd($rowstock);
-
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
 
-        // dd($results);
-
+        // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
         $CongDoan = null;
         foreach ($results as $result) {
@@ -509,6 +506,8 @@ class ProductionController extends Controller
 
         // Lấy kho của bán thành phẩm
         $SubItemWhs = null;
+
+        // dd($results);
         foreach ($results as $result) {
             $wareHouse = $result['wareHouse'];
 
@@ -521,16 +520,15 @@ class ProductionController extends Controller
             }
         }
 
-        // dd($results);
-        $history = HistorySL::where('to', $request->TO)
-            ->where('itemchild', $request->ItemCode)
-            ->select('id', 'LSX', 'SPDICH', 'itemchild', 'to', 'quantity', 'DocEntry',)
-            ->get();
-        $data = $history->toArray();
-
-        // dd($results);
+        // $history = HistorySL::where('to', $request->TO)
+        //     ->where('itemchild', $request->ItemCode)
+        //     ->select('id', 'LSX', 'SPDICH', 'itemchild', 'to', 'quantity', 'DocEntry',)
+        //     ->get();
+        // $data = $history->toArray();
+        
         $stock = [];
 
+        // Lấy danh sách số lượng tồn
         $groupedResults = [];
 
         foreach ($results as $result) {
@@ -551,7 +549,7 @@ class ProductionController extends Controller
 
             $groupedResults[$subItemCode]['OnHand'] = $onHand;
         }
-         // Lấy thông tin từ awaitingstocks
+         // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
         foreach ($groupedResults as &$item) {
             $awaitingQtySum = awaitingstocks::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
             $item['OnHand'] -= $awaitingQtySum;
@@ -582,7 +580,7 @@ class ProductionController extends Controller
             ->where('ItemCode', $request->ItemCode)
             ->first();
 
-        // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
+        // Lấy danh sách sản lượng và lỗi đã ghi nhận
         $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -648,6 +646,7 @@ class ProductionController extends Controller
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
+        // Tìm số lượng tối đa
         $maxQuantities = [];
 
         foreach ($groupedResults as $result) {
@@ -657,14 +656,13 @@ class ProductionController extends Controller
             $maxQuantity = floor($onHand / $baseQty);
             $maxQuantities[] = $maxQuantity;
         }
-
-        // Tìm số lượng tối thiểu
-        $maxQty = min($maxQuantities);
+        $maxQty = $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
         
+        // Tính tổng số lượng đang chờ xác nhận và xử lý lỗi
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
         $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
 
-        // 5. Trả về kết quả cho người dùng
+        // 4. Trả về kết quả cho người dùng
         return response()->json([
             'ItemInfo' => $ItemInfo,
             'CongDoan'  =>  $CongDoan,

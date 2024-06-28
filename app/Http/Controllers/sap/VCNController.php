@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\notireceiptVCN;
 use App\Models\historySLVCN;
+use App\Models\awaitingstocksvcn;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
 use App\Rules\AtLeastOneQty;
@@ -28,6 +29,7 @@ class VCNController extends Controller
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
             'version' => 'required|string|max:254',
+            'ErrorData',
             'CDay' => 'required|numeric',
             'CRong' => 'required|numeric',
             'CDai' => 'required|numeric',
@@ -71,6 +73,15 @@ class VCNController extends Controller
                     'CreatedBy' => Auth::user()->id,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                // Lưu dữ liệu vào awaitingstocks cho VCN
+                foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                    awaitingstocksvcn::create([
+                        'notiId' => $notifi->id,
+                        'SubItemCode' => $subItem['SubItemCode'],
+                        'AwaitingQty' => $request->CompleQty * $subItem['BaseQty'],
+                    ]);
+                }
             }
             if ($request->RejectQty > 0) {
                 $notifi = notireceiptVCN::create([
@@ -92,6 +103,30 @@ class VCNController extends Controller
                     'MaThiTruong' => $request->MaThiTruong,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                // Lưu dữ liệu vào awaitingstocks cho VCN
+                if (empty($request->SubItemCode)) {
+                    // Lưu lỗi thành phẩm
+                    foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                        $awaitingStock = awaitingstocksvcn::create([
+                            'notiId' => $notifi->id,
+                            'SubItemCode' => $subItem['SubItemCode'],
+                            'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                        ]);
+                    }
+                } else {
+                    // Lưu lỗi bán thành phẩm
+                    foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                        if ($subItem['SubItemCode'] == $request->SubItemCode) {
+                            $awaitingStock = awaitingstocksvcn::create([
+                                'notiId' => $notifi->id,
+                                'SubItemCode' => $subItem['SubItemCode'],
+                                'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                            ]);
+                            break;
+                        }
+                    }
+                }
             }
             DB::commit();
         } catch (\Exception | QueryException $e) {
@@ -243,8 +278,6 @@ class VCNController extends Controller
             //     ->where('deleted','=', 0)->get();
         }
 
-        //data need handle
-
         return response()->json([
             'data' => $results,
             'noti_choxacnhan' => $data, 'noti_phoixuly' => $datacxl
@@ -262,7 +295,6 @@ class VCNController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-            // Return validation errors with a 422 Unprocessable Entity status code
         }
 
         // 2. Truy vấn cơ sở dữ liệu SAP
@@ -271,20 +303,14 @@ class VCNController extends Controller
         // Code cũ
         $query = 'select ifnull(sum("ConLai"),0) "Quantity" from UV_GHINHANSLVCN where "ItemChild"=? and "TO"=? and "SPDICH"=?';
         $stmt = odbc_prepare($conDB, $query);
-
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-
         if (!odbc_execute($stmt, [$request->ItemCode, $request->TO, $request->SPDICH])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $row = odbc_fetch_array($stmt);
-
-        // dd($row);
         $RemainQuantity = (float)$row['Quantity'];
-
-        // dd($quantity);
 
         // Code mới (thêm "stock")
         $querystock = 'SELECT * FROM UV_SOLUONGTONVCN WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
@@ -303,6 +329,7 @@ class VCNController extends Controller
             $results[] = $rowstock;
         }
 
+        // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
         $CongDoan = null;
         foreach ($results as $result) {
@@ -331,16 +358,15 @@ class VCNController extends Controller
             }
         }
 
-        // dd($results);
-        $history = historySLVCN::where('to', $request->TO)
-            ->where('itemchild', $request->ItemCode)
-            ->select('id', 'LSX', 'SPDICH', 'itemchild', 'to', 'quantity', 'DocEntry',)
-            ->get();
-        $data = $history->toArray();
+        // $history = historySLVCN::where('to', $request->TO)
+        //     ->where('itemchild', $request->ItemCode)
+        //     ->select('id', 'LSX', 'SPDICH', 'itemchild', 'to', 'quantity', 'DocEntry',)
+        //     ->get();
+        // $data = $history->toArray();
 
-        // dd($results);
         $stock = [];
 
+        // Lấy danh sách số lượng tồn
         $groupedResults = [];
 
         foreach ($results as $result) {
@@ -359,36 +385,15 @@ class VCNController extends Controller
                 ];
             }
 
-            if ($CongDoan === 'SC') {
-                // Tính toán giá trị OnHand dựa trên yêu cầu khi $CongDoan là 'SC'
-                $quantity = historySLVCN::where('to', $request->TO)
-                    ->where('itemchild', $itemCode)
-                    ->sum(DB::raw('quantity * ' . $baseQty)); // Tính giá trị tổng quantity * baseQty
-
-                $groupedResults[$subItemCode]['OnHand'] = ceil($onHand - $quantity); // Làm tròn lên
-            } else {
-                $groupedResults[$subItemCode]['OnHand'] = $onHand;
-            }
+            $groupedResults[$subItemCode]['OnHand'] = $onHand;
         }
 
-        $maxQuantities = [];
-
-
-        foreach ($groupedResults as $result) {
-            $onHand = $result['OnHand'];
-            $baseQty = $result['BaseQty'];
-
-            $maxQuantity = floor($onHand / $baseQty);
-            $maxQuantities[] = $maxQuantity;
+        // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
+        foreach ($groupedResults as &$item) {
+            $awaitingQtySum = awaitingstocksvcn::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
+            $item['OnHand'] -= $awaitingQtySum;
         }
-
-        // Tìm số lượng tối thiểu 
-        $maxQty = $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
-
-        // Chuyển mảng kết quả về dạng danh sách
         $groupedResults = array_values($groupedResults);
-
-        // 3. Lấy số lượng còn lại phải sản xuất
 
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
         $factory = [
@@ -413,7 +418,7 @@ class VCNController extends Controller
             )
             ->first();
 
-        // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
+        // Lấy danh sách sản lượng và lỗi đã ghi nhận
         $notification = DB::table('notireceiptVCN as a')
             ->join('users as c', 'a.CreatedBy', '=', 'c.id')
             ->select(
@@ -442,10 +447,22 @@ class VCNController extends Controller
             ->where('a.Team', '=', $request->TO)
             ->get();
 
-        // dd($notification);
-        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
+        // Tính số lượng tối đa
+        $maxQuantities = [];
+        foreach ($groupedResults as &$result) {
+            $onHand = $result['OnHand'];
+            $baseQty = $result['BaseQty'];
 
-        // 5. Trả về kết quả cho người dùng
+            $maxQuantity = floor($onHand / $baseQty);
+            $maxQuantities[] = $maxQuantity;
+        }
+        $maxQty = $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
+
+        // Tính tống số lượng chờ xác nhận và chờ xử lý lỗi
+        $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity');
+        $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
+
+        // 4. Trả về kết quả cho người dùng
         return response()->json([
             'ItemInfo' => $ItemInfo,
             'CongDoan'  =>  $CongDoan,
@@ -454,10 +471,13 @@ class VCNController extends Controller
             'stocks' => $groupedResults,
             'maxQty' =>   $maxQty,
             'WaitingConfirmQty' => $WaitingConfirmQty,
+            'WaitingQCItemQty' => $WaitingQCItemQty,
             'remainQty' =>   $RemainQuantity,
             'Factorys' => $factory,
         ], 200);
     }
+
+    // Trả lại sản lượng đã giao
     function reject(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -471,7 +491,7 @@ class VCNController extends Controller
         if (!$data) {
             throw new \Exception('data không hợp lệ.');
         }
-             // giá trị cột confirm bằng 2 là trả lại
+        // giá trị cột confirm bằng 2 là trả lại
         notireceiptVCN::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
         return response()->json('success', 200);
     }
