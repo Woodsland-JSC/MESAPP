@@ -1459,7 +1459,7 @@ const ItemInput = ({
                                                             } flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
-                                                                <div className=" max-w-[90%]">
+                                                                <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
                                                                     <div className="text-xs text-[#647C9C]">
                                                                         <span className="mr-1">
                                                                             [
@@ -1484,7 +1484,7 @@ const ItemInput = ({
                                                                             item.SubItemCode
                                                                         }
                                                                     </div>
-                                                                    <div className="font-medium text-[15px] ">
+                                                                    <div className="font-medium text-[15px]">
                                                                         {item.SubItemName ===
                                                                         "Gỗ"
                                                                             ? "Nguyên liệu gỗ"
@@ -1514,11 +1514,11 @@ const ItemInput = ({
                                                 )}
                                             </div>
 
-                                            <div className="flex gap-2 items-center justify-between py-3 border-t px-2 pr-4">
+                                            <div className="flex gap-2 items-center justify-between py-3 border-t px-2 pr-4 ">
                                                 <Text className="font-semibold">
                                                     Số lượng tối đa có thể xuất:
                                                 </Text>
-                                                <span className="rounded-lg cursor-pointer px-3  py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                                <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                                     {selectedItemDetails?.maxQty >
                                                     0
                                                         ? (
