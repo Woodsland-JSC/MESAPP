@@ -561,7 +561,13 @@ const ItemInput = ({
                     toast.success("Thao tác thành công.");
                     setSelectedItemDetails((prev) => ({
                         ...prev,
+                        notifications: prev.notifications.filter(
+                            (notification) => notification.id !== selectedDelete
+                        ),
                         stocks: res.stocks,
+                        WaitingConfirmQty: res.WaitingConfirmQty,
+                        WaitingQCItemQty: res.WaitingQCItemQty,
+                        maxQty: res.maxQty,
                     }));
                 } catch (error) { 
                     toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -902,8 +908,8 @@ const ItemInput = ({
                                                 </label>
                                             </div>    
                                         </div>
-                                        <div className="mx-4 py-2 ">
-                                                <div className="flex items-center rounded-xl p-3 bg-blue-100">        
+                                        <div className=" mx-4 py-2 ">
+                                                <div className="w-full flex items-center justify-between rounded-xl p-3 bg-blue-100">        
                                                     <div className="w-[90%]">
                                                         <div className="text-xs m-0 text-[#647C9C]">
                                                             <span className="mr-1">
@@ -915,11 +921,11 @@ const ItemInput = ({
                                                             {selectedItemDetails?.SubItemCode}
                                                         </div>
                                                     </div>
-                                                    <span
-                                                        className="rounded-lg cursor-pointer px-3 py-1 text-white duration-300 bg-[#155979]"
+                                                    <div
+                                                        className="flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 bg-[#155979]"
                                                     >
                                                         -/-
-                                                    </span>
+                                                    </div>
                                                 </div>
                                         </div>
                                         
@@ -927,7 +933,7 @@ const ItemInput = ({
                                         {/* <div className="w-full flex justify-center"><HiChevronDoubleDown className="w-6 h-6 text-[#136C96]"/></div> */}
                                         
                                         <div className="border-t-2 border-dashed border-gray-200 mt-3 mx-4"></div>
-                                        <div className="flex  md:flex-row  pt-3 items-center xl:px-0 md:px-0 lg:px-0 px-4 !pr-5">
+                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 px-4 !pr-5">
                                             <div className=" flex justify-between items-center w-full">
                                                 <label className="font-medium">
                                                     Thành phẩm công đoạn rong:
@@ -938,7 +944,7 @@ const ItemInput = ({
                                         {/* Thành phẩm rong */}
                                         {selectedItemDetails?.stocks.map((stockItem, stockIndex) => (
                                             <div className="my-3 mt-2  " key={stockIndex}>
-                                                <div className="flex items-center bg-gray-900 border-[#DADADA] mx-3 rounded-t-2xl p-3 py-4 border-b-0 ">
+                                                <div className="flex items-center bg-gray-900 border-[#DADADA] mx-3 rounded-t-xl p-3 py-2.5 border-b-0 ">
                                                     {/* <VscCircleFilled className="text-blue-200 mr-2 w-3 h-3" /> */}
                                                     {/* <div className="text-white font-semibold text-xl mr-2">{stockIndex + 1 }.</div> */}
                                                     <div className="pl-2 text-white font-semibold text-xl">{stockItem?.ItemName || "Thành phẩm không xác định"}</div>
@@ -1820,8 +1826,7 @@ const ItemInput = ({
                                                         ) && (
                                                             <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
                                                                 <Text className="font-semibold">
-                                                                    Số lượng lỗi
-                                                                    đã ghi nhận:{" "}
+                                                                    Số lượng lỗi đã ghi nhận:{" "}
                                                                 </Text>{" "}
                                                             </div>
                                                         )}
@@ -2187,8 +2192,35 @@ const ItemInput = ({
                         </Alert>
 
                         <div className="border-b-2 border-gray-100"></div>
-
-                        <div className="flex items-item justify-end p-4 w-full gap-4">
+                        <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                                <button
+                                    onClick={() => {
+                                        closeInputModal();
+                                        setSelectedFaultItem({
+                                            ItemName: "",
+                                            ItemCode: "",
+                                            SubItemName: "",
+                                            SubItemCode: "",
+                                            SubItemBaseQty: "",
+                                            OnHand: "",
+                                        });
+                                        setFaultyAmount("");
+                                        setIsItemCodeDetech(false);
+                                        setRongData(null);
+                                    }}
+                                    className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                >
+                                    Đóng
+                                </button>
+                                <button
+                                    className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full text-white"
+                                    type="button"
+                                    onClick={onAlertDialogOpen}
+                                >
+                                    Xác nhận
+                                </button>
+                            </div>            
+                        {/* <div className="flex items-item justify-end p-4 w-full gap-4">
                             <Button
                                 className="bg-[#edf2f7]"
                                 onClick={() => {
@@ -2225,7 +2257,7 @@ const ItemInput = ({
                             >
                                 Ghi nhận
                             </Button>
-                        </div>
+                        </div> */}
                     </ModalFooter>
                 </ModalContent>
             </Modal>

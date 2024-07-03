@@ -489,7 +489,7 @@ class ProductionController extends Controller
             $results[] = $rowstock;
         }
 
-        // dd($results);
+        dd($results);
 
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
@@ -521,12 +521,6 @@ class ProductionController extends Controller
                 }
             }
         }
-
-        // $history = HistorySL::where('to', $request->TO)
-        //     ->where('itemchild', $request->ItemCode)
-        //     ->select('id', 'LSX', 'SPDICH', 'itemchild', 'to', 'quantity', 'DocEntry',)
-        //     ->get();
-        // $data = $history->toArray();
         
         $stock = [];
 
@@ -884,6 +878,7 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
 
+        // Lấy dữ liệu từ SAP
         $conDB = (new ConnectController)->connect_sap();
 
         $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
@@ -914,6 +909,7 @@ class ProductionController extends Controller
         notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
         awaitingstocks::where('notiId', $data->id)->delete();
 
+        // Lấy danh sách số lượng tồn
         $groupedResults = [];
 
         foreach ($results as $result) {
@@ -934,6 +930,7 @@ class ProductionController extends Controller
                 $groupedResults[$subItemCode]['OnHand'] = $onHand;
             }
         }
+        // Lấy dữ liệu từ awaitingstocks để tính toán số lượng tồn thực tế
         foreach ($groupedResults as &$item) {
             $awaitingQtySum = awaitingstocks::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
             $item['OnHand'] -= $awaitingQtySum;

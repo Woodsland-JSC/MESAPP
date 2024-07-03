@@ -492,54 +492,131 @@ class MasterDataController extends Controller
     //     }
     // }
 
+    // function UserSAPAssign(Request $request)
+    // {
+    //     try {
+    //         $userId = $request->input('userId');
+    //         $query = '';
+
+    //         if ($userId) {
+    //             // Kiểm tra người dùng có id = userId xem trường sap_id có rỗng không
+    //             $user = User::find($userId);
+    //             if (!$user) {
+    //                 // Nếu không tìm thấy người dùng với id tương ứng, trả về thông báo lỗi
+    //                 throw new \Exception('User with ID ' . $userId . ' not found.');
+    //             }
+    //             $sapId = $user->sap_id;
+
+    //             // Xây dựng câu truy vấn SQL dựa trên trạng thái của sap_id
+    //             $userData = User::whereNotNull('sap_id')->where('id', '!=', $userId)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
+
+    //             // dd($userData);
+
+    //             $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+    //         } else {
+    //             // Trường hợp không có userId được cung cấp trả về tất cả người dùng SAP chưa được link với ngừời dùng WEB
+    //             $userData = User::whereNotNull('sap_id')->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
+
+    //             $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+    //         }
+    //         // Kết nối đến cơ sở dữ liệu SAP
+    //         $conDB = (new ConnectController)->connect_sap();
+
+    //         // Chuẩn bị và thực thi truy vấn SQL
+    //         $stmt = odbc_prepare($conDB, $query);
+    //         if (!$stmt) {
+    //             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+    //         if (!odbc_execute($stmt)) {
+    //             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+
+    //         // Lấy kết quả và đóng kết nối
+    //         $results = array();
+    //         while ($row = odbc_fetch_array($stmt)) {
+    //             $results[] = $row;
+    //         }
+    //         odbc_close($conDB);
+
+    //         // Trả về kết quả dưới dạng JSON
+    //         return response()->json($results, 200);
+    //     } catch (\Exception $e) {
+    //         // Xử lý ngoại lệ và trả về thông báo lỗi
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     function UserSAPAssign(Request $request)
     {
         try {
             $userId = $request->input('userId');
             $query = '';
-
+    
+            // Kiểm tra nếu userId được cung cấp
             if ($userId) {
-                // Kiểm tra người dùng có id = userId xem trường sap_id có rỗng không
+                // Tìm người dùng có ID tương ứng
                 $user = User::find($userId);
                 if (!$user) {
-                    // Nếu không tìm thấy người dùng với id tương ứng, trả về thông báo lỗi
+                    // Nếu không tìm thấy người dùng, ném ngoại lệ
                     throw new \Exception('User with ID ' . $userId . ' not found.');
                 }
+    
+                // Lấy sap_id của người dùng
                 $sapId = $user->sap_id;
-
-                // Xây dựng câu truy vấn SQL dựa trên trạng thái của sap_id
-                $userData = User::whereNotNull('sap_id')->where('id', '!=', $userId)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-
-                $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+    
+                // Lấy danh sách sap_id của các người dùng khác (trừ userId hiện tại) và xây dựng chuỗi sap_id
+                $userData = User::whereNotNull('sap_id')
+                    ->where('id', '!=', $userId)
+                    ->pluck('sap_id')
+                    ->map(fn($item) => "'$item'")
+                    ->implode(',');
+    
+                // Xây dựng câu truy vấn SQL để lấy người dùng từ SAP ngoại trừ các sap_id đã được sử dụng
+                $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where ("USER_CODE" NOT IN (' . $userData . ') OR "USER_CODE" = \'' . $sapId . '\')';
             } else {
-                // Trường hợp không có userId được cung cấp
-                $userData = User::whereNotNull('sap_id')->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(',');
-
+                // Nếu không có userId, lấy danh sách sap_id của tất cả người dùng và xây dựng chuỗi sap_id
+                $userData = User::whereNotNull('sap_id')
+                    ->pluck('sap_id')
+                    ->map(fn($item) => "'$item'")
+                    ->implode(',');
+    
+                // Xây dựng câu truy vấn SQL để lấy tất cả người dùng từ SAP chưa được liên kết với người dùng web
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             }
+    
             // Kết nối đến cơ sở dữ liệu SAP
             $conDB = (new ConnectController)->connect_sap();
-
-            // Chuẩn bị và thực thi truy vấn SQL
+    
+            // Chuẩn bị câu truy vấn SQL
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
+                // Nếu chuẩn bị truy vấn thất bại, ném ngoại lệ
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
+    
+            // Thực thi câu truy vấn SQL
             if (!odbc_execute($stmt)) {
+                // Nếu thực thi truy vấn thất bại, ném ngoại lệ
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
-
-            // Lấy kết quả và đóng kết nối
+    
+            // Lấy kết quả truy vấn và lưu trữ trong mảng
             $results = array();
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
+    
+            // Đóng kết nối với cơ sở dữ liệu SAP
             odbc_close($conDB);
-
-            // Trả về kết quả dưới dạng JSON
+    
+            // Trả về kết quả dưới dạng JSON với mã trạng thái HTTP 200
             return response()->json($results, 200);
         } catch (\Exception $e) {
-            // Xử lý ngoại lệ và trả về thông báo lỗi
+            // Nếu có ngoại lệ, trả về thông báo lỗi dưới dạng JSON với mã trạng thái HTTP 500
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
@@ -547,37 +624,7 @@ class MasterDataController extends Controller
             ], 500);
         }
     }
-
-
-    function getAllSAPUser()
-    {
-        try {
-            $conDB = (new ConnectController)->connect_sap();
-            $userData = User::where('sap_id', '<>', null)->pluck('sap_id')->map(fn ($item) => "'$item'")->implode(','); // lấy danh sách user đã được assign và conver to string
-
-            $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
-            $stmt = odbc_prepare($conDB, $query);
-            if (!$stmt) {
-                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-            }
-            if (!odbc_execute($stmt)) {
-                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-            }
-
-            $results = array();
-            while ($row = odbc_fetch_array($stmt)) {
-                $results[] = $row;
-            }
-            odbc_close($conDB);
-            return response()->json($results, 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => false,
-                'status_code' => 500,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+    
 
     function settings(Request $request)
     {

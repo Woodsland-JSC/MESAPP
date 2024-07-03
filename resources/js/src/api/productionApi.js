@@ -23,6 +23,14 @@ const productionApi = {
             },
         });
     },
+    getFinishedGoodsListByGroupPlywood: (param) => {
+        const url = `/list-qc-vcn`;
+        return axiosClient().get(url, {
+            params: {
+                TO: param,
+            },
+        });
+    },
     getFinishedPlywoodGoodsList: (params) => {
         const queryStringParams = Object.keys(params)
             .map(
@@ -107,7 +115,12 @@ const productionApi = {
         return axiosClient().post(url, data);
     },
     rejectReceiptsVCN: (data) => {
-        const url = `/production/reject-receipts`;
+        const url = `/vcn/reject-receipts`;
+        return axiosClient().post(url, data);
+    },
+    acceptReceiptsVCNQC: (data) => {
+        // const url = `/v2/confirm-qc-cbg`;
+        const url = `/confirm-qc-vcn`;
         return axiosClient().post(url, data);
     },
     acceptReceiptsCBG: (data) => {
@@ -121,7 +134,7 @@ const productionApi = {
         return axiosClient().post(url, data);
     },
     acceptReceiptsVCN: (data) => {
-        const url = `/production/accept-receipts-vcn`;
+        const url = `/vcn/accept-receipts`;
         return axiosClient().post(url, data);
     },
     getErrorTypes: () => {

@@ -22,6 +22,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/getlist-team-exclude-qc', [QCController::class, 'listToExcludeQC']);
     route::get('/list-qc-cbg', [QCController::class, 'listConfirm']);
     route::post('/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBG'])->name('confirm-qc-cbg');
+    route::get('/list-qc-vcn', [QCController::class, 'listConfirmVCN']);
+    route::post('/confirm-qc-vcn', [QCController::class, 'acceptTeamQCVCN'])->name('confirm-qc-vcn');
     route::post('/v2/confirm-qc-cbg', [QCController::class, 'acceptTeamQCCBGV2'])->name('confirm-qc-cbg-v2');
     route::post('issueQC', [QCController::class, 'IssueQC'])->name('issueQC');
 });

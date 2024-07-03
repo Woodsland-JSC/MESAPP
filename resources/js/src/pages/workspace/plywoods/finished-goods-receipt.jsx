@@ -701,7 +701,7 @@ function PlywoodFinishedGoodsReceipt() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2 px-6 xl:px-0 lg:px-0 md:px-0 ">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -744,7 +744,7 @@ function PlywoodFinishedGoodsReceipt() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between px-6 px-6 xl:px-0 lg:px-0 md:px-0 items-center">
                         <div className="text-3xl font-bold ">
                             Nhập sản lượng ván công nghiệp
                         </div>
@@ -752,7 +752,7 @@ function PlywoodFinishedGoodsReceipt() {
 
                     {/* Controller */}
                     <div className="flex justify-between mb-6 items-center gap-4">
-                        <div className="my-4 mb-6 w-full border-2 rounded-xl bg-white z-0">
+                        <div className="my-4 mb-6 w-full border-2 border-gray-200 rounded-xl bg-white z-0">
                             <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
@@ -883,10 +883,9 @@ function PlywoodFinishedGoodsReceipt() {
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
                                     {awaitingReception.map((item, index) => (
                                         <AwaitingReception
-                                            type="wood-processing"
+                                            type="plywood"
                                             data={item}
                                             key={index}
-                                            variant="CBG"
                                             index={index}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={

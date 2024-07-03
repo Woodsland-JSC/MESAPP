@@ -869,7 +869,7 @@ function ControllerCard(props) {
                             <div className="flex xl:w-fit md:w-fit w-full items-center justify-end py-4 xl:py-0 lg:py-0 md:py-0 gap-x-3 ">
                                 <button
                                     onClick={onClose}
-                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                    className="bg-gray-300  p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                 >
                                     Đóng
                                 </button>
@@ -893,7 +893,7 @@ function ControllerCard(props) {
                                 ) : (
                                     <button
                                         onClick={handleSave}
-                                        className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                        className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Lưu lại
                                     </button>

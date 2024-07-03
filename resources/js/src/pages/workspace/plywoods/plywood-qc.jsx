@@ -73,7 +73,7 @@ function PlywoodQC() {
     const getDataFollowingGroup = async (param) => {
         setLoadingData(true);
         try {
-            const res = await productionApi.getFinishedGoodsListByGroup(param);
+            const res = await productionApi.getFinishedGoodsListByGroupPlywood(param);
             if (typeof res?.data === "object") {
                 setAwaitingReception(Object.values(res.data));
             } else {
@@ -163,7 +163,7 @@ function PlywoodQC() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="w-full inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -217,7 +217,7 @@ function PlywoodQC() {
                     </div>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-lg bg-white z-0">
+                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-xl bg-white z-0">
                         {/* Search */}
                         <div className="w-full">
                             <label
@@ -297,7 +297,7 @@ function PlywoodQC() {
                                         <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
                                             {filteredData.map((item, index) => (
                                                 <AwaitingReception
-                                                    type="wood-processing"
+                                                    type="plywood"
                                                     data={item}
                                                     key={index}
                                                     index={index}

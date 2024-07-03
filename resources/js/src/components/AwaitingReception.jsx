@@ -167,7 +167,7 @@ const AwaitingReception = ({
                 if (payload.id) {
                     switch (type) {
                         case "plywood":
-                            res = await productionApi.acceptReceiptsVCN(payload);
+                            res = await (variant === "QC" ? productionApi.acceptReceiptsVCNQC(payload) : productionApi.acceptReceiptsVCN(payload));
                             break;
                         default:
                             res = await (variant === "QC" ? productionApi.acceptReceiptsCBGQC(payload) : productionApi.acceptReceiptsCBG(payload));
@@ -227,27 +227,31 @@ const AwaitingReception = ({
                 if (payload?.reason) {
                     switch (type) {
                         case "plywood":
-                            const res1 = await productionApi.rejectReceiptsCBG(
+                            const res1 = await productionApi.rejectReceiptsVCN(
                                 payload
                             );
                             break;
                         default:
-                            const res2 = await productionApi.rejectReceiptsVCN(
+                            const res2 = await productionApi.rejectReceiptsCBG(
                                 payload
                             );
                             break;
                     }
-
                     onRejectReceipt(payload?.id);
                     onDismissAlertDialogClose();
+                    setRejectLoading(false);
                 } else {
                     toast("Vui lòng chọn lý do");
                 }
             } else {
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+                onDismissAlertDialogClose();
+                setRejectLoading(false);
             }
         } catch (error) {
             toast.error("Có lỗi xảy ra khi từ chối.");
+            onDismissAlertDialogClose();
+            setRejectLoading(false);
         }
         setRejectLoading(false);
     };
@@ -358,7 +362,7 @@ const AwaitingReception = ({
                 } `}
             >
                 <div className="!px-4 !py-3">
-                    <Stack mt="2" spacing="2">
+                    <Stack mt="1" spacing="2">
                         <div className="flex gap-2">
                             {/* <span>Tên: </span> */}
                             <span className="font-bold text-[19px] text-[#155979]">
@@ -372,14 +376,12 @@ const AwaitingReception = ({
                         </div>
 
                         {type == "plywood" ? (
-                            <>
-                                <div className="flex gap-2">
-                                    <span>Lệnh sản xuất: </span>
-                                    <span className="font-bold">
-                                        {data?.command || ""}
-                                    </span>
-                                </div>
-                            </>
+                            <div className="flex gap-2">
+                                <span>Mã thành phẩm: </span>
+                                <span className="font-bold">
+                                    {data?.ItemCode || "????"}
+                                </span>
+                            </div>
                         ) : (
                             <>
                                 <div className="flex gap-2">
