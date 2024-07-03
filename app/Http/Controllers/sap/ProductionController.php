@@ -489,7 +489,7 @@ class ProductionController extends Controller
             $results[] = $rowstock;
         }
 
-        dd($results);
+        // dd($results);
 
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
