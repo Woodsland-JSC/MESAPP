@@ -148,3 +148,5 @@ include('qc.php');
 include('v2/cbg.php');
 //include route vcn
 include('vcn.php');
+//include route report
+include('report.php');

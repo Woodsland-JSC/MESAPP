@@ -1007,6 +1007,8 @@ class VCNController extends Controller
                             'itemchild' => $allocate['ItemChild'],
                             'SPDich' => $data->FatherCode,
                             'to' => $data->Team,
+                            "source"=>$rootCause,
+                            "TOChuyenVe"=>$teamBack,
                             'quantity' => $allocate['Allocate'],
                             'ObjType' => 202,
                             'DocEntry' => $res['DocEntry']

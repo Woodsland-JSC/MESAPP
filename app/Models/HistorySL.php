@@ -18,6 +18,8 @@ class HistorySL extends Model
         'DocEntry',
         'LL',
         'HXL',
+        'source',
+        'TOChuyenVe',
         'SPDich',
         'isQualityCheck',
         'notiId',

@@ -610,6 +610,8 @@ class QCController extends Controller
                     'SPDich'=>$data->FatherCode,
                     'LL'=> $loailoi,
                     'HXL'=>$huongxuly,
+                    "source"=>$rootCause,
+                    "TOChuyenVe"=>$teamBack,
                     'isQualityCheck'=>1,
                     'notiId' => $request->id,
                 ], 
