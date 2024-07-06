@@ -1190,7 +1190,6 @@ class VCNController extends Controller
 
     function receiptRong(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'Data.*.FatherCode' => 'required|string|max:254',
             'Data.*.ItemCode' => 'required|string|max:254',
@@ -1262,6 +1261,7 @@ class VCNController extends Controller
                         'version' => $dt['version'],
                         'CreatedBy' => Auth::user()->id,
                         'MaThiTruong' => $dt['MaThiTruong'] ?? null,
+                        'loinhamay' => $dt['factories']['value'] ?? null,
                     ]);
                     $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
                 }
