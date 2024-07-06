@@ -7,5 +7,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'report'], function () {
         Route::get('/cbg-chitietgiaonhan', [ReportController::class, 'chitietgiaonhan']);
+        Route::get('/cbg-xulyloi', [ReportController::class, 'XuLyLoi']);
+        Route::get('/say-bienbanvaolo', [ReportController::class, 'bienbanvaolo']);
+        Route::get('/say-xepsay', [ReportController::class, 'xepsay']);
+        Route::get('/say-xepchosay', [ReportController::class, 'xepchosay']);
     });
 });

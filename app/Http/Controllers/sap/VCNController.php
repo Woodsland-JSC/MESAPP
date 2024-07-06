@@ -102,6 +102,7 @@ class VCNController extends Controller
                     'ErrorData' => $errorData,
                     'MaThiTruong' => $request->MaThiTruong,
                     'CreatedBy' => Auth::user()->id,
+                    'loinhamay' => $request->factories['value']??null
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
 

@@ -145,10 +145,18 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only(['FatherCode', 'ItemCode', 'ItemName', 'SubItemCode', 'SubItemName', 'CompleQty', 'RejectQty', 'CDay', 'CRong', 'CDai', 'Team', 'CongDoan', 'NexTeam', 'Type', 'LSX']);
+            $SLData = $request->only([
+            'FatherCode', 'ItemCode', 
+            'ItemName', 'SubItemCode', 
+            'SubItemName', 'CompleQty', 
+            'RejectQty', 'CDay', 
+            'CRong', 'CDai', 
+            'Team', 'CongDoan', '
+            NexTeam', 'Type', 
+            'LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SLData['openQty'] = 0;
-
+            $SLData['loinhamay'] = $request->factories['value']??null;
             $SanLuong = SanLuong::create($SLData);
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
