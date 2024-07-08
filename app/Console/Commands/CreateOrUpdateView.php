@@ -142,7 +142,7 @@ class CreateOrUpdateView extends Command
         // BÁO CÁO XẾP CHỜ SẤY
         DB::statement("
             CREATE VIEW gt_say_xepchoxay AS
-            select a.Code MaPallet,a.MaLo,a.LyDo, b.ItemCode,b.ItemName,b.CDai,b.CRong,b.CDay,sum(b.Qty) M3,sum(B.Qty_T) Qty,a.created_at,
+            select a.Code MaPallet,a.MaLo,a.LyDo, b.ItemCode,b.ItemName,b.CDai,b.CRong,b.CDay,sum(b.Qty) M3,sum(b.Qty_T) Qty,a.created_at,
             u.plant,u.branch,
             case when u.branch=1 then 'Thuận Hưng'
                 WHEN u.branch=3 THEN 'Tuyên Quang'
@@ -194,7 +194,7 @@ class CreateOrUpdateView extends Command
                 FROM sanluong a 
                 JOIN notireceipt b ON a.id = b.baseID AND b.deleted = 0 AND  b.type = 1
                 JOIN users c ON a.create_by = c.id
-                JOIN historysl sl on b.id=sl.notiId
+                JOIN historySL sl on b.id=sl.notiId
                 JOIN users d ON b.confirmBy = d.id;"
         );
     }
