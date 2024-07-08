@@ -132,7 +132,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
         }
 
         $input = $request->all();
@@ -144,6 +144,10 @@ class UserController extends Controller
         }
 
         $user = User::find($id);
+
+        if ($user->sap_id == $request->input('sap_id')) {
+            unset($input['sap_id']);
+        }      
 
         if ($request->has('avatar')) {
             $avatar = $request->file('avatar');
@@ -195,6 +199,8 @@ class UserController extends Controller
 
         unset($input['_method']);
 
+        
+
         $user->update($input);
 
         DB::table('model_has_roles')->where('model_id', $id)->delete();
@@ -203,6 +209,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
     }
+
     public function updateProfile(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -272,6 +279,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Profile updated successfully', 'user' => $user], 200);
     }
+
     public function changePassword(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [

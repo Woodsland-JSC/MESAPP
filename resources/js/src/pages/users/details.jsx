@@ -413,7 +413,6 @@ function User() {
                     return;
                     // }
                 }
-                
                 getCurrentUser();
                 setLoading(false);
             } catch (error) {
@@ -421,7 +420,6 @@ function User() {
                 toast.error("Có lỗi xảy ra, vui lòng thử lại.");
                 setLoading(false);
             }
-            // console.log("Giá trị updated values: ", updatedValues);
         } else {
             toast("Bạn chưa điều chỉnh thông tin.", {
                 icon: ` ℹ️`,
@@ -1109,8 +1107,7 @@ function User() {
                                                 }
                                                 options={sapId}
                                                 onChange={(value) => {
-                                                    // console.log("Giá trị trước khi thay đổi:", values.sapId);
-                                                    // console.log("Giá trị sau khi thay đổi:", value);
+
                                                     setInput((prev) => ({
                                                         ...prev,
                                                         sapId: value

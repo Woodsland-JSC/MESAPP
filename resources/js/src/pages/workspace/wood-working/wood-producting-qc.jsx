@@ -25,7 +25,6 @@ import productionApi from "../../../api/productionApi";
 import Loader from "../../../components/Loader";
 import AwaitingReception from "../../../components/AwaitingReception";
 
-
 function WoodProductingQC() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(false);
@@ -34,7 +33,6 @@ function WoodProductingQC() {
     const [isQC, setIsQC] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState(null);
-    // const [filteredData, setFilteredData] = useState(null);
 
     const [groupList, setGroupList] = useState([]);
     const [groupListOptions, setGroupListOptions] = useState([]);
@@ -43,10 +41,12 @@ function WoodProductingQC() {
     const [awaitingReception, setAwaitingReception] = useState([]);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
 
+    // QC Data
+    const [QCData, setQCData] = useState([]);
+
     // New Get All Group
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
-            // setLoading(true);
             try {
                 const res = await productionApi.getAllGroupWithoutQC();
                 const options = res.map((item) => ({
@@ -56,12 +56,10 @@ function WoodProductingQC() {
                 setGroupList(res);
                 setGroupListOptions(options);
                 console.log("1. Get all group: ", options);
-                // setSelectedGroup(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");
                 console.error(error);
             }
-            // setLoading(false);
         };
         getAllGroupWithoutQC();
         document.title = "Woodsland - Nhập sản lượng ván công nghiệp";
@@ -75,19 +73,19 @@ function WoodProductingQC() {
         setLoadingData(true);
         try {
             const res = await productionApi.getFinishedGoodsListByGroup(param);
+            setQCData(res);
+
             if (typeof res?.data === "object") {
                 setAwaitingReception(Object.values(res.data));
             } else {
                 setAwaitingReception([]);
             }
-
             console.log("3.Dữ liệu QC: ", res.data);
-
-            // setData(res.data);
+            setLoadingData(false);
         } catch (error) {
             toast.error("Có lỗi trong quá trình lấy dữ liệu.");
-        }
-        setLoadingData(false);
+            setLoadingData(false);
+        } 
     };
 
     useEffect(() => {
@@ -124,9 +122,6 @@ function WoodProductingQC() {
 
     const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
-            // setAwaitingReception((prev) =>
-            //     prev.filter((item) => item.id !== id)
-            // );
             getDataFollowingGroup({ TO: selectedGroup.value });
             toast.success("Ghi nhận thành công.");
         }
@@ -137,9 +132,6 @@ function WoodProductingQC() {
 
     const handleRejectReceipt = (id) => {
         if (selectedGroup) {
-            // setAwaitingReception((prev) =>
-            //     prev.filter((item) => item.id !== id)
-            // );
             getDataFollowingGroup({ TO: selectedGroup.value });
             toast.success("Huỷ bỏ & chuyển lại thành công.");
         }
@@ -162,7 +154,7 @@ function WoodProductingQC() {
         <Layout>
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
+                <div className="w-screen mb-4 xl:mb-4 p-6 px-3 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
                     <div className="mb-4">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -171,7 +163,7 @@ function WoodProductingQC() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="xl:ml-0 lg:ml-0 md:ml-0 ml-2 text-sm font-medium text-[#17506B]"
+                                            className="xl:ml-0 lg:ml-0 md:ml-0 text-sm font-medium text-[#17506B]"
                                         >
                                             Workspace
                                         </a>
@@ -302,13 +294,18 @@ function WoodProductingQC() {
                                                     key={index}
                                                     index={index}
                                                     variant="QC"
+                                                    errorType={QCData.errorType} 
+                                                    solution={QCData.solution}
+                                                    teamBack={QCData.teamBack}
+                                                    rootCause={QCData.rootCause}
+                                                    returnCode={QCData.returnCode}
                                                     isQualityCheck={
                                                         isQualityCheck
                                                     }
                                                     onConfirmReceipt={
                                                         handleConfirmReceipt
                                                     }
-                                                    onRejectReceipt={
+                                                    onRejectReceipt={   
                                                         handleRejectReceipt
                                                     }
                                                 />

@@ -875,7 +875,7 @@ class ProductionController extends Controller
             'TO' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
         }
 
         // Lấy dữ liệu từ SAP
@@ -896,6 +896,8 @@ class ProductionController extends Controller
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
+
+        // dd($results);
 
         $data = DB::table('notireceipt as a')
             ->where('a.id', $request->id)
@@ -1346,6 +1348,7 @@ class ProductionController extends Controller
         }
     }
 
+    //To be deleted
     function getAllTeam()
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -1357,8 +1360,6 @@ class ProductionController extends Controller
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
         if (!odbc_execute($stmt, ['N', 'Y', Auth::user()->plant])) {
-            // Handle execution error
-            // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $results = array();
@@ -1369,6 +1370,7 @@ class ProductionController extends Controller
         return response()->json($results, 200);
     }
 
+    // To be deleted
     function getRootCause()
     {
         $results = [

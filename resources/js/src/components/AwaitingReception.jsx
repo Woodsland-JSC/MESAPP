@@ -82,6 +82,11 @@ const AwaitingReception = ({
     data,
     type,
     index,
+    errorType,
+    solution,
+    teamBack,
+    rootCause,
+    returnCode,
     isQualityCheck,
     onConfirmReceipt,
     onRejectReceipt,
@@ -281,76 +286,36 @@ const AwaitingReception = ({
         }
     }, [faults.errorType]);
 
-    useEffect(() => {
-        const getErrorTypeOptions = async () => {
-            try {
-                const res = await productionApi.getErrorTypes();
-                const errorTypes = res.map((error, index) => ({
-                    value: error?.id || "",
-                    label: error?.name || "",
-                }));
-                // console.log("Other side: ", errorTypes);
-                setErrorTypeOptions(errorTypes);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const getSolutionOptions = async () => {
-            try {
-                const res = await productionApi.getSolutions("CBG");
-                const solutions = res.map((solution, index) => ({
-                    value: solution?.id || "",
-                    label: solution?.name || "",
-                }));
-                // console.log("Other side 2: ", solutions);
-                setSolutionOptions(solutions);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const getTeamBackOptions = async () => {
-            try {
-                const res = await productionApi.getTeamBacks();
-                const teamBacks = res.map((teamBack, index) => ({
-                    value: teamBack?.Code || "",
-                    label: teamBack?.Name || "",
-                }));
-                setTeamBackOptions(teamBacks);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const getRootCauseOptions = async () => {
-            try {
-                const res = await productionApi.getRootCauses();
-                const rootCauses = res.map((rootCause, index) => ({
-                    value: rootCause?.id || "",
-                    label: rootCause?.name || "",
-                }));
-                setRootCauseOptions(rootCauses);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        const getReturnCode = async () => {
-            try {
-                const res = await productionApi.getReturnCode();
-                const returnCodes = res.map((returnCode, index) => ({
-                    value: returnCode?.ItemCode || "",
-                    label: returnCode?.ItemName || "",
-                }));
-                setReturnCodeOptions(returnCodes);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+    // States:
+    // errorTypeOptions, solutionOptions, teamBackOptions, rootCauseOptions, returnCodeOptions
 
-        getErrorTypeOptions();
-        getSolutionOptions();
-        getTeamBackOptions();
-        getRootCauseOptions();
-        getReturnCode();
-    }, []);
+    useEffect(() => {
+        const filteredErrorTypes = type ? errorType?.filter(item => item.U_Type === type) : errorType;
+    
+        setErrorTypeOptions(filteredErrorTypes?.map((item) => ({
+            value: item?.id || "",
+            label: item?.name || "",
+        })));
+
+        console.log("errorTypeOptions: ",filteredErrorTypes);
+
+        setSolutionOptions(solution?.map((item, index) => ({
+            value: item?.id || "",
+            label: item?.name || "",
+        })));
+        setTeamBackOptions(teamBack?.map((item, index) => ({
+            value: item?.Code || "",
+            label: item?.Name || "",
+        })));
+        setRootCauseOptions(rootCause?.map((item, index) => ({
+            value: item?.id || "",
+            label: item?.name || "",
+        })));
+        setReturnCodeOptions(returnCode?.map((item, index) => ({
+            value: item?.ItemCode || "",
+            label: item?.ItemName || "",
+        })));
+    }, [type, errorType]);
 
     return (
         <>
@@ -635,7 +600,7 @@ const AwaitingReception = ({
                                     ref={rootCauseRef}
                                     className="mt-1 w-full"
                                     placeholder="Lựa chọn"
-                                    options={teamBackOptions}
+                                    options={rootCauseOptions}
                                     isClearable
                                     isSearchable
                                     value={faults.rootCause}

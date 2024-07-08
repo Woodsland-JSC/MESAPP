@@ -42,6 +42,9 @@ function PlywoodQC() {
     const [awaitingReception, setAwaitingReception] = useState([]);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
 
+    // QC Data
+    const [QCData, setQCData] = useState([]);
+
     // New Get All Group
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
@@ -74,6 +77,7 @@ function PlywoodQC() {
         setLoadingData(true);
         try {
             const res = await productionApi.getFinishedGoodsListByGroupPlywood(param);
+            setQCData(res);
             if (typeof res?.data === "object") {
                 setAwaitingReception(Object.values(res.data));
             } else {
@@ -81,8 +85,6 @@ function PlywoodQC() {
             }
 
             console.log("3.Dữ liệu QC: ", res.data);
-
-            // setData(res.data);
         } catch (error) {
             toast.error("Có lỗi trong quá trình lấy dữ liệu.");
         }
@@ -161,7 +163,7 @@ function PlywoodQC() {
         <Layout>
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
+                <div className="w-screen mb-4 xl:mb-4 p-6 px-3 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
                     <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
@@ -170,7 +172,7 @@ function PlywoodQC() {
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className=" text-sm font-medium text-[#17506B] md:ml-2"
                                         >
                                             Workspace
                                         </a>
@@ -301,6 +303,11 @@ function PlywoodQC() {
                                                     data={item}
                                                     key={index}
                                                     index={index}
+                                                    errorType={QCData.errorType} 
+                                                    solution={QCData.solution}
+                                                    teamBack={QCData.teamBack}
+                                                    rootCause={QCData.rootCause}
+                                                    returnCode={QCData.returnCode}
                                                     variant="QC"
                                                     isQualityCheck={
                                                         isQualityCheck

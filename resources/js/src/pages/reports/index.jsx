@@ -11,6 +11,8 @@ import Select from "react-select";
 import { dateToDateTime } from "../../utils/convertDatetime";
 import { MdOutlineRefresh } from "react-icons/md";
 import { TbRefresh } from "react-icons/tb";
+import { FaArrowRight } from "react-icons/fa";
+import { HiClipboard } from "react-icons/hi";
 import {
     Tabs,
     TabList,
@@ -32,26 +34,102 @@ const sizeOptions = [
     { value: "200", label: "200" },
 ];
 
-const exampleData = [
+const woodDryingReports = [
     {
         id: "0001",
-        name: "Báo cáo xếp sấy khối chế biến gỗ",
+        name: "Biên bản vào lò",
         link: "/reports/wood-processing-kiln-stacking",
     },
     {
         id: "0002",
-        name: "Báo cáo xếp chờ xấy",
+        name: "Biên bản lịch sử vào lò",
         link: "/reports/wood-awaiting-drying",
     },
     {
         id: "0003",
-        name: "Báo cáo tồn sấy lựa",
+        name: "Biên bản kiểm tra lò sấy",
         link: "/reports/selected-dried-inventory",
     },
     {
         id: "0004",
+        name: "Biên bản kiểm tra độ ẩm",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0005",
         name: "Báo cáo lò đang sấy",
         link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0006",
+        name: "Báo cáo kế hoạch sấy",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0007",
+        name: "Báo cáo xếp sấy khối CBG",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0008",
+        name: "Báo cáo sản lượng sấy",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0009",
+        name: "Báo cáo tồn sấy lựa",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0010",
+        name: "Báo cáo xếp chờ sấy",
+        link: "/reports/current-drying-kiln",
+    },
+];
+
+const woodProductingReports = [
+    {
+        id: "0001",
+        name: "Báo cáo sản lượng tuần (chi tiết)",
+        link: "/reports/wood-processing-kiln-stacking",
+    },
+    {
+        id: "0002",
+        name: "Báo cáo tỷ lệ đồng bộ",
+        link: "/reports/wood-awaiting-drying",
+    },
+    {
+        id: "0003",
+        name: "Báo cáo thông tin chi tiết giao nhận",
+        link: "/reports/selected-dried-inventory",
+    },
+    {
+        id: "0004",
+        name: "Báo cáo sản lượng sấy",
+        link: "/reports/current-drying-kiln",
+    },
+    {
+        id: "0005",
+        name: "Báo cáo chi tiết nhập tồn",
+        link: "/reports/current-drying-kiln",
+    },
+];
+
+const QCReports = [
+    {
+        id: "0001",
+        name: "Biên bản xử lý QC",
+        link: "/reports/wood-processing-kiln-stacking",
+    },
+    {
+        id: "0002",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/wood-awaiting-drying",
+    },
+    {
+        id: "0003",
+        name: "Báo cáo số lượng lỗi từng công đoạn",
+        link: "/reports/selected-dried-inventory",
     },
 ];
 
@@ -232,33 +310,6 @@ function Report() {
         recordGridRef.current.api.hideOverlay();
     }, []);
 
-    // User Actions
-    // const deleteUser = async (data) => {
-    //     const randomNum = Math.floor(Math.random() * 90 + 10);
-
-    //     const userInput = prompt(
-    //         `Nhập ${randomNum} để xác nhận xoá người dùng ${data.first_name}.\nLưu ý: Không thể hoàn tác xoá dữ liệu người dùng.`
-    //     );
-
-    //     if (userInput && parseInt(userInput) === randomNum) {
-    //         if (data.id) {
-    //             setLoading(true);
-    //             try {
-    //                 const res = await usersApi.deleteUser(data.id);
-    //                 console.log("Result xoá: ", res);
-    //                 toast.success("Xoá người dùng thành công.");
-    //                 setUserData(userData.filter((item) => item.id != data.id));
-    //             } catch (error) {
-    //                 console.error(error);
-    //                 toast.error("Có lỗi xảy ra.");
-    //             }
-    //             setLoading(false);
-    //         }
-    //     } else if (userInput && parseInt(userInput) !== randomNum) {
-    //         toast.error("Đã huỷ xoá người dùng.");
-    //     }
-    // };
-
     const handleRetryGrid = async () => {
         toast("Chức năng đang được phát triển.");
     };
@@ -277,32 +328,53 @@ function Report() {
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
-                    {/* Breadcrumb */}
-                    {/* <div className="mb-4">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <Link
-                                            to="/integration"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            Tích hợp
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div> */}
-
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">
-                        Danh sách báo cáo
+                    <div className="flex items-center justify-between mb-6">
+                        <div className=" text-3xl font-bold">
+                            Danh mục báo cáo
+                        </div>
+
+                        {/* Controller */}
+                        <div className="w-2/3 flex justify-between items-center">
+                            <div className="flex w-full justify-end space-x-4">
+                                <div className="w-1/2">
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg
+                                                className="w-4 h-4 text-gray-500"
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="record-search"
+                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Tìm kiếm báo cáo"
+                                            onInput={
+                                                onRecordFilterTextBoxChanged
+                                            }
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Main content */}
 
-                    <section className="bg-white rounded-lg border-2 mb-2 border-gray-200">
+                    <section className="bg-white rounded-xl border-2 mb-2 border-gray-200">
                         <Tabs size="lg">
                             <TabList className="">
                                 <Tab
@@ -310,7 +382,7 @@ function Report() {
                                     // onClick={() => handleTabClick(false)}
                                 >
                                     <div className="text-base font-medium">
-                                        Báo cáo
+                                        Báo cáo sấy phôi
                                     </div>
                                 </Tab>
                                 <Tab
@@ -318,160 +390,78 @@ function Report() {
                                     // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
-                                        Biên bản
+                                        Báo cáo sản lượng
+                                    </div>
+                                </Tab>
+                                <Tab
+                                    ref={recordTab}
+                                    // onClick={() => handleTabClick(true)}
+                                >
+                                    <div className="text-base font-medium">
+                                        Báo cáo kiểm định chất lượng
                                     </div>
                                 </Tab>
                             </TabList>
 
                             <TabPanels>
-                                {/* Báo cáo */}
+                                {/* Báo cáo sấy phôi */}
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
                                 >
-                                    {/* Controller */}
-                                    <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
-                                        <div className="flex w-full justify-end space-x-4">
-                                            <div className="">
-                                                <label
-                                                    for="search"
-                                                    className="mb-2 font-medium text-gray-900 sr-only"
-                                                >
-                                                    Tìm kiếm
-                                                </label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                        <svg
-                                                            className="w-4 h-4 text-gray-500"
-                                                            aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                            />
-                                                        </svg>
+                                    {/* Report Components */}
+                                    <div className="space-y-3">
+                                        {woodDryingReports.map((item, index) => (
+                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
+                                                <div className="flex items-center item-center gap-x-4">
+                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
+                                                        <HiClipboard className="  text-white w-5 h-5 " />
                                                     </div>
-                                                    <input
-                                                        type="search"
-                                                        id="search"
-                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Tìm kiếm"
-                                                        onInput={
-                                                            onReportFilterTextBoxChanged
-                                                        }
-                                                        required
-                                                    />
+                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
                                                 </div>
+                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className="ag-theme-alpine pb-4 ">
-                                        <AgGridReact
-                                            ref={reportGridRef}
-                                            rowData={reportData}
-                                            columnDefs={reportColumnDefs}
-                                            autoGroupColumnDef={
-                                                autoGroupColumnDef
-                                            }
-                                            defaultColDef={defaultColDef}
-                                            suppressRowClickSelection={true}
-                                            groupSelectsChildren={true}
-                                            rowSelection={"multiple"}
-                                            rowGroupPanelShow={"always"}
-                                            pivotPanelShow={"always"}
-                                            pagination={true}
-                                            paginationPageSize={20}
-                                            // paginationNumberFormatter={
-                                            //     paginationNumberFormatter
-                                            // }
-                                            onGridReady={onReportGridReady}
-                                            onFirstDataRendered={
-                                                onFirstReportDataRendered
-                                            }
-                                            suppressRowVirtualisation={true}
-                                            localeText={localeText}
-                                        />
+                                        ))}
                                     </div>
                                 </TabPanel>
 
-                                {/* Biên bản */}
+                                {/* Báo cáo sản lượng */}
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
                                 >
-                                    {/* Controller */}
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex w-full justify-end space-x-4">
-                                            <div className="">
-                                                <label
-                                                    for="record-search"
-                                                    className="mb-2 font-medium text-gray-900 sr-only"
-                                                >
-                                                    Tìm kiếm
-                                                </label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                        <svg
-                                                            className="w-4 h-4 text-gray-500"
-                                                            aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                            />
-                                                        </svg>
+                                    <div className="space-y-3">
+                                        {woodProductingReports.map((item, index) => (
+                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
+                                                <div className="flex items-center item-center gap-x-4">
+                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
+                                                        <HiClipboard className="  text-white w-5 h-5 " />
                                                     </div>
-                                                    <input
-                                                        type="text"
-                                                        id="record-search"
-                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Tìm kiếm"
-                                                        onInput={
-                                                            onRecordFilterTextBoxChanged
-                                                        }
-                                                        required
-                                                    />
+                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
                                                 </div>
+                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                             </div>
-                                        </div>
+                                        ))}
                                     </div>
-                                    <div className="ag-theme-alpine pb-4 ">
-                                        <AgGridReact
-                                            ref={recordGridRef}
-                                            rowData={recordData}
-                                            columnDefs={recordColumnDefs}
-                                            autoGroupColumnDef={
-                                                autoGroupColumnDef
-                                            }
-                                            defaultColDef={defaultColDef}
-                                            suppressRowClickSelection={true}
-                                            groupSelectsChildren={true}
-                                            rowSelection={"multiple"}
-                                            rowGroupPanelShow={"always"}
-                                            pivotPanelShow={"always"}
-                                            pagination={true}
-                                            paginationPageSize={20}
-                                            // paginationNumberFormatter={
-                                            //     paginationNumberFormatter
-                                            // }
-                                            onGridReady={onRecordGridReady}
-                                            onFirstDataRendered={
-                                                onFirstRecordDataRendered
-                                            }
-                                            localeText={localeText}
-                                        />
+                                </TabPanel>
+
+                                {/* Báo cáo QC */}
+                                <TabPanel
+                                    className="space-y-4"
+                                    style={gridStyle}
+                                >
+                                    <div className="space-y-3">
+                                        {QCReports.map((item, index) => (
+                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
+                                                <div className="flex items-center item-center gap-x-4">
+                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
+                                                        <HiClipboard className="  text-white w-5 h-5 " />
+                                                    </div>
+                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
+                                                </div>
+                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
+                                            </div>
+                                        ))}
                                     </div>
                                 </TabPanel>
                             </TabPanels>

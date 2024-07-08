@@ -22,6 +22,7 @@ use App\Models\historySLVCN;
 use App\Jobs\issueProduction;
 use App\Jobs\HistoryQC;
 use Illuminate\Support\Facades\Http;
+
 class QCController extends Controller
 {
     public function DanhGiaDoAm(Request $req)
@@ -73,10 +74,12 @@ class QCController extends Controller
         humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->update(['refID'  => $record->id]);
         // $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         if ($req->option == 'RL') {
-            planDryings::where('PlanID', $req->PlanID)->update(['Review' => 1,
-            'ReviewBy'=>Auth::user()->id,
-            'reviewDate'=>now(),
-             'result' => 0]);
+            planDryings::where('PlanID', $req->PlanID)->update([
+                'Review' => 1,
+                'ReviewBy' => Auth::user()->id,
+                'reviewDate' => now(),
+                'result' => 0
+            ]);
         }
         if ($req->option == 'SL') {
             planDryings::where('PlanID', $req->PlanID)->update(['Review' => 1, 'result' => 1]);
@@ -230,6 +233,8 @@ class QCController extends Controller
         ];
         return response()->json($header, 200);
     }
+
+    // To be deleted
     public function loailoi(Request $request)
     {
         try {
@@ -239,7 +244,7 @@ class QCController extends Controller
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt,['CBG'])) {
+            if (!odbc_execute($stmt, ['CBG'])) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -258,8 +263,8 @@ class QCController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-       
     }
+
     function huongxuly(Request $request)
     {
 
@@ -269,34 +274,34 @@ class QCController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-        
-            try {
-                $conDB = (new ConnectController)->connect_sap();
-                $query = 'select "Code" "id", "Name" "name" from "@V_HXLVCN" where "U_ObjType" = ?';
-                $stmt = odbc_prepare($conDB, $query);
-                if (!$stmt) {
-                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-                }
-                if (!odbc_execute($stmt, [$request->type])) {
-                    // Handle execution error
-                    // die("Error executing SQL statement: " . odbc_errormsg());
-                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-                }
-                $results = array();
-                while ($row = odbc_fetch_array($stmt)) {
-                    $results[] = $row;
-                }
-              $data = $results;
-                odbc_close($conDB);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'error' => false,
-                    'status_code' => 500,
-                    'message' => $e->getMessage()
-                ], 500);
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            $query = 'select "Code" "id", "Name" "name" from "@V_HXLVCN" where "U_ObjType" = ?';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-        
-       
+            if (!odbc_execute($stmt, [$request->type])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            $data = $results;
+            odbc_close($conDB);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+
+
         return response()->json($data, 200);
     }
 
@@ -322,52 +327,131 @@ class QCController extends Controller
                 break;
         }
 
+        // Danh sách lỗi chờ xử lý
         $data = DB::table('sanluong as a')
-        ->join('notireceipt as b', function ($join) {
-            $join->on('a.id', '=', 'b.baseID')
-                ->where('b.deleted', '=', 0);
-        })
-        ->join('users as c', 'a.create_by', '=', 'c.id')
-        ->select(
-            'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
-            'b.SubItemName',
-            'b.SubItemCode',
-            'b.ErrorData',
-            'a.team',
-            'a.CongDoan',
-            'a.CDay',
-            'a.CRong',
-            'a.CDai',
-            // DB::raw('b.openQty as Quantity'),
-            DB::raw('(b.openQty - (
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'b.ErrorData',
+                'a.team',
+                'a.CongDoan',
+                'a.CDay',
+                'a.CRong',
+                'a.CDai',
+                DB::raw('(b.openQty - (
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historySL 
                 WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.ItemCode END
                 AND isQualityCheck = 1
                 AND notiId = b.id                
             )) as Quantity'),
-            'a.created_at',
-            'c.first_name',
-            'c.last_name',
-            'b.text',
-            'b.id',
-            DB::raw('0 as type'),
-            'b.confirm'
-        )
-        ->where('b.confirm', '=', 0)
-        ->where('b.type', 1)
-        ->where('b.team', '=',  $toQC)
-        ->where('a.team', '=',  $request->TO)
-        ->havingRaw('Quantity > 0')
-        ->get();
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                DB::raw('0 as type'),
+                'b.confirm'
+            )
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', 1)
+            ->where('b.team', '=',  $toQC)
+            ->where('a.team', '=',  $request->TO)
+            ->havingRaw('Quantity > 0')
+            ->get();
 
         // dd($data);
-        // AND notiId = b.id
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        // Loại lỗi
+        $query_01 = 'select "Code" "id", "Name" "name", "U_Type" from "@V_LLVCN" where "U_ObjType" = ?';
+        $stmt_01 = odbc_prepare($conDB, $query_01);
+        if (!$stmt_01) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_01, ['CBG'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $errorType = array();
+        while ($row = odbc_fetch_array($stmt_01)) {
+            $errorType[] = $row;
+        }
+
+        //Hướng xử lý
+        $query_02 = 'select "Code" "id", "Name" "name" from "@V_HXLVCN" where "U_ObjType" = ?';
+        $stmt_02 = odbc_prepare($conDB, $query_02);
+        if (!$stmt_02) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_02, ['CBG'])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $solution = array();
+        while ($row = odbc_fetch_array($stmt_02)) {
+            $solution[] = $row;
+        }
+
+        // Tổ chuyển về
+        $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        $stmt_03 = odbc_prepare($conDB, $query_03);
+        if (!$stmt_03) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_03, ['N', 'Y', Auth::user()->plant])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $teamBack = array();
+        while ($row = odbc_fetch_array($stmt_03)) {
+            $teamBack[] = $row;
+        }
+
+        // Nguồn lỗi
+        $rootCause = [
+            [
+                'id' => 'C',
+                'name' => 'Lỗi đầu vào (Mã con)'
+            ],
+            [
+                'id' => 'P',
+                'name' => 'Lỗi đầu ra (Mã cha)'
+            ],
+        ];
+
+        // Mã hạ cấp
+        $query_04 = 'select "ItemCode", "ItemName" from OITM where U_CDOAN IN (?,?)';
+        $stmt_04 = odbc_prepare($conDB, $query_04);
+        if (!$stmt_04) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_04, ['TC', 'SC'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $returnCode = array();
+        while ($row = odbc_fetch_array($stmt_04)) {
+            $returnCode[] = $row;
+        }
+
+        odbc_close($conDB);
 
         return response()->json([
             'data' => $data,
+            'errorType' => $errorType,
+            'rootCause' => $rootCause,
+            'teamBack' => $teamBack,
+            'solution' => $solution,
+            'returnCode' => $returnCode
         ], 200);
     }
 
@@ -394,50 +478,126 @@ class QCController extends Controller
         }
 
         $data = DB::table('notireceiptvcn as a')
-        ->join('users as b', 'a.CreatedBy', '=', 'b.id')
-        ->select(
-            'a.FatherCode',
-            'a.ItemCode',
-            'a.ItemName',
-            'a.SubItemName',
-            'a.SubItemCode',
-            'a.ErrorData',
-            'a.team',
-            'a.CongDoan',
-            'a.CDay',
-            'a.CRong',
-            'a.CDai',
-            DB::raw('(a.openQty - (
+            ->join('users as b', 'a.CreatedBy', '=', 'b.id')
+            ->select(
+                'a.FatherCode',
+                'a.ItemCode',
+                'a.ItemName',
+                'a.SubItemName',
+                'a.SubItemCode',
+                'a.ErrorData',
+                'a.team',
+                'a.CongDoan',
+                'a.CDay',
+                'a.CRong',
+                'a.CDai',
+                DB::raw('(a.openQty - (
                 SELECT COALESCE(SUM(quantity), 0) 
                 FROM historySLVCN 
                 WHERE itemchild = CASE WHEN a.SubItemCode IS NOT NULL THEN a.SubItemCode ELSE a.ItemCode END
                 AND isQualityCheck = 1
                 AND notiId = a.id                
             )) as Quantity'),
-            'a.created_at',
-            'b.first_name',
-            'b.last_name',
-            'a.text',
-            'a.id',
-            // DB::raw('0 as type'),
-            // 'a.confirm'
-        )
-        ->where('a.deleted', '=', 0)
-        ->where('a.confirm', '=', 0)
-        ->where('a.type', 1)
-        // ->where('a.team', '=',  $toQC)
-        ->where('a.team', '=',  $request->TO)
-        ->havingRaw('Quantity > 0')
-        ->get();
+                'a.created_at',
+                'b.first_name',
+                'b.last_name',
+                'a.text',
+                'a.id',
+                // DB::raw('0 as type'),
+                // 'a.confirm'
+            )
+            ->where('a.deleted', '=', 0)
+            ->where('a.confirm', '=', 0)
+            ->where('a.type', 1)
+            // ->where('a.team', '=',  $toQC)
+            ->where('a.team', '=',  $request->TO)
+            ->havingRaw('Quantity > 0')
+            ->get();
 
         // dd($data);
-        // AND notiId = b.id
+        $conDB = (new ConnectController)->connect_sap();
+
+        // Loại lỗi
+        $query_01 = 'select "Code" "id", "Name" "name", "U_Type" from "@V_LLVCN" where "U_ObjType" = ?';
+        $stmt_01 = odbc_prepare($conDB, $query_01);
+        if (!$stmt_01) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_01, ['VCN'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $errorType = array();
+        while ($row = odbc_fetch_array($stmt_01)) {
+            $errorType[] = $row;
+        }
+
+        //Hướng xử lý
+        $query_02 = 'select "Code" "id", "Name" "name" from "@V_HXLVCN" where "U_ObjType" = ?';
+        $stmt_02 = odbc_prepare($conDB, $query_02);
+        if (!$stmt_02) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_02,['VCN'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $solution = array();
+        while ($row = odbc_fetch_array($stmt_02)) {
+            $solution[] = $row;
+        }
+
+        // Tổ chuyển về
+        $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        $stmt_03 = odbc_prepare($conDB, $query_03);
+        if (!$stmt_03) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_03, ['N', 'Y', Auth::user()->plant])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $teamBack = array();
+        while ($row = odbc_fetch_array($stmt_03)) {
+            $teamBack[] = $row;
+        }
+
+        // Nguồn lỗi
+        $rootCause = [
+            [
+                'id' => 'C',
+                'name' => 'Lỗi đầu vào (Mã con)'
+            ],
+            [
+                'id' => 'P',
+                'name' => 'Lỗi đầu ra (Mã cha)'
+            ],
+        ];
+
+        // Mã hạ cấp
+        $query_04 = 'select "ItemCode", "ItemName" from OITM where U_CDOAN IN (?,?)';
+        $stmt_04 = odbc_prepare($conDB, $query_04);
+        if (!$stmt_04) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt_04, ['TC', 'SC'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $returnCode = array();
+        while ($row = odbc_fetch_array($stmt_04)) {
+            $returnCode[] = $row;
+        }
+
+        odbc_close($conDB);
 
         return response()->json([
             'data' => $data,
+            'errorType' => $errorType,
+            'solution' => $solution,
+            'teamBack' => $teamBack,
+            'rootCause' => $rootCause,
+            'returnCode' => $returnCode
         ], 200);
     }
-    
+
     // danh sách tổ không bao gồm tổ QC thể hiện ở màn hình danh sách xác nhận QC
     function listToExcludeQC()
     {
@@ -449,7 +609,7 @@ class QCController extends Controller
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id,'Y','Y'])) {
+        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id, 'Y', 'Y'])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -500,61 +660,55 @@ class QCController extends Controller
         if ($data->openQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
         }
-        $closed=0;
+        $closed = 0;
         if ($data->openQty == $request->Qty) {
-            $closed=1;
+            $closed = 1;
         }
 
         //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
-        $warehouse="";
-        if($data->NextTeam='TH-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TH');
+        $warehouse = "";
+        if ($data->NextTeam = 'TH-QC') {
+            $warehouse = $this->getQCWarehouseByUser('TH');
+        } else if ($data->NextTeam = 'TQ-QC') {
+            $warehouse = $this->getQCWarehouseByUser('TQ');
+        } else {
+            $warehouse = $this->getQCWarehouseByUser('HG');
         }
-        else if($data->NextTeam='TQ-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TQ');
-        }
-        else
-        {
-            $warehouse= $this ->getQCWarehouseByUser('HG');
-        }
-      
-        if($warehouse=="-1")
-        {
+
+        if ($warehouse == "-1") {
             return response()->json([
                 'error' => 'Không tìm thấy kho QC',
             ], 500);
         }
 
         //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
-        $loailoi= $request->loailoi['label'];
-        $huongxuly= $request->huongxuly['label'];
-        $teamBack= $request->teamBack['value']??'';
-        $rootCause= $request->rootCause['value']??'';
-        $subCode= $request->subCode['value'] ??'';
-        $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
+        $loailoi = $request->loailoi['label'];
+        $huongxuly = $request->huongxuly['label'];
+        $teamBack = $request->teamBack['value'] ?? '';
+        $rootCause = $request->rootCause['value'] ?? '';
+        $subCode = $request->subCode['value'] ?? '';
+        $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
 
         // dd($U_GIAO);
 
-        $HistorySL=HistorySL::where('ObjType',59)->get()->count();
+        $HistorySL = HistorySL::where('ObjType', 59)->get()->count();
         $body = [
             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-            "U_LSX"=> $data->LSX,
-            "U_TO"=> $data->Team,
-            "U_LL"=> $loailoi,
-            "U_HXL"=> $huongxuly,
-            "U_QCC"=> $huongxuly,
-            "U_TOCD"=> $teamBack,
-            "U_NGiao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
-            "U_NNhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
-            "U_source"=>$rootCause,
-            "U_ItemHC"=>$subCode,
-            "U_cmtQC"=> $request->Note??"",
-            "U_QCN"=> $data->ItemCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+            "U_LSX" => $data->LSX,
+            "U_TO" => $data->Team,
+            "U_LL" => $loailoi,
+            "U_HXL" => $huongxuly,
+            "U_QCC" => $huongxuly,
+            "U_TOCD" => $teamBack,
+            "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+            "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+            "U_source" => $rootCause,
+            "U_ItemHC" => $subCode,
+            "U_cmtQC" => $request->Note ?? "",
+            "U_QCN" => $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,
-                "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,    
+                "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                 "WarehouseCode" =>  $warehouse,
                 "BatchNumbers" => [
                     [
@@ -565,10 +719,10 @@ class QCController extends Controller
                         "U_CRong" => $data->CRong,
                         "U_CDay" =>  $data->CDay,
                         "U_Status" => "HL",
-                        "U_TO"=> $data->Team,
-                        "U_LSX"=> $data->LSX,
-                        "U_Year"=> $request->year??now()->format('y'),
-                        "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                        "U_TO" => $data->Team,
+                        "U_LSX" => $data->LSX,
+                        "U_Year" => $request->year ?? now()->format('y'),
+                        "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                     ]
                 ]
             ]]
@@ -584,71 +738,70 @@ class QCController extends Controller
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
-            awaitingstocks::where('notiId', $request->id)->delete();      
+            awaitingstocks::where('notiId', $request->id)->delete();
             SanLuong::where('id', $data->id)->update(
                 [
                     'Status' =>  $closed,
-                    'openQty' =>$data->RejectQty-$data->openQty-$request->Qty,
+                    'openQty' => $data->RejectQty - $data->openQty - $request->Qty,
                 ]
-            ); 
-            notireceipt::where('id', $request->id)->
-            update(['confirm' =>  $closed,
+            );
+            notireceipt::where('id', $request->id)->update([
+                'confirm' =>  $closed,
                 'ObjType' =>  59,
                 'DocEntry' => $res['DocEntry'],
                 'confirmBy' => Auth::user()->id,
                 'isPushSAP' => 1,
-                'confirm_at' => now()->format('YmdHmi')]);
-            
+                'confirm_at' => now()->format('YmdHmi')
+            ]);
+
             HistorySL::create(
                 [
-                    'LSX'=>$data->LSX,
-                    'itemchild'=>$data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    'LSX' => $data->LSX,
+                    'itemchild' => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     'to' => $data->Team,
-                    'quantity'=>$request->Qty,
-                    'ObjType'=>59,
-                    'DocEntry'=>$res['DocEntry'],
-                    'SPDich'=>$data->FatherCode,
-                    'LL'=> $loailoi,
-                    'HXL'=>$huongxuly,
-                    "source"=>$rootCause,
-                    "TOChuyenVe"=>$teamBack,
-                    'isQualityCheck'=>1,
+                    'quantity' => $request->Qty,
+                    'ObjType' => 59,
+                    'DocEntry' => $res['DocEntry'],
+                    'SPDich' => $data->FatherCode,
+                    'LL' => $loailoi,
+                    'HXL' => $huongxuly,
+                    "source" => $rootCause,
+                    "TOChuyenVe" => $teamBack,
+                    'isQualityCheck' => 1,
                     'notiId' => $request->id,
-                ], 
+                ],
             );
             // check ErrorData not null để ap dung cho cac giao dich cu
-            if($data->ErrorData != null)
-            {
-                $dataIssues= json_decode($data->ErrorData, true);
+            if ($data->ErrorData != null) {
+                $dataIssues = json_decode($data->ErrorData, true);
                 // Lấy dữ liệu  tu notireceipt
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $this->IssueQC($dataIssue['SubItemCode'],(float)$dataIssue['BaseQty']*(float)$request->Qty,$dataIssues['SubItemWhs'],Auth::user()->branch);
+                    $this->IssueQC($dataIssue['SubItemCode'], (float)$dataIssue['BaseQty'] * (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch);
                 }
                 if ($data->IsPushSAP == 0) {
-                    $type='I';
-                    $qtypush=$data->RejectQty;
-                 }
-                 else
-                 {
-                     $type='U';
-                     $qtypush=$request->Qty;
-                 }
-                 HistoryQC::dispatch(
-                     $type,$request->id,
-                     $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
-                     $qtypush,
-                     $dataIssues['SubItemWhs'],
-                     $qtypush-$request->Qty,
-                     'CBG',
-                     $data->Team,
-                     $loailoi,
-                     $huongxuly,
-                     $rootCause,
-                     $subCode,
-                     $request->note,
-                     $teamBack 
-                 );
-            }    
+                    $type = 'I';
+                    $qtypush = $data->RejectQty;
+                } else {
+                    $type = 'U';
+                    $qtypush = $request->Qty;
+                }
+                HistoryQC::dispatch(
+                    $type,
+                    $request->id,
+                    $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    $qtypush,
+                    $dataIssues['SubItemWhs'],
+                    $qtypush - $request->Qty,
+                    'CBG',
+                    $data->Team,
+                    $loailoi,
+                    $huongxuly,
+                    $rootCause,
+                    $subCode,
+                    $request->note,
+                    $teamBack
+                );
+            }
             DB::commit();
             return response()->json('success', 200);
         } else {
@@ -676,24 +829,24 @@ class QCController extends Controller
 
         // 2. Truy vấn thông tin từ bảng "notireceiptvcn" để lấy dữ liệu
         $data = notireceiptvcn::select(
-                'id as notiID',
-                'ItemCode',
-                'SubItemCode',
-                'team as Team',
-                'NextTeam',
-                'openQty',
-                'IsPushSAP',
-                'ErrorData',
-                'CreatedBy',
-                'CDai',
-                'CRong',
-                'CDay',
+            'id as notiID',
+            'ItemCode',
+            'SubItemCode',
+            'team as Team',
+            'NextTeam',
+            'openQty',
+            'IsPushSAP',
+            'ErrorData',
+            'CreatedBy',
+            'CDai',
+            'CRong',
+            'CDay',
 
-            )
+        )
             ->where('id', $request->id)
             ->where('confirm', 0)
             ->first();
-           
+
         // dd($data);
 
         // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
@@ -703,62 +856,56 @@ class QCController extends Controller
         if ($data->openQty < $request->Qty) {
             throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
         }
-        $closed=0;
+        $closed = 0;
         if ($data->openQty == $request->Qty) {
-            $closed=1;
+            $closed = 1;
         }
 
         //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
-        $warehouse="";
-        if($data->NextTeam='TH-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TH');
-        }
-        else if($data->NextTeam='TQ-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TQ');
-        }
-        else
-        {
-            $warehouse= $this ->getQCWarehouseByUser('HG');
+        $warehouse = "";
+        if ($data->NextTeam = 'TH-QC') {
+            $warehouse = $this->getQCWarehouseByUser('TH');
+        } else if ($data->NextTeam = 'TQ-QC') {
+            $warehouse = $this->getQCWarehouseByUser('TQ');
+        } else {
+            $warehouse = $this->getQCWarehouseByUser('HG');
         }
         dd($warehouse);
 
-        if($warehouse=="-1")
-        {
+        if ($warehouse == "-1") {
             return response()->json([
                 'error' => 'Không tìm thấy kho QC',
             ], 500);
         }
 
         //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
-        $loailoi= $request->loailoi['label'];
-        $huongxuly= $request->huongxuly['label'];
-        $teamBack= $request->teamBack['value']??'';
-        $rootCause= $request->rootCause['value']??'';
-        $subCode= $request->subCode['value'] ??'';
-        $U_GIAO= DB::table('users')->where('id', $data->create_by)->first();
+        $loailoi = $request->loailoi['label'];
+        $huongxuly = $request->huongxuly['label'];
+        $teamBack = $request->teamBack['value'] ?? '';
+        $rootCause = $request->rootCause['value'] ?? '';
+        $subCode = $request->subCode['value'] ?? '';
+        $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
 
         // dd($U_GIAO);
 
-        $HistorySLVCN=historySLVCN::where('ObjType',59)->get()->count();
+        $HistorySLVCN = historySLVCN::where('ObjType', 59)->get()->count();
         $body = [
             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-            "U_LSX"=> $data->LSX,
-            "U_TO"=> $data->Team,
-            "U_LL"=> $loailoi,
-            "U_HXL"=> $huongxuly,
-            "U_QCC"=> $huongxuly,
-            "U_TOCD"=> $teamBack,
-            "U_NGiao"=> $U_GIAO->last_name. " ". $U_GIAO->first_name,
-            "U_NNhan"=> Auth::user()->last_name. " ".Auth::user()->first_name,
-            "U_source"=>$rootCause,
-            "U_ItemHC"=>$subCode,
-            "U_cmtQC"=> $request->Note??"",
-            "U_QCN"=> $data->ItemCode."-".$data->Team."-".str_pad($HistorySLVCN+1, 4, '0', STR_PAD_LEFT),
+            "U_LSX" => $data->LSX,
+            "U_TO" => $data->Team,
+            "U_LL" => $loailoi,
+            "U_HXL" => $huongxuly,
+            "U_QCC" => $huongxuly,
+            "U_TOCD" => $teamBack,
+            "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+            "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+            "U_source" => $rootCause,
+            "U_ItemHC" => $subCode,
+            "U_cmtQC" => $request->Note ?? "",
+            "U_QCN" => $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySLVCN + 1, 4, '0', STR_PAD_LEFT),
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,
-                "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,    
+                "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                 // "WarehouseCode" =>  $warehouse,
                 "WarehouseCode" => $data->NextTeam,
                 "BatchNumbers" => [
@@ -770,10 +917,10 @@ class QCController extends Controller
                         "U_CRong" => $data->CRong,
                         "U_CDay" =>  $data->CDay,
                         "U_Status" => "HL",
-                        "U_TO"=> $data->Team,
-                        "U_LSX"=> $data->LSX,
-                        "U_Year"=> $request->year??now()->format('y'),
-                        "U_Week"=> $request->week?str_pad($request->week,2, '0', STR_PAD_LEFT):str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                        "U_TO" => $data->Team,
+                        "U_LSX" => $data->LSX,
+                        "U_Year" => $request->year ?? now()->format('y'),
+                        "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                     ]
                 ]
             ]]
@@ -789,63 +936,62 @@ class QCController extends Controller
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
-            awaitingstocksvcn::where('notiId', $request->id)->delete();       
-            notireceiptvcn::where('id', $request->id)->
-            update(['confirm' =>  $closed,
+            awaitingstocksvcn::where('notiId', $request->id)->delete();
+            notireceiptvcn::where('id', $request->id)->update([
+                'confirm' =>  $closed,
                 'ObjType' =>  59,
                 'DocEntry' => $res['DocEntry'],
                 'confirmBy' => Auth::user()->id,
                 'isPushSAP' => 1,
-                'confirm_at' => now()->format('YmdHmi')]);
-            
+                'confirm_at' => now()->format('YmdHmi')
+            ]);
+
             HistorySLVCN::create(
                 [
-                    'LSX'=>$data->LSX,
-                    'itemchild'=>$data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    'LSX' => $data->LSX,
+                    'itemchild' => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     'to' => $data->Team,
-                    'quantity'=>$request->Qty,
-                    'ObjType'=>59,
-                    'DocEntry'=>$res['DocEntry'],
-                    'SPDich'=>$data->FatherCode,
-                    'LL'=> $loailoi,
-                    'HXL'=>$huongxuly,
-                    'isQualityCheck'=>1,
+                    'quantity' => $request->Qty,
+                    'ObjType' => 59,
+                    'DocEntry' => $res['DocEntry'],
+                    'SPDich' => $data->FatherCode,
+                    'LL' => $loailoi,
+                    'HXL' => $huongxuly,
+                    'isQualityCheck' => 1,
                     'notiId' => $request->id,
-                ], 
+                ],
             );
             // check ErrorData not null để ap dung cho cac giao dich cu
-            if($data->ErrorData != null)
-            {
-                $dataIssues= json_decode($data->ErrorData, true);
+            if ($data->ErrorData != null) {
+                $dataIssues = json_decode($data->ErrorData, true);
                 // Lấy dữ liệu  tu notireceipt
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $this->IssueQC($dataIssue['SubItemCode'],(float)$dataIssue['BaseQty']*(float)$request->Qty,$dataIssues['SubItemWhs'],Auth::user()->branch);
+                    $this->IssueQC($dataIssue['SubItemCode'], (float)$dataIssue['BaseQty'] * (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch);
                 }
                 if ($data->IsPushSAP == 0) {
-                    $type='I';
-                    $qtypush=$data->RejectQty;
-                 }
-                 else
-                 {
-                     $type='U';
-                     $qtypush=$request->Qty;
-                 }
-                 HistoryQC::dispatch(
-                     $type,$request->id,
-                     $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
-                     $qtypush,
-                     $dataIssues['SubItemWhs'],
-                     $qtypush-$request->Qty,
-                     'CBG',
-                     $data->Team,
-                     $loailoi,
-                     $huongxuly,
-                     $rootCause,
-                     $subCode,
-                     $request->note,
-                     $teamBack 
-                 );
-            }    
+                    $type = 'I';
+                    $qtypush = $data->RejectQty;
+                } else {
+                    $type = 'U';
+                    $qtypush = $request->Qty;
+                }
+                HistoryQC::dispatch(
+                    $type,
+                    $request->id,
+                    $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    $qtypush,
+                    $dataIssues['SubItemWhs'],
+                    $qtypush - $request->Qty,
+                    'CBG',
+                    $data->Team,
+                    $loailoi,
+                    $huongxuly,
+                    $rootCause,
+                    $subCode,
+                    $request->note,
+                    $teamBack
+                );
+            }
             DB::commit();
             return response()->json('success', 200);
         } else {
@@ -859,134 +1005,134 @@ class QCController extends Controller
     }
 
     // Accept QC V2
-    function acceptTeamQCCBGV2(Request $request)
-    {
-        // 1. Check dữ liệu đầu vào
-        $validator = Validator::make($request->all(), [
-            'Qty' => 'required|numeric|min:1',
-            'id' => 'required',
-        ]);
-        // 1.1. Báo lỗi nếu dữ liệu không hợp lệ
-        if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-        }
+    // function acceptTeamQCCBGV2(Request $request)
+    // {
+    //     // 1. Check dữ liệu đầu vào
+    //     $validator = Validator::make($request->all(), [
+    //         'Qty' => 'required|numeric|min:1',
+    //         'id' => 'required',
+    //     ]);
+    //     // 1.1. Báo lỗi nếu dữ liệu không hợp lệ
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+    //     }
 
-        // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
-        $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
-        ->select('a.*', 'b.id as notiID','b.SubItemCode as SubItemCode','b.team as NextTeam','b.openQty')
-        ->where('b.id', $request->id)
-        ->where('b.confirm', 0)->first();
+    //     // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
+    //     $data = DB::table('sanluong AS a')->join('notireceipt as b', 'a.id', '=', 'b.baseID',)
+    //     ->select('a.*', 'b.id as notiID','b.SubItemCode as SubItemCode','b.team as NextTeam','b.openQty')
+    //     ->where('b.id', $request->id)
+    //     ->where('b.confirm', 0)->first();
 
-        // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
-        if (!$data) {
-            throw new \Exception('data không hợp lệ.');
-        }
-        if ($data->openQty < $request->Qty) {
-            throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
-        }
-        
-        $closed=0;
-        if ($data->openQty == $request->Qty) {
-            $closed=1;
-        } 
+    //     // 2.1. Báo lỗi nếu dữ liệu không hợp lệ hoặc số lượng từ request lớn hơn số lượng ghi nhận lỗi, dồng thời cập nhật giá trị close -> báo hiệu việc điều chuyển đã xong
+    //     if (!$data) {
+    //         throw new \Exception('data không hợp lệ.');
+    //     }
+    //     if ($data->openQty < $request->Qty) {
+    //         throw new \Exception('Số lượng xác nhận không được lớn hơn số lượng báo lỗi');
+    //     }
 
-        //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
-        $warehouse="";
-        if($data->NextTeam='TH-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TH');
-        }
-        else if($data->NextTeam='TQ-QC')
-        {
-            $warehouse= $this ->getQCWarehouseByUser('TQ');
-        }
-        else
-        {
-            $warehouse= $this ->getQCWarehouseByUser('HG');
-        }
-        if($warehouse=="-1")
-        {
-            return response()->json([
-                'error' => 'Không tìm thấy kho QC',
-            ], 500);
-        }
+    //     $closed=0;
+    //     if ($data->openQty == $request->Qty) {
+    //         $closed=1;
+    //     } 
 
-        //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
-        $loailoi= $request->loailoi['label'];
-        $huongxuly= $request->huongxuly['label'];
-        $teamBack= $request->teamBack['value']??'';
-        $rootCause= $request->rootCause['value']??'';
-        $subCode= $request->subCode['value'] ??'';
+    //     //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
+    //     $warehouse="";
+    //     if($data->NextTeam='TH-QC')
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('TH');
+    //     }
+    //     else if($data->NextTeam='TQ-QC')
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('TQ');
+    //     }
+    //     else
+    //     {
+    //         $warehouse= $this ->getQCWarehouseByUser('HG');
+    //     }
+    //     if($warehouse=="-1")
+    //     {
+    //         return response()->json([
+    //             'error' => 'Không tìm thấy kho QC',
+    //         ], 500);
+    //     }
 
-        $HistorySL=HistorySL::where('ObjType',59)->get()->count();
-        $body = [
-            "U_BranchID" => Auth::user()->branch,
-            "U_LSX"=> $data->LSX,
-            "U_TO"=> $data->Team,
-            "U_LL"=> $loailoi,
-            "U_HXL"=> $huongxuly,
-            "U_TOE"=> $teamBack,
-            "U_source"=>$rootCause,
-            "U_ItemHC"=>$subCode,
-            "U_cmtQC"=> $request->Note??"",
-            "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
-            "V_IGN1Collection" => [[
-                "U_Quantity" => $request->Qty,
-                "U_ItemCode" =>   $data->SubItemCode,
-                "U_Whscode" =>  $warehouse,
-                "U_BaseType"=> 59
-            ]]
-        ];
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'Authorization' => 'Basic ' . BasicAuthToken(),
-        ])->post(UrlSAPServiceLayer() . '/b1s/v1/OIGN', $body);
-        $res = $response->json();
+    //     //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
+    //     $loailoi= $request->loailoi['label'];
+    //     $huongxuly= $request->huongxuly['label'];
+    //     $teamBack= $request->teamBack['value']??'';
+    //     $rootCause= $request->rootCause['value']??'';
+    //     $subCode= $request->subCode['value'] ??'';
 
-        // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
-        if ($response->successful()) {
-            SanLuong::where('id', $data->id)->update(
-                [
-                    'Status' =>  $closed,
-                    'openQty' =>$data->RejectQty-$data->openQty-$request->Qty,
-                ]
-            ); 
-            notireceipt::where('id', $request->id)->
-            update(['confirm' =>  $closed,
-            'ObjType' =>  59,
-            'DocEntry' => $res['DocEntry'],
-            'confirmBy' => Auth::user()->id,
-            'confirm_at' => now()->format('YmdHmi')]);
-            HistorySL::create(
-                [
-                    'LSX'=>$data->LSX,
-                    'itemchild'=>$data->SubItemCode,
-                    'to' => $data->Team,
-                    'quantity'=>$request->Qty,
-                    'ObjType'=>59,
-                    'DocEntry'=>$res['DocEntry'],
-                    'SPDich'=>$data->FatherCode,
-                    'LL'=> $loailoi,
-                    'HXL'=>$huongxuly,
-                    'isQualityCheck'=>1,
-                    'notiId' => $request->id,
-                ], 
-            );
-            DB::commit();
-            return response()->json('success', 200);
-        } else {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Failed receipt',
-                'error' => $res['error'],
-                'body' => $body
-            ], 500);
-        }
-    }
-    
+    //     $HistorySL=HistorySL::where('ObjType',59)->get()->count();
+    //     $body = [
+    //         "U_BranchID" => Auth::user()->branch,
+    //         "U_LSX"=> $data->LSX,
+    //         "U_TO"=> $data->Team,
+    //         "U_LL"=> $loailoi,
+    //         "U_HXL"=> $huongxuly,
+    //         "U_TOE"=> $teamBack,
+    //         "U_source"=>$rootCause,
+    //         "U_ItemHC"=>$subCode,
+    //         "U_cmtQC"=> $request->Note??"",
+    //         "U_QCN"=> $data->FatherCode."-".$data->Team."-".str_pad($HistorySL+1, 4, '0', STR_PAD_LEFT),
+    //         "V_IGN1Collection" => [[
+    //             "U_Quantity" => $request->Qty,
+    //             "U_ItemCode" =>   $data->SubItemCode,
+    //             "U_Whscode" =>  $warehouse,
+    //             "U_BaseType"=> 59
+    //         ]]
+    //     ];
+    //     $response = Http::withOptions([
+    //         'verify' => false,
+    //     ])->withHeaders([
+    //         'Content-Type' => 'application/json',
+    //         'Accept' => 'application/json',
+    //         'Authorization' => 'Basic ' . BasicAuthToken(),
+    //     ])->post(UrlSAPServiceLayer() . '/b1s/v1/OIGN', $body);
+    //     $res = $response->json();
+
+    //     // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
+    //     if ($response->successful()) {
+    //         SanLuong::where('id', $data->id)->update(
+    //             [
+    //                 'Status' =>  $closed,
+    //                 'openQty' =>$data->RejectQty-$data->openQty-$request->Qty,
+    //             ]
+    //         ); 
+    //         notireceipt::where('id', $request->id)->
+    //         update(['confirm' =>  $closed,
+    //         'ObjType' =>  59,
+    //         'DocEntry' => $res['DocEntry'],
+    //         'confirmBy' => Auth::user()->id,
+    //         'confirm_at' => now()->format('YmdHmi')]);
+    //         HistorySL::create(
+    //             [
+    //                 'LSX'=>$data->LSX,
+    //                 'itemchild'=>$data->SubItemCode,
+    //                 'to' => $data->Team,
+    //                 'quantity'=>$request->Qty,
+    //                 'ObjType'=>59,
+    //                 'DocEntry'=>$res['DocEntry'],
+    //                 'SPDich'=>$data->FatherCode,
+    //                 'LL'=> $loailoi,
+    //                 'HXL'=>$huongxuly,
+    //                 'isQualityCheck'=>1,
+    //                 'notiId' => $request->id,
+    //             ], 
+    //         );
+    //         DB::commit();
+    //         return response()->json('success', 200);
+    //     } else {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'message' => 'Failed receipt',
+    //             'error' => $res['error'],
+    //             'body' => $body
+    //         ], 500);
+    //     }
+    // }
+
     function getQCWarehouseByUser($plant)
     {
         // $WHS = Warehouse::where('flag', 'QC')->WHERE('branch',Auth::user()->branch)
@@ -994,50 +1140,51 @@ class QCController extends Controller
         // ->first();
 
         // $WHS=  $WHS? $WHS->WhsCode: 99;
-        $WHS= GetWhsCode($plant,'QC');
+        $WHS = GetWhsCode($plant, 'QC');
         return $WHS;
     }
-     // loại lỗi ván công nghiệp
-     function LoiLoaiVCN(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'type' => 'required',
-         ]);
-         if ($validator->fails()) {
-             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-             // Return validation errors with a 422 Unprocessable Entity status code
-         }
-         try {
-             $conDB = (new ConnectController)->connect_sap();
-             $query = 'select "Code" "id", "Name" "name" from "@V_LLVCN"  where "U_Type" = ? and "U_ObjType" = ?';
-             $stmt = odbc_prepare($conDB, $query);
-             if (!$stmt) {
-                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-             }
-             if (!odbc_execute($stmt, [$request->type,'VCN'])) {
-                 // Handle execution error
-                 // die("Error executing SQL statement: " . odbc_errormsg());
-                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-             }
-             $results = array();
-             while ($row = odbc_fetch_array($stmt)) {
-                 $results[] = $row;
-             }
-             return response()->json($results, 200);
-         } catch (\Exception $e) {
-             return response()->json([
-                 'error' => false,
-                 'status_code' => 500,
-                 'message' => $e->getMessage()
-             ], 500);
-         }
-     }
-     function IssueQC($ItemCode,$Quantity,$WarehouseCode,$branch)
-     {
-        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode,$branch);
-     }
-     function logToTableSAP($ItemCode,$Quantity,$WarehouseCode,$branch)
-     {
-        issueProduction::dispatch($ItemCode,$Quantity,$WarehouseCode,$branch);
-     }
+
+    // loại lỗi ván công nghiệp
+    function LoiLoaiVCN(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+            // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+            $query = 'select "Code" "id", "Name""name" from "@V_LLVCN" and "U_ObjType" = ?';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$request->type, 'VCN'])) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function IssueQC($ItemCode, $Quantity, $WarehouseCode, $branch)
+    {
+        issueProduction::dispatch($ItemCode, $Quantity, $WarehouseCode, $branch);
+    }
+    function logToTableSAP($ItemCode, $Quantity, $WarehouseCode, $branch)
+    {
+        issueProduction::dispatch($ItemCode, $Quantity, $WarehouseCode, $branch);
+    }
 }
