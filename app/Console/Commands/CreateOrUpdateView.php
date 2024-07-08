@@ -194,7 +194,7 @@ class CreateOrUpdateView extends Command
                 FROM sanluong a 
                 JOIN notireceipt b ON a.id = b.baseID AND b.deleted = 0 AND  b.type = 1
                 JOIN users c ON a.create_by = c.id
-                JOIN historysl sl on b.id=sl.notiId
+                JOIN historySL sl on b.id=sl.notiId
                 JOIN users d ON b.confirmBy = d.id;"
         );
     }
