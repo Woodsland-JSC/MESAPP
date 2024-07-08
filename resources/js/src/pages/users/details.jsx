@@ -148,38 +148,6 @@ const AsyncSelectField = forwardRef(
 
 const animatedComponents = makeAnimated();
 
-const MultiSelectField = forwardRef(
-    ({ options, name, setInput, innerRef, ...props }, ref) => {
-        const [selectedOption, setSelectedOption] = useState();
-        const { setFieldValue } = useFormikContext();
-
-        const handleChange = (option) => {
-            setSelectedOption(option);
-            setFieldValue(name, option ? option.map((opt) => opt.label) : []);
-            // console.log(option ? option.map((opt) => opt.label) : []);
-            setInput((prev) => ({
-                ...prev,
-                [name]: option
-                    ? option.map((opt) => opt.label?.toLowerCase())
-                    : [],
-            }));
-        };
-
-        return (
-            <Select
-                {...props}
-                ref={innerRef || ref}
-                options={options}
-                value={selectedOption}
-                onChange={handleChange}
-                placeholder="Lựa chọn"
-                components={animatedComponents}
-                isMulti
-            />
-        );
-    }
-);
-
 const AsyncMultiSelectField = forwardRef(
     ({ loadOptions, name, setInput, innerRef, ...props }, ref) => {
         const [selectedOption, setSelectedOption] = useState();
@@ -195,7 +163,7 @@ const AsyncMultiSelectField = forwardRef(
         };
 
         return (
-            <AsyncSelect
+            <Select
                 {...props}
                 ref={innerRef || ref}
                 cacheOptions
@@ -245,6 +213,7 @@ function User() {
 
     const [originalAvatar, setOriginalAvatar] = useState(null);
 
+    const [selectedRoleOptions, setSelectedRoleOptions] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [input, setInput] = useState({
@@ -573,8 +542,7 @@ function User() {
 
                 const rolesOptions = rolesRes.map((item) => ({
                     value: item.id,
-                    label:
-                        item.name
+                    label: item.name
                 }));
                 setRoles(rolesOptions);
 
@@ -673,7 +641,7 @@ function User() {
                                     <div className="flex items-center">
                                         <Link
                                             to="/users"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="text-sm font-medium text-[#17506B]"
                                         >
                                             Quản lý người dùng
                                         </Link>
@@ -948,6 +916,7 @@ function User() {
                                                     </label>
                                                     <AsyncMultiSelectField
                                                         name="authorization"
+                                                        // isMulti
                                                         options={roles}
                                                         defaultValue={
                                                             roles.filter(
