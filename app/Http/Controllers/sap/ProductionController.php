@@ -131,10 +131,10 @@ class ProductionController extends Controller
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
         ]);
-
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+        $errorData = json_encode($request->ErrorData);
         $toqc = "";
         if (Auth::user()->plant == 'TH') {
             $toqc = 'TH-QC';
@@ -151,8 +151,8 @@ class ProductionController extends Controller
             'SubItemName', 'CompleQty', 
             'RejectQty', 'CDay', 
             'CRong', 'CDai', 
-            'Team', 'CongDoan', '
-            NexTeam', 'Type', 
+            'Team', 'CongDoan', 'NexTeam',
+            'Type', 
             'LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SLData['openQty'] = 0;
@@ -160,7 +160,8 @@ class ProductionController extends Controller
             $SanLuong = SanLuong::create($SLData);
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
-            $errorData = json_encode($request->ErrorData);
+         
+
 
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
@@ -180,6 +181,7 @@ class ProductionController extends Controller
 
                 //Lưu thông tin awaitingstocks
                 foreach ($request->ErrorData['SubItemQty'] as $subItem) {
+                        
                     awaitingstocks::create([
                         'notiId' => $notifi->id,
                         'SubItemCode' => $subItem['SubItemCode'],
@@ -882,6 +884,8 @@ class ProductionController extends Controller
             'ItemCode' => 'required|string|max:254',
             'TO' => 'required|string|max:254',
         ]);
+
+        // dd($request);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
         }
@@ -899,7 +903,7 @@ class ProductionController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $rowstock = odbc_fetch_array($stmtstock);
+
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
@@ -1012,14 +1016,6 @@ class ProductionController extends Controller
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
-
-        $ItemInfo = DB::table('sanluong as a')
-            ->select(
-                'a.ItemCode',
-                'a.ItemName',
-            )
-            ->where('ItemCode', $request->ItemCode)
-            ->first();
 
         // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
         $Datareceipt = DB::table('sanluong as a')
