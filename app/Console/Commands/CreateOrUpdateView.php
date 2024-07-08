@@ -142,7 +142,7 @@ class CreateOrUpdateView extends Command
         // BÁO CÁO XẾP CHỜ SẤY
         DB::statement("
             CREATE VIEW gt_say_xepchoxay AS
-            select a.Code MaPallet,a.MaLo,a.LyDo, b.ItemCode,b.ItemName,b.CDai,b.CRong,b.CDay,sum(b.Qty) M3,sum(B.Qty_T) Qty,a.created_at,
+            select a.Code MaPallet,a.MaLo,a.LyDo, b.ItemCode,b.ItemName,b.CDai,b.CRong,b.CDay,sum(b.Qty) M3,sum(b.Qty_T) Qty,a.created_at,
             u.plant,u.branch,
             case when u.branch=1 then 'Thuận Hưng'
                 WHEN u.branch=3 THEN 'Tuyên Quang'
