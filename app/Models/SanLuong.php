@@ -30,6 +30,7 @@ class SanLuong extends Model
         'create_by',
         'LSX',
         'openQty',
+        'loinhamay'
     ];
 
     public function getCDaiAttribute($value)

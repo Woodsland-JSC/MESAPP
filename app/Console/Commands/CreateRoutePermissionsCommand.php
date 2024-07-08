@@ -44,6 +44,7 @@ class CreateRoutePermissionsCommand extends Command
             [
                 'sepsay', 'kehoachsay',
                 'vaolo', 'kiemtralo',
+                'QCCBG','QCVCN',
                 'losay', 'danhgiame',
                 'baocao', 'quanlyuser', 'monitor',
                 'CBG','VCN'
@@ -60,7 +61,9 @@ class CreateRoutePermissionsCommand extends Command
             'quanlyuser' => 'quản lý user',
             'monitor' => 'monitor',
             'CBG' => 'Chế biến gỗ',
-            'VCN' => 'Ván công nghiệp'
+            'VCN' => 'Ván công nghiệp',
+            'QCVCN'=>'QC ván công nghiệp',
+            'QCCBG'=>'QC chế biến gỗ'
 
         ];
 
