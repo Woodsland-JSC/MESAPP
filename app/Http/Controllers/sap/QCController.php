@@ -430,7 +430,7 @@ class QCController extends Controller
         ];
 
         // Mã hạ cấp
-        $query_04 = 'select "ItemCode", "ItemName" from OITM where U_CDOAN IN (?,?)';
+        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where U_CDOAN IN (?,?)';
         $stmt_04 = odbc_prepare($conDB, $query_04);
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -439,12 +439,28 @@ class QCController extends Controller
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $returnCode = array();
+
         while ($row = odbc_fetch_array($stmt_04)) {
-            $returnCode[] = $row;
+            $itemCode = $row['ItemCode'];
+            $itemName = $row['ItemName'];
+            $uCDay = $row['U_CDay'];
+            $uCRong = $row['U_CRong'];
+            $uCDai = $row['U_CDai'];
+
+            // Tạo chuỗi kích thước "U_CDayxU_CRongxU_CDai"
+            $sizeString = $uCDay . 'x' . $uCRong . 'x' . $uCDai;
+
+            // Nối chuỗi kích thước vào sau ItemName
+            $itemNameWithSize = $itemName . ' ' . $sizeString;
+
+            // Thêm kết quả vào mảng returnCode
+            $returnCode[] = [
+                'ItemCode' => $itemCode,
+                'ItemName' => $itemNameWithSize
+            ];
         }
 
         odbc_close($conDB);
-
         return response()->json([
             'data' => $data,
             'errorType' => $errorType,
@@ -537,7 +553,7 @@ class QCController extends Controller
         if (!$stmt_02) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_02,['VCN'])) {
+        if (!odbc_execute($stmt_02, ['VCN'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $solution = array();
