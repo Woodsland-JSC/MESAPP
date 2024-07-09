@@ -290,14 +290,15 @@ const AwaitingReception = ({
     // errorTypeOptions, solutionOptions, teamBackOptions, rootCauseOptions, returnCodeOptions
 
     useEffect(() => {
-        const filteredErrorTypes = type ? errorType?.filter(item => item.U_Type === type) : errorType;
-    
-        setErrorTypeOptions(filteredErrorTypes?.map((item) => ({
+        // console.log("errorType: ", type);
+        // const filteredErrorTypes = type === "wood-processing" ? errorType?.filter(item => item.U_Type === type) : errorType;
+
+        setErrorTypeOptions(errorTypes?.map((item) => ({
             value: item?.id || "",
             label: item?.name || "",
         })));
 
-        console.log("errorTypeOptions: ",filteredErrorTypes);
+        // console.log("errorTypeOptions: ",filteredErrorTypes);
 
         setSolutionOptions(solution?.map((item, index) => ({
             value: item?.id || "",
@@ -600,7 +601,7 @@ const AwaitingReception = ({
                                     ref={rootCauseRef}
                                     className="mt-1 w-full"
                                     placeholder="Lựa chọn"
-                                    options={rootCauseOptions}
+                                    options={teamBackOptions}
                                     isClearable
                                     isSearchable
                                     value={faults.rootCause}
