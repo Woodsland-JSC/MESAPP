@@ -493,7 +493,7 @@ class QCController extends Controller
                 break;
         }
 
-        $data = DB::table('notireceiptvcn as a')
+        $data = DB::table('notireceiptVCN as a')
             ->join('users as b', 'a.CreatedBy', '=', 'b.id')
             ->select(
                 'a.FatherCode',

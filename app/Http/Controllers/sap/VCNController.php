@@ -274,7 +274,7 @@ class VCNController extends Controller
         if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
             $data = null;
         } else {
-            $data = DB::table('notireceiptvcn as a')
+            $data = DB::table('notireceiptVCN as a')
             ->join('users as b', 'a.CreatedBy', '=', 'b.id')
             ->select(
                 'a.FatherCode',
