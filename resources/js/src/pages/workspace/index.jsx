@@ -415,9 +415,9 @@ function Workspace() {
                                                 </div>
                                             )}
 
-                                            {/* {user.permissions?.includes(
+                                            {user.permissions?.includes(
                                                 "QCCBG"
-                                            ) ? ( */}
+                                            ) ? (
                                                 <Link to="/workspace/wood-working/qc">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
@@ -439,7 +439,7 @@ function Workspace() {
                                                         QC Chế biến gỗ
                                                     </div>
                                                 </Link>
-                                            {/* ):(
+                                             ):(
                                                 <div>
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
@@ -452,7 +452,7 @@ function Workspace() {
                                                         Tạo kế hoạch sấy
                                                     </div>
                                                 </div>
-                                            )} */}
+                                            )} 
                                             
                                             {user.permissions?.includes(
                                                 "VCN"
@@ -493,9 +493,9 @@ function Workspace() {
                                                 </div>
                                             )}
 
-                                            {/* {user.permissions?.includes(
+                                            {user.permissions?.includes(
                                                 "QCVCN"
-                                            ) ? ( */}
+                                            ) ? (
                                                 <Link to="/workspace/plywood/qc">
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
@@ -517,7 +517,7 @@ function Workspace() {
                                                         QC VCN
                                                     </div>
                                                 </Link>
-                                            {/* ):(
+                                             ):(
                                                 <div>
                                                     <div className="flex justify-center xl:h-full md:h-full">
                                                         <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
@@ -530,7 +530,7 @@ function Workspace() {
                                                         Tạo kế hoạch sấy
                                                     </div>
                                                 </div>
-                                            )} */}
+                                            )} 
 
                                             <div>
                                                 <div className="flex justify-center xl:h-full md:h-full">
