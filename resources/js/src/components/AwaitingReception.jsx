@@ -293,7 +293,7 @@ const AwaitingReception = ({
         // console.log("errorType: ", type);
         // const filteredErrorTypes = type === "wood-processing" ? errorType?.filter(item => item.U_Type === type) : errorType;
 
-        setErrorTypeOptions(errorTypes?.map((item) => ({
+        setErrorTypeOptions(errorType?.map((item) => ({
             value: item?.id || "",
             label: item?.name || "",
         })));
