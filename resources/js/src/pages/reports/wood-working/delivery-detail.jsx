@@ -29,6 +29,9 @@ function DeliveryDetailReport() {
 
     // Loading States
     const [isTeamLoading, setIsTeamLoading] = useState(false);
+    const [selectedTeams, setSelectedTeams] = useState([]);
+
+
 
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
@@ -36,10 +39,29 @@ function DeliveryDetailReport() {
     const [teamData, setTeamData] = useState([]);
 
     const handleFactorySelect = (factory) => {
+        setTeamData(null);
+        setSelectedTeams([]);
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
 
         getTeamData(factory);
+    };
+
+    const handleCheckboxChange = (e) => {
+        const { value, checked } = e.target; 
+        setSelectedTeams((prevValues) => {
+            if (checked) {
+                if (!prevValues.includes(value)) {
+                    return [...prevValues, value];
+                }
+                
+            } else {
+                return prevValues.filter((val) => val !== value);
+            }
+            return prevValues;
+        });
+        console.log('Các tổ đã chọn: ', selectedTeams)
+        
     };
 
     const getTeamData = async (param) => {
@@ -307,6 +329,8 @@ function DeliveryDetailReport() {
                                                                 value={
                                                                     item.Code
                                                                 }
+                                                                onChange={handleCheckboxChange}
+                                                                checked={selectedTeams.includes(item.Code)}
                                                             >
                                                                 {item.Name}
                                                             </Checkbox>
@@ -328,6 +352,8 @@ function DeliveryDetailReport() {
                                                                 value={
                                                                     item.Code
                                                                 }
+                                                                onChange={handleCheckboxChange}
+                                                                checked={selectedTeams.includes(item.Code)}
                                                             >
                                                                 {item.Name}
                                                             </Checkbox>
@@ -349,6 +375,8 @@ function DeliveryDetailReport() {
                                                                 value={
                                                                     item.Code
                                                                 }
+                                                                onChange={handleCheckboxChange}
+                                                                checked={selectedTeams.includes(item.Code)}
                                                             >
                                                                 {item.Name}
                                                             </Checkbox>
@@ -370,6 +398,8 @@ function DeliveryDetailReport() {
                                                                 value={
                                                                     item.Code
                                                                 }
+                                                                onChange={handleCheckboxChange}
+                                                                checked={selectedTeams.includes(item.Code)}
                                                             >
                                                                 {item.Name}
                                                             </Checkbox>

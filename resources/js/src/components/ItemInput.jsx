@@ -1655,7 +1655,7 @@ const ItemInput = ({
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
                                                 {/* selectedItemDetails.CongDoan != "SC" && */}
-                                                {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.maxQty <=
+                                                {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.CongDoan !== "XV" && selectedItemDetails?.maxQty <=
                                                 0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
