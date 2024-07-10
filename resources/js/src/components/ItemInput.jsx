@@ -339,36 +339,36 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
-        if (selectedItemDetails.CongDoan !=="SC" && amount < 0) {
+        if (selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
-            (selectedItemDetails.CongDoan !=="SC" && (amount >
+            (selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (amount >
             selectedItemDetails.maxQty))
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
-            selectedItemDetails.CongDoan !=="SC" && (amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty) 
+            selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty) 
         ) {
             toast.error(<span>Số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{amount}</span>) đã vượt quá số lượng còn lại phải sản xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty}</span>)</span>);
             onAlertDialogClose();
             return;
-        } else if (selectedItemDetails.CongDoan !=="SC" && faultyAmount < 0) {
+        } else if (selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && faultyAmount < 0) {
             toast.error("Số lượng lỗi phải lớn hơn 0");
             onAlertDialogClose();
             return;
         } else if (
-            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.ItemCode !== "" && (faultyAmount >
+            selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (selectedFaultItem.ItemCode !== "" && (faultyAmount >
               selectedItemDetails.maxQty))
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
         }  else if (
-            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.SubItemCode === "" &&
+            selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (selectedFaultItem.SubItemCode === "" &&
             selectedFaultItem.ItemCode === "" &&
             faultyAmount)
         ) {
@@ -376,14 +376,14 @@ const ItemInput = ({
             onAlertDialogClose();
             return;
         } else if (
-            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.SubItemCode !== "" &&
+            selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (selectedFaultItem.SubItemCode !== "" &&
             faultyAmount > parseInt(selectedFaultItem.OnHand || 0))
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
-            selectedItemDetails.CongDoan !=="SC" && (selectedFaultItem.ItemCode !== "" &&
+            selectedItemDetails.CongDoan !=="SC" && selectedItemDetails.CongDoan !=="XV" && (selectedFaultItem.ItemCode !== "" &&
             ((parseInt(faultyAmount) + parseInt(amount)) > (parseInt(selectedItemDetails.maxQty))))
         ) {
             toast.error(<span>Tổng số lượng ghi nhận (<span style={{ fontWeight: 'bold' }}>{parseInt(faultyAmount) + parseInt(amount)}</span>) đã vượt quá số lượng tối đa có thể xuất (<span style={{ fontWeight: 'bold' }}>{selectedItemDetails.maxQty}</span>)</span>);
@@ -406,7 +406,6 @@ const ItemInput = ({
                     SubItemCode: item.SubItemCode,
                     BaseQty: item.BaseQty,
                 })),
-
               };
 
             try {

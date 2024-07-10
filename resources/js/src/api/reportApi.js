@@ -20,6 +20,14 @@ const reportApi = {
             }
         );
     },
+
+    // Pedro Version
+    getTeamByFactory: (factory) => {
+        const url = `/get-team-by-factory`;
+        return axiosClient().get(url, {params:{
+            FAC: factory,
+        }});
+    },
 };
 
 export default reportApi;

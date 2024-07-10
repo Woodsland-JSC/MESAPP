@@ -1,12 +1,12 @@
 import React from 'react'
 import Layout from '../../../layouts/layout'
 
-function HumidityCheckReport() {
+function QCHandlingReport() {
   return (
     <Layout>
-      <div>Báo cáo kiểm tra độ ẩm</div>
+      <div>Biên bản xử lý QC</div>
     </Layout>
   )
 }
 
-export default HumidityCheckReport
+export default QCHandlingReport

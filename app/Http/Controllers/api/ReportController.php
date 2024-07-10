@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Database\QueryException;
 
 class ReportController extends Controller
 {
@@ -147,4 +148,6 @@ class ReportController extends Controller
         // Download the output PDF file
         return response()->download($outputPdfFile);
     }
+
+    
 }

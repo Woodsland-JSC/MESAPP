@@ -4,7 +4,7 @@ import Layout from '../../../layouts/layout'
 function WeeklyGoodsReceiptReport() {
   return (
     <Layout>
-          <div>WeeklyGoodsReceiptReport</div>
+          <div>Báo cáo sản lượng tuần</div>
     </Layout>
 
   )

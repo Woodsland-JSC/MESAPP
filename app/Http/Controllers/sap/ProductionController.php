@@ -1398,6 +1398,35 @@ class ProductionController extends Controller
         $WHS = GetWhsCode(Auth::user()->plant, 'QC');
         return $WHS;
     }
+
+    public function getTeamByFactory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'FAC' => 'required|string|max:254',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'select "VisResCode" "Code","ResName" "Name" , "U_CDOAN" "CDOAN"
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, ['N', 'Y', $request->FAC])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        odbc_close($conDB);
+        return response()->json($results, 200);
+    }
+
     /*
     *********************************
     version 2: thay doi yeu cau 

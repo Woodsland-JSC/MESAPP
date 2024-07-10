@@ -12,6 +12,7 @@ import { dateToDateTime } from "../../utils/convertDatetime";
 import { MdOutlineRefresh } from "react-icons/md";
 import { TbRefresh } from "react-icons/tb";
 import { FaArrowRight } from "react-icons/fa";
+import { FaStar } from "react-icons/fa6";
 import { HiClipboard } from "react-icons/hi";
 import {
     Tabs,
@@ -38,52 +39,62 @@ const woodDryingReports = [
     {
         id: "0001",
         name: "Biên bản vào lò",
-        link: "/reports/wood-processing-kiln-stacking",
+        link: "/reports/kiln-loading",
+        priority: true,
     },
     {
         id: "0002",
         name: "Biên bản lịch sử vào lò",
-        link: "/reports/wood-awaiting-drying",
+        link: "/reports/kiln-loading-history",
+        priority: false,
     },
     {
         id: "0003",
         name: "Biên bản kiểm tra lò sấy",
-        link: "/reports/selected-dried-inventory",
+        link: "/reports/kiln-checking",
+        priority: false,
     },
     {
         id: "0004",
         name: "Biên bản kiểm tra độ ẩm",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/humidity-check",
+        priority: false,
     },
     {
         id: "0005",
         name: "Báo cáo lò đang sấy",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/drying-kilns",
+        priority: false,
     },
     {
         id: "0006",
         name: "Báo cáo kế hoạch sấy",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/drying-plan",
+        priority: false,
     },
     {
         id: "0007",
         name: "Báo cáo xếp sấy khối CBG",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/wood-drying",
+        priority: true,
     },
     {
         id: "0008",
         name: "Báo cáo sản lượng sấy",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/drying-product",
+        priority: false,
     },
     {
         id: "0009",
         name: "Báo cáo tồn sấy lựa",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/dried-wood-inventory",
+        priority: false,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/drying-queue",
+        priority: true,
     },
 ];
 
@@ -91,27 +102,26 @@ const woodProductingReports = [
     {
         id: "0001",
         name: "Báo cáo sản lượng tuần (chi tiết)",
-        link: "/reports/wood-processing-kiln-stacking",
+        link: "/reports/weekly-goods-receipts",
+        priority: false,
     },
     {
         id: "0002",
         name: "Báo cáo tỷ lệ đồng bộ",
-        link: "/reports/wood-awaiting-drying",
+        link: "/reports/sync-ratio",
+        priority: false,
     },
     {
         id: "0003",
         name: "Báo cáo thông tin chi tiết giao nhận",
-        link: "/reports/selected-dried-inventory",
+        link: "/reports/delivery-detail",
+        priority: true,
     },
     {
         id: "0004",
-        name: "Báo cáo sản lượng sấy",
-        link: "/reports/current-drying-kiln",
-    },
-    {
-        id: "0005",
         name: "Báo cáo chi tiết nhập tồn",
-        link: "/reports/current-drying-kiln",
+        link: "/reports/detail-stock-receipt",
+        priority: false,
     },
 ];
 
@@ -119,48 +129,26 @@ const QCReports = [
     {
         id: "0001",
         name: "Biên bản xử lý QC",
-        link: "/reports/wood-processing-kiln-stacking",
+        link: "/reports/qc-handling",
+        priority: false,
     },
     {
         id: "0002",
         name: "Báo cáo biện pháp xử lý lỗi",
-        link: "/reports/wood-awaiting-drying",
+        link: "/reports/defect-resolution",
+        priority: true,
     },
     {
         id: "0003",
         name: "Báo cáo số lượng lỗi từng công đoạn",
-        link: "/reports/selected-dried-inventory",
+        link: "/reports/defect-quantity",
+        priority: false,
     },
 ];
-
-const exampleData1 = [
-    {
-        id: "0001",
-        name: "Biên bản kiểm tra lò sấy",
-        link: "/reports/kiln-inspection",
-    },
-    {
-        id: "0002",
-        name: "Biên bản lịch sử vào lò",
-        link: "/reports/drying-kiln-history",
-    },
-    {
-        id: "0003",
-        name: "Biên bản kiểm tra độ ẩm",
-        link: "/reports/humidity-checking",
-    },
-];
-
-var checkboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
-
-var headerCheckboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
 
 function Report() {
     const { loading, setLoading } = useAppContext();
+    const [searchTerm, setSearchTerm] = useState("");
 
     const reportTab = useRef();
     const recordTab = useRef();
@@ -294,6 +282,25 @@ function Report() {
         );
     }, []);
 
+    const filterReports = (reports) => {
+        return reports.filter((item) =>
+            item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    };
+
+    const filteredWoodDryingReports = useMemo(
+        () => filterReports(woodDryingReports),
+        [woodDryingReports, searchTerm]
+    );
+    const filteredWoodProductingReports = useMemo(
+        () => filterReports(woodProductingReports),
+        [woodProductingReports, searchTerm]
+    );
+    const filteredQCReports = useMemo(
+        () => filterReports(QCReports),
+        [QCReports, searchTerm]
+    );
+
     const showLoadingReport = useCallback(() => {
         reportGridRef.current.api.showLoadingOverlay();
     }, []);
@@ -361,10 +368,10 @@ function Report() {
                                             id="record-search"
                                             className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm báo cáo"
-                                            onInput={
-                                                onRecordFilterTextBoxChanged
+                                            value={searchTerm}
+                                            onChange={(e) =>
+                                                setSearchTerm(e.target.value)
                                             }
-                                            required
                                         />
                                     </div>
                                 </div>
@@ -410,19 +417,37 @@ function Report() {
                                     style={gridStyle}
                                 >
                                     {/* Report Components */}
-                                    <div className="space-y-3">
-                                        {woodDryingReports.map((item, index) => (
-                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
-                                                <div className="flex items-center item-center gap-x-4">
-                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
-                                                        <HiClipboard className="  text-white w-5 h-5 " />
-                                                    </div>
-                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
-                                                </div>
-                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {filteredWoodDryingReports.length === 0 ? (
+                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
+                                    ):(
+                                        <div className="flex flex-col gap-y-3">
+                                            {filteredWoodDryingReports.map(
+                                                (item, index) => (
+                                                    <Link
+                                                        to={item.link}
+                                                        key={index}
+                                                        className=""
+                                                    >
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                            <div className="flex items-center gap-x-4">
+                                                                <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
+                                                                    <HiClipboard className="  text-white w-5 h-5 " />
+                                                                </div>
+                                                                <div className="text-[16px] group-hover:text-white">
+                                                                    {item.name}
+                                                                </div>
+                                                                {item.priority ==
+                                                                    true && (
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                )}
+                                                            </div>
+                                                            <FaArrowRight className="group-hover:text-white w-5 h-5" />
+                                                        </div>
+                                                    </Link>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
                                 </TabPanel>
 
                                 {/* Báo cáo sản lượng */}
@@ -430,39 +455,75 @@ function Report() {
                                     className="space-y-4"
                                     style={gridStyle}
                                 >
-                                    <div className="space-y-3">
-                                        {woodProductingReports.map((item, index) => (
-                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
-                                                <div className="flex items-center item-center gap-x-4">
-                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
-                                                        <HiClipboard className="  text-white w-5 h-5 " />
-                                                    </div>
-                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
-                                                </div>
-                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {filteredWoodProductingReports.length === 0 ? (
+                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
+                                    ):(
+                                        <div className="flex flex-col gap-y-3">
+                                            {filteredWoodProductingReports.map(
+                                                (item, index) => (
+                                                    <Link
+                                                        to={item.link}
+                                                        key={index}
+                                                        className=""
+                                                    >
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                            <div className="flex items-center gap-x-4">
+                                                                <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
+                                                                    <HiClipboard className="  text-white w-5 h-5 " />
+                                                                </div>
+                                                                <div className="text-[16px] group-hover:text-white">
+                                                                    {item.name}
+                                                                </div>
+                                                                {item.priority ==
+                                                                    true && (
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                )}
+                                                            </div>
+                                                            <FaArrowRight className="group-hover:text-white w-5 h-5" />
+                                                        </div>
+                                                    </Link>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
                                 </TabPanel>
 
                                 {/* Báo cáo QC */}
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
-                                >
-                                    <div className="space-y-3">
-                                        {QCReports.map((item, index) => (
-                                            <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl">
-                                                <div className="flex items-center item-center gap-x-4">
-                                                    <div className="group-hover:bg-black p-2 rounded-full bg-gray-900">
-                                                        <HiClipboard className="  text-white w-5 h-5 " />
-                                                    </div>
-                                                    <div className="text-[16px] group-hover:text-white">{item.name}</div>
-                                                </div>
-                                                <FaArrowRight className="group-hover:text-white w-5 h-5" />
-                                            </div>
-                                        ))}
-                                    </div>
+                                >   
+                                    {filteredQCReports.length === 0 ? (
+                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
+                                    ):(
+                                        <div className="flex flex-col gap-y-3">
+                                            {filteredQCReports.map(
+                                                (item, index) => (
+                                                    <Link
+                                                        to={item.link}
+                                                        key={index}
+                                                        className=""
+                                                    >
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                            <div className="flex items-center gap-x-4">
+                                                                <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
+                                                                    <HiClipboard className="  text-white w-5 h-5 " />
+                                                                </div>
+                                                                <div className="text-[16px] group-hover:text-white">
+                                                                    {item.name}
+                                                                </div>
+                                                                {item.priority ==
+                                                                    true && (
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                )}
+                                                            </div>
+                                                            <FaArrowRight className="group-hover:text-white w-5 h-5" />
+                                                        </div>
+                                                    </Link>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
                                 </TabPanel>
                             </TabPanels>
                         </Tabs>

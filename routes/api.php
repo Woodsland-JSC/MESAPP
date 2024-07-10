@@ -136,6 +136,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
 
+    // Report 
+    Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);
+
     Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
     Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
     Route::get('/nguyentest', [ProductionController::class, 'getQCWarehouseByUser'])->name('create.kilnhistorydetail');

@@ -1,12 +1,12 @@
 import React from 'react'
 import Layout from '../../../layouts/layout'
 
-function HumidityCheckReport() {
+function SyncRatioReport() {
   return (
     <Layout>
-      <div>Báo cáo kiểm tra độ ẩm</div>
+      <div>Báo cáo tỉ lệ đồng bộ</div>
     </Layout>
   )
 }
 
-export default HumidityCheckReport
+export default SyncRatioReport

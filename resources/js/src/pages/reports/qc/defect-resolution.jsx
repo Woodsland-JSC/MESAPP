@@ -1,12 +1,12 @@
 import React from 'react'
 import Layout from '../../../layouts/layout'
 
-function HumidityCheckReport() {
+function DefectResolution() {
   return (
     <Layout>
-      <div>Báo cáo kiểm tra độ ẩm</div>
+      <div>Báo cáo biện pháp xử lý lỗi</div> 
     </Layout>
   )
 }
 
-export default HumidityCheckReport
+export default DefectResolution

@@ -51,7 +51,29 @@ import CurrentDryingKilnReport from "../pages/reports/wooddrying/current-drying-
 import DryingKilnHistoryReport from "../pages/reports/wooddrying/drying-kiln-history";
 import HumidityCheckingReport from "../pages/reports/wooddrying/humidity-checking";
 
+// New
+import DriedWoodInventoryReport from "../pages/reports/wood-drying/dried-wood-inventory";
+import DryingKilnsReport from "../pages/reports/wood-drying/drying-kilns";
+import DryingPlanReport from "../pages/reports/wood-drying/drying-plan";
+import DryingProductReport from "../pages/reports/wood-drying/drying-product";
+import HumidityCheckReport from "../pages/reports/wood-drying/humidity-check";
+import KilnCheckingReport from "../pages/reports/wood-drying/kiln-checking";
+import KilnLoadingHistoryReport from "../pages/reports/wood-drying/kiln-loading-history";
+import KilnLoadingReport from "../pages/reports/wood-drying/kiln-loading";
+import CBGWoodDryingReport from "../pages/reports/wood-drying/wood-drying";
+import DryingQueueReport from "../pages/reports/wood-drying/drying-queue";
+
+import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail";
+import DetailStockReceiptReport from "../pages/reports/wood-working/detail-stock-receipt";
+import SyncRatioReport from "../pages/reports/wood-working/sync-ratio";
+import WeeklyGoodsReceiptsReport from "../pages/reports/wood-working/weekly-goods-receipts";
+
+import DefectQuantityReport from "../pages/reports/qc/defect-quantity";
+import DefectResolutionReport from "../pages/reports/qc/defect-resolution";
+import QCHandlingReport from "../pages/reports/qc/qc-handling";
+
 import useAppContext from "../store/AppContext";
+import HumidityCheck from "../components/HumidityCheck";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -236,6 +258,144 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <HumidityCheckingReport />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* New Report */}
+                    <Route
+                        path="/reports/dried-wood-inventory"
+                        element={
+                            <ProtectedRoute>
+                                <DriedWoodInventoryReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/drying-kilns"
+                        element={
+                            <ProtectedRoute>
+                                <DryingKilnsReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/drying-plan"
+                        element={
+                            <ProtectedRoute>
+                                <DryingPlanReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/drying-product"
+                        element={
+                            <ProtectedRoute>
+                                <DryingProductReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/humidity-check"
+                        element={
+                            <ProtectedRoute>
+                                <HumidityCheckReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/kiln-checking"
+                        element={
+                            <ProtectedRoute>
+                                <KilnCheckingReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/kiln-loading-history"
+                        element={
+                            <ProtectedRoute>
+                                <KilnLoadingHistoryReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/kiln-loading"
+                        element={
+                            <ProtectedRoute>
+                                <KilnLoadingReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-drying"
+                        element={
+                            <ProtectedRoute>
+                                <CBGWoodDryingReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/drying-queue"
+                        element={
+                            <ProtectedRoute>
+                                <DryingQueueReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/delivery-detail"
+                        element={
+                            <ProtectedRoute>
+                                <DeliveryDetailReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/detail-stock-receipt"
+                        element={
+                            <ProtectedRoute>
+                                <DetailStockReceiptReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/sync-ratio"
+                        element={
+                            <ProtectedRoute>
+                                <SyncRatioReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/weekly-goods-receipts"
+                        element={
+                            <ProtectedRoute>
+                                <WeeklyGoodsReceiptsReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/defect-quantity"
+                        element={
+                            <ProtectedRoute>
+                                <DefectQuantityReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/defect-resolution"
+                        element={
+                            <ProtectedRoute>
+                                <DefectResolutionReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/qc-handling"
+                        element={
+                            <ProtectedRoute>
+                                <QCHandlingReport />
                             </ProtectedRoute>
                         }
                     />
