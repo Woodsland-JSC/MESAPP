@@ -102,7 +102,7 @@ class VCNController extends Controller
                     'ErrorData' => $errorData,
                     'MaThiTruong' => $request->MaThiTruong,
                     'CreatedBy' => Auth::user()->id,
-                    'loinhamay' => $request->factories['value']??null
+                    'loinhamay' => $request->factories['value'] ?? null
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
 
@@ -275,32 +275,32 @@ class VCNController extends Controller
             $data = null;
         } else {
             $data = DB::table('notireceiptVCN as a')
-            ->join('users as b', 'a.CreatedBy', '=', 'b.id')
-            ->select(
-                'a.FatherCode',
-                'a.ItemCode',
-                'a.ItemName',
-                'a.team',
-                'a.CongDoan',
-                'a.CDay',
-                'a.CRong',
-                'a.CDai',
-                'a.Quantity',
-                'a.MaThiTruong',
-                'a.ProdType',
-                'a.created_at',
-                'b.first_name',
-                'b.last_name',
-                'a.text',
-                'a.id',
-                'a.type',
-                'a.confirm'
-            )
-            ->where('a.type', '=', 0)
-            ->where('a.NextTeam', $request->TO)
-            ->where('a.confirm', '=', 0)
-            ->where('a.deleted', '=', 0)
-            ->get();
+                ->join('users as b', 'a.CreatedBy', '=', 'b.id')
+                ->select(
+                    'a.FatherCode',
+                    'a.ItemCode',
+                    'a.ItemName',
+                    'a.team',
+                    'a.CongDoan',
+                    'a.CDay',
+                    'a.CRong',
+                    'a.CDai',
+                    'a.Quantity',
+                    'a.MaThiTruong',
+                    'a.ProdType',
+                    'a.created_at',
+                    'b.first_name',
+                    'b.last_name',
+                    'a.text',
+                    'a.id',
+                    'a.type',
+                    'a.confirm'
+                )
+                ->where('a.type', '=', 0)
+                ->where('a.NextTeam', $request->TO)
+                ->where('a.confirm', '=', 0)
+                ->where('a.deleted', '=', 0)
+                ->get();
         }
 
         return response()->json([
@@ -354,6 +354,8 @@ class VCNController extends Controller
             $results[] = $rowstock;
         }
 
+        // dd($results);
+
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
         $CongDoan = null;
@@ -379,6 +381,20 @@ class VCNController extends Controller
             } else {
                 if ($wareHouse !== $SubItemWhs) {
                     return response()->json(['error' => 'Các giá trị của wareHouse trong LSX không giống nhau!'], 422);
+                }
+            }
+        }
+
+        // Lấy loại ván
+        $ProdType = null;
+        foreach ($results as $result) {
+            $prodType = $result['ProdType'];
+
+            if ($ProdType === null) {
+                $ProdType = $prodType;
+            } else {
+                if ($prodType !== $ProdType) {
+                    return response()->json(['error' => 'Các giá trị của U_IType trong LSX không giống nhau!'], 422);
                 }
             }
         }
@@ -486,6 +502,7 @@ class VCNController extends Controller
             'ItemInfo' => $ItemInfo,
             'CongDoan'  =>  $CongDoan,
             'SubItemWhs' => $SubItemWhs,
+            'ProdType' => $ProdType,
             'notifications' => $notification,
             'stocks' => $groupedResults,
             'maxQty' =>   $maxQty,
@@ -636,7 +653,7 @@ class VCNController extends Controller
             'TO' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
         $data = notireceiptVCN::where('id', $request->id)->where('deleted', 0)->first();
         if (!$data) {
@@ -1008,8 +1025,8 @@ class VCNController extends Controller
                             'itemchild' => $allocate['ItemChild'],
                             'SPDich' => $data->FatherCode,
                             'to' => $data->Team,
-                            "source"=>$rootCause,
-                            "TOChuyenVe"=>$teamBack,
+                            "source" => $rootCause,
+                            "TOChuyenVe" => $teamBack,
                             'quantity' => $allocate['Allocate'],
                             'ObjType' => 202,
                             'DocEntry' => $res['DocEntry']
