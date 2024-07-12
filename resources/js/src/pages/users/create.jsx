@@ -589,7 +589,7 @@ function CreateUser() {
                                     <div className="flex items-center">
                                         <Link
                                             to="/users"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className="text-sm font-medium text-[#17506B]"
                                         >
                                             Quản lý người dùng
                                         </Link>

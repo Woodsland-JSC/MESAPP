@@ -621,14 +621,14 @@ function WoodSorting() {
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            className=" text-sm font-medium text-[#17506B]"
                                         >
                                             Workspace
                                         </a>

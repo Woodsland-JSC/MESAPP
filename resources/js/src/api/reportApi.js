@@ -28,6 +28,22 @@ const reportApi = {
             FAC: factory,
         }});
     },
+
+    getDeliveryDetailReport: (statusCode, to, branch, plant, fromDate, toDate) => {
+        const url = `/report/cbg-chitietgiaonhan`;
+        return axiosClient().get(url, {
+            params: {
+                status_code: statusCode,
+                To: to,
+                branch: branch,
+                plant: plant,
+                from_date: fromDate,
+                to_date: toDate
+            }
+        });
+    },
+
+
 };
 
 export default reportApi;

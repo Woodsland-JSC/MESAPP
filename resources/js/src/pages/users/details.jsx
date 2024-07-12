@@ -634,7 +634,7 @@ function User() {
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-4 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
@@ -672,7 +672,7 @@ function User() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">
+                    <div className="text-3xl font-bold mb-4">
                         Thông tin người dùng
                     </div>
                     {/* Main content */}

@@ -8,40 +8,45 @@ use Illuminate\Support\Facades\Validator;
 class ReportController extends Controller
 {
     /** Sấy gỗ */
-    //functiion report QC BÁO CAO XỬ LÝ LỖI
-    function chitietgiaonhan(Request $request){
-        //check request have data (have plant, branch,to )
-        //status code =0 chưa nhân, 1 đã nhận, 2 trả lại, 3 dở dang
-        // Retrieve branch, plant, to, and status code from the request
+    //
+    function chitietgiaonhan(Request $request) {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
         $branch = $request->input('branch');
         $plant = $request->input('plant');
         $to = $request->input('To');
-        $statusCode = $request->input('status_code'); // Default to 200 if not provided
-
-        // Start the query and add conditions based on the request inputs
+        $statusCode = $request->input('status_code');
+    
         $query = DB::table('gt_cbg_chitietgiaonhan');
-
+    
         if ($branch) {
             $query->where('branch', $branch);
         }
-
+    
         if ($plant) {
             $query->where('plant', $plant);
         }
-
-        if ($to) {
-            $query->where('ToHT', $to);
+    
+        if ($to && is_array($to)) {
+            $query->whereIn('ToHT', $to);
         }
         
-        if($statusCode!=null) {
-            $query->where('statuscode','=', $statusCode);
+        if ($statusCode) {
+            $query->where('statuscode', $statusCode);
         }
+    
+        if ($fromDate && $toDate) {
+            $query->whereBetween('ngaygiao', [$fromDate, $toDate])
+                  ->whereBetween('ngaynhan', [$fromDate, $toDate]);
+        }
+    
         // Get the results
         $data = $query->get();
-
+    
         // Return the JSON response with the requested status code
         return response()->json($data);
     }
+
     //báo cáo xếp chờ xấy
     function xepchosay(Request $request){
         $validate = Validator::make($request->all(), [

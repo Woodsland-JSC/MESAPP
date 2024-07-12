@@ -9,6 +9,7 @@ import { addDays, format, add } from "date-fns";
 import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
+import { BiConfused } from "react-icons/bi";
 
 function KilnChecking() {
     const [loading, setLoading] = useState(true);
@@ -40,14 +41,14 @@ function KilnChecking() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            class="text-sm font-medium text-[#17506B]"
                                         >
                                             Workspace
                                         </a>
@@ -124,8 +125,8 @@ function KilnChecking() {
                     </div> */}
 
                     {/* Content */}
-                    {/* {(bowCards.Status === 1).length > 0 &&
-                    (bowCards.Status === 2).length > 0 ? ( */}
+                    {(bowCards.Status === 1).length > 0 &&
+                    (bowCards.Status === 2).length > 0 ? (
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {bowCards &&
                             bowCards?.length > 0 &&
@@ -159,11 +160,18 @@ function KilnChecking() {
                                 )
                                 .reverse()}
                     </div>
-                    {/* ) : (
-                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-400 font-medium">
-                            Tiến trình hiện tại không có hoạt động nào.
-                        </div>
-                    )} */}
+                    ) : (
+                        <>
+                            {!loading && (
+                                <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
+                                    <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
+                                    <div className="  text-xl text-gray-400"> 
+                                        Tiến trình hiện tại không có hoạt động nào.
+                                    </div>
+                                </div>
+                            )}        
+                        </>
+                    )}
                 </div>
             </div>
             {loading && <Loader />}

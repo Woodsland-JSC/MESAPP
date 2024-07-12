@@ -6,7 +6,7 @@ import React, {
     useEffect,
 } from "react";
 import { Link } from "react-router-dom";
-import { AgGridReact, AgGridColumn } from "ag-grid-react";
+import { AgGridReact } from "ag-grid-react";
 import { FaPlus } from "react-icons/fa";
 import Select from "react-select";
 import { dateToDateTime } from "../../utils/convertDatetime";
@@ -47,13 +47,13 @@ const sizeOptions = [
     { value: "200", label: "200" },
 ];
 
-var checkboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
+// var checkboxSelection = function (params) {
+//     return params.columnApi.getRowGroupColumns().length === 0;
+// };
 
-var headerCheckboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
+// var headerCheckboxSelection = function (params) {
+//     return params.columnApi.getRowGroupColumns().length === 0;
+// };
 
 function Users() {
     const { loading, setLoading } = useAppContext();
@@ -101,8 +101,6 @@ function Users() {
             },
             minWidth: 210,
             maxHeight: 100,
-            checkboxSelection: checkboxSelection,
-            headerCheckboxSelection: headerCheckboxSelection,
         },
         {
             headerName: "Hidden Column",
@@ -174,8 +172,6 @@ function Users() {
             },
             maxWidth: 100,
             maxHeight: 100,
-            checkboxSelection: checkboxSelection,
-            headerCheckboxSelection: headerCheckboxSelection,
         },
         {
             headerName: "Tên role",
@@ -234,7 +230,6 @@ function Users() {
                     return params.data[params.colDef.field];
                 }
             },
-            headerCheckboxSelection: true,
             cellRenderer: "agGroupCellRenderer",
             cellRendererParams: {
                 checkbox: true,
@@ -394,7 +389,7 @@ function Users() {
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">
+                    <div className="text-3xl font-bold mb-4">
                         Quản lý người dùng
                     </div>
 

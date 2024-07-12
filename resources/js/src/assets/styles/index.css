@@ -216,3 +216,14 @@ div:where(.swal2-container) {
     z-index: 50000 !important;
 }
 
+/* Ag Grid Custom Theme */
+.ag-theme-quartz .ag-header {
+    background-color: #DBDCDD;
+}
+
+.ag-theme-quartz {
+    --ag-row-border-style: solid !important;  
+    --ag-row-border-color: rgb(188, 188, 188) !important;
+    --ag-cell-horizontal-border: solid 1px rgb(206, 206, 206) !important;
+}
+

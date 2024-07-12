@@ -24,6 +24,7 @@ import { addDays, format, add } from "date-fns";
 import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
+import { BiConfused } from "react-icons/bi";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -245,14 +246,14 @@ function CreateDryingPlan() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="w-full inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
                                         <a
                                             href="#"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            class="text-sm font-medium text-[#17506B]"
                                         >
                                             Workspace
                                         </a>
@@ -445,12 +446,12 @@ function CreateDryingPlan() {
                     </div> */}
 
                     {/* BOW Card List */}
-                    {/* {createdBowCards || filteredBowCards.length > 0 ? ( */}
+                    {createdBowCards && bowCards.length > 0 ? (
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {createdBowCards.map((createdbowCard, index) => (
                             <BOWCard key={index} {...createdbowCard} />
                         ))}
-                        {filteredBowCards
+                        {bowCards
                             ?.map((bowCard, index) => (
                                 <BOWCard
                                     key={index}
@@ -471,9 +472,18 @@ function CreateDryingPlan() {
                             ))
                             .reverse()}
                     </div>
-                    {/* ) : (
-                        <div className=" flex items-center justify-center text-center h-full mt-16 text-xl text-gray-500 font-medium">Tiến trình hiện tại không có hoạt động nào.</div>
-                    )} */}
+                    ) : (
+                        <>
+                            {!loading && (
+                                <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
+                                    <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
+                                    <div className="  text-xl text-gray-400"> 
+                                        Tiến trình hiện tại không có hoạt động nào.
+                                    </div>
+                                </div>
+                            )}        
+                        </>
+                    )}
                     <div class="fixed bottom-7 right-8 xl:hidden md:hidden block">
                         <button
                             class="bg-[#1f2937] hover:bg-[#2d3b4e] text-white font-bold p-5 rounded-full shadow-lg"

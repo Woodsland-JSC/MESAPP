@@ -16,7 +16,7 @@ use App\Models\awaitingstocks;
 use App\Models\awaitingstocksvcn;
 use App\Models\SanLuong;
 use App\Models\notireceipt;
-use App\Models\notireceiptvcn;
+use App\Models\notireceiptVCN;
 use App\Models\HistorySL;
 use App\Models\historySLVCN;
 use App\Jobs\issueProduction;
@@ -844,7 +844,7 @@ class QCController extends Controller
         }
 
         // 2. Truy vấn thông tin từ bảng "notireceiptvcn" để lấy dữ liệu
-        $data = notireceiptvcn::select(
+        $data = notireceiptVCN::select(
             'id as notiID',
             'ItemCode',
             'SubItemCode',
@@ -953,7 +953,7 @@ class QCController extends Controller
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
             awaitingstocksvcn::where('notiId', $request->id)->delete();
-            notireceiptvcn::where('id', $request->id)->update([
+            notireceiptVCN::where('id', $request->id)->update([
                 'confirm' =>  $closed,
                 'ObjType' =>  59,
                 'DocEntry' => $res['DocEntry'],
