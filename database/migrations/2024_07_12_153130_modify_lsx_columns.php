@@ -13,11 +13,11 @@ class ModifyLsxColumns extends Migration
      */
     public function up()
     {
-        Schema::table('historyslvcn', function (Blueprint $table) {
+        Schema::table('historySLVCN', function (Blueprint $table) {
             $table->dropColumn('LSX');
         });
 
-        Schema::table('notireceiptvcn', function (Blueprint $table) {
+        Schema::table('notireceiptVCN', function (Blueprint $table) {
             $table->string('LSX')->nullable()->after('id');
         });
     }
