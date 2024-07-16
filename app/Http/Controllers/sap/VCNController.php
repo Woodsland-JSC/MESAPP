@@ -21,7 +21,6 @@ class VCNController extends Controller
     // Ghi nhận sản lượng
     function receipts(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
@@ -30,6 +29,7 @@ class VCNController extends Controller
             'RejectQty' => 'required|numeric',
             'version' => 'required|string|max:254',
             'ErrorData',
+            'LSX' => 'required|string|max:254',
             'CDay' => 'required|numeric',
             'CRong' => 'required|numeric',
             'CDai' => 'required|numeric',
@@ -43,10 +43,10 @@ class VCNController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $toqc = "";
-        if (Auth::user()->plant == 'TH') {
-            $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'TQ') {
-            $toqc = 'TQ-QC';
+        if (Auth::user()->plant == 'YS2') {
+            $toqc = 'YS2-QC';
+        } else if (Auth::user()->plant == 'CH') {
+            $toqc = 'CH-QC';
         } else {
             $toqc = 'HG-QC';
         }
@@ -56,6 +56,7 @@ class VCNController extends Controller
             $errorData = json_encode($request->ErrorData);
             if ($request->CompleQty > 0) {
                 $notifi = notireceiptVCN::create([
+                    'LSX' => $request->LSX,
                     'text' => 'Production information waiting for confirmation',
                     'Quantity' => $request->CompleQty,
                     'MaThiTruong' => $request->MaThiTruong,
@@ -85,6 +86,7 @@ class VCNController extends Controller
             }
             if ($request->RejectQty > 0) {
                 $notifi = notireceiptVCN::create([
+                    'LSX' => $request->LSX,
                     'text' => 'Error information sent to QC',
                     'FatherCode' => $request->FatherCode,
                     'ItemCode' => $request->ItemCode,

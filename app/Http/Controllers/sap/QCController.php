@@ -341,6 +341,7 @@ class QCController extends Controller
                 'b.SubItemName',
                 'b.SubItemCode',
                 'b.ErrorData',
+                'b.QuyCach',
                 'a.team',
                 'a.CongDoan',
                 'a.CDay',
@@ -502,6 +503,7 @@ class QCController extends Controller
                 'a.SubItemName',
                 'a.SubItemCode',
                 'a.ErrorData',
+                'a.QuyCach',
                 'a.team',
                 'a.CongDoan',
                 'a.CDay',
@@ -685,10 +687,10 @@ class QCController extends Controller
         $warehouse = "";
         if ($data->NextTeam = 'TH-QC') {
             $warehouse = $this->getQCWarehouseByUser('TH');
-        } else if ($data->NextTeam = 'TQ-QC') {
-            $warehouse = $this->getQCWarehouseByUser('TQ');
+        } else if ($data->NextTeam = 'YS1-QC') {
+            $warehouse = $this->getQCWarehouseByUser('YS1');
         } else {
-            $warehouse = $this->getQCWarehouseByUser('HG');
+            $warehouse = $this->getQCWarehouseByUser('TB');
         }
 
         if ($warehouse == "-1") {
@@ -743,6 +745,8 @@ class QCController extends Controller
                 ]
             ]]
         ];
+
+        dd($body);
         $response = Http::withOptions([
             'verify' => false,
         ])->withHeaders([
@@ -751,6 +755,7 @@ class QCController extends Controller
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
         $res = $response->json();
+        // dd($res);
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
@@ -846,6 +851,7 @@ class QCController extends Controller
         // 2. Truy vấn thông tin từ bảng "notireceiptvcn" để lấy dữ liệu
         $data = notireceiptVCN::select(
             'id as notiID',
+            'LSX',
             'ItemCode',
             'SubItemCode',
             'team as Team',
@@ -879,14 +885,14 @@ class QCController extends Controller
 
         //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
         $warehouse = "";
-        if ($data->NextTeam = 'TH-QC') {
-            $warehouse = $this->getQCWarehouseByUser('TH');
-        } else if ($data->NextTeam = 'TQ-QC') {
-            $warehouse = $this->getQCWarehouseByUser('TQ');
+        if ($data->NextTeam = 'YS2-QC') {
+            $warehouse = $this->getQCWarehouseByUser('YS2');
+        } else if ($data->NextTeam = 'CH-QC') {
+            $warehouse = $this->getQCWarehouseByUser('CH');
         } else {
             $warehouse = $this->getQCWarehouseByUser('HG');
         }
-        dd($warehouse);
+        // dd($warehouse);
 
         if ($warehouse == "-1") {
             return response()->json([
@@ -900,7 +906,7 @@ class QCController extends Controller
         $teamBack = $request->teamBack['value'] ?? '';
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
-        $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+        $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
 
         // dd($U_GIAO);
 
@@ -922,8 +928,8 @@ class QCController extends Controller
             "DocumentLines" => [[
                 "Quantity" => $request->Qty,
                 "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
-                // "WarehouseCode" =>  $warehouse,
-                "WarehouseCode" => $data->NextTeam,
+                "WarehouseCode" =>  $warehouse,
+                // "WarehouseCode" => $data->NextTeam,
                 "BatchNumbers" => [
                     [
                         "BatchNumber" => now()->format('YmdHmi'),
@@ -941,6 +947,7 @@ class QCController extends Controller
                 ]
             ]]
         ];
+        // dd($body);
         $response = Http::withOptions([
             'verify' => false,
         ])->withHeaders([
@@ -949,6 +956,7 @@ class QCController extends Controller
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
         $res = $response->json();
+        // dd($res);
 
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
         if ($response->successful()) {
@@ -964,7 +972,7 @@ class QCController extends Controller
 
             HistorySLVCN::create(
                 [
-                    'LSX' => $data->LSX,
+                    // 'LSX' => $data->LSX,
                     'itemchild' => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     'to' => $data->Team,
                     'quantity' => $request->Qty,

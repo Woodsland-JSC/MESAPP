@@ -328,7 +328,7 @@ const AwaitingReception = ({
                 } `}
             >
                 <div className="!px-4 !py-3">
-                    <Stack mt="1" spacing="2">
+                    <Stack mt="1" spacing="1">
                         <div className="flex gap-2">
                             {/* <span>Tên: </span> */}
                             <span className="font-bold text-[19px] text-[#155979]">
@@ -371,6 +371,13 @@ const AwaitingReception = ({
                                 </div>
                             </>
                         )}
+
+                        <div className="flex gap-2">
+                            <span>Quy cách: </span>
+                            <span className="font-bold">
+                                {data?.QuyCach || "0*0*0"}
+                            </span>
+                        </div>
 
                         <div className="flex gap-2">
                             <span>Công đoạn giao: </span>

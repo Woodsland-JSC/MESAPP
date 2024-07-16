@@ -138,10 +138,10 @@ class ProductionController extends Controller
         $toqc = "";
         if (Auth::user()->plant == 'TH') {
             $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'TQ') {
-            $toqc = 'TQ-QC';
+        } else if (Auth::user()->plant == 'YS1') {
+            $toqc = 'YS1-QC';
         } else {
-            $toqc = 'HG-QC';
+            $toqc = 'TB-QC';
         }
         try {
             DB::beginTransaction();

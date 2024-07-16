@@ -11,6 +11,7 @@ class notireceiptVCN extends Model
     use HasFactory;
     protected $table = 'notireceiptVCN';
     protected $fillable = [
+    'LSX',
     'ProdType',
     'FatherCode',
     'ItemCode',
