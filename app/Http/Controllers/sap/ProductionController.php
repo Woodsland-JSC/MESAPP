@@ -1304,10 +1304,263 @@ class ProductionController extends Controller
     */
     // Danh sách sản lượng
   
+    function accept_v2 (Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        try {
+            DB::beginTransaction();
+            // to bình thường
+            $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+                ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
+                ->where('a.id', $request->id)
+                ->where('a.confirm', 0)
+                ->first();
 
+            $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
+            // kiểm tra xem có phải tổ qc không. nếu phải thì không cho phân bổ
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+                $allocates = $this->allocate_v2($dataallocate, $data->CompleQty);
+                // check allocate
+                if (isset($allocates['error']) && $allocates['error']) {
+                    return response()->json([
+                        'error' => true,
+                        'status_code' => 500,
+                        'message' => "Vượt hạn mức. kiểm tra tổ:".$data->Team . " sản phẩm: " .
+                        $data->ItemCode . " sản phẩm đích: " .
+                        $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+
+                if (count($allocates) == 0) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+                            $data->Team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+                // check tồn
+                $string='';
+                foreach ($allocates as $allocate) {
+                   $string .= $allocate['DocEntry'] . '-' . $allocate['Allocate'] . ';';
+                    // $body = [
+                    //     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    //     "U_LSX" => $data->LSX,
+                    //     "U_TO" => $data->Team,
+                    //     "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    //     "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+                    //     "DocumentLines" => [[
+                    //         "Quantity" => $allocate['Allocate'],
+                    //         "TransactionType" => "C",
+                    //         "BaseEntry" => $allocate['DocEntry'],
+                    //         "BaseType" => 202,
+                    //         "BatchNumbers" => [
+                    //             [
+                    //                 "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                    //                 "Quantity" => $allocate['Allocate'],
+                    //                 "ItemCode" =>  $allocate['ItemChild'],
+                    //                 "U_CDai" => $allocate['CDai'],
+                    //                 "U_CRong" => $allocate['CRong'],
+                    //                 "U_CDay" => $allocate['CDay'],
+                    //                 "U_Status" => "HD",
+                    //                 "U_Year" => $request->year ?? now()->format('y'),
+                    //                 "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                    //             ]
+                    //         ]
+                    //     ]]
+                    // ];
+                    // $response = Http::withOptions([
+                    //     'verify' => false,
+                    // ])->withHeaders([
+                    //     'Content-Type' => 'application/json',
+                    //     'Accept' => 'application/json',
+                    //     'Authorization' => 'Basic ' . BasicAuthToken(),
+                    // ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+                    // $res = $response->json();
+                    // if ($response->successful()) {
+                    //     SanLuong::where('id', $data->id)->update(
+                    //         [
+                    //             'Status' => 1,
+                    //         ]
+                    //     );
+                    //     notireceipt::where('id', $data->notiID)->update([
+                    //         'confirm' => 1,
+                    //         'ObjType' =>   202,
+                    //         // 'DocEntry' => $res['DocEntry'],
+                    //         'confirmBy' => Auth::user()->id,
+                    //         'confirm_at' => now()->format('YmdHmi')
+                    //     ]);
+                    //     awaitingstocks::where('notiId', $data->notiID)->delete();
+                    //     HistorySL::create(
+                    //         [
+                    //             'LSX' => $data->LSX,
+                    //             'itemchild' => $allocate['ItemChild'],
+                    //             'SPDich' => $data->FatherCode,
+                    //             'to' => $data->Team,
+                    //             'quantity' => $allocate['Allocate'],
+                    //             'ObjType' => 202,
+                    //             'DocEntry' => $res['DocEntry']
+                    //         ]
+                    //     );
+                    //     DB::commit();
+                    // } else {
+                    //     DB::rollBack();
+                    //     return response()->json([
+                    //         'message' => 'Failed receipt',
+                    //         'error' => $res['error'],
+                    //         'body' => $body
+                    //     ], 500);
+                    // }
+                }
+                if($string==''){
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
+                            $data->Team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+                $this->checkTonIssueAndAllocateIssue($string);
+
+                return response()->json('success', 200);
+            } else {
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => "Tổ không hợp lệ."
+                ], 500);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    function allocate_v2($data, $totalQty)
+    {
+        $nev = 0; // Khởi tạo nev
+
+        foreach ($data as &$item) {
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
+            } else {
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+
+        // Kiểm tra nếu totalQty còn lại và không thể phân bổ
+        if ($totalQty > 0) {
+            $nev = 1; // Đặt nev = 1
+            return ['error' => 'Vượt hạn mức', 'nev' => $nev];
+        }
+
+        $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
+
+        return ['allocatedData' => array_values($filteredData), 'nev' => $nev];
+    }
+    function collectStockAllocate($stringIssue)
+    {
+        try
+        {
+            $conDB = (new ConnectController)->connect_sap();
+            //lấy danh sách sản phẩm cần xuất
+            $query = 'call usp_issueAutoData(?)';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, ['7604-2;7599-5'])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            $dataIssue = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $dataIssue[] = $row;
+            }
+            //check data rỗng thì return
+            if (empty($dataIssue)) {
+                return null;
+            }
+            if(isset($dataIssue[0]['ItemError']))
+            {
+                throw new \Exception(  $dataIssue[0]['ItemError']);
+            }
+            $warehouses=[];
+            $itemCodes=[];
+            foreach ($dataIssue as $entry) {
+                if ($entry['Type'] != 'N') {
+                    $warehouses[] = $entry['WhsCode'];
+                    $itemCodes[] = $entry['ItemCode'];
+                }
+            }
+            // pick ra kho và mã hàng không trùng
+            $distinctWarehouses = array_unique($warehouses);
+            $distinctItemCodes = array_unique($itemCodes);
+            if (empty($distinctItemCodes) || empty($distinctWarehouses)) {
+              return allocateBatchSerial([], $dataIssue);
+            }
+            //allocate
+            else
+            {
+                // convert distinct item codes to string
+                $itemCodeString = implode(',', $distinctItemCodes);
+                $warehouseString = implode(',', $distinctWarehouses);
+                // lấy danh sách batch serial
+                $query = 'select * from  uspweb_stock_batchserial where "ItemCode" in (?) and "WhsCode" in (?)';
+                $stmt = odbc_prepare($conDB, $query);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt, [$itemCodeString, $warehouseString])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                $stockBatchSerial = array();
+                while ($row = odbc_fetch_array($stmt)) {
+                    $stockBatchSerial[] = $row;
+                }
+                odbc_close($conDB);
+                return allocateBatchSerial($stockBatchSerial, $dataIssue);
+            }
+        }
+        catch (\Exception $e)
+        {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' =>$e->getMessage()
+            ], 500);
+          
+        }
+        
+        
+    }
+    
     /*
     **********
      END Version 2 CBG
     *********
     */
+    
 }
