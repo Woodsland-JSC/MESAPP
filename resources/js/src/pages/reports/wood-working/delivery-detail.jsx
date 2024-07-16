@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -54,22 +54,21 @@ function DeliveryDetailReport() {
         getReportData();
     };
 
-    const handleCheckboxChange = (e) => {
-        const { value, checked } = e.target;
-        setSelectedTeams((prevValues) => {
-            if (checked) {
-                if (!prevValues.includes(value)) {
-                    return [...prevValues, value];
-                }            
-            } else {
-                return prevValues.filter((val) => val !== value);
-            }
-            return prevValues;
+    // const handleCheckboxChange = (e) => {
+    //     const { value, checked } = e.target;
+    //     setSelectedTeams((prevValues) => {
+    //         if (checked) {
+    //             if (!prevValues.includes(value)) {
+    //                 return [...prevValues, value];
+    //             }            
+    //         } else {
+    //             return prevValues.filter((val) => val !== value);
+    //         }
+    //         return prevValues;
             
-        });
-        getReportData();
-
-    };
+    //     });
+    //     getReportData();
+    // };
 
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
@@ -86,22 +85,163 @@ function DeliveryDetailReport() {
         }
     };
 
+    // const handleCheckboxChange = (e) => {
+    //     const { value, checked } = e.target;
+    //     setSelectedTeams((prevValues) => {
+    //         let newValues;
+    //         if (checked) {
+    //             if (!prevValues.includes(value)) {
+    //                 newValues = [...prevValues, value];
+    //             } else {
+    //                 newValues = prevValues;
+    //             }
+    //         } else {
+    //             newValues = prevValues.filter((val) => val !== value);
+    //         }
+    //         console.log(newValues); 
+    //         return newValues;
+    //     });
+    //     getReportData();
+    // };
+
+    // const handleSelectAll = () => {
+    //     setSelectAll((prevSelectAll) => {
+    //         const newSelectAll = !prevSelectAll;
+    //         if (newSelectAll) {
+    //             const allTeamCodes = teamData.map((item) => item.Code);
+    //             setSelectedTeams([...new Set(allTeamCodes)]);
+    //             console.log(selectedTeams);
+    //             if (fromDate && toDate && selectedFactory && isReceived && selectedTeams !== null) {
+    //                 getReportData();
+    //             }
+    //         } else {
+    //             setSelectedTeams([]);
+    //         }
+    //         return newSelectAll;
+            
+    //     });
+
+    // };
+
+    // const getReportData = async () => {
+    //     let params = {
+    //         from_date: format(fromDate, "yyyy-MM-dd"),
+    //         to_date: format(toDate, "yyyy-MM-dd"),
+    //         To: selectedTeams,
+    //         branch: selectedFactory === "TH" ? 1 : 3,
+    //         plant: selectedFactory,
+    //         status_code: isReceived ? 1 : 0,
+    //     };
+    
+    //     const allParamsFilled = (params) => {
+    //         for (let key in params) {
+    //             if (params.hasOwnProperty(key)) {
+    //                 if (params[key] === '' || params[key] === null || params[key] === undefined) {
+    //                     return false;
+    //                 }
+    //             }
+    //         }
+    //         return true;
+    //     };
+    
+    //     if (allParamsFilled(params)) {
+    //         try {
+    //             const res = await reportApi.getDeliveryDetailReport(
+                    // params.status_code,
+                    // params.To,
+                    // params.branch,
+                    // params.plant,
+                    // params.from_date,
+                    // params.to_date
+    //             );
+    //             setReportData(res);
+    //         } catch (error) {
+    //             console.error(error);
+    //             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+    //         }
+    //     } else {
+    //         console.log('Không thể gọi API vì không đủ thông tin');
+    //         toast.error("Vui lòng điền đầy đủ thông tin để tải báo cáo.");
+    //     }
+    // };
+
+    const handleCheckboxChange = (e) => {
+        const { value, checked } = e.target;
+        setSelectedTeams((prevValues) => {
+            let newValues;
+            if (checked) {
+                if (!prevValues.includes(value)) {
+                    newValues = [...prevValues, value];
+                } else {
+                    newValues = prevValues;
+                }
+            } else {
+                newValues = prevValues.filter((val) => val !== value);
+            }
+            return newValues;
+        });
+    };
+    
     const handleSelectAll = () => {
         setSelectAll((prevSelectAll) => {
             const newSelectAll = !prevSelectAll;
             if (newSelectAll) {
                 const allTeamCodes = teamData.map((item) => item.Code);
                 setSelectedTeams([...new Set(allTeamCodes)]);
-                if (fromDate && toDate && selectedFactory && isReceived && selectedTeams !== null) {
-                    getReportData();
-                }
             } else {
                 setSelectedTeams([]);
             }
             return newSelectAll;
         });
-
     };
+    
+    const getReportData = async () => {
+        let params = {
+            from_date: format(fromDate, "yyyy-MM-dd"),
+            to_date: format(toDate, "yyyy-MM-dd"),
+            To: selectedTeams,
+            branch: selectedFactory === "TH" ? 1 : 3,
+            plant: selectedFactory,
+            status_code: isReceived ? 1 : 0,
+        };
+    
+        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
+    
+        try {
+            const res = await reportApi.getDeliveryDetailReport(
+                params.status_code,
+                `[${params.To}]`,
+                params.branch,
+                params.plant,
+                params.from_date,
+                params.to_date
+            );
+            setReportData(res);
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+        }
+    };
+
+    useEffect(() => {
+        const allFieldsFilled = 
+          isReceived !== null &&
+          selectedTeams && selectedTeams.length > 0 &&
+          selectedFactory &&
+          fromDate &&
+          toDate;
+    
+        if (allFieldsFilled) {
+          getReportData();
+        } else {
+            console.log('Không thể gọi API vì không đủ thông tin');
+        }
+      }, [isReceived, selectedTeams, selectedFactory, fromDate, toDate]);
+    
+    // Sử dụng useEffect để log giá trị của selectedTeams khi nó thay đổi
+    useEffect(() => {
+        console.log(selectedTeams);
+    }, [selectedTeams]);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
@@ -122,287 +262,8 @@ function DeliveryDetailReport() {
         toast.success("Xuất file PDF thành công.");
     };
 
-    // const getReportData = async () => {
-    //     let params = {
-    //         from_date: format(fromDate, "yyyy-MM-dd"),
-    //         to_date: format(toDate, "yyyy-MM-dd"),
-    //         To: selectedTeams,
-    //         branch: selectedFactory === "TH" ? 1 : 3,
-    //         plant: selectedFactory,
-    //         status_code: isReceived ? 1 : 0,
-    //     }
-
-    //     try {
-    //         const res = await reportApi.getDeliveryDetailReport(
-    //                 params.status_code,
-    //                 params.To,
-    //                 params.branch,
-    //                 params.plant,
-    //                 params.from_date,
-    //                 params.to_date
-    //         );
-    //         setReportData(res);
-    //     } catch (error) {
-    //         console.error(error);
-    //         toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-    //     }
-    // };
-
-    const getReportData = async () => {
-        let params = {
-            from_date: format(fromDate, "yyyy-MM-dd"),
-            to_date: format(toDate, "yyyy-MM-dd"),
-            To: selectedTeams,
-            branch: selectedFactory === "TH" ? 1 : 3,
-            plant: selectedFactory,
-            status_code: isReceived ? 1 : 0,
-        };
-    
-        const allParamsFilled = (params) => {
-            for (let key in params) {
-                if (params.hasOwnProperty(key)) {
-                    if (params[key] === '' || params[key] === null || params[key] === undefined) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        };
-    
-        if (allParamsFilled(params)) {
-            try {
-                const res = await reportApi.getDeliveryDetailReport(
-                    params.status_code,
-                    params.To,
-                    params.branch,
-                    params.plant,
-                    params.from_date,
-                    params.to_date
-                );
-                setReportData(res);
-            } catch (error) {
-                console.error(error);
-                toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-            }
-        } else {
-            console.log('Không thể gọi API vì không đủ thông tin');
-            toast.warn("Vui lòng điền đầy đủ thông tin để tải báo cáo.");
-        }
-    };
-
     // Row Data: The data to be displayed.
-    const [rowData, setRowData] = useState([
-        {
-            itemname: "Gỗ sồi",
-            thickness: "20",
-            width: "100",
-            height: "1000",
-            unit: "Tấm",
-            quantity: "50",
-            m3: "0.1",
-            sender: "Nguyễn Văn A",
-            send_date: "2024-07-12 08:30",
-            receiver: "Trần Thị B",
-            receive_date: "2024-07-12 10:15",
-            production_order: "PO-001",
-        },
-        {
-            itemname: "Gỗ thông",
-            thickness: "15",
-            width: "150",
-            height: "2000",
-            unit: "Tấm",
-            quantity: "30",
-            m3: "0.135",
-            sender: "Lê Văn C",
-            send_date: "2024-07-13 09:45",
-            receiver: "Phạm Thị D",
-            receive_date: "2024-07-13 11:30",
-            production_order: "PO-002",
-        },
-        {
-            itemname: "Gỗ óc chó",
-            thickness: "25",
-            width: "200",
-            height: "1500",
-            unit: "Tấm",
-            quantity: "20",
-            m3: "0.15",
-            sender: "Hoàng Văn E",
-            send_date: "2024-07-14 07:15",
-            receiver: "Ngô Thị F",
-            receive_date: "2024-07-14 09:00",
-            production_order: "PO-003",
-        },
-        {
-            itemname: "Gỗ teak",
-            thickness: "30",
-            width: "120",
-            height: "2500",
-            unit: "Tấm",
-            quantity: "15",
-            m3: "0.135",
-            sender: "Đặng Văn G",
-            send_date: "2024-07-15 10:30",
-            receiver: "Bùi Thị H",
-            receive_date: "2024-07-15 13:45",
-            production_order: "PO-004",
-        },
-        {
-            itemname: "Gỗ hương",
-            thickness: "18",
-            width: "180",
-            height: "1800",
-            unit: "Tấm",
-            quantity: "25",
-            m3: "0.1458",
-            sender: "Vũ Văn I",
-            send_date: "2024-07-16 08:00",
-            receiver: "Lý Thị K",
-            receive_date: "2024-07-16 10:30",
-            production_order: "PO-005",
-        },
-        {
-            itemname: "Gỗ lim",
-            thickness: "22",
-            width: "160",
-            height: "2200",
-            unit: "Tấm",
-            quantity: "18",
-            m3: "0.12672",
-            sender: "Đinh Văn L",
-            send_date: "2024-07-17 11:15",
-            receiver: "Dương Thị M",
-            receive_date: "2024-07-17 14:00",
-            production_order: "PO-006",
-        },
-        {
-            itemname: "Gỗ trắc",
-            thickness: "28",
-            width: "140",
-            height: "1600",
-            unit: "Tấm",
-            quantity: "12",
-            m3: "0.07392",
-            sender: "Phan Văn N",
-            send_date: "2024-07-18 09:30",
-            receiver: "Hồ Thị P",
-            receive_date: "2024-07-18 11:45",
-            production_order: "PO-007",
-        },
-        {
-            itemname: "Gỗ dẻ gai",
-            thickness: "16",
-            width: "130",
-            height: "1900",
-            unit: "Tấm",
-            quantity: "35",
-            m3: "0.13832",
-            sender: "Trịnh Văn Q",
-            send_date: "2024-07-19 07:45",
-            receiver: "Mai Thị R",
-            receive_date: "2024-07-19 10:00",
-            production_order: "PO-008",
-        },
-        {
-            itemname: "Gỗ xoan đào",
-            thickness: "24",
-            width: "170",
-            height: "2100",
-            unit: "Tấm",
-            quantity: "22",
-            m3: "0.18768",
-            sender: "Lương Văn S",
-            send_date: "2024-07-20 10:00",
-            receiver: "Đỗ Thị T",
-            receive_date: "2024-07-20 12:30",
-            production_order: "PO-009",
-        },
-        {
-            itemname: "Gỗ mun",
-            thickness: "32",
-            width: "110",
-            height: "1700",
-            unit: "Tấm",
-            quantity: "10",
-            m3: "0.05984",
-            sender: "Châu Văn U",
-            send_date: "2024-07-21 08:30",
-            receiver: "Tống Thị V",
-            receive_date: "2024-07-21 11:15",
-            production_order: "PO-010",
-        },
-        {
-            itemname: "Gỗ gõ đỏ",
-            thickness: "26",
-            width: "190",
-            height: "2300",
-            unit: "Tấm",
-            quantity: "16",
-            m3: "0.18408",
-            sender: "Tạ Văn X",
-            send_date: "2024-07-22 09:15",
-            receiver: "Quách Thị Y",
-            receive_date: "2024-07-22 12:00",
-            production_order: "PO-011",
-        },
-        {
-            itemname: "Gỗ cẩm lai",
-            thickness: "19",
-            width: "145",
-            height: "1950",
-            unit: "Tấm",
-            quantity: "28",
-            m3: "0.15249",
-            sender: "Hà Văn Z",
-            send_date: "2024-07-23 11:30",
-            receiver: "Kiều Thị W",
-            receive_date: "2024-07-23 14:15",
-            production_order: "PO-012",
-        },
-        {
-            itemname: "Gỗ sao",
-            thickness: "21",
-            width: "155",
-            height: "2400",
-            unit: "Tấm",
-            quantity: "24",
-            m3: "0.18648",
-            sender: "Đoàn Văn A1",
-            send_date: "2024-07-24 08:45",
-            receiver: "Trương Thị B1",
-            receive_date: "2024-07-24 11:30",
-            production_order: "PO-013",
-        },
-        {
-            itemname: "Gỗ chò chỉ",
-            thickness: "23",
-            width: "135",
-            height: "2050",
-            unit: "Tấm",
-            quantity: "20",
-            m3: "0.12701",
-            sender: "Bành Văn C1",
-            send_date: "2024-07-25 10:15",
-            receiver: "Lưu Thị D1",
-            receive_date: "2024-07-25 13:00",
-            production_order: "PO-014",
-        },
-        {
-            itemname: "Gỗ giáng hương",
-            thickness: "27",
-            width: "175",
-            height: "1850",
-            unit: "Tấm",
-            quantity: "14",
-            m3: "0.12155",
-            sender: "Mạc Văn E1",
-            send_date: "2024-07-26 09:00",
-            receiver: "Thái Thị F1",
-            receive_date: "2024-07-26 11:45",
-            production_order: "PO-015",
-        },
-    ]);
+    const [rowData, setRowData] = useState([]);
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([

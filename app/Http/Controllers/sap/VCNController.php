@@ -880,7 +880,7 @@ class VCNController extends Controller
                     if ($response->successful()) {
                         historySLVCN::create(
                             [
-                                'LSX' => $data->LSX,
+                                // 'LSX' => $data->LSX,
                                 'itemchild' => $allocate['ItemChild'],
                                 'SPDich' => $data->FatherCode,
                                 'to' => $data->Team,
