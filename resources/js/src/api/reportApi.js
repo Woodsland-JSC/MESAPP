@@ -43,7 +43,26 @@ const reportApi = {
         });
     },
 
+    getDefectResolutionReport: (plant, fromDate, toDate) => {
+        const url = `/report/cbg-xulyloi`;
+        return axiosClient().get(url, {
+            params: {
+                plant: plant,
+                from_date: fromDate,
+                to_date: toDate
+            }
+        });
+    },
 
-};
+    getCBGWoodDryingReport: (fromDate, toDate) => {
+        const url = `/report/say-xepsay-cbg`;
+        return axiosClient().get(url, {
+            params: {
+                from_date: fromDate,
+                to_date: toDate
+            }
+        });
+    },
+}
 
 export default reportApi;

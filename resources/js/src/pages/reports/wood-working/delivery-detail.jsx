@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
 import { PiFilePdfBold } from "react-icons/pi";
 import { FiCheck } from "react-icons/fi";
+import "../../../assets/styles/index.css";
 import {
     FaArrowRotateLeft,
     FaArrowUpRightFromSquare,
@@ -20,21 +21,31 @@ import { Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
 import { AgGridReact } from "ag-grid-react";
+import "ag-grid-enterprise";
+// import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+
 import useAppContext from "../../../store/AppContext";
 
 function DeliveryDetailReport() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
+    const gridRef = useRef();
+
+    const getFirstDayOfCurrentMonth = () => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+      };
 
     // Date picker
-    const [fromDate, setFromDate] = useState(new Date());
+    const [fromDate, setFromDate] = useState(getFirstDayOfCurrentMonth());
     const [toDate, setToDate] = useState(new Date());
 
     // Loading States
     const [isTeamLoading, setIsTeamLoading] = useState(false);
+    const [isDataReportLoading, setIsDataReportLoading] = useState(false);
     const [selectedTeams, setSelectedTeams] = useState([]);
 
     const [selectedFactory, setSelectedFactory] = useState(null);
@@ -45,30 +56,23 @@ function DeliveryDetailReport() {
     const [reportData, setReportData] = useState(null);
 
     const handleFactorySelect = async (factory) => {
-        setTeamData(null);
-        setSelectedTeams([]);
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
-
-        getTeamData(factory);
-        getReportData();
+        setReportData(null);
+        setTeamData(null);
+        setSelectedTeams([]);
+        await getTeamData(factory);
+        if (
+            isReceived !== null &&
+            selectedTeams &&
+            selectedTeams.length > 0 &&
+            selectedFactory &&
+            fromDate &&
+            toDate
+        ) {
+            getReportData();
+        }
     };
-
-    // const handleCheckboxChange = (e) => {
-    //     const { value, checked } = e.target;
-    //     setSelectedTeams((prevValues) => {
-    //         if (checked) {
-    //             if (!prevValues.includes(value)) {
-    //                 return [...prevValues, value];
-    //             }            
-    //         } else {
-    //             return prevValues.filter((val) => val !== value);
-    //         }
-    //         return prevValues;
-            
-    //     });
-    //     getReportData();
-    // };
 
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
@@ -84,86 +88,6 @@ function DeliveryDetailReport() {
             console.error(error);
         }
     };
-
-    // const handleCheckboxChange = (e) => {
-    //     const { value, checked } = e.target;
-    //     setSelectedTeams((prevValues) => {
-    //         let newValues;
-    //         if (checked) {
-    //             if (!prevValues.includes(value)) {
-    //                 newValues = [...prevValues, value];
-    //             } else {
-    //                 newValues = prevValues;
-    //             }
-    //         } else {
-    //             newValues = prevValues.filter((val) => val !== value);
-    //         }
-    //         console.log(newValues); 
-    //         return newValues;
-    //     });
-    //     getReportData();
-    // };
-
-    // const handleSelectAll = () => {
-    //     setSelectAll((prevSelectAll) => {
-    //         const newSelectAll = !prevSelectAll;
-    //         if (newSelectAll) {
-    //             const allTeamCodes = teamData.map((item) => item.Code);
-    //             setSelectedTeams([...new Set(allTeamCodes)]);
-    //             console.log(selectedTeams);
-    //             if (fromDate && toDate && selectedFactory && isReceived && selectedTeams !== null) {
-    //                 getReportData();
-    //             }
-    //         } else {
-    //             setSelectedTeams([]);
-    //         }
-    //         return newSelectAll;
-            
-    //     });
-
-    // };
-
-    // const getReportData = async () => {
-    //     let params = {
-    //         from_date: format(fromDate, "yyyy-MM-dd"),
-    //         to_date: format(toDate, "yyyy-MM-dd"),
-    //         To: selectedTeams,
-    //         branch: selectedFactory === "TH" ? 1 : 3,
-    //         plant: selectedFactory,
-    //         status_code: isReceived ? 1 : 0,
-    //     };
-    
-    //     const allParamsFilled = (params) => {
-    //         for (let key in params) {
-    //             if (params.hasOwnProperty(key)) {
-    //                 if (params[key] === '' || params[key] === null || params[key] === undefined) {
-    //                     return false;
-    //                 }
-    //             }
-    //         }
-    //         return true;
-    //     };
-    
-    //     if (allParamsFilled(params)) {
-    //         try {
-    //             const res = await reportApi.getDeliveryDetailReport(
-                    // params.status_code,
-                    // params.To,
-                    // params.branch,
-                    // params.plant,
-                    // params.from_date,
-                    // params.to_date
-    //             );
-    //             setReportData(res);
-    //         } catch (error) {
-    //             console.error(error);
-    //             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-    //         }
-    //     } else {
-    //         console.log('Không thể gọi API vì không đủ thông tin');
-    //         toast.error("Vui lòng điền đầy đủ thông tin để tải báo cáo.");
-    //     }
-    // };
 
     const handleCheckboxChange = (e) => {
         const { value, checked } = e.target;
@@ -181,7 +105,7 @@ function DeliveryDetailReport() {
             return newValues;
         });
     };
-    
+
     const handleSelectAll = () => {
         setSelectAll((prevSelectAll) => {
             const newSelectAll = !prevSelectAll;
@@ -193,9 +117,11 @@ function DeliveryDetailReport() {
             }
             return newSelectAll;
         });
+
+
     };
-    
-    const getReportData = async () => {
+
+    const getReportData = useCallback(async () => {
         let params = {
             from_date: format(fromDate, "yyyy-MM-dd"),
             to_date: format(toDate, "yyyy-MM-dd"),
@@ -204,44 +130,55 @@ function DeliveryDetailReport() {
             plant: selectedFactory,
             status_code: isReceived ? 1 : 0,
         };
-    
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
-    
+        setIsDataReportLoading(true);
         try {
             const res = await reportApi.getDeliveryDetailReport(
                 params.status_code,
-                `[${params.To}]`,
+                params.To,
                 params.branch,
                 params.plant,
                 params.from_date,
                 params.to_date
             );
+            const formattedData = res.map((item) => ({
+                itemname: item.ItemName,
+                thickness: item.CDay,
+                width: item.CRong,
+                height: item.CDai,
+                unit: item.DVT,
+                quantity: parseInt(item.Quantity),
+                m3: item.M3,
+                sender: item.NguoiGiao,
+                send_date: item.ngaygiao,
+                receiver: item.NguoiNhan,
+                receive_date: item.ngaynhan,
+                production_order: item.LSX,
+            }));
+            setIsDataReportLoading(false);
+            setRowData(formattedData);
             setReportData(res);
         } catch (error) {
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+            setIsDataReportLoading(false);
         }
-    };
-
-    useEffect(() => {
-        const allFieldsFilled = 
-          isReceived !== null &&
-          selectedTeams && selectedTeams.length > 0 &&
-          selectedFactory &&
-          fromDate &&
-          toDate;
+    }, [fromDate, toDate, selectedTeams, selectedFactory, isReceived]);
     
+    useEffect(() => {
+        const allFieldsFilled =
+            isReceived !== null &&
+            selectedTeams &&
+            selectedTeams.length > 0 &&
+            selectedFactory &&
+            fromDate &&
+            toDate;
         if (allFieldsFilled) {
-          getReportData();
+            getReportData();
         } else {
-            console.log('Không thể gọi API vì không đủ thông tin');
+            console.log("Không thể gọi API vì không đủ thông tin");
         }
-      }, [isReceived, selectedTeams, selectedFactory, fromDate, toDate]);
-    
-    // Sử dụng useEffect để log giá trị của selectedTeams khi nó thay đổi
-    useEffect(() => {
-        console.log(selectedTeams);
-    }, [selectedTeams]);
+    }, [isReceived, selectedTeams, selectedFactory, fromDate, toDate, getReportData]);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
@@ -254,12 +191,12 @@ function DeliveryDetailReport() {
         toast.success("Đặt lại bộ lọc thành công.");
     };
 
-    const handleExportExcel = () => {
-        toast.success("Xuất file excel thành công.");
-    };
+    const handleExportExcel = useCallback(() => {
+        gridRef.current.api.exportDataAsExcel();
+    }, []);
 
     const handleExportPDF = () => {
-        toast.success("Xuất file PDF thành công.");
+        toast("Chức năng xuất PDF đang được phát triển.");
     };
 
     // Row Data: The data to be displayed.
@@ -267,13 +204,13 @@ function DeliveryDetailReport() {
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
-        { headerName: "Tên", field: "itemname", width: 350 },
-        { headerName: "Dày", field: "thickness", width: 100 },
-        { headerName: "Rộng", field: "width", width: 100 },
-        { headerName: "Dài", field: "height", width: 100 },
+        { headerName: "Tên", field: "itemname", width: 350, suppressHeaderMenuButton: true, filter: true},
+        { headerName: "Dày", field: "thickness", width: 80, suppressHeaderMenuButton: true,},
+        { headerName: "Rộng", field: "width", width: 80, suppressHeaderMenuButton: true, },
+        { headerName: "Dài", field: "height", width: 80, suppressHeaderMenuButton: true, },
         { headerName: "ĐVT", field: "unit", width: 100 },
-        { headerName: "Số lượng", field: "quantity", width: 100 },
-        { headerName: "M3", field: "m3", width: 180 },
+        { headerName: "Số lượng", field: "quantity", width: 100, suppressHeaderMenuButton: true, },
+        { headerName: "M3", field: "m3", width: 120 },
         { headerName: "Người giao", field: "sender" },
         { headerName: "Ngày giờ giao", field: "send_date" },
         { headerName: "Người nhận", field: "receiver" },
@@ -314,7 +251,7 @@ function DeliveryDetailReport() {
     return (
         <Layout>
             <div className="overflow-x-hidden">
-                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-5 xl:px-12 ">
+                <div className="w-screen  p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
                     <div className="flex items-center justify-between space-x-6 mb-3.5">
                         <div className="flex items-center space-x-4">
@@ -383,9 +320,16 @@ function DeliveryDetailReport() {
                                     </label>
                                     <DatePicker
                                         selected={fromDate}
+                                        dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (fromDate && toDate && selectedFactory && isReceived && selectedTeams) {
+                                            if (
+                                                fromDate &&
+                                                toDate &&
+                                                selectedFactory &&
+                                                isReceived &&
+                                                selectedTeams
+                                            ) {
                                                 getReportData();
                                             }
                                         }}
@@ -401,9 +345,16 @@ function DeliveryDetailReport() {
                                     </label>
                                     <DatePicker
                                         selected={toDate}
+                                        dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (fromDate && toDate && selectedFactory && isReceived && selectedTeams) {
+                                            if (
+                                                fromDate &&
+                                                toDate &&
+                                                selectedFactory &&
+                                                isReceived &&
+                                                selectedTeams
+                                            ) {
                                                 getReportData();
                                             }
                                         }}
@@ -454,7 +405,13 @@ function DeliveryDetailReport() {
                                             } `}
                                             onClick={() => {
                                                 setIsReceived(false);
-                                                if (fromDate && toDate && selectedFactory && isReceived && selectedTeams) {
+                                                if (
+                                                    fromDate &&
+                                                    toDate &&
+                                                    selectedFactory &&
+                                                    isReceived &&
+                                                    selectedTeams
+                                                ) {
                                                     getReportData();
                                                 }
                                             }}
@@ -472,7 +429,13 @@ function DeliveryDetailReport() {
                                             }`}
                                             onClick={() => {
                                                 setIsReceived(true);
-                                                if (fromDate && toDate && selectedFactory && isReceived && selectedTeams) {
+                                                if (
+                                                    fromDate &&
+                                                    toDate &&
+                                                    selectedFactory &&
+                                                    isReceived &&
+                                                    selectedTeams
+                                                ) {
                                                     getReportData();
                                                 }
                                             }}
@@ -635,23 +598,36 @@ function DeliveryDetailReport() {
                     </div>
 
                     {/* Content */}
-                    {reportData?.length > 0 ? (
-                        <div
-                            className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-6 "
-                            style={{
-                                height: 620,
-                                fontSize: 16,
-                            }}
-                        >
-                            <AgGridReact
-                                rowData={rowData}
-                                columnDefs={colDefs}
-                            />
+                    {isDataReportLoading ? (
+                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                            {/* <div>Đang tải dữ liệu</div> */}
+                            <div class="dots"></div>
                         </div>
                     ) : (
-                        <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                            Không có dữ liệu để hiển thị.
-                        </div>
+                        <>
+                            {reportData?.length > 0 ? (
+                                <div>
+                                    <div
+                                        className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
+                                        style={{
+                                            height: 630,
+                                            fontSize: 16,
+                                        }}
+                                    >
+                                        <AgGridReact
+                                            ref={gridRef}
+                                            rowData={rowData}
+                                            columnDefs={colDefs}
+
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                    Không có dữ liệu để hiển thị.
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {/* <div className="flex flex-col">

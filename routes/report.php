@@ -9,7 +9,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/cbg-chitietgiaonhan', [ReportController::class, 'chitietgiaonhan']);
         Route::get('/cbg-xulyloi', [ReportController::class, 'XuLyLoi']);
         Route::get('/say-bienbanvaolo', [ReportController::class, 'bienbanvaolo']);
-        Route::get('/say-xepsay', [ReportController::class, 'xepsay']);
+        Route::get('/say-xepsay-cbg', [ReportController::class, 'xepsay']);
         Route::get('/say-xepchosay', [ReportController::class, 'xepchosay']);
     });
 });

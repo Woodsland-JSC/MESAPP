@@ -27,25 +27,30 @@ class ReportController extends Controller
             $query->where('plant', $plant);
         }
     
-        if ($to && is_array($to)) {
-            $query->whereIn('ToHT', $to);
+        if ($to) {
+            $toArray = is_array($to) ? $to : explode(',', trim($to, '[]'));
+            $query->whereIn('ToHT', $toArray);
         }
         
-        if ($statusCode) {
+        if (isset($statusCode)) {
             $query->where('statuscode', $statusCode);
         }
-    
-        if ($fromDate && $toDate) {
-            $query->whereBetween('ngaygiao', [$fromDate, $toDate])
-                  ->whereBetween('ngaynhan', [$fromDate, $toDate]);
+
+        if ($statusCode == 0) {
+            if ($fromDate && $toDate) {
+                $query->whereBetween('ngaygiao', [$fromDate, $toDate]);
+            }
+        } else {
+            if ($fromDate && $toDate) {
+                $query->whereBetween('ngaygiao', [$fromDate, $toDate])
+                      ->whereBetween('ngaynhan', [$fromDate, $toDate]);
+            }
         }
     
-        // Get the results
         $data = $query->get();
     
-        // Return the JSON response with the requested status code
         return response()->json($data);
-    }
+    }  
 
     //báo cáo xếp chờ xấy
     function xepchosay(Request $request){
@@ -87,37 +92,25 @@ class ReportController extends Controller
         return response()->json($data);
     }
     function xepsay(Request $request){
-        $branch = $request->input('branch');
-        $plant = $request->input('plant');
         $fromDate = $request->input('fromDate');
-        $ToDate = $request->input('ToDate');
-        $oven= $request->input('oven');
+        $ToDate = $request->input('toDate');
+        // $oven= $request->input('oven');
 
         // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_say_xepsaycbg');
-
-        if ($branch) {
-            $query->where('branch', $branch);
-        }
-
-        if ($plant) {
-            $query->where('plant', $plant);
-        }
 
         if ($fromDate && $ToDate) {
             // where beetwen
             $query->whereBetween('created_at', [$fromDate, $ToDate]);
         }
-        
-        if($oven!=null) {
-            $query->where('Oven','=', $oven);
-        }
+    
         // Get the results
         $data = $query->get();
 
         // Return the JSON response with the requested status code
         return response()->json($data);
     }
+    
     function bienbanvaolo(Request $request){
         $branch = $request->input('branch');
         $plant = $request->input('plant');
@@ -141,24 +134,10 @@ class ReportController extends Controller
     /** chế biến gỗ */
         
     function XuLyLoi(Request $request){
-       
-        $validate = Validator::make($request->all(), [
-            'FromDate' => 'required|date',
-            'ToDate' => 'required|date',
-        ],[
-            'FromDate.required' => 'The FromDate is required.',
-            'FromDate.date' => 'The FromDate must be a valid date.',
-            'ToDate.required' => 'The ToDate is required.',
-            'ToDate.date' => 'The ToDate must be a valid date.',
-        ]);
-      
-        if ($validate->fails()) {
-            return response()->json(['error' => $validate->errors()], 400);
-        }
         $branch = $request->input('branch');
         $plant = $request->input('plant');
-        $fromDate = $request->FromDate;
-        $ToDate =$request->ToDate;
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
 
         // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_cbg_baocaoxulyloi');
@@ -171,9 +150,9 @@ class ReportController extends Controller
             $query->where('plant', $plant);
         }
        
-        if ($fromDate != null && $ToDate != null) {
+        if ($fromDate != null && $toDate != null) {
             // where beetwen
-            $query->whereRaw('DATE(created_at) BETWEEN ? AND ?', [$fromDate, $ToDate]);
+            $query->whereRaw('DATE(created_at) BETWEEN ? AND ?', [$fromDate, $toDate]);
         }
       
         // Get the results
