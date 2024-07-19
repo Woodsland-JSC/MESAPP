@@ -930,7 +930,7 @@ class QCController extends Controller
                     awaitingstocksvcn::where('notiId', $request->id)->delete();
                     historySLVCN::create(
                         [
-                            'LSX' => $data->LSX,
+                           // 'LSX' => $data->LSX,
                             'itemchild' => $allocate['ItemChild'],
                             'SPDich' => $data->FatherCode,
                             'to' => $data->Team,
@@ -983,6 +983,54 @@ class QCController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    function collectdata($spdich, $item, $to, $version)
+    {
+
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from UV_DETAILGHINHANSL_VCN where "SPDICH"=? and "ItemChild"=? and "TO"=? and "Version"=? order by "LSX" asc';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$spdich, $item, $to, $version])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $results = array();
+
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        };
+        odbc_close($conDB);
+        return  $results;
+    }
+    function allocate($data, $totalQty)
+    {
+        foreach ($data as &$item) {
+            // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
+            if (
+                isset($item['ConLai']) && $item['ConLai'] <= $totalQty
+            ) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
+            } else {
+                // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+
+        // Sử dụng array_filter với callback ngắn gọn hơn
+        $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
+
+        return array_values($filteredData);
     }
 
     function getQCWarehouseByUser()
