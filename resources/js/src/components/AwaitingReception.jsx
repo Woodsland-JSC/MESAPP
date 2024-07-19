@@ -186,7 +186,7 @@ const AwaitingReception = ({
                 }
             } catch (error) {
                 const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message;
-                showErrorAlert(`Lỗi từ SAP: ${errorMessage? errorMessage : "Lỗi kết nối hệ thống"}`);
+                showErrorAlert(`${errorMessage? errorMessage : "Lỗi kết nối mạng."}`);
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
                 onInputAlertDialogClose();
