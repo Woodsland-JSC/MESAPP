@@ -98,7 +98,6 @@ if (!function_exists('GetWhsCode')) {
     function GetWhsCode($FAC, $flag)
     {
        $conDB = (new ConnectController)->connect_sap();
-
     $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=? and "Inactive"=?;';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {

@@ -481,19 +481,6 @@ class QCController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
         }
-        $toQC = "";
-        switch (Auth()->user()->plant) {
-            case 'TH':
-                $toQC = 'TH-QC';
-                break;
-            case 'HG':
-                $toQC = 'HG-QC';
-                break;
-            case 'TQ':
-                $toQC = 'TQ-QC';
-                break;
-        }
-
         $data = DB::table('notireceiptVCN as a')
             ->join('users as b', 'a.CreatedBy', '=', 'b.id')
             ->select(
@@ -509,27 +496,17 @@ class QCController extends Controller
                 'a.CDay',
                 'a.CRong',
                 'a.CDai',
-                DB::raw('(a.openQty - (
-                SELECT COALESCE(SUM(quantity), 0) 
-                FROM historySLVCN 
-                WHERE itemchild = CASE WHEN a.SubItemCode IS NOT NULL THEN a.SubItemCode ELSE a.ItemCode END
-                AND isQualityCheck = 1
-                AND notiId = a.id                
-            )) as Quantity'),
+               'a.openQty as Quantity',
                 'a.created_at',
                 'b.first_name',
                 'b.last_name',
                 'a.text',
                 'a.id',
-                // DB::raw('0 as type'),
-                // 'a.confirm'
             )
             ->where('a.deleted', '=', 0)
-            ->where('a.confirm', '=', 0)
             ->where('a.type', 1)
-            // ->where('a.team', '=',  $toQC)
+            ->where('a.openQty', '>', 0)
             ->where('a.team', '=',  $request->TO)
-            ->havingRaw('Quantity > 0')
             ->get();
 
         // dd($data);
@@ -838,7 +815,6 @@ class QCController extends Controller
     // QC Xử lý lỗi cho VCN
     function acceptTeamQCVCN (Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'Qty' => 'required'
@@ -1035,7 +1011,8 @@ class QCController extends Controller
 
     function getQCWarehouseByUser()
     {
-        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
+      
+        $WHS = GetWhsCode(Auth::user()->plant, 'NG');
         return $WHS;
     }
 
