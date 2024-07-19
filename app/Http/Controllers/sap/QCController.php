@@ -722,8 +722,6 @@ class QCController extends Controller
                 ]
             ]]
         ];
-
-        dd($body);
         $response = Http::withOptions([
             'verify' => false,
         ])->withHeaders([
@@ -845,6 +843,7 @@ class QCController extends Controller
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
+            $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             $qtypush = 0;
             // check data history push sap
             if ($data->IsPushSAP == 0) {
@@ -873,6 +872,15 @@ class QCController extends Controller
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_LSX" => $data->LSX,
                     "U_TO" => $data->Team,
+                    "U_LL" => $loailoi,
+                    "U_HXL" => $huongxuly,
+                    "U_QCC" => $huongxuly,
+                    "U_TOCD" => $teamBack,
+                    "U_Giao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    "U_Nhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+                    "U_source" => $rootCause,
+                    "U_ItemHC" => $subCode,
+                    "U_cmtQC" => $request->Note ?? "",
                     "DocumentLines" => [[
                         "Quantity" => $allocate['Allocate'],
                         "TransactionType" => "R",
