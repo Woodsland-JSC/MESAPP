@@ -843,7 +843,7 @@ class QCController extends Controller
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
-            $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+            $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
             $qtypush = 0;
             // check data history push sap
             if ($data->IsPushSAP == 0) {
@@ -876,8 +876,8 @@ class QCController extends Controller
                     "U_HXL" => $huongxuly,
                     "U_QCC" => $huongxuly,
                     "U_TOCD" => $teamBack,
-                    "U_Giao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
-                    "U_Nhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+                    "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                     "U_source" => $rootCause,
                     "U_ItemHC" => $subCode,
                     "U_cmtQC" => $request->Note ?? "",
