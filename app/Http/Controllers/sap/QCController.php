@@ -496,7 +496,7 @@ class QCController extends Controller
                 'a.CDay',
                 'a.CRong',
                 'a.CDai',
-               'a.openQty as Quantity',
+                'a.openQty as Quantity',
                 'a.created_at',
                 'b.first_name',
                 'b.last_name',
