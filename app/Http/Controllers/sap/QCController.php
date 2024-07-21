@@ -663,11 +663,11 @@ class QCController extends Controller
         //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
         $warehouse = "";
         if ($data->NextTeam = 'TH-QC') {
-            $warehouse = $this->getQCWarehouseByUser('TH');
+            $warehouse = $this->getQCWarehouseByUser('QC');
         } else if ($data->NextTeam = 'YS1-QC') {
-            $warehouse = $this->getQCWarehouseByUser('YS1');
+            $warehouse = $this->getQCWarehouseByUser('QC');
         } else {
-            $warehouse = $this->getQCWarehouseByUser('TB');
+            $warehouse = $this->getQCWarehouseByUser('QC');
         }
 
         if ($warehouse == "-1") {
@@ -827,7 +827,7 @@ class QCController extends Controller
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
         //check kho QC
-        $whs = $this->getQCWarehouseByUser();
+        $whs = $this->getQCWarehouseByUser('NG');
         if ($whs == -1) {
             return response()->json([
                 'error' => false,
@@ -1017,10 +1017,10 @@ class QCController extends Controller
         return array_values($filteredData);
     }
 
-    function getQCWarehouseByUser()
+    function getQCWarehouseByUser($type)
     {
       
-        $WHS = GetWhsCode(Auth::user()->plant, 'NG');
+        $WHS = GetWhsCode(Auth::user()->plant, $type);
         return $WHS;
     }
 

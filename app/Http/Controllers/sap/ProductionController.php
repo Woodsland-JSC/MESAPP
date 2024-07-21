@@ -1259,16 +1259,6 @@ class ProductionController extends Controller
         ];
         return response()->json($results, 200);
     }
-
-    function getQCWarehouseByUser($plant)
-    {
-        // $WHS = Warehouse::where('flag', 'QC')->WHERE('branch', Auth::user()->branch)
-        //     ->where('FAC', $plant)
-        //     ->first();
-        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
-        return $WHS;
-    }
-
     public function getTeamByFactory(Request $request)
     {
         $validator = Validator::make($request->all(), [
