@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
 use App\Rules\AtLeastOneQty;
 use App\Jobs\HistoryQC;
 use Carbon\Carbon;
-
+use GuzzleHttp\Client;
 class VCNController extends Controller
 {
     // Ghi nhận sản lượng
@@ -1296,4 +1296,488 @@ class VCNController extends Controller
             'data' => $changedData
         ], 200);
     }
+     /*
+    *********************************
+    version 2: thay doi yeu cau nhập xuất cùng lúc
+    *********************************
+    */
+    // ghi nhận sản lượng công đoạn khác rong
+    function accept_v2 (Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+        try {
+            DB::beginTransaction();
+            // to bình thường
+            $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+                $allocates = $this->allocate_v2($dataallocate, $data->Quantity);
+                if (count($allocates) == 0) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+                            $data->team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+                if (isset($allocates['error']) && $allocates['error']) {
+                    return response()->json([
+                        'error' => true,
+                        'status_code' => 500,
+                        'message' => "Vượt hạn mức. kiểm tra tổ:".$data->team . " sản phẩm: " .
+                        $data->ItemCode . " sản phẩm đích: " .
+                        $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+                $string = '';
+                $dataReceipt = [];
+                foreach ($allocates['allocatedData'] as $allocate) {
+                        $string .= $allocate['DocEntry'] . '-' . $allocate['Allocate'] . ';';
+                        //data cho receipt
+                         $dataReceipt [] = [
+                            "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                            "U_LSX" => $data->LSX,
+                            "U_TO" => $data->Team,
+                            "DocumentLines" => [[
+                                "Quantity" => $allocate['Allocate'],
+                                "TransactionType" => "C",
+                                "BaseEntry" => $allocate['DocEntry'],
+                                "BaseType" => 202,
+                                "BatchNumbers" => [
+                                    [
+                                        "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                        "Quantity" => $allocate['Allocate'],
+                                        "ItemCode" =>  $allocate['ItemChild'],
+                                        "U_CDai" => $allocate['CDai'],
+                                        "U_CRong" => $allocate['CRong'],
+                                        "U_CDay" => $allocate['CDay'],
+                                        "U_Status" => "HD",
+                                        "U_Year" => $request->year ?? now()->format('y'),
+                                        "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                                    ]
+                                ]
+                            ]]
+                        ];
+                }
+                if($string==''){
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
+                            $data->Team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+               $stockissue= $this->collectStockAllocate($string);
+               $dataSendPayload = [
+                'InventoryGenEntries' => $dataReceipt,
+                'InventoryGenExits' => $stockissue
+            ];
+            
+           $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+           $client = new Client();
+                $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
+                    'verify' => false,
+                    'headers' => [
+                        'Accept' => '*/*',
+                        'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_'.$payload['uid'],
+                        'Authorization' => 'Basic '.BasicAuthToken(),
+                    ],
+                    'body' =>$payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
+                ]);
+                if($response->getStatusCode()==400){
+                   throw new \Exception('SAP ERROR Incomplete batch request body.');
+                 }
+                if($response->getStatusCode()==500){
+                    throw new \Exception('SAP ERROR '.$response->getBody()->getContents());
+                }
+                if($response->getStatusCode()==401){
+                    throw new \Exception('SAP authen '.$response->getBody()->getContents());
+                }
+                if($response->getStatusCode()==202){
+                    $res = $response->getBody()->getContents();
+                    // kiểm tra sussess hay faild hơi quăng nha
+                    if (strpos($res, 'ETag') !== false) {
+                        notireceiptVCN::where('id', $request->id)->update([
+                            'confirm' => 1,
+                            'confirmBy' => Auth::user()->id,
+                            'confirm_at' => now()->format('YmdHmi')
+                        ]);
+                        awaitingstocksvcn::where('notiId', $data->notiID)->delete();
+                        DB::commit();
+                    }
+                    else
+                    {
+                        preg_match('/\{.*\}/s', $res, $matches);
+                        if (isset($matches[0])) {
+                            $jsonString = $matches[0];
+                            $errorData = json_decode($jsonString, true);
+                        
+                            if (isset($errorData['error'])) {
+                                $errorCode = $errorData['error']['code'];
+                                $errorMessage = $errorData['error']['message']['value'];
+                                throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
+                            } 
+                        } 
+                    }
+                   
+                   
+                }
+                return response()->json('success', 200);
+            } else {
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => "Tổ không hợp lệ."
+                ], 500);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+      
+    }
+    function collectStockAllocate($stringIssue)
+    {
+            $conDB = (new ConnectController)->connect_sap();
+            //lấy danh sách sản phẩm cần xuất
+            $query = 'call usp_web_issueAutoData(?)';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$stringIssue])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            $dataIssue = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $dataIssue[] = $row;
+            }
+            //check data rỗng thì return
+            if (empty($dataIssue)) {
+                return null;
+            }
+           
+            if(isset($dataIssue[0]['ItemError']))
+            {
+                throw new \Exception(  $dataIssue[0]['ItemError']);
+            }
+            odbc_close($conDB);
+            //lấy danh sách batch serial
+            $inputArray = $dataIssue;
+           // Step 1: Create the initial data array with distinct DocEntry values
+            $uniqueDocEntries = array_unique(array_column($inputArray, 'DocEntry'));
+            $data = [];
+            foreach ($uniqueDocEntries as $docEntry) {
+                $data[] = [
+                    'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
+                    'DocumentLines' => [],
+                    'DocEntry' => $docEntry
+                ];
+            }
+            // Step 2: Group the data by DocEntry
+            $groupedData = [];
+            foreach ($inputArray as $item) {
+                $docEntry = $item['DocEntry'];
+                $key = $item['ItemCode'] . '|' . $item['WhsCode'];
+                if (!isset($groupedData[$docEntry])) {
+                    $groupedData[$docEntry] = [];
+                }
+                if (!isset($groupedData[$docEntry][$key])) {
+                    $groupedData[$docEntry][$key] = [
+                        'WarehouseCode' => $item['WhsCode'],
+                        'BaseEntry' => $item['DocEntry'], // Assuming BaseEntry is DocEntry
+                        'BaseType' => 202, // Assuming BaseType is always 202
+                        'BaseLine' => $item['BaseLine'],
+                        'Quantity'=>$item['QtyTotal'],
+                        'BatchNumbers' => [],
+                        'SerialNumbers' => []
+                    ];
+                    // If both Batch and Serial are null, add Quantity directly
+                    // if (empty($item['Batch']) && empty($item['Serial'])) {
+                    //     $groupedData[$docEntry][$key]['Quantity'] = $item['Qty'];
+                    // }
+                }
+                if ($item['Batch']) {
+                    $groupedData[$docEntry][$key]['BatchNumbers'][] = [
+                        'BatchNumber' => $item['Batch'],
+                        'Quantity' => $item['Qty'],
+                        'ItemCode' => $item['ItemCode']
+                    ];
+                }
+                if ($item['Serial']) {
+                    $groupedData[$docEntry][$key]['SerialNumbers'][] = [
+                        'SystemSerialNumber' => $item['Serial'],
+                        'Quantity' => $item['Qty'],
+                        'ItemCode' => $item['ItemCode']
+                    ];
+                }
+            }
+            // Step 3: Map the grouped data to the initial data array
+            foreach ($data as &$doc) {
+                if (isset($groupedData[$docEntry])) {
+                    $doc['DocumentLines'] = array_values($groupedData[$docEntry]);
+                }
+            }
+            foreach ($data as &$doc) {
+                unset($doc['DocEntry']);
+            }
+            // Output the final data structure
+            $output = $data;
+        return $output;  
+    }
+    function AcceptQCVCN_v2(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'Qty' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+
+        $loailoi = $request->loailoi['label'] ?? '';
+        $huongxuly = $request->huongxuly['label'] ?? '';
+        $teamBack = $request->teamBack['value'] ?? '';
+        $rootCause = $request->rootCause['value'] ?? '';
+        $subCode = $request->subCode['value'] ?? '';
+        //check kho QC
+        $whs = $this->getQCWarehouseByUser();
+        if ($whs == -1) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => "Không tìm thấy kho QC do user chưa được chỉ định nhà máy hoặc Hệ thống SAP chưa được cấu hình UserId: " . Auth::user()->id
+            ], 500);
+        }
+        try {
+            DB::beginTransaction();
+            // to bình thường
+            $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)
+                ->where('openQty', '>=', $request->Qty)->first();
+            if (!$data) {
+                throw new \Exception('data không hợp lệ.');
+            }
+            $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
+            $qtypush = 0;
+            // check data history push sap
+            if ($data->IsPushSAP == 0) {
+                $type = 'I';
+                $qtypush = $data->Quantity;
+            } else {
+                $type = 'U';
+                $qtypush = $request->Qty;
+            }
+            //allocate data
+            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+            $allocates = $this->allocate_v2($dataallocate, $request->Qty);
+             if (isset($allocates['error']) && $allocates['error']) {
+                    return response()->json([
+                        'error' => true,
+                        'status_code' => 500,
+                        'message' => "Vượt hạn mức. kiểm tra tổ:".$data->team . " sản phẩm: " .
+                        $data->ItemCode . " sản phẩm đích: " .
+                        $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+            if (count($allocates) == 0) {
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+                        $data->Team . " sản phẩm: " .
+                        $data->ItemCode . " sản phẩm đích: " .
+                        $data->FatherCode . " LSX." . $data->LSX
+                ], 500);
+            }
+            $string = '';
+            $dataReceipt = [];
+            foreach ($allocates['allocatedData'] as $allocate) {
+                    $string .= $allocate['DocEntry'] . '-' . $allocate['Allocate'] . ';';
+
+                    $dataReceipt []  = [
+                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "U_LSX" => $data->LSX,
+                    "U_TO" => $data->Team,
+                    "U_LL" => $loailoi,
+                    "U_HXL" => $huongxuly,
+                    "U_QCC" => $huongxuly,
+                    "U_TOCD" => $teamBack,
+                    "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+                    "U_source" => $rootCause,
+                    "U_ItemHC" => $subCode,
+                    "U_cmtQC" => $request->Note ?? "",
+                    "DocumentLines" => [[
+                        "Quantity" => $allocate['Allocate'],
+                        "TransactionType" => "R",
+                        "BaseEntry" => $allocate['DocEntry'],
+                        "BaseType" => 202,
+                        "WarehouseCode" => $whs,
+                        "BatchNumbers" => [
+                            [
+                                "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                "Quantity" => $allocate['Allocate'],
+                                "ItemCode" =>  $allocate['ItemChild'],
+                                "U_CDai" => $allocate['CDai'],
+                                "U_CRong" => $allocate['CRong'],
+                                "U_CDay" => $allocate['CDay'],
+                                "U_Status" => "HL",
+                                "U_Year" => $request->year ?? now()->format('y'),
+                                "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                            ]
+                        ]
+                    ]]
+                    ];
+                  
+                    historySLVCN::create(
+                        [
+                        // 'LSX' => $data->LSX,
+                            'itemchild' => $allocate['ItemChild'],
+                            'SPDich' => $data->FatherCode,
+                            'to' => $data->Team,
+                            "source" => $rootCause,
+                            "TOChuyenVe" => $teamBack,
+                            'quantity' => $allocate['Allocate'],
+                            'ObjType' => 202,
+                            'DocEntry' => ""
+                        ]
+                    );
+            }
+            
+            if($string==''){
+                DB::rollBack();
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
+                        $data->Team . " sản phẩm: " .
+                        $data->ItemCode . " sản phẩm đích: " .
+                        $data->FatherCode . " LSX." . $data->LSX
+                ], 500);
+            }
+           $stockissue= $this->collectStockAllocate($string);
+           $dataSendPayload = [
+            'InventoryGenEntries' => $dataReceipt,
+            'InventoryGenExits' => $stockissue
+        ];
+        
+       $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+       $client = new Client();
+            $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
+                'verify' => false,
+                'headers' => [
+                    'Accept' => '*/*',
+                    'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_'.$payload['uid'],
+                    'Authorization' => 'Basic '.BasicAuthToken(),
+                ],
+                'body' =>$payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
+            ]);
+            if($response->getStatusCode()==400){
+               throw new \Exception('SAP ERROR Incomplete batch request body.');
+             }
+            if($response->getStatusCode()==500){
+                throw new \Exception('SAP ERROR '.$response->getBody()->getContents());
+            }
+            if($response->getStatusCode()==401){
+                throw new \Exception('SAP authen '.$response->getBody()->getContents());
+            }
+            if($response->getStatusCode()==202){
+                $res = $response->getBody()->getContents();
+                // kiểm tra sussess hay faild hơi quăng nha
+                if (strpos($res, 'ETag') !== false) {
+                    awaitingstocksvcn::where('notiId', $request->id)->delete();
+                    notireceiptVCN::where('id', $request->id)->update([
+                        'confirm' => 1,
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => now()->format('YmdHmi'),
+                        'openQty' => $data->openQty - $request->Qty
+                    ]);
+                    DB::commit();
+                    HistoryQC::dispatch(
+                        $type,
+                        $request->id . "VCN",
+                        $data->ItemCode,
+                        $qtypush,
+                        $whs,
+                        $qtypush - $request->Qty,
+                        'VCN',
+                        $data->Team,
+                        $loailoi,
+                        $huongxuly,
+                        $rootCause,
+                        $subCode,
+                        $request->note,
+                        $teamBack
+                    );
+                } 
+                
+                else
+                {
+                    preg_match('/\{.*\}/s', $res, $matches);
+                    if (isset($matches[0])) {
+                        $jsonString = $matches[0];
+                        $errorData = json_decode($jsonString, true);
+                        if (isset($errorData['error'])) {
+                            $errorCode = $errorData['error']['code'];
+                            $errorMessage = $errorData['error']['message']['value'];
+                            throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
+                        } 
+                    } 
+                }
+            }
+            return response()->json('success', 200);
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+     function allocate_v2($data, $totalQty)
+    {
+        $nev = 0; // Khởi tạo nev
+        foreach ($data as &$item) {
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
+            } else {
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+        // Kiểm tra nếu totalQty còn lại và không thể phân bổ
+        if ($totalQty > 0) {
+            $nev = 1; // Đặt nev = 1
+            return ['error' => 'Vượt hạn mức', 'nev' => $nev];
+        }
+        $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
+        return ['allocatedData' => array_values($filteredData), 'nev' => $nev];
+    }
+    /*
+    **********
+     END Version 2 VCN
+    *********
+    */
 }

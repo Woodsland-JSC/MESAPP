@@ -104,7 +104,7 @@ if (!function_exists('playloadIssueCBG')) {
         }
         if($itemType == 0){
             $body = [
-                "BPL_IDAssignedToInvoice" =>  Auth::user()->Branch,
+                "BPL_IDAssignedToInvoice" =>  Auth::user()->branch,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $ItemCode,
@@ -116,7 +116,7 @@ if (!function_exists('playloadIssueCBG')) {
         }
         else if ($itemType == 1){
             $body = [
-                "BPL_IDAssignedToInvoice" =>  Auth::user()->Branch,
+                "BPL_IDAssignedToInvoice" =>  Auth::user()->branch,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $ItemCode,
@@ -129,7 +129,7 @@ if (!function_exists('playloadIssueCBG')) {
         }
         else if ($itemType == 2){
             $body = [
-                "BPL_IDAssignedToInvoice" => 1,
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "DocumentLines"=> [
                     [
                         "ItemCode"=> $ItemCode,
