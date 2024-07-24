@@ -189,6 +189,7 @@ class VCNController extends Controller
             $details = [
                 'ItemChild' => $row['ItemChild'],
                 'ChildName' => $row['ChildName'],
+                'QuyCach2' => $row['QuyCach2'],
                 'Version' => $row['Version'],
                 'ProdType' => $row['ProType'],
                 'CDay' => $row['CDay'],
@@ -1774,6 +1775,109 @@ class VCNController extends Controller
         }
         $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
         return ['allocatedData' => array_values($filteredData), 'nev' => $nev];
+    }
+    // Rong
+    /* cần ghi nhận cả số lượng receipt và issue cùng lúc
+    */
+    Function receiptRongv2(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'Data.*.FatherCode' => 'required|string|max:254',
+            'Data.*.ItemCode' => 'required|string|max:254',
+            'Data.*.ItemName' => 'required|string|max:254',
+            'Data.*' => [new AtLeastOneQty()],
+            'Data.*.version' => 'required|string|max:254',
+            'Data.*.CDay' => 'required|numeric',
+            'Data.*.CRong' => 'required|numeric',
+            'Data.*.CDai' => 'required|numeric',
+            'Data.*.Team' => 'required|string|max:254',
+            'Data.*.CongDoan' => 'required|string|max:254',
+            'Data.*.NextTeam' => 'required|string|max:254',
+            'Data.*.ProdType' => 'required|string|max:254',
+        ]);
+        
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+        dd($request->Data);
+        $toqc = "";
+        if (Auth::user()->plant == 'TH') {
+            $toqc = 'TH-QC';
+        } else if (Auth::user()->plant == 'TQ') {
+            $toqc = 'TQ-QC';
+        } else {
+            $toqc = 'HG-QC';
+        }
+        try {
+            DB::beginTransaction();
+            $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
+            foreach ($request->Data as $dt) {
+
+                if ($dt['CompleQty'] > 0) {
+                    $notifi = notireceiptVCN::create([
+                        'text' => 'Production information waiting for confirmation',
+                        'Quantity' => $dt['CompleQty'],
+                        'MaThiTruong' => $dt['MaThiTruong'] ?? null,
+                        'FatherCode' => $dt['FatherCode'],
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'team' => $dt['Team'],
+                        'NextTeam' => $dt['NextTeam'],
+                        'CongDoan' => $dt['CongDoan'],
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'type' => 0,
+                        'openQty' => 0,
+                        'ProdType' => $dt['ProdType'],
+                        'version' => $dt['version'],
+                        'CreatedBy' => Auth::user()->id,
+                    ]);
+                    $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+                }
+                if ($dt['RejectQty'] > 0) {
+                    $notifi = notireceiptVCN::create([
+                        'text' => 'Error information sent to QC',
+                        'FatherCode' => $dt['FatherCode'],
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'Quantity' => $dt['RejectQty'],
+                        'SubItemCode' => $dt['SubItemCode'] ?? null, //mã báo lỗi
+                        'SubItemName' => $dt['SubItemName'] ?? null, //tên mã báo lỗi
+                        'team' => $dt['Team'],
+                        'NextTeam' => $toqc,
+                        'CongDoan' => $dt['CongDoan'],
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'type' => 1,
+                        'openQty' => $dt['RejectQty'],
+                        'ProdType' => $dt['ProdType'],
+                        'version' => $dt['version'],
+                        'CreatedBy' => Auth::user()->id,
+                        'MaThiTruong' => $dt['MaThiTruong'] ?? null,
+                        'loinhamay' => $dt['factories']['value'] ?? null,
+                    ]);
+                    $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+                }
+            }
+
+            DB::commit();
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
+        }
+        return response()->json([
+            'message' => 'Successful',
+            'data' => $changedData
+        ], 200);
+    }
+    Function AcceiptRongv2(Request $request)
+    {
+        // ghi nhận thông tin lệnh
+        // lỗi chỉ lỗi 
+    }
+    Function QcRongv2(Request $request)
+    {
+        // ghi nhận thông tin lệnh
+        // lỗi chỉ lỗi 
     }
     /*
     **********
