@@ -674,7 +674,6 @@ class VCNController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $rowstock = odbc_fetch_array($stmtstock);
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
