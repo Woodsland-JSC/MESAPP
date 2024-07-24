@@ -1295,8 +1295,7 @@ class ProductionController extends Controller
                 'InventoryGenExits' => $stockissue
             ];
             
-           $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
-           dd($payload['payload']);
+           $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
                     'verify' => false,
@@ -1352,10 +1351,6 @@ class ProductionController extends Controller
                     }
                    
                    
-                }
-                else
-                {
-                    throw new \Exception('payload bad format'. $payload['payload']);
                 }
                 return response()->json('success', 200);
             } else {
