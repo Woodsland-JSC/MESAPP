@@ -1201,7 +1201,7 @@ class ProductionController extends Controller
     *********************************
     */
     // ghi nhận sản lượng công đoạn khác rong
-    function accept_v2 (Request $request)
+    function acceptV2 (Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',

@@ -1073,7 +1073,7 @@ class QCController extends Controller
      * v2 AcceptQC chế biên gỗ
      * 
      */
-    function acceptTeamQCCBG_v2(Request $request)
+    function acceptTeamQCCBGV2(Request $request)
     {
         // 1. Check dữ liệu đầu vào
         $validator = Validator::make($request->all(), [
