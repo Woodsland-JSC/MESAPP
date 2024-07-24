@@ -118,23 +118,24 @@ const productionApi = {
         const url = `/vcn/reject-receipts`;
         return axiosClient().post(url, data);
     },
-    acceptReceiptsVCNQC: (data) => {
-        // const url = `/v2/confirm-qc-cbg`;
-        const url = `/confirm-qc-vcn`;
-        return axiosClient().post(url, data);
-    },
     acceptReceiptsCBG: (data) => {
-        // const url = `/v2/production/accept-receipts`;
-        const url = `/production/accept-receipts`;
+        const url = `/v2/production/accept-receipts`;
+        // const url = `/production/accept-receipts`;
         return axiosClient().post(url, data);
     },
     acceptReceiptsCBGQC: (data) => {
-        // const url = `/v2/confirm-qc-cbg`;
-        const url = `/confirm-qc-cbg`;
+        const url = `/v2/production/confirm-qc-cbg`;
+        // const url = `/confirm-qc-cbg`;
         return axiosClient().post(url, data);
     },
     acceptReceiptsVCN: (data) => {
-        const url = `/vcn/accept-receipts`;
+        // const url = `/vcn/accept-receipts`;
+        const url = `/v2/vcn/accept-receipts`;
+        return axiosClient().post(url, data);
+    },
+    acceptReceiptsVCNQC: (data) => {
+        const url = `/v2/vcn/confirm-qc-vcn`;
+        // const url = `/confirm-qc-vcn`;
         return axiosClient().post(url, data);
     },
     getErrorTypes: () => {

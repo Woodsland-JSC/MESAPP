@@ -351,14 +351,13 @@ class VCNController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $rowstock = odbc_fetch_array($stmtstock);
+        
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
-
         // dd($results);
-
+        
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
         $CongDoan = null;
@@ -676,7 +675,6 @@ class VCNController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $rowstock = odbc_fetch_array($stmtstock);
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
@@ -1303,7 +1301,7 @@ class VCNController extends Controller
     *********************************
     */
     // ghi nhận sản lượng công đoạn khác rong
-    function accept_v2 (Request $request)
+    function acceptV2 (Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -1410,13 +1408,15 @@ class VCNController extends Controller
                     $res = $response->getBody()->getContents();
                     // kiểm tra sussess hay faild hơi quăng nha
                     if (strpos($res, 'ETag') !== false) {
+                     
                         notireceiptVCN::where('id', $request->id)->update([
                             'confirm' => 1,
                             'confirmBy' => Auth::user()->id,
                             'confirm_at' => now()->format('YmdHmi')
                         ]);
-                        awaitingstocksvcn::where('notiId', $data->notiID)->delete();
+                        awaitingstocksvcn::where('notiId', $request->id)->delete();
                         DB::commit();
+                        
                     }
                     else
                     {
@@ -1542,7 +1542,7 @@ class VCNController extends Controller
             $output = $data;
         return $output;  
     }
-    function AcceptQCVCN_v2(Request $request)
+    function AcceptQCVCNV2(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',

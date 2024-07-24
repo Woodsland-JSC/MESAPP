@@ -10,14 +10,14 @@ if (!function_exists('playloadBatch')) {
     $batchBoundary = '--batch_36522ad7-fc75-4b56-8c71-56071383e77c_'.$uid;
     $changeSetBoundary = 'changeset';
     $output = "{$batchBoundary}\n";
+    $totalTypes = count($data);
     if(empty($data['InventoryGenExits'])){
         if(count($data['InventoryGenEntries'])>1)
         {
             $output .="Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";;
         }
-        
+        $totalTypes=1;
     }
-    $totalTypes = count($data);
     $typeCounter = 0;
     foreach ($data as $type => $documents) {
         $typeCounter++;
@@ -83,6 +83,7 @@ if (!function_exists('playloadIssueCBG')) {
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
+        
         //3. create issue production
         if(count($results) == 0){
             throw new \Exception('Error creating issue production');
@@ -91,14 +92,14 @@ if (!function_exists('playloadIssueCBG')) {
         foreach ($results as $result){
             if($itemType == 1){
                 $serial_batch[] = [
-                    'BatchNumber' => $result['BatchNumber'],
-                    'Quantity' => $result['Quantity']
+                    'BatchNumber' => $result['BatchSeri'],
+                    'Quantity' => $result['Allocated']
                 ];
             }
             if($itemType == 2){
                 $serial_batch[] = [
-                    'SystemSerialNumber' => $result['SerialNumber'],
-                    'Quantity' => $result['Quantity']
+                    'SystemSerialNumber' => $result['BatchSeri'],
+                    'Quantity' => $result['Allocated']
                 ];
             }
         }

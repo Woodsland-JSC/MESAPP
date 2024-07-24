@@ -1201,7 +1201,7 @@ class ProductionController extends Controller
     *********************************
     */
     // ghi nhận sản lượng công đoạn khác rong
-    function accept_v2 (Request $request)
+    function acceptV2 (Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -1295,7 +1295,7 @@ class ProductionController extends Controller
                 'InventoryGenExits' => $stockissue
             ];
             
-           $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+           $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
                     'verify' => false,
@@ -1365,7 +1365,7 @@ class ProductionController extends Controller
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
       
