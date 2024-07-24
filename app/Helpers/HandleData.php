@@ -10,14 +10,14 @@ if (!function_exists('playloadBatch')) {
     $batchBoundary = '--batch_36522ad7-fc75-4b56-8c71-56071383e77c_'.$uid;
     $changeSetBoundary = 'changeset';
     $output = "{$batchBoundary}\n";
+    $totalTypes = count($data);
     if(empty($data['InventoryGenExits'])){
         if(count($data['InventoryGenEntries'])>1)
         {
             $output .="Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";;
         }
-        
+        $totalTypes=1;
     }
-    $totalTypes = count($data);
     $typeCounter = 0;
     foreach ($data as $type => $documents) {
         $typeCounter++;

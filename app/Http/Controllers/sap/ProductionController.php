@@ -1296,6 +1296,7 @@ class ProductionController extends Controller
             ];
             
            $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+           dd($payload['payload']);
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
                     'verify' => false,
@@ -1352,6 +1353,10 @@ class ProductionController extends Controller
                    
                    
                 }
+                else
+                {
+                    throw new \Exception('payload bad format'. $payload['payload']);
+                }
                 return response()->json('success', 200);
             } else {
                 return response()->json([
@@ -1365,7 +1370,7 @@ class ProductionController extends Controller
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
       
