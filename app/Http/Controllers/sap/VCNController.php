@@ -2622,7 +2622,7 @@ class VCNController extends Controller
                         'confirmBy' => Auth::user()->id,
                         'isQCConfirmed' => 1,
                     ]);
-                    ChiTietRong::where('baseID', $request->id)->where('ItemCode',$request->ItemCode)->update([   
+                    ChiTietRong::where('baseID', $request->id)->where('ItemCode',$request->ItemCode)->where('type',1)->update([   
                         'openQty' => $ctrong->openQty - $request->Qty
                     ]);
                     DB::commit();
