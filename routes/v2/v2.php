@@ -18,5 +18,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/receipts-productions-rong', [VCNController::class, 'receiptRongv2']);
         Route::get('/receipts-detail-rong', [VCNController::class, 'viewDetailRongv2']);
         Route::post('/accept-receipts-rong', [VCNController::class, 'AcceiptRongv2']);
+        Route::post('/confirm-qc-rong', [VCNController::class, 'AcceiptQCRongv2']);
     });
 });
