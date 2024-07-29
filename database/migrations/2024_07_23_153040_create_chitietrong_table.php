@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('chitietrong', function (Blueprint $table) {
             $table->id();
-            $table->integer('basseID');
+            $table->integer('baseID');
             $table->string('ItemCode')->nullable();
             $table->string('ItemName')->nullable();
             $table->integer('type')->nullable();
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->float('CDay')->default(1);
             $table->float('CRong')->default(1);
             $table->float('CDai')->default(1);
+            $table->decimal('openQty', 19, 6)->nullable();
+            $table->string('loinhamay')->nullable();
         });
     }
 

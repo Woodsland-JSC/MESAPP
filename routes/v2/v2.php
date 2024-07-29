@@ -12,7 +12,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     });
     Route::group(['prefix' => 'v2/vcn'], function () {
+        Route::get('/receipts-productions', [VCNController::class, 'indexv2']);
         Route::post('/accept-receipts', [VCNController::class, 'acceptV2']);
         route::post('/confirm-qc-vcn', [VCNController::class, 'AcceptQCVCNV2']);
+        Route::post('/receipts-productions-rong', [VCNController::class, 'receiptRongv2']);
+        Route::get('/receipts-detail-rong', [VCNController::class, 'viewDetailRongv2']);
+        Route::post('/accept-receipts-rong', [VCNController::class, 'AcceiptRongv2']);
     });
 });

@@ -43,7 +43,8 @@ class notireceiptVCN extends Model
     'ProdType',
     'version',
     'isPushSAP'  ,
-    'loinhamay'
+    'loinhamay',
+    'isRONG',
     ];
     public function getCreatedAtAttribute($value)
     {
