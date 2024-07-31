@@ -13,6 +13,7 @@ import { MdOutlineRefresh } from "react-icons/md";
 import { TbRefresh } from "react-icons/tb";
 import { FaArrowRight } from "react-icons/fa";
 import { FaStar } from "react-icons/fa6";
+import { FaMobileScreenButton } from "react-icons/fa6";
 import { HiClipboard } from "react-icons/hi";
 import {
     Tabs,
@@ -116,6 +117,7 @@ const woodProductingReports = [
         name: "Báo cáo thông tin chi tiết giao nhận",
         link: "/reports/delivery-detail",
         priority: true,
+        responsive: true,
     },
     {
         id: "0004",
@@ -336,15 +338,15 @@ function Report() {
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between mb-6">
                         <div className=" text-3xl font-bold">
                             Danh mục báo cáo
                         </div>
 
                         {/* Controller */}
-                        <div className="w-2/3 flex justify-between items-center">
+                        <div className="xl:w-2/3 lg:w-2/3 md:w-2/3 w-full flex xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between">
                             <div className="flex w-full justify-end space-x-4">
-                                <div className="w-1/2">
+                                <div className="xl:w-1/2 lg:w-1/2 md:w-1/2 w-full xl:mt-0 lg:mt-0 md:mt-0 mt-3">
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                             <svg
@@ -428,7 +430,7 @@ function Report() {
                                                         key={index}
                                                         className=""
                                                     >
-                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl w-full ">
                                                             <div className="flex items-center gap-x-4">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />
@@ -436,11 +438,11 @@ function Report() {
                                                                 <div className="text-[16px] group-hover:text-white">
                                                                     {item.name}
                                                                 </div>
-                                                                {item.priority ==
-                                                                    true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                {item.priority == true && (
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                 )}
                                                             </div>
+                                                            
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
                                                     </Link>
@@ -476,7 +478,11 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}
+                                                                {item.responsive ==
+                                                                    true && (
+                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                 )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -514,7 +520,7 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white" />
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                 )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />

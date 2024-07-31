@@ -585,9 +585,8 @@ function PlywoodFinishedGoodsReceipt() {
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
+                options.sort((a, b) => a.label.localeCompare(b.label));
                 setGroupListOptions(options);
-                // console.log("New Get All Group: ", options);
-                // setSelectedGroup(options[0]);
                 groupSelectRef?.current?.setValue(options[0]);
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load danh sách tổ.");

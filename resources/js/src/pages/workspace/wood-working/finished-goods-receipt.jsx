@@ -573,6 +573,7 @@ function FinishedGoodsReceipt() {
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
+                options.sort((a, b) => a.label.localeCompare(b.label));
                 setGroupListOptions(options);
                 groupSelectRef?.current?.setValue(options[0]);
             } catch (error) {

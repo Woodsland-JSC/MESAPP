@@ -227,6 +227,14 @@ div:where(.swal2-container) {
     --ag-cell-horizontal-border: solid 1px rgb(206, 206, 206) !important;
 }
 
+.ag-watermark{
+    opacity: 0 !important;
+}
+
+.ag-column-drop-empty-message ag-column-drop-horizontal-empty-message{
+    display: none !important;
+}
+
 .dots {
     width: 56px;
     height: 13.4px;

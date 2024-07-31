@@ -65,13 +65,13 @@ const exampleData = [
     },
 ];
 
-var checkboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
+// var checkboxSelection = function (params) {
+//     return params.columnApi.getRowGroupColumns().length === 0;
+// };
 
-var headerCheckboxSelection = function (params) {
-    return params.columnApi.getRowGroupColumns().length === 0;
-};
+// var headerCheckboxSelection = function (params) {
+//     return params.columnApi.getRowGroupColumns().length === 0;
+// };
 
 function Integration() {
     const { loading, setLoading } = useAppContext();
@@ -112,8 +112,6 @@ function Integration() {
             width: 90,
             maxWidth: 100,
             maxHeight: 100,
-            checkboxSelection: checkboxSelection,
-            headerCheckboxSelection: headerCheckboxSelection,
         },
         {
             headerName: "ID",
@@ -143,6 +141,7 @@ function Integration() {
                 );
             },
         },
+        
     ]);
 
     const autoGroupColumnDef = useMemo(() => {
@@ -157,18 +156,18 @@ function Integration() {
                     return params.data[params.colDef.field];
                 }
             },
-            headerCheckboxSelection: true,
             cellRenderer: "agGroupCellRenderer",
             cellRendererParams: {
                 checkbox: true,
             },
+            rowGroupPanelShow:"never",
         };
     }, []);
 
     const defaultColDef = useMemo(() => {
         return {
             editable: false,
-            enableRowGroup: true,
+            enableRowGroup: false,
             enablePivot: true,
             enableValue: true,
             sortable: true,
@@ -374,7 +373,6 @@ function Integration() {
                                             suppressRowClickSelection={true}
                                             groupSelectsChildren={true}
                                             rowSelection={"multiple"}
-                                            rowGroupPanelShow={"always"}
                                             pivotPanelShow={"always"}
                                             pagination={true}
                                             paginationPageSize={20}

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+    useState,
+    useEffect,
+    useMemo,
+    useCallback,
+    useRef,
+} from "react";
 import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -25,8 +31,27 @@ import "ag-grid-enterprise";
 // import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-
+import Select from "react-select";
+import AsyncSelect from "react-select/async";
+import { FaArrowDown } from "react-icons/fa";
+import { FaExclamation } from "react-icons/fa";
+import { FaMobileAlt } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
+
+const ExampleOptions = [
+    {
+        label: "1. Tổ 01",
+        value: "1",
+    },
+    {
+        label: "2. Tổ 2",
+        value: "2",
+    },
+    {
+        label: "2. Tổ 3",
+        value: "3",
+    },
+];
 
 function DeliveryDetailReport() {
     const navigate = useNavigate();
@@ -37,23 +62,40 @@ function DeliveryDetailReport() {
     const getFirstDayOfCurrentMonth = () => {
         const date = new Date();
         return new Date(date.getFullYear(), date.getMonth(), 1);
-      };
+    };
 
     // Date picker
     const [fromDate, setFromDate] = useState(getFirstDayOfCurrentMonth());
     const [toDate, setToDate] = useState(new Date());
+    const [fromDateMobile, setFromDateMobile] = useState(
+        getFirstDayOfCurrentMonth()
+    );
+    const [toDateMobile, setToDateMobile] = useState(new Date());
 
     // Loading States
     const [isTeamLoading, setIsTeamLoading] = useState(false);
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
     const [selectedTeams, setSelectedTeams] = useState([]);
+    const [selectedTeamMobile, setSelectedTeamMobile] = useState(null);
 
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
     const [isReceived, setIsReceived] = useState(true);
     const [teamData, setTeamData] = useState([]);
+    const [teamOptions, setTeamOptions] = useState([]);
 
     const [reportData, setReportData] = useState(null);
+    const [reportDataMobile, setReportDataMobile] = useState(null);
+    const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
+
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredData = useMemo(() => {
+        return reportDataMobile?.filter(item => {
+            const searchValue = `${item.CDay}*${item.CRong}*${item.CDai}`.toLowerCase();
+            return searchValue.includes(searchTerm.toLowerCase());
+        });
+    }, [reportDataMobile, searchTerm]);
 
     const handleFactorySelect = async (factory) => {
         console.log("Nhà máy đang chọn là:", factory);
@@ -62,16 +104,16 @@ function DeliveryDetailReport() {
         setTeamData(null);
         setSelectedTeams([]);
         await getTeamData(factory);
-        if (
-            isReceived !== null &&
-            selectedTeams &&
-            selectedTeams.length > 0 &&
-            selectedFactory &&
-            fromDate &&
-            toDate
-        ) {
-            getReportData();
-        }
+        // if (
+        //     isReceived !== null &&
+        //     selectedTeams !== null &&
+        //     selectedTeams.length > 0 &&
+        //     selectedFactory &&
+        //     fromDate &&
+        //     toDate
+        // ) {
+        //     getReportData();
+        // }
     };
 
     const getTeamData = async (param) => {
@@ -117,8 +159,6 @@ function DeliveryDetailReport() {
             }
             return newSelectAll;
         });
-
-
     };
 
     const getReportData = useCallback(async () => {
@@ -163,7 +203,39 @@ function DeliveryDetailReport() {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedTeams, selectedFactory, isReceived]);
+    }, [fromDate, toDate, selectedTeams, selectedFactory, isReceived, selectAll]);
+
+    const getReportDataMobile = useCallback(async () => {
+        if (!fromDateMobile || !toDateMobile || !selectedTeamMobile) {
+            console.log("Không thể gọi API vì thiếu thông tin. (Mobile)");
+            return;
+        }
+    
+        let params = {
+            from_date: format(fromDateMobile, "yyyy-MM-dd"),
+            to_date: format(toDateMobile, "yyyy-MM-dd"),
+            To: selectedTeamMobile.value,
+            plant: user.plant,
+        };
+        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
+        setIsDataReportLoading(true);
+        try {
+            const res = await reportApi.getDeliveryDetailReport(
+                params.status_code,
+                params.To,
+                params.branch,
+                params.plant,
+                params.from_date,
+                params.to_date
+            );
+            setIsDataReportLoading(false);
+            setReportDataMobile(res);
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+            setIsDataReportLoading(false);
+        }
+    }, [fromDateMobile, toDateMobile, selectedTeamMobile, user.plant]);
     
     useEffect(() => {
         const allFieldsFilled =
@@ -178,7 +250,47 @@ function DeliveryDetailReport() {
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [isReceived, selectedTeams, selectedFactory, fromDate, toDate, getReportData]);
+    
+        const allFieldsFilledMobile =
+            selectedTeamMobile && fromDateMobile && toDateMobile;
+        if (allFieldsFilledMobile) {
+            getReportDataMobile();
+        } else {
+            console.log("Không thể gọi API vì không đủ thông tin. (Mobile)");
+        }
+    }, [
+        isReceived,
+        selectedTeams,
+        selectedFactory,
+        fromDate,
+        toDate,
+        fromDateMobile,
+        toDateMobile,
+        selectedTeamMobile,
+        getReportDataMobile,
+        getReportData,
+    ]);
+
+    // New Get All Group
+    useEffect(() => {
+        const loadTeamOptions = () => {
+            return reportApi
+                .getTeamByFactory(user.plant)
+                .then((response) => {
+                    const options = response.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+                    options.sort((a, b) => a.label.localeCompare(b.label));
+                    setTeamOptions(options);
+                })
+                .catch((error) => {
+                    console.error("Error fetching team data:", error);
+                    toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+                });
+        };
+        loadTeamOptions();
+    }, []);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
@@ -204,12 +316,38 @@ function DeliveryDetailReport() {
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
-        { headerName: "Tên", field: "itemname", width: 350, suppressHeaderMenuButton: true, filter: true},
-        { headerName: "Dày", field: "thickness", width: 80, suppressHeaderMenuButton: true,},
-        { headerName: "Rộng", field: "width", width: 80, suppressHeaderMenuButton: true, },
-        { headerName: "Dài", field: "height", width: 80, suppressHeaderMenuButton: true, },
+        {
+            headerName: "Tên",
+            field: "itemname",
+            width: 350,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Dày",
+            field: "thickness",
+            width: 80,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Rộng",
+            field: "width",
+            width: 80,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Dài",
+            field: "height",
+            width: 80,
+            suppressHeaderMenuButton: true,
+        },
         { headerName: "ĐVT", field: "unit", width: 100 },
-        { headerName: "Số lượng", field: "quantity", width: 100, suppressHeaderMenuButton: true, },
+        {
+            headerName: "Số lượng",
+            field: "quantity",
+            width: 100,
+            suppressHeaderMenuButton: true,
+        },
         { headerName: "M3", field: "m3", width: 120 },
         { headerName: "Người giao", field: "sender" },
         { headerName: "Ngày giờ giao", field: "send_date" },
@@ -250,10 +388,10 @@ function DeliveryDetailReport() {
 
     return (
         <Layout>
-            <div className="overflow-x-hidden">
-                <div className="w-screen  p-6 px-5 xl:p-5 xl:px-12 ">
+            <div className="overflow-x-hidden over xl:h-fit lg:h-fit md:h-fit h-screen">
+                <div className="w-screen h-full p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
-                    <div className="flex items-center justify-between space-x-6 mb-3.5">
+                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col items-center justify-between xL:space-x-6 lg:space-x-6 md:space-x-6 space-x-0 xL:space-y-0 lg:space-y-0 md:space-y-0 space-y-4 mb-3.5">
                         <div className="flex items-center space-x-4">
                             <div
                                 className="p-2 hover:bg-gray-200 rounded-full cursor-pointer active:scale-[.87] active:duration-75 transition-all"
@@ -272,9 +410,9 @@ function DeliveryDetailReport() {
                         </div>
 
                         {/* Search & Export */}
-                        <div className="w-1/2 flex items-center justify-between border-2 border-gray-300 p-2 px-4 pr-1  rounded-lg bg-[#F9FAFB]">
-                            <div className="flex items-center space-x-3 w-2/3">
-                                <IoSearch className="w-6 h-6 text-gray-500" />
+                        <div className="xl:w-1/2 lg:w-1/2 md:w-1/2 w-full items-center justify-between border-2 border-gray-300 p-2 px-4 pr-1 rounded-lg bg-[#F9FAFB] xl:display:flex lg:flex md:flex hidden">
+                            <div className="flex items-center space-x-3 xl:w-2/3 lg:w-3/4 md:w-3/4 w-[90%] ">
+                                <IoSearch className="w-6 h-6 text-gray-500 " />
                                 <input
                                     type="text"
                                     placeholder="Tìm kiếm tất cả..."
@@ -282,7 +420,7 @@ function DeliveryDetailReport() {
                                 />
                             </div>
 
-                            <div className="flex justify-end items-center divide-x-2 w-1/3">
+                            <div className="flex justify-end items-center divide-x-2 xl:w-1/3 lg:w-1/4 md:w-1/4 w-[10%">
                                 <div className="mx-2.5"></div>
                                 <div>
                                     <FaArrowRotateLeft
@@ -292,13 +430,49 @@ function DeliveryDetailReport() {
                                 </div>
                                 <div>
                                     <FaArrowUpRightFromSquare
-                                        className="mx-2.5 w-5 h-5 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
+                                        className="mx-2.5 w-5 h-5 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all xl:display:inline-block lg:inline-block md:inline-block hidden"
                                         onClick={handleExportExcel}
                                     />
                                 </div>
                                 <div>
                                     <PiFilePdfBold
-                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
+                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all xl:display:inline-block lg:inline-block md:inline-block hidden"
+                                        onClick={handleExportPDF}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Responsive Search */}
+                        <div className="xl:w-1/2 lg:w-1/2 md:w-1/2 w-full flex items-center justify-between border-2 border-gray-300 p-2 px-4 pr-1 rounded-lg bg-[#F9FAFB] xl:display:hidden lg:hidden md:hidden  ">
+                            <div className="flex items-center space-x-3 xl:w-2/3 lg:w-3/4 md:w-3/4 w-[90%] ">
+                                <IoSearch className="w-6 h-6 text-gray-500 " />
+                                <input
+                                    type="text"
+                                    placeholder="Tìm kiếm theo quy cách..."
+                                    className=" w-full focus:ring-transparent !outline-none bg-[#F9FAFB]  border-gray-30 ring-transparent border-transparent focus:border-transparent focus:ring-0"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex justify-end items-center divide-x-2 xl:w-1/3 lg:w-1/4 md:w-1/4 w-[10%">
+                                <div className="mx-2.5"></div>
+                                <div>
+                                    <FaArrowRotateLeft
+                                        className="mx-2.5 w-[22px] h-[22px] text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
+                                        onClick={handleResetFilter}
+                                    />
+                                </div>
+                                <div>
+                                    <FaArrowUpRightFromSquare
+                                        className="mx-2.5 w-5 h-5 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all xl:display:inline-block lg:inline-block md:inline-block hidden"
+                                        onClick={handleExportExcel}
+                                    />
+                                </div>
+                                <div>
+                                    <PiFilePdfBold
+                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all xl:display:inline-block lg:inline-block md:inline-block hidden"
                                         onClick={handleExportPDF}
                                     />
                                 </div>
@@ -307,7 +481,7 @@ function DeliveryDetailReport() {
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 xl:display:block lg:block md:block hidden">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/4">
@@ -324,11 +498,12 @@ function DeliveryDetailReport() {
                                         onChange={(date) => {
                                             setFromDate(date);
                                             if (
-                                                fromDate &&
-                                                toDate &&
+                                                isReceived !== null &&
+                                                selectedTeams !== null &&
+                                                selectedTeams.length > 0 &&
                                                 selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
+                                                fromDate &&
+                                                toDate
                                             ) {
                                                 getReportData();
                                             }
@@ -349,11 +524,12 @@ function DeliveryDetailReport() {
                                         onChange={(date) => {
                                             setToDate(date);
                                             if (
-                                                fromDate &&
-                                                toDate &&
+                                                isReceived !== null &&
+                                                selectedTeams !== null &&
+                                                selectedTeams.length > 0 &&
                                                 selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
+                                                fromDate &&
+                                                toDate
                                             ) {
                                                 getReportData();
                                             }
@@ -405,15 +581,15 @@ function DeliveryDetailReport() {
                                             } `}
                                             onClick={() => {
                                                 setIsReceived(false);
-                                                if (
-                                                    fromDate &&
-                                                    toDate &&
-                                                    selectedFactory &&
-                                                    isReceived &&
-                                                    selectedTeams
-                                                ) {
-                                                    getReportData();
-                                                }
+                                                // if (
+                                                //     fromDate &&
+                                                //     toDate &&
+                                                //     selectedFactory &&
+                                                //     isReceived &&
+                                                //     selectedTeams
+                                                // ) {
+                                                //     getReportData();
+                                                // }
                                             }}
                                         >
                                             <span>Chưa nhận</span>
@@ -429,15 +605,15 @@ function DeliveryDetailReport() {
                                             }`}
                                             onClick={() => {
                                                 setIsReceived(true);
-                                                if (
-                                                    fromDate &&
-                                                    toDate &&
-                                                    selectedFactory &&
-                                                    isReceived &&
-                                                    selectedTeams
-                                                ) {
-                                                    getReportData();
-                                                }
+                                                // if (
+                                                //     fromDate &&
+                                                //     toDate &&
+                                                //     selectedFactory &&
+                                                //     isReceived &&
+                                                //     selectedTeams
+                                                // ) {
+                                                //     getReportData();
+                                                // }
                                             }}
                                         >
                                             <span>Đã nhận</span>
@@ -597,11 +773,76 @@ function DeliveryDetailReport() {
                         )}
                     </div>
 
+                    {/* Responsive Header */}
+                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 xl:display:hidden lg:hidden md:hidden block">
+                        {/*Filter */}
+                        <div className="flex-col items-center space-y-3 px-4 mt-1 mb-1">
+                            {/* Date Filter */}
+                            <div className="flex space-x-3">
+                                <div className="col-span-1 w-full">
+                                    <label
+                                        htmlFor="indate"
+                                        className="block mb-1 font-medium text-gray-900 "
+                                    >
+                                        Từ ngày
+                                    </label>
+                                    <DatePicker
+                                        selected={fromDateMobile}
+                                        dateFormat="dd/MM/yyyy"
+                                        onChange={(date) => {
+                                            setFromDateMobile(date);
+                                        }}
+                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                    />
+                                </div>
+                                <div className="col-span-1 w-full">
+                                    <label
+                                        htmlFor="indate"
+                                        className="block mb-1 font-medium text-gray-900 "
+                                    >
+                                        Đến ngày
+                                    </label>
+                                    <DatePicker
+                                        selected={toDateMobile}
+                                        dateFormat="dd/MM/yyyy"
+                                        onChange={(date) => {
+                                            setToDateMobile(date);
+                                        }}
+                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Team Filter */}
+                            <div className="flex space-x-3 w-full">
+                                <div className="w-full">
+                                    <label
+                                        htmlFor="first_name"
+                                        className="block mb-1 font-medium text-gray-900"
+                                    >
+                                        Chọn công đoạn
+                                    </label>
+                                    <Select
+                                        placeholder="Chọn công đoạn..."
+                                        options={teamOptions}
+                                        defaultOptions
+                                        onChange={(value) => {
+                                            setSelectedTeamMobile(value);
+                                            console.log(
+                                                "Selected Team:",
+                                                value
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                            {/* <div>Đang tải dữ liệu</div> */}
-                            <div class="dots"></div>
+                        <div className="mt-4 bg-[#dbdcdd] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
+                            <div class="dots my-1"></div>
                         </div>
                     ) : (
                         <>
@@ -618,138 +859,141 @@ function DeliveryDetailReport() {
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
-
                                         />
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#dbdcdd] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}
                         </>
                     )}
 
-                    {/* <div className="flex flex-col">
-                        <div className="overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                <div className="overflow-auto border-2 rounded-xl border-gray-500">
-                                    <table className="min-w-full   text-center font-light text-surface">
-                                        <thead className="rounded-t-xl bg-[#DBDCDD] border-b-2 border-gray-500 font-medium">
-                                            <tr className="rounded-t-xl">
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    #
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    First
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Last
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="font-normal">
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    1
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Mark
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Otto
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @mdo
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    2
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Jacob
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Thornton
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @fat
-                                                </td>
-                                            </tr>
-                                            <tr className="border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    3
-                                                </td>
-                                                <td
-                                                    colSpan="2"
-                                                    className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Larry the Bird
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @twitter
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    {/* Responsive Contents */}
+                    <div className="space-y-3 mt-4 xl:display:hidden lg:hidden md:hidden block">
+                        <div className="text-left text-sm text-gray-500 ">
+                            {reportDataMobile?.length || 0} kết quả
                         </div>
-                    </div> */}
+                        {/* Data */}
+                        {isDataReportLoading ? (
+                            <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div class="dots my-1"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {reportDataMobile?.length > 0 ? (
+                                    <>
+                                        {filteredData?.map(
+                                            (item, index) => (
+                                                <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
+                                                    <div className="flex-col w-full">
+                                                        <div className="text-xl font-semibold text-[#17506B] mb-1">
+                                                            {item.ItemName}
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold">
+                                                            <span>
+                                                                Quy cách:{" "}
+                                                            </span>
+                                                            <span className="font-normal">
+                                                                {item.CDay}*
+                                                                {item.CRong}*
+                                                                {item.CDai}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold mb-2">
+                                                            <span>
+                                                                Số lượng:{" "}
+                                                            </span>
+                                                            <span className="font-normal">
+                                                                {parseInt(
+                                                                    item.Quantity
+                                                                )}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="mt-3 flex items-center w-full pl-3 ">
+                                                            <div className="space-y-3 border-l-2 border-dashed border-gray-400 w-full">
+                                                                <div className="relative w-full">
+                                                                    <FaArrowDown className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-blue-600 p-1" />
+                                                                    <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                        <div className="flex-col  ">
+                                                                            <div className="font-medium text-[15px]">
+                                                                                Người
+                                                                                giao:{" "}
+                                                                            </div>
+                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                                {
+                                                                                    item.NguoiGiao
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex text-gray-500 space-x-2 items-center">
+                                                                            <div>
+                                                                                {
+                                                                                    item.ngaygiao
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="relative w-full ">
+                                                                    {item.NguoiNhan ? (
+                                                                        <>
+                                                                            <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
+                                                                            <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                                <div className="flex-col ">
+                                                                                    <div className="font-medium text-[15px]">
+                                                                                        Người
+                                                                                        nhận:{" "}
+                                                                                    </div>
+                                                                                    <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                                        {
+                                                                                            item.NguoiNhan
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex text-gray-500 space-x-2 items-center">
+                                                                                    <div>
+                                                                                        {
+                                                                                            item.ngaynhan
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <FaExclamation className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-orange-500 p-1" />
+                                                                            <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                                <div className="font-medium text-[15px]">
+                                                                                    Sản
+                                                                                    phẩm
+                                                                                    đang
+                                                                                    chờ
+                                                                                    nhận.
+                                                                                </div>
+                                                                            </div>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
+                                        <div className="pb-3"></div>
+                                    </>
+                                ) : (
+                                    <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                        Không có dữ liệu để hiển thị.
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
-                {/* <div className="py-4"></div> */}
             </div>
         </Layout>
     );

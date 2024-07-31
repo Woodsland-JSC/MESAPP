@@ -48,8 +48,26 @@ class ReportController extends Controller
         }
     
         $data = $query->get();
-    
-        return response()->json($data);
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'".implode("','", $itemdistinct->toArray())."'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+        
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+        
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+            return $item;
+        });
+        
+        return response()->json($updatedData);
     }  
 
     //báo cáo xếp chờ xấy
@@ -85,11 +103,29 @@ class ReportController extends Controller
             // where beetwen
             $query->whereRaw('DATE(created_at) BETWEEN ? AND ?', [$fromDate, $ToDate]);
         }
+        
         // Get the results
         $data = $query->get();
-
-        // Return the JSON response with the requested status code
-        return response()->json($data);
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'".implode("','", $itemdistinct->toArray())."'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+        
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+        
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+            return $item;
+        });
+        
+        return response()->json($updatedData);
     }
     function xepsay(Request $request){
         $fromDate = $request->input('fromDate');
@@ -106,9 +142,26 @@ class ReportController extends Controller
     
         // Get the results
         $data = $query->get();
-
-        // Return the JSON response with the requested status code
-        return response()->json($data);
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'".implode("','", $itemdistinct->toArray())."'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+        
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+        
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+            return $item;
+        });
+        
+        return response()->json($updatedData);
     }
     
     function bienbanvaolo(Request $request){
@@ -128,8 +181,26 @@ class ReportController extends Controller
         }
         // Get the results
         $data = $query->get();
-        // Return the JSON response with the requested status code
-        return response()->json($data);
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'".implode("','", $itemdistinct->toArray())."'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+        
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+        
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+            return $item;
+        });
+        
+        return response()->json($updatedData);
     }
     /** chế biến gỗ */
         
@@ -157,8 +228,25 @@ class ReportController extends Controller
       
         // Get the results
         $data = $query->get();
-
-        // Return the JSON response with the requested status code
-        return response()->json($data);
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'".implode("','", $itemdistinct->toArray())."'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+        
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+        
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+            return $item;
+        });
+        
+        return response()->json($updatedData);
     }
 }

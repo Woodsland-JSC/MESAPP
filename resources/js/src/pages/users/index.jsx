@@ -500,7 +500,6 @@ function Users() {
                                             suppressRowClickSelection={true}
                                             groupSelectsChildren={true}
                                             rowSelection={"multiple"}
-                                            rowGroupPanelShow={"always"}
                                             pivotPanelShow={"always"}
                                             pagination={true}
                                             paginationPageSize={20}
@@ -602,7 +601,6 @@ function Users() {
                                             suppressRowClickSelection={true}
                                             groupSelectsChildren={true}
                                             rowSelection={"multiple"}
-                                            rowGroupPanelShow={"always"}
                                             pivotPanelShow={"always"}
                                             pagination={true}
                                             paginationPageSize={20}
