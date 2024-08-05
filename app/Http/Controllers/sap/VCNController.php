@@ -1338,6 +1338,7 @@ class VCNController extends Controller
                     'SPDICH' => $row['SPDICH'],
                     'NameSPDich' => $row['NameSPDich'],
                     'MaThiTruong' => $row['MaThiTruong'],
+                    'QuyCach2' => $row['QuyCach2'],
                     'Details' => [],
                 ];
             }
@@ -1347,7 +1348,6 @@ class VCNController extends Controller
             $details = [
                 'ItemChild' => $row['ItemChild'],
                 'ChildName' => $row['ChildName'],
-                'QuyCach2' => $row['QuyCach2'],
                 'Version' => $row['Version'],
                 'ProdType' => $row['ProType'],
                 'CDay' => $row['CDay'],
@@ -1511,7 +1511,7 @@ class VCNController extends Controller
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
-
+            
             // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
@@ -1531,6 +1531,7 @@ class VCNController extends Controller
             // Lấy công đoạn hiện tại
             $CongDoan = null;
             foreach ($results as $result) {
+               
                 $U_CDOAN = $result['U_CDOAN'];
 
                 if ($CongDoan === null) {
@@ -1544,7 +1545,7 @@ class VCNController extends Controller
             // laays stock item father
             $query2 = 'call UV_WEB_StockRong(?)';
             $stmt = odbc_prepare($conDB, $query2);
-
+           
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
@@ -1561,8 +1562,9 @@ class VCNController extends Controller
                 $TotalFather=0;
             }
             else{
-                $TotalFather = $stockFather[0]['Quantity'];
+                $TotalFather = $stockFather[0]['Qty'];
             }
+        
             // Lấy dữ liệu tồn Itemfather cho việc xuất nguyên liệu rong
             $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
             ->where('deleted', 0)
@@ -1605,6 +1607,7 @@ class VCNController extends Controller
                 'b.ItemCode'
             )
             ->get();
+          
             //data noti
             $notification = NotiReceiptVCN::query()
             ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
@@ -1683,6 +1686,7 @@ class VCNController extends Controller
                 return response()->json([
                     'CongDoan' => $CongDoan,
                     'notifications'=> null,
+                    'FatherStock'=>$TotalFather,
                     'stocks' => $results,
                     'Factorys' => $factory
                 ], 200);
@@ -1695,6 +1699,7 @@ class VCNController extends Controller
             ], 500);
         }
     }
+
     function acceptV2 (Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2189,7 +2194,6 @@ class VCNController extends Controller
             'Data.*.CDay' => 'required|numeric',
             'Data.*.CRong' => 'required|numeric',
             'Data.*.CDai' => 'required|numeric',
-            'Data.*.Team' => 'required|string|max:254',
         ]);
         
         // Check if validation fails
@@ -2234,7 +2238,7 @@ class VCNController extends Controller
                         'Quantity' => $dt['CompleQty'],
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
                         'Team' => $request->Team,
-                        'NextTeam' => $dt['NextTeam'],
+                        'NextTeam' => $request->NextTeam,
                         'CDay'=>$dt['CDay'],
                         'CRong'=>$dt['CRong'],
                         'CDai'=>$dt['CDai']

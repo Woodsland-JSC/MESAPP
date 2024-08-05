@@ -41,7 +41,7 @@ const productionApi = {
             )
             .join("&");
 
-        const url = `/vcn/receipts-productions?${queryStringParams}`;
+        const url = `v2/vcn/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
     getFinishedGoodsDetail: (params) => {
@@ -81,7 +81,7 @@ const productionApi = {
             )
             .join("&");
 
-        const url = `/vcn/receipts-detail-rong?${queryStringParams}`;
+        const url = `v2/vcn/receipts-detail-rong?${queryStringParams}`;
         return axiosClient().get(url);
     },
     enterFinishedGoodsAmountCBG: (data) => {
@@ -89,13 +89,13 @@ const productionApi = {
         return axiosClient().post(url, data);
     },
     enterFinishedGoodsAmountVCN: (data) => {
-        // const url = `/v2/production/receipts-production`;
+        // const url = `/v2/vcn/production/receipts-production`;
         const url = `/vcn/receipts-production`;
         return axiosClient().post(url, data);
     },
     enterFinishedRongAmountVCN: (data) => {
         // const url = `/v2/production/receipts-production`;
-        const url = `/vcn/receipts-productions-rong`;
+        const url = `v2/vcn/receipts-productions-rong`;
         return axiosClient().post(url, data);
     },
     deleteReceiptCBG: (payload) => {
