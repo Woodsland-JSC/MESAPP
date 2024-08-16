@@ -324,8 +324,10 @@ class QCController extends Controller
             case 'HG':
                 $toQC = 'HG-QC';
                 break;
-            case 'TQ':
-                $toQC = 'TQ-QC';
+            case 'YS1':
+                $toQC = 'YS1-QC';
+            case 'TB':
+                $toQC = 'TB-QC';    
                 break;
         }
 

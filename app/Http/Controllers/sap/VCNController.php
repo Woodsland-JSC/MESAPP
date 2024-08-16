@@ -1542,7 +1542,8 @@ class VCNController extends Controller
                     }
                 }
             }
-            // laays stock item father
+            
+            //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
             $query2 = 'call UV_WEB_StockRong(?)';
             $stmt = odbc_prepare($conDB, $query2);
            
@@ -1565,12 +1566,14 @@ class VCNController extends Controller
                 $TotalFather = $stockFather[0]['Qty'];
             }
         
-            // Lấy dữ liệu tồn Itemfather cho việc xuất nguyên liệu rong
+            // Lấy dữ liệu đã ghi nhận trên web
             $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
             ->where('deleted', 0)
             ->where('confirm', 0)
             ->where('type', -1)
             ->sum('QtyIssueRong');
+
+            // Trả về tồn thực tế
             $TotalFather=$TotalFather-$databtp;
 
             // lấy data dở dàng 
@@ -1611,15 +1614,21 @@ class VCNController extends Controller
             //data noti
             $notification = NotiReceiptVCN::query()
             ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
+            ->join('users as c', 'notireceiptVCN.CreatedBy', '=', 'c.id')
             ->select(
                 'notireceiptVCN.id',
                 'version',
                 'LSX',
                 'ProdType',
                 'FatherCode',
+                'SubItemCode',
+                'SubItemName',
+                'NotiReceiptVCN.created_at as CreatedAt',
                 'b.ItemCode',
                 'b.ItemName',
                 'b.type',
+                'QtyIssueRong',
+                DB::raw("CONCAT(c.first_name, ' ', c.last_name) as fullname"),
                 DB::raw('SUM(b.Quantity) as Quantity') // Sử dụng SUM để tính tổng số lượng
             )
             ->where('deleted', 0)
@@ -1633,15 +1642,23 @@ class VCNController extends Controller
                 'LSX',
                 'ProdType',
                 'FatherCode',
+                'SubItemCode',
+                'SubItemName',
+                'CreatedAt',
                 'b.ItemCode',
                 'b.ItemName',
                 'b.type',
+                'fullname',     
             )
             ->get()
             ->groupBy('id')  // Nhóm theo id
             ->map(function ($items, $id) {
                 return [
                     'notiID' => $id,
+                    'QtyIssueRong'=> $items[0]['QtyIssueRong'],
+                    'SubItemName' => $items[0]['SubItemName'],
+                    'fullname'=> $items[0]['fullname'],
+                    'CreatedAt' => $items[0]['CreatedAt'],
                     'detail' => $items->map(function ($item) {
                         return [
                             'ItemCode' => $item->ItemCode,
@@ -1682,7 +1699,6 @@ class VCNController extends Controller
                     'notifications' => $notification
                 ], 200);
             } else {
-           
                 return response()->json([
                     'CongDoan' => $CongDoan,
                     'notifications'=> null,
@@ -2185,7 +2201,10 @@ class VCNController extends Controller
             'CongDoan' => 'required|string|max:254',
             'version' => 'required|string|max:254',
             'ProdType' => 'required|string|max:254',
-            'FatherCode' => 'required|string|max:254',
+            // 'FatherCode' => 'required|string|max:254',
+            // 'ItemChild' => 'required|string|max:254',
+            'SubItemCode' => 'required|string|max:254',
+            'SubItemName' => 'required|string|max:254',
             'NextTeam' => 'required|string|max:254',
             'team' => 'required|string|max:254',
             'Data.*.ItemCode' => 'required|string|max:254',
@@ -2214,20 +2233,22 @@ class VCNController extends Controller
              $notidata=notireceiptVCN::create([
                 'LSX' => $request->LSX,
                 'MaThiTruong' => $request->MaThiTruong ?? null,
-                'FatherCode' =>$request->FatherCode,
+                'FatherCode' =>$request->SubItemCode,
+                'SubItemCode' =>$request->SubItemCode,
+                'SubItemName' =>$request->SubItemName,
                 'team' => $request->team,
                 'NextTeam' => $request->NextTeam,
                 'CongDoan' => $request->CongDoan,
-                'type' => -1,// công đoạn rong
+                'type' => 1,
                 'openQty' => 0,
                 'ProdType' => $request->ProdType,
                 'version' => $request->version,
                 'isRONG'=>true,
+                'QtyIssueRong'=>$request->QtyIssue,
                 'CreatedBy' => Auth::user()->id,
             ]);
 
             foreach ($request->Data as $dt) {
-
                 if ($dt['CompleQty'] > 0) {
                     ChiTietRong::create([
                         'baseID'=>$notidata->id,
@@ -2339,8 +2360,7 @@ class VCNController extends Controller
                     $quantity = $allocate['Allocated'];
                     if (isset($allocates[$docEntry])) {
                         // Append the item to DocumentLines if DocEntry exists
-                        $allocates[$docEntry]['DocumentLines'][] = [
-                           
+                        $allocates[$docEntry]['DocumentLines'][] = [    
                             "Qty" => $quantity,
                             "BaseEntry" => $docEntry,
                             'BaseLine'=> $allocate['LineNum'],

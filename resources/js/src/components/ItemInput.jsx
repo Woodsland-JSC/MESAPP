@@ -48,6 +48,7 @@ import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
 import { MdDangerous } from "react-icons/md";
 import { HiChevronDoubleDown } from "react-icons/hi";
+import { PiArrowFatLinesDownFill } from "react-icons/pi";
 
 const ItemInput = ({
     data,
@@ -188,6 +189,7 @@ const ItemInput = ({
                             value: item.Factory,
                             label: item.FactoryName,
                         })),
+                        notifications: res.notifications,
                         stocks: res.stocks,
                         SubItemCode: item.ChildName,
                         SubItemName: item.ItemChild,
@@ -202,7 +204,7 @@ const ItemInput = ({
                         CDay: stock.CDay,
                         CRong: stock.CRong,
                         CDai: stock.CDai,
-                        factories: ""
+                        factories: "",
                     }));
                     console.log("Kết quả tạo mảng rong: ", RONGReceiptData);
                     setRongData(RONGReceiptData);
@@ -364,7 +366,8 @@ const ItemInput = ({
                     CongDoan: choosenItem.CDOAN,
                     version: choosenItem.Version,
                     ProdType: "LVL",
-                    FatherCode: choosenItem.ItemChild,
+                    SubItemCode: choosenItem.ItemChild,
+                    SubItemName: choosenItem.ChildName,
                     team: choosenItem.TO,
                     NextTeam: choosenItem.TOTT,
                     Data: rongData,
@@ -587,6 +590,31 @@ const ItemInput = ({
         }
     };
 
+    function transformDetail(details) {
+        const result = [];
+    
+        details.forEach(item => {
+            let existingItem = result.find(detail => detail.ItemCode === item.ItemCode && detail.ItemName === item.ItemName);
+            
+            if (!existingItem) {
+                existingItem = {
+                    ItemCode: item.ItemCode,
+                    ItemName: item.ItemName
+                };
+                result.push(existingItem);
+            }
+    
+            if (item.Type === 0) {
+                existingItem.Qty_Type0 = item.Qty;
+            } else if (item.Type === 1) {
+                existingItem.Qty_Type1 = item.Qty;
+            }
+        });
+    
+        return result;
+    }
+    
+
     const handleDeleteProcessingReceipt = async (item) => {
         setDeleteProcessingLoading(true);
         if (variant === "CBG") {
@@ -725,10 +753,10 @@ const ItemInput = ({
                         ...prev,
                         stocks: res.stocks.map((stock) => ({
                             ...stock,
-                            notifications: stock.notifications.filter(
-                                (notification) => notification.id !== payload.id
-                            ),
                         })),
+                        notifications: res.notifications.filter(
+                            (notification) => notification.id !== payload.id
+                        ),
                     }));
                 } catch (error) {
                     toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -1011,14 +1039,17 @@ const ItemInput = ({
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
                                 {selectedItemDetails?.CongDoan === "RO" ? (
                                     <div className="xl:mx-0 lg:mx-0 md:mx-0 mx-3">
-                                        <div className="flex pt-4 xl:px-0 md:px-0 lg:px-0">
-                                            <div className="">
-                                                <label className="font-semibold">
-                                                    Bán thành phẩm:
-                                                </label>
+                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
+                                           <div className="w-full h-fit space-y-2">
+                                                <div className="font-bold text-xl text-[#155979]">
+                                                    Bán thành phẩm rong
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="pt-1 pb-2 ">
+                                        <div className="pt-2 pb-2 ">
+                                            {/* <div className="font-semibold pb-2">
+                                                    Số lượng tồn tại tổ:
+                                            </div> */}
                                             <div className="w-full flex items-center justify-between rounded-xl p-3 bg-blue-100">
                                                 <div className="w-[90%]">
                                                     <div className="text-xs m-0 text-[#647C9C]">
@@ -1092,12 +1123,13 @@ const ItemInput = ({
                                             )}
                                         </Box>
 
-                                        <div className="border-t-2 border-dashed border-gray-200 mt-3"></div>
-                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 !pr-5">
-                                            <div className=" flex justify-between items-center w-full">
-                                                <label className="font-medium">
-                                                    Thành phẩm công đoạn rong:
-                                                </label>
+                                        <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
+                                        
+                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
+                                           <div className="w-full h-fit space-y-2">
+                                                <div className="font-bold text-xl text-[#155979]">
+                                                    Thành phẩm rong
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1174,8 +1206,8 @@ const ItemInput = ({
                                                                 <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-2 pr-4 justify-between">
                                                                     <Text className="font-semibold">
                                                                         Số lượng
-                                                                        tối đa
-                                                                        có thể
+                                                                        còn lại
+                                                                        phải sản
                                                                         xuất:
                                                                     </Text>
                                                                     <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
@@ -1291,139 +1323,6 @@ const ItemInput = ({
                                                                         lỗi
                                                                     </div>
                                                                 </div>
-                                                                <div className="border-b border-gray-200">
-                                                                    {/* Số lượng ghi nhận lỗi */}
-                                                                    {stockItem?.notifications &&
-                                                                        stockItem?.notifications.filter(
-                                                                            (
-                                                                                notif
-                                                                            ) =>
-                                                                                notif.confirm ==
-                                                                                    0 &&
-                                                                                notif.type ==
-                                                                                    1
-                                                                        )
-                                                                            ?.length >
-                                                                            0 &&
-                                                                        stockItem?.notifications.filter(
-                                                                            (
-                                                                                notif
-                                                                            ) =>
-                                                                                notif.confirm ==
-                                                                                    0 &&
-                                                                                notif.type ==
-                                                                                    1
-                                                                        ) && (
-                                                                            <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
-                                                                                <Text className="font-semibold">
-                                                                                    Số
-                                                                                    lượng
-                                                                                    lỗi
-                                                                                    đã
-                                                                                    ghi
-                                                                                    nhận:{" "}
-                                                                                </Text>{" "}
-                                                                            </div>
-                                                                        )}
-                                                                    {stockItem?.notifications &&
-                                                                        stockItem?.notifications.filter(
-                                                                            (
-                                                                                notif
-                                                                            ) =>
-                                                                                notif.confirm ==
-                                                                                    0 &&
-                                                                                notif.type ==
-                                                                                    1
-                                                                        )
-                                                                            ?.length >
-                                                                            0 &&
-                                                                        stockItem?.notifications
-                                                                            .filter(
-                                                                                (
-                                                                                    notif
-                                                                                ) =>
-                                                                                    notif.confirm ==
-                                                                                        0 &&
-                                                                                    notif.type ==
-                                                                                        1
-                                                                            )
-                                                                            .map(
-                                                                                (
-                                                                                    item,
-                                                                                    index
-                                                                                ) => (
-                                                                                    <div
-                                                                                        key={
-                                                                                            "Error_" +
-                                                                                            index
-                                                                                        }
-                                                                                        className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
-                                                                                    >
-                                                                                        {/*  */}
-                                                                                        <div className="flex flex-col">
-                                                                                            <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
-                                                                                                {Number(
-                                                                                                    item?.Quantity
-                                                                                                )}
-                                                                                            </div>
-                                                                                            <Text className="font-semibold text-[15px] ">
-                                                                                                Người
-                                                                                                giao:{" "}
-                                                                                                <span className="text-red-700">
-                                                                                                    {item?.last_name +
-                                                                                                        " " +
-                                                                                                        item?.first_name}
-                                                                                                </span>
-                                                                                            </Text>
-                                                                                            <div className="flex text-sm">
-                                                                                                <Text className=" font-medium text-gray-600">
-                                                                                                    Thời
-                                                                                                    gian
-                                                                                                    giao:{" "}
-                                                                                                </Text>
-                                                                                                <span className="ml-1 text-gray-600">
-                                                                                                    {moment(
-                                                                                                        item?.created_at,
-                                                                                                        "YYYY-MM-DD HH:mm:ss"
-                                                                                                    ).format(
-                                                                                                        "DD/MM/YYYY"
-                                                                                                    ) ||
-                                                                                                        ""}{" "}
-                                                                                                    {moment(
-                                                                                                        item?.created_at,
-                                                                                                        "YYYY-MM-DD HH:mm:ss"
-                                                                                                    ).format(
-                                                                                                        "HH:mm:ss"
-                                                                                                    ) ||
-                                                                                                        ""}
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="flex gap-x-6 items-center">
-                                                                                            <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit">
-                                                                                                {Number(
-                                                                                                    item?.Quantity
-                                                                                                )}
-                                                                                            </div>
-                                                                                            <button
-                                                                                                onClick={() => {
-                                                                                                    onDeleteProcessingDialogOpen();
-                                                                                                    setSelectedDelete(
-                                                                                                        item?.id
-                                                                                                    );
-                                                                                                    setDialogType(
-                                                                                                        "qc"
-                                                                                                    );
-                                                                                                }}
-                                                                                                className="rounded-full p-2 duration-200 ease hover:bg-red-100"
-                                                                                            >
-                                                                                                <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                )
-                                                                            )}
-                                                                </div>
                                                                 <Box className="px-2 pt-2">
                                                                     <label className="font-semibold ">
                                                                         Số lượng
@@ -1433,31 +1332,73 @@ const ItemInput = ({
                                                                     <NumberInput
                                                                         step={1}
                                                                         className="mt-2"
-                                                                        value={rongData[stockIndex].RejectQty}
-                                                                        onChange={(value) => {
-                                                                            if (value === 0 || !value || value === NaN) {
-                                                                            setRongData((prevData) => {
-                                                                                const newData = [...prevData];
-                                                                                newData[stockIndex].RejectQty = "";
-                                                                                newData[stockIndex].factories = "";
-                                                                                return newData;
-                                                                            });
-                                                                            console.log("dữ liệu cập nhật:", rongData);
+                                                                        value={
+                                                                            rongData[
+                                                                                stockIndex
+                                                                            ]
+                                                                                .RejectQty
+                                                                        }
+                                                                        onChange={(
+                                                                            value
+                                                                        ) => {
+                                                                            if (
+                                                                                value ===
+                                                                                    0 ||
+                                                                                !value ||
+                                                                                value ===
+                                                                                    NaN
+                                                                            ) {
+                                                                                setRongData(
+                                                                                    (
+                                                                                        prevData
+                                                                                    ) => {
+                                                                                        const newData =
+                                                                                            [
+                                                                                                ...prevData,
+                                                                                            ];
+                                                                                        newData[
+                                                                                            stockIndex
+                                                                                        ].RejectQty =
+                                                                                            "";
+                                                                                        newData[
+                                                                                            stockIndex
+                                                                                        ].factories =
+                                                                                            "";
+                                                                                        return newData;
+                                                                                    }
+                                                                                );
+                                                                                console.log(
+                                                                                    "dữ liệu cập nhật:",
+                                                                                    rongData
+                                                                                );
                                                                             } else {
-                                                                            setRongData((prevData) => {
-                                                                                const newData = [...prevData];
-                                                                                newData[stockIndex].RejectQty = value;
-                                                                                return newData;
-                                                                            });
-                                                                            console.log("dữ liệu cập nhật:", rongData);
+                                                                                setRongData(
+                                                                                    (
+                                                                                        prevData
+                                                                                    ) => {
+                                                                                        const newData =
+                                                                                            [
+                                                                                                ...prevData,
+                                                                                            ];
+                                                                                        newData[
+                                                                                            stockIndex
+                                                                                        ].RejectQty =
+                                                                                            value;
+                                                                                        return newData;
+                                                                                    }
+                                                                                );
+                                                                                console.log(
+                                                                                    "dữ liệu cập nhật:",
+                                                                                    rongData
+                                                                                );
                                                                             }
                                                                         }}
-                                                                        >
-                                                                    <NumberInputField />
-                                                                    <NumberInputStepper>
-                                                                        <NumberIncrementStepper />
-                                                                        <NumberDecrementStepper />
-                                                                    </NumberInputStepper>
+                                                                    >
+                                                                        <NumberInputField />
+                                                                        <NumberInputStepper>
+                                                                            <NumberIncrementStepper />
+                                                                            <NumberDecrementStepper />
+                                                                        </NumberInputStepper>
                                                                     </NumberInput>
                                                                 </Box>
                                                                 <Box className="px-2 pt-3">
@@ -1470,24 +1411,66 @@ const ItemInput = ({
                                                                     <Select
                                                                         className="mt-2 mb-2"
                                                                         placeholder="Lựa chọn"
-                                                                        options={selectedItemDetails?.factories}
+                                                                        options={
+                                                                            selectedItemDetails?.factories
+                                                                        }
                                                                         isClearable
                                                                         isSearchable
-                                                                        value={rongData[stockIndex].factories || ""}
-                                                                        onChange={(value) => {
-                                                                            if (!rongData[stockIndex].RejectQty || rongData[stockIndex].RejectQty  < 1) {
-                                                                                toast.error("Vui lòng khai báo số lượng lỗi.");
-                                                                                setRongData((prevData) => {
-                                                                                    const newData = [...prevData];
-                                                                                    newData[stockIndex].factories = "";
-                                                                                    return newData;
-                                                                                });
+                                                                        value={
+                                                                            rongData[
+                                                                                stockIndex
+                                                                            ]
+                                                                                .factories ||
+                                                                            ""
+                                                                        }
+                                                                        onChange={(
+                                                                            value
+                                                                        ) => {
+                                                                            if (
+                                                                                !rongData[
+                                                                                    stockIndex
+                                                                                ]
+                                                                                    .RejectQty ||
+                                                                                rongData[
+                                                                                    stockIndex
+                                                                                ]
+                                                                                    .RejectQty <
+                                                                                    1
+                                                                            ) {
+                                                                                toast.error(
+                                                                                    "Vui lòng khai báo số lượng lỗi."
+                                                                                );
+                                                                                setRongData(
+                                                                                    (
+                                                                                        prevData
+                                                                                    ) => {
+                                                                                        const newData =
+                                                                                            [
+                                                                                                ...prevData,
+                                                                                            ];
+                                                                                        newData[
+                                                                                            stockIndex
+                                                                                        ].factories =
+                                                                                            "";
+                                                                                        return newData;
+                                                                                    }
+                                                                                );
                                                                             } else {
-                                                                                setRongData((prevData) => {
-                                                                                    const newData = [...prevData];
-                                                                                    newData[stockIndex].factories = value;
-                                                                                    return newData;
-                                                                                });
+                                                                                setRongData(
+                                                                                    (
+                                                                                        prevData
+                                                                                    ) => {
+                                                                                        const newData =
+                                                                                            [
+                                                                                                ...prevData,
+                                                                                            ];
+                                                                                        newData[
+                                                                                            stockIndex
+                                                                                        ].factories =
+                                                                                            value;
+                                                                                        return newData;
+                                                                                    }
+                                                                                );
                                                                             }
                                                                         }}
                                                                     />
@@ -1495,10 +1478,57 @@ const ItemInput = ({
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="border border-dashed rounded-b-xl border-gray-300"></div>
+                                                    
                                                 </div>
                                             )
                                         )}
+                                        {selectedItemDetails?.notifications?.length > 0 && (
+                                            <>
+                                                <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
+                                                <div> 
+                                                    <div className="text-[#17506B] text-xl font-bold my-3">Lịch sử ghi nhận</div>
+                                                    <div className="space-y-4">
+                                                        {selectedItemDetails?.notifications?.map((item, index) => (
+                                                            <div className="p-2 px-4 rounded-lg bg-gray-50 border border-gray-300">
+                                                                <div className="">
+                                                                    <div className="text-[#235973] text-lg font-semibold">{item.QtyIssueRong}</div>
+                                                                    <div className="font-medium">{item.SubItemName}</div>
+                                                                </div>
+
+                                                                <div className="flex space-x-5">
+                                                                    <div className="text-sm">Tạo bởi: <span className="font-medium text-[#235973]">{item.fullname}</span></div>
+                                                                    <div className="text-sm">Ngày giờ tạo: <span className="font-medium text-[#235973]">{item.CreatedAt}</span></div>
+                                                                </div>
+                                                                
+                                                                <div className="my-2 border-b border-gray-300"></div>
+                                                                
+                                                                <div className="space-y-2">
+                                                                    {transformDetail(item.detail).map((detailItem, detailIndex) => (
+                                                                        <div className="">
+                                                                            <div className="font-semibold">{detailItem.ItemName}</div>
+                                                                            <div className="text-gray-500 flex justify-between">
+                                                                                <div>Số lượng ghi nhận sản lượng:</div>
+                                                                                <div>{parseInt(detailItem.Qty_Type0)}</div> 
+                                                                            </div>
+                                                                            {detailItem.Qty_Type1 && (
+                                                                                <div className="text-gray-500 flex justify-between">
+                                                                                    <div>Số lượng ghi nhận lỗi:</div>
+                                                                                    <div>{parseInt(detailItem.Qty_Type1)}</div> 
+                                                                                </div>
+                                                                            )}
+                                                                            
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                
+                                                                
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                        
                                     </div>
                                 ) : (
                                     <>
