@@ -326,6 +326,7 @@ class QCController extends Controller
                 break;
             case 'YS1':
                 $toQC = 'YS1-QC';
+                break;
             case 'TB':
                 $toQC = 'TB-QC';    
                 break;
