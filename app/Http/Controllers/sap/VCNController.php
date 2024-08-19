@@ -48,6 +48,9 @@ class VCNController extends Controller
             $toqc = 'YS2-QC';
         } else if (Auth::user()->plant == 'CH') {
             $toqc = 'CH-QC';
+        }
+        else if (Auth::user()->plant == 'YS1') {
+                $toqc = 'YS1-QC';
         } else {
             $toqc = 'HG-QC';
         }
@@ -2222,8 +2225,11 @@ class VCNController extends Controller
         $toqc = "";
         if (Auth::user()->plant == 'TH') {
             $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'TQ') {
-            $toqc = 'TQ-QC';
+        } else if (Auth::user()->plant == 'YS1') {
+            $toqc = 'YS1-QC';
+        }
+        else if (Auth::user()->plant == 'YS2') {
+            $toqc = 'YS2-QC';
         } else {
             $toqc = 'HG-QC';
         }
@@ -2239,7 +2245,7 @@ class VCNController extends Controller
                 'team' => $request->team,
                 'NextTeam' => $request->NextTeam,
                 'CongDoan' => $request->CongDoan,
-                'type' => 1,
+                'type' => -1,
                 'openQty' => 0,
                 'ProdType' => $request->ProdType,
                 'version' => $request->version,
@@ -2266,8 +2272,25 @@ class VCNController extends Controller
                     ]);
                 }
                 if ($dt['RejectQty'] > 0) {
+                    $noti=notireceiptVCN::create([
+                        'LSX' => $request->LSX,
+                        'MaThiTruong' => $request->MaThiTruong ?? null,
+                        'FatherCode' =>$request->SubItemCode,
+                        'SubItemCode' =>$request->SubItemCode,
+                        'SubItemName' =>$request->SubItemName,
+                        'team' => $request->team,
+                        'NextTeam' => $request->NextTeam,
+                        'CongDoan' => $request->CongDoan,
+                        'type' => -1,
+                        'openQty' => 0,
+                        'ProdType' => $request->ProdType,
+                        'version' => $request->version,
+                        'isRONG'=>true,
+                        'QtyIssueRong'=>$request->QtyIssue,
+                        'CreatedBy' => Auth::user()->id,
+                    ]);
                     ChiTietRong::create([
-                        'baseID'=>$notidata->id,
+                        'baseID'=>$noti->id,
                         'ItemCode' => $dt['ItemCode'],
                         'ItemName' => $dt['ItemName'],
                         'type' => 1,
