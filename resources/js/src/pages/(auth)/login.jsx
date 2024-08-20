@@ -98,7 +98,7 @@ function Login() {
             toast.success("Đăng nhập thành công");
             navigate("/");
         } catch (error) {
-            toast.error("Đăng nhập thất bại");
+            toast.error(error.response.data.message);
             console.error("Login failed:", error);
         }
         setLoading(false);

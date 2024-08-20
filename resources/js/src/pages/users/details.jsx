@@ -375,12 +375,10 @@ function User() {
                     toast.success("Điều chỉnh thông tin thành công.");
                 }
                 if (user.id == userId && newPassword) {
-                    // if (newPassword) {
                     handleSignOut();
                     setLoading(false);
                     toast.success("Điều chỉnh thông tin thành công.");
                     return;
-                    // }
                 }
                 getCurrentUser();
                 setLoading(false);
@@ -409,6 +407,24 @@ function User() {
             return null;
         }
     };
+    // Load data cho avatar
+    useEffect(() => {
+        if (input.lastName && input.firstName && !avatar.file) {
+            const tempName =
+                input.lastName.trim().charAt(0) +
+                input.firstName.trim().charAt(0);
+            const res = (async () => {
+                const base64 = await getAutoAvatar(tempName);
+                // console.log("Auto ava: ", base64);
+                setAvatar({ ...avatar, autoImg: base64 });
+            })();
+            setAvatarLoading(false);
+        }
+
+        if (!input.lastName && !input.firstName) {
+            setAvatar({ ...avatar, imgSrc: null, autoImg: DefaultAvatar });
+        }
+    }, [input]);
 
     const getCurrentUser = useCallback(async () => {
         try {
@@ -462,7 +478,6 @@ function User() {
                 setIsFirstLoading(false);
             }
 
-            // const userData = await res;
             setInput(userData);
             setOriginalInfo(userData);
 
@@ -484,41 +499,7 @@ function User() {
         }
     }, [userId]);
 
-    useEffect(() => {
-        if (input.lastName && input.firstName && !avatar.file) {
-            const tempName =
-                input.lastName.trim().charAt(0) +
-                input.firstName.trim().charAt(0);
-            const res = (async () => {
-                const base64 = await getAutoAvatar(tempName);
-                // console.log("Auto ava: ", base64);
-                setAvatar({ ...avatar, autoImg: base64 });
-            })();
-            setAvatarLoading(false);
-        }
-
-        if (!input.lastName && !input.firstName) {
-            setAvatar({ ...avatar, imgSrc: null, autoImg: DefaultAvatar });
-        }
-    }, [input]);
-
-    useEffect(() => {
-        const handleBeforeUnload = (event) => {
-            if (hasChanged) {
-                const message =
-                    "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa được lưu.";
-                event.returnValue = message;
-                return message;
-            }
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [hasChanged]);
-
+    // Lấy data chi nhánh, role và SAP ID
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -542,7 +523,7 @@ function User() {
 
                 const rolesOptions = rolesRes.map((item) => ({
                     value: item.id,
-                    label: item.name
+                    label: item.name,
                 }));
                 setRoles(rolesOptions);
 
@@ -571,9 +552,38 @@ function User() {
         };
     }, []);
 
+    const [selectedSapUser, setSelectedSapUser] = useState(null);
     useEffect(() => {
-        // console.log("Hello");
-        // if (isFirstLoading) {
+        if (currentUser && sapId.length > 0) {
+            const defaultUser = sapId.find(
+                (id) => id.USER_CODE === currentUser.sap_id
+            );
+            if (defaultUser) {
+                setSelectedSapUser(defaultUser);
+            }
+        }
+    }, [currentUser, sapId]);
+
+    // Thông báo dữ liệu chưa được lưu
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (hasChanged) {
+                const message =
+                    "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa được lưu.";
+                event.returnValue = message;
+                return message;
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [hasChanged]);
+
+    // Load danh sách nhà máy khi user chọn chi nhánh
+    useEffect(() => {
         const selectedBranch = input.branch;
 
         const getFactoriesByBranchId = async () => {
@@ -595,15 +605,12 @@ function User() {
                     setInput((prev) => ({ ...prev, factory: "" }));
                 } else {
                     setFactories([]);
-                    // factorySelectRef.current?.selectOption([]);
                 }
             } catch (error) {
                 console.error(error);
             }
             setFactoryLoading(false);
         };
-
-        // console.log("Chỗ này call api nè: ", factorySelectRef.current);
         getFactoriesByBranchId();
         // }
     }, [input.branch]);
@@ -615,18 +622,6 @@ function User() {
             document.body.classList.remove("body-no-scroll");
         }
     }, [loading]);
-
-    const [selectedSapUser, setSelectedSapUser] = useState(null);
-
-    useEffect(() => {
-        if (currentUser && sapId.length > 0) {
-          const defaultUser = sapId.find(id => id.USER_CODE === currentUser.sap_id);
-          if (defaultUser) {
-            setSelectedSapUser(defaultUser);
-          }
-        }
-      }, [currentUser, sapId]);
-    
 
     return (
         <Layout>
@@ -664,7 +659,6 @@ function User() {
                                                 d="m1 9 4-4-4-4"
                                             />
                                         </svg>
-                                        
                                     </div>
                                 </li>
                             </ol>
@@ -721,7 +715,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.lastName &&
-                                                        touched.lastName ? (
+                                                    touched.lastName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="lastName" />
                                                         </span>
@@ -755,7 +749,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.firstName &&
-                                                        touched.firstName ? (
+                                                    touched.firstName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="firstName" />
                                                         </span>
@@ -793,7 +787,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.email &&
-                                                        touched.email ? (
+                                                    touched.email ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="email" />
                                                         </span>
@@ -823,15 +817,15 @@ function User() {
                                                             setInput(
                                                                 (prev) => ({
                                                                     ...prev,
-                                                                    username: e
-                                                                        .target
-                                                                        .value,
+                                                                    username:
+                                                                        e.target
+                                                                            .value,
                                                                 })
                                                             );
                                                         }}
                                                     />
                                                     {errors.username &&
-                                                        touched.username ? (
+                                                    touched.username ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="username" />
                                                         </span>
@@ -860,7 +854,7 @@ function User() {
                                                         setInput={setInput}
                                                     />
                                                     {errors.gender &&
-                                                        touched.gender ? (
+                                                    touched.gender ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="gender" />
                                                         </span>
@@ -896,7 +890,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.password &&
-                                                        touched.password ? (
+                                                    touched.password ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="password" />
                                                         </span>
@@ -929,7 +923,7 @@ function User() {
                                                         setInput={setInput}
                                                     />
                                                     {errors.authorization &&
-                                                        touched.authorization ? (
+                                                    touched.authorization ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="authorization" />
                                                         </span>
@@ -1035,7 +1029,7 @@ function User() {
                                                     </label>
                                                 </button>
                                                 {avatar.imgSrc &&
-                                                    avatar.imgSrc !=
+                                                avatar.imgSrc !=
                                                     DefaultAvatar ? (
                                                     <span
                                                         className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
@@ -1076,10 +1070,9 @@ function User() {
                                                 }
                                                 options={sapId}
                                                 onChange={(value) => {
-
                                                     setInput((prev) => ({
                                                         ...prev,
-                                                        sapId: value
+                                                        sapId: value,
                                                     }));
                                                 }}
                                                 setInput={setInput}
@@ -1106,7 +1099,7 @@ function User() {
                                                 value="1"
                                             />
                                             {errors.integrationId &&
-                                                touched.integrationId ? (
+                                            touched.integrationId ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="integrationId" />
                                                 </span>
@@ -1171,7 +1164,7 @@ function User() {
                                                 setInput={setInput}
                                             />
                                             {errors.factory &&
-                                                touched.factory ? (
+                                            touched.factory ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="factory" />
                                                 </span>

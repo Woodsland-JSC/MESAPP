@@ -112,27 +112,47 @@ function Users() {
                 (params.data.last_name ? params.data.last_name : ""),
         },
         {
-            headerName: "Giới tính",
-            valueGetter: function (params) {
-                return params.data.gender == "male"
-                    ? "Nam"
-                    : params.data.gender == "female"
-                    ? "Nữ"
-                    : "";
-            },
+            headerName: "Mã nhân viên",
+            field: "employeeecode",
+            minWidth: 210,
+            hide: true,
+            valueGetter: (params) =>
+                (params.data.username ? params.data.username + " " : "")
         },
         { headerName: "Email", field: "email", minWidth: 170 },
-        { headerName: "Vai trò", field: "role" },
-        { headerName: "Plant", field: "plant" },
         {
-            headerName: "Ngày tạo",
-            valueGetter: function (params) {
-                return dateToDateTime(params.data.created_at) || "";
-            },
-            minWidth: 130,
+            headerName: "Chi nhánh",
+            field: "branch",
+            minWidth: 210,
+            valueGetter: (params) =>
+                (params.data.branch === "1" ?  "Woodsland" : 
+                params.data.branch === "3" ? "Woodsland Tuyên Quang" :
+                params.data.branch === "4" ? "Viforex" :
+                params.data.branch === null ? "" : "")
+        },
+        { headerName: "Nhà máy", field: "plant", minWidth: 130, },
+        {
+            headerName: "Nghiệp vụ",
+            field: "branch",
+            minWidth: 150,
+            valueGetter: (params) =>
+                (params.data.plant === "TH" ?  "CBG" : 
+                params.data.plant === "YS1" ? "CBG" :
+                params.data.plant === "YS2" ? "VCN" :
+                params.data.plant === "TB" ? "CBG" :
+                params.data.plant === "CH" ? "VCN" :
+                params.data.plant === "HG" ? "VCN" :
+                params.data.plant === null ? "" : "")
+        },
+        {
+            headerName: "SAP ID",
+            minWidth: 120,
+            valueGetter: (params) =>(params.data.sap_id || "")
+            
         },
         {
             headerName: "Chặn",
+            minWidth: 120,
             cellRenderer: (params) => {
                 return (
                     <Switch
@@ -183,6 +203,14 @@ function Users() {
                     </Link>
                 );
             },
+        },
+        {
+            headerName: "Tên Role",   
+            valueGetter: function (params) {
+                return params.data.name;
+            },
+            hide: false,
+            minWidth: 150,
         },
         {
             headerName: "Ngày tạo",
@@ -276,6 +304,7 @@ function Users() {
         hideLoadingRole();
     }, []);
 
+
     const onFirstUserDataRendered = useCallback((params) => {
         userGridRef?.current?.api?.paginationGoToPage(0);
     }, []);
@@ -295,13 +324,15 @@ function Users() {
     };
 
     const onUserFilterTextBoxChanged = useCallback(() => {
-        userGridRef?.current?.api?.setQuickFilter(
-            document.getElementById("user-search").value
-        );
+        userGridRef?.current?.api?.setGridOption(
+            "quickFilterText",
+            document.getElementById("user-search").value,
+          );
     }, []);
 
     const onRoleFilterTextBoxChanged = useCallback(() => {
-        roleGridRef?.current?.api?.setQuickFilter(
+        roleGridRef?.current?.api?.setGridOption(
+            "quickFilterText",
             document.getElementById("role-search").value
         );
     }, []);
@@ -466,8 +497,8 @@ function Users() {
                                                     <input
                                                         type="search"
                                                         id="user-search"
-                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Nhập tên user cần tìm"
+                                                        className="block w-[300px] p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg text-[14px] bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                        placeholder="Nhập tên hoặc mã nhân viên"
                                                         onInput={
                                                             onUserFilterTextBoxChanged
                                                         }
@@ -480,8 +511,8 @@ function Users() {
                                                 className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                                    <FaPlus />
-                                                    <div className="">
+                                                    <FaPlus className="w-3 h-3"/>
+                                                    <div className="text-[15px]">
                                                         Tạo User
                                                     </div>
                                                 </button>
@@ -567,8 +598,8 @@ function Users() {
                                                     <input
                                                         type="search"
                                                         id="role-search"
-                                                        className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Tìm kiếm"
+                                                        className="block w-[300px] p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 text-[14px]"
+                                                        placeholder="Tìm kiếm tên Role"
                                                         onInput={
                                                             onRoleFilterTextBoxChanged
                                                         }
@@ -581,8 +612,8 @@ function Users() {
                                                 className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                                    <FaPlus />
-                                                    <div className="">
+                                                    <FaPlus className="w-3 h-3"/>
+                                                    <div className="text-[15px]">
                                                         Tạo Role
                                                     </div>
                                                 </button>

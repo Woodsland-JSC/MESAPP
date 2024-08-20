@@ -501,40 +501,6 @@ function CreateUser() {
         };
     }, []);
 
-    // const handleBranchChange = (selectedBranch) => {
-    //     factorySelectRef.current.clear();
-    //     loadFactories(selectedBranch, setFactories);
-    // };
-
-    // useEffect(() => {
-    //     const selectedBranch = input.branch;
-
-    //     if (selectedBranch) {
-    //         const getFactoriesByBranchId = async () => {
-    //             try {
-    //                 const res = await usersApi.getFactoriesByBranchId(selectedBranch);
-    //                 const options = res.map((item) => ({
-    //                     value: item.Code,
-    //                     label: item.Name,
-    //                 }));
-    //                 // setFactories(options);
-    //                 loadFactories(selectedBranch, (options) => {
-    //                     setFactories(options);
-    //                   });
-    //             } catch (error) {
-    //                 console.error(error);
-    //             }
-    //         };
-
-    //         console.log("Chỗ này call api nè:");
-    //         getFactoriesByBranchId();
-
-    //     } else {
-    //         // setFactories([]);
-    //         console.log("Chỗ này xoá options của factory nè", factorySelectRef.current?.state);
-    //     }
-    // }, [input.branch]);
-
     useEffect(() => {
         const selectedBranch = input.branch;
 

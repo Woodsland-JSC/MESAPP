@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class AuthController extends Controller
 {
-
-
     public function login(Request $request)
     {
         try {
@@ -38,7 +36,7 @@ class AuthController extends Controller
                 return response()->json([
                     'error' => true,
                     'status_code' => 401,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Email hoặc mật khẩu không đúng'
                 ], 401);
             }
 
@@ -56,7 +54,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status_code' => 403,
                     'error' => true,
-                    'message' => 'User not active'
+                    'message' => 'Tài khoản đã bị vô hiệu, hãy liên hệ admin của bạn.'
                 ], 403); // Sử dụng status code 403 để chỉ rõ người dùng không được phép truy cập
             }
 
@@ -88,32 +86,12 @@ class AuthController extends Controller
         } catch (\Exception $error) {
             return response()->json([
                 'status_code' => 500,
-                'message' => 'Error in Login' . $error,
+                'message' => 'Có lỗi xảy ra khi đăng nhập.' . $error,
                 'error' => true,
             ]);
         }
     }
-    /**
-     * @OA\Get(
-     *     path="/api/logout",
-     *     tags={"Authentication"},
-     *     summary="Logout",
-     *     @OA\Response(
-     *         response=200,
-     *         description="successful operation",
-     *         @OA\JsonContent(
-     *            @OA\Property(
-     *                  property="message",
-     *                  type="string",
-     *                  example="Successfully logged out"
-     *              ),
-     *         )
-     *     ),
-     *     security={
-     *         {"api_key": {}}
-     *     }
-     * )
-     */
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
