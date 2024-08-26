@@ -211,9 +211,7 @@ function Workspace() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                                {title}
-                                                            </div>
+                                                            
                                                         </div>
                                                     )
                                             )}
@@ -269,7 +267,7 @@ function Workspace() {
                                                     type: "VCN",
                                                 },
                                                 {
-                                                    permission: "VCN",
+                                                    permission: "ND",
                                                     link: "/workspace/kiln",
                                                     icon: <HiHomeModern />,
                                                     title: "Sản lượng nội địa",
@@ -278,7 +276,7 @@ function Workspace() {
                                                     type: "ND",
                                                 },
                                                 {
-                                                    permission: "QCVCN",
+                                                    permission: "QCND",
                                                     link: "/workspace/drying-wood-checking",
                                                     icon: <HiHandThumbUp />,
                                                     title: "Kiểm định chất lượng nội địa",
@@ -335,10 +333,7 @@ function Workspace() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                                {title}
                                                             </div>
-                                                        </div>
                                                     )
                                             )}
                                         </div>

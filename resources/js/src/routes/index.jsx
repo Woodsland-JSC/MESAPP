@@ -90,14 +90,7 @@ function AppRoutes() {
             <Wrapper>
                 <Routes>
                     <Route path="/login" element={<Login />} />
-                    <Route
-                        path="/"
-                        element={
-                            <ProtectedRoute>
-                                <Workspace />
-                            </ProtectedRoute>
-                        }
-                    />
+                    <Route path="/" element={<Navigate to="/workspace" replace />} />
                     <Route
                         path="/workspace"
                         element={

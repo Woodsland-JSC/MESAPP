@@ -338,7 +338,7 @@ function Report() {
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Header */}
-                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between mb-6">
+                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between mb-3">
                         <div className="serif text-4xl font-bold">
                             Danh mục báo cáo
                         </div>

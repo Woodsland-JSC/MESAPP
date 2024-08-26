@@ -241,73 +241,56 @@ function WoodProductingQC() {
                                     />
                                 </div>
                             </div>
-
-                            
                         </div>
                         {/* Data */}
                         <div className="flex my-2 gap-4 justify-center h-full">
-                                {loadingData ? (
-                                    <div className="text-center mt-12">
-                                        <Spinner
-                                            thickness="4px"
-                                            speed="0.65s"
-                                            emptyColor="gray.200"
-                                            color="#155979"
-                                            size="xl"
-                                        />
-                                    </div>
-                                ) : (
-                                    <>
-                                        {selectedGroup &&
-                                        awaitingReception?.length > 0 ? (
-                                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                                {filteredData.map(
-                                                    (item, index) => (
-                                                        <AwaitingReception
-                                                            type="wood-processing"
-                                                            data={item}
-                                                            key={index}
-                                                            index={index}
-                                                            variant="QC"
-                                                            errorType={
-                                                                QCData.errorType
-                                                            }
-                                                            solution={
-                                                                QCData.solution
-                                                            }
-                                                            teamBack={
-                                                                QCData.teamBack
-                                                            }
-                                                            rootCause={
-                                                                QCData.rootCause
-                                                            }
-                                                            returnCode={
-                                                                QCData.returnCode
-                                                            }
-                                                            isQualityCheck={
-                                                                isQualityCheck
-                                                            }
-                                                            onConfirmReceipt={
-                                                                handleConfirmReceipt
-                                                            }
-                                                            onRejectReceipt={
-                                                                handleRejectReceipt
-                                                            }
-                                                        />
-                                                    )
-                                                )}
+                            {loadingData ? (
+                                <div className="flex justify-center mt-12">
+                                    <div class="special-spinner"></div>
+                                </div>
+                            ) : (
+                                <>
+                                    {selectedGroup &&
+                                    awaitingReception?.length > 0 ? (
+                                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                            {filteredData.map((item, index) => (
+                                                <AwaitingReception
+                                                    type="wood-processing"
+                                                    data={item}
+                                                    key={index}
+                                                    index={index}
+                                                    variant="QC"
+                                                    errorType={QCData.errorType}
+                                                    solution={QCData.solution}
+                                                    teamBack={QCData.teamBack}
+                                                    rootCause={QCData.rootCause}
+                                                    returnCode={
+                                                        QCData.returnCode
+                                                    }
+                                                    isQualityCheck={
+                                                        isQualityCheck
+                                                    }
+                                                    onConfirmReceipt={
+                                                        handleConfirmReceipt
+                                                    }
+                                                    onRejectReceipt={
+                                                        handleRejectReceipt
+                                                    }
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="h-full mt-10 flex flex-col items-center justify-center text-center">
+                                            <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                            <div className="  text-lg text-gray-400">
+                                                Không tìm thấy dữ liệu để hiển
+                                                thị.
                                             </div>
-                                        ) : (
-                                            <div className="h-full mt-10 flex flex-col items-center justify-center text-center">
-                                                <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
-                                                <div className="  text-lg text-gray-400"> 
-                                                    Không tìm thấy dữ liệu để hiển thị.
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

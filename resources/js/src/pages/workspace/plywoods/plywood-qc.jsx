@@ -24,9 +24,11 @@ import moment from "moment";
 import productionApi from "../../../api/productionApi";
 import Loader from "../../../components/Loader";
 import AwaitingReception from "../../../components/AwaitingReception";
+import { BiConfused } from "react-icons/bi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 function PlywoodQC() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(false);
 
@@ -76,7 +78,9 @@ function PlywoodQC() {
     const getDataFollowingGroup = async (param) => {
         setLoadingData(true);
         try {
-            const res = await productionApi.getFinishedGoodsListByGroupPlywood(param);
+            const res = await productionApi.getFinishedGoodsListByGroupPlywood(
+                param
+            );
             setQCData(res);
             if (typeof res?.data === "object") {
                 setAwaitingReception(Object.values(res.data));
@@ -110,18 +114,18 @@ function PlywoodQC() {
     const navigate = useNavigate();
 
     const handleBackNavigation = (event) => {
-      if (event.type === 'popstate') {
-        navigate('/workspace?production=true');
-      }
+        if (event.type === "popstate") {
+            navigate("/workspace?production=true");
+        }
     };
-  
+
     useEffect(() => {
-      window.addEventListener('popstate', handleBackNavigation);
-  
-      return () => {
-        window.removeEventListener('popstate', handleBackNavigation);
-      };
-    }, [navigate]);;
+        window.addEventListener("popstate", handleBackNavigation);
+
+        return () => {
+            window.removeEventListener("popstate", handleBackNavigation);
+        };
+    }, [navigate]);
 
     const handleConfirmReceipt = (id) => {
         if (selectedGroup) {
@@ -163,172 +167,137 @@ function PlywoodQC() {
         <Layout>
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-3 xl:p-12 xl:px-32">
-                    {/* Breadcrumb */}
-                    <div className="mb-2">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="w-full inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <a
-                                            href="#"
-                                            className=" text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            Workspace
-                                        </a>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div className="flex  items-center">
-                                        <svg
-                                            className="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <Link
-                                            to="/workspace?production=true"
-                                            className="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            <div className="">
-                                                <div className="xl:w-full lg:w-full md:w-full w-[205px]">
-                                                    Quản lý sản xuất
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                    {/* Go back */}
+                    <div
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:mx-0 lg:mx-0 md:mx-0 mx-4"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoMdArrowRoundBack />
+                        <div>Quay lại</div>
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center">
-                        <div className="text-3xl font-bold ">
+                    <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center">
+                        <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
                             Kiểm định chất lượng ván công nghiệp
                         </div>
                     </div>
 
                     {/* Controller */}
-                    <div className=" my-4 mb-6 xl:w-full p-4 w-full border-2 border-gray-300 rounded-xl bg-white z-0">
-                        {/* Search */}
-                        <div className="w-full">
-                            <label
-                                htmlFor="search"
-                                className="mb-2 font-medium text-gray-900 sr-only"
-                            >
-                                Tìm kiếm
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                    <svg
-                                        className="w-4 h-4 text-gray-500"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 20 20"
+                    <div className="flex flex-col justify-between mb-6 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
+                        <div className="my-4 mb-0 w-full  rounded-xl bg-white z-0">
+                            <div className="flex flex-col p-4  w-full ">
+                                {/* Search */}
+                                <div className="w-full">
+                                    <label
+                                        htmlFor="search"
+                                        className="mb-2 font-medium text-gray-900 sr-only"
                                     >
-                                        <path
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                        Tìm kiếm
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg
+                                                className="w-4 h-4 text-gray-500"
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    stroke="currentColor"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="search"
+                                            id="search"
+                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Tìm kiếm"
+                                            onChange={(value) => {
+                                                setSearchTerm(
+                                                    value.target.value
+                                                );
+                                            }}
+                                            required
                                         />
-                                    </svg>
+                                    </div>
                                 </div>
-                                <input
-                                    type="search"
-                                    id="search"
-                                    className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Tìm kiếm"
-                                    onChange={(value) => {
-                                        setSearchTerm(value.target.value);
-                                    }}
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        {/* Select Progress*/}
-                        <div className="mt-4">
-                            <label
-                                htmlFor="first_name"
-                                className="block mb-2 text-md font-medium text-gray-900"
-                            >
-                                Tổ, xưởng sản xuất
-                            </label>
-                            <Select
-                                options={groupListOptions}
-                                defaultValue={selectedGroup}
-                                onChange={(value) => {
-                                    setSelectedGroup(value);
-                                    // getDataFollowingGroup(value.value);
-                                    console.log("2. Selected Group: ", value);
-                                }}
-                                placeholder="Chọn tổ, xưởng sản xuất"
-                                className=""
-                            />
-                        </div>
-
-                        {/* Data */}
-                        <div className="flex my-5 gap-4 justify-center h-full">
-                            {loadingData ? (
-                                <div className="text-center mt-8">
-                                    <Spinner
-                                        thickness="4px"
-                                        speed="0.65s"
-                                        emptyColor="gray.200"
-                                        color="#155979"
-                                        size="xl"
+                                {/* Select Progress*/}
+                                <div className="mt-4">
+                                    <label
+                                        htmlFor="first_name"
+                                        className="block mb-2 text-md font-medium text-gray-900"
+                                    >
+                                        Tổ, xưởng sản xuất
+                                    </label>
+                                    <Select
+                                        options={groupListOptions}
+                                        defaultValue={selectedGroup}
+                                        onChange={(value) => {
+                                            setSelectedGroup(value);
+                                            // getDataFollowingGroup(value.value);
+                                            console.log(
+                                                "2. Selected Group: ",
+                                                value
+                                            );
+                                        }}
+                                        placeholder="Chọn tổ, xưởng sản xuất"
+                                        className=""
                                     />
                                 </div>
-                            ) : (
-                                <>
-                                    {selectedGroup &&
-                                    awaitingReception?.length > 0 ? (
-                                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                            {filteredData.map((item, index) => (
-                                                <AwaitingReception
-                                                    type="plywood"
-                                                    data={item}
-                                                    key={index}
-                                                    index={index}
-                                                    errorType={QCData.errorType} 
-                                                    solution={QCData.solution}
-                                                    teamBack={QCData.teamBack}
-                                                    rootCause={QCData.rootCause}
-                                                    returnCode={QCData.returnCode}
-                                                    variant="QC"
-                                                    isQualityCheck={
-                                                        isQualityCheck
-                                                    }
-                                                    onConfirmReceipt={
-                                                        handleConfirmReceipt
-                                                    }
-                                                    onRejectReceipt={
-                                                        handleRejectReceipt
-                                                    }
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex w-full h-full justify-center items-center">
-                                            Không có dữ liệu
-                                        </div>
-                                    )}
-                                </>
-                            )}
+                            </div>
                         </div>
+                    </div>
+                    {/* Data */}
+                    <div className="flex my-2 gap-4 justify-center h-full">
+                        {loadingData ? (
+                            <div className="flex justify-center mt-12">
+                                <div class="special-spinner"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {selectedGroup &&
+                                awaitingReception?.length > 0 ? (
+                                    <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                        {filteredData.map((item, index) => (
+                                            <AwaitingReception
+                                                type="plywood"
+                                                data={item}
+                                                key={index}
+                                                index={index}
+                                                errorType={QCData.errorType}
+                                                solution={QCData.solution}
+                                                teamBack={QCData.teamBack}
+                                                rootCause={QCData.rootCause}
+                                                returnCode={QCData.returnCode}
+                                                variant="QC"
+                                                isQualityCheck={isQualityCheck}
+                                                onConfirmReceipt={
+                                                    handleConfirmReceipt
+                                                }
+                                                onRejectReceipt={
+                                                    handleRejectReceipt
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="mt-10 flex flex-col items-center justify-center text-center">
+                                        <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                        <div className="  text-lg text-gray-400">
+                                            Không tìm thấy dữ liệu để hiển thị.
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -336,4 +305,4 @@ function PlywoodQC() {
     );
 }
 
-export default PlywoodQC
+export default PlywoodQC;
