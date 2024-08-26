@@ -2,6 +2,12 @@ import React, { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/lexend";
+import '@fontsource/source-serif-pro/200.css';
+import '@fontsource/source-serif-pro/300.css';
+import '@fontsource/source-serif-pro/400.css';
+import '@fontsource/source-serif-pro/600.css';
+import '@fontsource/source-serif-pro/700.css';
+import '@fontsource/source-serif-pro/900.css';
 import AppRoutes from "./routes/index.jsx";
 
 function App() {

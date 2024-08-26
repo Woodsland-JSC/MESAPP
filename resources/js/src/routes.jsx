@@ -18,7 +18,7 @@ import UserDetails from './pages/users/details';
 const routes = [
   {
     path: '/',
-    component: <Home/>,
+    component: <Workspace/>,
     exact: true,
   },
   {

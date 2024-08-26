@@ -400,10 +400,10 @@ function DeliveryDetailReport() {
                                 <FaArrowLeft className="w-5 h-5 text-gray-600" />
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
-                                <div className="text-sm text-[#17506B]">
+                                <div className="text-sm mb-1 text-[#17506B]">
                                     Báo cáo sản lượng
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Báo cáo thông tin chi tiết giao nhận
                                 </div>
                             </div>
@@ -481,7 +481,7 @@ function DeliveryDetailReport() {
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 xl:display:block lg:block md:block hidden">
+                    <div className=" bg-white rounded-xl py-2 pb-3 xl:display:block lg:block md:block hidden">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/4">

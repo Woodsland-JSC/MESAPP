@@ -592,28 +592,31 @@ const ItemInput = ({
 
     function transformDetail(details) {
         const result = [];
-    
-        details.forEach(item => {
-            let existingItem = result.find(detail => detail.ItemCode === item.ItemCode && detail.ItemName === item.ItemName);
-            
+
+        details.forEach((item) => {
+            let existingItem = result.find(
+                (detail) =>
+                    detail.ItemCode === item.ItemCode &&
+                    detail.ItemName === item.ItemName
+            );
+
             if (!existingItem) {
                 existingItem = {
                     ItemCode: item.ItemCode,
-                    ItemName: item.ItemName
+                    ItemName: item.ItemName,
                 };
                 result.push(existingItem);
             }
-    
+
             if (item.Type === 0) {
                 existingItem.Qty_Type0 = item.Qty;
             } else if (item.Type === 1) {
                 existingItem.Qty_Type1 = item.Qty;
             }
         });
-    
+
         return result;
     }
-    
 
     const handleDeleteProcessingReceipt = async (item) => {
         setDeleteProcessingLoading(true);
@@ -806,14 +809,14 @@ const ItemInput = ({
 
     return (
         <>
-            <div className="shadow-lg relative border-2 rounded-t-md bg-white border-indigo-100 z-1">
+            <div className="shadow-md relative  rounded-lg bg-white z-1">
                 <div
-                    className=" pl-3 text-[18px] font-medium bg-[#1A222F] text-[white] p-2 py-1.5
-                 rounded-t-md"
+                    className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5
+                 xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
                 >
-                    {data.NameSPDich}
+                    {data.NameSPDich || "Sản phẩm không xác định"}
                 </div>
-                <div className="w-full h-full rounded-t-lg flex flex-col gap-4 pt-0 z-[999] bg-white">
+                <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
                               <section
@@ -828,64 +831,63 @@ const ItemInput = ({
                                           MaThiTruong
                                       );
                                   }}
-                                  className="cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                  className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
                                   key={index}
                               >
-                                  <div className="flex items-center pt-2 pb-1 pl-2 font-medium ">
-                                      <span className="text-[#17506b] p-1 rounded-full font-semibold">
-                                          {index + 1}.
-                                      </span>
-
-                                      {item.ChildName}
-                                      <div>
+                                  <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
+                                      <div className="flex items-center">
                                           <span>
-                                              ({item.CDay}*{item.CRong}*
-                                              {item.CDai})
+                                              <IoIosArrowDown className="inline-block text-gray-500" />{" "}
+                                              {item.ChildName}{" "}
+                                              {variant === "VCN" ? (<span className="text-[#1979A6]">{data.QuyCach2}</span>) : (item.CDay * item.CRong * item.CDai)}
+                                              {item.Version && (
+                                                  <span className="pl-2 font-medium text-[#17506b]">
+                                                      V.
+                                                      <span>
+                                                          {item.Version}
+                                                      </span>
+                                                  </span>
+                                              )}
                                           </span>
                                       </div>
-                                      {item.Version && (
-                                          <span className="pl-2 font-medium text-[#2A7BA1]">
-                                              V.<span>{item.Version}</span>
-                                          </span>
-                                      )}
                                   </div>
-                                  <div className="relative overflow-x-auto shadow-md ml-0 ">
-                                      <table className=" w-full text-sm text-left rtl:text-right text-gray-500">
-                                          <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+                                  <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-2.5">
+                                      <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
+                                          <thead className="bg-[#dae0ec] ">
                                               <tr>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2"
+                                                      className="px-3 py-2 text-xs font-medium uppercase text-gray-500 "
                                                   >
                                                       Lệnh sản xuất
                                                   </th>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2 text-right"
+                                                      className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
                                                   >
                                                       Sản lượng
                                                   </th>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2 text-right"
+                                                      className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
                                                   >
                                                       Đã làm
                                                   </th>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2 text-right"
+                                                      className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
                                                   >
                                                       Lỗi
                                                   </th>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2 text-right"
+                                                      className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
                                                   >
                                                       Còn lại
                                                   </th>
                                               </tr>
                                           </thead>
-                                          <tbody>
+                                          <tbody className=" border-t border-[#c4cfe7]  ">
                                               {item.LSX?.length > 0 ? (
                                                   item.LSX.filter(
                                                       (production) =>
@@ -902,39 +904,39 @@ const ItemInput = ({
                                                               index
                                                           ) => (
                                                               <tr
-                                                                  className="bg-white border-b"
+                                                                  className="bg-[#ECEFF5] border-[#c4cfe7] border-b"
                                                                   key={index}
                                                               >
                                                                   <th
                                                                       scope="row"
-                                                                      className="px-2 py-1 font-medium text-gray-900 whitespace-nowrap"
+                                                                      className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
                                                                   >
                                                                       {
                                                                           production.LSX
                                                                       }
                                                                   </th>
-                                                                  <td className="px-2 py-2 text-right">
+                                                                  <td className="px-2 py-2 text-right text-gray-800">
                                                                       {formatNumber(
                                                                           Number(
                                                                               production.SanLuong
                                                                           )
                                                                       )}
                                                                   </td>
-                                                                  <td className="px-2 py-2 text-right">
+                                                                  <td className="px-2 py-2 text-right text-gray-900">
                                                                       {formatNumber(
                                                                           Number(
                                                                               production.DaLam
                                                                           )
                                                                       )}
                                                                   </td>
-                                                                  <td className="px-2 py-2 text-right">
+                                                                  <td className="px-2 py-2 text-right text-gray-900">
                                                                       {formatNumber(
                                                                           Number(
                                                                               production.Loi
                                                                           )
                                                                       )}
                                                                   </td>
-                                                                  <td className="px-2 py-2 text-right">
+                                                                  <td className="px-2  py-2 text-right text-gray-800">
                                                                       {formatNumber(
                                                                           Number(
                                                                               production.ConLai
@@ -950,10 +952,10 @@ const ItemInput = ({
                                           </tbody>
                                           <tfoot>
                                               <tr>
-                                                  <td className="px-2 py-2">
+                                                  <td className="font-bold text-gray-700 px-2 py-2">
                                                       Tổng
                                                   </td>
-                                                  <td className="px-2 py-2 text-right font-bold">
+                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                       {formatNumber(
                                                           Number(
                                                               item.LSX.reduce(
@@ -967,7 +969,7 @@ const ItemInput = ({
                                                           )
                                                       )}
                                                   </td>
-                                                  <td className="px-2 py-2 text-right font-bold">
+                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                       {formatNumber(
                                                           Number(
                                                               item.LSX.reduce(
@@ -981,7 +983,7 @@ const ItemInput = ({
                                                           )
                                                       )}
                                                   </td>
-                                                  <td className="px-2 py-2 text-right font-bold">
+                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                       {formatNumber(
                                                           Number(
                                                               item.LSX.reduce(
@@ -995,7 +997,7 @@ const ItemInput = ({
                                                           )
                                                       )}
                                                   </td>
-                                                  <td className="px-2 py-2 text-right font-bold">
+                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                       {formatNumber(
                                                           Number(
                                                               item.LSX.reduce(
@@ -1028,7 +1030,7 @@ const ItemInput = ({
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent className="!px-0">
                     <ModalHeader>
-                        <div class="xl:ml-6 uppercase xl:text-xl ">
+                        <div class="xl:ml-6 serif font-bold text-2xl ">
                             Ghi nhận sản lượng
                         </div>
                     </ModalHeader>
@@ -1040,17 +1042,14 @@ const ItemInput = ({
                                 {selectedItemDetails?.CongDoan === "RO" ? (
                                     <div className="xl:mx-0 lg:mx-0 md:mx-0 mx-3">
                                         <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
-                                           <div className="w-full h-fit space-y-2">
+                                            <div className="w-full h-fit space-y-2">
                                                 <div className="font-bold text-xl text-[#155979]">
                                                     Bán thành phẩm rong
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="pt-2 pb-2 ">
-                                            {/* <div className="font-semibold pb-2">
-                                                    Số lượng tồn tại tổ:
-                                            </div> */}
-                                            <div className="w-full flex items-center justify-between rounded-xl p-3 bg-blue-100">
+                                            <div className={`w-full flex items-center justify-between rounded-xl p-3 ${selectedItemDetails?.FatherStock <= 0 ? "bg-gray-200" : "bg-blue-100"}`}>
                                                 <div className="w-[90%]">
                                                     <div className="text-xs m-0 text-[#647C9C]">
                                                         <span className="mr-1">
@@ -1065,7 +1064,7 @@ const ItemInput = ({
                                                         }
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 bg-[#155979]">
+                                                <div className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${selectedItemDetails?.FatherStock <= 0 ? "bg-gray-500" : "bg-[#155979]"} `}>
                                                     {selectedItemDetails?.FatherStock ||
                                                         0}
                                                 </div>
@@ -1124,9 +1123,9 @@ const ItemInput = ({
                                         </Box>
 
                                         <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
-                                        
+
                                         <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
-                                           <div className="w-full h-fit space-y-2">
+                                            <div className="w-full h-fit space-y-2">
                                                 <div className="font-bold text-xl text-[#155979]">
                                                     Thành phẩm rong
                                                 </div>
@@ -1203,7 +1202,7 @@ const ItemInput = ({
                                                                     </div>
                                                                 </div>
 
-                                                                <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-2 pr-4 justify-between">
+                                                                <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-0 pr-2 justify-between">
                                                                     <Text className="font-semibold">
                                                                         Số lượng
                                                                         còn lại
@@ -1219,7 +1218,7 @@ const ItemInput = ({
                                                                     </span>
                                                                 </div>
 
-                                                                <Box className="px-2 pt-2">
+                                                                <Box className="px-0 pt-2">
                                                                     <label className="mt-7 font-semibold">
                                                                         Số lượng
                                                                         ghi nhận
@@ -1323,11 +1322,9 @@ const ItemInput = ({
                                                                         lỗi
                                                                     </div>
                                                                 </div>
-                                                                <Box className="px-2 pt-2">
+                                                                <Box className="px-0 pt-2">
                                                                     <label className="font-semibold ">
-                                                                        Số lượng
-                                                                        ghi nhận
-                                                                        lỗi
+                                                                        Số lượng ghi nhận lỗi:
                                                                     </label>
                                                                     <NumberInput
                                                                         step={1}
@@ -1401,7 +1398,7 @@ const ItemInput = ({
                                                                         </NumberInputStepper>
                                                                     </NumberInput>
                                                                 </Box>
-                                                                <Box className="px-2 pt-3">
+                                                                <Box className="px-0 pt-3">
                                                                     <label className="font-semibold">
                                                                         Lỗi phôi
                                                                         nhận từ
@@ -1478,57 +1475,137 @@ const ItemInput = ({
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    
                                                 </div>
                                             )
                                         )}
-                                        {selectedItemDetails?.notifications?.length > 0 && (
+                                        {selectedItemDetails?.notifications
+                                            ?.length > 0 && (
                                             <>
                                                 <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
-                                                <div> 
-                                                    <div className="text-[#17506B] text-xl font-bold my-3">Lịch sử ghi nhận</div>
+                                                <div>
+                                                    <div className="text-[#17506B] font-bold text-xl my-3">
+                                                        Lịch sử ghi nhận <span className="font-semibold">({selectedItemDetails?.notifications.length})</span>
+                                                    </div>
                                                     <div className="space-y-4">
-                                                        {selectedItemDetails?.notifications?.map((item, index) => (
-                                                            <div className="p-2 px-4 rounded-lg bg-gray-50 border border-gray-300">
-                                                                <div className="">
-                                                                    <div className="text-[#235973] text-lg font-semibold">{item.QtyIssueRong}</div>
-                                                                    <div className="font-medium">{item.SubItemName}</div>
-                                                                </div>
-
-                                                                <div className="flex space-x-5">
-                                                                    <div className="text-sm">Tạo bởi: <span className="font-medium text-[#235973]">{item.fullname}</span></div>
-                                                                    <div className="text-sm">Ngày giờ tạo: <span className="font-medium text-[#235973]">{item.CreatedAt}</span></div>
-                                                                </div>
-                                                                
-                                                                <div className="my-2 border-b border-gray-300"></div>
-                                                                
-                                                                <div className="space-y-2">
-                                                                    {transformDetail(item.detail).map((detailItem, detailIndex) => (
-                                                                        <div className="">
-                                                                            <div className="font-semibold">{detailItem.ItemName}</div>
-                                                                            <div className="text-gray-500 flex justify-between">
-                                                                                <div>Số lượng ghi nhận sản lượng:</div>
-                                                                                <div>{parseInt(detailItem.Qty_Type0)}</div> 
-                                                                            </div>
-                                                                            {detailItem.Qty_Type1 && (
-                                                                                <div className="text-gray-500 flex justify-between">
-                                                                                    <div>Số lượng ghi nhận lỗi:</div>
-                                                                                    <div>{parseInt(detailItem.Qty_Type1)}</div> 
+                                                        {selectedItemDetails?.notifications?.map(
+                                                            (item, index) => (
+                                                                <div className="p-2 px-4 rounded-lg bg-[#effff9] border border-green-400">
+                                                                    <div className="flex justify-between w-full">
+                                                                        <div className="flex flex-col">
+                                                                            <div className="">
+                                                                                <div className="text-green-600 xl:text-lg lg:text-lg md:text-lg text-2xl font-semibold">
+                                                                                    {
+                                                                                        item.QtyIssueRong
+                                                                                    }
                                                                                 </div>
-                                                                            )}
-                                                                            
+                                                                                <div className="font-medium">
+                                                                                    {
+                                                                                        item.SubItemName
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-5 lg:space-x-4 md:space-x-3">
+                                                                                <div className="text-sm">
+                                                                                    Người
+                                                                                    giao:{" "}
+                                                                                    <span className="font-medium text-[#15803D]">
+                                                                                        {
+                                                                                            item.fullname
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="text-sm text-gray-600">
+                                                                                    <span className="font-medium">
+                                                                                        Thời
+                                                                                        gian
+                                                                                        giao:{" "}
+                                                                                    </span>
+                                                                                    <span className="">
+                                                                                        {
+                                                                                            item.CreatedAt
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                    ))}
+
+                                                                        <div className="flex items-center gap-x-6">
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    onDeleteProcessingDialogOpen();
+                                                                                    console.log("Id Noti bị xóa:", item?.notiID);
+                                                                                    setSelectedDelete(
+                                                                                        item?.id
+                                                                                    );
+                                                                                    setDialogType(
+                                                                                        "product"
+                                                                                    );
+                                                                                }}
+                                                                                className="rounded-full  duration-200 ease hover:bg-red-100 px-2 py-2"
+                                                                            >
+                                                                                <AiTwotoneDelete className="text-red-700 text-2xl h-fit" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="my-2 border-b border-gray-300"></div>
+
+                                                                    <div className="space-y-2">
+                                                                        {transformDetail(
+                                                                            item.detail
+                                                                        ).map(
+                                                                            (
+                                                                                detailItem,
+                                                                                detailIndex
+                                                                            ) => (
+                                                                                <div className="">
+                                                                                    <div className="font-semibold">
+                                                                                        {
+                                                                                            detailItem.ItemName
+                                                                                        }
+                                                                                    </div>
+                                                                                    <div className="text-gray-500 flex justify-between">
+                                                                                        <div>
+                                                                                            Số
+                                                                                            lượng
+                                                                                            ghi
+                                                                                            nhận
+                                                                                            sản
+                                                                                            lượng:
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            {parseInt(
+                                                                                                detailItem.Qty_Type0
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {detailItem.Qty_Type1 && (
+                                                                                        <div className="text-gray-500 flex justify-between">
+                                                                                            <div>
+                                                                                                Số
+                                                                                                lượng
+                                                                                                ghi
+                                                                                                nhận
+                                                                                                lỗi:
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                {parseInt(
+                                                                                                    detailItem.Qty_Type1
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                                
-                                                                
-                                                            </div>
-                                                        ))}
+                                                            )
+                                                        )}
                                                     </div>
                                                 </div>
                                             </>
                                         )}
-                                        
                                     </div>
                                 ) : (
                                     <>

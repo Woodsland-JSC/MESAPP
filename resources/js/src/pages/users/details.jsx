@@ -666,7 +666,7 @@ function User() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-4">
+                    <div className="serif text-4xl font-bold mb-4">
                         Thông tin người dùng
                     </div>
                     {/* Main content */}
@@ -679,7 +679,7 @@ function User() {
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl mb-6">
-                                    <h1 className="mb-2 text-xl text-center font-semibold md:text-left">
+                                    <h1 className="mb-2 serif text-2xl text-center font-bold md:text-left">
                                         Thông tin cơ bản
                                     </h1>
                                     <section className="flex flex-col-reverse md:flex-row md:gap-4">
@@ -932,7 +932,7 @@ function User() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div
+                                            {/* <div
                                                 className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 my-4"
                                                 {...getRootProps()}
                                             >
@@ -983,7 +983,7 @@ function User() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                            )}
+                                            )} */}
                                         </div>
                                         <div className="flex flex-col justify-center items-center md:w-5/12 lg:w-1/3 mb-4">
                                             <span className="mb-4">
@@ -1044,7 +1044,7 @@ function User() {
                                         </div>
                                     </section>
                                     <div className="my-4 border-b border-gray-200"></div>
-                                    <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
+                                    <h1 className="mb-4 serif text-2xl text-center font-bold md:text-left">
                                         Đồng bộ và tích hợp
                                     </h1>
                                     <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">

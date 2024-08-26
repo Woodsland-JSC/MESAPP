@@ -96,7 +96,7 @@ function Login() {
             };
             setUser(currentUser);
             toast.success("Đăng nhập thành công");
-            navigate("/");
+            navigate("/workspace");
         } catch (error) {
             toast.error(error.response.data.message);
             console.error("Login failed:", error);
@@ -105,7 +105,7 @@ function Login() {
     };
 
     return isAuthenticated ? (
-        <Navigate to="/" replace />
+        <Navigate to="/workspace" replace />
     ) : (
         <section className="h-screen bg-gray-50 ">
             <div className="xl:pt-0 pt-20">

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
+import { Spinner } from "@chakra-ui/react";
 import {
     AlertDialog,
     AlertDialogBody,
@@ -46,401 +47,8 @@ import PlyWoodItemInput from "../../../components/PlyWoodItemInput";
 import ItemInput from "../../../components/ItemInput";
 import AwaitingReception from "../../../components/AwaitingReception";
 import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
-
-const steps = [
-    { title: "Bước 1", description: "Chọn loại sản phẩm" },
-    { title: "Bước 2", description: "Kiểm tra thông tin" },
-    { title: "Bước 3", description: "Nhập số lượng sản phẩm" },
-];
-
-var waitingReceiptNotifications = [
-    {
-        id: 70152702,
-        subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-        thickness: 15,
-        width: 367.5,
-        length: 740,
-        amount: 2,
-        createdDate: new Date(),
-        createdBy: {
-            id: 54,
-            last_name: "Nguyen",
-            first_name: "An",
-        },
-        fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-    },
-];
-
-var exampleData = [
-    {
-        id: 1,
-        itemName: "TYBYN bar table 74x74x102 acacia/black",
-        previousGroup: null,
-        fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-        nextGroup: {
-            id: "TH-X3TC1",
-            no: 4,
-            name: "Tổ Tinh chế 1 X3",
-        },
-        itemDetails: [
-            {
-                id: 70152702,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 420,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 960,
-                        done: 719,
-                        faults: 0,
-                        processing: 241,
-                    },
-                    {
-                        command: "TH2344TP-02",
-                        quantity: 800,
-                        done: 400,
-                        faults: 2,
-                        processing: 398,
-                    },
-                ],
-                totalQuantity: 1760,
-                totalDone: 1119,
-                totalFaults: 2,
-                totalProcessing: 641,
-            },
-            {
-                id: 70152703,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 500,
-                        done: 300,
-                        faults: 1,
-                        processing: 199,
-                    },
-                ],
-                totalQuantity: 500,
-                totalDone: 300,
-                totalFaults: 1,
-                totalProcessing: 199,
-            },
-        ],
-    },
-    {
-        id: 2,
-        itemName: "TJUSIG hanger 78",
-        previousGroup: null,
-        fromGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-        nextGroup: {
-            id: "TH-X3TC2",
-            no: 4,
-            name: "Tổ Tinh chế 2 X3",
-        },
-        itemDetails: [
-            {
-                id: 70421102,
-                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 20,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 10800,
-                        done: 4494,
-                        faults: 0,
-                        processing: 6306,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 4800,
-                        done: 0,
-                        faults: 0,
-                        processing: 4800,
-                    },
-                ],
-                totalQuantity: 15600,
-                totalDone: 4494,
-                totalFaults: 0,
-                totalProcessing: 11106,
-            },
-            {
-                id: 70421103,
-                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
-                thickness: 30,
-                width: 30,
-                length: 780,
-                stockQuantity: 630,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 5400,
-                        done: 1107,
-                        faults: 0,
-                        processing: 4293,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 2400,
-                        done: 0,
-                        faults: 0,
-                        processing: 2400,
-                    },
-                ],
-                totalQuantity: 7800,
-                totalDone: 1107,
-                totalFaults: 0,
-                totalProcessing: 6693,
-            },
-            {
-                id: 70421104,
-                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
-                thickness: 26,
-                width: 26,
-                length: 115,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 14400,
-                        done: 0,
-                        faults: 0,
-                        processing: 14400,
-                    },
-                ],
-                totalQuantity: 14400,
-                totalDone: 0,
-                totalFaults: 0,
-                totalProcessing: 14400,
-            },
-        ],
-    },
-];
-
-var exampleData1 = [
-    {
-        id: 1,
-        itemName: "TYBYN bar table 74x74x102 acacia/black",
-        previousGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-        fromGroup: {
-            id: "TH-X3TC1",
-            no: 4,
-            name: "Tổ Tinh chế 1 X3",
-        },
-        nextGroup: {
-            id: "TH-X3S",
-            no: 6,
-            name: "Tổ Sơn X3",
-        },
-        itemDetails: [
-            {
-                id: 70152702,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt trên AD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 1000,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 960,
-                        done: 719,
-                        faults: 0,
-                        processing: 241,
-                    },
-                    {
-                        command: "TH2344TP-02",
-                        quantity: 800,
-                        done: 400,
-                        faults: 2,
-                        processing: 398,
-                    },
-                ],
-                totalQuantity: 1760,
-                totalDone: 1119,
-                totalFaults: 2,
-                totalProcessing: 641,
-            },
-            {
-                id: 70152703,
-                subItemName: "TYBYN Bàn bar 74 đen - Mặt dưới CD",
-                thickness: 15,
-                width: 367.5,
-                length: 740,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2344TP-01",
-                        quantity: 500,
-                        done: 300,
-                        faults: 1,
-                        processing: 199,
-                    },
-                ],
-                totalQuantity: 500,
-                totalDone: 300,
-                totalFaults: 1,
-                totalProcessing: 199,
-            },
-        ],
-    },
-];
-
-var exampleData2 = [
-    {
-        id: 2,
-        itemName: "TJUSIG hanger 78",
-        previousGroup: {
-            id: "TH-X3SC",
-            no: 3,
-            name: "Tổ Sơ chế X3",
-        },
-        fromGroup: {
-            id: "TH-X3TC2",
-            no: 4,
-            name: "Tổ Tinh chế 2 X3",
-        },
-        nextGroup: {
-            id: "TH-X3S",
-            no: 6,
-            name: "Tổ Sơn X3",
-        },
-        itemDetails: [
-            {
-                id: 70421102,
-                subItemName: "TJUSIG Hanger 78 - Phần nối vào tường",
-                thickness: 30,
-                width: 35,
-                length: 40,
-                stockQuantity: 1000,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 10800,
-                        done: 4494,
-                        faults: 0,
-                        processing: 6306,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 4800,
-                        done: 0,
-                        faults: 0,
-                        processing: 4800,
-                    },
-                ],
-                totalQuantity: 15600,
-                totalDone: 4494,
-                totalFaults: 0,
-                totalProcessing: 11106,
-            },
-            {
-                id: 70421103,
-                subItemName: "TJUSIG Hanger 78 - Thân móc áo",
-                thickness: 30,
-                width: 30,
-                length: 780,
-                stockQuantity: 630,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2345TP-02",
-                        quantity: 5400,
-                        done: 1107,
-                        faults: 0,
-                        processing: 4293,
-                    },
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 2400,
-                        done: 0,
-                        faults: 0,
-                        processing: 2400,
-                    },
-                ],
-                totalQuantity: 7800,
-                totalDone: 1107,
-                totalFaults: 0,
-                totalProcessing: 6693,
-            },
-            {
-                id: 70421104,
-                subItemName: "TJUSIG Hanger 78 - Tay móc áo",
-                thickness: 26,
-                width: 26,
-                length: 115,
-                stockQuantity: 0,
-                pendingErrors: [],
-                pendingReceipts: [],
-                returns: [],
-                productionCommands: [
-                    {
-                        command: "TH2346TP-02",
-                        quantity: 14400,
-                        done: 0,
-                        faults: 0,
-                        processing: 14400,
-                    },
-                ],
-                totalQuantity: 14400,
-                totalDone: 0,
-                totalFaults: 0,
-                totalProcessing: 14400,
-            },
-        ],
-    },
-];
+import { BiConfused } from "react-icons/bi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
@@ -653,60 +261,26 @@ function PlywoodFinishedGoodsReceipt() {
             {/* Container */}
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-0 xl:p-12 xl:px-32">
-                    {/* Breadcrumb */}
-                    <div className="mb-2 px-6 xl:px-0 lg:px-0 md:px-0 ">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <a
-                                            href="#"
-                                            className="text-sm font-medium text-[#17506B] "
-                                        >
-                                            Workspace
-                                        </a>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div className="flex items-center">
-                                        <svg
-                                            className="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <Link
-                                            to="/workspace?production=true"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            <div>Quản lý sản xuất</div>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                    {/* Go back */}
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] mx-4"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoMdArrowRoundBack />
+                        <div>Quay lại</div>
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between px-6 px-6 xl:px-0 lg:px-0 md:px-0 items-center">
-                        <div className="text-3xl font-bold ">
-                            Nhập sản lượng ván công nghiệp
+                    <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center">
+                        <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
+                            Nhập sản lượng khối ván công nghiệp
                         </div>
                     </div>
 
                     {/* Controller */}
-                    <div className="flex justify-between mb-6 items-center gap-4">
-                        <div className="my-4 mb-6 w-full border-2 border-gray-200 rounded-xl bg-white z-0">
+                    <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
+                        <div className="my-4 mb-2 w-full  rounded-xl bg-white ">
                             <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
@@ -765,7 +339,6 @@ function PlywoodFinishedGoodsReceipt() {
                                     Tổ & Xưởng sản xuất
                                 </div>
                                 <Select
-                                    // isDisabled={true}
                                     ref={groupSelectRef}
                                     options={groupListOptions}
                                     defaultValue={selectedGroup}
@@ -776,41 +349,40 @@ function PlywoodFinishedGoodsReceipt() {
                                     className="mt-2 mb-6"
                                 />
                             </div>
-
-                            <div className="flex flex-col pb-2 gap-4 gap-y-6 my-4 xl:px-4 lg:px-4 md:px-2 sm:px-0">
-                                {loadingData ? (
-                                    <Stack>
-                                        <Skeleton height="250px" />
-                                        <Skeleton height="250px" />
-                                    </Stack>
-                                ) : searchResult.length > 0 ? (
-                                    searchResult.map((item, index) => (
-                                        <ItemInput
-                                            data={item}
-                                            MaThiTruong={item.MaThiTruong}
-                                            index={index}
-                                            key={index}
-                                            selectedGroup={selectedGroup}
-                                            searchTerm={searchTerm}
-                                            variant="VCN"
-                                            nextGroup={item.nextGroup}
-                                            fromGroup={item.fromGroup}
-                                            isQualityCheck={isQualityCheck}
-                                            onReceiptFromChild={
-                                                handleReceiptFromChild
-                                            }
-                                            onRejectFromChild={
-                                                handleRejectFromChild
-                                            }
-                                        />
-                                    ))
-                                ) : (
-                                    <span className="text-gray-500 text-center">
-                                        Không có dữ liệu để hiển thị.
-                                    </span>
-                                )}
-                            </div>
+                            
                         </div>
+
+                    </div>
+                    <div className="w-full flex flex-col pb-2 gap-4 gap-y-4 sm:px-0">
+                        {loadingData ? (
+                            <div className="flex justify-center mt-12">
+                                <div class="special-spinner"></div>
+                            </div>
+                        ) : searchResult.length > 0 ? (
+                            searchResult.map((item, index) => (
+                                <ItemInput
+                                    data={item}
+                                    MaThiTruong={item.MaThiTruong}
+                                    index={index}
+                                    key={index}
+                                    selectedGroup={selectedGroup}
+                                    searchTerm={searchTerm}
+                                    variant="VCN"
+                                    nextGroup={item.nextGroup}
+                                    fromGroup={item.fromGroup}
+                                    isQualityCheck={isQualityCheck}
+                                    onReceiptFromChild={handleReceiptFromChild}
+                                    onRejectFromChild={handleRejectFromChild}
+                                />
+                            ))
+                        ) : (
+                            <div className="h-full mt-10 flex flex-col items-center justify-center text-center">
+                                <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                <div className="  text-lg text-gray-400">
+                                    Không tìm thấy dữ liệu để hiển thị.
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -406,32 +406,44 @@ class MasterDataController extends Controller
     {
         try {
             $userId = $request->input('userId');
-            $user = User::find($userId);
-            if (!$user) {
-                // Nếu không tìm thấy người dùng, ném ngoại lệ
-                throw new \Exception('User with ID ' . $userId . ' not found.');
-            }
-            // Lấy sap_id của người dùng
-            $sapId = $user->sap_id;
+            // Kiểm tra xem có nhận được id từ request không
+            // 1. Nếu nhận được id từ request, kiểm tra xem người dùng hiện tại đã có sap id hay chưa 
+            // 2. Nếu không nhận được id từ request, lấy tất cả người dùng SAP chưa được liên kết
+            if ($request->input('userId')) {
+                $user = User::find($userId);
+                if (!$user) {
+                    throw new \Exception('User with ID ' . $userId . ' not found.');
+                }
 
-            $query = '';
+                // Lấy sap_id của người dùng
+                $sapId = $user->sap_id;
 
-            // Kiểm tra xem người dùng hiện tại có SAP ID chưa
-            // Nếu có SAPID: Lấy tất cả người dùng SAP chưa liên kết cùng với SAP ID của người dùng hiện tại
-            // Nếu chưa có SAP ID: Lấy tất cả người dùng SAP chưa liên kết
-            if ($sapId) {
-                $userData = User::whereNotNull('sap_id')
-                    ->where('id', '!=', $userId)
-                    ->pluck('sap_id')
-                    ->map(fn($item) => "'$item'")
-                    ->implode(',');
+                $query = '';
 
-                $query = 'SELECT "USER_CODE", "NAME"  FROM "UV_OHEM" WHERE "USER_CODE" NOT IN (' . $userData . ') OR "USER_CODE" = \'' . $sapId . '\'';
+                // Kiểm tra xem người dùng hiện tại có SAP ID chưa
+                // 1. Nếu có SAPID: Lấy tất cả người dùng SAP chưa liên kết cùng với SAP ID của người dùng hiện tại
+                // 2. Nếu chưa có SAP ID: Lấy tất cả người dùng SAP chưa liên kết
+                if ($sapId) {
+                    $userData = User::whereNotNull('sap_id')
+                        ->where('id', '!=', $userId)
+                        ->pluck('sap_id')
+                        ->map(fn($item) => "'$item'")
+                        ->implode(',');
+
+                    $query = 'SELECT "USER_CODE", "NAME"  FROM "UV_OHEM" WHERE "USER_CODE" NOT IN (' . $userData . ') OR "USER_CODE" = \'' . $sapId . '\'';
+                } else {
+                    $userData = User::whereNotNull('sap_id')
+                        ->pluck('sap_id')
+                        ->map(fn($item) => "'$item'")
+                        ->implode(',');
+
+                    $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
+                }
             } else {
                 $userData = User::whereNotNull('sap_id')
-                    ->pluck('sap_id')
-                    ->map(fn($item) => "'$item'")
-                    ->implode(',');
+                        ->pluck('sap_id')
+                        ->map(fn($item) => "'$item'")
+                        ->implode(',');
 
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             }
@@ -439,13 +451,11 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
-                // Nếu chuẩn bị truy vấn thất bại, ném ngoại lệ
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
 
             // Thực thi câu truy vấn SQL
             if (!odbc_execute($stmt)) {
-                // Nếu thực thi truy vấn thất bại, ném ngoại lệ
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
@@ -455,13 +465,10 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
 
-            // Đóng kết nối với cơ sở dữ liệu SAP
             odbc_close($conDB);
 
-            // Trả về kết quả dưới dạng JSON với mã trạng thái HTTP 200
             return response()->json($results, 200);
         } catch (\Exception $e) {
-            // Nếu có ngoại lệ, trả về thông báo lỗi dưới dạng JSON với mã trạng thái HTTP 500
             return response()->json([
                 'error' => false,
                 'status_code' => 500,

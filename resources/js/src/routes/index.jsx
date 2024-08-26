@@ -94,7 +94,7 @@ function AppRoutes() {
                         path="/"
                         element={
                             <ProtectedRoute>
-                                <Home />
+                                <Workspace />
                             </ProtectedRoute>
                         }
                     />

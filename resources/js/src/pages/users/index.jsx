@@ -420,13 +420,13 @@ function Users() {
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-4">
+                    <div className="serif text-4xl font-bold mb-4">
                         Quản lý người dùng
                     </div>
 
                     {/* Main content */}
 
-                    <section className="bg-white rounded-lg border-2 mb-2 border-gray-200">
+                    <section className="bg-white rounded-lg mb-2">
                         <Tabs size="lg">
                             <TabList className="">
                                 <Tab

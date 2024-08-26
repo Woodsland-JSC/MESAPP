@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { MdPlaylistAddCheckCircle } from "react-icons/md";
-import { FaPallet} from "react-icons/fa";
+import { FaPallet } from "react-icons/fa";
 import { FaCalendarCheck } from "react-icons/fa6";
 import { HiSearchCircle, HiBadgeCheck } from "react-icons/hi";
 import {
@@ -15,10 +15,12 @@ import {
     HiMiniBanknotes,
     HiArchiveBoxArrowDown,
 } from "react-icons/hi2";
+import { LuLayers } from "react-icons/lu";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAppContext from "../../store/AppContext";
 import "../../assets/styles/customTabs.css";
+import "../../assets/styles/index.css";
 
 function Workspace() {
     const { user, setUser, isAuthenticated, setIsAuthenticated } =
@@ -60,14 +62,14 @@ function Workspace() {
             {/* Container */}
             <div className="flex overflow-x-hidden justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen  xl:p-12 p-6 px-5 xl:px-32 ">
+                <div className="w-screen  xl:p-12 lg:p-12 md:p-10 p-6 py-4 px-5 xl:px-32 ">
                     {/* Header */}
-                    <div className="xl:mb-12 lg:mb-12 md:mb-12 mb-5">
-                        <div className="xl:text-3xl lg:text-3xl md:text-3xl text-[1.75rem] font-bold xl:mb-2 lg:mb-2 md:mb-2">
-                            Xin chào, {user?.first_name}! 👋
-                        </div>
-                        <div className="text-gray-500">
-                            Chúc một ngày làm việc tốt lành.
+                    <div className="xl:mb-8 lg:mb-8 md:mb-8 mb-5">
+                        <div className="text-gray-600">Xin chào,</div>
+                        <div className="xl:text-4xl lg:text-3xl md:text-3xl text-4xl  xl:mb-2 lg:mb-2 md:mb-2">
+                            <span className="serif font-bold">
+                                {user?.last_name}!
+                            </span>
                         </div>
                     </div>
 
@@ -79,7 +81,7 @@ function Workspace() {
                             colorScheme="blackAlpha"
                         >
                             <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3 max-w-sm w-full">
-                                <Tab 
+                                <Tab
                                     className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap "
                                     ref={FirstTab}
                                     onClick={() => handleTabClick(false)}
@@ -88,7 +90,7 @@ function Workspace() {
                                         Quản lý sấy gỗ
                                     </div>
                                 </Tab>
-                                <Tab 
+                                <Tab
                                     className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit "
                                     ref={SecondTab}
                                     onClick={() => handleTabClick(true)}
@@ -99,576 +101,246 @@ function Workspace() {
                                 </Tab>
                             </TabList>
 
-                            <TabPanels px="0" className="w-full flex justify-center">
+                            <TabPanels
+                                px="0"
+                                className="w-full flex justify-center"
+                            >
                                 <TabPanel
-                                    className="xl:p-4 lg:p-4 md:p-4 p-1 w-full"
-                                    // style={{ padding: "1rem 1rem" }}
+                                    className="xl:p-4 lg:p-4 md:p-4 p-0"
+                                    style={{ padding: "1rem 0rem" }}
                                 >
                                     {/* Cards List */}
                                     <div className="cusTabs w-full flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            {/* Xep say */}
-                                            {user.permissions?.includes(
-                                                "sepsay"
-                                            ) ? (
-                                                <Link to="/workspace/wood-sorting">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiSquare3Stack3D className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
+                                            {[
+                                                {
+                                                    permission: "sepsay",
+                                                    link: "/workspace/wood-sorting",
+                                                    icon: <HiSquare3Stack3D />,
+                                                    title: "Xếp sấy",
+                                                    description:
+                                                        "Tạo và xếp pallet để chuẩn bị cho vào lò.",
+                                                },
+                                                {
+                                                    permission: "kehoachsay",
+                                                    link: "/workspace/create-drying-plan",
+                                                    icon: (
+                                                        <HiClipboardDocumentList />
+                                                    ),
+                                                    title: "Tạo kế hoạch sấy",
+                                                    description:
+                                                        "Tạo kế hoạch sấy trên danh sách lò hiện có.",
+                                                },
+                                                {
+                                                    permission: "vaolo",
+                                                    link: "/workspace/load-into-kiln",
+                                                    icon: <HiRectangleStack />,
+                                                    title: "Vào lò",
+                                                    description:
+                                                        "Cho pallet đã tạo vào lò để chuẩn bị sấy.",
+                                                },
+                                                {
+                                                    permission: "kiemtralo",
+                                                    link: "/workspace/kiln-checking",
+                                                    icon: <HiSearchCircle />,
+                                                    title: "Kiểm tra lò sấy",
+                                                    description:
+                                                        "Kiểm tra lò sấy dựa trên các tiêu chuẩn hoạt động.",
+                                                },
+                                                {
+                                                    permission: "losay",
+                                                    link: "/workspace/kiln",
+                                                    icon: <HiHomeModern />,
+                                                    title: "Lò sấy",
+                                                    description:
+                                                        "Tiến hành khởi động quá trình sấy gỗ.",
+                                                },
+                                                {
+                                                    permission: "danhgiame",
+                                                    link: "/workspace/drying-wood-checking",
+                                                    icon: <HiHandThumbUp />,
+                                                    title: "Đánh giá mẻ sấy",
+                                                    description:
+                                                        "Đánh giá mẻ gỗ sau khi sấy và kết thúc quy trình.",
+                                                },
+                                            ].map(
+                                                ({
+                                                    permission,
+                                                    link,
+                                                    icon,
+                                                    title,
+                                                    description,
+                                                }) =>
+                                                    user.permissions?.includes(
+                                                        permission
+                                                    ) ? (
+                                                        <Link
+                                                            to={link}
+                                                            key={permission}
+                                                        >
+                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-gray-900">
+                                                                            {
+                                                                                title
+                                                                            }
+                                                                        </h5>
+                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                            {
+                                                                                description
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                        <div className=" text-3xl h-fit rounded-full m-1 p-3 bg-[#DAEAF1] text-[#17506b]">
+                                                                            {
+                                                                                icon
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Xếp sấy
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Tạo và xếp
-                                                                    pallet để
-                                                                    chuẩn bị cho
-                                                                    vào lò.
-                                                                </p>
+                                                        </Link>
+                                                    ) : (
+                                                        <div key={permission}>
+                                                            <div className="flex justify-center w-full h-[12rem] xl:h-full lg:h-full md:h-full">
+                                                                <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5 mr-0 xl:p-8 md:p-8 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                                    <div className="text-xl flex h-fit justify-center w-fit rounded-full p-4 m-1 text-[transparent]">
+                                                                        <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Xếp sấy
-                                                    </div>
-                                                </Link>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex justify-center w-fit xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Tao ke hoach say */}
-                                            {user.permissions?.includes(
-                                                "kehoachsay"
-                                            ) ? (
-                                                <Link to="/workspace/create-drying-plan">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiClipboardDocumentList className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Tạo kế hoạch
-                                                                    sấy
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Tạo kế hoạch
-                                                                    sấy trên
-                                                                    danh sách lò
-                                                                    hiện có.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </Link>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )}
-                                            
-                                            {/* Vao lo */}
-                                            {user.permissions?.includes(
-                                                "vaolo"
-                                            ) ? (
-                                                <Link to="/workspace/load-into-kiln">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiRectangleStack className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Vào lò
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Cho pallet
-                                                                    đã tạo vào
-                                                                    lò để chuẩn
-                                                                    bị sấy.
-                                                                </p>
+                                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                                {title}
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Vào lò
-                                                    </div>
-                                                </Link>
-                                            ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Kiem tra lo say */}
-                                            {user.permissions?.includes(
-                                                "kiemtralo"
-                                            ) ? (
-                                                <Link to="/workspace/kiln-checking">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiSearchCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Kiểm tra lò
-                                                                    sấy
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Kiểm tra lò
-                                                                    sấy dựa trên
-                                                                    các tiêu
-                                                                    chuẩn hoạt
-                                                                    động.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Kiểm tra lò sấy
-                                                    </div>
-                                                </Link>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {user.permissions?.includes(
-                                                "losay"
-                                            ) ? (
-                                                <Link to="/workspace/kiln">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiHomeModern className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Lò sấy
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Tiến hành
-                                                                    khởi động
-                                                                    quá trình
-                                                                    sấy gỗ.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Lò sấy
-                                                    </div>
-                                                </Link>
-                                            ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {user.permissions?.includes(
-                                                "danhgiame"
-                                            ) ? (
-                                                <Link to="/workspace/drying-wood-checking">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl h-fit rounded-full m-1 p-5 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiHandThumbUp className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Đánh giá mẻ
-                                                                    sấy
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Đánh giá mẻ
-                                                                    gỗ sau khi
-                                                                    sấy và kết
-                                                                    thúc quy
-                                                                    trình.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Đánh giá mẻ sấy
-                                                    </div>
-                                                </Link>
-                                            ): (
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
+                                                    )
                                             )}
                                         </div>
                                     </div>
                                 </TabPanel>
-                                <TabPanel 
-                                    className="xl:p-4 lg:p-4 md:p-4 p-1 w-full"
-                                    // style={{ padding: "1rem 1rem" }}
+                                <TabPanel
+                                    className="xl:p-4 lg:p-4 md:p-4 p-0"
+                                    style={{ padding: "1rem 0rem" }}
                                 >
                                     {/* Cards List */}
-                                    <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            {user.permissions?.includes(
-                                                "CBG"
-                                            ) ? (
-                                                <Link to="/workspace/wood-working/finished-goods-receipt">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                                
+                                    <div className="cusTabs w-full  flex justify-center mt-1 xl:justify-normal">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
+                                            {[
+                                                {
+                                                    permission: "CBG",
+                                                    link: "/workspace/wood-working/finished-goods-receipt",
+                                                    icon: (
+                                                        <HiArchiveBoxArrowDown />
+                                                    ),
+                                                    title: "Sản lượng chế biến gỗ",
+                                                    description:
+                                                        "Nhập sản lượng theo công đoạn",
+                                                    type: "CBG",
+                                                },
+                                                {
+                                                    permission: "QCCBG",
+                                                    link: "/workspace/wood-working/qc",
+                                                    icon: <HiBadgeCheck />,
+                                                    title: "Kiểm định chất lượng chế biến gỗ",
+                                                    description:
+                                                        "Xử lý lỗi nhập thành phẩm.",
+                                                    type: "CBG",
+                                                },
+                                                {
+                                                    permission: "VCN",
+                                                    link: "/workspace/plywood/finished-goods-receipt",
+                                                    icon: (
+                                                        <HiArchiveBoxArrowDown />
+                                                    ),
+                                                    title: "Sản lượng ván công nghiệp",
+                                                    description:
+                                                        "Nhập sản lượng theo công đoạn",
+                                                    type: "VCN",
+                                                },
+                                                {
+                                                    permission: "QCVCN",
+                                                    link: "/workspace/plywood/qc",
+                                                    icon: <HiBadgeCheck />,
+                                                    title: "Kiểm định chất lượng ván công nghiệp",
+                                                    description:
+                                                        "Xử lý lỗi nhập thành phẩm.",
+                                                    type: "VCN",
+                                                },
+                                                {
+                                                    permission: "VCN",
+                                                    link: "/workspace/kiln",
+                                                    icon: <HiHomeModern />,
+                                                    title: "Sản lượng nội địa",
+                                                    description:
+                                                        "Nhập sản lượng lắp đặt khối nội địa",
+                                                    type: "ND",
+                                                },
+                                                {
+                                                    permission: "QCVCN",
+                                                    link: "/workspace/drying-wood-checking",
+                                                    icon: <HiHandThumbUp />,
+                                                    title: "Kiểm định chất lượng nội địa",
+                                                    description:
+                                                        "Đánh giá mẻ gỗ sau khi sấy và kết thúc quy trình.",
+                                                    type: "ND",
+                                                },
+                                            ].map(
+                                                ({
+                                                    permission,
+                                                    link,
+                                                    icon,
+                                                    title,
+                                                    description,
+                                                    type,
+                                                }) =>
+                                                    user.permissions?.includes(
+                                                        permission
+                                                    ) ? (
+                                                        <Link
+                                                            to={link}
+                                                            key={permission}
+                                                        >
+                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                <div className="xl:w-full w-fit flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                            {
+                                                                                title
+                                                                            }
+                                                                        </h5>
+                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                            {
+                                                                                description
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                        <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
+                                                                            {
+                                                                                icon
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Nhập thành phẩm chế biến gỗ
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Nhập thành phẩm chế biến.
-                                                                </p>
+                                                        </Link>
+                                                    ) : (
+                                                        <div key={permission}>
+                                                            <div className="flex justify-center w-full h-[12rem] xl:h-full lg:h-full md:h-full">
+                                                                <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5 mr-0 xl:p-8 md:p-8 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
+                                                                    <div className="text-xl flex h-fit justify-center w-fit rounded-full p-4 m-1 text-[transparent]">
+                                                                        <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
+                                                                {title}
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Nhập thành phẩm chế biến gỗ
-                                                    </div>
-                                                </Link>
-                                            ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
+                                                    )
                                             )}
-
-                                            {user.permissions?.includes(
-                                                "QCCBG"
-                                            ) ? (
-                                                <Link to="/workspace/wood-working/qc">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                                <HiBadgeCheck className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Kiểm định chất lượng chế biến gỗ
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Kiểm định chất lượng thành phẩm chế biến gỗ.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        QC Chế biến gỗ
-                                                    </div>
-                                                </Link>
-                                             ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )} 
-                                            
-                                            {user.permissions?.includes(
-                                                "VCN"
-                                            ) ? (
-                                                <Link to="/workspace/plywood/finished-goods-receipt">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#eae7ff] text-violet-600">
-                                                                <FaPallet className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Nhập thành phẩm ván công nghiệp
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Nhập thành phẩm ván.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        Nhập thành phẩm ván công nghiệp
-                                                    </div>
-                                                </Link>
-                                            ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {user.permissions?.includes(
-                                                "QCVCN"
-                                            ) ? (
-                                                <Link to="/workspace/plywood/qc">
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4 mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-5 m-1 bg-[#eae7ff] text-violet-600">
-                                                                <HiBadgeCheck  className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                            <div>
-                                                                <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                    Kiểm định chất lượng ván công nghiệp
-                                                                </h5>
-                                                                <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                    Kiểm định ván công nghiệp
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex xl:hidden justify-center text-center mt-2">
-                                                        QC VCN
-                                                    </div>
-                                                </Link>
-                                             ):(
-                                                <div>
-                                                    <div className="flex justify-center xl:h-full md:h-full">
-                                                        <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                            <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                                <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                        Tạo kế hoạch sấy
-                                                    </div>
-                                                </div>
-                                            )} 
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada]  rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </TabPanel>                          
-                                <TabPanel style={{ padding: "1rem 1rem" }}>
-                                    {/* Cards List */}
-                                    <div className="cusTabs flex justify-center mt-1 xl:justify-normal">
-                                        <div className="grid xl:grid-cols-3 xl:gap-x-7 gap-x-8 xl:gap-y-6 grid-cols-2 gap-y-6">
-                                            <Link to="/workspace/wood-producting-qc">
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            {/* <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/> */}
-                                                            <MdPlaylistAddCheckCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                        <div>
-                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Chế biến gỗ
-                                                            </h5>
-                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Lorem ipsum
-                                                                dolor sit amet
-                                                                consectetur,
-                                                                adipisicing
-                                                                elit.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Chế biến gỗ
-                                                </div>
-                                            </Link>
-
-                                            <Link to="/workspace/wood-producting-qc">
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-4  mr-0 xl:p-8 md:p-8 bg-white border-2 border-gray-300 rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 hover:scale-105">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full p-5 m-1 bg-[#DAEAF1] text-[#17506b]">
-                                                            {/* <HiMiniBanknotes className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10"/> */}
-                                                            <MdPlaylistAddCheckCircle className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                        <div>
-                                                            <h5 class="hidden xl:block lg:block  mb-2 text-xl font-bold tracking-tight text-gray-900 ">
-                                                                Ván công nghiệp
-                                                            </h5>
-                                                            <p class="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500 ">
-                                                                Lorem ipsum
-                                                                dolor sit amet
-                                                                consectetur,
-                                                                adipisicing
-                                                                elit.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex xl:hidden justify-center text-center mt-2">
-                                                    Ván công nghiệp
-                                                </div>
-                                            </Link>
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
-                                            
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="flex justify-center xl:h-full md:h-full">
-                                                    <div className="xl:w-full w-fit h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5  mr-0 xl:p-8 md:p-8 bg-[#dadada] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                        <div className="text-xl flex h-fit justify-center w-fit rounded-full  p-4 m-1  text-[transparent]">
-                                                            <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex xl:hidden opacity-0 justify-center text-center mt-2">
-                                                    Tạo kế hoạch sấy
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </TabPanel>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../../layouts/layout";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import BOWCard from "../../../components/BOWCard";
 import { HiPlus } from "react-icons/hi";
@@ -25,6 +26,7 @@ import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
+import { IoIosArrowBack } from "react-icons/io";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,6 +34,7 @@ function CreateDryingPlan() {
     const [isKilnLoading, setIsKilnLoading] = useState(false);
 
     const { user } = useAppContext();
+    const navigate = useNavigate();
 
     const [kiln, setKiln] = useState([]);
     const [dryingReasonsPlan, setDryingReasonsPlan] = useState([]);
@@ -53,19 +56,6 @@ function CreateDryingPlan() {
 
     useEffect(() => {
         loadKilns();
-        // palletsApi
-        //     .getKiln()
-        //     .then((data) => {
-        //         const options = data.map((item) => ({
-        //             value: item.Code,
-        //             label: item.Name,
-        //         }));
-        //         setKiln(options);
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error fetching kiln list:", error);
-        //     });
-
         palletsApi
             .getPlanDryingReason()
             .then((data) => {
@@ -244,57 +234,19 @@ function CreateDryingPlan() {
             {/* Container */}
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 p-6 px-5 xl:p-12 xl:px-32">
-                    {/* Breadcrumb */}
-                    <div className="mb-2">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="w-full inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <a
-                                            href="#"
-                                            class="text-sm font-medium text-[#17506B]"
-                                        >
-                                            Workspace
-                                        </a>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div class="flex  items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <Link
-                                            to="/workspace"
-                                            class="w-full flex-nowrap ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            <div className="">
-                                                <div className="w-[105px]">
-                                                    Quản lý sấy gỗ
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen mb-4 xl:mb-4  px-5 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                    {/* Go back */}
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] "
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoIosArrowBack />
+                        <div>Quay lại</div>
                     </div>
 
                     {/* Header */}
                     <div className="flex justify-between mb-6 items-center">
-                        <div className="text-3xl font-bold ">
+                        <div className="serif text-4xl font-bold ">
                             Tạo kế hoạch sấy
                         </div>
                         <button

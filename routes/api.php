@@ -128,7 +128,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reasons', [MasterDataController::class, 'getReason'])->name('pallet-muc-dich-say');
     Route::get('/oven-reasons', [MasterDataController::class, 'getReasonPlan'])->name('lo-say-muc-dich-say');
     Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
-    Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
+    Route::get('/', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');

@@ -323,7 +323,7 @@ const AwaitingReception = ({
     return (
         <>
             <div
-                className={`rounded-lg ${
+                className={`bg-[#F7F7F7] rounded-xl ${
                     variant === "QC"
                         ? " border-2 border-gray-200 !shadow-md"
                         : " border-2 border-gray-200 !shadow-md"

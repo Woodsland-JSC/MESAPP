@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import BOWCard from "../../../components/BOWCard";
 import palletsApi from "../../../api/palletsApi";
 import axios from "axios";
@@ -9,10 +10,13 @@ import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
+import { IoIosArrowBack } from "react-icons/io";
 
 function Kiln() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
+
+    const navigate = useNavigate();
 
     const { user } = useAppContext();
 
@@ -39,50 +43,17 @@ function Kiln() {
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
                 <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
-                    {/* Breadcrumb */}
-                    <div className="mb-2">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <a
-                                            href="#"
-                                            class="text-sm font-medium text-[#17506B]"
-                                        >
-                                            Workspace
-                                        </a>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div class="flex items-center">
-                                        <svg
-                                            class="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <Link
-                                            to="/workspace"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            <div>Quản lý sấy gỗ</div>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
+                    {/* Go back */}
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoIosArrowBack />
+                        <div>Quay lại</div>
+                    </div>        
+
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Lò sấy</div>
+                    <div className="serif text-4xl font-bold mb-6">Lò sấy</div>
 
                     {/* Controller */}
                     {/* <div className=" my-4 mb-6 xl:w-full">

@@ -426,7 +426,6 @@ function CreateUser() {
     };
 
     useEffect(() => {
-        console.log("Ra branch khum: ", branchSelectRef.current?.props.options);
         const getAutoAvatar = async (name) => {
             try {
                 const res = await generateAvatar(name);
@@ -585,7 +584,7 @@ function CreateUser() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Tạo mới</div>
+                    <div className="serif text-4xl font-bold mb-4">Tạo mới người dùng</div>
 
                     {/* Main content */}
                     <Formik
@@ -597,7 +596,7 @@ function CreateUser() {
                             return (
                                 <div className="pb-8 ">
                                     <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                        <h1 className="mb-2 text-xl text-center font-semibold md:text-left">
+                                        <h1 className="mb-2 serif text-2xl text-center font-bold md:text-left">
                                             Thông tin cơ bản
                                         </h1>
                                         <section className="flex flex-col-reverse md:flex-row md:gap-4">
@@ -836,7 +835,7 @@ function CreateUser() {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div
+                                                {/* <div
                                                     className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 my-4"
                                                     {...getRootProps()}
                                                 >
@@ -867,8 +866,8 @@ function CreateUser() {
                                                             </span>
                                                         </>
                                                     )}
-                                                </div>
-                                                {previewSignature && (
+                                                </div> */}
+                                                {/* {previewSignature && (
                                                     <div>
                                                         <div className="relative w-fit mx-auto">
                                                             <img
@@ -883,7 +882,7 @@ function CreateUser() {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                )}
+                                                )} */}
                                             </div>
                                             <div className="flex flex-col justify-center items-center md:w-1/3 mb-4">
                                                 <span className="mb-4">
@@ -960,7 +959,7 @@ function CreateUser() {
                                             </div>
                                         </section>
                                         <div className="my-4 border-b border-gray-200"></div>
-                                        <h1 className="mb-4 text-xl font-semibold text-center md:text-left">
+                                        <h1 className="mb-4 serif text-2xl font-bold text-center md:text-left">
                                             Đồng bộ và tích hợp
                                         </h1>
                                         <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">

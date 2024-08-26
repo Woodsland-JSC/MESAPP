@@ -552,7 +552,7 @@ function Profile() {
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
+                                    <h1 className="mb-4 serif text-2xl text-center font-semibold md:text-left">
                                         Thông tin cơ bản
                                     </h1>
 
@@ -724,15 +724,8 @@ function Profile() {
                                                 >
                                                     Upload chữ ký{" "}
                                                 </label>
-                                                {/* <input
-                                                ref={signInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                name="Signature"
-                                                onChange={handleChangeSignature}
-                                                    id="signature"
-                                                /> */}
-                                                <div
+                                                
+                                                {/* <div
                                                     className="p-4 cursor-pointer border-dashed rounded-md border-2 border-sky-500 mb-4"
                                                     {...getRootProps()}
                                                 >
@@ -763,7 +756,7 @@ function Profile() {
                                                             </span>
                                                         </>
                                                     )}
-                                                </div>
+                                                </div> */}
                                                 {previewSignature && (
                                                     <div>
                                                         <div className="relative w-fit mx-auto">

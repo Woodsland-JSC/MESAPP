@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../../components/PalletCard";
@@ -21,6 +22,7 @@ import "sweetalert2/src/sweetalert2.scss";
 import BigSelect from "../../../components/Select/BigSelect";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
+import { IoIosArrowBack } from "react-icons/io";
 import {
     Modal,
     ModalOverlay,
@@ -34,6 +36,7 @@ import {
 
 function WoodSorting() {
     const { user } = useAppContext();
+    const navigate = useNavigate();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -619,53 +622,19 @@ function WoodSorting() {
             {/* Container */}
             <div className="flex mb-4 xl:mb-0 justify-center h-full bg-transparent">
                 {/* Section */}
-                <div className="w-screen p-6 px-5 xl:p-12 xl:px-32">
-                    {/* Breadcrumb */}
-                    <div className="mb-2">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <a
-                                            href="#"
-                                            className=" text-sm font-medium text-[#17506B]"
-                                        >
-                                            Workspace
-                                        </a>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div className="flex items-center">
-                                        <svg
-                                            className="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                        <Link
-                                            to="/workspace"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            <div>Quản lý sấy gỗ</div>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                    {/* Go back */}
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoIosArrowBack />
+                        <div>Quay lại</div>
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center">
-                        <div className="text-3xl font-bold ">
+                    <div className="flex justify-between xl:mb-4 lg:mb-4 md:mb-4 mb-0 items-center">
+                        <div className="serif text-4xl font-bold ">
                             Tạo pallet xếp sấy
                         </div>
                         <div className="flex gap-x-4 ">
@@ -673,34 +642,34 @@ function WoodSorting() {
                                 className="bg-[#10151c] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onOpen}
                             >
-                                <HiOutlineSearch className="text-xl mr-2" />
-                                Lịch sử xếp pallet
+                                <HiOutlineClock className="text-xl mr-2" />
+                                Xem lịch sử
                             </button>
 
                             <button
                                 className="bg-[#040507] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
                                 onClick={onPalletTracingOpen}
-                            >
-                                <HiOutlineClock className="text-xl mr-2" />
-                                Truy nguyên pallet
+                            >   
+                                <HiOutlineSearch className="text-xl mr-2" />    
+                                Truy nguyên
                             </button>
                         </div>
                     </div>
 
                     {/* History In Mobile View */}
-                    <div className="xl:hidden lg:hidden md:hidden">
+                    <div className="flex space-x-2 xl:hidden lg:hidden md:hidden">
                         <button
                             className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all"
                             onClick={onOpen}
                         >
-                            <HiOutlineSearch className="text-xl mr-2" />
-                            Lịch sử xếp pallet
+                            <HiOutlineClock className="text-xl mr-2" />
+                            Xem lịch sử
                         </button>
                         <button
                             className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all"
                             onClick={onPalletTracingOpen}
                         >
-                            <HiOutlineClock className="text-xl mr-2" />
+                            <HiOutlineSearch className="text-xl mr-2" />    
                             Truy nguyên
                         </button>
                     </div>
@@ -1554,10 +1523,10 @@ function WoodSorting() {
                     </Modal>
 
                     {/* Components */}
-                    <div className="p-6 bg-white border-2 border-gray-300 shadow-sm rounded-xl">
+                    <div className="xl:p-6 lg:p-6 md:p-6 p-4 bg-white  shadow-sm rounded-xl">
                         <section>
                             <form>
-                                <div className="xl:grid xl:space-y-0 space-y-5 gap-5 mb-6 xl:grid-cols-3">
+                                <div className="xl:grid xl:space-y-0 space-y-3 gap-5 mb-6 xl:grid-cols-3">
                                     <div className="col-span-1">
                                         <label
                                             htmlFor="wood_type"

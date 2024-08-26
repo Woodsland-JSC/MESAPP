@@ -602,7 +602,6 @@ class QCController extends Controller
     function listToExcludeQC()
     {
         $conDB = (new ConnectController)->connect_sap();
-
         $query = 'select "VisResCode" "Code","ResName" "Name", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
         join OHEM C ON B."EmpID"=C."empID" where c."empID" =? AND "validFor"=? and "U_QC"<> ?';
         $stmt = odbc_prepare($conDB, $query);
@@ -614,12 +613,14 @@ class QCController extends Controller
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
+        
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $row['QC'] = $row['QC'] === '0' ? false : true;
             $results[] = $row;
         }
         odbc_close($conDB);
+        // dd($results);
         return response()->json($results, 200);
     }
 

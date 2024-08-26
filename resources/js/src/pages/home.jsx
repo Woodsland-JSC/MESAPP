@@ -8,7 +8,7 @@ import { TbArrowNarrowRight } from "react-icons/tb";
 function Home() {
     return (
         <div className="landing-page background-animate">
-            <Header variant="homepage" />
+            <Header variant="homepage"/>
             <div className=" ">
                 <div className=" flex items-center flex-col pt-20">
                     <div className="hero-txt text-4xl xl:text-6xl font-semibold xl:space-x-4 md:space-x-4 space-x-2 mt-20 mb-0 text-black">

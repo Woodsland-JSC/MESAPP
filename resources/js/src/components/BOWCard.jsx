@@ -105,17 +105,14 @@ function BOWCard(props) {
     };
 
     return (
-        <div className=" border-2 border-gray-300 rounded-2xl bg-white h-[27rem] shadow-sm">
+        <div className=" rounded-2xl bg-white h-[24rem] shadow-sm">
             {/* Header */}
-            <div className="flex flex-col rounded-t-xl py-2 px-6 h-[30%]">
+            <div className="flex flex-col justify-start rounded-t-xl py-2 px-6 h-[31%]">
                 <div className="flex space-x-4">
                     {getStatusContent()}
-                    <div className="bow-status p-1 px-3 text-xs text-gray-400 font-semibold bg-gray-100 w-fit rounded-full justify-end my-4">
-                        PlanID: {planID}
-                    </div>
                 </div>
 
-                <div className=" text-[1.25rem] font-bold text-[#17506B] ">
+                <div className="text-[1.25rem] font-bold text-[#17506B] ">
                     Mẻ sấy số:
                     <span className="ml-2">{batchNumber}</span>
                 </div>
@@ -127,10 +124,10 @@ function BOWCard(props) {
 
             <div className="hidden"></div>
 
-            <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[3%]"></div>
+            <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[2%]"></div>
 
             {/* Details */}
-            <div className="space-y-3 py-2 px-6 pt-4 text-[15px]  h-[47%]">
+            <div className="space-y-2 py-2 px-6 pt-4 text-[15px]  h-[47%]">
                 <div className="grid grid-cols-2">
                     <div className="font-semibold">Chiều dày sấy:</div>
                     <div className="font-medium ">{thickness}</div>
