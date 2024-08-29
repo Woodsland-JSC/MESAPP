@@ -487,7 +487,7 @@ const AwaitingReception = ({
                                 htmlFor="errorType"
                                 className="font-semibold text-red-700"
                             >
-                                QC ghi nhận số lượng lỗi
+                                QC ghi nhận số lượng lỗi *
                             </label>
                             <input
                                 className="mt-1 border p-1.5 rounded-md border-gray-300 focus:border-indigo-600 focus:outline-none w-full px-3"
@@ -507,7 +507,7 @@ const AwaitingReception = ({
                                 htmlFor="errorType"
                                 className="font-semibold text-red-700"
                             >
-                                Loại lỗi
+                                Loại lỗi *
                             </label>
                             <Select
                                 ref={errorTypeRef}
@@ -549,7 +549,7 @@ const AwaitingReception = ({
                                 htmlFor="solution"
                                 className="font-semibold text-red-700"
                             >
-                                Hướng xử lý
+                                Hướng xử lý *
                             </label>
                             <Select
                                 ref={solutionRef}
@@ -580,7 +580,7 @@ const AwaitingReception = ({
                                 htmlFor="teamBack"
                                 className="font-semibold text-red-700"
                             >
-                                Tổ chuyển về.
+                                Tổ chuyển về *
                             </label>
                             <Select
                                 ref={teamBackRef}
@@ -604,7 +604,7 @@ const AwaitingReception = ({
                         >
                             <div>
                                 <div className="font-semibold text-red-700">
-                                    Nguồn lỗi.
+                                    Nguồn lỗi
                                 </div>
                                 <Select
                                     ref={rootCauseRef}

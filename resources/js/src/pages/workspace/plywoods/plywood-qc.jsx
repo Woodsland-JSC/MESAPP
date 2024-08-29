@@ -58,6 +58,7 @@ function PlywoodQC() {
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
+                options.sort((a, b) => a.label.localeCompare(b.label));
                 setGroupListOptions(options);
                 console.log("1. Get all group: ", options);
                 // setSelectedGroup(options[0]);
@@ -256,7 +257,7 @@ function PlywoodQC() {
                         </div>
                     </div>
                     {/* Data */}
-                    <div className="flex my-2 gap-4 justify-center h-full">
+                    <div className="flex my-2 px-3 gap-4 justify-center h-full">
                         {loadingData ? (
                             <div className="flex justify-center mt-12">
                                 <div class="special-spinner"></div>
@@ -289,7 +290,7 @@ function PlywoodQC() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="mt-10 flex flex-col items-center justify-center text-center">
+                                    <div className="flex flex-col items-center justify-center text-center">
                                         <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
                                         <div className="  text-lg text-gray-400">
                                             Không tìm thấy dữ liệu để hiển thị.

@@ -264,8 +264,24 @@ function FinishedGoodsReceipt() {
 
                     {/* Controller */}
                     <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
-                        <div className="my-4 mb-2 w-full  rounded-xl bg-white ">
-                            <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
+                        <div className="my-4 mb-2 w-full pb-4 rounded-xl bg-white ">
+                            <div className="flex flex-col p-4 pb-0  w-full justify-end ">
+                                <div className="px-0">
+                                    <div className="block text-md font-medium text-gray-900 ">
+                                        Tổ & Xưởng sản xuất
+                                    </div>
+                                    <Select
+                                        // isDisabled={true}
+                                        ref={groupSelectRef}
+                                        options={groupListOptions}
+                                        defaultValue={selectedGroup}
+                                        onChange={(value) => {
+                                            setSelectedGroup(value);
+                                        }}
+                                        placeholder="Tìm kiếm"
+                                        className="mt-2 mb-4 "
+                                    />
+                                </div>
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -316,23 +332,6 @@ function FinishedGoodsReceipt() {
                                             </div>
                                         </button>
                                     )}
-                            </div>
-
-                            <div className="px-4">
-                                <div className="block text-md font-medium text-gray-900 mt-4 ">
-                                    Tổ & Xưởng sản xuất
-                                </div>
-                                <Select
-                                    // isDisabled={true}
-                                    ref={groupSelectRef}
-                                    options={groupListOptions}
-                                    defaultValue={selectedGroup}
-                                    onChange={(value) => {
-                                        setSelectedGroup(value);
-                                    }}
-                                    placeholder="Tìm kiếm"
-                                    className="mt-2 mb-6 "
-                                />
                             </div>
                         </div>
                     </div>

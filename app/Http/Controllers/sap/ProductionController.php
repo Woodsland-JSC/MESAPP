@@ -32,6 +32,9 @@ class ProductionController extends Controller
             'MaThiTruong',
             'N_GIAO',
             'N_NHAN',
+            'CDay' => 'required', 
+            'CRong' => 'required',
+            'CDai' => 'required',
             'CDay' => 'required|numeric',
             'CRong' => 'required|numeric',
             'CDai' => 'required|numeric',
@@ -40,6 +43,7 @@ class ProductionController extends Controller
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
         ]);
+        // dd($request->all());
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }

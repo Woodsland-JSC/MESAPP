@@ -142,6 +142,9 @@ const ItemInput = ({
                 console.log("Chi tiết thành phẩm: ", res);
                 setSelectedItemDetails({
                     ...item,
+                    CDay: item.CDay,
+                    CRong: item.CRong,
+                    CDai: item.CDai,
                     ItemInfo: res.ItemInfo,
                     stockQuantity: res.maxQuantity,
                     totalProcessing: res.remainQty,
@@ -456,16 +459,18 @@ const ItemInput = ({
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
-        } else if (
-            selectedItemDetails.CongDoan !== "SC" &&
-            selectedItemDetails.CongDoan !== "XV" &&
-            selectedFaultItem.SubItemCode !== "" &&
-            faultyAmount > parseInt(selectedFaultItem.OnHand || 0)
-        ) {
-            toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
-            onAlertDialogClose();
-            return;
-        } else if (
+        } 
+        // else if (
+        //     selectedItemDetails.CongDoan !== "SC" &&
+        //     selectedItemDetails.CongDoan !== "XV" &&
+        //     selectedFaultItem.SubItemCode !== "" &&
+        //     faultyAmount > parseInt(selectedFaultItem.OnHand || 0)
+        // ) {
+        //     toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
+        //     onAlertDialogClose();
+        //     return;
+        // } 
+        else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
             selectedFaultItem.ItemCode !== "" &&
@@ -514,9 +519,9 @@ const ItemInput = ({
                     SubItemName: selectedFaultItem.SubItemName,
                     SubItemCode: selectedFaultItem.SubItemCode,
                     MaThiTruong: MaThiTruong,
-                    CDay: Number(selectedItemDetails.CDay),
-                    CRong: Number(selectedItemDetails.CRong),
-                    CDai: Number(selectedItemDetails.CDai),
+                    CDay: selectedItemDetails.CDay,
+                    CRong: selectedItemDetails.CRong,
+                    CDai: selectedItemDetails.CDai,
                     Team: selectedItemDetails.TO,
                     CongDoan: selectedItemDetails.NameTO,
                     NexTeam: selectedItemDetails.TOTT,
@@ -538,6 +543,7 @@ const ItemInput = ({
                 if (payload.FatherCode && payload.ItemCode) {
                     if (payload.CompleQty || payload.RejectQty) {
                         if (variant === "CBG") {
+                            console.log("Dữ liệu sẽ được gửi đi:", payload);
                             const res =
                                 await productionApi.enterFinishedGoodsAmountCBG(
                                     payload
@@ -839,7 +845,15 @@ const ItemInput = ({
                                           <span>
                                               <IoIosArrowDown className="inline-block text-gray-500" />{" "}
                                               {item.ChildName}{" "}
-                                              {variant === "VCN" ? (<span className="text-[#1979A6]">{data.QuyCach2}</span>) : (item.CDay * item.CRong * item.CDai)}
+                                              {variant === "VCN" ? (
+                                                  <span className="text-[#1979A6]">
+                                                      {data.QuyCach2}
+                                                  </span>
+                                              ) : (
+                                                  item.CDay *
+                                                  item.CRong *
+                                                  item.CDai
+                                              )}
                                               {item.Version && (
                                                   <span className="pl-2 font-medium text-[#17506b]">
                                                       V.
@@ -1049,7 +1063,14 @@ const ItemInput = ({
                                             </div>
                                         </div>
                                         <div className="pt-2 pb-2 ">
-                                            <div className={`w-full flex items-center justify-between rounded-xl p-3 ${selectedItemDetails?.FatherStock <= 0 ? "bg-gray-200" : "bg-blue-100"}`}>
+                                            <div
+                                                className={`w-full flex items-center justify-between rounded-xl p-3 ${
+                                                    selectedItemDetails?.FatherStock <=
+                                                    0
+                                                        ? "bg-gray-200"
+                                                        : "bg-blue-100"
+                                                }`}
+                                            >
                                                 <div className="w-[90%]">
                                                     <div className="text-xs m-0 text-[#647C9C]">
                                                         <span className="mr-1">
@@ -1064,7 +1085,14 @@ const ItemInput = ({
                                                         }
                                                     </div>
                                                 </div>
-                                                <div className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${selectedItemDetails?.FatherStock <= 0 ? "bg-gray-500" : "bg-[#155979]"} `}>
+                                                <div
+                                                    className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${
+                                                        selectedItemDetails?.FatherStock <=
+                                                        0
+                                                            ? "bg-gray-500"
+                                                            : "bg-[#155979]"
+                                                    } `}
+                                                >
                                                     {selectedItemDetails?.FatherStock ||
                                                         0}
                                                 </div>
@@ -1092,25 +1120,15 @@ const ItemInput = ({
                                                     className="mt-2 mb-2"
                                                     value={RONGInputQty}
                                                     onChange={(value) => {
-                                                        if (
-                                                            value === 0 ||
-                                                            !value ||
-                                                            value === NaN
-                                                        ) {
-                                                            setRONGInputQty("");
-                                                            console.log(
-                                                                "Số lượng BTP đem đi RONG",
-                                                                RONGInputQty
-                                                            );
-                                                        } else {
-                                                            setRONGInputQty(
-                                                                value
-                                                            );
-                                                            console.log(
-                                                                "Số lượng BTP đem đi RONG",
-                                                                RONGInputQty
-                                                            );
-                                                        }
+                                                        const newValue =
+                                                            value || "";
+                                                        setRONGInputQty(
+                                                            newValue
+                                                        );
+                                                        console.log(
+                                                            "Số lượng BTP đem đi RONG",
+                                                            newValue
+                                                        );
                                                     }}
                                                 >
                                                     <NumberInputField />
@@ -1324,7 +1342,9 @@ const ItemInput = ({
                                                                 </div>
                                                                 <Box className="px-0 pt-2">
                                                                     <label className="font-semibold ">
-                                                                        Số lượng ghi nhận lỗi:
+                                                                        Số lượng
+                                                                        ghi nhận
+                                                                        lỗi:
                                                                     </label>
                                                                     <NumberInput
                                                                         step={1}
@@ -1484,7 +1504,16 @@ const ItemInput = ({
                                                 <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
                                                 <div>
                                                     <div className="text-[#17506B] font-bold text-xl my-3">
-                                                        Lịch sử ghi nhận <span className="font-semibold">({selectedItemDetails?.notifications.length})</span>
+                                                        Lịch sử ghi nhận{" "}
+                                                        <span className="font-semibold">
+                                                            (
+                                                            {
+                                                                selectedItemDetails
+                                                                    ?.notifications
+                                                                    .length
+                                                            }
+                                                            )
+                                                        </span>
                                                     </div>
                                                     <div className="space-y-4">
                                                         {selectedItemDetails?.notifications?.map(
@@ -1533,7 +1562,10 @@ const ItemInput = ({
                                                                             <button
                                                                                 onClick={() => {
                                                                                     onDeleteProcessingDialogOpen();
-                                                                                    console.log("Id Noti bị xóa:", item?.notiID);
+                                                                                    console.log(
+                                                                                        "Id Noti bị xóa:",
+                                                                                        item?.notiID
+                                                                                    );
                                                                                     setSelectedDelete(
                                                                                         item?.id
                                                                                     );
@@ -1753,7 +1785,7 @@ const ItemInput = ({
                                                     ))}
                                             </div>
 
-                                            <div className="flex gap-2 items-center justify-between py-3 border-t px-2 pr-4 ">
+                                            <div className="flex gap-2 items-center justify-between py-3 border-t px-0 pr-2 ">
                                                 <Text className="font-semibold">
                                                     Số lượng tối đa có thể xuất:
                                                 </Text>
@@ -1767,7 +1799,7 @@ const ItemInput = ({
                                                         : 0}
                                                 </span>
                                             </div>
-                                            <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-2 pr-4 justify-between">
+                                            <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-0 pr-2 justify-between">
                                                 <Text className="font-semibold">
                                                     Số lượng còn phải sản xuất:
                                                 </Text>
@@ -1881,7 +1913,7 @@ const ItemInput = ({
                                                         </>
                                                     ))}
 
-                                            <Box className="px-2">
+                                            <Box className="px-0">
                                                 <label className="mt-6 font-semibold">
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
@@ -2146,7 +2178,7 @@ const ItemInput = ({
                                                             </div>
                                                         ))}
                                             </div>
-                                            <Box className="px-2 pt-2">
+                                            <Box className="px-0 pt-2">
                                                 <label className="font-semibold ">
                                                     Số lượng ghi nhận lỗi:
                                                 </label>
@@ -2280,7 +2312,7 @@ const ItemInput = ({
                                                                     "XV" && (
                                                                     <>
                                                                         {" "}
-                                                                        <div className="my-3 font-medium text-[15pxtext-red-700">
+                                                                        <div className="my-3 font-medium text-[15px] text-red-700">
                                                                             Lỗi
                                                                             bán
                                                                             thành
@@ -2353,7 +2385,7 @@ const ItemInput = ({
                                                         </>
                                                     ))}
                                             </Box>
-                                            <Box className="px-2 pt-2">
+                                            <Box className="px-0 pt-2">
                                                 <label className="font-semibold">
                                                     Lỗi phôi nhận từ nhà máy
                                                     khác:

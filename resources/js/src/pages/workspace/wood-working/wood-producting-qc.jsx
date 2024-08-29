@@ -56,6 +56,7 @@ function WoodProductingQC() {
                     label: item.Name + " - " + item.Code,
                 }));
                 setGroupList(res);
+                options.sort((a, b) => a.label.localeCompare(b.label));
                 setGroupListOptions(options);
                 console.log("1. Get all group: ", options);
             } catch (error) {

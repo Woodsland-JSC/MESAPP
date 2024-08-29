@@ -39,7 +39,6 @@ class VCNController extends Controller
             'NexTeam' => 'required|string|max:254',
             'ProdType' => 'required|string|max:254',
         ]);
-
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }

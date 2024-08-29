@@ -90,11 +90,9 @@ function Users() {
             cellRenderer: (params) => {
                 return (
                     <Link to={"/user/" + params.data.id}>
-                        {(params.data.first_name
-                            ? params.data.first_name + " "
-                            : "") +
-                            (params.data.last_name
-                                ? params.data.last_name
+                        {(params.data.last_name ? params.data.last_name + " " : "") + 
+                            (params.data.first_name
+                                ? params.data.first_name
                                 : "")}
                     </Link>
                 );

@@ -280,7 +280,22 @@ function PlywoodFinishedGoodsReceipt() {
 
                     {/* Controller */}
                     <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
-                        <div className="my-4 mb-2 w-full  rounded-xl bg-white ">
+                        <div className="my-4 mb-2 w-full pb-4 rounded-xl bg-white ">
+                            <div className="px-4">
+                                <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
+                                    Tổ & Xưởng sản xuất
+                                </div>
+                                <Select
+                                    ref={groupSelectRef}
+                                    options={groupListOptions}
+                                    defaultValue={selectedGroup}
+                                    onChange={(value) => {
+                                        setSelectedGroup(value);
+                                    }}
+                                    placeholder="Tìm kiếm"
+                                    className="mt-2 mb-0"
+                                />
+                            </div>
                             <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
@@ -334,21 +349,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     )}
                             </div>
 
-                            <div className="px-4">
-                                <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
-                                    Tổ & Xưởng sản xuất
-                                </div>
-                                <Select
-                                    ref={groupSelectRef}
-                                    options={groupListOptions}
-                                    defaultValue={selectedGroup}
-                                    onChange={(value) => {
-                                        setSelectedGroup(value);
-                                    }}
-                                    placeholder="Tìm kiếm"
-                                    className="mt-2 mb-6"
-                                />
-                            </div>
+                            
                             
                         </div>
 
