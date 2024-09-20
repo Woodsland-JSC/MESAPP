@@ -43,12 +43,14 @@ import moment from "moment";
 import { formatNumber } from "../utils/numberFormat";
 import { FaCircleRight } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
-import { VscCircleFilled } from "react-icons/vsc";
+import { FaInstalod } from "react-icons/fa";
 import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
 import { MdDangerous } from "react-icons/md";
-import { HiChevronDoubleDown } from "react-icons/hi";
-import { PiArrowFatLinesDownFill } from "react-icons/pi";
+import { TbTrash } from "react-icons/tb";
+import { FaBox } from "react-icons/fa";
+import { FaClock } from "react-icons/fa";
+import { FaDotCircle } from "react-icons/fa";
 
 const ItemInput = ({
     data,
@@ -204,6 +206,7 @@ const ItemInput = ({
                         ItemName: stock.ItemName,
                         CompleQty: "",
                         RejectQty: "",
+                        ConLai: parseInt(stock.ConLai),
                         CDay: stock.CDay,
                         CRong: stock.CRong,
                         CDai: stock.CDai,
@@ -275,74 +278,17 @@ const ItemInput = ({
 
     const handleSubmitQuantityRong = async () => {
         let isValid = true;
+        console.log("Rong data: ", rongData);
         for (let i = 0; i < rongData.length; i++) {
             const item = rongData[i];
             const allEmpty = rongData.every(
                 (item) => item.CompleQty === "" && item.RejectQty === ""
             );
-
-            if (RONGInputQty === "" && allEmpty) {
-                toast.error("Vui lòng ghi nhận trước khi xác nhận!");
-                onAlertDialogClose();
-                return;
-            }
-            if (RONGInputQty === "" || RONGInputQty === null) {
-                toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
-                onAlertDialogClose();
-                return;
-            }
-            if (
-                (RONGInputQty !== "" || RONGInputQty !== null) &&
-                RONGInputQty === "0"
-            ) {
-                toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
-                onAlertDialogClose();
-                return;
-            }
-            if (RONGInputQty > selectedItemDetails.FatherStock) {
-                toast.error(
-                    <span>
-                        Số lượng ghi nhận bán thành phẩm{" "}
-                        <span style={{ fontWeight: "bold" }}>
-                            {selectedItemDetails.ChildName}
-                        </span>{" "}
-                        không được vượt quá {selectedItemDetails.FatherStock}.
-                    </span>
-                );
-                onAlertDialogClose();
-                return;
-            }
-            if (
-                RONGInputQty === "" &&
-                (item.CompleQty === "" || item.CompleQty === null)
-            ) {
-                toast.error(
-                    <span>
-                        Số lượng ghi nhận{" "}
-                        <span style={{ fontWeight: "bold" }}>
-                            {item.ItemName}
-                        </span>{" "}
-                        không được bỏ trống.
-                    </span>
-                );
-                onAlertDialogClose();
-                return;
-            }
-            if (item.CompleQty <= 0) {
-                toast.error(
-                    <span>
-                        Số lượng ghi nhận{" "}
-                        <span style={{ fontWeight: "bold" }}>
-                            {item.ItemName}
-                        </span>{" "}
-                        phải lớn hơn 0
-                    </span>
-                );
-                onAlertDialogClose();
-                return;
-            }
-            if (item.RejectQty !== "" && item.RejectQty !== null) {
-                if (item.RejectQty <= 0) {
+            const isAllCompleteEmpty = rongData.every(
+                (item) => item.CompleQty === ""
+            );
+            if(item.RejectQty) {
+                if (item.RejectQty < 0) {
                     toast.error(
                         <span>
                             Số lượng lỗi{" "}
@@ -353,9 +299,262 @@ const ItemInput = ({
                         </span>
                     );
                     onAlertDialogClose();
+                }
+                if (item.RejectQty > parseInt(item.ConLai)) {
+                    toast.error(
+                        <span>
+                            Số lượng lỗi{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được vượt quá {item.ConLai}.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                }
+                if ((RONGInputQty !== "" || RONGInputQty !== null) && item.CompleQty) {
+                    toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+                    onAlertDialogClose();
+                    return;
+                }
+                if (
+                    (RONGInputQty !== "" || RONGInputQty !== null) &&
+                    RONGInputQty === "0" || RONGInputQty < 0
+                ){
+                    toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+                    onAlertDialogClose();
+                    return;
+                }
+                if (RONGInputQty > selectedItemDetails.FatherStock) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận bán thành phẩm{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {selectedItemDetails.ChildName}
+                            </span>{" "}
+                            không được vượt quá {selectedItemDetails.FatherStock}.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+                if (
+                    RONGInputQty && (item.CompleQty === "" || item.CompleQty === null)
+                ) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được bỏ trống.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+                if (RONGInputQty && item.CompleQty <= 0) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            phải lớn hơn 0
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                } 
+                if (RONGInputQty && (item.CompleQty > parseInt(item.ConLai))) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được vượt quá {item.ConLai}.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+            } else if (item.RejectQty === null && item.RejectQty === "") {
+                if (RONGInputQty === "" && isAllCompleteEmpty) {
+                    toast.error("Vui lòng ghi nhận trước khi xác nhận!");
+                    onAlertDialogClose();
+                    return;
+                }
+                if (RONGInputQty === "" && allEmpty) {
+                    toast.error("Vui lòng ghi nhận trước khi xác nhận!");
+                    onAlertDialogClose();
+                    return;
+                }
+                if ((RONGInputQty === "" || RONGInputQty === null)) {
+                    toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+                    onAlertDialogClose();
+                    return;
+                }
+                if (
+                    (RONGInputQty !== "" || RONGInputQty !== null) &&
+                    RONGInputQty === "0" || RONGInputQty < 0
+                ){
+                    toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+                    onAlertDialogClose();
+                    return;
+                }
+                if (RONGInputQty > selectedItemDetails.FatherStock) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận bán thành phẩm{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {selectedItemDetails.ChildName}
+                            </span>{" "}
+                            không được vượt quá {selectedItemDetails.FatherStock}.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+                if (
+                    (item.CompleQty === "" || item.CompleQty === null)
+                ) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được bỏ trống.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+                if (item.CompleQty <= 0) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            phải lớn hơn 0
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                } 
+                if (item.CompleQty > parseInt(item.ConLai)) {
+                    toast.error(
+                        <span>
+                            Số lượng ghi nhận{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được vượt quá {item.ConLai}.
+                        </span>
+                    );
+                    onAlertDialogClose();
                     return;
                 }
             }
+            // if (RONGInputQty === "" && allEmpty) {
+            //     toast.error("Vui lòng ghi nhận trước khi xác nhận!");
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if ((RONGInputQty === "" || RONGInputQty === null)) {
+            //     toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if (
+            //     (RONGInputQty !== "" || RONGInputQty !== null) &&
+            //     RONGInputQty === "0" || RONGInputQty < 0
+            // ){
+            //     toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if (RONGInputQty > selectedItemDetails.FatherStock) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng ghi nhận bán thành phẩm{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {selectedItemDetails.ChildName}
+            //             </span>{" "}
+            //             không được vượt quá {selectedItemDetails.FatherStock}.
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if (
+            //     (item.CompleQty === "" || item.CompleQty === null)
+            // ) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng ghi nhận{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {item.ItemName}
+            //             </span>{" "}
+            //             không được bỏ trống.
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if (item.CompleQty <= 0) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng ghi nhận{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {item.ItemName}
+            //             </span>{" "}
+            //             phải lớn hơn 0
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            //     return;
+            // } 
+            // if (item.CompleQty > parseInt(item.ConLai)) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng ghi nhận{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {item.ItemName}
+            //             </span>{" "}
+            //             không được vượt quá {item.ConLai}.
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            //     return;
+            // }
+            // if (item.RejectQty < 0) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng lỗi{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {item.ItemName}
+            //             </span>{" "}
+            //             phải lớn hơn 0
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            // }
+            // if (item.RejectQty > parseInt(item.ConLai)) {
+            //     toast.error(
+            //         <span>
+            //             Số lượng lỗi{" "}
+            //             <span style={{ fontWeight: "bold" }}>
+            //                 {item.ItemName}
+            //             </span>{" "}
+            //             không được vượt quá {item.ConLai}.
+            //         </span>
+            //     );
+            //     onAlertDialogClose();
+            // }
+
         }
         if ((isValid = false)) {
             onAlertDialogClose();
@@ -459,7 +658,7 @@ const ItemInput = ({
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
-        } 
+        }
         // else if (
         //     selectedItemDetails.CongDoan !== "SC" &&
         //     selectedItemDetails.CongDoan !== "XV" &&
@@ -469,7 +668,7 @@ const ItemInput = ({
         //     toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
         //     onAlertDialogClose();
         //     return;
-        // } 
+        // }
         else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
@@ -671,13 +870,31 @@ const ItemInput = ({
                     toast.success("Thao tác thành công.");
                     setSelectedItemDetails((prev) => ({
                         ...prev,
-                        stocks: res.stocks.map((stock) => ({
-                            ...stock,
-                            notifications: stock.notifications.filter(
-                                (notification) => notification.id !== payload.id
-                            ),
+                        CongDoan: res.CongDoan,
+                        FatherStock: res.FatherStock,
+                        notifications: prev.notifications.filter(
+                            (notification) => notification.notiID !== selectedDelete
+                        ),
+                        factories: res.Factorys?.map((factoryItem) => ({
+                            value: factoryItem.Factory,
+                            label: factoryItem.FactoryName,
                         })),
+                        stocks: res.stocks,
+                        // SubItemCode: item.ChildName,
+                        // SubItemName: item.ItemChild,
                     }));
+                    console.log("Dữ liệu sau khi xóa", selectedItemDetails);
+                    const RONGReceiptData = res.stocks.map((stock, key) => ({
+                        ItemCode: stock.ItemCode,
+                        ItemName: stock.ItemName,
+                        CompleQty: "",
+                        RejectQty: "",
+                        CDay: stock.CDay,
+                        CRong: stock.CRong,
+                        CDai: stock.CDai,
+                        factories: "",
+                    }));
+                    setRongData(RONGReceiptData);
                 } catch (error) {
                     toast.error("Có lỗi xảy ra. Vui lòng thử lại");
                 }
@@ -850,9 +1067,9 @@ const ItemInput = ({
                                                       {data.QuyCach2}
                                                   </span>
                                               ) : (
-                                                  item.CDay *
-                                                  item.CRong *
-                                                  item.CDai
+                                                <span className="">
+                                                      ({item.CDay}*{item.CRong}*{item.CDai})
+                                                </span>
                                               )}
                                               {item.Version && (
                                                   <span className="pl-2 font-medium text-[#17506b]">
@@ -1049,103 +1266,111 @@ const ItemInput = ({
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
+                    <div className="border-b-2 border-[#DADADA]"></div>
                     <ModalBody px={0} py={0}>
-                        <div className="flex flex-col justify-center mb-4 ">
+                        <div className="flex flex-col justify-center pb-4 bg-[#FAFAFA] ">
                             <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
                                 {selectedItemDetails?.CongDoan === "RO" ? (
                                     <div className="xl:mx-0 lg:mx-0 md:mx-0 mx-3">
-                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
-                                            <div className="w-full h-fit space-y-2">
-                                                <div className="font-bold text-xl text-[#155979]">
-                                                    Bán thành phẩm rong
+                                        <div className="flex md:flex-row pt-3 pb-2 items-center xl:px-0 md:px-0 lg:px-0 ">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="px-1 rounded-xl">
+                                                    <FaInstalod className="text-[#5777ae] w-6 h-6" />
+                                                </div>
+                                                <div className="uppercase font-bold text-lg">
+                                                    Bán thành phẩm rong{" "}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="pt-2 pb-2 ">
-                                            <div
-                                                className={`w-full flex items-center justify-between rounded-xl p-3 ${
-                                                    selectedItemDetails?.FatherStock <=
-                                                    0
-                                                        ? "bg-gray-200"
-                                                        : "bg-blue-100"
-                                                }`}
-                                            >
-                                                <div className="w-[90%]">
-                                                    <div className="text-xs m-0 text-[#647C9C]">
-                                                        <span className="mr-1">
-                                                            {
-                                                                selectedItemDetails?.SubItemName
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                    <div className="font-medium text-[17px] ">
-                                                        {
-                                                            selectedItemDetails?.SubItemCode
-                                                        }
-                                                    </div>
-                                                </div>
+
+                                        <div className="p-3 border-2 border-[#DADADA] bg-white rounded-xl shadow-sm">
+                                            <div className="">
                                                 <div
-                                                    className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${
+                                                    className={`w-full flex items-center justify-between rounded-xl p-3 ${
                                                         selectedItemDetails?.FatherStock <=
                                                         0
-                                                            ? "bg-gray-500"
-                                                            : "bg-[#155979]"
-                                                    } `}
+                                                            ? "bg-gray-200"
+                                                            : "bg-blue-100"
+                                                    }`}
                                                 >
-                                                    {selectedItemDetails?.FatherStock ||
-                                                        0}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <Box className=" pt-2 pb-1">
-                                            <label className="mt-6 font-semibold">
-                                                Số lượng ghi nhận bán thành
-                                                phẩm:
-                                            </label>
-                                            {selectedItemDetails?.FatherStock <=
-                                            0 ? (
-                                                <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
-                                                    <MdDangerous className="w-6 h-6" />
-                                                    <div>
-                                                        Không đủ số lượng để ghi
-                                                        nhận
+                                                    <div className="w-[90%]">
+                                                        <div className="text-xs m-0 text-[#647C9C]">
+                                                            <span className="mr-1">
+                                                                {
+                                                                    selectedItemDetails?.SubItemName
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div className="font-medium text-[17px] ">
+                                                            {
+                                                                selectedItemDetails?.SubItemCode
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${
+                                                            selectedItemDetails?.FatherStock <=
+                                                            0
+                                                                ? "bg-gray-500"
+                                                                : "bg-[#155979]"
+                                                        } `}
+                                                    >
+                                                        {selectedItemDetails?.FatherStock ||
+                                                            0}
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <NumberInput
-                                                    ref={receipInput}
-                                                    step={1}
-                                                    className="mt-2 mb-2"
-                                                    value={RONGInputQty}
-                                                    onChange={(value) => {
-                                                        const newValue =
-                                                            value || "";
-                                                        setRONGInputQty(
-                                                            newValue
-                                                        );
-                                                        console.log(
-                                                            "Số lượng BTP đem đi RONG",
-                                                            newValue
-                                                        );
-                                                    }}
-                                                >
-                                                    <NumberInputField />
-                                                    <NumberInputStepper>
-                                                        <NumberIncrementStepper />
-                                                        <NumberDecrementStepper />
-                                                    </NumberInputStepper>
-                                                </NumberInput>
-                                            )}
-                                        </Box>
+                                            </div>
+                                            <Box className=" pt-2">
+                                                <label className="mt-6 font-semibold">
+                                                    Số lượng ghi nhận bán thành
+                                                    phẩm:
+                                                </label>
+                                                {selectedItemDetails?.FatherStock <=
+                                                0 ? (
+                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
+                                                        <MdDangerous className="w-6 h-6" />
+                                                        <div>
+                                                            Không đủ số lượng để
+                                                            ghi nhận
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <NumberInput
+                                                        ref={receipInput}
+                                                        step={1}
+                                                        className="mt-2"
+                                                        value={RONGInputQty}
+                                                        onChange={(value) => {
+                                                            const newValue =
+                                                                value || "";
+                                                            setRONGInputQty(
+                                                                newValue
+                                                            );
+                                                            console.log(
+                                                                "Số lượng BTP đem đi RONG",
+                                                                newValue
+                                                            );
+                                                        }}
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                )}
+                                            </Box>
+                                        </div>
 
-                                        <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
+                                        {/* <div className="border-t-2 border-dashed border-gray-300 mt-3"></div> */}
 
-                                        <div className="flex md:flex-row pt-3 items-center xl:px-0 md:px-0 lg:px-0 ">
-                                            <div className="w-full h-fit space-y-2">
-                                                <div className="font-bold text-xl text-[#155979]">
-                                                    Thành phẩm rong
+                                        <div className="flex md:flex-row pt-6 items-center xl:px-0 md:px-0 lg:px-0 ">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="px-1 rounded-xl">
+                                                    <FaBox className="text-[#5777ae] w-5 h-5" />
+                                                </div>
+                                                <div className="uppercase font-bold text-lg">
+                                                    Thành phẩm rong{" "}
                                                 </div>
                                             </div>
                                         </div>
@@ -1158,9 +1383,7 @@ const ItemInput = ({
                                                     key={stockIndex}
                                                 >
                                                     <div className="flex items-center bg-gray-900 border-[#DADADA]  rounded-t-xl p-3 py-2.5 border-b-0 ">
-                                                        {/* <VscCircleFilled className="text-blue-200 mr-2 w-3 h-3" /> */}
-                                                        {/* <div className="text-white font-semibold text-xl mr-2">{stockIndex + 1 }.</div> */}
-                                                        <div className="pl-2 text-white font-semibold text-xl">
+                                                        <div className="pl-2 text-white font-semibold text-lg">
                                                             {stockItem?.ItemName ||
                                                                 "Thành phẩm không xác định"}
                                                         </div>
@@ -1207,7 +1430,7 @@ const ItemInput = ({
                                                         </div>
                                                     </div>
 
-                                                    <div className="bg-white border-t-0 !mb-4 border-[#DADADA] border-2 rounded-b-xl shadow-md ">
+                                                    <div className="bg-white border-t-0 !mb-4 border-[#DADADA] border-2 rounded-b-xl shadow-sm">
                                                         <div className="space-y-1">
                                                             {/* Ghi nhận sản lượng */}
                                                             <div className="p-4 py-4 pt-2 ">
@@ -1329,11 +1552,11 @@ const ItemInput = ({
                                                                     )}
                                                                 </Box>
                                                             </div>
-                                                            <div className="border-gray-300 border"></div>
+                                                            <div className="border-[#e4e6e8] border"></div>
 
                                                             {/* Ghi nhận lỗi */}
                                                             <div className="p-4 pb-4">
-                                                                <div className="flex space-x-2 pb-4 items-center">
+                                                                <div className="flex space-x-2 pb-1 items-center">
                                                                     <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                                                     <div className="font-semibold text-lg ">
                                                                         Ghi nhận
@@ -1501,11 +1724,19 @@ const ItemInput = ({
                                         {selectedItemDetails?.notifications
                                             ?.length > 0 && (
                                             <>
-                                                <div className="border-t-2 border-dashed border-gray-300 mt-3"></div>
+                                                {/* <div className="border-t-2 border-dashed border-gray-300 mt-3"></div> */}
                                                 <div>
-                                                    <div className="text-[#17506B] font-bold text-xl my-3">
-                                                        Lịch sử ghi nhận{" "}
-                                                        <span className="font-semibold">
+                                                    <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
+                                                        <div className="flex items-center space-x-1">
+                                                            <div className="px-1 rounded-xl">
+                                                                <FaClock className="text-[#5777ae] w-5 h-5" />
+                                                            </div>
+                                                            <div className="uppercase">
+                                                                Lịch sử ghi nhận{" "}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="pr-2 text-[17px] font-semibold">
                                                             (
                                                             {
                                                                 selectedItemDetails
@@ -1513,125 +1744,200 @@ const ItemInput = ({
                                                                     .length
                                                             }
                                                             )
-                                                        </span>
+                                                        </div>
                                                     </div>
                                                     <div className="space-y-4">
                                                         {selectedItemDetails?.notifications?.map(
                                                             (item, index) => (
-                                                                <div className="p-2 px-4 rounded-lg bg-[#effff9] border border-green-400">
-                                                                    <div className="flex justify-between w-full">
-                                                                        <div className="flex flex-col">
-                                                                            <div className="">
-                                                                                <div className="text-green-600 xl:text-lg lg:text-lg md:text-lg text-2xl font-semibold">
-                                                                                    {
-                                                                                        item.QtyIssueRong
-                                                                                    }
-                                                                                </div>
-                                                                                <div className="font-medium">
-                                                                                    {
-                                                                                        item.SubItemName
-                                                                                    }
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-5 lg:space-x-4 md:space-x-3">
-                                                                                <div className="text-sm">
-                                                                                    Người
-                                                                                    giao:{" "}
-                                                                                    <span className="font-medium text-[#15803D]">
-                                                                                        {
-                                                                                            item.fullname
-                                                                                        }
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="text-sm text-gray-600">
-                                                                                    <span className="font-medium">
-                                                                                        Thời
-                                                                                        gian
-                                                                                        giao:{" "}
-                                                                                    </span>
-                                                                                    <span className="">
-                                                                                        {
-                                                                                            item.CreatedAt
-                                                                                        }
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="flex items-center gap-x-6">
-                                                                            <button
-                                                                                onClick={() => {
-                                                                                    onDeleteProcessingDialogOpen();
-                                                                                    console.log(
-                                                                                        "Id Noti bị xóa:",
-                                                                                        item?.notiID
-                                                                                    );
-                                                                                    setSelectedDelete(
-                                                                                        item?.id
-                                                                                    );
-                                                                                    setDialogType(
-                                                                                        "product"
-                                                                                    );
-                                                                                }}
-                                                                                className="rounded-full  duration-200 ease hover:bg-red-100 px-2 py-2"
-                                                                            >
-                                                                                <AiTwotoneDelete className="text-red-700 text-2xl h-fit" />
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="my-2 border-b border-gray-300"></div>
-
-                                                                    <div className="space-y-2">
-                                                                        {transformDetail(
-                                                                            item.detail
-                                                                        ).map(
-                                                                            (
-                                                                                detailItem,
-                                                                                detailIndex
-                                                                            ) => (
-                                                                                <div className="">
-                                                                                    <div className="font-semibold">
-                                                                                        {
-                                                                                            detailItem.ItemName
-                                                                                        }
-                                                                                    </div>
-                                                                                    <div className="text-gray-500 flex justify-between">
-                                                                                        <div>
-                                                                                            Số
-                                                                                            lượng
-                                                                                            ghi
-                                                                                            nhận
-                                                                                            sản
-                                                                                            lượng:
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            {parseInt(
-                                                                                                detailItem.Qty_Type0
-                                                                                            )}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    {detailItem.Qty_Type1 && (
-                                                                                        <div className="text-gray-500 flex justify-between">
-                                                                                            <div>
-                                                                                                Số
-                                                                                                lượng
-                                                                                                ghi
-                                                                                                nhận
-                                                                                                lỗi:
+                                                                <>
+                                                                    {item?.Type === 0 ? (
+                                                                        <div className="p-2 px-4 rounded-lg bg-[#f8fffb] border-2 border-[#81ca9c]">
+                                                                            {/* Bán thành phẩm */}
+                                                                            <div className="flex justify-between w-full">
+                                                                                <div className="flex flex-col w-full">
+                                                                                    <div className="flex items-center justify-between w-full py-1">
+                                                                                        <div className="">
+                                                                                            <div className="text-[#8D9194] font-medium text-xs uppercase">
+                                                                                                Bán
+                                                                                                thành
+                                                                                                phẩm
+                                                                                                rong
                                                                                             </div>
-                                                                                            <div>
+                                                                                            <div className="text-[17px] font-semibold uppercase">
+                                                                                                {
+                                                                                                    item.SubItemName
+                                                                                                }
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="text-[#15803D] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
+                                                                                            {
+                                                                                                item.QtyIssueRong || 0
+                                                                                            }
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="my-2 mt-1 border-b-2 border border-green-500"></div>
+
+                                                                            {/* Thành phẩm */}
+                                                                            <div className=" ">
+                                                                                <div className="text-[#898c90] mb-0 font-medium text-xs uppercase">
+                                                                                    Thành
+                                                                                    phẩm
+                                                                                    rong
+                                                                                </div>
+
+                                                                                {transformDetail(
+                                                                                    item?.detail
+                                                                                ).map(
+                                                                                    (
+                                                                                        detailItem,
+                                                                                        detailIndex
+                                                                                    ) => (
+                                                                                        <div className=" flex items-center justify-between">
+                                                                                            <div className="flex items-center space-x-2">
+                                                                                                {/* <FaArrowRightLong /> */}
+                                                                                                <FaDotCircle className="text-green-600 w-3 h-3" />
+                                                                                                <div className="font-medium">
+                                                                                                    {
+                                                                                                        detailItem.ItemName
+                                                                                                    }
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="font-semibold px-2">
                                                                                                 {parseInt(
-                                                                                                    detailItem.Qty_Type1
+                                                                                                    detailItem.Qty_Type0
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                    )}
+                                                                                    )
+                                                                                )}
+                                                                            </div>
+
+                                                                            <div className="my-2 mb-1 border-b border border-gray-200"></div>
+
+                                                                            <div className="py-1 flex justify-between space-x-5">
+                                                                                <div className="">
+                                                                                    <div className="text-sm">
+                                                                                        Người
+                                                                                        giao:{" "}
+                                                                                        <span className="font-medium text-[#15803D]">
+                                                                                            {
+                                                                                                item.fullname
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className="text-sm ">
+                                                                                            <span className="">
+                                                                                                Thời
+                                                                                                gian
+                                                                                                giao:{" "}
+                                                                                            </span>
+                                                                                        <span className="font-medium text-gray-600">
+                                                                                            {
+                                                                                                item.CreatedAt
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
                                                                                 </div>
-                                                                            )
-                                                                        )}
-                                                                    </div>
-                                                                </div>
+
+                                                                                <div className="flex items-center gap-x-6">
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            onDeleteProcessingDialogOpen();
+                                                                                            console.log(
+                                                                                                "Id Noti bị xóa:",
+                                                                                                item?.notiID
+                                                                                            );
+                                                                                            setSelectedDelete(
+                                                                                                item?.notiID
+                                                                                            );
+                                                                                            setDialogType(
+                                                                                                "product"
+                                                                                            );
+                                                                                        }}
+                                                                                        className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
+                                                                                    >
+                                                                                        <TbTrash className="text-red-700 text-2xl h-fit" />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : item?.Type === 1 ? (
+                                                                        <div className="p-2 px-4 rounded-lg bg-[#fff3f3] border-2 border-[#db8c8c]">
+                                                                            {/* Bán thành phẩm */}
+                                                                            <div className="flex justify-between w-full">
+                                                                                <div className="flex flex-col w-full">
+                                                                                    <div className="flex items-center justify-between w-full py-1">
+                                                                                        <div className="">
+                                                                                            <div className="text-[#8D9194] font-medium text-xs uppercase">
+                                                                                                Thành phẩm rong
+                                                                                            </div>
+                                                                                            <div className="text-[17px] font-semibold uppercase">
+                                                                                                {
+                                                                                                    item.ItemName
+                                                                                                }
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="text-[#801515] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
+                                                                                            {parseInt(item.Quantity) || 0}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="my-2 mb-1 border-b border border-gray-200"></div>
+
+                                                                            <div className="py-1 flex justify-between space-x-5">
+                                                                                <div className="">
+                                                                                    <div className="text-sm">
+                                                                                        Người
+                                                                                        giao:{" "}
+                                                                                        <span className="font-medium text-[#801515]">
+                                                                                            {
+                                                                                                item.fullname
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className="text-sm ">
+                                                                                            <span className="">
+                                                                                                Thời
+                                                                                                gian
+                                                                                                giao:{" "}
+                                                                                            </span>
+                                                                                        <span className="font-medium text-gray-600">
+                                                                                            {
+                                                                                                item.CreatedAt
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div className="flex items-center gap-x-6">
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            onDeleteProcessingDialogOpen();
+                                                                                            console.log(
+                                                                                                "Id Noti bị xóa:",
+                                                                                                item?.notiID
+                                                                                            );
+                                                                                            setSelectedDelete(
+                                                                                                item?.notiID
+                                                                                            );
+                                                                                            setDialogType(
+                                                                                                "product"
+                                                                                            );
+                                                                                        }}
+                                                                                        className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
+                                                                                    >
+                                                                                        <TbTrash className="text-red-700 text-2xl h-fit" />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : null}
+                                                                </>
                                                             )
                                                         )}
                                                     </div>
@@ -1653,7 +1959,7 @@ const ItemInput = ({
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] shadow-md rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-4">
+                                        <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] shadow-sm rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-4 bg-white">
                                             <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
                                                 <label className="font-medium uppercase text-sm text-gray-400">
                                                     Chiều Dày
@@ -1683,7 +1989,7 @@ const ItemInput = ({
                                             </div>
                                         </div>
 
-                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 border-2 border-[#DADADA] shadow-md rounded-xl space-y-2">
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex justify-between pb-3 ">
                                                 <div className="flex items-center space-x-2">
                                                     <FaCircleRight className="w-7 h-7 text-blue-700" />
@@ -2033,7 +2339,7 @@ const ItemInput = ({
                                                         </div>
                                                     ))}
                                         </div>
-                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-md rounded-xl space-y-2">
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-3 items-center">
                                                 <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                                 <div className="font-semibold text-lg ">

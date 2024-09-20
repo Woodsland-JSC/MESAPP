@@ -49,6 +49,7 @@ import AwaitingReception from "../../../components/AwaitingReception";
 import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 import { BiConfused } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { FaArrowUp } from "react-icons/fa";
 
 function PlywoodFinishedGoodsReceipt() {
     const navigate = useNavigate();
@@ -256,6 +257,37 @@ function PlywoodFinishedGoodsReceipt() {
 
     const searchResult = searchItems(data, searchTerm);
 
+    const [progress, setProgress] = useState(0);
+    const [isActive, setIsActive] = useState(false);
+  
+    useEffect(() => {
+      const progressPath = document.querySelector('.progress-circle path');
+      const pathLength = progressPath.getTotalLength();
+  
+      progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
+      progressPath.style.strokeDashoffset = pathLength;
+  
+      const updateProgress = () => {
+        const scroll = window.scrollY;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = pathLength - (scroll * pathLength) / height;
+        progressPath.style.strokeDashoffset = progress;
+  
+        setIsActive(scroll > 50);
+      };
+  
+      updateProgress();
+      window.addEventListener('scroll', updateProgress);
+  
+      return () => {
+        window.removeEventListener('scroll', updateProgress);
+      };
+    }, []);
+  
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <Layout>
             {/* Container */}
@@ -264,7 +296,7 @@ function PlywoodFinishedGoodsReceipt() {
                 <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
                     {/* Go back */}
                     <div 
-                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] mx-4"
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
                         onClick={() => navigate(-1)}
                     >
                         <IoMdArrowRoundBack />
@@ -296,7 +328,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     className="mt-2 mb-0"
                                 />
                             </div>
-                            <div className="flex flex-col p-4 pb-0 sm:flex-row w-full justify-end space-x-4">
+                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col p-4 pb-0 w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -460,6 +492,27 @@ function PlywoodFinishedGoodsReceipt() {
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+            <div
+                className={`progress-wrap fixed right-12 bottom-12 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${
+                    isActive
+                        ? "opacity-100 visible translate-y-0"
+                        : "opacity-0 invisible translate-y-4"
+                }`}
+                onClick={scrollToTop}
+            >
+                <svg
+                    className="progress-circle svg-content w-full h-full p-1"
+                    viewBox="-1 -1 102 102"
+                >
+                    <path
+                        d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
+                        className="stroke-[#ABC8D6] stroke-[4] fill-none transition-all duration-200"
+                    />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[18px]  text-white " >
+                    <FaArrowUp className="w-6 h-6"/>
+                </span>
+            </div>
             {loading && <Loader />}
         </Layout>
     );

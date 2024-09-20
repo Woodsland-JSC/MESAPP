@@ -107,7 +107,7 @@ function Login() {
     return isAuthenticated ? (
         <Navigate to="/workspace" replace />
     ) : (
-        <section className="h-screen bg-gray-50 ">
+        <section className="h-screen bg-gray-100 ">
             <div className="xl:pt-0 pt-20">
                 <div className="flex flex-col items-center justify-center px-6 py-4 md:pt-10 mx-auto md:h-screen lg:py-0">
                     <Link
@@ -116,11 +116,16 @@ function Login() {
                     >
                         <img className="w-20 h-20 mr-2" src={Logo} alt="logo" />
                     </Link>
-                    <div className="w-full bg-white rounded-lg shadow  md:mt-0 sm:max-w-md xl:p-0 ">
+                    <div className="w-full bg-white rounded-xl shadow  md:mt-0 sm:max-w-md xl:p-0 ">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                            <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
-                                Đăng nhập
-                            </h1>
+                            <div className="space-y-2 pb-4">
+                                <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
+                                    Đăng nhập
+                                </h1>
+                                <p className=" text-center leading-tight tracking-tight text-gray-500  ">
+                                    Vui lòng đăng nhập để sử dụng ứng dụng
+                                </p>
+                            </div>
                             <form className="space-y-4 md:space-y-6" action="#">
                                 <div>
                                     <label

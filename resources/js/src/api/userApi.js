@@ -129,11 +129,11 @@ const usersApi = {
         const url = `/factorybybranch/${branchId}`;
         return axiosClient().get(url);
     },
-    // deleteUser: (userId) => {
-    //     const url = `/users/delete/${userId}`;
-    //     return axiosClient().delete(url);
+    deleteUser: (userId) => {
+        const url = `/users/delete/${userId}`;
+        return axiosClient().delete(url);
 
-    // }
+    }
 };
 
 export default usersApi;

@@ -47,6 +47,7 @@ import ItemInput from "../../../components/ItemInput";
 import AwaitingReception from "../../../components/AwaitingReception";
 import { BiConfused } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { FaArrowUp } from "react-icons/fa";
 
 function FinishedGoodsReceipt() {
     const navigate = useNavigate();
@@ -240,6 +241,37 @@ function FinishedGoodsReceipt() {
 
     const searchResult = searchItems(data, searchTerm);
 
+    const [progress, setProgress] = useState(0);
+    const [isActive, setIsActive] = useState(false);
+  
+    useEffect(() => {
+      const progressPath = document.querySelector('.progress-circle path');
+      const pathLength = progressPath.getTotalLength();
+  
+      progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
+      progressPath.style.strokeDashoffset = pathLength;
+  
+      const updateProgress = () => {
+        const scroll = window.scrollY;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = pathLength - (scroll * pathLength) / height;
+        progressPath.style.strokeDashoffset = progress;
+  
+        setIsActive(scroll > 50);
+      };
+  
+      updateProgress();
+      window.addEventListener('scroll', updateProgress);
+  
+      return () => {
+        window.removeEventListener('scroll', updateProgress);
+      };
+    }, []);
+  
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <Layout>
             {/* Container */}
@@ -282,56 +314,61 @@ function FinishedGoodsReceipt() {
                                         className="mt-2 mb-4 "
                                     />
                                 </div>
-                                <div className="w-full">
-                                    <label
-                                        htmlFor="search"
-                                        className="mb-2 font-medium text-gray-900 sr-only"
-                                    >
-                                        Tìm kiếm
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <svg
-                                                className="w-4 h-4 text-gray-500"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            type="search"
-                                            id="search"
-                                            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Tìm kiếm"
-                                            onChange={(e) =>
-                                                setSearchTerm(e.target.value)
-                                            }
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                {selectedGroup &&
-                                    !loadingData &&
-                                    awaitingReception?.length > 0 && (
-                                        <button
-                                            onClick={onModalOpen}
-                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col pb-0 w-full justify-end space-x-4">
+                                    <div className="w-full">
+                                        <label
+                                            htmlFor="search"
+                                            className="mb-2 font-medium text-gray-900 sr-only"
                                         >
-                                            <HiMiniBellAlert className="text-xl" />
-                                            <div className="w-full whitespace-nowrap">
-                                                Thông báo: Có phôi chờ xác nhận
+                                            Tìm kiếm
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                <svg
+                                                    className="w-4 h-4 text-gray-500"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                    />
+                                                </svg>
                                             </div>
-                                        </button>
-                                    )}
+                                            <input
+                                                type="search"
+                                                id="search"
+                                                className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Tìm kiếm"
+                                                onChange={(e) =>
+                                                    setSearchTerm(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    {selectedGroup &&
+                                        !loadingData &&
+                                        awaitingReception?.length > 0 && (
+                                            <button
+                                                onClick={onModalOpen}
+                                                className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            >
+                                                <HiMiniBellAlert className="text-xl" />
+                                                <div className="w-full whitespace-nowrap">
+                                                    Thông báo: Có phôi chờ xác
+                                                    nhận
+                                                </div>
+                                            </button>
+                                        )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -441,6 +478,27 @@ function FinishedGoodsReceipt() {
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+            <div
+                className={`progress-wrap fixed right-12 bottom-12 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${
+                    isActive
+                        ? "opacity-100 visible translate-y-0"
+                        : "opacity-0 invisible translate-y-4"
+                }`}
+                onClick={scrollToTop}
+            >
+                <svg
+                    className="progress-circle svg-content w-full h-full p-1"
+                    viewBox="-1 -1 102 102"
+                >
+                    <path
+                        d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
+                        className="stroke-[#ABC8D6] stroke-[4] fill-none transition-all duration-200"
+                    />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[18px]  text-white ">
+                    <FaArrowUp className="w-6 h-6" />
+                </span>
+            </div>
             {loading && <Loader />}
         </Layout>
     );

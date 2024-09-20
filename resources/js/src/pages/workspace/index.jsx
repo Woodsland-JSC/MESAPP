@@ -179,7 +179,7 @@ function Workspace() {
                                                             key={permission}
                                                         >
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
                                                                         <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-gray-900">
                                                                             {
@@ -204,14 +204,29 @@ function Workspace() {
                                                         </Link>
                                                     ) : (
                                                         <div key={permission}>
-                                                            <div className="flex justify-center w-full h-[12rem] xl:h-full lg:h-full md:h-full">
-                                                                <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5 mr-0 xl:p-8 md:p-8 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                                    <div className="text-xl flex h-fit justify-center w-fit rounded-full p-4 m-1 text-[transparent]">
-                                                                        <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
+                                                                            {
+                                                                                title
+                                                                            }
+                                                                        </h5>
+                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-transparent">
+                                                                            {
+                                                                                description
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                        <div className=" text-3xl h-fit rounded-full m-1 p-3 bg-transparent text-transparent">
+                                                                            {
+                                                                                icon
+                                                                            }
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            
                                                         </div>
                                                     )
                                             )}
@@ -301,7 +316,7 @@ function Workspace() {
                                                             key={permission}
                                                         >
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-fit flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
                                                                         <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
                                                                             {
@@ -326,14 +341,30 @@ function Workspace() {
                                                         </Link>
                                                     ) : (
                                                         <div key={permission}>
-                                                            <div className="flex justify-center w-full h-[12rem] xl:h-full lg:h-full md:h-full">
-                                                                <div className="xl:w-full w-full h-full flex xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center p-5 mr-0 xl:p-8 md:p-8 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl">
-                                                                    <div className="text-xl flex h-fit justify-center w-fit rounded-full p-4 m-1 text-[transparent]">
-                                                                        <HiArchiveBoxArrowDown className="xl:w-8 xl:h-8 lg:w-8 lg:h-8 md:w-8 md:h-8 w-10 h-10" />
+                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
+                                                                            {
+                                                                                title
+                                                                            }
+                                                                        </h5>
+                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-transparent">
+                                                                            {
+                                                                                description
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                        <div className=" text-3xl h-fit rounded-full m-1 p-3 bg-transparent text-transparent">
+                                                                            {
+                                                                                icon
+                                                                            }
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            </div>
+                                                        </div>
                                                     )
                                             )}
                                         </div>

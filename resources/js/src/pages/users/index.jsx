@@ -47,17 +47,15 @@ const sizeOptions = [
     { value: "200", label: "200" },
 ];
 
-// var checkboxSelection = function (params) {
-//     return params.columnApi.getRowGroupColumns().length === 0;
-// };
-
-// var headerCheckboxSelection = function (params) {
-//     return params.columnApi.getRowGroupColumns().length === 0;
-// };
 
 function Users() {
     const { loading, setLoading } = useAppContext();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isDeleteUserOpen, onOpen: onDeleteUserOpen, onClose: onDeleteUserClose } = useDisclosure();
+    
+    const [selectedUser, setSelectedUser] = useState(null);
+
+    const [deleteUserLoading, setDeleteUserLoading] = useState(false);
     const [deleteRoleLoading, setDeleteRoleLoading] = useState(false);
 
     const [modalParam, setModalParam] = useState(null);
@@ -90,7 +88,9 @@ function Users() {
             cellRenderer: (params) => {
                 return (
                     <Link to={"/user/" + params.data.id}>
-                        {(params.data.last_name ? params.data.last_name + " " : "") + 
+                        {(params.data.last_name
+                            ? params.data.last_name + " "
+                            : "") +
                             (params.data.first_name
                                 ? params.data.first_name
                                 : "")}
@@ -115,7 +115,7 @@ function Users() {
             minWidth: 210,
             hide: true,
             valueGetter: (params) =>
-                (params.data.username ? params.data.username + " " : "")
+                params.data.username ? params.data.username + " " : "",
         },
         { headerName: "Email", field: "email", minWidth: 170 },
         {
@@ -123,30 +123,42 @@ function Users() {
             field: "branch",
             minWidth: 210,
             valueGetter: (params) =>
-                (params.data.branch === "1" ?  "Woodsland" : 
-                params.data.branch === "3" ? "Woodsland Tuyên Quang" :
-                params.data.branch === "4" ? "Viforex" :
-                params.data.branch === null ? "" : "")
+                params.data.branch === "1"
+                    ? "Woodsland Thuận Hưng"
+                    : params.data.branch === "3"
+                    ? "Woodsland Tuyên Quang"
+                    : params.data.branch === "4"
+                    ? "Viforex"
+                    : params.data.branch === null
+                    ? ""
+                    : "",
         },
-        { headerName: "Nhà máy", field: "plant", minWidth: 130, },
+        { headerName: "Nhà máy", field: "plant", minWidth: 130 },
         {
             headerName: "Nghiệp vụ",
             field: "branch",
             minWidth: 150,
             valueGetter: (params) =>
-                (params.data.plant === "TH" ?  "CBG" : 
-                params.data.plant === "YS1" ? "CBG" :
-                params.data.plant === "YS2" ? "VCN" :
-                params.data.plant === "TB" ? "CBG" :
-                params.data.plant === "CH" ? "VCN" :
-                params.data.plant === "HG" ? "VCN" :
-                params.data.plant === null ? "" : "")
+                params.data.plant === "TH"
+                    ? "CBG"
+                    : params.data.plant === "YS1"
+                    ? "CBG"
+                    : params.data.plant === "YS2"
+                    ? "VCN"
+                    : params.data.plant === "TB"
+                    ? "CBG"
+                    : params.data.plant === "CH"
+                    ? "VCN"
+                    : params.data.plant === "HG"
+                    ? "VCN"
+                    : params.data.plant === null
+                    ? ""
+                    : "",
         },
         {
             headerName: "SAP ID",
             minWidth: 120,
-            valueGetter: (params) =>(params.data.sap_id || "")
-            
+            valueGetter: (params) => params.data.sap_id || "",
         },
         {
             headerName: "Chặn",
@@ -170,10 +182,14 @@ function Users() {
                         <Link to={"/user/" + params.data.id}>
                             <LiaEditSolid className="cursor-pointer text-yellow-700 text-[20px]" />
                         </Link>
-                        {/* <RiDeleteBin6Line
+                        <RiDeleteBin6Line
                             className="cursor-pointer text-red-700 text-[18px]"
-                            onClick={() => deleteUser(params.data)}
-                        /> */}
+                            // onClick={() => deleteUser(params.data)}
+                            onClick={() => {
+                                onDeleteUserOpen();
+                                setSelectedUser(params.data);
+                            }}
+                        />
                     </div>
                 );
             },
@@ -203,7 +219,7 @@ function Users() {
             },
         },
         {
-            headerName: "Tên Role",   
+            headerName: "Tên Role",
             valueGetter: function (params) {
                 return params.data.name;
             },
@@ -302,7 +318,6 @@ function Users() {
         hideLoadingRole();
     }, []);
 
-
     const onFirstUserDataRendered = useCallback((params) => {
         userGridRef?.current?.api?.paginationGoToPage(0);
     }, []);
@@ -324,8 +339,8 @@ function Users() {
     const onUserFilterTextBoxChanged = useCallback(() => {
         userGridRef?.current?.api?.setGridOption(
             "quickFilterText",
-            document.getElementById("user-search").value,
-          );
+            document.getElementById("user-search").value
+        );
     }, []);
 
     const onRoleFilterTextBoxChanged = useCallback(() => {
@@ -369,6 +384,21 @@ function Users() {
     };
 
     // Role Actions
+    const deleteUser= async (userId) => {
+        setDeleteUserLoading(true);
+        try {
+            const res = await usersApi.deleteUser(userId);
+            toast.success("Xóa người dùng thành công.");
+            setDeleteUserLoading(false);
+            onDeleteUserClose();
+            onUserGridReady();
+        } catch (error) {
+            toast.error("Không thể xóa người dùng. Hãy thử lại sau.");
+            onDeleteUserClose();
+            setDeleteUserLoading(false);
+        }
+    };
+
     const deleteRole = async (roleId) => {
         setDeleteRoleLoading(true);
         try {
@@ -423,7 +453,6 @@ function Users() {
                     </div>
 
                     {/* Main content */}
-
                     <section className="bg-white rounded-lg mb-2">
                         <Tabs size="lg">
                             <TabList className="">
@@ -509,7 +538,7 @@ function Users() {
                                                 className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                                    <FaPlus className="w-3 h-3"/>
+                                                    <FaPlus className="w-3 h-3" />
                                                     <div className="text-[15px]">
                                                         Tạo User
                                                     </div>
@@ -546,6 +575,63 @@ function Users() {
                                             }
                                         />
                                     </div>
+                                    <Modal
+                                        closeOnOverlayClick={false}
+                                        isOpen={isDeleteUserOpen}
+                                        onClose={onDeleteUserClose}
+                                        isCentered
+                                        size="sm"
+                                    >
+                                        <ModalOverlay />
+                                        <ModalContent>
+                                            <ModalHeader>
+                                                Xác nhận hành động
+                                            </ModalHeader>
+                                            <ModalBody pb={6}>
+                                                Bạn chắc chắn muốn xóa người
+                                                dùng{" "}
+                                                <span className="font-semibold text-[#155979]">
+                                                    {selectedUser?.last_name}{" "}
+                                                    {selectedUser?.first_name}?
+                                                </span>
+                                            </ModalBody>
+
+                                            <ModalFooter>
+                                                <div className="flex w-full xl:justify-end lg:justify-end md:justify-end gap-x-3">
+                                                    <button
+                                                        onClick={
+                                                            onDeleteUserClose
+                                                        }
+                                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                                    >
+                                                        Đóng
+                                                    </button>
+                                                    <button
+                                                        className="flex justify-center items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                                        onClick={() =>
+                                                            deleteUser(
+                                                                selectedUser.id
+                                                            )
+                                                        }
+                                                    >
+                                                        {deleteUserLoading ? (
+                                                            <div className="flex justify-center items-center space-x-4">
+                                                                <Spinner
+                                                                    size="sm"
+                                                                    color="white"
+                                                                />
+                                                                <div>
+                                                                    Đang tải
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            "Xác nhận"
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </ModalFooter>
+                                        </ModalContent>
+                                    </Modal>
                                 </TabPanel>
 
                                 {/* Phân quyền */}
@@ -610,7 +696,7 @@ function Users() {
                                                 className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                                    <FaPlus className="w-3 h-3"/>
+                                                    <FaPlus className="w-3 h-3" />
                                                     <div className="text-[15px]">
                                                         Tạo Role
                                                     </div>
@@ -644,54 +730,57 @@ function Users() {
                                         />
                                     </div>
                                 </TabPanel>
+                                <Modal
+                                    closeOnOverlayClick={false}
+                                    isOpen={isOpen}
+                                    onClose={onClose}
+                                    isCentered
+                                    size="sm"
+                                >
+                                    <ModalOverlay />
+                                    <ModalContent>
+                                        <ModalHeader>
+                                            Bạn chắc chắn muốn xóa role?
+                                        </ModalHeader>
+                                        <ModalBody pb={6}>
+                                            Sau khi bấm xác nhận sẽ không thể
+                                            thu hồi hành động.
+                                        </ModalBody>
+
+                                        <ModalFooter>
+                                            <div className="flex w-full xl:justify-end lg:justify-end md:justify-end gap-x-3">
+                                                <button
+                                                    onClick={onClose}
+                                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                                >
+                                                    Đóng
+                                                </button>
+                                                <button
+                                                    className="flex justify-center items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                                    onClick={() =>
+                                                        deleteRole(modalParam)
+                                                    }
+                                                >
+                                                    {deleteRoleLoading ? (
+                                                        <div className="flex justify-center items-center space-x-4">
+                                                            <Spinner
+                                                                size="sm"
+                                                                color="white"
+                                                            />
+                                                            <div>Đang tải</div>
+                                                        </div>
+                                                    ) : (
+                                                        "Xác nhận"
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </ModalFooter>
+                                    </ModalContent>
+                                </Modal>
                             </TabPanels>
                         </Tabs>
                     </section>
-                    <Modal
-                        closeOnOverlayClick={false}
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        isCentered
-                        size="sm"
-                    >
-                        <ModalOverlay />
-                        <ModalContent>
-                            <ModalHeader>
-                                Bạn chắc chắn muốn xóa role?
-                            </ModalHeader>
-                            <ModalBody pb={6}>
-                                Sau khi bấm xác nhận sẽ không thể thu hồi hành
-                                động.
-                            </ModalBody>
 
-                            <ModalFooter>
-                                <div className="flex w-full xl:justify-end lg:justify-end md:justify-end gap-x-3">
-                                    <button
-                                        onClick={onClose}
-                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
-                                    >
-                                        Đóng
-                                    </button>
-                                    <button
-                                        className="flex justify-center items-center bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
-                                        onClick={() => deleteRole(modalParam)}
-                                    >
-                                        {deleteRoleLoading ? (
-                                            <div className="flex justify-center items-center space-x-4">
-                                                <Spinner
-                                                    size="sm"
-                                                    color="white"
-                                                />
-                                                <div>Đang tải</div>
-                                            </div>
-                                        ) : (
-                                            "Xác nhận"
-                                        )}
-                                    </button>
-                                </div>
-                            </ModalFooter>
-                        </ModalContent>
-                    </Modal>
                     <div className="py-4"></div>
                 </div>
             </div>

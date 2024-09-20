@@ -307,34 +307,33 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Password updated successfully'], 200);
     }
-    // public function delete($id)
-    // {
-    //     $user = User::find($id);
+    public function delete($id)
+    {
+        $user = User::find($id);
 
-    //     if (!$user) {
-    //         return response()->json(['error' => 'User not found'], 404);
-    //     }
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
 
-    //     $avatarPath = 'public/avatars/' . $user->id;
+        $avatarPath = 'public/avatars/' . $user->id;
 
-    //     if (Storage::exists($avatarPath)) {
-    //         Storage::deleteDirectory($avatarPath);
-    //     }
+        if (Storage::exists($avatarPath)) {
+            Storage::deleteDirectory($avatarPath);
+        }
 
-    //     DB::table('model_has_roles')->where('model_id', $id)->delete();
+        DB::table('model_has_roles')->where('model_id', $id)->delete();
 
-    //     // Xóa người dùng
-    //     $user->delete();
+        // Xóa người dùng
+        $user->delete();
 
-    //     return response()->json(['message' => 'User deleted successfully'], 200);
-    // }
+        return response()->json(['message' => 'User deleted successfully'], 200);
+    }
+    
     function importuser(Request $request)
     {
         
         $data = Excel::toArray([], $request->file);
         $headerRow = $data[0][0];
-
-        $responseData=[];
         try
         { // Process the data rows
             db::beginTransaction();
@@ -365,9 +364,8 @@ class UserController extends Controller
             db::rollback();
             return response()->json(['error' => $e->getMessage()], 422);
         }
-       
-       
     }
+
     function viewimportuser()
     {
         // $user = User::find(1);

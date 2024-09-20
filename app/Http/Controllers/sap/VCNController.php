@@ -570,6 +570,7 @@ class VCNController extends Controller
         }
 
         notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        ChiTietRong::where('baseID', $request->id)->delete();
 
         // Lấy dữ liệu từ SAP
         $conDB = (new ConnectController)->connect_sap();
@@ -589,16 +590,164 @@ class VCNController extends Controller
             $results[] = $row;
         }
 
-        // Lấy data dở dàng
-        $data = notireceiptVCN::select('ItemCode', 'version')
-            ->selectRaw('SUM(CASE WHEN type = 1 THEN openQty ELSE Quantity END) AS TotalQuantity')
-            ->where('FatherCode', $request->FatherCode)
-            ->where('Team', $request->TO)
-            ->where('version', $request->version)
-            ->where('confirm', '=', 0)
-            ->where('deleted', '=', 0)
-            ->groupBy('ItemCode', 'version')
-            ->get();
+        // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
+        $factory = [
+            [
+                'Factory' => '01',
+                'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+            ],
+            [
+                'Factory' => '02',
+                'FactoryName' => 'Nhà Máy CBG Yên sơn'
+            ],
+            [
+                'Factory' => '03',
+                'FactoryName' => 'Nhà Máy CBG Thái Bình'
+            ],
+        ];
+
+        // Lấy công đoạn hiện tại
+        $CongDoan = null;
+        foreach ($results as $result) {
+            $U_CDOAN = $result['U_CDOAN'];
+
+            if ($CongDoan === null) {
+                $CongDoan = $U_CDOAN;
+            } else {
+                if ($U_CDOAN !== $CongDoan) {
+                    return response()->json(['error' => 'Các giá trị của U_CDOAN trong LSX không giống nhau!'], 422);
+                }
+            }
+        }
+
+        //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
+        $query2 = 'call UV_WEB_StockRong(?)';
+        $stmt = odbc_prepare($conDB, $query2);
+       
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        if (!odbc_execute($stmt, [$request->FatherCode])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $TotalFather=0;
+        $stockFather = [];
+        while ($row = odbc_fetch_array($stmt)) {
+            $stockFather[] = $row;
+        }
+        if (count($stockFather) == 0) {
+            $TotalFather=0;
+        }
+        else{
+            $TotalFather = $stockFather[0]['Qty'];
+        }
+    
+        // Lấy dữ liệu đã ghi nhận trên web
+        $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
+        ->where('deleted', 0)
+        ->where('confirm', 0)
+        ->where('type', -1)
+        ->sum('QtyIssueRong');
+
+        // Trả về tồn thực tế
+        $TotalFather=$TotalFather-$databtp;
+
+        // lấy data dở dàng 
+        $data = $data = NotiReceiptVCN::query()
+        ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
+        ->select(
+            'version',
+            'LSX',
+            'ProdType',
+            'FatherCode',
+            'b.ItemCode',
+            DB::raw('SUM(CASE WHEN b.type = 1 THEN b.openQty ELSE b.Quantity END) AS TotalQuantity')
+        )
+        ->where('deleted', 0)
+        ->where('version', $request->version)
+        ->where('FatherCode', $request->FatherCode)
+        ->where('notireceiptVCN.team', $request->TO)
+        ->where(function($query) {
+            $query->where(function($query) {
+                $query->where('b.type', 0)
+                      ->where('confirm', 0);
+            })
+            ->orWhere(function($query) {
+                $query->where('b.type', 1)
+                      ->where('deleted', 0)
+                      ->where('b.openQty','>', 0);
+            });
+        })
+        ->groupBy(
+            'version',
+            'LSX',
+            'ProdType',
+            'FatherCode',
+            'b.ItemCode'
+        )
+        ->get();
+      
+        //data noti
+        $notification = NotiReceiptVCN::query()
+        ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
+        ->join('users as c', 'notireceiptVCN.CreatedBy', '=', 'c.id')
+        ->select(
+            'notireceiptVCN.id',
+            'version',
+            'LSX',
+            'ProdType',
+            'FatherCode',
+            'SubItemCode',
+            'SubItemName',
+            'NotiReceiptVCN.created_at as CreatedAt',
+            'b.ItemCode',
+            'b.ItemName',
+            'b.type',
+            'QtyIssueRong',
+            DB::raw("CONCAT(c.first_name, ' ', c.last_name) as fullname"),
+            DB::raw('SUM(b.Quantity) as Quantity') // Sử dụng SUM để tính tổng số lượng
+        )
+        ->where('deleted', 0)
+        ->where('confirm', 0)
+        ->where('version', $request->version)
+        ->where('FatherCode', $request->FatherCode)
+        ->where('notireceiptVCN.team', $request->TO)
+        ->groupBy(
+            'notireceiptVCN.id',
+            'version',
+            'LSX',
+            'ProdType',
+            'FatherCode',
+            'SubItemCode',
+            'SubItemName',
+            'CreatedAt',
+            'b.ItemCode',
+            'b.ItemName',
+            'b.type',
+            'fullname',     
+        )
+        ->get()
+        ->groupBy('id')  // Nhóm theo id
+        ->map(function ($items, $id) {
+            return [
+                'notiID' => $id,
+                'QtyIssueRong'=> $items[0]['QtyIssueRong'],
+                'SubItemName' => $items[0]['SubItemName'],
+                'fullname'=> $items[0]['fullname'],
+                'CreatedAt' => $items[0]['CreatedAt'],
+                'detail' => $items->map(function ($item) {
+                    return [
+                        'ItemCode' => $item->ItemCode,
+                        'ItemName' => $item->ItemName,
+                        'Qty' => $item->Quantity,  // Sử dụng trường đã được tính tổng
+                        'Type' => $item->type
+                    ];
+                })->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
 
         if ($data->count() > 0) {
             // Map mảng 2 theo ItemCode và version
@@ -611,39 +760,28 @@ class VCNController extends Controller
             // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
             foreach ($results as &$item1) {
                 $itemCode = $item1['ItemCode'];
-
-                $notiData = DB::table('notireceiptVCN')
-                    ->join('users', 'notireceiptVCN.CreatedBy', '=', 'users.id')
-                    ->select('notireceiptVCN.*', 'users.first_name', 'users.last_name')
-                    ->where('notireceiptVCN.FatherCode', $request->FatherCode)
-                    ->where('notireceiptVCN.Team', $request->TO)
-                    ->where('notireceiptVCN.ItemCode', $itemCode)
-                    ->where('notireceiptVCN.version', $request->version)
-                    ->where('notireceiptVCN.confirm', '=', 0)
-                    ->where('notireceiptVCN.deleted', '=', 0)
-                    ->get();
-
                 if (isset($map[$itemCode])) {
                     foreach ($map[$itemCode] as $version => $totalQuantity) {
                         $item1['ConLai'] -= $totalQuantity;
                     }
                 }
                 $item1['ConLai'] = (float) $item1['ConLai'];
-                $item1['notifications'] = $notiData;
+              
             }
-            // dd($notiData);
-
             return response()->json([
+                'CongDoan' => $CongDoan,
+                'FatherStock'=>$TotalFather,
                 'stocks' => $results,
-                'message' => 'success',
+                'Factorys' => $factory,
+                'notifications' => $notification
             ], 200);
         } else {
-            foreach ($results as &$item1) {
-                $item1['notifications'] = [];
-            }
             return response()->json([
+                'CongDoan' => $CongDoan,
+                'notifications'=> null,
+                'FatherStock'=>$TotalFather,
                 'stocks' => $results,
-                'message' => 'success',
+                'Factorys' => $factory
             ], 200);
         }
     }
@@ -1231,10 +1369,10 @@ class VCNController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
         $toqc = "";
-        if (Auth::user()->plant == 'TH') {
-            $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'TQ') {
-            $toqc = 'TQ-QC';
+        if (Auth::user()->plant == 'YS2') {
+            $toqc = 'YS2-QC';
+        } else if (Auth::user()->plant == 'CH') {
+            $toqc = 'CH-QC';
         } else {
             $toqc = 'HG-QC';
         }
@@ -1485,6 +1623,7 @@ class VCNController extends Controller
             'noti_choxacnhan' => $data, 'noti_phoixuly' => $datacxl
         ], 200);
     }
+
     function viewDetailRongv2(Request $request)
     {
         // 1. Nhận vào giá trị "SPDICH", "ItemCode', "To" từ request
@@ -1514,19 +1653,19 @@ class VCNController extends Controller
                 $results[] = $row;
             }
             
-            // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
+            //3. Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
-                    'Factory' => '01',
-                    'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+                    'Factory' => '04',
+                    'FactoryName' => 'Nhà Máy VCN Yên Sơn'
                 ],
                 [
-                    'Factory' => '02',
-                    'FactoryName' => 'Nhà Máy CBG Yên sơn'
+                    'Factory' => '05',
+                    'FactoryName' => 'Nhà Máy VCN Chiêm Hóa'
                 ],
                 [
-                    'Factory' => '03',
-                    'FactoryName' => 'Nhà Máy CBG Thái Bình'
+                    'Factory' => '06',
+                    'FactoryName' => 'Nhà Máy VCN Hà Giang'
                 ],
             ];
 
@@ -1578,44 +1717,48 @@ class VCNController extends Controller
             // Trả về tồn thực tế
             $TotalFather=$TotalFather-$databtp;
 
-            // lấy data dở dàng 
-            $data = $data = NotiReceiptVCN::query()
-            ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
-            ->select(
-                'version',
-                'LSX',
-                'ProdType',
-                'FatherCode',
-                'b.ItemCode',
-                DB::raw('SUM(CASE WHEN b.type = 1 THEN b.openQty ELSE b.Quantity END) AS TotalQuantity')
-            )
-            ->where('deleted', 0)
-            ->where('version', $request->version)
-            ->where('FatherCode', $request->FatherCode)
-            ->where('notireceiptVCN.team', $request->TO)
-            ->where(function($query) {
-                $query->where(function($query) {
-                    $query->where('b.type', 0)
-                          ->where('confirm', 0);
-                })
-                ->orWhere(function($query) {
-                    $query->where('b.type', 1)
-                          ->where('deleted', 0)
-                          ->where('b.openQty','>', 0);
-                });
-            })
-            ->groupBy(
-                'version',
-                'LSX',
-                'ProdType',
-                'FatherCode',
-                'b.ItemCode'
-            )
-            ->get();
+            
+            // =============
+            // 1. Lấy data dở dang??
+            // $data = $data = NotiReceiptVCN::query()
+            // ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
+            // ->select(
+            //     'version',
+            //     'LSX',
+            //     'ProdType',
+            //     'FatherCode',
+            //     'b.ItemCode',
+            //     DB::raw('SUM(CASE WHEN b.type = 1 THEN b.openQty ELSE b.Quantity END) AS TotalQuantity')
+            // )
+            // ->where('deleted', 0)
+            // ->where('version', $request->version)
+            // ->where('FatherCode', $request->FatherCode)
+            // ->where('notireceiptVCN.team', $request->TO)
+            // ->where(function($query) {
+            //     $query->where(function($query) {
+            //         $query->where('b.type', 0)
+            //               ->where('confirm', 0);
+            //     })
+            //     ->orWhere(function($query) {
+            //         $query->where('b.type', 1)
+            //               ->where('deleted', 0)
+            //               ->where('b.openQty','>', 0);
+            //     });
+            // })
+            // ->groupBy(
+            //     'version',
+            //     'LSX',
+            //     'ProdType',
+            //     'FatherCode',
+            //     'b.ItemCode'
+            // )
+            // ->get();
+
+            // dd($data);
           
             //data noti
             $notification = NotiReceiptVCN::query()
-            ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
+            ->leftJoin('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
             ->join('users as c', 'notireceiptVCN.CreatedBy', '=', 'c.id')
             ->select(
                 'notireceiptVCN.id',
@@ -1623,12 +1766,14 @@ class VCNController extends Controller
                 'LSX',
                 'ProdType',
                 'FatherCode',
+                'notireceiptVCN.ItemName as DetectItemName' ,
+                'notireceiptVCN.Quantity as DetectQuantity',
                 'SubItemCode',
                 'SubItemName',
-                'NotiReceiptVCN.created_at as CreatedAt',
+                'notireceiptVCN.created_at as CreatedAt',
                 'b.ItemCode',
                 'b.ItemName',
-                'b.type',
+                'notireceiptVCN.type as Type',
                 'QtyIssueRong',
                 DB::raw("CONCAT(c.first_name, ' ', c.last_name) as fullname"),
                 DB::raw('SUM(b.Quantity) as Quantity') // Sử dụng SUM để tính tổng số lượng
@@ -1643,72 +1788,95 @@ class VCNController extends Controller
                 'version',
                 'LSX',
                 'ProdType',
+                'DetectItemName',
+                'DetectQuantity',
                 'FatherCode',
                 'SubItemCode',
                 'SubItemName',
                 'CreatedAt',
                 'b.ItemCode',
                 'b.ItemName',
-                'b.type',
+                'Type',
                 'fullname',     
             )
             ->get()
             ->groupBy('id')  // Nhóm theo id
             ->map(function ($items, $id) {
-                return [
-                    'notiID' => $id,
-                    'QtyIssueRong'=> $items[0]['QtyIssueRong'],
-                    'SubItemName' => $items[0]['SubItemName'],
-                    'fullname'=> $items[0]['fullname'],
-                    'CreatedAt' => $items[0]['CreatedAt'],
-                    'detail' => $items->map(function ($item) {
-                        return [
-                            'ItemCode' => $item->ItemCode,
-                            'ItemName' => $item->ItemName,
-                            'Qty' => $item->Quantity,  // Sử dụng trường đã được tính tổng
-                            'Type' => $item->type
-                        ];
-                    })->toArray(),
-                ];
+                if ($items[0]->Type == 1) {
+                    return [
+                        'notiID' => $id,
+                        'Quantity' => $items[0]['DetectQuantity'],
+                        'ItemName' => $items[0]['DetectItemName'],
+                        'fullname' => $items[0]['fullname'],
+                        'CreatedAt' => $items[0]['CreatedAt'],
+                        'Type' => $items[0]->Type,
+                    ];
+                } else { // Type = 0
+                    return [
+                        'notiID' => $id,
+                        'QtyIssueRong' => $items[0]['QtyIssueRong'],
+                        'SubItemName' => $items[0]['SubItemName'],
+                        'fullname' => $items[0]['fullname'],
+                        'CreatedAt' => $items[0]['CreatedAt'],
+                        'Type' => $items[0]->Type,
+                        'detail' => $items->map(function ($item) {
+                            return [
+                                'ItemCode' => $item->ItemCode,
+                                'ItemName' => $item->ItemName,
+                                'Qty' => $item->Quantity,  // Sử dụng trường đã được tính tổng
+                            ];
+                        })->toArray(),
+                    ];
+                }
             })
             ->values()
-            ->toArray();        
+            ->toArray(); 
 
-            if ($data->count() > 0) {
-                // Map mảng 2 theo ItemCode và version
-                $map = [];
-                foreach ($data as $item) {
-                    $itemCode = $item['ItemCode'];
-                    $map[$itemCode][$item['version']] = $item['TotalQuantity'];
-                }
+            // dd($notification);
 
-                // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
-                foreach ($results as &$item1) {
-                    $itemCode = $item1['ItemCode'];
-                    if (isset($map[$itemCode])) {
-                        foreach ($map[$itemCode] as $version => $totalQuantity) {
-                            $item1['ConLai'] -= $totalQuantity;
-                        }
-                    }
-                    $item1['ConLai'] = (float) $item1['ConLai'];
+            return response()->json([
+                'CongDoan' => $CongDoan,
+                'FatherStock'=>$TotalFather,
+                'stocks' => $results,
+                'Factorys' => $factory,
+                'notifications' => $notification
+            ], 200);
+
+            // if ($data->count() > 0) {
+            //     // Map mảng 2 theo ItemCode và version
+            //     $map = [];
+            //     foreach ($data as $item) {
+            //         $itemCode = $item['ItemCode'];
+            //         $map[$itemCode][$item['version']] = $item['TotalQuantity'];
+            //     }
+
+            //     // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
+            //     foreach ($results as &$item1) {
+            //         $itemCode = $item1['ItemCode'];
+            //         if (isset($map[$itemCode])) {
+            //             foreach ($map[$itemCode] as $version => $totalQuantity) {
+            //                 $item1['ConLai'] -= $totalQuantity;
+            //             }
+            //         }
+            //         $item1['ConLai'] = (float) $item1['ConLai'];
                   
-                }
-                return response()->json([
-                    'CongDoan' => $CongDoan,
-                    'FatherStock'=>$TotalFather,
-                    'stocks' => $results,
-                    'Factorys' => $factory,
-                    'notifications' => $notification
-                ], 200);
-            } else {
-                return response()->json([
-                    'CongDoan' => $CongDoan,
-                    'notifications'=> null,
-                    'FatherStock'=>$TotalFather,
-                    'stocks' => $results,
-                    'Factorys' => $factory
-                ], 200);
-            }
+            //     }
+            //     return response()->json([
+            //         'CongDoan' => $CongDoan,
+            //         'FatherStock'=>$TotalFather,
+            //         'stocks' => $results,
+            //         'Factorys' => $factory,
+            //         'notifications' => $notification
+            //     ], 200);
+            // } else {
+            //     return response()->json([
+            //         'CongDoan' => $CongDoan,
+            //         'notifications'=> null,
+            //         'FatherStock'=>$TotalFather,
+            //         'stocks' => $results,
+            //         'Factorys' => $factory
+            //     ], 200);
+            // }
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -2199,12 +2367,10 @@ class VCNController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'LSX'=> 'required|string|max:254',
-            'QtyIssue' => 'required',
+            'QtyIssue',
             'CongDoan' => 'required|string|max:254',
             'version' => 'required|string|max:254',
             'ProdType' => 'required|string|max:254',
-            // 'FatherCode' => 'required|string|max:254',
-            // 'ItemChild' => 'required|string|max:254',
             'SubItemCode' => 'required|string|max:254',
             'SubItemName' => 'required|string|max:254',
             'NextTeam' => 'required|string|max:254',
@@ -2235,26 +2401,26 @@ class VCNController extends Controller
         try {
             DB::beginTransaction();
             // data header
-             $notidata=notireceiptVCN::create([
-                'LSX' => $request->LSX,
-                'MaThiTruong' => $request->MaThiTruong ?? null,
-                'FatherCode' =>$request->SubItemCode,
-                'SubItemCode' =>$request->SubItemCode,
-                'SubItemName' =>$request->SubItemName,
-                'team' => $request->team,
-                'NextTeam' => $request->NextTeam,
-                'CongDoan' => $request->CongDoan,
-                'type' => -1,
-                'openQty' => 0,
-                'ProdType' => $request->ProdType,
-                'version' => $request->version,
-                'isRONG'=>true,
-                'QtyIssueRong'=>$request->QtyIssue,
-                'CreatedBy' => Auth::user()->id,
-            ]);
-
             foreach ($request->Data as $dt) {
                 if ($dt['CompleQty'] > 0) {
+                    $notidata=notireceiptVCN::create([
+                        'LSX' => $request->LSX,
+                        'text' => 'Production information waiting for confirmation',
+                        'MaThiTruong' => $request->MaThiTruong ?? null,
+                        'FatherCode' =>$request->SubItemCode,
+                        'SubItemCode' =>$request->SubItemCode,
+                        'SubItemName' =>$request->SubItemName,
+                        'team' => $request->team,
+                        'NextTeam' => $request->NextTeam,
+                        'CongDoan' => $request->CongDoan,
+                        'type' => 0,
+                        'openQty' => 0,
+                        'ProdType' => $request->ProdType,
+                        'version' => $request->version,
+                        'isRONG'=>true,
+                        'QtyIssueRong'=>$request->QtyIssue,
+                        'CreatedBy' => Auth::user()->id,
+                    ]);
                     ChiTietRong::create([
                         'baseID'=>$notidata->id,
                         'ItemCode' => $dt['ItemCode'],
@@ -2273,37 +2439,40 @@ class VCNController extends Controller
                 if ($dt['RejectQty'] > 0) {
                     $noti=notireceiptVCN::create([
                         'LSX' => $request->LSX,
+                        'text' => 'Error information sent to QC',
                         'MaThiTruong' => $request->MaThiTruong ?? null,
                         'FatherCode' =>$request->SubItemCode,
-                        'SubItemCode' =>$request->SubItemCode,
-                        'SubItemName' =>$request->SubItemName,
+                        'ItemCode' =>$dt['ItemCode'],
+                        'ItemName' =>$dt['ItemName'],
                         'team' => $request->team,
+                        'Quantity' => $dt['RejectQty'],
                         'NextTeam' => $request->NextTeam,
                         'CongDoan' => $request->CongDoan,
-                        'type' => -1,
+                        'type' => 1,
                         'openQty' => 0,
                         'ProdType' => $request->ProdType,
                         'version' => $request->version,
                         'isRONG'=>true,
                         'QtyIssueRong'=>$request->QtyIssue,
                         'CreatedBy' => Auth::user()->id,
-                    ]);
-                    ChiTietRong::create([
-                        'baseID'=>$noti->id,
-                        'ItemCode' => $dt['ItemCode'],
-                        'ItemName' => $dt['ItemName'],
-                        'type' => 1,
-                        'Quantity' => $dt['RejectQty'],
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                        'LYDO' => $request->LYDO ?? null,
-                        'Team' => $request->Team,
-                        'NextTeam' => $toqc,
-                        'CDay'=>$dt['CDay'],
-                        'CRong'=>$dt['CRong'],
-                        'CDai'=>$dt['CDai'],
-                        'openQty' => $dt['RejectQty'],
-                        'loinhamay' => $dt['factories']['value'] ?? null,
                     ]);
+                    // ChiTietRong::create([
+                    //     'baseID'=>$noti->id,
+                    //     'ItemCode' => $dt['ItemCode'],
+                    //     'ItemName' => $dt['ItemName'],
+                    //     'type' => 1,
+                    //     'Quantity' => $dt['RejectQty'],
+                    //     'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                    //     'LYDO' => $request->LYDO ?? null,
+                    //     'Team' => $request->Team,
+                    //     'NextTeam' => $toqc,
+                    //     'CDay'=>$dt['CDay'],
+                    //     'CRong'=>$dt['CRong'],
+                    //     'CDai'=>$dt['CDai'],
+                    //     'openQty' => $dt['RejectQty'],
+                    //     'loinhamay' => $dt['factories']['value'] ?? null,
+                    // ]);
                 }
             }
 

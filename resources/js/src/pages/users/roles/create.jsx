@@ -54,12 +54,20 @@ const permissionsName = [
         name: "Ghi nhận ván công nghiệp",
     },
     {
+        value: "ND",
+        name: "Ghi nhận nội địa",
+    },
+    {
         value: "QCCBG",
         name: "Kiểm định chế biến gỗ",
     },
     {
         value: "QCVCN",
         name: "Kiểm định ván công nghiệp",
+    },
+    {
+        value: "QCND",
+        name: "Kiểm định nội địa",
     },
 ];
 
@@ -145,7 +153,7 @@ function CreateRole() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#F8F9F7] h-full">
+            <div className="flex justify-center bg-[#EAEAED] h-full">
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}

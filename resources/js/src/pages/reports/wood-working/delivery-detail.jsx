@@ -657,7 +657,34 @@ function DeliveryDetailReport() {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-full grid grid-cols-4">
+                                        <div className="w-full grid grid-cols-5">
+                                        <div className="col-span-1 space-y-2">
+                                                <div className="text-[#155979] uppercase font-medium">
+                                                    Runnen
+                                                </div>
+                                                {teamData
+                                                    .filter(
+                                                        (item) =>
+                                                            item.CDOAN === "RN"
+                                                    )
+                                                    .map((item, index) => (
+                                                        <div key={index}>
+                                                            <Checkbox
+                                                                value={
+                                                                    item.Code
+                                                                }
+                                                                onChange={
+                                                                    handleCheckboxChange
+                                                                }
+                                                                isChecked={selectedTeams.includes(
+                                                                    item.Code
+                                                                )}
+                                                            >
+                                                                {item.Name}
+                                                            </Checkbox>
+                                                        </div>
+                                                    ))}
+                                            </div>
                                             <div className="col-span-1 space-y-2 ">
                                                 <div className="text-[#155979] uppercase font-medium">
                                                     Sơ chế
