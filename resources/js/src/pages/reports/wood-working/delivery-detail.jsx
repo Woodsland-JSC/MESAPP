@@ -182,6 +182,7 @@ function DeliveryDetailReport() {
                 params.to_date
             );
             const formattedData = res.map((item) => ({
+                resource: item.TenTo,
                 itemname: item.ItemName,
                 thickness: item.CDay,
                 width: item.CRong,
@@ -311,13 +312,21 @@ function DeliveryDetailReport() {
         toast("Chức năng xuất PDF đang được phát triển.");
     };
 
+
+
     // Row Data: The data to be displayed.
     const [rowData, setRowData] = useState([]);
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerName: "Tên",
+            headerName: "Tổ sản xuất",
+            field: "resource",
+            rowGroup: true,
+            hide: true
+        },
+        {
+            headerName: "Tên chi tiết",
             field: "itemname",
             width: 350,
             suppressHeaderMenuButton: true,
@@ -347,14 +356,51 @@ function DeliveryDetailReport() {
             field: "quantity",
             width: 100,
             suppressHeaderMenuButton: true,
+            aggFunc: 'sum',
+            headerComponentParams: { displayName: "Số lượng" }
         },
-        { headerName: "M3", field: "m3", width: 120 },
+        { headerName: "M3", field: "m3", width: 120, aggFunc: 'sum', headerComponentParams: { displayName: "M3" }  },
         { headerName: "Người giao", field: "sender" },
         { headerName: "Ngày giờ giao", field: "send_date" },
         { headerName: "Người nhận", field: "receiver" },
         { headerName: "Ngày giờ nhận", field: "receive_date" },
         { headerName: "Lệnh sản xuất", field: "production_order" },
     ]);
+
+    const groupDisplayType = 'groupRows';
+    const getRowStyle = params => {
+        if (params.node.rowIndex % 2 === 0) {
+            return { background: '#F6F6F6' };  // Dòng chẵn
+        }
+        return { background: '#ffffff' };  // Dòng lẻ
+    };
+    
+
+    // const groupRowAggNodes = (nodes) => {
+    //     let totalQuantity = 0;
+    //     let totalM3 = 0;
+
+    //     nodes.forEach(node => {
+    //         if (node.data) {
+    //             totalQuantity += node.data.quantity || 0;
+    //             totalM3 += node.data.m3 || 0;
+    //         }
+    //     });
+
+    //     return { quantity: totalQuantity, m3: totalM3 }; 
+    // };
+
+    // const autoGroupColumnDef = {
+    //     cellRendererParams: {
+    //         footerValueGetter: (params) => params.value,
+    //         innerRenderer: (params) => {
+    //             const groupName = params.value;
+    //             const totalQuantity = params.node.aggData ? `$${params.node.aggData.quantity}` : '';
+    //             const totalM3 = params.node.aggData ? `$${params.node.aggData.m3}` : '';
+    //             return `${groupName} (Total Quantity: ${totalQuantity}, Total M3: ${totalM3})`;  // Hiển thị tổng salary và bonus riêng biệt
+    //         }
+    //     }
+    // };
 
     const FactoryOption = ({ value, label }) => (
         <div
@@ -886,6 +932,10 @@ function DeliveryDetailReport() {
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
+                                            groupDisplayType={groupDisplayType}
+                                            getRowStyle={getRowStyle}
+                                            groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
                                         />
                                     </div>
                                 </div>

@@ -1502,8 +1502,7 @@ const ItemInput = ({
                                                                                     value ===
                                                                                         0 ||
                                                                                     !value ||
-                                                                                    value ===
-                                                                                        NaN
+                                                                                    isNaN(value)
                                                                                 ) {
                                                                                     setRongData(
                                                                                         (
@@ -1585,8 +1584,7 @@ const ItemInput = ({
                                                                                 value ===
                                                                                     0 ||
                                                                                 !value ||
-                                                                                value ===
-                                                                                    NaN
+                                                                                isNaN(value)
                                                                             ) {
                                                                                 setRongData(
                                                                                     (
