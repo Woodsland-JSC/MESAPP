@@ -323,7 +323,8 @@ function DeliveryDetailReport() {
             headerName: "Tổ sản xuất",
             field: "resource",
             rowGroup: true,
-            hide: true
+            hide: true,
+            sort: 'asc'
         },
         {
             headerName: "Tên chi tiết",
@@ -375,6 +376,15 @@ function DeliveryDetailReport() {
         return { background: '#ffffff' };  // Dòng lẻ
     };
     
+    const autoGroupColumnDef = {
+        headerName: 'Tổ sản xuất',
+        cellRenderer: 'agGroupCellRenderer',
+        field: 'resource',
+        comparator: (a, b) => {
+            // So sánh để sắp xếp theo thứ tự alphabet
+            return a.localeCompare(b);
+        },
+    };
 
     // const groupRowAggNodes = (nodes) => {
     //     let totalQuantity = 0;

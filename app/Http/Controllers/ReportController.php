@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 class ReportController extends Controller
 {
     /** Sấy gỗ */
@@ -36,14 +37,34 @@ class ReportController extends Controller
             $query->where('statuscode', $statusCode);
         }
 
+        // if ($statusCode == 0) {
+        //     if ($fromDate && $toDate) {
+        //         $query->whereBetween('ngaygiao', [$fromDate, $toDate]);
+        //     }
+        // } else {
+        //     if ($fromDate && $toDate) {
+        //         $query->whereBetween('ngaygiao', [$fromDate, $toDate])
+        //               ->whereBetween('ngaynhan', [$fromDate, $toDate]);
+        //     }
+        // }
+
         if ($statusCode == 0) {
             if ($fromDate && $toDate) {
-                $query->whereBetween('ngaygiao', [$fromDate, $toDate]);
+                $query->whereBetween('ngaygiao', [
+                    Carbon::parse($fromDate)->startOfDay(), 
+                    Carbon::parse($toDate)->endOfDay(),
+                ]);
             }
         } else {
             if ($fromDate && $toDate) {
-                $query->whereBetween('ngaygiao', [$fromDate, $toDate])
-                      ->whereBetween('ngaynhan', [$fromDate, $toDate]);
+                $query->whereBetween('ngaygiao', [
+                    Carbon::parse($fromDate)->startOfDay(),
+                    Carbon::parse($toDate)->endOfDay()
+                ])
+                ->whereBetween('ngaynhan', [
+                    Carbon::parse($fromDate)->startOfDay(),
+                    Carbon::parse($toDate)->endOfDay()
+                ]);
             }
         }
     
