@@ -361,7 +361,7 @@ function DeliveryDetailReport() {
             headerComponentParams: { displayName: "Số lượng" }
         },
         { headerName: "M3", field: "m3", width: 120, aggFunc: 'sum', headerComponentParams: { displayName: "M3" }  },
-        { headerName: "Người giao", field: "sender" },
+        { headerName: "Người giao", field: "sender", filter: true, },
         { headerName: "Ngày giờ giao", field: "send_date" },
         { headerName: "Người nhận", field: "receiver" },
         { headerName: "Ngày giờ nhận", field: "receive_date" },
