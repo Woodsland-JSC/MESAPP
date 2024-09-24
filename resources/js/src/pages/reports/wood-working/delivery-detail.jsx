@@ -324,51 +324,52 @@ function DeliveryDetailReport() {
             field: "resource",
             rowGroup: true,
             hide: true,
-            sort: 'asc'
+            sort: 'asc',
+            headerComponentParams: { displayName: "Tổ sản xuất" }
         },
         {
             headerName: "Tên chi tiết",
             field: "itemname",
-            width: 350,
+            minWidth: 400,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
             headerName: "Dày",
             field: "thickness",
-            width: 80,
+            maxWidth: 80,
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Rộng",
             field: "width",
-            width: 80,
+            maxWidth: 80,
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Dài",
             field: "height",
-            width: 80,
+            maxWidth: 80,
             suppressHeaderMenuButton: true,
         },
-        { headerName: "ĐVT", field: "unit", width: 100 },
+        { headerName: "ĐVT", field: "unit", maxWidth: 90, },
         {
             headerName: "Số lượng",
             field: "quantity",
-            width: 100,
+            maxWidth: 110,
             suppressHeaderMenuButton: true,
             aggFunc: 'sum',
             headerComponentParams: { displayName: "Số lượng" }
         },
         { headerName: "M3", field: "m3", width: 120, aggFunc: 'sum', headerComponentParams: { displayName: "M3" }  },
-        { headerName: "Người giao", field: "sender", filter: true, },
-        { headerName: "Ngày giờ giao", field: "send_date" },
-        { headerName: "Người nhận", field: "receiver" },
-        { headerName: "Ngày giờ nhận", field: "receive_date" },
-        { headerName: "Lệnh sản xuất", field: "production_order" },
+        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240, },
+        { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
+        { headerName: "Người nhận", field: "receiver", minWidth: 240, },
+        { headerName: "Ngày giờ nhận", field: "receive_date", minWidth: 200, },
+        { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200 },
     ]);
 
-    const groupDisplayType = 'groupRows';
+    const groupDisplayType = 'multipleColumns';
     const getRowStyle = params => {
         if (params.node.rowIndex % 2 === 0) {
             return { background: '#F6F6F6' };  // Dòng chẵn
@@ -376,41 +377,37 @@ function DeliveryDetailReport() {
         return { background: '#ffffff' };  // Dòng lẻ
     };
     
-    const autoGroupColumnDef = {
-        headerName: 'Tổ sản xuất',
-        cellRenderer: 'agGroupCellRenderer',
-        field: 'resource',
-        comparator: (a, b) => {
-            // So sánh để sắp xếp theo thứ tự alphabet
-            return a.localeCompare(b);
-        },
-    };
+    const defaultColDef = useMemo(() => {
+        return {
+          flex: 1,
+          minWidth: 150,
+        };
+      }, []);
+      
+    const autoGroupColumnDef = useMemo(() => {
+        return {
+          minWidth: 300,
+        };
+      }, []);
 
-    // const groupRowAggNodes = (nodes) => {
-    //     let totalQuantity = 0;
-    //     let totalM3 = 0;
-
-    //     nodes.forEach(node => {
-    //         if (node.data) {
-    //             totalQuantity += node.data.quantity || 0;
-    //             totalM3 += node.data.m3 || 0;
-    //         }
-    //     });
-
-    //     return { quantity: totalQuantity, m3: totalM3 }; 
-    // };
-
-    // const autoGroupColumnDef = {
-    //     cellRendererParams: {
-    //         footerValueGetter: (params) => params.value,
-    //         innerRenderer: (params) => {
-    //             const groupName = params.value;
-    //             const totalQuantity = params.node.aggData ? `$${params.node.aggData.quantity}` : '';
-    //             const totalM3 = params.node.aggData ? `$${params.node.aggData.m3}` : '';
-    //             return `${groupName} (Total Quantity: ${totalQuantity}, Total M3: ${totalM3})`;  // Hiển thị tổng salary và bonus riêng biệt
-    //         }
-    //     }
-    // };
+      const statusBar = useMemo(() => { 
+        return {
+            statusPanels: [
+                {
+                    key: 'aUniqueString',
+                    statusPanel: 'agTotalRowCountComponent',
+                    align: 'left'
+                },
+                {
+                    statusPanel: 'agAggregationComponent',
+                    statusPanelParams: {
+                        // possible values are: 'count', 'sum', 'min', 'max', 'avg'
+                        aggFuncs: ['avg', 'sum']
+                    }
+                }
+            ]
+        };
+    }, []);
 
     const FactoryOption = ({ value, label }) => (
         <div
@@ -942,10 +939,12 @@ function DeliveryDetailReport() {
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
+                                            defaultColDef={defaultColDef}
+                                            autoGroupColumnDef={autoGroupColumnDef}
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
-                                            groupIncludeFooter={true}
-                                            // groupIncludeTotalFooter={true}
+                                            // groupTotalRow={"bottom"}
+                                            grandTotalRow={"bottom"} 
                                         />
                                     </div>
                                 </div>

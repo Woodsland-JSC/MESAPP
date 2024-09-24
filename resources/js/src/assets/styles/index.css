@@ -235,11 +235,18 @@ div:where(.swal2-container) {
     font-weight: 600;
 }
 
+.ag-theme-quartz .ag-row-group:hover {
+    background-color: transparent !important;
+}
+
 .ag-row-footer{
     background-color: #ffffff !important;
     font-weight: 600;
 }
 
+.ag-row-last{
+    background-color: #B9E0F6 !important;
+} 
 
 /* ============ */
 
