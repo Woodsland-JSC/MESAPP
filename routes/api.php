@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');
         Route::post('/upload',[UserController::class, 'importuser']);
         Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
+        route::post('/syncfromSAP', [UserController::class, 'syncFromSap']);
     });
     /**
      * Pallet Routes
@@ -132,11 +133,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');
-    
+
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
 
-    // Report 
+    // Report
     Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);
 
     Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
