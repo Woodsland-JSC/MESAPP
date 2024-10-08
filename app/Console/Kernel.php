@@ -10,11 +10,11 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule): void
+    protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('run:sql1530')->dailyAt('15:30');
+        $schedule->command('run:sql1415')->dailyAt('14:15');
     }
-
     /**
      * Register the commands for the application.
      */
