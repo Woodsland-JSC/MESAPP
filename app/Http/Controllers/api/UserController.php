@@ -132,7 +132,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
         $input = $request->all();
@@ -147,7 +147,7 @@ class UserController extends Controller
 
         if ($user->sap_id == $request->input('sap_id')) {
             unset($input['sap_id']);
-        }      
+        }
 
         if ($request->has('avatar')) {
             $avatar = $request->file('avatar');
@@ -199,7 +199,7 @@ class UserController extends Controller
 
         unset($input['_method']);
 
-        
+
 
         $user->update($input);
 
@@ -328,10 +328,10 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
-    
+
     function importuser(Request $request)
     {
-        
+
         $data = Excel::toArray([], $request->file);
         $headerRow = $data[0][0];
         try
@@ -344,7 +344,7 @@ class UserController extends Controller
                 $input['last_name'] = $rowData[1];
                 $input['username']= $rowData[2];
                 $input['email']=$rowData[3];
-    
+
                 $input['password'] = Hash::make($rowData[4]);
                 if($input['email'] == null){
                     $input['email'] = $input['username'].'@wl.com';
@@ -355,7 +355,7 @@ class UserController extends Controller
                 $input['integration_id']=1;
                 $user = User::create($input);
                 $user->assignRole([$rowData[6]]);
-              
+
             }
             db::commit();
             return response()->json(['message' => 'import users successfully'], 200); // 20 Created status code
@@ -371,5 +371,44 @@ class UserController extends Controller
         // $user = User::find(1);
         dd( Auth::user()->first_name);
         return view('importuser');
+    }
+    function syncFromSap(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'username' => 'required|unique:users,username',
+            'password' => 'required',
+            'plant' => 'required',
+            'sap_id' => 'required|unique:users,sap_id',
+            'roles' => 'required|exists:roles,name',
+            'branch' => 'required'
+
+
+        ]);
+
+        try
+        { // Process the data rows
+
+            $input['first_name'] = $request->input('first_name');
+            $input['last_name'] = $request->input('last_name');
+            $input['username']= $request->input('username');
+            $input['email']=$input['username'].'@wl.com';
+            $input['password'] = Hash::make(123456);
+
+            $input['sap_id']=$request->input('sap_id');
+            $input['branch']=$request->input('branch');
+            $input['plant']=$request->input('plant');
+            $input['integration_id']=1;
+            db::beginTransaction();
+            $user= User::firstOrNew( $input);
+            $user->assignRole([$request->input('roles')]);
+            db::commit();
+            return response()->json(['message' => 'created users successfully'], 200); // 20 Created status code
+        } catch (\Exception $e) {
+            db::rollback();
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+
     }
 }
