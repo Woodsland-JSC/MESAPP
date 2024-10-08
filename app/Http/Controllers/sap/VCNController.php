@@ -533,7 +533,7 @@ class VCNController extends Controller
             throw new \Exception('data không hợp lệ.');
         }
         // giá trị cột confirm bằng 2 là trả lại
-        notireceiptVCN::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+        notireceiptVCN::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => Carbon::now()->format('YmdHis'), 'text' => $request->reason]);
         awaitingstocksvcn::where('notiId', $request->id)->delete();
         return response()->json('success', 200);
     }
@@ -569,7 +569,7 @@ class VCNController extends Controller
             throw new \Exception('data không hợp lệ.');
         }
 
-        notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => Carbon::now()->format('YmdHis')]);
         ChiTietRong::where('baseID', $request->id)->delete();
 
         // Lấy dữ liệu từ SAP
@@ -822,7 +822,7 @@ class VCNController extends Controller
         }
 
         // Xóa số lượng giao chờ xác nhận
-        notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        notireceiptVCN::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => Carbon::now()->format('YmdHis')]);
         awaitingstocksvcn::where('notiId', $data->id)->delete();
 
         // Lấy danh sách số lượng tồn
@@ -996,7 +996,7 @@ class VCNController extends Controller
                             "BaseType" => 202,
                             "BatchNumbers" => [
                                 [
-                                    "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                    "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                     "Quantity" => $allocate['Allocate'],
                                     "ItemCode" =>  $allocate['ItemChild'],
                                     "U_CDai" => $allocate['CDai'],
@@ -1042,7 +1042,7 @@ class VCNController extends Controller
                 notireceiptVCN::where('id', $request->id)->update([
                     'confirm' => 1,
                     'confirmBy' => Auth::user()->id,
-                    'confirm_at' => now()->format('YmdHmi')
+                    'confirm_at' => Carbon::now()->format('YmdHis')
                 ]);
                 awaitingstocksvcn::where('notiId', $data->notiID)->delete();
                 DB::commit();
@@ -1139,7 +1139,7 @@ class VCNController extends Controller
                         "WarehouseCode" => $whs,
                         "BatchNumbers" => [
                             [
-                                "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                 "Quantity" => $allocate['Allocate'],
                                 "ItemCode" =>  $allocate['ItemChild'],
                                 "U_CDai" => $allocate['CDai'],
@@ -1187,7 +1187,7 @@ class VCNController extends Controller
             notireceiptVCN::where('id', $request->id)->update([
                 'confirm' => 1,
                 'confirmBy' => Auth::user()->id,
-                'confirm_at' => now()->format('YmdHmi'),
+                'confirm_at' => Carbon::now()->format('YmdHis'),
                 'openQty' => $data->openQty - $request->Qty
             ]);
             DB::commit();
@@ -1939,7 +1939,7 @@ class VCNController extends Controller
                                 "BaseType" => 202,
                                 "BatchNumbers" => [
                                     [
-                                        "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                        "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                         "Quantity" => $allocate['Allocate'],
                                         "ItemCode" =>  $allocate['ItemChild'],
                                         "U_CDai" => $allocate['CDai'],
@@ -1997,7 +1997,7 @@ class VCNController extends Controller
                         notireceiptVCN::where('id', $request->id)->update([
                             'confirm' => 1,
                             'confirmBy' => Auth::user()->id,
-                            'confirm_at' => now()->format('YmdHmi')
+                            'confirm_at' => Carbon::now()->format('YmdHis')
                         ]);
                         awaitingstocksvcn::where('notiId', $request->id)->delete();
                         DB::commit();
@@ -2215,7 +2215,7 @@ class VCNController extends Controller
                         "WarehouseCode" => $whs,
                         "BatchNumbers" => [
                             [
-                                "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                 "Quantity" => $allocate['Allocate'],
                                 "ItemCode" =>  $allocate['ItemChild'],
                                 "U_CDai" => $allocate['CDai'],
@@ -2289,7 +2289,7 @@ class VCNController extends Controller
                     notireceiptVCN::where('id', $request->id)->update([
                         'confirm' => 1,
                         'confirmBy' => Auth::user()->id,
-                        'confirm_at' => now()->format('YmdHmi'),
+                        'confirm_at' => Carbon::now()->format('YmdHis'),
                         'openQty' => $data->openQty - $request->Qty,
                         'isQCConfirmed' => 1,
                     ]);
@@ -2559,7 +2559,7 @@ class VCNController extends Controller
                             "Quantity"=>$quantity,
                             "BatchNumbers"=>[[
                                 "ItemCode" => $itemCode,
-                                "BatchNumber"=>now()->format('YmdHmi').$docEntry,
+                                "BatchNumber"=>Carbon::now()->format('YmdHis').$docEntry,
                                 "Quantity"=>$quantity,
                             ]],
                         ];
@@ -2581,7 +2581,7 @@ class VCNController extends Controller
                                     "Qty" => $quantity,
                                     "BatchNumbers"=>[[
                                         "ItemCode" => $itemCode,
-                                        "BatchNumber"=>now()->format('YmdHmi').$docEntry,
+                                        "BatchNumber"=>Carbon::now()->format('YmdHis').$docEntry,
                                         "Quantity"=>$quantity,
                                     ]],
                                 ]
@@ -2625,7 +2625,7 @@ class VCNController extends Controller
                     notireceiptVCN::where('id', $request->id)->update([
                         'confirm' => 1,
                         'confirmBy' => Auth::user()->id,
-                        'confirm_at' => now()->format('YmdHmi')
+                        'confirm_at' => Carbon::now()->format('YmdHis')
                     ]);
                     DB::commit();
                     
@@ -2775,7 +2775,7 @@ class VCNController extends Controller
                     "WarehouseCode" => $whs,
                     "BatchNumbers" => [
                         [
-                            "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                            "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                             "Quantity" => $allocate['Allocated'],
                             "ItemCode" =>  $allocate['ItemCode'],
                             // "U_CDai" => $allocate['CDai'],

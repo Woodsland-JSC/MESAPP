@@ -24,6 +24,7 @@ use App\Jobs\HistoryQC;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Database\QueryException;
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 
 class QCController extends Controller
 {
@@ -44,6 +45,7 @@ class QCController extends Controller
         $res = humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
+
     function removeDoAm(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -57,6 +59,7 @@ class QCController extends Controller
         $res = humidityDetails::where('PlanID', $request->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
+
     public function HoanThanhDoAm(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -88,6 +91,7 @@ class QCController extends Controller
         }
         return response()->json(['message' => 'success', 'humiditys' => $record], 200);
     }
+
     public function DanhGiaKT(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -113,6 +117,7 @@ class QCController extends Controller
         $res = DisabilityDetail::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'plandrying' => $res], 200);
     }
+
     function removeDisabledRecord(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -126,6 +131,7 @@ class QCController extends Controller
         $res = humidityDetails::where('PlanID', $request->PlanID)->where('refID', -1)->get();
         return response()->json(['message' => 'success', 'humiditys' => $res], 200);
     }
+
     public function HoanThanhKT(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -226,7 +232,7 @@ class QCController extends Controller
         }
 
         $header = [
-            'Date' => now()->format('Y-m-d'),
+            'Date' => Carbon::now()->format('Y-m-d'),
             'PlanID' => $req->PlanID,
             'Factory' => $result->Name,
             'Oven' => $result->Oven,
@@ -315,9 +321,9 @@ class QCController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
-        }
+        };
         $toQC = "";
-        switch (Auth()->user()->plant) {
+        switch (Auth::user()->plant) {
             case 'TH':
                 $toQC = 'TH-QC';
                 break;
@@ -330,7 +336,7 @@ class QCController extends Controller
             case 'TB':
                 $toQC = 'TB-QC';    
                 break;
-        }
+        };
 
         // Danh sách lỗi chờ xử lý
         $data = DB::table('sanluong as a')
@@ -713,7 +719,7 @@ class QCController extends Controller
                 "WarehouseCode" =>  $warehouse,
                 "BatchNumbers" => [
                     [
-                        "BatchNumber" => now()->format('YmdHmi'),
+                        "BatchNumber" => Carbon::now()->format('YmdHis'),
                         "Quantity" => $request->Qty,
                         "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                         "U_CDai" => $data->CDai,
@@ -753,7 +759,7 @@ class QCController extends Controller
                 'DocEntry' => $res['DocEntry'],
                 'confirmBy' => Auth::user()->id,
                 'isPushSAP' => 1,
-                'confirm_at' => now()->format('YmdHmi')
+                'confirm_at' => Carbon::now()->format('YmdHis')
             ]);
 
             HistorySL::create(
@@ -895,7 +901,7 @@ class QCController extends Controller
                         "WarehouseCode" => $whs,
                         "BatchNumbers" => [
                             [
-                                "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                 "Quantity" => $allocate['Allocate'],
                                 "ItemCode" =>  $allocate['ItemChild'],
                                 "U_CDai" => $allocate['CDai'],
@@ -944,7 +950,7 @@ class QCController extends Controller
             notireceiptVCN::where('id', $request->id)->update([
                 'confirm' => 1,
                 'confirmBy' => Auth::user()->id,
-                'confirm_at' => now()->format('YmdHmi'),
+                'confirm_at' => Carbon::now()->format('YmdHis'),
                 'openQty' => $data->openQty - $request->Qty
             ]);
             DB::commit();
@@ -997,6 +1003,7 @@ class QCController extends Controller
         odbc_close($conDB);
         return  $results;
     }
+
     function allocate($data, $totalQty)
     {
         foreach ($data as &$item) {
@@ -1065,14 +1072,18 @@ class QCController extends Controller
             ], 500);
         }
     }
+
     function IssueQC($ItemCode, $Quantity, $WarehouseCode, $branch)
     {
         issueProduction::dispatch($ItemCode, $Quantity, $WarehouseCode, $branch);
     }
+
     function logToTableSAP($ItemCode, $Quantity, $WarehouseCode, $branch)
     {
         issueProduction::dispatch($ItemCode, $Quantity, $WarehouseCode, $branch);
     }
+
+
     /**
      * v2 AcceptQC chế biên gỗ
      * 
@@ -1166,7 +1177,7 @@ class QCController extends Controller
                     "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     "WarehouseCode" =>  $warehouse,
                     "BatchNumbers" => [[
-                        "BatchNumber" => now()->format('YmdHmi'),
+                        "BatchNumber" => Carbon::now()->format('YmdHis'),
                         "Quantity" => $request->Qty,
                         "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                         "U_CDai" => $data->CDai,
@@ -1259,7 +1270,7 @@ class QCController extends Controller
                             'DocEntry' => '',
                             'confirmBy' => Auth::user()->id,
                             'isPushSAP' => 1,
-                            'confirm_at' => now()->format('YmdHmi')
+                            'confirm_at' => Carbon::now()->format('YmdHis')
                         ]);
 
                         HistorySL::create(

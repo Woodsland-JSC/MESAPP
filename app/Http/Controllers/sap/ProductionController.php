@@ -15,6 +15,7 @@ use App\Models\HistorySL;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 class ProductionController extends Controller
 {
    
@@ -642,7 +643,7 @@ class ProductionController extends Controller
         }
         // giá trị cột confirm bằng 2 là trả lại
         SanLuong::where('id', $data->id)->update(['Status' => 1]);
-        notireceipt::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => now()->format('YmdHmi'), 'text' => $request->reason]);
+        notireceipt::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => Carbon::now()->format('YmdHis'), 'text' => $request->reason]);
         awaitingstocks::where('notiId', $request->id)->delete();
         return response()->json('success', 200);
     }
@@ -703,7 +704,7 @@ class ProductionController extends Controller
         }
 
         // Xóa số lượng giao chờ xác nhận
-        notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => now()->format('YmdHmi')]);
+        notireceipt::where('id', $data->id)->update(['deleted' => 1, 'deleteBy' => Auth::user()->id, 'deleted_at' => Carbon::now()->format('YmdHis')]);
         awaitingstocks::where('notiId', $data->id)->delete();
 
         // Lấy danh sách số lượng tồn
@@ -1061,7 +1062,7 @@ class ProductionController extends Controller
                             "BaseType" => 202,
                             "BatchNumbers" => [
                                 [
-                                    "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                    "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                     "Quantity" => $allocate['Allocate'],
                                     "ItemCode" =>  $allocate['ItemChild'],
                                     "U_CDai" => $allocate['CDai'],
@@ -1093,7 +1094,7 @@ class ProductionController extends Controller
                             'ObjType' =>   202,
                             // 'DocEntry' => $res['DocEntry'],
                             'confirmBy' => Auth::user()->id,
-                            'confirm_at' => now()->format('YmdHmi')
+                            'confirm_at' => Carbon::now()->format('Y-m-d H:i:s')
                         ]);
                         awaitingstocks::where('notiId', $data->notiID)->delete();
                         HistorySL::create(
@@ -1257,7 +1258,7 @@ class ProductionController extends Controller
                                 "BaseType" => 202,
                                 "BatchNumbers" => [
                                     [
-                                        "BatchNumber" => now()->format('YmdHmi') . $allocate['DocEntry'],
+                                        "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
                                         "Quantity" => $allocate['Allocate'],
                                         "ItemCode" =>  $allocate['ItemChild'],
                                         "U_CDai" => $allocate['CDai'],
@@ -1333,7 +1334,7 @@ class ProductionController extends Controller
                             'ObjType' =>   202,
                             // 'DocEntry' => $res['DocEntry'],
                             'confirmBy' => Auth::user()->id,
-                            'confirm_at' => now()->format('YmdHmi')
+                            'confirm_at' => Carbon::now()->format('YmdHis'),
                         ]);
                         awaitingstocks::where('notiId', $data->notiID)->delete();
                       

@@ -74,12 +74,12 @@ class CreateOrUpdateView extends Command
                 b.confirm_at AS ngaynhan,
                 c.plant,
                 c.branch branch,
-                 case when c.branch=1 then 'Thuận Hưng'
+                case when c.branch=1 then 'Thuận Hưng'
             WHEN c.branch=3 THEN 'Tuyên Quang'
             WHEN c.branch=4 THEN 'Viforex'
-            ELSE 'NOT DEFINE' END as branchName
+            ELSE 'Không xác định' END as branchName
             FROM sanluong a 
-            JOIN notireceipt b ON a.id = b.baseID AND b.deleted = 0 AND b.confirm IN (0, 1,2) AND b.type = 0
+            JOIN notireceipt b ON a.id = b.baseID AND b.deleted = 0 AND b.confirm IN (0,1) AND b.type = 0
             JOIN users c ON a.create_by = c.id
             LEFT JOIN users d ON b.confirmBy = d.id
         ");

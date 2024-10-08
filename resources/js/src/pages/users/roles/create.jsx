@@ -7,6 +7,10 @@ import Layout from "../../../layouts/layout";
 import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
 import roleApi from "../../../api/roleApi";
+import { BiSolidDryer } from "react-icons/bi";
+import { FaWarehouse } from "react-icons/fa6";
+import { FaUserGear } from "react-icons/fa6";
+import { FaIndustry } from "react-icons/fa6";
 
 const permissionsName = [
     {
@@ -38,19 +42,19 @@ const permissionsName = [
         name: "Báo cáo",
     },
     {
-        value: "quanlyuser",
-        name: "Quản lý người dùng",
-    },
-    {
-        value: "monitor",
-        name: "Tích hợp",
-    },
-    {
         value: "CBG",
-        name: "Ghi nhận chế biến gỗ",
+        name: "Sản xuất chế biến gỗ ",
+    },
+    {
+        value: "CBGCX",
+        name: "Sản xuất chế biến gỗ (Chỉ xem)",
     },
     {
         value: "VCN",
+        name: "Ghi nhận ván công nghiệp",
+    },
+    {
+        value: "VCNCX",
         name: "Ghi nhận ván công nghiệp",
     },
     {
@@ -157,14 +161,14 @@ function CreateRole() {
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-6 px-5 xl:px-32 border-t border-gray-200">
                     {/* Breadcrumb */}
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <nav className="flex" aria-label="Breadcrumb">
                             <ol className="inline-flex items-center space-x-1 md:space-x-3">
                                 <li>
                                     <div className="flex items-center">
                                         <Link
                                             to="/users"
-                                            class="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
+                                            class="text-sm font-medium text-[#17506B] "
                                         >
                                             Quản lý người dùng
                                         </Link>
@@ -197,17 +201,17 @@ function CreateRole() {
                     </div>
 
                     {/* Header */}
-                    <div className="text-3xl font-bold pb-6">Tạo mới role</div>
+                    <div className="serif text-3xl font-bold pb-3">Tạo mới role</div>
                     {/* Main content */}
-                    <form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl mb-6">
-                        <div className="flex gap-4">
-                            <label className="whitespace-nowrap flex items-center text-md font-medium text-gray-900">
-                                Nhập tên role cần tạo:{" "}
+                    <form className="flex flex-col p-4 space-y-4 bg-white border-2 border-gray-200 rounded-xl mb-6">
+                        <div className="flex space-x-4 justify-center">
+                            <label className="whitespace-nowrap flex items-center text-md font-medium text-gray-900 pb-1.5">
+                                Tên role:{" "}
                             </label>
                             <input
                                 ref={nameInputRef}
                                 type="text"
-                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-1/2 p-2 text-[15px]"
                                 onInput={(e) =>
                                     setRoleInfo((prev) => ({
                                         ...prev,
@@ -217,69 +221,41 @@ function CreateRole() {
                             />
                         </div>
 
-                        <div className="my-4 border-b border-gray-200"></div>
-                        <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
+                        <div className="my-2 border-b border-gray-200"></div>
+                        {/* <h1 className="mb-4 text-xl text-center font-semibold md:text-left">
                             Danh sách permission
-                        </h1>
-
-                        <div className="divide-y divide-slate-100 ...">
-                            <div className="flex px-6 bg-gray-50 py-3">
-                                <span className="w-1/12 font-bold">#</span>
-                                <span className="w-2/3 font-bold">
-                                    Tên permission
-                                </span>
-                                <span className="font-bold">Lựa chọn</span>
+                        </h1> */}
+                        <div className="bg-[#e9f8ff] p-3 rounded-xl">
+                            <div className="w-full flex items-center justify-between px-4">
+                                <div className="flex items-center space-x-3 w-full uppercase py-2 font-bold text-lg">
+                                    <div className="flex space-x-2">
+                                        <FaIndustry className="w-6 h-6 text-[#17506B] " />
+                                        <div>Chức năng sấy gỗ</div>
+                                    </div>
+                                    <span className="text-base text-gray-400">{""}/Vận hành</span>
+                                </div>
+                                <div className="w-full text-right pr-3">
+                                    <Checkbox
+                                        size="lg"
+                                    >
+                                            Chọn tất cả
+                                    </Checkbox>
+                                </div>
                             </div>
+                            <div className="my-1 mb-2 border-b border-gray-200 "></div>
+                            <div className="grid grid-cols-3 px-4">
                             {permissions?.length > 0 &&
-                                permissions.map((item, index) => (
-                                    <div key={index} className="flex px-6 py-4">
-                                        <span className="w-1/12 sm:w-1/12">
+                                permissions
+                                .filter((item, index) => index >= 1 && index <= 6)
+                                .map((item, index) => (
+                                    <div key={index} className="flex w-full py-2">
+                                        {/* <span className="w-1/12 sm:w-1/12">
                                             {index + 1}
-                                        </span>
-                                        <span className="w-2/3">
-                                            {permissionsName.find(
-                                                (permission) =>
-                                                    permission.value ==
-                                                    item.name
-                                            )?.name || ""}
-                                        </span>
-                                        <div className="flex justify-center w-[15%]">
+                                        </span> */}
+                                        <div className="flex  w-full ">
                                             <Checkbox
+                                                className=""
                                                 size="lg"
-                                                // onChange={(e) => {
-                                                //     const isExisted =
-                                                //         roleInfo.permission.includes(
-                                                //             item.name
-                                                //         );
-                                                    
-                                                //     setRoleInfo((prev) => {
-
-                                                //         if (isExisted) {
-                                                //             return {
-                                                //                 ...prev,
-                                                //                 permission:
-                                                //                     prev.permission.filter(
-                                                //                         (
-                                                //                             data
-                                                //                         ) =>
-                                                //                             data ==
-                                                //                             item.name
-                                                //                     ),
-                                                //             };
-                                                //         } else {
-                                                //             return {
-                                                //                 ...prev,
-                                                //                 permission: [
-                                                //                     ...prev.permission,
-                                                //                     item.name,
-                                                //                 ],
-                                                //             };
-                                                //         }
-
-                                                        
-                                                //     });
-                                                    
-                                                // }}
                                                 onChange={(e) => {
                                                     const isChecked = e.target.checked;
                                                     setRoleInfo((prev) => {
@@ -302,10 +278,155 @@ function CreateRole() {
                                                     });
                                                     console.log("roleInfo", roleInfo.permission);
                                                 }}
-                                            />
+                                            >
+                                                {permissionsName.find(
+                                                (permission) =>
+                                                    permission.value ==
+                                                    item.name
+                                            )?.name || ""}
+                                            </Checkbox>
                                         </div>
+                                        <span className="w-2/3">
+                                            
+                                        </span>
+                                        
                                     </div>
                                 ))}
+                        </div>
+                        </div>
+
+                        <div className="bg-[#e9f8ff] p-3 rounded-xl">
+                            <div className="w-full flex items-center justify-between px-4">
+                                <div className="flex items-end space-x-3 w-full uppercase py-2 font-bold text-lg">
+                                    <div className="flex space-x-2">
+                                        <FaWarehouse className="w-6 h-6 text-[#17506B]" />
+                                        <div>Chức năng sản xuất</div>
+                                    </div>
+                                    <span className="text-base text-gray-400">{""}/Vận hành</span>
+                                </div>
+                                <div className="w-full text-right pr-3">
+                                    <Checkbox
+                                        size="lg"
+                                    >
+                                            Chọn tất cả
+                                    </Checkbox>
+                                </div>
+                            </div>
+                            <div className="my-1 mb-2 border-b border-gray-200 "></div>
+                            <div className="grid grid-cols-3 px-4">
+                            {permissions?.length > 0 &&
+                                permissions
+                                .filter((item, index) => index >= 7 && index <= 13)
+                                .map((item, index) => (
+                                    <div key={index} className="flex w-full py-2">
+                                        {/* <span className="w-1/12 sm:w-1/12">
+                                            {index + 1}
+                                        </span> */}
+                                        <div className="flex w-full ">
+                                            <Checkbox
+                                                className=""
+                                                size="lg"
+                                                onChange={(e) => {
+                                                    const isChecked = e.target.checked;
+                                                    setRoleInfo((prev) => {
+                                                        let updatedPermissions;
+                                                        if (isChecked) {
+                                                            updatedPermissions = [
+                                                                ...prev.permission,
+                                                                item.name,
+                                                            ];
+                                                        } else {
+                                                            updatedPermissions = prev.permission.filter(
+                                                                (permission) =>
+                                                                    permission !== item.name
+                                                            );
+                                                        }
+                                                        return {
+                                                            ...prev,
+                                                            permission: updatedPermissions,
+                                                        };
+                                                    });
+                                                    console.log("roleInfo", roleInfo.permission);
+                                                }}
+                                            >
+                                                {permissionsName.find(
+                                                (permission) =>
+                                                    permission.value ==
+                                                    item.name
+                                            )?.name || ""}
+                                            </Checkbox>
+                                        </div>
+                                        
+                                    </div>
+                                ))}
+                        </div>
+                        </div>
+
+                        <div className="bg-[#e9f8ff] p-3 rounded-xl">
+                            <div className="w-full flex items-center justify-between px-4">
+                                <div className="flex items-end space-x-3 w-full uppercase py-2 font-bold text-lg">
+                                    <div className="flex space-x-2">
+                                        <FaUserGear className="w-6 h-6 text-[#17506B] mx-1" />
+                                        <div>Chức năng quản trị</div>
+                                    </div>
+                                    <span className="text-base text-gray-400">{""}/Quản trị</span>
+                                </div>
+                                <div className="w-full text-right pr-3">
+                                    <Checkbox
+                                        size="lg"
+                                    >
+                                            Chọn tất cả
+                                    </Checkbox>
+                                </div>
+                            </div>
+                            <div className="my-1 mb-2 border-b border-gray-200 "></div>
+                            <div className="grid grid-cols-3 px-4">
+                            {permissions?.length > 0 &&
+                                permissions
+                                .filter((item, index) => index >= 7 && index <= 13)
+                                .map((item, index) => (
+                                    <div key={index} className="flex w-full py-2">
+                                        {/* <span className="w-1/12 sm:w-1/12">
+                                            {index + 1}
+                                        </span> */}
+                                        <div className="flex w-full ">
+                                            <Checkbox
+                                                className=""
+                                                size="lg"
+                                                onChange={(e) => {
+                                                    const isChecked = e.target.checked;
+                                                    setRoleInfo((prev) => {
+                                                        let updatedPermissions;
+                                                        if (isChecked) {
+                                                            updatedPermissions = [
+                                                                ...prev.permission,
+                                                                item.name,
+                                                            ];
+                                                        } else {
+                                                            updatedPermissions = prev.permission.filter(
+                                                                (permission) =>
+                                                                    permission !== item.name
+                                                            );
+                                                        }
+                                                        return {
+                                                            ...prev,
+                                                            permission: updatedPermissions,
+                                                        };
+                                                    });
+                                                    console.log("roleInfo", roleInfo.permission);
+                                                }}
+                                            >
+                                                {permissionsName.find(
+                                                (permission) =>
+                                                    permission.value ==
+                                                    item.name
+                                            )?.name || ""}
+                                            </Checkbox>
+                                        </div>
+                                        
+                                    </div>
+                                ))}
+                        </div>
                         </div>
 
                         <button

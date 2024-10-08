@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 
 class DryingOvenController extends Controller

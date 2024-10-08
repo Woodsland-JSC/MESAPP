@@ -92,7 +92,7 @@ function DeliveryDetailReport() {
 
     const filteredData = useMemo(() => {
         return reportDataMobile?.filter(item => {
-            const searchValue = `${item.CDay}*${item.CRong}*${item.CDai}`.toLowerCase();
+            const searchValue = `${item.CDay}x${item.CRong}x${item.CDai}`.toLowerCase();
             return searchValue.includes(searchTerm.toLowerCase());
         });
     }, [reportDataMobile, searchTerm]);
