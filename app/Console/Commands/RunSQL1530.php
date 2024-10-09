@@ -7,23 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class RunSQL1530 extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:run-s-q-l1530';
+    protected $signature = 'sql:run-first';
+    protected $description = 'Run the first SQL command at 15:30';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         DB::statement(`

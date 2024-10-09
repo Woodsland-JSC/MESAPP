@@ -12,8 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('run:sql1530')->dailyAt('15:30');
-        $schedule->command('run:sql1415')->dailyAt('14:15');
+        $schedule->command('sql:run-first')->dailyAt('15:30');
+        $schedule->command('sql:run-second')->dailyAt('16:15');
     }
     /**
      * Register the commands for the application.

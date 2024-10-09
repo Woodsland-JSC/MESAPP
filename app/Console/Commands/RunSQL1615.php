@@ -7,23 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class RunSQL1415 extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:run-s-q-l1415';
+    protected $signature = 'sql:run-second';
+    protected $description = 'Run the second SQL command at 16:15';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         DB::statement(`
@@ -106,6 +92,6 @@ class RunSQL1415 extends Command
             T10."SubItemCode",
             T10."SubItemName" ) T41 ON T40."U_To" = T41."U_To" 
         AND T40."SubItemCode" = T41."SubItemCode" WITH READ ONLY`);
-        $this->info('SQL for 15:30 executed successfully.');
+        $this->info('SQL for 16:15 executed successfully.');
     }
 }
