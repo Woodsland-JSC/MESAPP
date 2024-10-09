@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class RunSQL1415 extends Command
+class RunSQL1615 extends Command
 {
     protected $signature = 'sql:run-second';
     protected $description = 'Run the second SQL command at 16:15';
