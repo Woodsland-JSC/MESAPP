@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use PDO;
+use PDOException;
 
 class RunSQL1530 extends Command
 {
@@ -102,9 +104,13 @@ class RunSQL1530 extends Command
         ";
 
         try {
-            DB::statement($sql);
-            $this->info('SQL for 15:30 executed successfully.');
-        } catch (\Exception $e) {
+            $dsn = 'odbc:DRIVER={HDBODBC};SERVERNODE=sap.woodsland.com.vn:30015;UID=SYSTEM;PWD=S@p@Systemb1;';
+            $pdo = new PDO($dsn);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $pdo->exec($sql);
+            $this->info('SQL for 15:30 executed successfully on SAP HANA.');
+        } catch (PDOException $e) {
             $this->error('Error executing SQL command: ' . $e->getMessage());
         }
     }
