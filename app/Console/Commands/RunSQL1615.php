@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use PDO;
-use PDOException;
+use App\Http\Controllers\sap\ConnectController;
 
 class RunSQL1615 extends Command
 {
@@ -14,7 +12,11 @@ class RunSQL1615 extends Command
 
     public function handle()
     {
-        $sql = "
+        // Kết nối tới SAP thông qua ConnectController
+        $connectController = new ConnectController();
+        $conDB = $connectController->connect_sap();
+
+        $command = "
             ALTER VIEW \"UV_SOLUONGTON\" ( \"U_GRID\", \"U_To\", \"U_Next\", \"U_CDOAN\", \"U_SPDICH\", \"ItemCode\", \"ItemName\", \"SubItemCode\", \"SubItemName\", \"wareHouse\", \"OnHand\", \"OnHandTo\", \"BaseQty\" ) AS 
             SELECT
                 T40.\"U_GRID\",
@@ -103,15 +105,14 @@ class RunSQL1615 extends Command
             WITH READ ONLY
         ";
 
-        try {
-            $dsn = 'odbc:DRIVER={HDBODBC};SERVERNODE=sap.woodsland.com.vn:30015;UID=SYSTEM;PWD=S@p@Systemb1;';
-            $pdo = new PDO($dsn);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = odbc_prepare($conDB, $command);
+        
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
 
-            $pdo->exec($sql);
-            $this->info('SQL for 15:30 executed successfully on SAP HANA.');
-        } catch (PDOException $e) {
-            $this->error('Error executing SQL command: ' . $e->getMessage());
+        if (!odbc_execute($stmt, ['sampleTO'])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
     }
 }
