@@ -64,6 +64,7 @@ class CreateOrUpdateView extends Command
                 a.CDai, 
                 a.Team ToHT,
                 a.NexTeam ToTT, 
+                a.CongDoan TenTo,
                 'T' AS DVT,
                 (b.Quantity * a.CDay * a.CRong * a.CDai / 1000000000) AS M3,
                 CONCAT(c.first_name, ' ', c.last_name) AS NguoiGiao,
