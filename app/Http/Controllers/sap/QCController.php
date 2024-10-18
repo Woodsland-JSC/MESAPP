@@ -447,7 +447,7 @@ class QCController extends Controller
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_04, ['TC', 'SC'])) {
+        if (!odbc_execute($stmt_04, ['TC', 'SC', 'HT', 'DG', 'MM', 'LP'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $returnCode = array();
@@ -455,9 +455,9 @@ class QCController extends Controller
         while ($row = odbc_fetch_array($stmt_04)) {
             $itemCode = $row['ItemCode'];
             $itemName = $row['ItemName'];
-            $uCDay = $row['U_CDay'];
-            $uCRong = $row['U_CRong'];
-            $uCDai = $row['U_CDai'];
+            $uCDay = $row['U_CDay'] ?? 0;
+            $uCRong = $row['U_CRong'] ?? 0;
+            $uCDai = $row['U_CDai'] ?? 0;
 
             // Tạo chuỗi kích thước "U_CDayxU_CRongxU_CDai"
             $sizeString = $uCDay . 'x' . $uCRong . 'x' . $uCDai;
