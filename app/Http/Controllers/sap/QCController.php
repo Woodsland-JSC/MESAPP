@@ -442,7 +442,7 @@ class QCController extends Controller
         ];
 
         // Mã hạ cấp
-        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where U_CDOAN IN (?,?)';
+        $query_04 = `select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where U_CDOAN IN (?,?,?,?,?,?) and "ValidFor"='Y'`;
         $stmt_04 = odbc_prepare($conDB, $query_04);
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
