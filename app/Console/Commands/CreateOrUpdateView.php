@@ -68,7 +68,7 @@ class CreateOrUpdateView extends Command
                 (b.Quantity * a.CDay * a.CRong * a.CDai / 1000000000) AS M3,
                 CONCAT(c.first_name, ' ', c.last_name) AS NguoiGiao,
                 a.created_at AS ngaygiao,
-                b.confirm IN AS statuscode,
+                b.confirm  AS statuscode,
                 case when b.confirm = 0 then 'Chờ xác nhận' when b.confirm = 1 then 'Đã xác nhận' else 'Đã từ chối' end as TrangThai,
                 CONCAT(d.first_name, ' ', d.last_name) AS NguoiNhan,
                 b.confirm_at AS ngaynhan,
