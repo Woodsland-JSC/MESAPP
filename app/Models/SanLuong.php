@@ -30,7 +30,8 @@ class SanLuong extends Model
         'create_by',
         'LSX',
         'openQty',
-        'loinhamay'
+        'loinhamay',
+        'SLDG'
     ];
 
     public function getCDaiAttribute($value)
@@ -44,7 +45,7 @@ class SanLuong extends Model
 
     public function setCDaiAttribute($value)
     {
-        $this->attributes['CDai'] = (float) $value; 
+        $this->attributes['CDai'] = (float) $value;
     }
 
     public function getCRongAttribute($value)
@@ -72,6 +73,6 @@ class SanLuong extends Model
 
     public function setCDayAttribute($value)
     {
-        $this->attributes['CDay'] = (float) $value; 
+        $this->attributes['CDay'] = (float) $value;
     }
 }
