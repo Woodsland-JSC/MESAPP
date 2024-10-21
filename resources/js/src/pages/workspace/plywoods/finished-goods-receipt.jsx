@@ -328,6 +328,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     className="mt-2 mb-0"
                                 />
                             </div>
+                            
                             <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col p-4 pb-0 w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
@@ -380,12 +381,10 @@ function PlywoodFinishedGoodsReceipt() {
                                         </button>
                                     )}
                             </div>
-
-                            
-                            
                         </div>
 
                     </div>
+
                     <div className="w-full flex flex-col pb-2 gap-4 gap-y-4 sm:px-0">
                         {loadingData ? (
                             <div className="flex justify-center mt-12">

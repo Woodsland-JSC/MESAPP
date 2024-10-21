@@ -178,8 +178,31 @@ function WoodProductingQC() {
                     <div className="flex flex-col justify-between mb-6 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
                         <div className="my-4 mb-0 w-full  rounded-xl bg-white z-0">
                             <div className="flex flex-col p-4 pb-0  w-full ">
+                                {/* Select Progress*/}
+                                <div className="">
+                                    <label
+                                        htmlFor="first_name"
+                                        className="block mb-2 text-md font-medium text-gray-900"
+                                    >
+                                        Tổ, xưởng sản xuất
+                                    </label>
+                                    <Select
+                                        options={groupListOptions}
+                                        defaultValue={selectedGroup}
+                                        onChange={(value) => {
+                                            setSelectedGroup(value);
+                                            console.log(
+                                                "2. Selected Group: ",
+                                                value
+                                            );
+                                        }}
+                                        placeholder="Chọn tổ, xưởng sản xuất"
+                                        className=""
+                                    />
+                                </div>
+
                                 {/* Search */}
-                                <div className="w-full">
+                                <div className="w-full my-4">
                                     <label
                                         htmlFor="search"
                                         className="mb-2 font-medium text-gray-900 sr-only"
@@ -207,7 +230,7 @@ function WoodProductingQC() {
                                         <input
                                             type="search"
                                             id="search"
-                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm"
                                             onChange={(value) => {
                                                 setSearchTerm(
@@ -217,29 +240,6 @@ function WoodProductingQC() {
                                             required
                                         />
                                     </div>
-                                </div>
-
-                                {/* Select Progress*/}
-                                <div className="my-4">
-                                    <label
-                                        htmlFor="first_name"
-                                        className="block mb-2 text-md font-medium text-gray-900"
-                                    >
-                                        Tổ, xưởng sản xuất
-                                    </label>
-                                    <Select
-                                        options={groupListOptions}
-                                        defaultValue={selectedGroup}
-                                        onChange={(value) => {
-                                            setSelectedGroup(value);
-                                            console.log(
-                                                "2. Selected Group: ",
-                                                value
-                                            );
-                                        }}
-                                        placeholder="Chọn tổ, xưởng sản xuất"
-                                        className=""
-                                    />
                                 </div>
                             </div>
                         </div>

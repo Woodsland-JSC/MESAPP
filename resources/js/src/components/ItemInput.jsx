@@ -1068,6 +1068,7 @@ const ItemInput = ({
                                                   </span>
                                               ) : (
                                                 <span className="">
+                                                      {/* ({item.CDay % 10 > 0 ? parseFloat(item.CDay) : parseInt(item.CDay)}*{item.CRong % 10 > 0 ? parseFloat(item.CRong) : parseInt(item.CRong)}*{item.CDai % 10 > 0 ? parseFloat(item.CDai) : parseInt(item.CDai)}) */}
                                                       ({item.CDay}*{item.CRong}*{item.CDai})
                                                 </span>
                                               )}
