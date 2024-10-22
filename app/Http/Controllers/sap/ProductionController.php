@@ -16,9 +16,10 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
+use App\Jobs\SyncSLDGToSAP;
 class ProductionController extends Controller
 {
-   
+
     function receipts(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -33,7 +34,7 @@ class ProductionController extends Controller
             'MaThiTruong',
             'N_GIAO',
             'N_NHAN',
-            'CDay' => 'required', 
+            'CDay' => 'required',
             'CRong' => 'required',
             'CDai' => 'required',
             // 'CDay' => 'required|numeric',
@@ -60,21 +61,22 @@ class ProductionController extends Controller
         try {
             DB::beginTransaction();
             $SLData = $request->only([
-            'FatherCode', 'ItemCode', 
-            'ItemName', 'SubItemCode', 
-            'SubItemName', 'CompleQty', 
-            'RejectQty', 'CDay', 
-            'CRong', 'CDai', 
+            'FatherCode', 'ItemCode',
+            'ItemName', 'SubItemCode',
+            'SubItemName', 'CompleQty',
+            'RejectQty', 'CDay',
+            'CRong', 'CDai',
             'Team', 'CongDoan', 'NexTeam',
-            'Type', 
+            'Type',
             'LSX']);
             $SLData['create_by'] = Auth::user()->id;
             $SLData['openQty'] = 0;
             $SLData['loinhamay'] = $request->factories['value']??null;
+            $SLData['SLDG'] = $request->SLDG??0;
             $SanLuong = SanLuong::create($SLData);
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
-         
+
 
 
             if ($request->CompleQty > 0) {
@@ -95,7 +97,7 @@ class ProductionController extends Controller
 
                 //Lưu thông tin awaitingstocks
                 foreach ($request->ErrorData['SubItemQty'] as $subItem) {
-                        
+
                     awaitingstocks::create([
                         'notiId' => $notifi->id,
                         'SubItemCode' => $subItem['SubItemCode'],
@@ -433,7 +435,7 @@ class ProductionController extends Controller
         // Lấy kho của bán thành phẩm
         $SubItemWhs = null;
 
-        
+
         foreach ($results as $result) {
             $wareHouse = $result['wareHouse'];
 
@@ -445,7 +447,7 @@ class ProductionController extends Controller
                 }
             }
         }
-        
+
         $stock = [];
 
         // Lấy danh sách số lượng tồn
@@ -518,6 +520,7 @@ class ProductionController extends Controller
                 'CRong',
                 'CDai',
                 'b.Quantity',
+                'a.SLDG',
                 'a.created_at',
                 'c.first_name',
                 'c.last_name',
@@ -577,7 +580,7 @@ class ProductionController extends Controller
             $maxQuantities[] = $maxQuantity;
         }
         $maxQty = $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
-        
+
         // Tính tổng số lượng đang chờ xác nhận và xử lý lỗi
         $WaitingConfirmQty = $notification->where('type', '=', 0)->sum('Quantity') ?? 0;
         $WaitingQCItemQty = $notification->where('type', '=', 1)->where('SubItemCode', '=', null)->sum('Quantity') ?? 0;
@@ -671,7 +674,7 @@ class ProductionController extends Controller
 
         // dd($request);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
 
         // Lấy dữ liệu từ SAP
@@ -1141,7 +1144,7 @@ class ProductionController extends Controller
     {
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'select "VisResCode" "Code","ResName" "Name" 
+        $query = 'select "VisResCode" "Code","ResName" "Name"
         from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -1210,6 +1213,7 @@ class ProductionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
+            'CongDoan' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -1222,11 +1226,14 @@ class ProductionController extends Controller
             ->where('a.id', $request->id)
             ->where('a.confirm', 0)
             ->first();
-           
+
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+            // Data sync to SAP
+            $U_Item=$data->ItemCode;
+            $U_Qty=$data->SLDG??0;
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
@@ -1299,7 +1306,7 @@ class ProductionController extends Controller
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
             ];
-            
+
            $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
@@ -1337,7 +1344,7 @@ class ProductionController extends Controller
                             'confirm_at' => Carbon::now()->format('YmdHis'),
                         ]);
                         awaitingstocks::where('notiId', $data->notiID)->delete();
-                      
+
                         DB::commit();
                     }
                     else
@@ -1346,16 +1353,21 @@ class ProductionController extends Controller
                         if (isset($matches[0])) {
                             $jsonString = $matches[0];
                             $errorData = json_decode($jsonString, true);
-                        
+
                             if (isset($errorData['error'])) {
                                 $errorCode = $errorData['error']['code'];
                                 $errorMessage = $errorData['error']['message']['value'];
                                 throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                            } 
-                        } 
+                            }
+                        }
                     }
-                   
-                   
+
+
+                }
+                // check xem có phải công đoạn đóng gói không nếu có phải thì đẩy về SAP
+                if($request->CongDoan =='TP')
+                {
+                    $this->dispatch(new SyncSLDGToSAP($U_Item,$U_Qty,Auth::user()->branch,now()->format('Ymd')));
                 }
                 return response()->json('success', 200);
             } else {
@@ -1373,7 +1385,7 @@ class ProductionController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-      
+
     }
     function collectStockAllocate($stringIssue)
     {
@@ -1395,7 +1407,7 @@ class ProductionController extends Controller
             if (empty($dataIssue)) {
                 return null;
             }
-           
+
             if(isset($dataIssue[0]['ItemError']))
             {
                 throw new \Exception(  $dataIssue[0]['ItemError']);
@@ -1458,7 +1470,7 @@ class ProductionController extends Controller
             }
             // Output the final data structure
             $output = $data;
-        return $output;  
+        return $output;
     }
     /*
     **********
@@ -1466,5 +1478,5 @@ class ProductionController extends Controller
     *********
     */
 
-    
+
 }
