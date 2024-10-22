@@ -49,7 +49,8 @@ const sizeOptions = [
 
 
 function Users() {
-    const { loading, setLoading } = useAppContext();
+    const { user,loading, setLoading } = useAppContext();
+    const currentBranch = user?.branch || 0;
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isDeleteUserOpen, onOpen: onDeleteUserOpen, onClose: onDeleteUserClose } = useDisclosure();
     
@@ -64,10 +65,9 @@ function Users() {
         setModalParam(params);
         onOpen();
     };
-
     const userTab = useRef();
     const roleTab = useRef();
-    const userGridRef = useRef(null);
+    const userGridRef = useRef();
     const roleGridRef = useRef();
 
     const containerStyle = useMemo(
@@ -122,6 +122,8 @@ function Users() {
             headerName: "Chi nhánh",
             field: "branch",
             minWidth: 210,
+            filter: true,
+            filter: 'agSetColumnFilter',
             valueGetter: (params) =>
                 params.data.branch === "1"
                     ? "Woodsland Thuận Hưng"
@@ -297,13 +299,27 @@ function Users() {
         return "[" + params.value.toLocaleString() + "]";
     }, []);
 
-    const onUserGridReady = useCallback(async () => {
-        // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
+    // const onUserGridReady = useCallback(async () => {
+    //     // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
+    //     // console.log("currentBranch: ", currentBranch);
+    //     showLoadingUser();
+    //     const res = await usersApi.getAllUsers();
+    //     setUserData(res);
+    //     hideLoadingUser();
+    // }, []);
+
+    const onUserGridReady = useCallback(async (params) => {
         showLoadingUser();
         const res = await usersApi.getAllUsers();
         setUserData(res);
         hideLoadingUser();
-    }, []);
+
+        // Set default filter for branch
+        const branchFilter = currentBranch ? { branch: { filterType: 'text', type: 'equals', filter: currentBranch } } : null;
+        if (branchFilter) {
+            params.api.setFilterModel(branchFilter);
+        }
+    }, [currentBranch]);
 
     const onRoleGridReady = useCallback(async () => {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
@@ -712,7 +728,7 @@ function Users() {
                                             autoGroupColumnDef={
                                                 autoGroupColumnDef
                                             }
-                                            defaultColDef={defaultColDef}
+                                            defaultColDef={defaultColDef} 
                                             suppressRowClickSelection={true}
                                             groupSelectsChildren={true}
                                             rowSelection={"multiple"}

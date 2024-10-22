@@ -68,7 +68,7 @@ function Workspace() {
                         <div className="text-gray-600">Xin chào,</div>
                         <div className="xl:text-4xl lg:text-3xl md:text-3xl text-4xl  xl:mb-2 lg:mb-2 md:mb-2">
                             <span className="serif font-bold">
-                                {user?.last_name}!
+                                {user?.first_name}!
                             </span>
                         </div>
                     </div>

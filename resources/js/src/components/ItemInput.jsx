@@ -121,6 +121,7 @@ const ItemInput = ({
     // const [selectedItem, setSelectedItem] = useState(null);
     const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
     const [amount, setAmount] = useState("");
+    const [packagedAmount, setPackagedAmount] = useState("");
     const [faultyAmount, setFaultyAmount] = useState("");
     const [choosenItem, setChoosenItem] = useState(null);
 
@@ -2104,6 +2105,7 @@ const ItemInput = ({
                                                         : 0}
                                                 </span>
                                             </div>
+
                                             <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-0 pr-2 justify-between">
                                                 <Text className="font-semibold">
                                                     Số lượng còn phải sản xuất:
@@ -2116,6 +2118,7 @@ const ItemInput = ({
                                                     ) || 0}
                                                 </span>
                                             </div>
+
                                             {/* Số lượng giao chờ xác nhận */}
                                             {selectedItemDetails?.notifications &&
                                                 selectedItemDetails?.notifications.filter(
@@ -2123,10 +2126,9 @@ const ItemInput = ({
                                                         notif.confirm == 0 &&
                                                         notif.type == 0
                                                 )?.length > 0 && (
-                                                    <div className="flex items-center justify-between w-full p-1 px-2 !mt-2 !mb-2">
+                                                    <div className="flex items-center justify-between w-full p-1 px-0 !mt-2 !mb-1">
                                                         <Text className="font-semibold">
-                                                            Số lượng đã giao chờ
-                                                            xác nhận:{" "}
+                                                            Số lượng đã giao chờ xác nhận:{" "}
                                                         </Text>{" "}
                                                     </div>
                                                 )}
@@ -2159,6 +2161,12 @@ const ItemInput = ({
                                                                                 item?.Quantity
                                                                             )}
                                                                         </div>
+                                                                        <Text className="font-semibold text-[15px] ">
+                                                                            Số lượng giao chờ đóng gói:{" "}
+                                                                            <span className="text-green-700">
+                                                                                {Number(item?.Quantity)}
+                                                                            </span>
+                                                                        </Text>
                                                                         <Text className="font-semibold text-[15px] ">
                                                                             Người
                                                                             giao:{" "}
@@ -2217,6 +2225,36 @@ const ItemInput = ({
                                                             </div>
                                                         </>
                                                     ))}
+
+                                            {(selectedItemDetails?.CongDoan === "DG" && selectedItemDetails?.maxQty > 0) &&
+                                            (<div className="">
+                                                <Box className="px-0">
+                                                    <label className="mt-6 font-semibold">
+                                                        Số lượng đã đóng gói chờ giao:
+                                                    </label>
+  
+                                                    <NumberInput
+                                                        ref={receipInput}
+                                                        step={1}
+                                                        min={1}
+                                                        value={packagedAmount}
+                                                        className="mt-2 mb-2"
+                                                        onChange={(value) => {
+                                                        setPackagedAmount(
+                                                            value
+                                                            );
+                                                        }}
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                </Box>
+                                                <div className="border-b pt-2"></div>
+                                            </div>)}
+
 
                                             <Box className="px-0">
                                                 <label className="mt-6 font-semibold">
@@ -2338,6 +2376,7 @@ const ItemInput = ({
                                                         </div>
                                                     ))}
                                         </div>
+
                                         <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-3 items-center">
                                                 <FaExclamationCircle className="w-7 h-7 text-red-700" />
@@ -2882,7 +2921,15 @@ const ItemInput = ({
                                 <>
                                     {(amount && amount !== "") ||
                                     (faultyAmount && faultyAmount !== "") ? (
-                                        <>
+                                        <div className="space-y-1">
+                                            {packagedAmount && (
+                                                <div className="text-yellow-700">
+                                                    Số lượng đã đóng gói chờ giao:{" "}
+                                                    <span className="font-bold">
+                                                        {packagedAmount || 0}
+                                                    </span>
+                                                </div>
+                                            )}
                                             {amount && (
                                                 <div className="text-green-700">
                                                     Ghi nhận sản lượng:{" "}
@@ -2912,7 +2959,7 @@ const ItemInput = ({
                                                         )}
                                                 </div>
                                             )}
-                                        </>
+                                        </div>
                                     ) : (
                                         <p>
                                             Bạn chưa ghi nhận bất kỳ giá trị
