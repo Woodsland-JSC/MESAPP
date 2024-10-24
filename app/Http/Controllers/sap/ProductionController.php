@@ -1205,6 +1205,7 @@ class ProductionController extends Controller
     version 2: thay doi yeu cau nhập xuất cùng lúc
     *********************************
     */
+    
     // ghi nhận sản lượng công đoạn khác rong
     function acceptV2 (Request $request)
     {
@@ -1375,6 +1376,7 @@ class ProductionController extends Controller
         }
       
     }
+
     function collectStockAllocate($stringIssue)
     {
             $conDB = (new ConnectController)->connect_sap();

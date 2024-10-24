@@ -2038,6 +2038,7 @@ class VCNController extends Controller
         }
       
     }
+    
     function collectStockAllocate($stringIssue)
     {
             $conDB = (new ConnectController)->connect_sap();

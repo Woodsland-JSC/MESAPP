@@ -2161,12 +2161,12 @@ const ItemInput = ({
                                                                                 item?.Quantity
                                                                             )}
                                                                         </div>
-                                                                        <Text className="font-semibold text-[15px] ">
+                                                                        {/* <Text className="font-semibold text-[15px] ">
                                                                             Số lượng giao chờ đóng gói:{" "}
                                                                             <span className="text-green-700">
                                                                                 {Number(item?.Quantity)}
                                                                             </span>
-                                                                        </Text>
+                                                                        </Text> */}
                                                                         <Text className="font-semibold text-[15px] ">
                                                                             Người
                                                                             giao:{" "}
