@@ -38,10 +38,9 @@ class MasterDataController extends Controller
                 INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
                 INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
                 WHERE T1."Quantity" > 0 AND
-                T3."U_Flag" IN (?) AND 
-                T3."BPLid" = ? AND 
-                T3."U_FAC" = ? AND 
-                T2."Series" = 72';
+                T3."U_Flag" IN (?) AND
+                T3."BPLid" = ? AND
+                T3."U_FAC" = ? ';
             if ($request->reason == 'SL') {
                 $flag = 'SL';
                 $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
@@ -49,8 +48,8 @@ class MasterDataController extends Controller
                     INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
                     INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
                     WHERE T1."Quantity" > 0 AND
-                    T3."U_Flag" IN (?) AND 
-                    T3."BPLid" = ? AND 
+                    T3."U_Flag" IN (?) AND
+                    T3."BPLid" = ? AND
                     T3."U_FAC" = ? ';
             }
 
@@ -407,7 +406,7 @@ class MasterDataController extends Controller
         try {
             $userId = $request->input('userId');
             // Kiểm tra xem có nhận được id từ request không
-            // 1. Nếu nhận được id từ request, kiểm tra xem người dùng hiện tại đã có sap id hay chưa 
+            // 1. Nếu nhận được id từ request, kiểm tra xem người dùng hiện tại đã có sap id hay chưa
             // 2. Nếu không nhận được id từ request, lấy tất cả người dùng SAP chưa được liên kết
             if ($request->input('userId')) {
                 $user = User::find($userId);
@@ -537,7 +536,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
             DB::beginTransaction();
             $query = 'select "WhsCode","WhsName","BPLid" "Location","U_Flag","U_FAC"
-            from OWHS a 
+            from OWHS a
             WHERE "U_Flag" in(?,?,?,?,?) and "Inactive"=?;';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
@@ -605,7 +604,7 @@ class MasterDataController extends Controller
             // T0 OITW is Warehouse Table from SAP (WhsCode)
             // T1 OIBT là bảng lưu thành phẩm ghi nhận
             // T2 OITM là bảng lưu Item
-            // 
+            //
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai",? "Flag" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
@@ -625,7 +624,7 @@ class MasterDataController extends Controller
                 $results[] = $row;
             }
 
-            // dd($results); 
+            // dd($results);
 
             odbc_close($conDB);
             $results = array_filter($results, fn($item) => (float) $item['Quantity'] > 0);
