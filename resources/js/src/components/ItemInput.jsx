@@ -613,13 +613,6 @@ const ItemInput = ({
             onAlertDialogClose();
             return;
         }  else if (
-            selectedItemDetails.CongDoan == "DG" &&
-            amount > packagedAmount
-        ) {
-            toast.error("Số lượng ghi nhận không được lớn hơn số lượng đã đóng gói.");
-            onAlertDialogClose();
-            return;
-        } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
             amount >

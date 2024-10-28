@@ -166,7 +166,7 @@ function DeliveryDetailReport() {
             from_date: format(fromDate, "yyyy-MM-dd"),
             to_date: format(toDate, "yyyy-MM-dd"),
             To: selectedTeams,
-            branch: selectedFactory === "TH" ? 1 : 3,
+            branch: user.branch,
             plant: selectedFactory,
             status_code: isReceived ? 1 : 0,
         };
@@ -927,7 +927,7 @@ function DeliveryDetailReport() {
                     {/* Content */}
                     {isDataReportLoading ? (
                         <div className="mt-4 bg-[#dbdcdd] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
-                            <div class="dots my-1"></div>
+                            <div className="dots my-1"></div>
                         </div>
                     ) : (
                         <>
@@ -969,7 +969,7 @@ function DeliveryDetailReport() {
                         {/* Data */}
                         {isDataReportLoading ? (
                             <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                                <div class="dots my-1"></div>
+                                <div className="dots my-1"></div>
                             </div>
                         ) : (
                             <>

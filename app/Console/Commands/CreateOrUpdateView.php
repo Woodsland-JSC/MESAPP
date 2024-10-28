@@ -73,7 +73,6 @@ class CreateOrUpdateView extends Command
                 case when b.confirm = 0 then 'Chờ xác nhận' when b.confirm = 1 then 'Đã xác nhận' else 'Đã từ chối' end as TrangThai,
                 CONCAT(d.first_name, ' ', d.last_name) AS NguoiNhan,
                 b.confirm_at AS ngaynhan,
-                c.plant,
                 c.branch branch,
                 case when c.branch=1 then 'Thuận Hưng'
             WHEN c.branch=3 THEN 'Tuyên Quang'
@@ -84,6 +83,7 @@ class CreateOrUpdateView extends Command
             JOIN users c ON a.create_by = c.id
             LEFT JOIN users d ON b.confirmBy = d.id
         ");
+        
         // view report biên bản vào lò.
         DB::statement(" 
         create view say_bienbanvaolo 

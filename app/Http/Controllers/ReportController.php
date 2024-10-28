@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 class ReportController extends Controller
 {
-    /** Sấy gỗ */
+
     //
     function chitietgiaonhan(Request $request) {
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
         $branch = $request->input('branch');
-        $plant = $request->input('plant');
+        // $plant = $request->input('plant');
         $to = $request->input('To');
         $statusCode = $request->input('status_code');
     
@@ -24,9 +24,9 @@ class ReportController extends Controller
             $query->where('branch', $branch);
         }
     
-        if ($plant) {
-            $query->where('plant', $plant);
-        }
+        // if ($plant) {
+        //     $query->where('plant', $plant);
+        // }
     
         if ($to) {
             $toArray = is_array($to) ? $to : explode(',', trim($to, '[]'));
