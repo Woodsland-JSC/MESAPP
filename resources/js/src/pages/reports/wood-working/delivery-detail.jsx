@@ -606,8 +606,8 @@ function DeliveryDetailReport() {
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
-                                        value="YS1"
-                                        label="Yên Sơn 1"
+                                        value="YS"
+                                        label="Yên Sơn"
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
@@ -720,6 +720,7 @@ function DeliveryDetailReport() {
                                                         (item) =>
                                                             item.CDOAN === "RN"
                                                     )
+                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -747,6 +748,7 @@ function DeliveryDetailReport() {
                                                         (item) =>
                                                             item.CDOAN === "SC"
                                                     )
+                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -774,6 +776,7 @@ function DeliveryDetailReport() {
                                                         (item) =>
                                                             item.CDOAN === "TC"
                                                     )
+                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -801,6 +804,7 @@ function DeliveryDetailReport() {
                                                         (item) =>
                                                             item.CDOAN === "HT"
                                                     )
+                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -828,6 +832,7 @@ function DeliveryDetailReport() {
                                                         (item) =>
                                                             item.CDOAN === "DG"
                                                     )
+                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox

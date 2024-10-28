@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
+use App\Jobs\SyncSLDGToSAP;
 class ProductionController extends Controller
 {
    
@@ -30,6 +31,7 @@ class ProductionController extends Controller
             'ErrorData',
             'CompleQty' => 'required|numeric',
             'RejectQty' => 'required|numeric',
+            'PackagedQty',
             'MaThiTruong',
             'N_GIAO',
             'N_NHAN',
@@ -59,24 +61,41 @@ class ProductionController extends Controller
         }
         try {
             DB::beginTransaction();
-            $SLData = $request->only([
-            'FatherCode', 'ItemCode', 
-            'ItemName', 'SubItemCode', 
-            'SubItemName', 'CompleQty', 
-            'RejectQty', 'CDay', 
-            'CRong', 'CDai', 
-            'Team', 'CongDoan', 'NexTeam',
-            'Type', 
-            'LSX']);
-            $SLData['create_by'] = Auth::user()->id;
-            $SLData['openQty'] = 0;
-            $SLData['loinhamay'] = $request->factories['value']??null;
-            $SanLuong = SanLuong::create($SLData);
+            // $SLData = $request->only([
+            // 'FatherCode', 'ItemCode', 
+            // 'ItemName', 'SubItemCode', 
+            // 'SubItemName', 'CompleQty', 
+            // 'RejectQty', 'PackagedQty','CDay', 
+            // 'CRong', 'CDai', 
+            // 'Team', 'CongDoan', 'NexTeam',
+            // 'Type', 
+            // 'LSX']);
+            // $SLData['create_by'] = Auth::user()->id;
+            // $SLData['openQty'] = 0;
+            // $SLData['loinhamay'] = $request->factories['value']??null;
+            // dd($SLData);
+            $SanLuong = SanLuong::create([
+                'FatherCode' => $request->FatherCode,
+                'ItemCode' => $request->ItemCode,
+                'ItemName' => $request->ItemName,
+                'CompleQty' => $request->CompleQty,
+                'RejectQty' => $request->RejectQty,
+                'SLDG' => $request->PackagedQty,
+                'CDay' => $request->CDay,
+                'CRong' => $request->CRong,
+                'CDai' => $request->CDai,
+                'Team' => $request->Team,
+                'CongDoan' => $request->CongDoan,
+                'NexTeam' => $request->NexTeam,
+                'Type' => $request->Type,
+                'LSX' => $request->LSX,
+                'create_by' => Auth::user()->id,
+                'loinhamay' => $request->factories['value']??null,
+                'openQty' => 0,
+            ]);
 
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
          
-
-
             if ($request->CompleQty > 0) {
                 $notifi = notireceipt::create([
                     'text' => 'Production information waiting for confirmation',
@@ -162,7 +181,8 @@ class ProductionController extends Controller
     {
         // 1. Nhận vào tham số "TO", nếu không nhận được tham số sẽ báo lỗi
         $validator = Validator::make($request->all(), [
-            'TO' => 'required'
+            'TO' => 'required',
+            'CongDoan' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
@@ -258,9 +278,8 @@ class ProductionController extends Controller
                 'sanluong.ItemCode',
                 'sanluong.Team',
                 'sanluong.NexTeam',
-                DB::raw('sum(Quantity) as Quantity')
+                DB::raw('sum(Quantity) as Quantity'),
             )
-
             ->get();
         if ($stockpending !== null) {
             foreach ($results as &$result) {
@@ -308,6 +327,7 @@ class ProductionController extends Controller
                     'CRong',
                     'CDai',
                     'b.Quantity',
+                    'a.SLDG',
                     'b.MaThiTruong',
                     'a.created_at',
                     'c.first_name',
@@ -355,6 +375,7 @@ class ProductionController extends Controller
         //data need handle
 
         return response()->json([
+            'CongDoan' => $request->CongDoan,
             'data' => $results,
             'noti_choxacnhan' => $data,
             'noti_phoixuly' => $data2
@@ -518,6 +539,7 @@ class ProductionController extends Controller
                 'CRong',
                 'CDai',
                 'b.Quantity',
+                'a.SLDG',
                 'a.created_at',
                 'c.first_name',
                 'c.last_name',
@@ -550,6 +572,7 @@ class ProductionController extends Controller
                 'CRong',
                 'CDai',
                 'b.Quantity',
+                'a.SLDG',
                 'a.created_at',
                 'c.first_name',
                 'c.last_name',
@@ -1185,12 +1208,12 @@ class ProductionController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         $query = 'select "VisResCode" "Code","ResName" "Name" , "U_CDOAN" "CDOAN"
-        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        from "ORSC" where "U_QC" =? AND "validFor"=? AND "U_FAC"=? AND "U_KHOI"=?;';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['N', 'Y', $request->FAC])) {
+        if (!odbc_execute($stmt, ['N', 'Y', $request->FAC, 'CBG'] )) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $results = array();
@@ -1207,10 +1230,181 @@ class ProductionController extends Controller
     */
     
     // ghi nhận sản lượng công đoạn khác rong
+    // function acceptV2 (Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'id' => 'required',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     try {
+    //         DB::beginTransaction();
+    //         // to bình thường
+    //         $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
+    //         ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
+    //         ->where('a.id', $request->id)
+    //         ->where('a.confirm', 0)
+    //         ->first();
+           
+    //         if (!$data) {
+    //             throw new \Exception('data không hợp lệ.');
+    //         }
+    //         $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+    //         if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+    //             $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
+    //             $allocates = $this->allocate($dataallocate, $data->CompleQty);
+    //             if (count($allocates) == 0) {
+    //                 return response()->json([
+    //                     'error' => false,
+    //                     'status_code' => 500,
+    //                     'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+    //                         $data->team . " sản phẩm: " .
+    //                         $data->ItemCode . " sản phẩm đích: " .
+    //                         $data->FatherCode . " LSX." . $data->LSX
+    //                 ], 500);
+    //             }
+    //             $string = '';
+    //             $dataReceipt = [];
+    //             foreach ($allocates as $allocate) {
+    //                     $string .= $allocate['DocEntry'] . '-' . $allocate['Allocate'] . ';';
+    //                     //data cho receipt
+    //                      $dataReceipt [] = [
+    //                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+    //                         "U_LSX" => $data->LSX,
+    //                         "U_TO" => $data->Team,
+    //                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+    //                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+    //                         "DocumentLines" => [[
+    //                             "Quantity" => $allocate['Allocate'],
+    //                             "TransactionType" => "C",
+    //                             "BaseEntry" => $allocate['DocEntry'],
+    //                             "BaseType" => 202,
+    //                             "BatchNumbers" => [
+    //                                 [
+    //                                     "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
+    //                                     "Quantity" => $allocate['Allocate'],
+    //                                     "ItemCode" =>  $allocate['ItemChild'],
+    //                                     "U_CDai" => $allocate['CDai'],
+    //                                     "U_CRong" => $allocate['CRong'],
+    //                                     "U_CDay" => $allocate['CDay'],
+    //                                     "U_Status" => "HD",
+    //                                     "U_Year" => $request->year ?? now()->format('y'),
+    //                                     "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+    //                                 ]
+    //                             ]
+    //                         ]]
+    //                     ];
+    //                     HistorySL::create(
+    //                         [
+    //                             'LSX' => $data->LSX,
+    //                             'itemchild' => $allocate['ItemChild'],
+    //                             'SPDich' => $data->FatherCode,
+    //                             'to' => $data->Team,
+    //                             'quantity' => $allocate['Allocate'],
+    //                             'ObjType' => 202,
+    //                             'DocEntry' => '' //$res['DocEntry']
+    //                         ]
+    //                     );
+    //             }
+    //             if($string==''){
+    //                 DB::rollBack();
+    //                 return response()->json([
+    //                     'error' => false,
+    //                     'status_code' => 500,
+    //                     'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
+    //                         $data->Team . " sản phẩm: " .
+    //                         $data->ItemCode . " sản phẩm đích: " .
+    //                         $data->FatherCode . " LSX." . $data->LSX
+    //                 ], 500);
+    //             }
+    //            $stockissue= $this->collectStockAllocate($string);
+    //            $dataSendPayload = [
+    //             'InventoryGenEntries' => $dataReceipt,
+    //             'InventoryGenExits' => $stockissue
+    //         ];
+            
+    //        $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload
+    //        $client = new Client();
+    //             $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
+    //                 'verify' => false,
+    //                 'headers' => [
+    //                     'Accept' => '*/*',
+    //                     'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_'.$payload['uid'],
+    //                     'Authorization' => 'Basic '.BasicAuthToken(),
+    //                 ],
+    //                 'body' =>$payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
+    //             ]);
+    //             if($response->getStatusCode()==400){
+    //                throw new \Exception('SAP ERROR Incomplete batch request body.');
+    //              }
+    //             if($response->getStatusCode()==500){
+    //                 throw new \Exception('SAP ERROR '.$response->getBody()->getContents());
+    //             }
+    //             if($response->getStatusCode()==401){
+    //                 throw new \Exception('SAP authen '.$response->getBody()->getContents());
+    //             }
+    //             if($response->getStatusCode()==202){
+    //                 $res = $response->getBody()->getContents();
+    //                 // kiểm tra sussess hay faild hơi quăng nha
+    //                 if (strpos($res, 'ETag') !== false) {
+    //                     SanLuong::where('id', $data->id)->update(
+    //                         [
+    //                             'Status' => 1,
+    //                         ]
+    //                     );
+    //                     notireceipt::where('id', $data->notiID)->update([
+    //                         'confirm' => 1,
+    //                         'ObjType' =>   202,
+    //                         // 'DocEntry' => $res['DocEntry'],
+    //                         'confirmBy' => Auth::user()->id,
+    //                         'confirm_at' => Carbon::now()->format('YmdHis'),
+    //                     ]);
+    //                     awaitingstocks::where('notiId', $data->notiID)->delete();
+                      
+    //                     DB::commit();
+    //                 }
+    //                 else
+    //                 {
+    //                     preg_match('/\{.*\}/s', $res, $matches);
+    //                     if (isset($matches[0])) {
+    //                         $jsonString = $matches[0];
+    //                         $errorData = json_decode($jsonString, true);
+                        
+    //                         if (isset($errorData['error'])) {
+    //                             $errorCode = $errorData['error']['code'];
+    //                             $errorMessage = $errorData['error']['message']['value'];
+    //                             throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
+    //                         } 
+    //                     } 
+    //                 }
+                   
+                   
+    //             }
+    //             return response()->json('success', 200);
+    //         } else {
+    //             return response()->json([
+    //                 'error' => false,
+    //                 'status_code' => 500,
+    //                 'message' => "Tổ không hợp lệ."
+    //             ], 500);
+    //         }
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage(),
+    //         ], 500);
+    //     }
+      
+    // }
+
     function acceptV2 (Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
+            'CongDoan' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -1223,11 +1417,14 @@ class ProductionController extends Controller
             ->where('a.id', $request->id)
             ->where('a.confirm', 0)
             ->first();
-           
+
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+            // Data sync to SAP
+            $U_Item=$data->ItemCode;
+            $U_Qty=$data->SLDG??0;
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
@@ -1300,7 +1497,7 @@ class ProductionController extends Controller
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
             ];
-            
+
            $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
@@ -1338,7 +1535,7 @@ class ProductionController extends Controller
                             'confirm_at' => Carbon::now()->format('YmdHis'),
                         ]);
                         awaitingstocks::where('notiId', $data->notiID)->delete();
-                      
+
                         DB::commit();
                     }
                     else
@@ -1347,16 +1544,21 @@ class ProductionController extends Controller
                         if (isset($matches[0])) {
                             $jsonString = $matches[0];
                             $errorData = json_decode($jsonString, true);
-                        
+
                             if (isset($errorData['error'])) {
                                 $errorCode = $errorData['error']['code'];
                                 $errorMessage = $errorData['error']['message']['value'];
                                 throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                            } 
-                        } 
+                            }
+                        }
                     }
-                   
-                   
+
+
+                }
+                // check xem có phải công đoạn đóng gói không nếu có phải thì đẩy về SAP
+                if($request->CongDoan =='TP')
+                {
+                    $this->dispatch(new SyncSLDGToSAP($U_Item,$U_Qty,Auth::user()->branch,now()->format('Ymd')));
                 }
                 return response()->json('success', 200);
             } else {
@@ -1374,7 +1576,7 @@ class ProductionController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-      
+
     }
 
     function collectStockAllocate($stringIssue)

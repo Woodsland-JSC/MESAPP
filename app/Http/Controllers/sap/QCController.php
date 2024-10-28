@@ -608,7 +608,7 @@ class QCController extends Controller
     function listToExcludeQC()
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select "VisResCode" "Code","ResName" "Name", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
+        $query = 'select "VisResCode" "Code","ResName" "Name", "U_CDOAN" "CongDoan", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
         join OHEM C ON B."EmpID"=C."empID" where c."empID" =? AND "validFor"=? and "U_QC"<> ?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {

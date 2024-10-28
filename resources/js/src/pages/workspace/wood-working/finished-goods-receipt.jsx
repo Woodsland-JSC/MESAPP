@@ -79,19 +79,13 @@ function FinishedGoodsReceipt() {
     const [groupList, setGroupList] = useState([]);
 
     const [selectedGroup, setSelectedGroup] = useState(null);
-    const [isQualityCheck, setIsQualityCheck] = useState(false);
+    const [isQualityCheck, setIsQualityCheck] = useState(false);  
 
     const handleReceiptFromChild = (data, receipts) => {
-        const params = {
-            TO: selectedGroup.value,
-        };
         getDataFollowingGroup(params);
     };
 
     const handleRejectFromChild = (data, faults) => {
-        const params = {
-            TO: selectedGroup.value,
-        };
         getDataFollowingGroup(params);
     };
 
@@ -142,6 +136,7 @@ function FinishedGoodsReceipt() {
                 const options = res.map((item) => ({
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
+                    CongDoan: item.CongDoan,
                 }));
                 setGroupList(res);
                 options.sort((a, b) => a.label.localeCompare(b.label));
@@ -172,6 +167,10 @@ function FinishedGoodsReceipt() {
     const getDataFollowingGroup = async (params) => {
         setLoadingData(true);
         try {
+            let params = {
+                TO: selectedGroup?.value,
+                CongDoan: selectedGroup?.CongDoan,
+            }
             const res = await productionApi.getFinishedGoodsList(params);
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
@@ -309,6 +308,7 @@ function FinishedGoodsReceipt() {
                                         defaultValue={selectedGroup}
                                         onChange={(value) => {
                                             setSelectedGroup(value);
+                                            console.log("Selected group: ", value);
                                         }}
                                         placeholder="Tìm kiếm"
                                         className="mt-2 mb-4 "
@@ -432,6 +432,7 @@ function FinishedGoodsReceipt() {
                                             data={item}
                                             key={index}
                                             index={index}
+                                            CongDoan={item.CongDoan}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
                                                 handleConfirmReceipt

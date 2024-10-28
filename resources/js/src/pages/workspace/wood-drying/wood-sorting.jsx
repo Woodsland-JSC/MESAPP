@@ -52,7 +52,7 @@ function WoodSorting() {
     const [palletTracingLoading, setPalletTracingLoading] = useState(false);
 
     const [woodTypes, setWoodTypes] = useState([]);
-    const [dryingMethods, setDryingMethods] = useState([]);
+    const [dryingMethodsOptions, setDryingMethodsOptions] = useState([]);
     const [dryingReasons, setDryingReasons] = useState([]);
     const [palletCode, setPalletCode] = useState(null);
     const [palletHistory, setPalletHistory] = useState([]);
@@ -153,6 +153,7 @@ function WoodSorting() {
     const [selectedDryingReason, setSelectedDryingReason] = useState(null);
     const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
     const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
+    
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -203,29 +204,67 @@ function WoodSorting() {
         };
 
         fetchData();
-    }, []);
+    }, []);         
 
-    const loadDryingMethodCallback = async (inputValue, callback) => {
-        try {
-            const dryingMethodsData = await palletsApi.getDryingMethod(selectedDryingReason.value);
-            const dryingMethodsOptions = dryingMethodsData.map((item) => ({
-                value: item.ItemCode + "-" + item.BatchNum,
-                label: item.ItemName,
-                batchNum: item.BatchNum,
-                code: item.ItemCode,
-            }));
-            if (callback) {
-                callback(dryingMethodsOptions);
-            }
-            // setDryingMethods(dryingMethodsOptions);
-        } catch (error) {
-            console.error("Error fetching drying methods:", error);
-        }
-    };
+    // const loadDryingMethodCallback = async (inputValue, callback) => {
+    //     try {
+    //         const dryingMethodsData = await palletsApi.getDryingMethod(selectedDryingReason.value);
+    //         const dryingMethodsOptions = dryingMethodsData.map((item) => ({
+    //             value: item.ItemCode + "-" + item.BatchNum,
+    //             label: item.ItemName,
+    //             batchNum: item.BatchNum,
+    //             code: item.ItemCode,
+    //         }));
+            
+    //         if (callback) {
+    //             callback();
+    //         }
+    //         // setDryingMethods(dryingMethodsOptions);
+    //     } catch (error) {
+    //         console.error("Error fetching drying methods:", error);
+    //     }
+    // };
     
-    const loadDryingMethods = (inputValue, callback) => {
-        loadDryingMethodCallback(inputValue, callback);
-    };
+    // const loadDryingMethods = (inputValue, callback) => {
+    //     loadDryingMethodCallback(inputValue, callback);
+    // };
+
+    const loadDryingMethodsData = async (dryingReasonValue) => {
+        try {
+          if (!dryingReasonValue) {
+            setDryingMethodsOptions([]);
+            return;
+          }
+      
+          const dryingMethodsData = await palletsApi.getDryingMethod(dryingReasonValue);
+          const options = dryingMethodsData.map((item) => ({
+            value: `${item.ItemCode}-${item.BatchNum}`,
+            label: item.ItemName,
+            batchNum: item.BatchNum,
+            code: item.ItemCode,
+          }));
+          
+          setDryingMethodsOptions(options);
+        } catch (error) {
+          console.error("Error fetching drying methods:", error);
+          setDryingMethodsOptions([]);
+        }
+      };
+      
+      // Hàm filter options dựa trên input value - không gọi API
+      const loadDryingMethods = async (inputValue, callback) => {     
+        return dryingMethodsOptions.filter((method) =>
+          method.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+      };
+      
+      // Sử dụng useEffect để load data khi selectedDryingReason thay đổi
+      useEffect(() => {
+        if (selectedDryingReason?.value) {
+          loadDryingMethodsData(selectedDryingReason.value);
+        }
+      }, [selectedDryingReason]);
+      
 
     // Validating
     const validateData = () => {
@@ -1580,12 +1619,8 @@ function WoodSorting() {
                                             placeholder="Chọn mục đích sấy"
                                             options={dryingReasons}
                                             onChange={(value) => {
-                                                setSelectedDryingReason(value)
+                                                setSelectedDryingReason(value);
                                                 console.log("Selected Drying Reason:", value);
-                                                setReloadDryingMethodsKey(
-                                                    (prevKey) =>
-                                                        prevKey + 1
-                                                );
                                             }}
                                             isDisabled={palletCards.length > 0}
                                         />
@@ -1597,21 +1632,34 @@ function WoodSorting() {
                                         >
                                             Quy cách thô
                                         </label>
-                                        <AsyncSelect
-                                            key={reloadDryingMethodsKey}    
-                                            loadingMessage={() =>
-                                                "Đang tải..."
-                                            }
+                                        {/* <AsyncSelect
+                                            key={reloadDryingMethodsKey}
+                                            loadingMessage={() => "Đang tải..."}
                                             ref={(ref) => {
                                                 dryingMethodSelectRef = ref;
                                             }}
+                                            cacheOptions
                                             defaultOptions
                                             placeholder="Chọn quy cách thô"
                                             loadOptions={loadDryingMethods}
                                             onChange={(value) => {
                                                 setSelectedDryingMethod(value);
                                             }}
-                                        />
+                                        /> */}
+                                            <AsyncSelect
+                                                loadingMessage={() => "Đang tải..."}
+                                                ref={(ref) => {
+                                                    dryingMethodSelectRef = ref;
+                                                }}
+                                                cacheOptions
+                                                defaultOptions={dryingMethodsOptions} // Sử dụng options đã load sẵn
+                                                placeholder="Chọn quy cách thô"
+                                                loadOptions={loadDryingMethods}
+                                                onChange={(value) => {
+                                                    console.log("Selected Drying Method:", value);
+                                                    setSelectedDryingMethod(value);
+                                                }}
+                                            />
                                     </div>
 
                                     <div className="col-span-1">

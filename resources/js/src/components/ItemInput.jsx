@@ -595,6 +595,7 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantity = async () => {
+        
         if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
@@ -609,6 +610,13 @@ const ItemInput = ({
             amount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
+            onAlertDialogClose();
+            return;
+        }  else if (
+            selectedItemDetails.CongDoan == "DG" &&
+            amount > packagedAmount
+        ) {
+            toast.error("Số lượng ghi nhận không được lớn hơn số lượng đã đóng gói.");
             onAlertDialogClose();
             return;
         } else if (
@@ -732,6 +740,7 @@ const ItemInput = ({
                     LSX: selectedItemDetails.LSX[0].LSX,
                     CompleQty: 0,
                     RejectQty: 0,
+                    PackagedQty: 0,
                 };
                 if (amount && amount > 0) {
                     payload.CompleQty = Number(amount);
@@ -739,7 +748,9 @@ const ItemInput = ({
                 if (faultyAmount && faultyAmount > 0) {
                     payload.RejectQty = Number(faultyAmount);
                 }
-
+                if (packagedAmount && packagedAmount > 0) {
+                    payload.PackagedQty = Number(packagedAmount);
+                }
                 if (payload.FatherCode && payload.ItemCode) {
                     if (payload.CompleQty || payload.RejectQty) {
                         if (variant === "CBG") {
@@ -2161,12 +2172,6 @@ const ItemInput = ({
                                                                                 item?.Quantity
                                                                             )}
                                                                         </div>
-                                                                        {/* <Text className="font-semibold text-[15px] ">
-                                                                            Số lượng giao chờ đóng gói:{" "}
-                                                                            <span className="text-green-700">
-                                                                                {Number(item?.Quantity)}
-                                                                            </span>
-                                                                        </Text> */}
                                                                         <Text className="font-semibold text-[15px] ">
                                                                             Người
                                                                             giao:{" "}
@@ -2176,6 +2181,19 @@ const ItemInput = ({
                                                                                     item?.first_name}
                                                                             </span>
                                                                         </Text>
+                                                                        <div className="flex text-sm">
+                                                                            <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                Số lượng đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                Đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <span className="ml-1 text-gray-600">
+                                                                                {Number(
+                                                                                    item?.SLDG || 0
+                                                                                )}
+                                                                            </span>
+                                                                        </div>
                                                                         <div className="flex text-sm">
                                                                             <Text className=" font-medium text-gray-600">
                                                                                 Thời
@@ -2970,8 +2988,8 @@ const ItemInput = ({
                             )}
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">
-                            <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
-                            <button
+                            <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
+                            {((amount ) ||(faultyAmount )) && (<button
                                 disabled={confirmLoading}
                                 className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                 onClick={
@@ -2988,7 +3006,7 @@ const ItemInput = ({
                                 ) : (
                                     "Xác nhận"
                                 )}
-                            </button>
+                            </button>)}
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>

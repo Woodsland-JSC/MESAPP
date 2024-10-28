@@ -90,6 +90,7 @@ const AwaitingReception = ({
     isQualityCheck,
     onConfirmReceipt,
     onRejectReceipt,
+    CongDoan,
     variant,
 }) => {
     const errorTypeRef = useRef();
@@ -167,6 +168,7 @@ const AwaitingReception = ({
                     subCode: faults.returnCode || null,
                     Note: faults.Note || null,
                     Qty: faults.Qty,
+                    CongDoan: CongDoan || null,
                     year: faults.year || null,
                     week: faults.week?.value || null,
                 };
@@ -384,16 +386,23 @@ const AwaitingReception = ({
                         <div className="flex gap-2">
                             <span>Công đoạn giao: </span>
                             <span className="font-bold">
-                                {data?.CongDoan || ""}
+                                {data?.CongDoan || "Không xác định"}
                             </span>
                         </div>
 
                         <div className="flex gap-2">
-                            <span>Số lượng: </span>
+                            <span>Số lượng giao: </span>
                             <span className="font-bold">
-                                {Number(data?.Quantity) || ""}
+                                {Number(data?.Quantity) || 0}
                             </span>
                         </div>
+
+                        {data?.SLDG && (<div className="flex gap-2">
+                            <span>Số lượng đã đóng gói chờ giao: </span>
+                            <span className="font-bold">
+                                {Number(data?.SLDG) || 0}
+                            </span>
+                        </div>)}
 
                         <span className="rounded-lg cursor-pointer px-2 py-2 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
                             Người tạo:{" "}

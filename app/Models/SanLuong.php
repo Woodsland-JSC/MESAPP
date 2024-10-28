@@ -16,6 +16,7 @@ class SanLuong extends Model
         'ItemName',
         'CompleQty',
         'RejectQty',
+        'SLDG',
         'CDay',
         'CRong',
         'CDai',
@@ -31,7 +32,6 @@ class SanLuong extends Model
         'LSX',
         'openQty',
         'loinhamay',
-        'SLDG'
     ];
 
     public function getCDaiAttribute($value)
