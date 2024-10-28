@@ -2174,7 +2174,7 @@ const ItemInput = ({
                                                                                     item?.first_name}
                                                                             </span>
                                                                         </Text>
-                                                                        <div className="flex text-sm">
+                                                                        {selectedItemDetails?.CongDoan == 'DG' && (<div className="flex text-sm">
                                                                             <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
                                                                                 Số lượng đã đóng gói chờ giao:{" "}
                                                                             </Text>
@@ -2186,7 +2186,7 @@ const ItemInput = ({
                                                                                     item?.SLDG || 0
                                                                                 )}
                                                                             </span>
-                                                                        </div>
+                                                                        </div>)}
                                                                         <div className="flex text-sm">
                                                                             <Text className=" font-medium text-gray-600">
                                                                                 Thời
