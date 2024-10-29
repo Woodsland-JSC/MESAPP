@@ -60,7 +60,6 @@ const ItemInput = ({
     MaThiTruong,
     variant,
     nextGroup,
-    onReceiptFromChild,
     onRejectFromChild,
 }) => {
     const checkRef = useRef(null);
@@ -459,109 +458,11 @@ const ItemInput = ({
                     return;
                 }
             }
-            // if (RONGInputQty === "" && allEmpty) {
-            //     toast.error("Vui lòng ghi nhận trước khi xác nhận!");
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if ((RONGInputQty === "" || RONGInputQty === null)) {
-            //     toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if (
-            //     (RONGInputQty !== "" || RONGInputQty !== null) &&
-            //     RONGInputQty === "0" || RONGInputQty < 0
-            // ){
-            //     toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if (RONGInputQty > selectedItemDetails.FatherStock) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng ghi nhận bán thành phẩm{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {selectedItemDetails.ChildName}
-            //             </span>{" "}
-            //             không được vượt quá {selectedItemDetails.FatherStock}.
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if (
-            //     (item.CompleQty === "" || item.CompleQty === null)
-            // ) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng ghi nhận{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {item.ItemName}
-            //             </span>{" "}
-            //             không được bỏ trống.
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if (item.CompleQty <= 0) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng ghi nhận{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {item.ItemName}
-            //             </span>{" "}
-            //             phải lớn hơn 0
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            //     return;
-            // } 
-            // if (item.CompleQty > parseInt(item.ConLai)) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng ghi nhận{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {item.ItemName}
-            //             </span>{" "}
-            //             không được vượt quá {item.ConLai}.
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            //     return;
-            // }
-            // if (item.RejectQty < 0) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng lỗi{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {item.ItemName}
-            //             </span>{" "}
-            //             phải lớn hơn 0
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            // }
-            // if (item.RejectQty > parseInt(item.ConLai)) {
-            //     toast.error(
-            //         <span>
-            //             Số lượng lỗi{" "}
-            //             <span style={{ fontWeight: "bold" }}>
-            //                 {item.ItemName}
-            //             </span>{" "}
-            //             không được vượt quá {item.ConLai}.
-            //         </span>
-            //     );
-            //     onAlertDialogClose();
-            // }
-
         }
         if ((isValid = false)) {
             onAlertDialogClose();
         } else {
             setConfirmLoading(true);
-
             try {
                 const Data = {
                     LSX: choosenItem.LSX[0].LSX,
@@ -580,22 +481,20 @@ const ItemInput = ({
                     Data
                 );
                 toast.success("Ghi nhận & chuyển tiếp thành công!");
+                
             } catch (error) {
                 // Xử lý lỗi (nếu có)
                 console.error("Đã xảy ra lỗi:", error);
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
             }
             setConfirmLoading(false);
-            onReceiptFromChild();
             setRongData(null);
-
             onAlertDialogClose();
             closeInputModal();
         }
     };
 
-    const handleSubmitQuantity = async () => {
-        
+    const handleSubmitQuantity = async () => {  
         if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
@@ -660,18 +559,7 @@ const ItemInput = ({
             toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
             onAlertDialogClose();
             return;
-        }
-        // else if (
-        //     selectedItemDetails.CongDoan !== "SC" &&
-        //     selectedItemDetails.CongDoan !== "XV" &&
-        //     selectedFaultItem.SubItemCode !== "" &&
-        //     faultyAmount > parseInt(selectedFaultItem.OnHand || 0)
-        // ) {
-        //     toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
-        //     onAlertDialogClose();
-        //     return;
-        // }
-        else if (
+        } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
             selectedFaultItem.ItemCode !== "" &&
@@ -694,7 +582,6 @@ const ItemInput = ({
             return;
         } else {
             setConfirmLoading(true);
-
             // Object chứa dữ liệu lỗi
             const ErrorData = isItemCodeDetech
                 ? {
@@ -712,7 +599,7 @@ const ItemInput = ({
                       })),
                   };
 
-            try {
+            try {      
                 const payload = {
                     FatherCode: data.SPDICH,
                     ItemCode: selectedItemDetails.ItemChild,
@@ -776,7 +663,7 @@ const ItemInput = ({
                                 SubItemBaseQty: "",
                                 OnHand: "",
                             });
-                            setIsItemCodeDetech(false);
+
                         }
                     } else {
                         toast("Chưa nhập bất kì số lượng nào.");
@@ -789,14 +676,14 @@ const ItemInput = ({
                 console.error("Đã xảy ra lỗi:", error);
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
             }
+            setIsItemCodeDetech(false);
             setConfirmLoading(false);
-            onReceiptFromChild();
             setFaults({});
             setAmount();
             setFaultyAmount();
 
             onAlertDialogClose();
-            closeInputModal();
+            closeInputModal(); 
         }
     };
 

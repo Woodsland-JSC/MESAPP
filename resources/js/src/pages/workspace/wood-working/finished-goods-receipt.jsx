@@ -81,10 +81,6 @@ function FinishedGoodsReceipt() {
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);  
 
-    const handleReceiptFromChild = (data, receipts) => {
-        getDataFollowingGroup(params);
-    };
-
     const handleRejectFromChild = (data, faults) => {
         getDataFollowingGroup(params);
     };
@@ -390,7 +386,6 @@ function FinishedGoodsReceipt() {
                                     nextGroup={item.nextGroup}
                                     fromGroup={item.fromGroup}
                                     isQualityCheck={isQualityCheck}
-                                    onReceiptFromChild={handleReceiptFromChild}
                                     onRejectFromChild={handleRejectFromChild}
                                 />
                             ))
