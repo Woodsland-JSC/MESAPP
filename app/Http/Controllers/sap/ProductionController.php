@@ -1556,7 +1556,7 @@ class ProductionController extends Controller
 
                 }
                 // check xem có phải công đoạn đóng gói không nếu có phải thì đẩy về SAP
-                if($request->CongDoan =='TP')
+                if($request->CongDoan =='TP' && $U_Qty!=0)
                 {
                     $this->dispatch(new SyncSLDGToSAP($U_Item,$U_Qty,Auth::user()->branch,now()->format('Ymd')));
                 }
