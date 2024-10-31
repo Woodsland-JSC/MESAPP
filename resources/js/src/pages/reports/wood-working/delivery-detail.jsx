@@ -216,7 +216,7 @@ function DeliveryDetailReport() {
             from_date: format(fromDateMobile, "yyyy-MM-dd"),
             to_date: format(toDateMobile, "yyyy-MM-dd"),
             To: selectedTeamMobile.value,
-            plant: user.plant,
+            plant: user.plant === "YS1" || user.plant === "YS2" ? "YS" : user.plant,
         };
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
@@ -274,23 +274,24 @@ function DeliveryDetailReport() {
 
     // New Get All Group
     useEffect(() => {
-        const loadTeamOptions = () => {
-            return reportApi
-                .getTeamByFactory(user.plant)
-                .then((response) => {
-                    const options = response.map((item) => ({
-                        value: item.Code,
-                        label: item.Name,
-                    }));
-                    options.sort((a, b) => a.label.localeCompare(b.label));
-                    setTeamOptions(options);
-                })
-                .catch((error) => {
-                    console.error("Error fetching team data:", error);
-                    toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-                });
-        };
-        loadTeamOptions();
+        const userPlant = user.plant === "YS1" || user.plant === "YS2" ? "YS" : user.plant;
+    
+        reportApi
+            .getTeamByFactory(userPlant)
+            .then((response) => {
+                const options = response
+                    .map((item) => ({
+                        value: item.Code || "",
+                        label: item.Name || "",
+                    }))
+                    .filter((option) => option.label)
+                    .sort((a, b) => a.label.localeCompare(b.label));
+                setTeamOptions(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching team data:", error);
+                toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+            });
     }, []);
 
     const handleResetFilter = () => {
@@ -987,9 +988,9 @@ function DeliveryDetailReport() {
                                                                 Quy cách:{" "}
                                                             </span>
                                                             <span className="font-normal">
-                                                                {item.CDay}*
-                                                                {item.CRong}*
-                                                                {item.CDai}
+                                                                {Number(item.CDay)}*
+                                                                {Number(item.CRong)}*
+                                                                {Number(item.CDai)}
                                                             </span>
                                                         </div>
                                                         <div className="grid grid-cols-2 font-semibold mb-2">

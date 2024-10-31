@@ -442,12 +442,12 @@ class QCController extends Controller
         ];
 
         // Mã hạ cấp
-        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where "validFor"=? and "U_CDOAN" IN (?,?,?,?,?,?) and "ItmsGrpCode" IN (?,?)';
+        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where "validFor"=? and "ItmsGrpCod" IN (?,?)';
         $stmt_04 = odbc_prepare($conDB, $query_04);
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_04, ['Y','TC', 'SC', 'HT', 'DG', 'MM', 'LP', '101', '102'])) {
+        if (!odbc_execute($stmt_04, ['Y', '101', '103', '106'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $returnCode = array();
