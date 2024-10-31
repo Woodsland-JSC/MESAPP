@@ -414,6 +414,8 @@ class QCController extends Controller
             $solution[] = $row;
         }
 
+        $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS': Auth::user()->plant;
+
         // Tổ chuyển về
         $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
         from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
@@ -421,7 +423,7 @@ class QCController extends Controller
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_03, ['N', 'Y', Auth::user()->plant])) {
+        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $teamBack = array();
