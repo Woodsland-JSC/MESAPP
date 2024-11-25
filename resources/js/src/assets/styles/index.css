@@ -30,6 +30,7 @@ body {
         right: 0;
         top: 0;
         z-index: 99999;
+        animation: fadeIn 0.25s forwards;
     }
 
     .loader-inner {
@@ -199,6 +200,14 @@ body {
     }
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
 .css-r90m2q:disabled, .css-r90m2q[disabled], .css-r90m2q[aria-disabled=true], .css-r90m2q[data-disabled] {
     opacity: 0.7 !important;
@@ -239,12 +248,13 @@ div:where(.swal2-container) {
     background-color: transparent !important;
 }
 
-.ag-row-footer{
+/* Chỗ này Phước thêm className vào những <AgGridReact /> mà Phước cần thôi nhé, kh là ảnh hưởng global */
+.custom-grid .ag-row-footer{
     background-color: #ffffff !important;
     font-weight: 600;
 }
 
-.ag-row-last{
+.custom-grid .ag-row-last{
     background-color: #B9E0F6 !important;
 } 
 
@@ -341,3 +351,4 @@ div:where(.swal2-container) {
        transform: scaleY(-1) rotate(-135deg);
     }
  }
+ 

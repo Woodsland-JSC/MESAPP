@@ -102,27 +102,27 @@ const woodDryingReports = [
 const woodProductingReports = [
     {
         id: "0001",
-        name: "Báo cáo sản lượng tuần (chi tiết)",
-        link: "/reports/weekly-goods-receipts",
-        priority: false,
-    },
-    {
-        id: "0002",
-        name: "Báo cáo tỷ lệ đồng bộ",
-        link: "/reports/sync-ratio",
-        priority: false,
-    },
-    {
-        id: "0003",
         name: "Báo cáo thông tin chi tiết giao nhận",
         link: "/reports/delivery-detail",
         priority: true,
         responsive: true,
     },
     {
+        id: "0002",
+        name: "Báo cáo tổng sản lượng theo ngày - tuần - tháng",
+        link: "/reports/production-volume-by-time",
+        priority: false,
+    },
+    {
+        id: "0003",
+        name: "Báo cáo chi tiết số lượng giao đi",
+        link: "/reports/delivered-quantity-details",
+        priority: false,
+    },
+    {
         id: "0004",
-        name: "Báo cáo chi tiết nhập tồn",
-        link: "/reports/detail-stock-receipt",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/error-handling-measure",
         priority: false,
     },
 ];

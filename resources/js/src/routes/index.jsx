@@ -64,13 +64,17 @@ import CBGWoodDryingReport from "../pages/reports/wood-drying/wood-drying";
 import DryingQueueReport from "../pages/reports/wood-drying/drying-queue";
 
 import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail";
-import DetailStockReceiptReport from "../pages/reports/wood-working/detail-stock-receipt";
-import SyncRatioReport from "../pages/reports/wood-working/sync-ratio";
-import WeeklyGoodsReceiptsReport from "../pages/reports/wood-working/weekly-goods-receipts";
+import ErrorHandlingMeasureReport from "../pages/reports/wood-working/error-handling-measure";
+import DeliveredQuantityDetailReport from "../pages/reports/wood-working/delivered-quantity-detail";
+import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 
 import DefectQuantityReport from "../pages/reports/qc/defect-quantity";
 import DefectResolutionReport from "../pages/reports/qc/defect-resolution";
 import QCHandlingReport from "../pages/reports/qc/qc-handling";
+
+import FinishedDetailsReceipt from "../pages/workspace/inland/finished-details-receipt";
+import FinishedPackagingReceipt from "../pages/workspace/inland/finished-packaging-receipt";
+import InstallationProgress from "../pages/workspace/inland/installation-progress";
 
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
@@ -187,7 +191,35 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
-                    
+
+                    {/* Inland  */}
+                    <Route
+                        path="/workspace/inland/finished-details-receipt"
+                        element={
+                            // <ProtectedRoute permissionsRequired={['CTND']}>
+                            <ProtectedRoute>
+                                <FinishedDetailsReceipt />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/workspace/inland/finished-packaging-receipt"
+                        element={
+                            // <ProtectedRoute permissionsRequired={['CTND']}>
+                            <ProtectedRoute>
+                                <FinishedPackagingReceipt />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/workspace/inland/installation-progress"
+                        element={
+                            // <ProtectedRoute permissionsRequired={['TDND']}>
+                            <ProtectedRoute>
+                                <InstallationProgress />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Reports */}
                     <Route
@@ -345,26 +377,26 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/detail-stock-receipt"
+                        path="/reports/error-handling-measure"
                         element={
                             <ProtectedRoute>
-                                <DetailStockReceiptReport />
+                                <ErrorHandlingMeasureReport />
                             </ProtectedRoute>
                         }
                     />
                     <Route
-                        path="/reports/sync-ratio"
+                        path="/reports/delivered-quantity-details"
                         element={
                             <ProtectedRoute>
-                                <SyncRatioReport />
+                                <DeliveredQuantityDetailReport />
                             </ProtectedRoute>
                         }
                     />
                     <Route
-                        path="/reports/weekly-goods-receipts"
+                        path="/reports/production-volume-by-time"
                         element={
                             <ProtectedRoute>
-                                <WeeklyGoodsReceiptsReport />
+                                <ProductionVolumeByTimeReport />
                             </ProtectedRoute>
                         }
                     />
