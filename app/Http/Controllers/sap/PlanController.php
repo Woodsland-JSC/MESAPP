@@ -109,6 +109,7 @@ class PlanController extends Controller
 
         return response()->json($pallets, 200);
     }
+
     //danh sách mẻ sấy có thể vào lò
     function listovens()
     {
@@ -121,6 +122,7 @@ class PlanController extends Controller
             ->get();
         return response()->json($pallets, 200);
     }
+
     //danh sách mẻ sấy có thể chay lo
     function ListRunOven()
     {
@@ -132,6 +134,7 @@ class PlanController extends Controller
             ->get();
         return response()->json($pallets, 200);
     }
+    
     //danh sách mẻ sấy có thể hoan thanh
     function Listcomplete()
     {

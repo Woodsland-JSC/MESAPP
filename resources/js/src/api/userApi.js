@@ -1,4 +1,4 @@
-import { useRangeSliderContext } from "@chakra-ui/react";
+// import { useRangeSliderContext } from "@chakra-ui/react";
 import axiosClient from "./axiosClient";
 
 const usersApi = {
@@ -41,7 +41,7 @@ const usersApi = {
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);
         formData.append("integration_id", userData.integrationId);
-        // formData.append("roles", userData.authorization);
+        formData.append("roles", userData.authorization);
         formData.append("branch", userData.branch);
         if (userData.avatar) {
             formData.append("avatar", userData.avatar ? userData.avatar : "");
@@ -51,13 +51,9 @@ const usersApi = {
             formData.append("imagesign", userData.imagesign ? userData.imagesign : "");
         }
 
-        userData.authorization.forEach((role, index) => {
-            formData.append(`roles[${index}]`, role);
-        });
-
-
         return axiosClient().post(url, formData);
     },
+    
     updateUser: (userId, userData) => {
         const url = `/users/update/${userId}`;
         const formData = new FormData();
@@ -71,7 +67,7 @@ const usersApi = {
         formData.append("plant", userData.factory);
         formData.append("sap_id", userData.sapId);
         formData.append("integration_id", userData.integrationId);
-        // formData.append("roles", userData.authorization);
+        formData.append("roles", userData.authorization);
         formData.append("branch", userData.branch);
         if (userData.avatar) {
             formData.append("avatar", userData.avatar ? userData.avatar : "");
@@ -80,10 +76,6 @@ const usersApi = {
         if (userData.imagesign) {
             formData.append("imagesign", userData.imagesign ? userData.imagesign : "");
         }
-
-        userData.authorization.forEach((role, index) => {
-            formData.append(`roles[${index}]`, role);
-        });
 
         return axiosClient().post(url, formData);
     },
@@ -125,9 +117,13 @@ const usersApi = {
             }
         });
     },
-    getFactoriesByBranchId: (branchId) => {
+    getFactoriesByBranchId: (branchId, KHOI) => {
         const url = `/factorybybranch/${branchId}`;
-        return axiosClient().get(url);
+        return axiosClient().get(url, {
+            params:{
+                KHOI: KHOI
+            }
+        });
     },
     deleteUser: (userId) => {
         const url = `/users/delete/${userId}`;

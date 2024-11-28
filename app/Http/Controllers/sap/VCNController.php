@@ -1436,6 +1436,8 @@ class VCNController extends Controller
             'data' => $changedData
         ], 200);
     }
+
+    
      /*
     *********************************
     version 2: thay doi yeu cau nhập xuất cùng lúc
@@ -1570,8 +1572,9 @@ class VCNController extends Controller
 
         $data = null;
         $datacxl = null;
+
         //data need confirm
-        if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
+        if ($request->TO == "QC_YS(VCN)" || $request->TO == "QC_CH" || $request->TO == "QC_HG") {
             $data = null;
         } else {
             $data = DB::table('notireceiptVCN as a')

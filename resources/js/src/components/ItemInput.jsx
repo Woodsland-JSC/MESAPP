@@ -8,9 +8,6 @@ import {
     AlertDialogOverlay,
     AlertDialogCloseButton,
     Alert,
-    AlertIcon,
-    AlertTitle,
-    AlertDescription,
     ModalOverlay,
     Modal,
     ModalHeader,
@@ -59,8 +56,8 @@ const ItemInput = ({
     searchTerm,
     MaThiTruong,
     variant,
+    selectedFactory,
     nextGroup,
-    onRejectFromChild,
 }) => {
     const checkRef = useRef(null);
     const itemCheckRef = useRef(null);
@@ -132,6 +129,7 @@ const ItemInput = ({
 
     const openInputModal = async (item) => {
         console.log("Item đã chọn: ", item);
+        console.log("Nhà máy hiện tại: ", selectedFactory);
         if (variant === "CBG") {
             setLoading(true);
             const params = {
@@ -287,7 +285,7 @@ const ItemInput = ({
             const isAllCompleteEmpty = rongData.every(
                 (item) => item.CompleQty === ""
             );
-            if(item.RejectQty) {
+            if (item.RejectQty) {
                 if (item.RejectQty < 0) {
                     toast.error(
                         <span>
@@ -312,16 +310,24 @@ const ItemInput = ({
                     );
                     onAlertDialogClose();
                 }
-                if ((RONGInputQty !== "" || RONGInputQty !== null) && item.CompleQty) {
-                    toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+                if (
+                    (RONGInputQty !== "" || RONGInputQty !== null) &&
+                    item.CompleQty
+                ) {
+                    toast.error(
+                        "Vui lòng nhập số lượng ghi nhận bán thành phẩm."
+                    );
                     onAlertDialogClose();
                     return;
                 }
                 if (
-                    (RONGInputQty !== "" || RONGInputQty !== null) &&
-                    RONGInputQty === "0" || RONGInputQty < 0
-                ){
-                    toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+                    ((RONGInputQty !== "" || RONGInputQty !== null) &&
+                        RONGInputQty === "0") ||
+                    RONGInputQty < 0
+                ) {
+                    toast.error(
+                        "Số lượng ghi nhận bán thành phẩm phải lớn hơn 0."
+                    );
                     onAlertDialogClose();
                     return;
                 }
@@ -332,14 +338,16 @@ const ItemInput = ({
                             <span style={{ fontWeight: "bold" }}>
                                 {selectedItemDetails.ChildName}
                             </span>{" "}
-                            không được vượt quá {selectedItemDetails.FatherStock}.
+                            không được vượt quá{" "}
+                            {selectedItemDetails.FatherStock}.
                         </span>
                     );
                     onAlertDialogClose();
                     return;
                 }
                 if (
-                    RONGInputQty && (item.CompleQty === "" || item.CompleQty === null)
+                    RONGInputQty &&
+                    (item.CompleQty === "" || item.CompleQty === null)
                 ) {
                     toast.error(
                         <span>
@@ -365,8 +373,8 @@ const ItemInput = ({
                     );
                     onAlertDialogClose();
                     return;
-                } 
-                if (RONGInputQty && (item.CompleQty > parseInt(item.ConLai))) {
+                }
+                if (RONGInputQty && item.CompleQty > parseInt(item.ConLai)) {
                     toast.error(
                         <span>
                             Số lượng ghi nhận{" "}
@@ -390,16 +398,21 @@ const ItemInput = ({
                     onAlertDialogClose();
                     return;
                 }
-                if ((RONGInputQty === "" || RONGInputQty === null)) {
-                    toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+                if (RONGInputQty === "" || RONGInputQty === null) {
+                    toast.error(
+                        "Vui lòng nhập số lượng ghi nhận bán thành phẩm."
+                    );
                     onAlertDialogClose();
                     return;
                 }
                 if (
-                    (RONGInputQty !== "" || RONGInputQty !== null) &&
-                    RONGInputQty === "0" || RONGInputQty < 0
-                ){
-                    toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+                    ((RONGInputQty !== "" || RONGInputQty !== null) &&
+                        RONGInputQty === "0") ||
+                    RONGInputQty < 0
+                ) {
+                    toast.error(
+                        "Số lượng ghi nhận bán thành phẩm phải lớn hơn 0."
+                    );
                     onAlertDialogClose();
                     return;
                 }
@@ -410,15 +423,14 @@ const ItemInput = ({
                             <span style={{ fontWeight: "bold" }}>
                                 {selectedItemDetails.ChildName}
                             </span>{" "}
-                            không được vượt quá {selectedItemDetails.FatherStock}.
+                            không được vượt quá{" "}
+                            {selectedItemDetails.FatherStock}.
                         </span>
                     );
                     onAlertDialogClose();
                     return;
                 }
-                if (
-                    (item.CompleQty === "" || item.CompleQty === null)
-                ) {
+                if (item.CompleQty === "" || item.CompleQty === null) {
                     toast.error(
                         <span>
                             Số lượng ghi nhận{" "}
@@ -443,7 +455,7 @@ const ItemInput = ({
                     );
                     onAlertDialogClose();
                     return;
-                } 
+                }
                 if (item.CompleQty > parseInt(item.ConLai)) {
                     toast.error(
                         <span>
@@ -475,13 +487,13 @@ const ItemInput = ({
                     team: choosenItem.TO,
                     NextTeam: choosenItem.TOTT,
                     Data: rongData,
+                    KHOI: "VCN",
                 };
                 console.log("Dữ liệu sẽ được gửi đi: ", Data);
                 const res = await productionApi.enterFinishedRongAmountVCN(
                     Data
                 );
                 toast.success("Ghi nhận & chuyển tiếp thành công!");
-                
             } catch (error) {
                 // Xử lý lỗi (nếu có)
                 console.error("Đã xảy ra lỗi:", error);
@@ -494,7 +506,7 @@ const ItemInput = ({
         }
     };
 
-    const handleSubmitQuantity = async () => {  
+    const handleSubmitQuantity = async () => {
         if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
@@ -511,7 +523,7 @@ const ItemInput = ({
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
             return;
-        }  else if (
+        } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
             amount >
@@ -599,7 +611,7 @@ const ItemInput = ({
                       })),
                   };
 
-            try {      
+            try {
                 const payload = {
                     FatherCode: data.SPDICH,
                     ItemCode: selectedItemDetails.ItemChild,
@@ -621,6 +633,8 @@ const ItemInput = ({
                     CompleQty: 0,
                     RejectQty: 0,
                     PackagedQty: 0,
+                    KHOI: variant || "",
+                    Factory: selectedFactory || "",
                 };
                 if (amount && amount > 0) {
                     payload.CompleQty = Number(amount);
@@ -663,7 +677,6 @@ const ItemInput = ({
                                 SubItemBaseQty: "",
                                 OnHand: "",
                             });
-
                         }
                     } else {
                         toast("Chưa nhập bất kì số lượng nào.");
@@ -683,7 +696,7 @@ const ItemInput = ({
             setFaultyAmount();
 
             onAlertDialogClose();
-            closeInputModal(); 
+            closeInputModal();
         }
     };
 
@@ -765,7 +778,8 @@ const ItemInput = ({
                         CongDoan: res.CongDoan,
                         FatherStock: res.FatherStock,
                         notifications: prev.notifications.filter(
-                            (notification) => notification.notiID !== selectedDelete
+                            (notification) =>
+                                notification.notiID !== selectedDelete
                         ),
                         factories: res.Factorys?.map((factoryItem) => ({
                             value: factoryItem.Factory,
@@ -938,13 +952,6 @@ const ItemInput = ({
                                   onClick={() => {
                                       openInputModal(item);
                                       setChoosenItem(item);
-                                      console.log("Item đã chọn:", item);
-                                      console.log("Item:", choosenItem);
-                                      console.log(
-                                          "Mã Thị Trường của item:" +
-                                              item.ChildName,
-                                          MaThiTruong
-                                      );
                                   }}
                                   className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
                                   key={index}
@@ -959,10 +966,11 @@ const ItemInput = ({
                                                       {data.QuyCach2}
                                                   </span>
                                               ) : (
-                                                <span className="">
+                                                  <span className="">
                                                       {/* ({item.CDay % 10 > 0 ? parseFloat(item.CDay) : parseInt(item.CDay)}*{item.CRong % 10 > 0 ? parseFloat(item.CRong) : parseInt(item.CRong)}*{item.CDai % 10 > 0 ? parseFloat(item.CDai) : parseInt(item.CDai)}) */}
-                                                      ({item.CDay}*{item.CRong}*{item.CDai})
-                                                </span>
+                                                      ({item.CDay}*{item.CRong}*
+                                                      {item.CDai})
+                                                  </span>
                                               )}
                                               {item.Version && (
                                                   <span className="pl-2 font-medium text-[#17506b]">
@@ -1395,7 +1403,9 @@ const ItemInput = ({
                                                                                     value ===
                                                                                         0 ||
                                                                                     !value ||
-                                                                                    isNaN(value)
+                                                                                    isNaN(
+                                                                                        value
+                                                                                    )
                                                                                 ) {
                                                                                     setRongData(
                                                                                         (
@@ -1477,7 +1487,9 @@ const ItemInput = ({
                                                                                 value ===
                                                                                     0 ||
                                                                                 !value ||
-                                                                                isNaN(value)
+                                                                                isNaN(
+                                                                                    value
+                                                                                )
                                                                             ) {
                                                                                 setRongData(
                                                                                     (
@@ -1641,7 +1653,8 @@ const ItemInput = ({
                                                         {selectedItemDetails?.notifications?.map(
                                                             (item, index) => (
                                                                 <>
-                                                                    {item?.Type === 0 ? (
+                                                                    {item?.Type ===
+                                                                    0 ? (
                                                                         <div className="p-2 px-4 rounded-lg bg-[#f8fffb] border-2 border-[#81ca9c]">
                                                                             {/* Bán thành phẩm */}
                                                                             <div className="flex justify-between w-full">
@@ -1661,9 +1674,8 @@ const ItemInput = ({
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="text-[#15803D] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
-                                                                                            {
-                                                                                                item.QtyIssueRong || 0
-                                                                                            }
+                                                                                            {item.QtyIssueRong ||
+                                                                                                0}
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -1720,11 +1732,11 @@ const ItemInput = ({
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="text-sm ">
-                                                                                            <span className="">
-                                                                                                Thời
-                                                                                                gian
-                                                                                                giao:{" "}
-                                                                                            </span>
+                                                                                        <span className="">
+                                                                                            Thời
+                                                                                            gian
+                                                                                            giao:{" "}
+                                                                                        </span>
                                                                                         <span className="font-medium text-gray-600">
                                                                                             {
                                                                                                 item.CreatedAt
@@ -1755,7 +1767,8 @@ const ItemInput = ({
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    ) : item?.Type === 1 ? (
+                                                                    ) : item?.Type ===
+                                                                      1 ? (
                                                                         <div className="p-2 px-4 rounded-lg bg-[#fff3f3] border-2 border-[#db8c8c]">
                                                                             {/* Bán thành phẩm */}
                                                                             <div className="flex justify-between w-full">
@@ -1763,7 +1776,9 @@ const ItemInput = ({
                                                                                     <div className="flex items-center justify-between w-full py-1">
                                                                                         <div className="">
                                                                                             <div className="text-[#8D9194] font-medium text-xs uppercase">
-                                                                                                Thành phẩm rong
+                                                                                                Thành
+                                                                                                phẩm
+                                                                                                rong
                                                                                             </div>
                                                                                             <div className="text-[17px] font-semibold uppercase">
                                                                                                 {
@@ -1772,7 +1787,10 @@ const ItemInput = ({
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="text-[#801515] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
-                                                                                            {parseInt(item.Quantity) || 0}
+                                                                                            {parseInt(
+                                                                                                item.Quantity
+                                                                                            ) ||
+                                                                                                0}
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -1792,11 +1810,11 @@ const ItemInput = ({
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="text-sm ">
-                                                                                            <span className="">
-                                                                                                Thời
-                                                                                                gian
-                                                                                                giao:{" "}
-                                                                                            </span>
+                                                                                        <span className="">
+                                                                                            Thời
+                                                                                            gian
+                                                                                            giao:{" "}
+                                                                                        </span>
                                                                                         <span className="font-medium text-gray-600">
                                                                                             {
                                                                                                 item.CreatedAt
@@ -2019,7 +2037,8 @@ const ItemInput = ({
                                                 )?.length > 0 && (
                                                     <div className="flex items-center justify-between w-full p-1 px-0 !mt-2 !mb-1">
                                                         <Text className="font-semibold">
-                                                            Số lượng đã giao chờ xác nhận:{" "}
+                                                            Số lượng đã giao chờ
+                                                            xác nhận:{" "}
                                                         </Text>{" "}
                                                     </div>
                                                 )}
@@ -2061,19 +2080,33 @@ const ItemInput = ({
                                                                                     item?.first_name}
                                                                             </span>
                                                                         </Text>
-                                                                        {selectedItemDetails?.CongDoan == 'DG' && (<div className="flex text-sm">
-                                                                            <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
-                                                                                Số lượng đã đóng gói chờ giao:{" "}
-                                                                            </Text>
-                                                                            <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
-                                                                                Đã đóng gói chờ giao:{" "}
-                                                                            </Text>
-                                                                            <span className="ml-1 text-gray-600">
-                                                                                {Number(
-                                                                                    item?.SLDG || 0
-                                                                                )}
-                                                                            </span>
-                                                                        </div>)}
+                                                                        {selectedItemDetails?.CongDoan ==
+                                                                            "DG" && (
+                                                                            <div className="flex text-sm">
+                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                    Số
+                                                                                    lượng
+                                                                                    đã
+                                                                                    đóng
+                                                                                    gói
+                                                                                    chờ
+                                                                                    giao:{" "}
+                                                                                </Text>
+                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                    Đã
+                                                                                    đóng
+                                                                                    gói
+                                                                                    chờ
+                                                                                    giao:{" "}
+                                                                                </Text>
+                                                                                <span className="ml-1 text-gray-600">
+                                                                                    {Number(
+                                                                                        item?.SLDG ||
+                                                                                            0
+                                                                                    )}
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
                                                                         <div className="flex text-sm">
                                                                             <Text className=" font-medium text-gray-600">
                                                                                 Thời
@@ -2124,35 +2157,45 @@ const ItemInput = ({
                                                         </>
                                                     ))}
 
-                                            {(selectedItemDetails?.CongDoan === "DG" && selectedItemDetails?.maxQty > 0) &&
-                                            (<div className="">
-                                                <Box className="px-0">
-                                                    <label className="mt-6 font-semibold">
-                                                        Số lượng đã đóng gói chờ giao:
-                                                    </label>
-  
-                                                    <NumberInput
-                                                        ref={receipInput}
-                                                        step={1}
-                                                        min={1}
-                                                        value={packagedAmount}
-                                                        className="mt-2 mb-2"
-                                                        onChange={(value) => {
-                                                        setPackagedAmount(
-                                                            value
-                                                            );
-                                                        }}
-                                                    >
-                                                        <NumberInputField />
-                                                        <NumberInputStepper>
-                                                            <NumberIncrementStepper />
-                                                            <NumberDecrementStepper />
-                                                        </NumberInputStepper>
-                                                    </NumberInput>
-                                                </Box>
-                                                <div className="border-b pt-2"></div>
-                                            </div>)}
+                                            {selectedItemDetails?.CongDoan ===
+                                                "DG" &&
+                                                selectedItemDetails?.maxQty >
+                                                    0 && (
+                                                    <div className="">
+                                                        <Box className="px-0">
+                                                            <label className="mt-6 font-semibold">
+                                                                Số lượng đã đóng
+                                                                gói chờ giao:
+                                                            </label>
 
+                                                            <NumberInput
+                                                                ref={
+                                                                    receipInput
+                                                                }
+                                                                step={1}
+                                                                min={1}
+                                                                value={
+                                                                    packagedAmount
+                                                                }
+                                                                className="mt-2 mb-2"
+                                                                onChange={(
+                                                                    value
+                                                                ) => {
+                                                                    setPackagedAmount(
+                                                                        value
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <NumberInputField />
+                                                                <NumberInputStepper>
+                                                                    <NumberIncrementStepper />
+                                                                    <NumberDecrementStepper />
+                                                                </NumberInputStepper>
+                                                            </NumberInput>
+                                                        </Box>
+                                                        <div className="border-b pt-2"></div>
+                                                    </div>
+                                                )}
 
                                             <Box className="px-0">
                                                 <label className="mt-6 font-semibold">
@@ -2714,13 +2757,17 @@ const ItemInput = ({
                             >
                                 Đóng
                             </button>
-                            <button
-                                className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full text-white"
-                                type="button"
-                                onClick={onAlertDialogOpen}
-                            >
-                                Xác nhận
-                            </button>
+                            {user.permissions.includes(
+                                "CBG" || "VCN" || "DAND"
+                            ) && (
+                                <button
+                                    className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full text-white"
+                                    type="button"
+                                    onClick={onAlertDialogOpen}
+                                >
+                                    Xác nhận
+                                </button>
+                            )}
                         </div>
                     </ModalFooter>
                 </ModalContent>
@@ -2822,7 +2869,8 @@ const ItemInput = ({
                                         <div className="space-y-1">
                                             {packagedAmount && (
                                                 <div className="text-yellow-700">
-                                                    Số lượng đã đóng gói chờ giao:{" "}
+                                                    Số lượng đã đóng gói chờ
+                                                    giao:{" "}
                                                     <span className="font-bold">
                                                         {packagedAmount || 0}
                                                     </span>
@@ -2869,24 +2917,26 @@ const ItemInput = ({
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
-                            {((amount ) ||(faultyAmount )) && (<button
-                                disabled={confirmLoading}
-                                className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
-                                onClick={
-                                    selectedItemDetails?.CongDoan === "RO"
-                                        ? handleSubmitQuantityRong
-                                        : handleSubmitQuantity
-                                }
-                            >
-                                {confirmLoading ? (
-                                    <div className="flex items-center space-x-4">
-                                        <Spinner size="sm" color="white" />
-                                        <div>Đang tải</div>
-                                    </div>
-                                ) : (
-                                    "Xác nhận"
-                                )}
-                            </button>)}
+                            {(amount || faultyAmount) && (
+                                <button
+                                    disabled={confirmLoading}
+                                    className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    onClick={
+                                        selectedItemDetails?.CongDoan === "RO"
+                                            ? handleSubmitQuantityRong
+                                            : handleSubmitQuantity
+                                    }
+                                >
+                                    {confirmLoading ? (
+                                        <div className="flex items-center space-x-4">
+                                            <Spinner size="sm" color="white" />
+                                            <div>Đang tải</div>
+                                        </div>
+                                    ) : (
+                                        "Xác nhận"
+                                    )}
+                                </button>
+                            )}
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>

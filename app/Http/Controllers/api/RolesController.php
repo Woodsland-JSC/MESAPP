@@ -106,12 +106,14 @@ class RolesController extends Controller
             return response()->json(['error' => 'Role not found'], 404);
         }
 
+        $allpermissions = Permission::select('id', 'name')->orderBy('id', 'asc')->get();
+        
         $rolePermissions = [
             'name' => $role->name,
             'permissions' => $role->permissions->pluck('name')->toArray()
         ];
 
-        $allpermissions = Permission::all();
+        
         return response()->json(['details' => $rolePermissions, 'allPermission' => $allpermissions], 200);
     }
 

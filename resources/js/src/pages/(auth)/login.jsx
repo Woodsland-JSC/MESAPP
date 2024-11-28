@@ -70,12 +70,13 @@ function Login() {
                 avatar,
                 plant,
                 sap_id,
+                role,
                 branch,
                 permissions,
             } = response;
             if (!avatar) {
                 const tempName =
-                    first_name.trim().charAt(0) + (last_name ? (last_name.trim().charAt(0)) : '');
+                    first_name?.trim().charAt(0) + (last_name ? (last_name.trim().charAt(0)) : '');
                 avatar = await getAutoAvatar(tempName);
             }
             const savedUserInfo = {
@@ -86,6 +87,7 @@ function Login() {
                 avatar,
                 plant,
                 sap_id,
+                role,
                 branch,
                 permissions,
             };
@@ -98,9 +100,9 @@ function Login() {
             toast.success("Đăng nhập thành công");
             navigate("/workspace");
         } catch (error) {
-            toast.error(error.response.data.message);
+            toast.error(error?.response?.data?.message || "Đã xảy ra lỗi khi đăng nhập.");
             console.error("Login failed:", error);
-        }
+        } 
         setLoading(false);
     };
 

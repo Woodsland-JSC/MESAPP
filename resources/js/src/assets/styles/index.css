@@ -199,8 +199,10 @@ body {
     }
 }
 
-
-.css-r90m2q:disabled, .css-r90m2q[disabled], .css-r90m2q[aria-disabled=true], .css-r90m2q[data-disabled] {
+.css-r90m2q:disabled,
+.css-r90m2q[disabled],
+.css-r90m2q[aria-disabled="true"],
+.css-r90m2q[data-disabled] {
     opacity: 0.7 !important;
     color: #333333 !important;
 }
@@ -211,21 +213,21 @@ div:where(.swal2-container) {
 
 /* Ag Grid Custom Theme */
 .ag-theme-quartz .ag-header {
-    background-color: #DBDCDD;
+    background-color: #dbdcdd;
 }
 
 .ag-theme-quartz {
-    --ag-row-border-style: solid !important;  
+    --ag-row-border-style: solid !important;
     --ag-row-border-color: rgb(188, 188, 188) !important;
     --ag-cell-horizontal-border: solid 1px rgb(206, 206, 206) !important;
-    --ag-odd-row-background-color: #F5F5F6;
+    --ag-odd-row-background-color: #f5f5f6;
 }
 
-.ag-watermark{
+.ag-watermark {
     opacity: 0 !important;
 }
 
-.ag-column-drop-empty-message ag-column-drop-horizontal-empty-message{
+.ag-column-drop-empty-message ag-column-drop-horizontal-empty-message {
     display: none !important;
 }
 
@@ -239,105 +241,181 @@ div:where(.swal2-container) {
     background-color: transparent !important;
 }
 
-.ag-row-footer{
+.ag-row-footer {
     background-color: #ffffff !important;
     font-weight: 600;
 }
 
-.ag-row-last{
-    background-color: #B9E0F6 !important;
-} 
+.ag-row-last {
+    background-color: #b9e0f6 !important;
+}
 
 /* ============ */
 
 .dots {
     width: 56px;
     height: 13.4px;
-    background: radial-gradient(circle closest-side,#222222 90%,#0000) 0%   50%,
-         radial-gradient(circle closest-side,#222222 90%,#0000) 50%  50%,
-         radial-gradient(circle closest-side,#222222 90%,#0000) 100% 50%;
-    background-size: calc(100%/3) 100%;
+    background: radial-gradient(circle closest-side, #222222 90%, #0000) 0% 50%,
+        radial-gradient(circle closest-side, #222222 90%, #0000) 50% 50%,
+        radial-gradient(circle closest-side, #222222 90%, #0000) 100% 50%;
+    background-size: calc(100% / 3) 100%;
     background-repeat: no-repeat;
     animation: dots-zcf63l 1s infinite linear;
- }
- 
- @keyframes dots-zcf63l {
+}
+
+@keyframes dots-zcf63l {
     33% {
-       background-size: calc(100%/3) 0%  ,calc(100%/3) 100%,calc(100%/3) 100%;
+        background-size: calc(100% / 3) 0%, calc(100% / 3) 100%,
+            calc(100% / 3) 100%;
     }
- 
+
     50% {
-       background-size: calc(100%/3) 100%,calc(100%/3) 0%  ,calc(100%/3) 100%;
+        background-size: calc(100% / 3) 100%, calc(100% / 3) 0%,
+            calc(100% / 3) 100%;
     }
- 
+
     66% {
-       background-size: calc(100%/3) 100%,calc(100%/3) 100%,calc(100%/3) 0%;
+        background-size: calc(100% / 3) 100%, calc(100% / 3) 100%,
+            calc(100% / 3) 0%;
     }
- }
+}
 
- /* Serif font */
- .serif{
-    font-family: 'Source Serif Pro', serif;
- }
+/* Serif font */
+.serif {
+    font-family: "Source Serif Pro", serif;
+}
 
-  /* Inter font */
-  .inter{
-    font-family: 'Inter', sans-serif;
- }
- 
- .special-spinner {
+/* Inter font */
+.inter {
+    font-family: "Inter", sans-serif;
+}
+
+.special-spinner {
     width: 56px;
     height: 56px;
     border-radius: 50%;
     border: 9px solid #137aa9;
     animation: spinner-bulqg1 0.8s infinite linear alternate,
-         spinner-oaa3wk 1.6s infinite linear;
- }
- 
- @keyframes spinner-bulqg1 {
+        spinner-oaa3wk 1.6s infinite linear;
+}
+
+@keyframes spinner-bulqg1 {
     0% {
-       clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+        clip-path: polygon(
+            50% 50%,
+            0 0,
+            50% 0%,
+            50% 0%,
+            50% 0%,
+            50% 0%,
+            50% 0%
+        );
     }
- 
+
     12.5% {
-       clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+        clip-path: polygon(
+            50% 50%,
+            0 0,
+            50% 0%,
+            100% 0%,
+            100% 0%,
+            100% 0%,
+            100% 0%
+        );
     }
- 
+
     25% {
-       clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 100% 100%, 100% 100%);
+        clip-path: polygon(
+            50% 50%,
+            0 0,
+            50% 0%,
+            100% 0%,
+            100% 100%,
+            100% 100%,
+            100% 100%
+        );
     }
- 
+
     50% {
-       clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+        clip-path: polygon(
+            50% 50%,
+            0 0,
+            50% 0%,
+            100% 0%,
+            100% 100%,
+            50% 100%,
+            0% 100%
+        );
     }
- 
+
     62.5% {
-       clip-path: polygon(50% 50%, 100% 0, 100% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+        clip-path: polygon(
+            50% 50%,
+            100% 0,
+            100% 0%,
+            100% 0%,
+            100% 100%,
+            50% 100%,
+            0% 100%
+        );
     }
- 
+
     75% {
-       clip-path: polygon(50% 50%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50% 100%, 0% 100%);
+        clip-path: polygon(
+            50% 50%,
+            100% 100%,
+            100% 100%,
+            100% 100%,
+            100% 100%,
+            50% 100%,
+            0% 100%
+        );
     }
- 
+
     100% {
-       clip-path: polygon(50% 50%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 0% 100%);
+        clip-path: polygon(
+            50% 50%,
+            50% 100%,
+            50% 100%,
+            50% 100%,
+            50% 100%,
+            50% 100%,
+            0% 100%
+        );
     }
- }
- 
- @keyframes spinner-oaa3wk {
+}
+
+@keyframes spinner-oaa3wk {
     0% {
-       transform: scaleY(1) rotate(0deg);
+        transform: scaleY(1) rotate(0deg);
     }
- 
+
     49.99% {
-       transform: scaleY(1) rotate(135deg);
+        transform: scaleY(1) rotate(135deg);
     }
- 
+
     50% {
-       transform: scaleY(-1) rotate(0deg);
+        transform: scaleY(-1) rotate(0deg);
     }
- 
+
     100% {
-       transform: scaleY(-1) rotate(-135deg);
+        transform: scaleY(-1) rotate(-135deg);
     }
- }
+}
+
+/* Custom Underline */
+.underline--cbg {
+    background-image: linear-gradient(120deg, #84fac7 0%, #68a9ca 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 0.1em;
+    background-position: 0 88%;
+    transition: background-size 0.25s ease-in;
+}
+
+.underline--vcn {
+    background-image: linear-gradient(120deg, #b984fa 0%, #ffb5fa 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 0.1em;
+    background-position: 0 88%;
+    transition: background-size 0.25s ease-in;
+}

@@ -28,12 +28,16 @@ import {
     NumberDecrementStepper,
     Badge,
     Button,
-    Box,
-    Text,
-    Skeleton,
-    SkeletonCircle,
-    SkeletonText,
-    Stack,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverHeader,
+    PopoverBody,
+    PopoverFooter,
+    PopoverArrow,
+    PopoverCloseButton,
+    PopoverAnchor,
+    Portal,
     useDisclosure,
 } from "@chakra-ui/react";
 import { HiMiniBellAlert } from "react-icons/hi2";
@@ -41,6 +45,7 @@ import Select, { components } from "react-select";
 import { Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import productionApi from "../../../api/productionApi";
+import usersApi from "../../../api/userApi";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import ItemInput from "../../../components/ItemInput";
@@ -51,8 +56,9 @@ import { FaArrowUp } from "react-icons/fa";
 
 function FinishedGoodsReceipt() {
     const navigate = useNavigate();
-    // const { loading, setLoading } = useAppContext();
+    const { user } = useAppContext();
     const groupSelectRef = useRef();
+    const factorySelectRef = useRef();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -77,8 +83,12 @@ function FinishedGoodsReceipt() {
 
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
+    const [factories, setFactories] = useState([]);
 
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [selectedQCFactory, setSelectedQCFactory] = useState(false);
+
+    const [selectedFactory, setSelectedFactory] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);  
 
     const handleRejectFromChild = (data, faults) => {
@@ -123,18 +133,54 @@ function FinishedGoodsReceipt() {
         };
     }, [navigate]);
 
+    useEffect(() => {
+    const selectedBranch = user?.branch;
+    const selectedDimension = "CBG";
+
+    const getFactoriesByBranchId = async () => {
+            // setFactoryLoading(true);
+            try {
+                if (selectedBranch) {
+                    factorySelectRef.current.clearValue();
+                    setFactories([]);
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch, selectedDimension
+                    );
+
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+
+                    setFactories(options);
+                } else {
+                    setFactories([]);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+            // setFactoryLoading(false);
+        };
+        getFactoriesByBranchId();
+        // }
+    },[]);
+
     // New Get All Group
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
+            const KHOI = "CBG";
+            const factory = selectedFactory?.value || null;
             setLoading(true);
             try {
-                const res = await productionApi.getAllGroupWithoutQC();
+                const res = await productionApi.getAllGroupWithoutQC(factory, KHOI);
                 const options = res.map((item) => ({
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
                     CongDoan: item.CongDoan,
+                    Factory: item.Factory,
                 }));
                 setGroupList(res);
+                
                 options.sort((a, b) => a.label.localeCompare(b.label));
                 setGroupListOptions(options);
                 groupSelectRef?.current?.setValue(options[0]);
@@ -150,7 +196,7 @@ function FinishedGoodsReceipt() {
             document.title = "Woodsland";
             document.body.classList.remove("body-no-scroll");
         };
-    }, []);
+    }, [selectedFactory]);
 
     useEffect(() => {
         if (loading) {
@@ -272,7 +318,7 @@ function FinishedGoodsReceipt() {
             {/* Container */}
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                <div className="w-screen mb-4 xl:mb-4  px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}
                     <div
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:mx-0 lg:mx-0 md:mx-0 mx-4"
@@ -285,31 +331,55 @@ function FinishedGoodsReceipt() {
                     {/* Header */}
                     <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center ">
                         <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
-                            Nhập sản lượng khối chế biến gỗ
+                            Nhập sản lượng khối <span className="text-[#1f4e32]">chế biến gỗ</span>
                         </div>
                     </div>
 
                     {/* Controller */}
                     <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
-                        <div className="my-4 mb-2 w-full pb-4 rounded-xl bg-white ">
+                        <div className="my-4 mb-2 mt-3 w-full pb-4 rounded-xl bg-white ">
                             <div className="flex flex-col p-4 pb-0  w-full justify-end ">
-                                <div className="px-0">
-                                    <div className="block text-md font-medium text-gray-900 ">
-                                        Tổ & Xưởng sản xuất
+                                {/* Select Progress*/}
+                                <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 ">    
+                                    {user.role == 1 && (<div className="px-0 w-full">
+                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                            Nhà máy sản xuất
+                                        </div>
+                                        <Select
+                                            // isDisabled={true}
+                                            ref={factorySelectRef}
+                                            options={factories}
+                                            defaultValue={factories}
+                                            onChange={(value) => {
+                                                setSelectedFactory(value);
+                                                console.log("Selected factory: ", value);
+                                            }}
+                                            placeholder="Tìm kiếm"
+                                            className="mt-1 mb-3 w-full"
+                                        />
+                                    </div>)} 
+
+                                    <div className="px-0 w-full">
+                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                            Tổ & Xưởng sản xuất
+                                        </div>
+                                        <Select
+                                            // isDisabled={true}
+                                            ref={groupSelectRef}
+                                            options={groupListOptions}
+                                            defaultValue={selectedGroup}
+                                            onChange={(value) => {
+                                                setSelectedGroup(value);
+                                                setSelectedQCFactory(value.Factory);
+                                                console.log("Selected group: ", value);
+                                            }}
+                                            placeholder="Tìm kiếm"
+                                            className="mt-1 mb-4 w-full "
+                                        />
                                     </div>
-                                    <Select
-                                        // isDisabled={true}
-                                        ref={groupSelectRef}
-                                        options={groupListOptions}
-                                        defaultValue={selectedGroup}
-                                        onChange={(value) => {
-                                            setSelectedGroup(value);
-                                            console.log("Selected group: ", value);
-                                        }}
-                                        placeholder="Tìm kiếm"
-                                        className="mt-2 mb-4 "
-                                    />
                                 </div>
+                                
+                                {/* Search */}
                                 <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col pb-0 w-full justify-end space-x-4">
                                     <div className="w-full">
                                         <label
@@ -340,7 +410,7 @@ function FinishedGoodsReceipt() {
                                                 type="search"
                                                 id="search"
                                                 className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Tìm kiếm"
+                                                placeholder="Tìm kiếm bán thành phẩm"
                                                 onChange={(e) =>
                                                     setSearchTerm(
                                                         e.target.value
@@ -365,13 +435,13 @@ function FinishedGoodsReceipt() {
                                             </button>
                                         )}
                                 </div>
-                            </div>
+                            </div>       
                         </div>
                     </div>
                     <div className="w-full flex flex-col pb-2 gap-4 gap-y-4 sm:px-0">
                         {loadingData ? (
                             <div className="flex justify-center mt-12">
-                                <div class="special-spinner"></div>
+                                <div className="special-spinner"></div>
                             </div>
                         ) : searchResult.length > 0 ? (
                             searchResult.map((item, index) => (
@@ -381,6 +451,7 @@ function FinishedGoodsReceipt() {
                                     index={index}
                                     key={index}
                                     selectedGroup={selectedGroup}
+                                    selectedFactory={selectedQCFactory}
                                     searchTerm={searchTerm}
                                     variant="CBG"
                                     nextGroup={item.nextGroup}
@@ -427,7 +498,7 @@ function FinishedGoodsReceipt() {
                                             data={item}
                                             key={index}
                                             index={index}
-                                            CongDoan={item.CongDoan}
+                                            CongDoan={selectedGroup.CongDoan}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
                                                 handleConfirmReceipt

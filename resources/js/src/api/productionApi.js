@@ -15,11 +15,13 @@ const productionApi = {
         const url = `/production/receipts-productions?${queryStringParams}`; 
         return axiosClient().get(url);
     },
-    getFinishedGoodsListByGroup: (param) => {
+    getFinishedGoodsListByGroup: (param, KHOI, Factory) => {
         const url = `/list-qc-cbg`;
         return axiosClient().get(url, {
             params: {
                 TO: param,
+                KHOI: KHOI,
+                Factory: Factory
             },
         });
     },
@@ -151,9 +153,14 @@ const productionApi = {
         const url = `/danhsachto`;
         return axiosClient().get(url);
     },
-    getAllGroupWithoutQC: () => {
+    getAllGroupWithoutQC: (factory, KHOI) => {
         const url = `/getlist-team-exclude-qc`;
-        return axiosClient().get(url);
+        return axiosClient().get(url, {
+            params:{
+                factory: factory,
+                KHOI: KHOI
+            }
+        });
     },
     getTeamBacks: () =>
     {

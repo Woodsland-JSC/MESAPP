@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 import { MdDeleteOutline } from "react-icons/md";
 import { TiDeleteOutline } from "react-icons/ti";
 import Select from "react-select";
@@ -18,6 +19,7 @@ import useAppContext from "../../store/AppContext";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 import PasswordIllustration from "../../assets/images/password-illustration.png";
 import { areObjectsEqual } from "../../utils/objectFunctions";
+import { IoIosArrowBack } from "react-icons/io";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -515,27 +517,18 @@ function Profile() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen xl:py-12  p-6 px-5 xl:p-12 xl:px-32 ">
-                    {/* Breadcrumb */}
-                    {/* <div className="mb-4">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <Link
-                                            to="/settings"
-                                            className="ml-1 text-sm font-medium text-[#17506B] md:ml-2"
-                                        >
-                                            Cài đặt
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen mb-4 xl:mb-4  px-5 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32 ">
+                    {/* Go back
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] "
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoIosArrowBack />
+                        <div>Quay lại</div>
                     </div> */}
 
                     {/* Header */}
-                    <div className="text-3xl font-bold mb-6">Trang cá nhân</div>
+                    <div className="text-3xl font-bold mb-2 serif">Trang cá nhân</div>
                     {/* Main content */}
                     <Formik
                         key={formKey}
@@ -545,18 +538,15 @@ function Profile() {
                         onSubmit={(values) => {
                             handleChangeInfo(values);
                         }}
-                        // onValuesChange={(newValues) => {
-                        //     // console.log("Hello An");
-                        // }}
                     >
                         {({ errors, touched, values, setFieldValue }) => {
                             return (
                                 <Form className="flex flex-col p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                    <h1 className="mb-4 serif text-2xl text-center font-semibold md:text-left">
+                                    <h1 className="mb-2 serif text-2xl text-center font-bold md:text-left">
                                         Thông tin cơ bản
                                     </h1>
 
-                                    <section className="flex flex-col-reverse md:flex-row-reverse md:gap-4 mt-4 mb-0 sm:my-4">
+                                    <section className="flex flex-col-reverse md:flex-row-reverse md:gap-4 mt-2 mb-0 sm:my-4">
                                         <div className="md:w-2/3 my-2 sm:mb-4">
                                             <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="w-full">
@@ -909,8 +899,8 @@ function Profile() {
                         }) => {
                             return (
                                 <div className="pb-9">
-                                    <Form className="flex flex-col mt-8 p-6 bg-white border-2 border-gray-200 rounded-xl">
-                                        <h1 className="mb-0 text-xl font-semibold text-center md:text-left">
+                                    <Form className="flex flex-col mt-4 p-6 bg-white border-2 border-gray-200 rounded-xl">
+                                        <h1 className="mb-0 text-2xl serif font-bold text-center md:text-left">
                                             Thay đổi mật khẩu
                                         </h1>
                                         <section className="flex flex-col-reverse  md:flex-row md:items-center md:gap-4 mt-4 mb-0 sm:my-4">

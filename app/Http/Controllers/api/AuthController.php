@@ -24,14 +24,14 @@ class AuthController extends Controller
                 'password' => 'required'
             ]);
             if ($validator->fails()) {
-                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
             }
             $loginField = filter_var($request->input('email'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
             $credentials = [
                 $loginField => $request->input('email'),
                 'password' => $request->input('password'),
             ];
-
+            
             if (!Auth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
@@ -48,8 +48,6 @@ class AuthController extends Controller
             $user = Auth::user();
 
             if ($user->is_block === 1) {
-                // Giả sử cột 'isActive' trong database xác định trạng thái hoạt động của người dùng
-                // Nếu người dùng không active, trả về lỗi 403 Forbidden
                 Auth::logout(); // Đảm bảo đăng xuất người dùng nếu không active
                 return response()->json([
                     'status_code' => 403,
@@ -65,9 +63,6 @@ class AuthController extends Controller
                 $user->avatar = asset('storage/' . $user->avatar);
             }
 
-            /*
-                @Responses
-            */
             return response()->json([
                 'status_code' => 200,
                 'access_token' => $tokenResult,
@@ -78,10 +73,9 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'avatar' => $user->avatar,
                 'plant' => $user->plant,
-                'sap_id' => $user->sap_id,
+                'role' => $user->role,
                 'branch' => $user->branch,
-                'permissions' => $permissions
-
+                'permissions' => $permissions,
             ])->withCookie($cookie);
         } catch (\Exception $error) {
             return response()->json([

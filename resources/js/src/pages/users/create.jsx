@@ -16,6 +16,7 @@ import generateAvatar from "../../utils/generateAvatar";
 import usersApi from "../../api/userApi";
 import roleApi from "../../api/roleApi";
 import TinyLoader from "../../components/TinyLoader";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -39,9 +40,9 @@ const validationSchema = Yup.object().shape({
     // email: Yup.string()
     //     .email("Email không hợp lệ")
     //     .required("Email là bắt buộc"),
-    gender: Yup.string()
-        .oneOf(["male", "female"], "Giá trị không hợp lệ")
-        .required("Giới tính là bắt buộc"),
+    // gender: Yup.string()
+    //     .oneOf(["male", "female"], "Giá trị không hợp lệ")
+    //     .required("Giới tính là bắt buộc"),
     password: Yup.string()
         .required("Mật khẩu là bắt buộc")
         .test("uppercase", "Mật khẩu cần có ít nhất 1 kí tự in hoa", (value) =>
@@ -65,9 +66,7 @@ const validationSchema = Yup.object().shape({
             "Mật khẩu phải có từ 8 - 15 ký tự",
             (value) => value && value.length >= 8 && value.length <= 15
         ),
-    authorization: Yup.array()
-        .of(Yup.string())
-        .min(1, 'Phải có ít nhất 1 quyền')
+    authorization: Yup.string()
         .required('Phân quyền là bắt buộc'),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
     username: Yup.string().required("Username là bắt buộc"),
@@ -197,7 +196,7 @@ function CreateUser() {
         email: "",
         gender: "0",
         password: "",
-        authorization: [],
+        authorization: "",
         sapId: "",
         integrationId: 1,
         factory: "",
@@ -545,43 +544,15 @@ function CreateUser() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen">
                 {/* Section */}
-                <div className="w-screen xl:p-12 p-4 px-5 xl:px-32 border-t border-gray-200">
-                    {/* Breadcrumb */}
-                    <div className="mb-4">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <Link
-                                            to="/users"
-                                            className="text-sm font-medium text-[#17506B]"
-                                        >
-                                            Quản lý người dùng
-                                        </Link>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div className="flex items-center">
-                                        <svg
-                                            className="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
+                <div className="w-screen xl:p-12 xl:pt-6 p-4 px-5 xl:px-32 border-t border-gray-200">
+                    {/* Go back */}
+                    <div 
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoMdArrowRoundBack />
+                        <div>Quay lại</div>
+                    </div>  
 
                     {/* Header */}
                     <div className="serif text-4xl font-bold mb-4">Tạo mới người dùng</div>
@@ -601,7 +572,7 @@ function CreateUser() {
                                         </h1>
                                         <section className="flex flex-col-reverse md:flex-row md:gap-4">
                                             <div className="md:w-2/3 mb-4">
-                                                <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
+                                                <div className="flex flex-col md:grid md:grid-cols-2 gap-x-4">
                                                     <div className="w-full">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Họ{" "}
@@ -746,9 +717,6 @@ function CreateUser() {
                                                     <div className="w-full">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Giới tính{" "}
-                                                            <span className="text-red-600">
-                                                                *
-                                                            </span>
                                                         </label>
                                                         <SelectField
                                                             name="gender"
@@ -805,18 +773,22 @@ function CreateUser() {
                                                     </div>
                                                     <div className="w-full">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
-                                                            Phân quyền{" "}
+                                                            Vai trò{" "}
                                                             <span className="text-red-600">
                                                                 *
                                                             </span>
                                                         </label>
-                                                        {/* <SelectField
+                                                        <SelectField
                                                             name="authorization"
-                                                            options={
-                                                                authorizationOptions
-                                                            }
-                                                        /> */}
-                                                        <AsyncMultiSelectField
+                                                            placeholder="Chọn vai trò"
+                                                            ref={authorizationInputRef}
+                                                            // isMulti
+                                                            options={roles}
+                                                            setInput={setInput}
+                                                            value={values.authorization}
+
+                                                        />
+                                                        {/* <AsyncMultiSelectField
                                                             ref={authorizationInputRef}
                                                             name="authorization"
                                                             loadOptions={
@@ -824,7 +796,7 @@ function CreateUser() {
                                                             }
                                                             options={roles}
                                                             setInput={setInput}
-                                                        />
+                                                        /> */}
                                                         {errors.authorization &&
                                                             touched.authorization ? (
                                                             <span className="text-xs text-red-600">
@@ -958,11 +930,13 @@ function CreateUser() {
                                                 </div>
                                             </div>
                                         </section>
+
                                         <div className="my-4 border-b border-gray-200"></div>
+
                                         <h1 className="mb-4 serif text-2xl font-bold text-center md:text-left">
                                             Đồng bộ và tích hợp
                                         </h1>
-                                        <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
+                                        <div className="flex flex-col md:grid md:grid-cols-2 gap-x-4 w-full justify-between items-center">
                                             <div className="w-full">
                                                 <label className="block mb-2 text-md font-medium text-gray-900">
                                                     SAP ID{" "}

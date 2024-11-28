@@ -114,7 +114,7 @@ function Workspace() {
                                         <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
                                             {[
                                                 {
-                                                    permission: "sepsay",
+                                                    permission: "xepsay",
                                                     link: "/workspace/wood-sorting",
                                                     icon: <HiSquare3Stack3D />,
                                                     title: "Xếp sấy",
@@ -242,7 +242,7 @@ function Workspace() {
                                         <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
                                             {[
                                                 {
-                                                    permission: "CBG",
+                                                    permission: "CBG" || "CBG(CX)",
                                                     link: "/workspace/wood-working/finished-goods-receipt",
                                                     icon: (
                                                         <HiArchiveBoxArrowDown />
@@ -262,7 +262,7 @@ function Workspace() {
                                                     type: "CBG",
                                                 },
                                                 {
-                                                    permission: "VCN",
+                                                    permission: "VCN" || "VCN(CX)",
                                                     link: "/workspace/plywood/finished-goods-receipt",
                                                     icon: (
                                                         <HiArchiveBoxArrowDown />

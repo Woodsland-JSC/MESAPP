@@ -6,18 +6,10 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
-    AlertDialogCloseButton,
-    Alert,
-    AlertIcon,
-    AlertTitle,
-    AlertDescription,
     Badge,
     Button,
     ButtonGroup,
     Box,
-    Card,
-    CardBody,
-    CardFooter,
     Divider,
     Image,
     Stack,
@@ -28,11 +20,6 @@ import {
     Radio,
     RadioGroup,
     useDisclosure,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    NumberIncrementStepper,
-    NumberDecrementStepper,
 } from "@chakra-ui/react";
 import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
@@ -92,6 +79,7 @@ const AwaitingReception = ({
     onRejectReceipt,
     CongDoan,
     variant,
+    Factory,
 }) => {
     const errorTypeRef = useRef();
     const solutionRef = useRef();
@@ -161,9 +149,9 @@ const AwaitingReception = ({
             try {
                 const payload = {
                     id: data?.id,
-                    loailoi: faults.errorType,
-                    huongxuly: faults.solution,
-                    teamBack: faults.teamBack,
+                    loailoi: faults.errorType || null,
+                    huongxuly: faults.solution || null,
+                    teamBack: faults.teamBack || null,
                     rootCause: faults.rootCause || null,
                     subCode: faults.returnCode || null,
                     Note: faults.Note || null,
@@ -171,6 +159,7 @@ const AwaitingReception = ({
                     CongDoan: CongDoan || null,
                     year: faults.year || null,
                     week: faults.week?.value || null,
+                    Factory: Factory || null,
                 };
                 let res;
                 if (payload.id) {
@@ -189,7 +178,7 @@ const AwaitingReception = ({
                     showErrorAlert("Có lỗi xảy ra. Vui lòng thử lại");
                 }
             } catch (error) {
-                const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message;
+                const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message || error.response?.data?.error;
                 showErrorAlert(`${errorMessage? errorMessage : "Lỗi kết nối mạng."}`);
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
@@ -294,9 +283,6 @@ const AwaitingReception = ({
     // errorTypeOptions, solutionOptions, teamBackOptions, rootCauseOptions, returnCodeOptions
 
     useEffect(() => {
-        // console.log("errorType: ", type);
-        // const filteredErrorTypes = type === "wood-processing" ? errorType?.filter(item => item.U_Type === type) : errorType;
-
         setErrorTypeOptions(errorType?.map((item) => ({
             value: item?.id || "",
             label: item?.name || "",
@@ -382,6 +368,13 @@ const AwaitingReception = ({
                                 {data?.QuyCach || "0*0*0"}
                             </span>
                         </div>
+
+                        {CongDoan == "TP" && (<div className="flex gap-2">
+                            <span>Mã Thị Trường: </span>
+                            <span className="font-bold">
+                                {data?.MaThiTruong || "Chưa định nghĩa"}
+                            </span>
+                        </div>)}
 
                         <div className="flex gap-2">
                             <span>Công đoạn giao: </span>

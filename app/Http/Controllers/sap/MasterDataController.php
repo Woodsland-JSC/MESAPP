@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpWord\Shared\Validate;
 
 /**
  * Class MasterData.
@@ -370,19 +371,41 @@ class MasterDataController extends Controller
         return response()->json(Reasons::orderBy('Code', 'ASC')->where('is_active', 0)->where('type', 'L')->get(['Code', 'Name']), 200);
     }
 
-    function listfactory(string $id)
+    function listfactory(string $id, Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'KHOI',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+            // Return validation errors with a 422 Unprocessable Entity status code
+        }
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'select "Code","Name"  from "@G_SAY4" where "U_BranchID"=?';
+            $KHOI = $request->input('KHOI');
+
+            $query = 'SELECT "Code", "Name" FROM "@G_SAY4" WHERE "U_BranchID" = ?';
+            $params = [$id];
+        
+            // Kiểm tra giá trị của $KHOI để thêm các điều kiện phù hợp
+            if ($KHOI === 'CBG') {
+                $query .= ' AND "U_CBG" = ?';
+                $params[] = 'Y';
+            } else if ($KHOI === 'VCN') {
+                $query .= ' AND "U_VCN" = ?';
+                $params[] = 'Y';
+            } else if ($KHOI === 'ND') {
+                $query .= ' AND "U_ND" = ?';
+                $params[] = 'Y';
+            }
+
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [$id])) {
-                // Handle execution error
-                // die("Error executing SQL statement: " . odbc_errormsg());
+            if (!odbc_execute($stmt, [$id, 'Y', 'Y', 'Y', 'Y'])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 

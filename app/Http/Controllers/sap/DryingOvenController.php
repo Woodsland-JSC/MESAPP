@@ -120,7 +120,7 @@ class DryingOvenController extends Controller
                 $pallet->update([
                     'DocNum' => $res['DocumentNumber'],
                     'DocEntry' => $res['AbsoluteEntry'],
-                    'CreateBy' => auth()->id(),
+                    'CreateBy' => Auth::user()->id,
 
                 ]);
                 DB::commit();
@@ -236,20 +236,9 @@ class DryingOvenController extends Controller
             // 1. Lấy dữ liệu từ request và thông tin kho
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->toArray();
-
-            // dd($quyCachList);
-
-            // Lấy dữ liệu kho sẽ lưu trữ (CS)
-            // $towarehouse = Warehouse::where('flag', 'CS')
-            //     ->WHERE('branch', Auth::user()->branch)
-            //     ->where('FAC', Auth::user()->plant)
-            //     ->first()->WhsCode;
-            //new lấy dữ liệu kho sẽ lưu trữ (CS)
             $towarehouse = WarehouseCS();
 
             // Kiểm tra xem quy cách đã tồn tại hay chưa, nếu đã tồn tại lấy thông tin pallet tồn tại
-
-            // Version 1: Không quan tâm số lượng pallet trùng, miễn trùng là thêm vào hết
             $existingPallet = Pallet::where('activeStatus', 0)
             ->where(function ($query) use ($quyCachList) {
                 foreach ($quyCachList as $quyCach) {
@@ -258,18 +247,6 @@ class DryingOvenController extends Controller
             })
             ->latest()
             ->first();
-            
-            // Version 2: Quan tâm số lượng pallet trùng, số lượng quyCach trong quyCachList phải tương đương số lượng QuyCach trong Pallets
-            // $existingPallet = Pallet::where('activeStatus', 0)
-            // ->where(function ($query) use ($quyCachList) {
-            //     $query->whereRaw("LENGTH(QuyCach) - LENGTH(REPLACE(QuyCach, '_', '')) + 1 = ?", [count($quyCachList)]);
-
-            //     foreach ($quyCachList as $index => $quyCach) {
-            //         $query->where('QuyCach', 'like', '%' . $quyCach . '%');
-            //     }
-            // })
-            // ->latest()
-            // ->first();
 
             // Nếu chưa tồn tại thì tạo pallet mới
             if ($existingPallet) {
@@ -342,6 +319,7 @@ class DryingOvenController extends Controller
                         ]
                     ]
                 ];
+                // dd($ldt);
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
                     "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
@@ -356,17 +334,20 @@ class DryingOvenController extends Controller
 
             $body = [
                 "U_Pallet" => $pallet->Code,
-                "U_CreateBy" => Auth::user()->sap_id,
+                "U_PalletCreatedBy" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
                 "BPLID" => Auth::user()->branch,
+                "ToWarehouse" =>  $towarehouse,
+                "FromWarehouse" => $detailData['WhsCode'],
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "StockTransferLines" => $ldt
             ];
+            // dd($body);
             $body2 = [
                 "U_Code" => $pallet->Code,
                 "U_Status" => "CS",
                 "U_Quant" => $toQty,
                 "U_Vol" => max($totalkl, 1),
-                "U_USER" => Auth::user()->sap_id,
+                "U_USER" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
                 "G_PALLETLCollection" => $ldt2
             ];
 
@@ -378,6 +359,7 @@ class DryingOvenController extends Controller
                 "Accept" => "application/json",
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+
             $response2 = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
@@ -386,8 +368,20 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
+            // $response3 = Http::withOptions([
+            //     'verify' => false,
+            // ])->withHeaders([
+            //     "Content-Type" => "application/json",
+            //     "Accept" => "application/json",
+            //     "Authorization" => "Basic " . BasicAuthToken(),
+            // ])->get(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers(67)");
+
             $res = $response->json();
+            // dd(2, $res);
+
             $res2 = $response2->json();
+            // $res3 = $response3->json();
+            // dd(3, $res3);
 
             if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();
@@ -401,7 +395,7 @@ class DryingOvenController extends Controller
                         'DocNum' => $res['DocNum'],
                         'DocEntry' => $res['DocEntry'],
                         'palletSAP' => $res2['DocEntry'],
-                        'CreateBy' => auth()->id(),
+                        'CreateBy' => Auth::user()->id,
                         'activeStatus' => 0,
                     ]);
                 }

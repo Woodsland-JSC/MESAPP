@@ -123,7 +123,7 @@ function AppRoutes() {
                     <Route
                         path="/workspace/wood-sorting"
                         element={
-                            <ProtectedRoute permissionsRequired={["sepsay"]}>
+                            <ProtectedRoute permissionsRequired={["xepsay"]}>
                                 <WoodSorting />
                             </ProtectedRoute>
                         }

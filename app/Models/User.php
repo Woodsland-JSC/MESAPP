@@ -13,6 +13,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
+    protected $guard_name = 'web';
+
     protected $table = 'users';
     protected $fillable = [
         'first_name',
@@ -26,6 +28,7 @@ class User extends Authenticatable
         'email',
         'password',
         'branch',
+        'role',
         'imagesign',
         'username'
     ];

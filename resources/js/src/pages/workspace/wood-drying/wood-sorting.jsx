@@ -341,6 +341,7 @@ function WoodSorting() {
                                     flag={item.Flag}
                                     thickness={item.CDay}
                                     isInvalidQuantity={isInvalidQuantity}
+                                    createPalletLoading={createPalletLoading}
                                     onDelete={() =>
                                         handleDeletePalletCard(
                                             item.WhsCode + item.BatchNum,
@@ -661,7 +662,7 @@ function WoodSorting() {
             {/* Container */}
             <div className="flex mb-4 xl:mb-0 justify-center h-full bg-transparent">
                 {/* Section */}
-                <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}
                     <div 
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
@@ -678,16 +679,18 @@ function WoodSorting() {
                         </div>
                         <div className="flex gap-x-4 ">
                             <button
-                                className="bg-[#10151c] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
+                                className="bg-[#10151c] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                 onClick={onOpen}
+                                disabled={createPalletLoading}
                             >
                                 <HiOutlineClock className="text-xl mr-2" />
                                 Xem lịch sử
                             </button>
 
                             <button
-                                className="bg-[#040507] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
+                                className="bg-[#040507] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                 onClick={onPalletTracingOpen}
+                                disabled={createPalletLoading}
                             >   
                                 <HiOutlineSearch className="text-xl mr-2" />    
                                 Truy nguyên
@@ -698,15 +701,17 @@ function WoodSorting() {
                     {/* History In Mobile View */}
                     <div className="flex space-x-2 xl:hidden lg:hidden md:hidden">
                         <button
-                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all"
+                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                             onClick={onOpen}
+                            disabled={createPalletLoading}
                         >
                             <HiOutlineClock className="text-xl mr-2" />
                             Xem lịch sử
                         </button>
                         <button
-                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all"
+                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                             onClick={onPalletTracingOpen}
+                            disabled={createPalletLoading}
                         >
                             <HiOutlineSearch className="text-xl mr-2" />    
                             Truy nguyên
@@ -1599,6 +1604,7 @@ function WoodSorting() {
                                             type="text"
                                             id="batch_id"
                                             value={batchId}
+                                            placeholder="Nhập mã lô"
                                             onChange={(e) =>
                                                 setBatchId(e.target.value)
                                             }
@@ -1683,7 +1689,7 @@ function WoodSorting() {
                                         type="button"
                                         onClick={handleAddToList}
                                         className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
-                                        // disabled={(palletCards.length) > 0 ? true : false}
+                                        disabled={createPalletLoading}
                                     >
                                         Thêm vào danh sách
                                     </button>
@@ -1696,7 +1702,7 @@ function WoodSorting() {
                         {/* List */}
                         <div className="my-6 space-y-5">
                             {/* List of Pallet Cards */}
-                            <div className="my-6 space-y-5">
+                            <div className={`my-6 space-y-5 ${createPalletLoading ? "pointer-events-none opacity-50" : ""}`}>
                                 {isLoading ? (
                                     <div className="text-center">
                                         <Spinner

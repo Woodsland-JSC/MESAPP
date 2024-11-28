@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
 use App\Jobs\SyncSLDGToSAP;
+use App\Http\Controllers\sap\ConnectController;
 class ProductionController extends Controller
 {
    
@@ -38,42 +39,54 @@ class ProductionController extends Controller
             'CDay' => 'required', 
             'CRong' => 'required',
             'CDai' => 'required',
-            // 'CDay' => 'required|numeric',
-            // 'CRong' => 'required|numeric',
-            // 'CDai' => 'required|numeric',
             'Team' => 'required|string|max:254',
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
+            'KHOI' => 'required',
+            'Factory' => 'required',
         ]);
         // dd($request->all());
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
         $errorData = json_encode($request->ErrorData);
-        $toqc = "";
-        if (Auth::user()->plant == 'TH') {
-            $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'YS1') {
-            $toqc = 'YS1-QC';
-        } else {
-            $toqc = 'TB-QC';
+
+        // Lấy tên tổ QC theo SAP
+        $conDB = (new ConnectController)->connect_sap();
+
+        $KHOI = $request->input('KHOI');
+        $Factory = $request->input('Factory');
+        $query = 'SELECT "ResName" FROM "ORSC" WHERE "U_CDOAN" = ? AND "U_FAC" = ? AND "U_KHOI" = ?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
+        if (!odbc_execute($stmt, ['QC', $Factory, $KHOI])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        $toqc = $results[0]['ResName'];
+
+        odbc_close($conDB);
+
+        // dd($toqc);
+
+        // $toqc = "";
+        // if (Auth::user()->plant == 'TH') {
+        //     $toqc = 'TH-QC';
+        // } else if (Auth::user()->plant == 'YS') {
+        //     $toqc = 'YS-QC';
+        // } else if (Auth::user()->plant == 'HG') {
+        //     $toqc = 'TB-QC';
+        // }
+
         try {
             DB::beginTransaction();
-            // $SLData = $request->only([
-            // 'FatherCode', 'ItemCode', 
-            // 'ItemName', 'SubItemCode', 
-            // 'SubItemName', 'CompleQty', 
-            // 'RejectQty', 'PackagedQty','CDay', 
-            // 'CRong', 'CDai', 
-            // 'Team', 'CongDoan', 'NexTeam',
-            // 'Type', 
-            // 'LSX']);
-            // $SLData['create_by'] = Auth::user()->id;
-            // $SLData['openQty'] = 0;
-            // $SLData['loinhamay'] = $request->factories['value']??null;
-            // dd($SLData);
             $SanLuong = SanLuong::create([
                 'FatherCode' => $request->FatherCode,
                 'ItemCode' => $request->ItemCode,
@@ -1425,17 +1438,17 @@ class ProductionController extends Controller
             // Data sync to SAP
             $U_Item=$data->ItemCode;
             $U_Qty=$data->SLDG??0;
-            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC" && $data->NextTeam != "TB-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
                 if (count($allocates) == 0) {
                     return response()->json([
                         'error' => false,
                         'status_code' => 500,
-                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
-                            $data->team . " sản phẩm: " .
+                        'message' => "Không có sản phẩm còn lại để phân bổ. Vui lòng kiểm tra tổ:" .
+                            $data->Team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .
-                            $data->FatherCode . " LSX." . $data->LSX
+                            $data->FatherCode . " LSX: " . $data->LSX
                     ], 500);
                 }
                 $string = '';
@@ -1477,7 +1490,7 @@ class ProductionController extends Controller
                                 'to' => $data->Team,
                                 'quantity' => $allocate['Allocate'],
                                 'ObjType' => 202,
-                                'DocEntry' => '' //$res['DocEntry']
+                                'DocEntry' => '' 
                             ]
                         );
                 }
@@ -1552,8 +1565,6 @@ class ProductionController extends Controller
                             }
                         }
                     }
-
-
                 }
                 // check xem có phải công đoạn đóng gói không nếu có phải thì đẩy về SAP
                 if($request->CongDoan =='TP' && $U_Qty!=0)
@@ -1576,7 +1587,6 @@ class ProductionController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-
     }
 
     function collectStockAllocate($stringIssue)

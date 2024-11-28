@@ -40,6 +40,7 @@ import Select, { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import toast from "react-hot-toast";
 import productionApi from "../../../api/productionApi";
+import usersApi from "../../../api/userApi";
 import FinishedGoodsIllustration from "../../../assets/images/wood-receipt-illustration.png";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
@@ -52,9 +53,11 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowUp } from "react-icons/fa";
 
 function PlywoodFinishedGoodsReceipt() {
+    const { user } = useAppContext();
     const navigate = useNavigate();
     // const { loading, setLoading } = useAppContext();
     const groupSelectRef = useRef();
+    const factorySelectRef = useRef();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -79,8 +82,10 @@ function PlywoodFinishedGoodsReceipt() {
 
     const [groupListOptions, setGroupListOptions] = useState([]);
     const [groupList, setGroupList] = useState([]);
+    const [factories, setFactories] = useState([]);
 
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [selectedFactory, setSelectedFactory] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const handleReceiptFromChild = (data, receipts) => {
@@ -115,23 +120,10 @@ function PlywoodFinishedGoodsReceipt() {
                 prev.filter((item) => item.id !== id)
             );
             toast.success("Huỷ bỏ & chuyển lại thành công.");
-            // setAwaitingReception((prev) => {
-            //     const groupKey = selectedGroup.value;
-            //     const updatedGroup = awaitingReception[groupKey].filter(
-            //         (item, i) => i !== index
-            //     );
-            //     return {
-            //         ...prev,
-            //         [groupKey]: updatedGroup,
-            //     };
-            // });
         }
         if (awaitingReception.length <= 0) {
             onModalClose();
         }
-        // console.log("Ra index: ", index);
-        // console.log("Thực hiện reject: ", reason);
-        // console.log("Ra example data: ", exampleData);
     };
 
     const handleBackNavigation = (event) => {
@@ -148,15 +140,51 @@ function PlywoodFinishedGoodsReceipt() {
       };
     }, [navigate]);;
 
+
+    useEffect(() => {
+        const selectedBranch = user?.branch;
+        const selectedDimension = "VCN";
+
+    const getFactoriesByBranchId = async () => {
+            // setFactoryLoading(true);
+            try {
+                if (selectedBranch) {
+                    factorySelectRef.current.clearValue();
+                    setFactories([]);
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch, selectedDimension
+                    );
+
+                    const options = res.map((item) => ({
+                        value: item.Code,
+                        label: item.Name,
+                    }));
+
+                    setFactories(options);
+                } else {
+                    setFactories([]);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+            // setFactoryLoading(false);
+        };
+        getFactoriesByBranchId();
+        // }
+    },[]);       
+
     // New Get All Group
     useEffect(() => {
         const getAllGroupWithoutQC = async () => {
+            const KHOI = "VCN";
+            const factory = selectedFactory?.value || null;
             setLoading(true);
             try {
-                const res = await productionApi.getAllGroupWithoutQC();
+                const res = await productionApi.getAllGroupWithoutQC(factory, KHOI);
                 const options = res.map((item) => ({
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
+                    Factory: item.Factory,
                 }));
                 setGroupList(res);
                 options.sort((a, b) => a.label.localeCompare(b.label));
@@ -174,7 +202,7 @@ function PlywoodFinishedGoodsReceipt() {
             document.title = "Woodsland";
             document.body.classList.remove("body-no-scroll");
         };
-    }, []);
+    }, [selectedFactory]);
 
     useEffect(() => {
         if (loading) {
@@ -293,7 +321,7 @@ function PlywoodFinishedGoodsReceipt() {
             {/* Container */}
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32">
+                <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 xl:pt-6 lg:pt-6 md:pt-6 lg:p-12 md:p-12 p-4 xl:px-32">
                     {/* Go back */}
                     <div 
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
@@ -306,30 +334,51 @@ function PlywoodFinishedGoodsReceipt() {
                     {/* Header */}
                     <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center">
                         <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
-                            Nhập sản lượng khối ván công nghiệp
+                            Nhập sản lượng khối <span className=" text-[#402a62]">ván công nghiệp</span>
                         </div>
                     </div>
 
                     {/* Controller */}
                     <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
-                        <div className="my-4 mb-2 w-full pb-4 rounded-xl bg-white ">
-                            <div className="px-4">
-                                <div className="block mb-2 text-md font-medium text-gray-900 mt-4">
-                                    Tổ & Xưởng sản xuất
+                        <div className="my-4 mb-2 mt-3 w-full pb-4 rounded-xl bg-white ">
+                            <div className="flex flex-col p-4 pb-0  w-full justify-end ">
+                                <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 ">
+                                    {user.role == 1 && (<div className="px-0 w-full">
+                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                            Nhà máy sản xuất
+                                        </div>
+                                        <Select
+                                            // isDisabled={true}
+                                            ref={factorySelectRef}
+                                            options={factories}
+                                            defaultValue={factories}
+                                            onChange={(value) => {
+                                                setSelectedFactory(value);
+                                                console.log("Selected factory: ", value);
+                                            }}
+                                            placeholder="Tìm kiếm"
+                                            className="mt-1 mb-3 w-full"
+                                        />
+                                    </div>)} 
+
+                                    <div className="px-0 w-full">
+                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900">
+                                            Tổ & Xưởng sản xuất
+                                        </div>
+                                        <Select
+                                            ref={groupSelectRef}
+                                            options={groupListOptions}
+                                            defaultValue={selectedGroup}
+                                            onChange={(value) => {
+                                                setSelectedGroup(value);
+                                            }}
+                                            placeholder="Tìm kiếm"
+                                            className="mt-1 mb-4 w-full"
+                                        />
+                                    </div>
                                 </div>
-                                <Select
-                                    ref={groupSelectRef}
-                                    options={groupListOptions}
-                                    defaultValue={selectedGroup}
-                                    onChange={(value) => {
-                                        setSelectedGroup(value);
-                                    }}
-                                    placeholder="Tìm kiếm"
-                                    className="mt-2 mb-0"
-                                />
-                            </div>
-                            
-                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col p-4 pb-0 w-full justify-end space-x-4">
+
+                                <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col pb-0 w-full justify-end space-x-4">
                                 <div className="w-full">
                                     <label
                                         htmlFor="search"
@@ -359,7 +408,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             type="search"
                                             id="search"
                                             className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Tìm kiếm"
+                                            placeholder="Tìm kiếm bán thành phẩm"
                                             onChange={(e) =>
                                                 setSearchTerm(e.target.value)
                                             }
@@ -380,15 +429,15 @@ function PlywoodFinishedGoodsReceipt() {
                                             </div>
                                         </button>
                                     )}
-                            </div>
+                                </div>                            
+                            </div>                                                  
                         </div>
-
                     </div>
 
                     <div className="w-full flex flex-col pb-2 gap-4 gap-y-4 sm:px-0">
                         {loadingData ? (
                             <div className="flex justify-center mt-12">
-                                <div class="special-spinner"></div>
+                                <div className="special-spinner"></div>
                             </div>
                         ) : searchResult.length > 0 ? (
                             searchResult.map((item, index) => (

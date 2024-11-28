@@ -23,6 +23,7 @@ function PalletCard(props) {
         height,
         thickness,
         onQuantityChange,
+        createPalletLoading,
         // isInvalidQuantity
     } = props;
 
@@ -50,12 +51,13 @@ function PalletCard(props) {
                     <span>{itemCode} - </span>
                     {itemName}
                 </div>
-                <div
-                    className="flex justify-end text-[#17506B] text-3xl cursor-pointer w-fit"
+                <button
+                    className="flex justify-end text-[#17506B] text-3xl cursor-pointer w-fit disabled:text-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                     onClick={onDelete}
+                    disabled={createPalletLoading}
                 >
                     <AiFillCloseCircle />
-                </div>
+                </button>
             </div>
             <div className=" pallet-line grid xl:grid-cols-2 md:grid-cols-2 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">
                 <div className="hidden">

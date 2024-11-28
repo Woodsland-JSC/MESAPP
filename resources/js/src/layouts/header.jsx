@@ -28,7 +28,6 @@ import {
     ScaleFade,
     Slide,
     SlideFade,
-    Collapse,
     useDisclosure,
     Box,
     IconButton,
@@ -221,6 +220,7 @@ function Header(props) {
                                                     : user?.branch === ""
                                                     ? "Chưa có chi nhánh"
                                                     : ""}
+                                                {" "}- {user?.plant}
                                             </div>
                                         </div>
 

@@ -24,6 +24,7 @@ import usersApi from "../../api/userApi";
 import roleApi from "../../api/roleApi";
 import { areObjectsEqual } from "../../utils/objectFunctions";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -78,10 +79,7 @@ const validationSchema = Yup.object().shape({
 
             return true;
         }),
-    authorization: Yup.array()
-        .of(Yup.string())
-        .min(1, "Phải có ít nhất 1 quyền")
-        .required("Phân quyền là bắt buộc"),
+    authorization: Yup.string().required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
     username: Yup.string().required("username là bắt buộc"),
     integrationId: Yup.string().required("Integration ID là bắt buộc"),
@@ -184,25 +182,31 @@ function User() {
     const { userId } = useParams();
     const navigate = useNavigate();
 
+    // Ref
     const fileInputRef = useRef();
     const authorizationInputRef = useRef(null);
     const branchSelectRef = useRef(null);
     const sapIdSelectRef = useRef(null);
     const factorySelectRef = useRef(null);
 
-    const [isFirstLoading, setIsFirstLoading] = useState(true);
     const [roles, setRoles] = useState([]);
     const [branches, setBranches] = useState([]);
     const [sapId, setSapId] = useState([]);
-    const [factoryLoading, setFactoryLoading] = useState(false);
     const [factories, setFactories] = useState([]);
+    const { user, setUser } = useAppContext();
+
+    const [currentUser, setCurrentUser] = useState([]);
+    
+    const [originalInfo, setOriginalInfo] = useState(null);
 
     const [formKey, setFormKey] = useState(0);
-    const { user, setUser } = useAppContext();
+    
     const [loading, setLoading] = useState(false);
-
     const [avatarLoading, setAvatarLoading] = useState(false);
+    const [factoryLoading, setFactoryLoading] = useState(false);
+    // const [isFirstLoading, setIsFirstLoading] = useState(true);
 
+    const [originalAvatar, setOriginalAvatar] = useState(null);        
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
@@ -210,8 +214,6 @@ function User() {
     });
 
     const [hasChanged, setHasChanged] = useState(false);
-
-    const [originalAvatar, setOriginalAvatar] = useState(null);
 
     const [selectedRoleOptions, setSelectedRoleOptions] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -229,10 +231,6 @@ function User() {
         factory: "",
         branch: "",
     });
-
-    const [currentUser, setCurrentUser] = useState([]);
-
-    const [originalInfo, setOriginalInfo] = useState(null);
 
     const [signature, setSignature] = useState(null);
     const [previewSignature, setPreviewSignature] = useState(null);
@@ -407,6 +405,104 @@ function User() {
             return null;
         }
     };
+
+    const getCurrentUser = useCallback(async () => {
+        try {
+            if (!userId) {
+                navigate("/users");
+                return;
+            }
+            const data = await usersApi.getUserDetails(userId);
+
+            if (data.branches) {
+                const options = data.branches.map((item) => ({
+                    value: item.BPLId,
+                    label: item.BPLName,
+                }));
+
+                setBranches(options);
+            }
+
+            if (data.roles) {
+                const options = data.roles.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                }));
+
+                setRoles(options);
+            }
+
+            if (data.SAPUsers) {
+                const options = data.SAPUsers.map((item) => ({
+                    value: item.USER_CODE,
+                    label: item.NAME + " - " + item.USER_CODE,
+                }));
+
+                setSapId(options);
+            }
+
+            if (data.branches) {
+                const res = await usersApi.getFactoriesByBranchId(data.user.branch);
+
+                const options = res.map((item) => ({
+                    value: item.Code,
+                    label: item.Name,
+                }));
+
+                setFactories(options);
+            }
+
+            const {
+                first_name: firstName,
+                last_name: lastName,
+                email,
+                username: username,
+                gender,
+                sap_id: sapId,
+                integration_id: integrationId,
+                plant,
+                branch,
+                avatar,
+                roles,
+            } = data.user;
+
+            const userData = {
+                firstName: firstName || "",
+                lastName: lastName || "",
+                email: email || "",
+                username: username || "",
+                gender,
+                password: "",
+                authorization: data.user.role,
+                sapId: sapId || "",
+                integrationId: integrationId || "1",
+                factory: plant || "",
+                branch: branch || "",
+            };
+
+            setCurrentUser(data.user);
+
+            setInput(userData);
+            setOriginalInfo(userData);
+
+            if (avatar) {
+                setOriginalAvatar(avatar);
+                setAvatar({
+                    autoImg: null,
+                    file: data.user.avatar,
+                    imgSrc: data.user.avatar,
+                });
+            }
+            setFormKey((prevKey) => prevKey + 1);
+        } catch (error) {
+            console.error(error);
+            toast.error("Không tìm thấy user");
+            if (error.response && error.response.status === 404) {
+                navigate("/notfound", { replace: true });
+            }
+        }
+    }, [userId]);
+    
     // Load data cho avatar
     useEffect(() => {
         if (input.lastName && input.firstName && !avatar.file) {
@@ -426,113 +522,11 @@ function User() {
         }
     }, [input]);
 
-    const getCurrentUser = useCallback(async () => {
-        try {
-            if (!userId) {
-                navigate("/notfound");
-                return;
-            }
-            const data = await usersApi.getUserDetails(userId);
-            const {
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                username: username,
-                gender,
-                sap_id: sapId,
-                integration_id: integrationId,
-                plant,
-                branch,
-                avatar,
-                roles,
-            } = data.user;
-
-            const role = data.UserRole;
-
-            const userData = {
-                firstName: firstName || "",
-                lastName: lastName || "",
-                email: email || "",
-                username: username || "",
-                gender,
-                password: "",
-                authorization: role,
-                sapId: sapId || "",
-                integrationId: integrationId || "1",
-                factory: plant || "",
-                branch: branch || "",
-            };
-
-            setCurrentUser(data.user);
-            console.log("Current User Data: ", currentUser);
-
-            if (branch) {
-                const res = await usersApi.getFactoriesByBranchId(branch);
-
-                const options = res.map((item) => ({
-                    value: item.Code,
-                    label: item.Name,
-                }));
-
-                setFactories(options);
-                setIsFirstLoading(false);
-            }
-
-            setInput(userData);
-            setOriginalInfo(userData);
-
-            if (avatar) {
-                setOriginalAvatar(avatar);
-                setAvatar({
-                    autoImg: null,
-                    file: data.user.avatar,
-                    imgSrc: data.user.avatar,
-                });
-            }
-            setFormKey((prevKey) => prevKey + 1);
-        } catch (error) {
-            // console.error(error);
-            toast.error("Không tìm thấy user");
-            if (error.response && error.response.status === 404) {
-                navigate("/notfound", { replace: true });
-            }
-        }
-    }, [userId]);
-
     // Lấy data chi nhánh, role và SAP ID
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-
-                const branchesPromise = usersApi.getAllBranches();
-                const rolesPromise = roleApi.getAllRole();
-                const sapIdPromise = usersApi.getAllSapId(userId);
-
-                const [branchesRes, rolesRes, sapIdRes] = await Promise.all([
-                    branchesPromise,
-                    rolesPromise,
-                    sapIdPromise,
-                ]);
-
-                const branchesOptions = branchesRes.map((item) => ({
-                    value: item.BPLId,
-                    label: item.BPLName,
-                }));
-                setBranches(branchesOptions);
-
-                const rolesOptions = rolesRes.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                }));
-                setRoles(rolesOptions);
-
-                const sapIdOptions = sapIdRes.map((item) => ({
-                    value: item.USER_CODE,
-                    label: item.NAME + " - " + item.USER_CODE,
-                }));
-                setSapId(sapIdOptions);
-
                 await getCurrentUser();
 
                 setLoading(false);
@@ -627,42 +621,14 @@ function User() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen xl:p-12 p-4 px-5 xl:px-32 border-t border-gray-200">
-                    {/* Breadcrumb */}
-                    <div className="mb-2">
-                        <nav className="flex" aria-label="Breadcrumb">
-                            <ol className="inline-flex items-center space-x-1 md:space-x-3">
-                                <li>
-                                    <div className="flex items-center">
-                                        <Link
-                                            to="/users"
-                                            className="text-sm font-medium text-[#17506B]"
-                                        >
-                                            Quản lý người dùng
-                                        </Link>
-                                    </div>
-                                </li>
-                                <li aria-current="page">
-                                    <div className="flex items-center">
-                                        <svg
-                                            className="w-3 h-3 text-gray-400 mx-1"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 6 10"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="m1 9 4-4-4-4"
-                                            />
-                                        </svg>
-                                    </div>
-                                </li>
-                            </ol>
-                        </nav>
+                <div className="w-screen px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 xl:px-32 border-t border-gray-200">
+                    {/* Go back */}
+                    <div
+                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:mx-0 lg:mx-0 md:mx-0 mx-4"
+                        onClick={() => navigate(-1)}
+                    >
+                        <IoMdArrowRoundBack />
+                        <div>Quay lại</div>
                     </div>
 
                     {/* Header */}
@@ -684,7 +650,7 @@ function User() {
                                     </h1>
                                     <section className="flex flex-col-reverse md:flex-row md:gap-4">
                                         <div className="md:w-2/3 mb-4">
-                                            <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4">
+                                            <div className="flex flex-col md:grid md:grid-cols-2 gap-x-4">
                                                 <div className="w-full">
                                                     <label
                                                         htmlFor="last_name"
@@ -903,23 +869,28 @@ function User() {
                                                         htmlFor="authorization"
                                                         className="block mb-2 text-md font-medium text-gray-900"
                                                     >
-                                                        Phân quyền{" "}
+                                                        Vai trò{" "}
                                                         <span className="text-red-600">
                                                             *
                                                         </span>
                                                     </label>
-                                                    <AsyncMultiSelectField
+                                                    <SelectField
                                                         name="authorization"
-                                                        // isMulti
+                                                        placeholder="Chọn vai trò"
                                                         options={roles}
                                                         defaultValue={
                                                             roles.filter(
                                                                 (item) =>
-                                                                    values.authorization.includes(
-                                                                        item.label
-                                                                    )
+                                                                    values.authorization ==
+                                                                    item.value
                                                             ) || null
                                                         }
+                                                        onChange={(value) => {
+                                                            setInput((prev) => ({
+                                                                ...prev,
+                                                                authorization: value,
+                                                            }));
+                                                        }}
                                                         setInput={setInput}
                                                     />
                                                     {errors.authorization &&
@@ -1043,11 +1014,13 @@ function User() {
                                             </div>
                                         </div>
                                     </section>
+
                                     <div className="my-4 border-b border-gray-200"></div>
+
                                     <h1 className="mb-4 serif text-2xl text-center font-bold md:text-left">
                                         Đồng bộ và tích hợp
                                     </h1>
-                                    <div className="flex flex-col md:grid md:grid-cols-2 gap-y-2 gap-x-4 w-full justify-between items-center">
+                                    <div className="flex flex-col md:grid md:grid-cols-2 gap-x-4 w-full justify-between items-center">
                                         <div className="w-full">
                                             <label
                                                 htmlFor="sap-id"

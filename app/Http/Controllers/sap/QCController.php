@@ -316,29 +316,36 @@ class QCController extends Controller
     // Danh sách lỗi gửi về QC theo tổ báo lỗi cho CBG.
     function listConfirm(Request $request)
     {
+        //1. Lấy dữ liệu gửi từ người dùng
         $validator = Validator::make($request->all(), [
             'TO' => 'required',
+            'KHOI',
+            'Factory'=> 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
         };
+
+        // 2. Lấy tên tổ QC theo nhà máy
+        $Factory = $request->input('Factory');
+
         $toQC = "";
-        switch (Auth::user()->plant) {
+        switch ($Factory) {
             case 'TH':
-                $toQC = 'TH-QC';
+                $toQC = 'QC_TH';
                 break;
             case 'HG':
-                $toQC = 'HG-QC';
+                $toQC = 'QC_HG';
                 break;
-            case 'YS1':
-                $toQC = 'YS1-QC';
+            case 'YS':
+                $toQC = 'QC_YS(CBG)';
                 break;
             case 'TB':
-                $toQC = 'TB-QC';    
+                $toQC = 'QC_TB';
                 break;
         };
 
-        // Danh sách lỗi chờ xử lý
+        // 3. Danh sách lỗi chờ xử lý
         $data = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -353,7 +360,7 @@ class QCController extends Controller
                 'b.SubItemCode',
                 'b.ErrorData',
                 'b.QuyCach',
-                'a.team',
+                'a.Team',
                 'a.CongDoan',
                 'a.CDay',
                 'a.CRong',
@@ -376,13 +383,12 @@ class QCController extends Controller
             ->where('b.confirm', '=', 0)
             ->where('b.type', 1)
             ->where('b.team', '=',  $toQC)
-            ->where('a.team', '=',  $request->TO)
+            ->where('a.Team', '=',  $request->TO)
             ->havingRaw('Quantity > 0')
             ->get();
-
-        // dd($data);
-
-        $conDB = (new ConnectController)->connect_sap();
+        
+        //4. Truy vấn các thông tin dưới SAP
+        $conDB = (new ConnectController)->connect_sap();    
 
         // Loại lỗi
         $query_01 = 'select "Code" "id", "Name" "name", "U_Type" from "@V_LLVCN" where "U_ObjType" = ?';
@@ -414,7 +420,7 @@ class QCController extends Controller
             $solution[] = $row;
         }
 
-        $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS': Auth::user()->plant;
+        $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS' : Auth::user()->plant;
 
         // Tổ chuyển về
         $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
@@ -444,12 +450,13 @@ class QCController extends Controller
         ];
 
         // Mã hạ cấp
-        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where "validFor"=? and "ItmsGrpCod" IN (?,?)';
+        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where "validFor"=? and "ItmsGrpCod"= ?';
+
         $stmt_04 = odbc_prepare($conDB, $query_04);
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_04, ['Y', '101', '106'])) {
+        if (!odbc_execute($stmt_04, ['Y', '106'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $returnCode = array();
@@ -461,11 +468,21 @@ class QCController extends Controller
             $uCRong = $row['U_CRong'] ?? 0;
             $uCDai = $row['U_CDai'] ?? 0;
 
+            // Hàm định dạng giá trị
+            $formatDimension = function ($value) {
+                return ($value == floor($value)) ? (int)$value : round($value, 1);
+            };
+
+            // Định dạng lại các kích thước
+            $uCDayFormatted = $formatDimension($uCDay);
+            $uCRongFormatted = $formatDimension($uCRong);
+            $uCDaiFormatted = $formatDimension($uCDai);
+
             // Tạo chuỗi kích thước "U_CDayxU_CRongxU_CDai"
-            $sizeString = $uCDay . 'x' . $uCRong . 'x' . $uCDai;
+            $sizeString = $uCDayFormatted . 'x' . $uCRongFormatted . 'x' . $uCDaiFormatted;
 
             // Nối chuỗi kích thước vào sau ItemName
-            $itemNameWithSize = $itemName . ' ' . $sizeString;
+            $itemNameWithSize = $itemName . ' ' . '(' . $sizeString . ')';
 
             // Thêm kết quả vào mảng returnCode
             $returnCode[] = [
@@ -581,19 +598,44 @@ class QCController extends Controller
         ];
 
         // Mã hạ cấp
-        $query_04 = 'select "ItemCode", "ItemName" from OITM where U_CDOAN IN (?,?)';
+        $query_04 = 'select "ItemCode", "ItemName", "U_CDay", "U_CRong", "U_CDai" from OITM where "validFor"=? and "ItmsGrpCod"= ?';
         $stmt_04 = odbc_prepare($conDB, $query_04);
         if (!$stmt_04) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_04, ['TC', 'SC'])) {
+        if (!odbc_execute($stmt_04, ['Y', '109'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $returnCode = array();
         while ($row = odbc_fetch_array($stmt_04)) {
-            $returnCode[] = $row;
-        }
+            $itemCode = $row['ItemCode'];
+            $itemName = $row['ItemName'];
+            $uCDay = $row['U_CDay'] ?? 0;
+            $uCRong = $row['U_CRong'] ?? 0;
+            $uCDai = $row['U_CDai'] ?? 0;
 
+            // Hàm định dạng giá trị
+            $formatDimension = function ($value) {
+                return ($value == floor($value)) ? (int)$value : round($value, 1);
+            };
+
+            // Định dạng lại các kích thước
+            $uCDayFormatted = $formatDimension($uCDay);
+            $uCRongFormatted = $formatDimension($uCRong);
+            $uCDaiFormatted = $formatDimension($uCDai);
+
+            // Tạo chuỗi kích thước "U_CDayxU_CRongxU_CDai"
+            $sizeString = $uCDayFormatted . 'x' . $uCRongFormatted . 'x' . $uCDaiFormatted;
+
+            // Nối chuỗi kích thước vào sau ItemName
+            $itemNameWithSize = $itemName . ' ' . '(' . $sizeString . ')';
+
+            // Thêm kết quả vào mảng returnCode
+            $returnCode[] = [
+                'ItemCode' => $itemCode,
+                'ItemName' => $itemNameWithSize
+            ];
+        }
         odbc_close($conDB);
 
         return response()->json([
@@ -607,21 +649,61 @@ class QCController extends Controller
     }
 
     // danh sách tổ không bao gồm tổ QC thể hiện ở màn hình danh sách xác nhận QC
-    function listToExcludeQC()
+    function listToExcludeQC(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'factory',
+            'KHOI',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
+        }
+
+        $factory = $request->factory;
+        $KHOI = $request->KHOI;
+        // dd($factory);
+
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select "VisResCode" "Code","ResName" "Name", "U_CDOAN" "CongDoan", Case when "U_QC"= ? then true else false end QC from "ORSC" A JOIN "RSC4" B ON A."VisResCode"=b."ResCode"
-        join OHEM C ON B."EmpID"=C."empID" where c."empID" =? AND "validFor"=? and "U_QC"<> ?';
+        $query =
+            'SELECT 
+            "VisResCode" AS "Code", 
+            "ResName" AS "Name", 
+            "U_CDOAN" AS "CongDoan",
+            "U_FAC" AS "Factory", 
+            CASE WHEN "U_QC" = ? THEN TRUE ELSE FALSE END AS QC 
+        FROM 
+            "ORSC" A 
+            JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
+            JOIN OHEM C ON B."EmpID" = C."empID" 
+        WHERE 
+            c."empID" = ? 
+            AND "validFor" = ?
+            AND "U_QC" <> ?
+        ';
+
+        $params = ['Y', Auth::user()->sap_id, 'Y', 'Y'];
+
+        if (!empty($KHOI)) {
+            $query .= ' AND "U_KHOI" =?';
+            $params[] = $KHOI;
+        }
+
+        if (!empty($factory)) {
+            $query .= ' AND "U_FAC" =?';
+            $params[] = $factory;
+        }
+
+        // dd($params, $query);
+
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id, 'Y', 'Y'])) {
-            // Handle execution error
-            // die("Error executing SQL statement: " . odbc_errormsg());
+        if (!odbc_execute($stmt, ['Y', Auth::user()->sap_id, 'Y', 'Y', $KHOI, $factory])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $row['QC'] = $row['QC'] === '0' ? false : true;
@@ -678,7 +760,7 @@ class QCController extends Controller
         $warehouse = "";
         if ($data->NextTeam = 'TH-QC') {
             $warehouse = $this->getQCWarehouseByUser('QC');
-        } else if ($data->NextTeam = 'YS1-QC') {
+        } else if ($data->NextTeam = 'YS-QC') {
             $warehouse = $this->getQCWarehouseByUser('QC');
         } else {
             $warehouse = $this->getQCWarehouseByUser('QC');
@@ -1027,16 +1109,37 @@ class QCController extends Controller
         }
 
         // Sử dụng array_filter với callback ngắn gọn hơn
-        $filteredData = array_filter($data, fn ($item) => $item['Allocate'] != 0);
+        $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
 
         return array_values($filteredData);
     }
 
     function getQCWarehouseByUser($type)
     {
-
         $WHS = GetWhsCode(Auth::user()->plant, $type);
         return $WHS;
+    }
+    function getQCWarehouse($KHOI, $Flag, $Factory)
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select TOP 1 "WhsCode", "WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=? and "U_KHOI"=? and "Inactive"=?;';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [Auth::user()->branch,$Factory, $Flag, $KHOI, 'N'])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $WhsCode = "";
+        if ($stmt && odbc_fetch_row($stmt)) {
+            $WhsCode = odbc_result($stmt, "WhsCode");
+        } else {
+            $WhsCode = "-1";
+        }
+        odbc_close($conDB);
+        return $WhsCode;
     }
 
     // loại lỗi ván công nghiệp
@@ -1096,7 +1199,9 @@ class QCController extends Controller
         $validator = Validator::make($request->all(), [
             'Qty' => 'required|numeric|min:1',
             'id' => 'required',
+            'Factory' => 'required',
         ]);
+
         // 1.1. Báo lỗi nếu dữ liệu không hợp lệ
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
@@ -1133,20 +1238,17 @@ class QCController extends Controller
             }
 
             //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
-            $warehouse = "";
-            if ($data->NextTeam = 'TH-QC') {
-                $warehouse = $this->getQCWarehouseByUser('QC');
-            } else if ($data->NextTeam = 'YS1-QC') {
-                $warehouse = $this->getQCWarehouseByUser('QC');
-            } else {
-                $warehouse = $this->getQCWarehouseByUser('QC');
+            $warehouse = '';
+            if ($data->NextTeam = 'QC_TH' || $data->NextTeam = 'QC_YS(CBG)' || $data->NextTeam = 'QC_TB') {
+                $warehouse = $this->getQCWarehouse('CBG', 'QC', $request->Factory);
             }
-
             if ($warehouse == "-1") {
                 return response()->json([
                     'error' => 'Không tìm thấy kho QC',
                 ], 500);
             }
+
+            // dd($warehouse);
 
             $output = '';
 
@@ -1200,7 +1302,7 @@ class QCController extends Controller
             $IssueData = '';
             // dd($data->ErrorData);
             if ($data->ErrorData != null) {
-                
+
                 $dataIssues = json_decode($data->ErrorData, true);
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;

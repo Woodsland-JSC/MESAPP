@@ -24,4 +24,11 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
+    protected $commands = [
+        \App\Console\Commands\RefreshRolesPermissions::class,
+        \App\Console\Commands\UpdateUserRole::class,
+        \App\Console\Commands\UpdateUserFactory::class,
+    ];
+
 }

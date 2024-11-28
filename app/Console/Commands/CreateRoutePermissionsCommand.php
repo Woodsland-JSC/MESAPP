@@ -42,7 +42,7 @@ class CreateRoutePermissionsCommand extends Command
     {
         $permissionsToCreate =
             [
-                'sepsay', 'kehoachsay',
+                'xepsay', 'kehoachsay',
                 'vaolo', 'kiemtralo',
                 'QCCBG','QCVCN',
                 'losay', 'danhgiame',
@@ -51,7 +51,7 @@ class CreateRoutePermissionsCommand extends Command
             ];
 
         $messageMapping = [
-            'sepsay' => 'sếp xấy',
+            'xepsay' => 'sếp xấy',
             'kehoachsay' => 'kế hoạch sấy',
             'vaolo' => 'vào lò',
             'kiemtralo' => 'kiểm tra lò',
@@ -94,25 +94,25 @@ class CreateRoutePermissionsCommand extends Command
         // Kiểm tra và cập nhật quyền nếu role client đã tồn tại
         $existingClientRole = Role::where('name', 'client')->first();
         if ($existingClientRole) {
-            $clientPermissions = Permission::whereIn('name', ['sepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
+            $clientPermissions = Permission::whereIn('name', ['xepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
             $existingClientRole->syncPermissions($clientPermissions);
             $this->info('Client role permissions updated successfully.');
         } else {
             $clientRole = Role::create(['name' => 'client']);
-            $clientPermissions = Permission::whereIn('name', ['sepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
+            $clientPermissions = Permission::whereIn('name', ['xepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
             $clientRole->givePermissionTo($clientPermissions);
             $this->info('Client role created successfully.');
         }
         // Tạo và cập nhật role sấy
         $existingSayRole = Role::where('name', 'sấy')->first();
         if ($existingSayRole) {
-            $SayPermissions = Permission::whereIn('name', ['sepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
+            $SayPermissions = Permission::whereIn('name', ['xepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
             $existingSayRole->syncPermissions($SayPermissions);
             $this->info('sấy role permissions updated successfully.');
         }else
         {
             $SayRole = Role::create(['name' => 'sấy']);
-            $SayPermissions = Permission::whereIn('name', ['sepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
+            $SayPermissions = Permission::whereIn('name', ['xepsay', 'kehoachsay', 'vaolo', 'kiemtralo', 'losay', 'danhgiame'])->get();
             $SayRole->givePermissionTo($SayPermissions);
             $this->info('sấy role created successfully.');
         }

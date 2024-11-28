@@ -39,6 +39,7 @@ import {
     Button,
 } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
+import { set } from "date-fns";
 
 const sizeOptions = [
     { value: "20", label: "20" },
@@ -123,7 +124,6 @@ function Users() {
             field: "branch",
             minWidth: 210,
             filter: true,
-            filter: 'agSetColumnFilter',
             valueGetter: (params) =>
                 params.data.branch === "1"
                     ? "Woodsland Thuận Hưng"
@@ -211,7 +211,7 @@ function Users() {
         },
         {
             headerName: "Tên role",
-            minWidth: 100,
+            minWidth: 300,
             cellRenderer: (params) => {
                 return (
                     <Link to={"/roles/" + params.data.id}>
@@ -219,14 +219,6 @@ function Users() {
                     </Link>
                 );
             },
-        },
-        {
-            headerName: "Tên Role",
-            valueGetter: function (params) {
-                return params.data.name;
-            },
-            hide: false,
-            minWidth: 150,
         },
         {
             headerName: "Ngày tạo",
@@ -417,16 +409,22 @@ function Users() {
 
     const deleteRole = async (roleId) => {
         setDeleteRoleLoading(true);
-        try {
-            const res = await roleApi.deleteRole(roleId);
-            toast.success("Xóa role thành công.");
+        if(roleId == 1){
+            toast.error("Bạn không thể xóa vai trò này.");
             setDeleteRoleLoading(false);
             onClose();
-            onRoleGridReady();
-        } catch (error) {
-            toast.error("Có lỗi xảy ra. Hãy thử lại sau.");
-            onClose();
-            setDeleteRoleLoading(false);
+        } else {
+            try {
+                const res = await roleApi.deleteRole(roleId);
+                toast.success("Xóa role thành công.");
+                setDeleteRoleLoading(false);
+                onClose();
+                onRoleGridReady();
+            } catch (error) {
+                toast.error("Có lỗi xảy ra. Hãy thử lại sau.");
+                onClose();
+                setDeleteRoleLoading(false);
+            }
         }
     };
 

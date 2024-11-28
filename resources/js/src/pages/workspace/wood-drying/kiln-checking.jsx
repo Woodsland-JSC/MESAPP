@@ -42,7 +42,7 @@ function KilnChecking() {
             {/* Container */}
             <div className="flex justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen mb-4 xl:mb-4 px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32 border-t border-gray-200">
+                <div className="w-screen mb-4 xl:mb-4 px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32 border-t border-gray-200">
                     {/* Go back */}
                     <div 
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
