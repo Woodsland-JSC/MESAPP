@@ -259,8 +259,6 @@ class DryingOvenController extends Controller
 
                 $combinedQuyCach = implode('_', $quyCachList);
 
-                // dd($combinedQuyCach);
-
                 $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT), 'QuyCach' => $combinedQuyCach]);
                 $isDuplicate = false;
             }
@@ -368,20 +366,9 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
-            // $response3 = Http::withOptions([
-            //     'verify' => false,
-            // ])->withHeaders([
-            //     "Content-Type" => "application/json",
-            //     "Accept" => "application/json",
-            //     "Authorization" => "Basic " . BasicAuthToken(),
-            // ])->get(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers(67)");
-
             $res = $response->json();
-            // dd(2, $res);
 
             $res2 = $response2->json();
-            // $res3 = $response3->json();
-            // dd(3, $res3);
 
             if (!empty($res['error']) && !empty($res2['error'])) {
                 DB::rollBack();

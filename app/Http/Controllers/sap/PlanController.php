@@ -479,7 +479,6 @@ class PlanController extends Controller
     // chi tiết mẻ
     function productionDetail($id)
     {
-
         // Assuming Plandryings is your model for the plandryings table
         $plandrying = planDryings::with('details')
             ->where('PlanID', $id)

@@ -30,7 +30,7 @@ import { IoIosArrowBack } from "react-icons/io";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [isKilnLoading, setIsKilnLoading] = useState(false);
 
     const { user } = useAppContext();
@@ -54,6 +54,23 @@ function CreateDryingPlan() {
     const [createdBowCards, setCreatedBowCards] = useState([]);
     const [bowCards, setBowCards] = useState([]);
 
+    const getBOWLists = async () => {
+        setLoading(true);
+        try {
+            const res = await palletsApi.getBOWList();
+            setBowCards(res || []);
+
+        } catch (error) {
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+            console.error("Error fetching BOWCard list:", error);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        getBOWLists();
+    }, []);
+
     useEffect(() => {
         loadKilns();
         palletsApi
@@ -76,25 +93,6 @@ function CreateDryingPlan() {
             setReloadAsyncSelectKey((prevKey) => prevKey + 1);
         }
     }, [selectedDryingReasonsPlan]);
-
-    useEffect(() => {
-        palletsApi
-            .getBOWList()
-
-            .then((response) => {
-                console.log("1. Load danh sách BOWCard:", response);
-
-                setBowCards(response || []);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching BOWCard list:", error);
-                setLoading(false);
-            });
-        // .finally(() => {
-
-        // });
-    }, []);
 
     const loadKilns = async () => {
         setIsKilnLoading(true);
@@ -404,7 +402,8 @@ function CreateDryingPlan() {
                             <BOWCard key={index} {...createdbowCard} />
                         ))}
                         {bowCards
-                            ?.map((bowCard, index) => (
+                            ?.map((bowCard, index) => ((
+                                bowCard.Status === 0)) && (
                                 <BOWCard
                                     key={index}
                                     planID={bowCard.PlanID}

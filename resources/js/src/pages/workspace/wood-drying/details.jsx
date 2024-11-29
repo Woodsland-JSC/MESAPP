@@ -175,7 +175,7 @@ function Details() {
             <div>
                 <div className="flex justify-center bg-transparent">
                     {/* Section */}
-                    <div className="w-screen p-6 px-5 xl:p-12 xl:px-32 border-t border-gray-200">
+                    <div className="w-screen p-6 px-5 xl:p-6 xl:px-32 border-t border-gray-200">
                         {/* Header */}
                         <div className="flex items-center text-2xl font-bold mb-6 gap-x-6">
                             <button
@@ -195,8 +195,8 @@ function Details() {
                                 borderRadius="lg"
                             >
                                 <div>
-                                    <div className="xl:text-2xl text-2xl font-bold text-[#17506B] ">
-                                        <div className="xl:inline-block lg:inline-block md:inline-block hidden">Chi tiết mẻ sấy:</div>
+                                    <div className="serif xl:text-3xl text-2xl font-bold text-[#17506B] ">
+                                        <div className="text-gray-800 xl:inline-block lg:inline-block md:inline-block hidden">Chi tiết mẻ sấy:</div>
                                         <div className="xl:hidden lg:hidden md:hidden inline-block">Mẻ sấy:</div>{" "}
                                         <span>{BOWData.Code}</span>{" "}
                                     </div>

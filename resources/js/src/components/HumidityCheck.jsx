@@ -358,7 +358,7 @@ function HumidityCheck(props) {
                     <div className="w-8 h-8">
                         <RiWaterPercentFill className="w-full h-full text-[#17506B]" />
                     </div>
-                    <div className="xl:text-xl xl:w-full w-[70%] text-lg">
+                    <div className="serif xl:text-2xl xl:w-full w-[70%] text-xl">
                         Danh sách biên bản kiểm tra độ ẩm
                     </div>
                 </div>

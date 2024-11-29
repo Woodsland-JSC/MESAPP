@@ -14,9 +14,11 @@ import {
     HiMiniArchiveBoxArrowDown,
     HiMiniBanknotes,
     HiArchiveBoxArrowDown,
+    HiViewColumns,
+    HiArchiveBox
 } from "react-icons/hi2";
 import { LuLayers } from "react-icons/lu";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import { Tabs, TabList, TabPanels, Tab, TabPanel, Box, Text, Flex, IconButton, Button, VStack } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAppContext from "../../store/AppContext";
 import "../../assets/styles/customTabs.css";
@@ -28,6 +30,8 @@ function Workspace() {
 
     const FirstTab = useRef();
     const SecondTab = useRef();
+
+    const [openInlandSelect, setOpenInlandSelect] = useState(false);
 
     const handleTabClick = (isSecondTab) => {
         const params = new URLSearchParams(window.location.search);
@@ -41,6 +45,18 @@ function Workspace() {
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.pushState({}, "", newUrl);
     };
+
+    const handleMenuClick = (type) => {
+        switch (type) {
+            case 'ND':
+                setOpenInlandSelect(!openInlandSelect);
+                console.log("Tào lao vị: ", !openInlandSelect)
+                break;
+
+            default:
+                break;
+        }
+    }
 
     useEffect(() => {
         document.title = "Woodsland - Workspace";
@@ -282,21 +298,25 @@ function Workspace() {
                                                     type: "VCN",
                                                 },
                                                 {
-                                                    permission: "ND",
-                                                    link: "/workspace/kiln",
-                                                    icon: <HiHomeModern />,
+                                                    // permission: "CTND",
+                                                    permission: "DAND",
+                                                    select: "ND",
+                                                    // link: "/workspace/inland/finished-details-receipt",
+                                                    // icon: <HiHomeModern />,
+                                                    icon: <HiArchiveBoxArrowDown />,
                                                     title: "Sản lượng nội địa",
                                                     description:
                                                         "Nhập sản lượng lắp đặt khối nội địa",
                                                     type: "ND",
                                                 },
                                                 {
-                                                    permission: "QCND",
-                                                    link: "/workspace/drying-wood-checking",
-                                                    icon: <HiHandThumbUp />,
-                                                    title: "Kiểm định chất lượng nội địa",
+                                                    // permission: "LDND",
+                                                    permission: "LDDAND",
+                                                    link: "/workspace/inland/installation-progress",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Tiến độ lắp đặt nội địa",
                                                     description:
-                                                        "Đánh giá mẻ gỗ sau khi sấy và kết thúc quy trình.",
+                                                        "Báo cáo tiến độ lắp đặt đồ nội thất.",
                                                     type: "ND",
                                                 },
                                             ].map(
@@ -307,40 +327,73 @@ function Workspace() {
                                                     title,
                                                     description,
                                                     type,
+                                                    select
                                                 }) =>
                                                     user.permissions?.includes(
                                                         permission
                                                     ) ? (
-                                                        <Link
-                                                            to={link}
-                                                            key={permission}
-                                                        >
-                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
-                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
-                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
-                                                                            {
-                                                                                title
-                                                                            }
-                                                                        </h5>
-                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
-                                                                            {
-                                                                                description
-                                                                            }
-                                                                        </p>
-                                                                    </div>
-                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
-                                                                        <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
-                                                                            {
-                                                                                icon
-                                                                            }
+                                                        select == "ND" ? (
+                                                            <div
+                                                                key={title}
+                                                                className="cursor-pointer"
+                                                                onClick={() => handleMenuClick("ND")}
+                                                            >
+                                                                <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                    <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                        <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                            <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                {
+                                                                                    title
+                                                                                }
+                                                                            </h5>
+                                                                            <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                {
+                                                                                    description
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                            <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
+                                                                                {
+                                                                                    icon
+                                                                                }
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </Link>
+                                                        ) : (
+                                                            <Link
+                                                                to={link}
+                                                                key={title}
+                                                            >
+                                                                <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                    <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                        <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                            <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                {
+                                                                                    title
+                                                                                }
+                                                                            </h5>
+                                                                            <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                {
+                                                                                    description
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                            <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
+                                                                                {
+                                                                                    icon
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </Link>
+                                                        )
                                                     ) : (
-                                                        <div key={permission}>
+                                                        <div key={title}>
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
                                                                 <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
@@ -387,6 +440,42 @@ function Workspace() {
                     </div> */}
                 </div>
             </div>
+            {openInlandSelect && (
+                <div className="loader bg-[#eaeaed] bg-opacity-75 backdrop-blur-sm flex justify-center items-center" onClick={() => setOpenInlandSelect(false)} >
+                    <IconButton
+                        aria-label="Close Overlay"
+                        icon={<>✖</>}
+                        position="absolute"
+                        top="4"
+                        right="4"
+                        onClick={() => setOpenInlandSelect(false)}
+                    />
+                    <div
+                        className="bg-white p-6 rounded-md shadow-lg gap-4 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col md:flex-row gap-8">
+                            <Link to={"/workspace/inland/finished-details-receipt"}
+                                className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center gap-2 w-52"
+                            >
+                                <Text fontWeight="bold">Sản lượng chi tiết</Text>
+                                <Box fontSize="3xl" color="blue.500">
+                                    📊
+                                </Box>
+                            </Link>
+
+                            <Link to={"/workspace/inland/finished-packaging-receipt"}
+                                className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center gap-2 w-52"
+                            >
+                                <Text fontWeight="bold">Sản lượng đóng gói</Text>
+                                <Box fontSize="3xl" color="green.500">
+                                    📦
+                                </Box>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 }

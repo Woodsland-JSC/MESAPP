@@ -92,8 +92,7 @@ function Kiln() {
                     </div> */}
 
                     {/* Content */}
-                    {(bowCards.Status === 2).length > 0 &&
-                        (bowCards.Status === 3).length > 0 ? (
+                    {bowCards.some(card => card.Status === 2) && bowCards.some(card => card.Status === 3) ?  (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {bowCards
                             ?.map(

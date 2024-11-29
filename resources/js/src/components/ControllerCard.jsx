@@ -741,10 +741,10 @@ function ControllerCard(props) {
     return (
         <div className="bg-white border-2 border-gray-300 rounded-xl">
             {/* Header */}
-            <div className="flex flex-col px-6 py-4 border-b border-gray-200">
+            <div className="flex flex-col px-4 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-x-3 font-medium">
                     <PiCaretCircleDoubleRightFill className="text-2xl w-8 h-8 text-[#17506B]" />
-                    <div className="xl:text-xl xl:w-full w-[70%] text-lg">
+                    <div className="serif font-bold xl:text-2xl xl:w-full w-[70%] text-xl">
                         Tiến trình: <span>{progressTitle}</span>
                     </div>
                 </div>

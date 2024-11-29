@@ -78,12 +78,12 @@ function SizeCard(props) {
     return (
         <div className="border-2 mb-4 border-gray-300 rounded-xl">
             {/* Header */}
-            <div className="bg-white rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-6  border-gray-300">
+            <div className="bg-white rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-4  border-gray-300">
                 <div className="flex items-center gap-x-3 font-medium">
                     <div className="w-9 h-9">
                         <IoScanCircleSharp className="text-3xl w-full h-full text-[#17506B]" />
                     </div>
-                    <div className="xl:text-xl xl:w-full text-lg">
+                    <div className="serif font-bold xl:text-2xl xl:w-full text-xl">
                         Các kích thước pallet
                     </div>
                 </div>

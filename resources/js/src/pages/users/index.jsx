@@ -460,7 +460,7 @@ function Users() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
+                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-4 xl:px-32 ">
                     {/* Header */}
                     <div className="serif text-4xl font-bold mb-4">
                         Quản lý người dùng
@@ -560,7 +560,7 @@ function Users() {
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="ag-theme-alpine pb-4 ">
+                                    <div className="ag-theme-alpine pb-4">
                                         <AgGridReact
                                             ref={userGridRef}
                                             rowData={userData}
@@ -587,6 +587,7 @@ function Users() {
                                             includeHiddenColumnsInQuickFilter={
                                                 true
                                             }
+                                            
                                         />
                                     </div>
                                     <Modal

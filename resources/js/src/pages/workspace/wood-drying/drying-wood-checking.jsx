@@ -92,8 +92,8 @@ function DryingWoodChecking() {
                     </div> */}
 
                     {/* Content */}
-                    {(bowCards.Status === 4).length > 0 && (bowCards.Status === 3).length > 0 ? (
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                    {bowCards.some(card => card.Status === 3) && bowCards.some(card => card.Status === 4) ? (
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {bowCards
                             ?.map(
                                 (bowCard, index) =>

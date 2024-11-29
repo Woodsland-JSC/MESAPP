@@ -58,8 +58,7 @@ function KilnChecking() {
                     </div>
 
                     {/* Content */}
-                    {(bowCards.Status === 1).length > 0 &&
-                    (bowCards.Status === 2).length > 0 ? (
+                    {bowCards.length > 0 ? (
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {bowCards &&
                             bowCards?.length > 0 &&

@@ -206,29 +206,18 @@ function WoodSorting() {
         fetchData();
     }, []);         
 
-    // const loadDryingMethodCallback = async (inputValue, callback) => {
-    //     try {
-    //         const dryingMethodsData = await palletsApi.getDryingMethod(selectedDryingReason.value);
-    //         const dryingMethodsOptions = dryingMethodsData.map((item) => ({
-    //             value: item.ItemCode + "-" + item.BatchNum,
-    //             label: item.ItemName,
-    //             batchNum: item.BatchNum,
-    //             code: item.ItemCode,
-    //         }));
-            
-    //         if (callback) {
-    //             callback();
-    //         }
-    //         // setDryingMethods(dryingMethodsOptions);
-    //     } catch (error) {
-    //         console.error("Error fetching drying methods:", error);
-    //     }
-    // };
+    const formatNumber = (num) => {
+        const number = parseFloat(num); // Chuyển đổi sang số
+        if (isNaN(number)) {
+            return ""; // Xử lý trường hợp không phải là số, trả về chuỗi rỗng
+        }
+        if (Number.isInteger(number)) {
+            return number.toString(); // Hiển thị số nguyên
+        } else {
+            return number.toFixed(2); // Hiển thị tối đa 2 chữ số thập phân
+        }
+    };
     
-    // const loadDryingMethods = (inputValue, callback) => {
-    //     loadDryingMethodCallback(inputValue, callback);
-    // };
-
     const loadDryingMethodsData = async (dryingReasonValue) => {
         try {
           if (!dryingReasonValue) {
@@ -426,15 +415,11 @@ function WoodSorting() {
                 WhsCode: card.props.whsCode,
                 BatchNum: card.props.batchNum,
                 Qty: parseInt(palletQuantities[card.key]),
-                CDai: card.props.height,
-                CDay: card.props.thickness,
-                CRong: card.props.width,
-                QuyCach:
-                    card.props.thickness +
-                    "x" +
-                    card.props.width +
-                    "x" +
-                    card.props.height,
+                CDai: formatNumber(card.props.height),
+                CDay: formatNumber(card.props.thickness),
+                CRong: formatNumber(card.props.width),
+                QuyCach: 
+                `${formatNumber(card.props.thickness)}x${formatNumber(card.props.width)}x${formatNumber(card.props.height)}`,
             })),
         };
         return palletObject;

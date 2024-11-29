@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import BOWCard from "../../../components/BOWCard";
 import palletsApi from "../../../api/palletsApi";
-import axios from "axios";
 import toast from "react-hot-toast";
-import { addDays, format, add } from "date-fns";
 import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
@@ -14,32 +12,27 @@ import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
 
 function LoadIntoKiln() {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [bowCards, setBowCards] = useState([]);
 
     const { user } = useAppContext();
     const navigate = useNavigate();
 
-    // Mini Loading When Loading Into Kiln
-    const [miniLoading, setMiniLoading] = useState(false);
+    const getBOWLists = async () => {
+        setLoading(true);
+        try {
+            const res = await palletsApi.getBOWList();
+            console.log("Danh sách tại công đoạn vào lò: ", res);
+            setBowCards(res);
+        } catch (error) {
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+            console.error("Error fetching BOWCard list:", error);
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
-        palletsApi
-            .getBOWList()
-
-            .then((response) => {
-                console.log("1. Load danh sách BOWCard:", response);
-
-                setBowCards(response || []);
-
-                console.log("hello: ", bowCards);
-            })
-            .catch((error) => {
-                console.error("Error fetching BOWCard list:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        getBOWLists();
     }, []);
 
     return (
@@ -61,39 +54,39 @@ function LoadIntoKiln() {
                     <div className="serif text-4xl font-bold mb-6">Vào lò</div>
 
                     {/* BOWCard List */}
-                    {(bowCards.Status === 0).length > 0 && (bowCards.Status === 1).length > 0 ? (
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {bowCards &&
-                            bowCards.length > 0 &&
-                            bowCards
-                                ?.map(
-                                    (bowCard, index) =>
-                                        ((bowCard.Status === 1 ||
-                                            bowCard.Status === 0) && bowCard.plant === user.plant) && (
-                                            <BOWCard
-                                                key={index}
-                                                planID={bowCard.PlanID}
-                                                status={bowCard.Status}
-                                                batchNumber={bowCard.Code}
-                                                kilnNumber={bowCard.Oven}
-                                                thickness={bowCard.Method}
-                                                purpose={bowCard.Reason}
-                                                finishedDate={moment(
-                                                    bowCard?.created_at
-                                                )
-                                                    .add(bowCard?.Time, "days")
-                                                    .format(
-                                                        "YYYY-MM-DD HH:mm:ss"
-                                                    )}
-                                                palletQty={bowCard.TotalPallet}
-                                                weight={bowCard.Mass}
-                                                isChecked={bowCard.Checked}
-                                                isReviewed={bowCard.Review}
-                                            />
-                                        )
-                                )
-                                .reverse()}
-                    </div>
+                    {bowCards.some(card => card.Status === 0) && bowCards.some(card => card.Status === 1)  ? (
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                            {bowCards &&
+                                bowCards.length > 0 &&
+                                bowCards
+                                    ?.map(
+                                        (bowCard, index) =>
+                                            ((bowCard.Status === 1 ||
+                                                bowCard.Status === 0) && bowCard.plant === user.plant) && (
+                                                <BOWCard
+                                                    key={index}
+                                                    planID={bowCard.PlanID}
+                                                    status={bowCard.Status}
+                                                    batchNumber={bowCard.Code}
+                                                    kilnNumber={bowCard.Oven}
+                                                    thickness={bowCard.Method}
+                                                    purpose={bowCard.Reason}
+                                                    finishedDate={moment(
+                                                        bowCard?.created_at
+                                                    )
+                                                        .add(bowCard?.Time, "days")
+                                                        .format(
+                                                            "YYYY-MM-DD HH:mm:ss"
+                                                        )}
+                                                    palletQty={bowCard.TotalPallet}
+                                                    weight={bowCard.Mass}
+                                                    isChecked={bowCard.Checked}
+                                                    isReviewed={bowCard.Review}
+                                                />
+                                            )
+                                    )
+                                    .reverse()}
+                        </div>
                     ) : (
                         <>
                             {!loading && (

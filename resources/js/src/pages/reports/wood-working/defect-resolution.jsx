@@ -258,7 +258,7 @@ function DefectResolution() {
                                     Báo cáo kiểm định chất lượng
                                 </div>
                                 <div className=" text-2xl font-semibold">
-                                    Báo cáo biện pháp xử lý lỗi
+                                    Báo cáo biện pháp xử lý lỗi (CBG)
                                 </div>
                             </div>
                         </div>

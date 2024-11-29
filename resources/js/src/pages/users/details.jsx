@@ -1124,7 +1124,6 @@ function User() {
                                             <SelectField
                                                 innerRef={factorySelectRef}
                                                 name="factory"
-                                                // loadOptions={loadFactories}
                                                 defaultValue={
                                                     factories.find(
                                                         (item) =>

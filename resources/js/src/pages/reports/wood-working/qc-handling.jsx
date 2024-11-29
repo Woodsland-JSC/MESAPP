@@ -1,12 +1,12 @@
 import React from 'react'
 import Layout from '../../../layouts/layout'
 
-function SyncRatioReport() {
+function QCHandlingReport() {
   return (
     <Layout>
-      <div>Báo cáo tỉ lệ đồng bộ</div>
+      <div>Biên bản xử lý QC (CBG)</div>
     </Layout>
   )
 }
 
-export default SyncRatioReport
+export default QCHandlingReport

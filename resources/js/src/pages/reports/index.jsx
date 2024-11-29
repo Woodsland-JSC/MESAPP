@@ -102,27 +102,27 @@ const woodDryingReports = [
 const woodProductingReports = [
     {
         id: "0001",
-        name: "Báo cáo sản lượng tuần (chi tiết)",
-        link: "/reports/weekly-goods-receipts",
-        priority: false,
-    },
-    {
-        id: "0002",
-        name: "Báo cáo tỷ lệ đồng bộ",
-        link: "/reports/sync-ratio",
-        priority: false,
-    },
-    {
-        id: "0003",
         name: "Báo cáo thông tin chi tiết giao nhận",
         link: "/reports/delivery-detail",
         priority: true,
         responsive: true,
     },
     {
+        id: "0002",
+        name: "Báo cáo tổng sản lượng theo ngày - tuần - tháng",
+        link: "/reports/production-volume-by-time",
+        priority: false,
+    },
+    {
+        id: "0003",
+        name: "Báo cáo chi tiết số lượng giao đi",
+        link: "/reports/delivered-quantity-details",
+        priority: false,
+    },
+    {
         id: "0004",
-        name: "Báo cáo chi tiết nhập tồn",
-        link: "/reports/detail-stock-receipt",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/error-handling-measure",
         priority: false,
     },
 ];
@@ -147,6 +147,58 @@ const QCReports = [
         priority: false,
     },
 ];
+
+const CBGReports = [
+    {
+        id: "0001",
+        name: "Báo cáo chi tiết giao nhận",
+        link: "/reports/qc-handling",
+        priority: false,
+    },
+    {
+        id: "0002",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/defect-resolution",
+        priority: true,
+    },
+    {
+        id: "0003",
+        name: "Báo cáo số lượng lỗi từng công đoạn",
+        link: "/reports/defect-quantity",
+        priority: false,
+    },
+];
+
+const VCNReports = [
+    {
+        id: "0001",
+        name: "Báo cáo chi tiết thông tin giao nhận",
+        link: "/reports/qc-handling",
+        priority: false,
+    },
+    {
+        id: "0002",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/defect-resolution",
+        priority: true,
+    },
+];
+
+const DANDReports = [
+    {
+        id: "0001",
+        name: "Báo cáo chi tiết thông tin giao nhận (Dự kiến)",
+        link: "/reports/qc-handling",
+        priority: false,
+    },
+    {
+        id: "0002",
+        name: "Báo cáo biện pháp xử lý lỗi (Dự kiến)",
+        link: "/reports/defect-resolution",
+        priority: true,
+    },
+];
+
 
 function Report() {
     const { loading, setLoading } = useAppContext();
@@ -336,7 +388,7 @@ function Report() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-12 xl:px-32 ">
+                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-4 xl:px-32 ">
                     {/* Header */}
                     <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between mb-3">
                         <div className="serif text-4xl font-bold">
@@ -399,7 +451,7 @@ function Report() {
                                     // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
-                                        Báo cáo sản lượng
+                                        Báo cáo chế biến gỗ
                                     </div>
                                 </Tab>
                                 <Tab
@@ -407,7 +459,15 @@ function Report() {
                                     // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
-                                        Báo cáo kiểm định chất lượng
+                                        Báo cáo ván công nghiệp
+                                    </div>
+                                </Tab>
+                                <Tab
+                                    ref={recordTab}
+                                    // onClick={() => handleTabClick(true)}
+                                >
+                                    <div className="text-base font-medium">
+                                        Báo cáo dự án nội địa
                                     </div>
                                 </Tab>
                             </TabList>
@@ -452,7 +512,7 @@ function Report() {
                                     )}
                                 </TabPanel>
 
-                                {/* Báo cáo sản lượng */}
+                                {/* Báo cáo chế biến gỗ */}
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
@@ -494,7 +554,45 @@ function Report() {
                                     )}
                                 </TabPanel>
 
-                                {/* Báo cáo QC */}
+                                {/* Báo cáo ván công nghiệp */}
+                                <TabPanel
+                                    className="space-y-4"
+                                    style={gridStyle}
+                                >   
+                                    {filteredQCReports.length === 0 ? (
+                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
+                                    ):(
+                                        <div className="flex flex-col gap-y-3">
+                                            {filteredQCReports.map(
+                                                (item, index) => (
+                                                    <Link
+                                                        to={item.link}
+                                                        key={index}
+                                                        className=""
+                                                    >
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                            <div className="flex items-center gap-x-4">
+                                                                <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
+                                                                    <HiClipboard className="  text-white w-5 h-5 " />
+                                                                </div>
+                                                                <div className="text-[16px] group-hover:text-white">
+                                                                    {item.name}
+                                                                </div>
+                                                                {item.priority ==
+                                                                    true && (
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}
+                                                            </div>
+                                                            <FaArrowRight className="group-hover:text-white w-5 h-5" />
+                                                        </div>
+                                                    </Link>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+                                </TabPanel>
+
+                                {/* Báo cáo dự án nội địa */}
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
