@@ -311,7 +311,7 @@ function Workspace() {
                                                 },
                                                 {
                                                     // permission: "LDND",
-                                                    permission: "LDDAND",
+                                                    permission: "TDLDND",
                                                     link: "/workspace/inland/installation-progress",
                                                     icon: <HiViewColumns />,
                                                     title: "Tiến độ lắp đặt nội địa",

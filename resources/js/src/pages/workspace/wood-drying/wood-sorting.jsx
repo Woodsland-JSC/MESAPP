@@ -153,7 +153,6 @@ function WoodSorting() {
     const [selectedDryingReason, setSelectedDryingReason] = useState(null);
     const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
     const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
-    
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -204,7 +203,7 @@ function WoodSorting() {
         };
 
         fetchData();
-    }, []);         
+    }, []);
 
     const formatNumber = (num) => {
         const number = parseFloat(num); // Chuyển đổi sang số
@@ -217,43 +216,48 @@ function WoodSorting() {
             return number.toFixed(2); // Hiển thị tối đa 2 chữ số thập phân
         }
     };
-    
+
     const loadDryingMethodsData = async (dryingReasonValue) => {
         try {
-          if (!dryingReasonValue) {
-            setDryingMethodsOptions([]);
-            return;
-          }
-      
-          const dryingMethodsData = await palletsApi.getDryingMethod(dryingReasonValue);
-          const options = dryingMethodsData.map((item) => ({
-            value: `${item.ItemCode}-${item.BatchNum}`,
-            label: item.ItemName,
-            batchNum: item.BatchNum,
-            code: item.ItemCode,
-          }));
-          
-          setDryingMethodsOptions(options);
+            //   if (!dryingReasonValue) {
+            //     setDryingMethodsOptions([]);
+            //     return;
+            //   }
+
+            const dryingMethodsData = await palletsApi.getDryingMethod(
+                dryingReasonValue
+            );
+            const options = dryingMethodsData.map((item) => ({
+                value: `${item.ItemCode}-${item.BatchNum}`,
+                label: item.ItemName,
+                batchNum: item.BatchNum,
+                code: item.ItemCode,
+            }));
+
+            setDryingMethodsOptions(options);
         } catch (error) {
-          console.error("Error fetching drying methods:", error);
-          setDryingMethodsOptions([]);
+            console.error("Error fetching drying methods:", error);
+            toast.error(
+                "Không thể lấy dữ liệu quy cách thô. " + error?.response?.data?.message
+            );
+
+            setDryingMethodsOptions([]);
         }
-      };
-      
-      // Hàm filter options dựa trên input value - không gọi API
-      const loadDryingMethods = async (inputValue, callback) => {     
+    };
+
+    // Hàm filter options dựa trên input value - không gọi API
+    const loadDryingMethods = async (inputValue, callback) => {
         return dryingMethodsOptions.filter((method) =>
-          method.label.toLowerCase().includes(inputValue.toLowerCase())
+            method.label.toLowerCase().includes(inputValue.toLowerCase())
         );
-      };
-      
-      // Sử dụng useEffect để load data khi selectedDryingReason thay đổi
-      useEffect(() => {
-        if (selectedDryingReason?.value) {
-          loadDryingMethodsData(selectedDryingReason.value);
-        }
-      }, [selectedDryingReason]);
-      
+    };
+
+    // Sử dụng useEffect để load data khi selectedDryingReason thay đổi
+    // useEffect(() => {
+    //     if (selectedDryingReason?.value) {
+    //       loadDryingMethodsData(selectedDryingReason.value);
+    //     }
+    // }, [selectedDryingReason]);
 
     // Validating
     const validateData = () => {
@@ -305,19 +309,27 @@ function WoodSorting() {
                 console.log("2. Get thông tin từ ItemCode:", response);
 
                 if (response && response.length > 0) {
-                    response.forEach(item => {
+                    response.forEach((item) => {
                         const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}-${item.BatchNum}`;
-                        if(!quyCachList.includes(quyCach)) {
-                            setQuyCachList(prevList => [...prevList, quyCach]);
-                        } 
+                        if (!quyCachList.includes(quyCach)) {
+                            setQuyCachList((prevList) => [
+                                ...prevList,
+                                quyCach,
+                            ]);
+                        }
                         if (quyCachList.includes(quyCach)) {
                             toast.error("Quy cách đã tồn tại trong danh sách.");
                             return;
-                        } else if((quyCachList.length >= 2) && (!quyCachList.includes(quyCach))) {
-                            toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
+                        } else if (
+                            quyCachList.length >= 2 &&
+                            !quyCachList.includes(quyCach)
+                        ) {
+                            toast.error(
+                                "Một pallet chỉ chứa tối đa 2 quy cách."
+                            );
                             return;
                         } else {
-                                const newPalletCard = (
+                            const newPalletCard = (
                                 <PalletCard
                                     key={item.WhsCode + item.BatchNum}
                                     itemCode={selectedDryingMethod.code}
@@ -345,8 +357,14 @@ function WoodSorting() {
                                     }}
                                 />
                             );
-                            setPalletCards(prevPalletCards => [...prevPalletCards, newPalletCard]);
-                            console.log("Danh sách item trong pallet: ", palletCards);
+                            setPalletCards((prevPalletCards) => [
+                                ...prevPalletCards,
+                                newPalletCard,
+                            ]);
+                            console.log(
+                                "Danh sách item trong pallet: ",
+                                palletCards
+                            );
                             toast.success("Đã thêm vào danh sách");
                         }
                     });
@@ -355,25 +373,24 @@ function WoodSorting() {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                     return;
                 }
-                
             } catch (error) {
                 console.error("Error fetching stock by item:", error);
                 toast.error("Không tìm thấy thông tin. Vui lòng thử lại sau.");
             } finally {
                 setIsLoading(false);
-                
             }
         }
     };
 
     const handleDeletePalletCard = (id, quyCach) => {
-        setQuyCachList(prevList => prevList.filter(item => item !== quyCach));
+        setQuyCachList((prevList) =>
+            prevList.filter((item) => item !== quyCach)
+        );
         console.log("Danh sách Quy Cach: ", quyCachList);
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
         toast("Đã xóa khỏi danh sách");
-        
     };
 
     const handlePalletQuantityChange = (id, quantity) => {
@@ -418,8 +435,9 @@ function WoodSorting() {
                 CDai: formatNumber(card.props.height),
                 CDay: formatNumber(card.props.thickness),
                 CRong: formatNumber(card.props.width),
-                QuyCach: 
-                `${formatNumber(card.props.thickness)}x${formatNumber(card.props.width)}x${formatNumber(card.props.height)}`,
+                QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(
+                    card.props.width
+                )}x${formatNumber(card.props.height)}`,
             })),
         };
         return palletObject;
@@ -444,23 +462,28 @@ function WoodSorting() {
             var thickness = parseFloat(card.props.thickness);
             var quantity = parseFloat(palletQuantities[card.key] || 0);
 
-            if ( selectedDryingReason.value !== "SL" && (
-                quantity > Math.floor((inStock * 1000000000) / (height * width * thickness)) ||
-                quantity === 0 ||
-                quantity < 0 ||
-                quantity == "" ||
-                quantity == null
-            )) {
+            if (
+                selectedDryingReason.value !== "SL" &&
+                (quantity >
+                    Math.floor(
+                        (inStock * 1000000000) / (height * width * thickness)
+                    ) ||
+                    quantity === 0 ||
+                    quantity < 0 ||
+                    quantity == "" ||
+                    quantity == null)
+            ) {
                 hasInvalidQuantity = true;
                 break;
             }
-            if ( selectedDryingReason.value === "SL" && (
-                quantity > inStock ||
-                quantity === 0 ||
-                quantity < 0 ||
-                quantity == "" ||
-                quantity == null
-            )) {
+            if (
+                selectedDryingReason.value === "SL" &&
+                (quantity > inStock ||
+                    quantity === 0 ||
+                    quantity < 0 ||
+                    quantity == "" ||
+                    quantity == null)
+            ) {
                 hasInvalidQuantity = true;
                 break;
             }
@@ -575,9 +598,9 @@ function WoodSorting() {
 
     const [result, setResult] = useState({
         totalQty_T: 0,
-        data: []
+        data: [],
     });
-    
+
     // Hàm handleCheckPallet
     const handleCheckPallet = async () => {
         if (!selectedPallet) {
@@ -607,26 +630,30 @@ function WoodSorting() {
                     setPalletTracingData(response.data.data[0]);
                     const updatedResult = {
                         totalQty_T: 0,
-                        data: []
+                        data: [],
                     };
                     const itemInfo = {};
-                    response.data.data.forEach(item => {
+                    response.data.data.forEach((item) => {
                         updatedResult.totalQty_T += item.Qty_T;
-                        const key = `${item.ItemName}_${Math.floor(item.CDay)}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`;
+                        const key = `${item.ItemName}_${Math.floor(
+                            item.CDay
+                        )}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`;
                         if (itemInfo[key]) {
                             itemInfo[key].Qty_T += item.Qty_T;
                         } else {
                             itemInfo[key] = {
                                 ItemName: item.ItemName,
                                 Qty_T: item.Qty_T,
-                                QuyCach: `${Math.floor(item.CDay)}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`
+                                QuyCach: `${Math.floor(item.CDay)}x${Math.floor(
+                                    item.CRong
+                                )}x${Math.floor(item.CDai)}`,
                             };
                         }
                     });
-    
+
                     updatedResult.data = Object.values(itemInfo);
                     setResult(updatedResult);
-    
+
                     console.log(result);
                     console.log(
                         "Kết quả truy xuất lịch sử pallet :",
@@ -649,7 +676,7 @@ function WoodSorting() {
                 {/* Section */}
                 <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}
-                    <div 
+                    <div
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
                         onClick={() => navigate(-1)}
                     >
@@ -676,8 +703,8 @@ function WoodSorting() {
                                 className="bg-[#040507] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                 onClick={onPalletTracingOpen}
                                 disabled={createPalletLoading}
-                            >   
-                                <HiOutlineSearch className="text-xl mr-2" />    
+                            >
+                                <HiOutlineSearch className="text-xl mr-2" />
                                 Truy nguyên
                             </button>
                         </div>
@@ -698,7 +725,7 @@ function WoodSorting() {
                             onClick={onPalletTracingOpen}
                             disabled={createPalletLoading}
                         >
-                            <HiOutlineSearch className="text-xl mr-2" />    
+                            <HiOutlineSearch className="text-xl mr-2" />
                             Truy nguyên
                         </button>
                     </div>
@@ -877,10 +904,11 @@ function WoodSorting() {
                                                             <div className="text-lg font-semibold">
                                                                 Quy cách:{" "}
                                                                 <span>
-                                                                    {pallet.QuyCach}
+                                                                    {
+                                                                        pallet.QuyCach
+                                                                    }
                                                                 </span>
                                                             </div>
-                                                            
                                                         </div>
                                                         <div className="p-4 pt-2 space-y-1">
                                                             <div className="grid grid-cols-2">
@@ -888,8 +916,16 @@ function WoodSorting() {
                                                                     Số lượng:{" "}
                                                                 </div>
                                                                 <div className="font-semibold">
-                                                                    {pallet.sum_quantity}
-                                                                    <span>{" "}{pallet.LyDo === "SL" ? "(m3)" : ""}</span>
+                                                                    {
+                                                                        pallet.sum_quantity
+                                                                    }
+                                                                    <span>
+                                                                        {" "}
+                                                                        {pallet.LyDo ===
+                                                                        "SL"
+                                                                            ? "(m3)"
+                                                                            : ""}
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                             <div className="grid grid-cols-2">
@@ -1060,46 +1096,50 @@ function WoodSorting() {
 
                                         <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
 
-                                        {result.data.map((item, index) =>
-                                        <div className="space-y-1 mb-3">
-                                            <div className="w-full xl:flex lg:flex md:flex">
-                                                <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
-                                                    Quy cách:
+                                        {result.data.map((item, index) => (
+                                            <div className="space-y-1 mb-3">
+                                                <div className="w-full xl:flex lg:flex md:flex">
+                                                    <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
+                                                        Quy cách:
+                                                    </div>
+                                                    <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
+                                                        {item.ItemName} (
+                                                        {item.QuyCach})
+                                                    </div>
+                                                    <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
+                                                        {item.ItemName} (
+                                                        {item.QuyCach})
+                                                    </div>
                                                 </div>
-                                                <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
-                                                    {item.ItemName}{" "}
-                                                    ({item.QuyCach})
-                                                </div>
-                                                <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
-                                                    {item.ItemName}{" "}
-                                                    ({item.QuyCach})
+                                                <div className="w-full flex">
+                                                    <div className="w-1/4 font-semibold">
+                                                        Số lượng:
+                                                    </div>
+                                                    <div className="w-3/4">
+                                                        {palletTracingData.LyDo ==
+                                                        "SL" ? (
+                                                            <span>
+                                                                <span>
+                                                                    {
+                                                                        palletTracingData.Qty
+                                                                    }
+                                                                </span>{" "}
+                                                                (m3)
+                                                            </span>
+                                                        ) : (
+                                                            <span>
+                                                                <span>
+                                                                    {
+                                                                        palletTracingData.Qty_T
+                                                                    }
+                                                                </span>{" "}
+                                                                (T)
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="w-full flex">
-                                                <div className="w-1/4 font-semibold">
-                                                    Số lượng:
-                                                </div>
-                                                <div className="w-3/4">
-                                                    {palletTracingData.LyDo == "SL" ? (
-                                                        <span>
-                                                        <span>
-                                                        {palletTracingData.Qty}
-                                                        </span>{" "}
-                                                        (m3)
-                                                        </span>
-                                                    ): (
-                                                        <span>
-                                                        <span>
-                                                        {palletTracingData.Qty_T}
-                                                        </span>{" "}
-                                                        (T)
-                                                        </span>
-                                                    )}
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                        )}
+                                        ))}
 
                                         {/* COC Information */}
                                         <div className="my-1 mt-4 border border-gray-300 shadow-sm rounded-lg">
@@ -1176,13 +1216,17 @@ function WoodSorting() {
                                                                 <a className="font-semibold text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-lg">
                                                                     Chờ sấy
                                                                 </a>
-                                                                {palletTracingData.LyDo=== "SL" ? (
+                                                                {palletTracingData.LyDo ===
+                                                                "SL" ? (
                                                                     <a
                                                                         href="#!"
                                                                         className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
-                                                                        Số lượng:{" "}
-                                                                        {palletTracingData.Qty}{" "}
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {
+                                                                            palletTracingData.Qty
+                                                                        }{" "}
                                                                         (m3)
                                                                     </a>
                                                                 ) : (
@@ -1190,10 +1234,13 @@ function WoodSorting() {
                                                                         href="#!"
                                                                         className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                     >
-                                                                        Số lượng:{" "}
-                                                                        {palletTracingData.Qty_T}{" "}
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {
+                                                                            palletTracingData.Qty_T
+                                                                        }{" "}
                                                                         (T)
-                                                                    </a>         
+                                                                    </a>
                                                                 )}
                                                             </div>
                                                             <div className="space-y-1 max-w-lg ">
@@ -1269,13 +1316,17 @@ function WoodSorting() {
                                                                         Đã vào
                                                                         lò
                                                                     </a>
-                                                                    {palletTracingData.LyDo=== "SL" ? (
+                                                                    {palletTracingData.LyDo ===
+                                                                    "SL" ? (
                                                                         <a
                                                                             href="#!"
                                                                             className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty
+                                                                            }{" "}
                                                                             (m3)
                                                                         </a>
                                                                     ) : (
@@ -1283,10 +1334,13 @@ function WoodSorting() {
                                                                             href="#!"
                                                                             className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty_T}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty_T
+                                                                            }{" "}
                                                                             (T)
-                                                                        </a>         
+                                                                        </a>
                                                                     )}
                                                                 </div>
                                                                 <div className="space-y-1 max-w-lg">
@@ -1349,16 +1403,22 @@ function WoodSorting() {
                                                                     >
                                                                         Số
                                                                         lượng:{" "}
-                                                                        {result.totalQty_T}{" "}
+                                                                        {
+                                                                            result.totalQty_T
+                                                                        }{" "}
                                                                         (T)
                                                                     </a>
-                                                                    {palletTracingData.LyDo=== "SL" ? (
+                                                                    {palletTracingData.LyDo ===
+                                                                    "SL" ? (
                                                                         <a
                                                                             href="#!"
                                                                             className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty
+                                                                            }{" "}
                                                                             (m3)
                                                                         </a>
                                                                     ) : (
@@ -1366,10 +1426,13 @@ function WoodSorting() {
                                                                             href="#!"
                                                                             className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty_T}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty_T
+                                                                            }{" "}
                                                                             (T)
-                                                                        </a>         
+                                                                        </a>
                                                                     )}
                                                                 </div>
                                                                 <div className="space-y-1 max-w-lg">
@@ -1453,16 +1516,22 @@ function WoodSorting() {
                                                                     >
                                                                         Số
                                                                         lượng:{" "}
-                                                                        {result.totalQty_T}{" "}
+                                                                        {
+                                                                            result.totalQty_T
+                                                                        }{" "}
                                                                         (T)
                                                                     </a>
-                                                                    {palletTracingData.LyDo=== "SL" ? (
+                                                                    {palletTracingData.LyDo ===
+                                                                    "SL" ? (
                                                                         <a
                                                                             href="#!"
                                                                             className="font-medium text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty
+                                                                            }{" "}
                                                                             (m3)
                                                                         </a>
                                                                     ) : (
@@ -1470,10 +1539,13 @@ function WoodSorting() {
                                                                             href="#!"
                                                                             className="font-medium text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
                                                                         >
-                                                                            Số lượng:{" "}
-                                                                            {palletTracingData.Qty_T}{" "}
+                                                                            Số
+                                                                            lượng:{" "}
+                                                                            {
+                                                                                palletTracingData.Qty_T
+                                                                            }{" "}
                                                                             (T)
-                                                                        </a>         
+                                                                        </a>
                                                                     )}
                                                                 </div>
                                                                 <div className="space-y-1 max-w-lg">
@@ -1508,7 +1580,8 @@ function WoodSorting() {
                                                                         </div>
                                                                         <div>
                                                                             Kho
-                                                                            sau sấy
+                                                                            sau
+                                                                            sấy
                                                                         </div>
                                                                     </div>
                                                                     {/* <div className="xl:grid lg:grid md:grid grid-cols-2">
@@ -1611,7 +1684,13 @@ function WoodSorting() {
                                             options={dryingReasons}
                                             onChange={(value) => {
                                                 setSelectedDryingReason(value);
-                                                console.log("Selected Drying Reason:", value);
+                                                console.log(
+                                                    "Selected Drying Reason:",
+                                                    value
+                                                );
+                                                loadDryingMethodsData(
+                                                    value.value
+                                                );
                                             }}
                                             isDisabled={palletCards.length > 0}
                                         />
@@ -1637,20 +1716,25 @@ function WoodSorting() {
                                                 setSelectedDryingMethod(value);
                                             }}
                                         /> */}
-                                            <AsyncSelect
-                                                loadingMessage={() => "Đang tải..."}
-                                                ref={(ref) => {
-                                                    dryingMethodSelectRef = ref;
-                                                }}
-                                                cacheOptions
-                                                defaultOptions={dryingMethodsOptions} // Sử dụng options đã load sẵn
-                                                placeholder="Chọn quy cách thô"
-                                                loadOptions={loadDryingMethods}
-                                                onChange={(value) => {
-                                                    console.log("Selected Drying Method:", value);
-                                                    setSelectedDryingMethod(value);
-                                                }}
-                                            />
+                                        <AsyncSelect
+                                            loadingMessage={() => "Đang tải..."}
+                                            ref={(ref) => {
+                                                dryingMethodSelectRef = ref;
+                                            }}
+                                            cacheOptions
+                                            defaultOptions={
+                                                dryingMethodsOptions
+                                            } // Sử dụng options đã load sẵn
+                                            placeholder="Chọn quy cách thô"
+                                            loadOptions={loadDryingMethods}
+                                            onChange={(value) => {
+                                                console.log(
+                                                    "Selected Drying Method:",
+                                                    value
+                                                );
+                                                setSelectedDryingMethod(value);
+                                            }}
+                                        />
                                     </div>
 
                                     <div className="col-span-1">
@@ -1687,7 +1771,13 @@ function WoodSorting() {
                         {/* List */}
                         <div className="my-6 space-y-5">
                             {/* List of Pallet Cards */}
-                            <div className={`my-6 space-y-5 ${createPalletLoading ? "pointer-events-none opacity-50" : ""}`}>
+                            <div
+                                className={`my-6 space-y-5 ${
+                                    createPalletLoading
+                                        ? "pointer-events-none opacity-50"
+                                        : ""
+                                }`}
+                            >
                                 {isLoading ? (
                                     <div className="text-center">
                                         <Spinner
@@ -1733,9 +1823,9 @@ function WoodSorting() {
                     </div>
                 </div>
             </div>
-            {/* {
+            {
                 loading && <Loader />
-            } */}
+            }
         </Layout>
     );
 }

@@ -22,53 +22,154 @@ use PhpOffice\PhpWord\Shared\Validate;
  */
 class MasterDataController extends Controller
 {
+    // function ItemMasterData(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'reason' => 'required'
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+    //         // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     $conDB = (new ConnectController)->connect_sap();
+
+    //     try {
+    //         // change request, add filter with reason
+    //         $flag = 'TS';
+    //         $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum", T1."WhsCode" FROM OITW T0
+    //             INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+    //             INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+    //             INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+    //             WHERE (T1."Quantity"*1000000000/(T1."U_CDai"*T1."U_CRong"*T1."U_CDay")) > 1 AND
+    //             T3."U_Flag" IN (?) AND
+    //             T3."BPLid" = ? AND
+    //             T3."U_FAC" = ? ';
+    //         if ($request->reason == 'SL') {
+    //             $flag = 'SL';
+    //             $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
+    //                 INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+    //                 INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+    //                 INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+    //                 WHERE (T1."Quantity"*1000000000/(T1."U_CDai"*T1."U_CRong"*T1."U_CDay")) > 1 AND
+    //                 T3."U_Flag" IN (?) AND
+    //                 T3."BPLid" = ? AND
+    //                 T3."U_FAC" = ? ';
+    //         }        
+
+    //         $stmt = odbc_prepare($conDB, $query);
+    //         if (!$stmt) {
+    //             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+    //         $branch = Auth::user()->branch;
+    //         $plant = Auth::user()->plant;
+    //         if (!odbc_execute($stmt, [' ', $flag, $branch, $plant])) {
+    //             // Handle execution error
+    //             // die("Error executing SQL statement: " . odbc_errormsg());
+    //             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+    //         }
+
+    //         $results = array();
+    //         while ($row = odbc_fetch_array($stmt)) {
+    //             $results[] = $row;
+    //         }
+
+    //         odbc_close($conDB);
+    //         return response()->json($results, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     function ItemMasterData(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'reason' => 'required'
         ]);
+
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-            // Return validation errors with a 422 Unprocessable Entity status code
         }
+
+        $flag = 'TS';
+        if ($request->reason == 'SL') {
+            $flag = 'SL' ;
+        }
+
+        $branch = Auth::user()->branch;
+        $plant = Auth::user()->plant;
+
+        $conDB = (new ConnectController)->connect_sap();
+
         try {
-            // change request, add filter with reason
-            $flag = 'TS';
-            $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
-                INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-                INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-                INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                WHERE T1."Quantity" > 0 AND
-                T3."U_Flag" IN (?) AND
-                T3."BPLid" = ? AND
-                T3."U_FAC" = ? ';
-            if ($request->reason == 'SL') {
-                $flag = 'SL';
-                $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
-                    INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-                    INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-                    INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                    WHERE T1."Quantity" > 0 AND
-                    T3."U_Flag" IN (?) AND
-                    T3."BPLid" = ? AND
-                    T3."U_FAC" = ? ';
+            // Kiểm tra danh sách kho
+            $warehouseQuery = 'SELECT "WhsCode", "WhsName" FROM OWHS WHERE "BPLid" = ? AND "U_FAC" = ? AND "U_Flag" = ? AND "Inactive" = ?;';
+            $warehouseStmt = odbc_prepare($conDB, $warehouseQuery);
+            if (!$warehouseStmt) {
+                throw new \Exception('Error preparing warehouse SQL statement: ' . odbc_errormsg($conDB));
             }
 
-            $conDB = (new ConnectController)->connect_sap();
+            if (!odbc_execute($warehouseStmt, [$branch, $plant, $flag, 'N'])) {
+                throw new \Exception('Error executing warehouse SQL statement: ' . odbc_errormsg($conDB));
+            }
 
-            $stmt = odbc_prepare($conDB, $query);
+            $warehouses = [];
+            while ($row = odbc_fetch_array($warehouseStmt)) {
+                $warehouses[] = $row;
+            }
+
+            if (count($warehouses) > 1) {
+                return response()->json([
+                    'error' => true,
+                    'status_code' => 422,
+                    'message' => 'Đang có nhiều hơn 1 kho cùng hoạt động, hãy vô hiệu các kho không cần thiết.'
+                ], 422);
+            }
+            
+            if (count($warehouses) === 0) {
+                return response()->json([
+                    'error' => true,
+                    'status_code' => 404,
+                    'message' => 'Không tìm thấy kho chứa quy cách thô thỏa điều kiện.'
+                ], 404);
+            }
+
+            // Thực hiện truy vấn chính
+            $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum", T1."WhsCode" 
+                        FROM OITW T0
+                        INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+                        INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+                        INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+                        WHERE (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1 
+                            AND T3."U_Flag" IN (?) 
+                            AND T3."BPLid" = ? 
+                            AND T3."U_FAC" = ?'; 
+
+            if ($request->reason == 'SL') {
+                $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum"
+                            FROM OITW T0
+                            INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+                            INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+                            INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+                            WHERE (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1 
+                                AND T3."U_Flag" IN (?) 
+                                AND T3."BPLid" = ? 
+                                AND T3."U_FAC" = ? ';
+            }
+
+            $stmt = odbc_prepare($conDB, $mainQuery);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            $branch = Auth::user()->branch;
-            $plant = Auth::user()->plant;
+
             if (!odbc_execute($stmt, [' ', $flag, $branch, $plant])) {
-                // Handle execution error
-                // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
-            $results = array();
+            $results = [];
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
@@ -76,6 +177,7 @@ class MasterDataController extends Controller
             odbc_close($conDB);
             return response()->json($results, 200);
         } catch (\Exception $e) {
+            odbc_close($conDB); // Đảm bảo kết nối được đóng trong mọi trường hợp
             return response()->json([
                 'error' => false,
                 'status_code' => 500,
@@ -633,6 +735,8 @@ class MasterDataController extends Controller
                 'Inner join OITM T2 on T0."ItemCode" = T2."ItemCode" ' .
                 'inner join OWHS T3 ON T3."WhsCode"=T0."WhsCode" ' .
                 'where T1."Quantity" > 0 and T0."ItemCode"= ? and t3."WhsCode"=? and T1."BatchNum" =? and "BPLid" = ? and ' . $filter;
+
+            // dd($query, $flag, $id, $warehouse, $request->batchnum, Auth::user()->branch);
             $stmt = odbc_prepare($conDB, $query);
 
             if (!$stmt) {

@@ -276,7 +276,7 @@ class UserController extends Controller
             'last_name' => $request->input('last_name'),
             'email' => $request->input('email'),
             'username' => $request->input('username'),
-            'password' => isset($input['password']) ? Hash::make($input['password']) : $user->password,
+            'password' => $input['password'] ?? $user->password,
             'plant' => $request->input('plant'),
             'sap_id' => $request->input('sap_id'),
             'branch' => $request->input('branch'),
