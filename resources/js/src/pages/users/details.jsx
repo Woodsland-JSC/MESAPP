@@ -372,7 +372,7 @@ function User() {
                 if (user.id != userId) {
                     toast.success("Điều chỉnh thông tin thành công.");
                 }
-                if (user.id == userId && newPassword) {
+                if (user.id == userId) {
                     handleSignOut();
                     setLoading(false);
                     toast.success("Điều chỉnh thông tin thành công.");

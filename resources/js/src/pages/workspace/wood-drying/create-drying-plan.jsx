@@ -380,33 +380,33 @@ function CreateDryingPlan() {
                     </Modal>
 
                     {/* BOW Card List */}
-                    {((createdBowCards || bowCards.length > 0) && bowCards.some(card => card.plant === user.plant)) ? (
-                    <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                        {createdBowCards.map((createdbowCard, index) => (
-                            <BOWCard key={index} {...createdbowCard} />
-                        ))}
-                        {bowCards
-                            ?.map((bowCard, index) => ((
-                                bowCard.Status === 0) && bowCard.plant === user.plant) && (
-                                <BOWCard
-                                    key={index}
-                                    planID={bowCard.PlanID}
-                                    status={bowCard.Status}
-                                    batchNumber={bowCard.Code}
-                                    kilnNumber={bowCard.Oven}
-                                    thickness={bowCard.Method}
-                                    purpose={bowCard.Reason}
-                                    finishedDate={moment(bowCard?.created_at)
-                                        .add(bowCard?.Time, "days")
-                                        .format("YYYY-MM-DD HH:mm:ss")}
-                                    palletQty={bowCard.TotalPallet}
-                                    weight={bowCard.Mass}
-                                    isChecked={bowCard.Checked}
-                                    isReviewed={bowCard.Review}
-                                />
-                            ))
-                            .reverse()}
-                    </div>
+                    {((createdBowCards?.length > 0 || bowCards.some(card => card.Status === 0)) && bowCards.some(card => card.plant === user.plant)) ? (
+                        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
+                            {createdBowCards.map((createdbowCard, index) => (
+                                <BOWCard key={index} {...createdbowCard} />
+                            ))}
+                            {bowCards
+                                ?.map((bowCard, index) => ((
+                                    bowCard.Status === 0) && bowCard.plant === user.plant) && (
+                                    <BOWCard
+                                        key={index}
+                                        planID={bowCard.PlanID}
+                                        status={bowCard.Status}
+                                        batchNumber={bowCard.Code}
+                                        kilnNumber={bowCard.Oven}
+                                        thickness={bowCard.Method}
+                                        purpose={bowCard.Reason}
+                                        finishedDate={moment(bowCard?.created_at)
+                                            .add(bowCard?.Time, "days")
+                                            .format("YYYY-MM-DD HH:mm:ss")}
+                                        palletQty={bowCard.TotalPallet}
+                                        weight={bowCard.Mass}
+                                        isChecked={bowCard.Checked}
+                                        isReviewed={bowCard.Review}
+                                    />
+                                ))
+                                .reverse()}
+                        </div>
                     ) : (
                         <>
                             {!loading && (
