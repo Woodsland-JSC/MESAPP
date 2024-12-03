@@ -27,6 +27,7 @@ import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
+import { BiSolidFactory } from "react-icons/bi";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -234,18 +235,37 @@ function CreateDryingPlan() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4  px-5 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}
-                    <div 
-                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] "
-                        onClick={() => navigate(-1)}
-                    >
-                        <IoIosArrowBack />
-                        <div>Quay lại</div>
+                    <div className="flex items-top justify-between">
+                        <div
+                            className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
+                            onClick={() => navigate(-1)}
+                        >
+                            <IoIosArrowBack />
+                            <div>Quay lại</div>
+                        </div>
+                        <div className="flex space-x-2 items-center xl:hidden lg:hidden md:hidden text-xs p-1 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold h-fit rounded-lg ">
+                            <BiSolidFactory />
+                            {user.plant === "TH" ? "Thuận Hưng"
+                                : user.plant === "YS" ? "Yên Sơn"
+                                : user.plant === "CH" ? "Chiêm Hóa"
+                                : user.plant === "TB" ? "Thái Bình"
+                                : user.plant === "HG" ? "Hà Giang"
+                                : "UNKNOWN"}
+                        </div>
                     </div>
 
                     {/* Header */}
                     <div className="flex justify-between mb-6 items-center">
-                        <div className="serif text-4xl font-bold ">
-                            Tạo kế hoạch sấy
+                        <div className="flex space-x-4">
+                            <div className="serif text-4xl font-bold">Tạo kế hoạch sấy</div>
+                            <div className="xl:inline-block lg:inline-block md:inline-block hidden text-[12px] p-0.5 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold uppercase h-fit rounded-lg">
+                                {user.plant === "TH" ? "Thuận Hưng"
+                                : user.plant === "YS" ? "Yên Sơn"
+                                : user.plant === "CH" ? "Chiêm Hóa"
+                                : user.plant === "TB" ? "Thái Bình"
+                                : user.plant === "HG" ? "Hà Giang"
+                                : "UNKNOWN"}
+                            </div>
                         </div>
                         <button
                             className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"
@@ -359,51 +379,15 @@ function CreateDryingPlan() {
                         </ModalContent>
                     </Modal>
 
-                    {/* Controller */}
-                    {/* <div className=" my-4 mb-6 xl:w-full">
-                        <label
-                            for="search"
-                            className="mb-2 text-sm font-medium text-gray-900 sr-only"
-                        >
-                            Search
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                    />
-                                </svg>
-                            </div>
-                            <input
-                                type="search"
-                                id="search"
-                                className="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Search"
-                                required
-                            />
-                        </div>
-                    </div> */}
-
                     {/* BOW Card List */}
-                    {createdBowCards && bowCards.length > 0 ? (
+                    {((createdBowCards || bowCards.length > 0) && bowCards.some(card => card.plant === user.plant)) ? (
                     <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {createdBowCards.map((createdbowCard, index) => (
                             <BOWCard key={index} {...createdbowCard} />
                         ))}
                         {bowCards
                             ?.map((bowCard, index) => ((
-                                bowCard.Status === 0)) && (
+                                bowCard.Status === 0) && bowCard.plant === user.plant) && (
                                 <BOWCard
                                     key={index}
                                     planID={bowCard.PlanID}
@@ -429,7 +413,7 @@ function CreateDryingPlan() {
                                 <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
                                     <div className="  text-xl text-gray-400"> 
-                                        Tiến trình hiện tại không có hoạt động nào.
+                                        Tiến trình hiện tại của nhà máy không có hoạt động nào.
                                     </div>
                                 </div>
                             )}        

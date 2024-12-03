@@ -11,6 +11,7 @@ import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
+import { BiSolidFactory } from "react-icons/bi";
 
 function DryingWoodChecking() {
     const [loading, setLoading] = useState(true);
@@ -42,17 +43,36 @@ function DryingWoodChecking() {
                 {/* Section */}
                 <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:px-32 xl:pt-6 lg:pt-6 md:pt-6 pt-2 border-t border-gray-200">
                     {/* Go back */}
-                    <div 
-                        className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
-                        onClick={() => navigate(-1)}
-                    >
-                        <IoIosArrowBack />
-                        <div>Quay lại</div>
+                    <div className="flex items-top justify-between">
+                        <div
+                            className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
+                            onClick={() => navigate(-1)}
+                        >
+                            <IoIosArrowBack />
+                            <div>Quay lại</div>
+                        </div>
+                        <div className="flex space-x-2 items-center xl:hidden lg:hidden md:hidden text-xs p-1 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold h-fit rounded-lg ">
+                            <BiSolidFactory />
+                            {user.plant === "TH" ? "Thuận Hưng"
+                                : user.plant === "YS" ? "Yên Sơn"
+                                : user.plant === "CH" ? "Chiêm Hóa"
+                                : user.plant === "TB" ? "Thái Bình"
+                                : user.plant === "HG" ? "Hà Giang"
+                                : "UNKNOWN"}
+                        </div>
                     </div>
 
                     {/* Header */}
-                    <div className="serif text-4xl font-bold mb-6">
-                        Đánh giá mẻ sấy
+                    <div className="flex space-x-4 mb-6">
+                        <div className="serif text-4xl font-bold ">Đánh giá mẻ sấy</div>   
+                        <div className="xl:inline-block lg:inline-block md:inline-block hidden text-[12px] p-0.5 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold uppercase h-fit rounded-lg">
+                                {user.plant === "TH" ? "Thuận Hưng"
+                                : user.plant === "YS" ? "Yên Sơn"
+                                : user.plant === "CH" ? "Chiêm Hóa"
+                                : user.plant === "TB" ? "Thái Bình"
+                                : user.plant === "HG" ? "Hà Giang"
+                                : "UNKNOWN"}
+                        </div>
                     </div>
 
                     {/* Controller */}
@@ -92,7 +112,7 @@ function DryingWoodChecking() {
                     </div> */}
 
                     {/* Content */}
-                    {bowCards.some(card => card.Status === 3) && bowCards.some(card => card.Status === 4) ? (
+                    {((bowCards.some(card => card.Status === 3) || bowCards.some(card => card.Status === 4)) && bowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {bowCards
                             ?.map(
@@ -128,7 +148,7 @@ function DryingWoodChecking() {
                                 <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
                                     <div className="  text-xl text-gray-400"> 
-                                        Tiến trình hiện tại không có hoạt động nào.
+                                        Tiến trình hiện tại của nhà máy không có hoạt động nào.
                                     </div>
                                 </div>
                             )}        
