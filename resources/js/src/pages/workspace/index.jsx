@@ -258,7 +258,7 @@ function Workspace() {
                                         <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
                                             {[
                                                 {
-                                                    permission: "CBG" || "CBG(CX)",
+                                                    permission: ["CBG", "CBG(CX)"],
                                                     link: "/workspace/wood-working/finished-goods-receipt",
                                                     icon: (
                                                         <HiArchiveBoxArrowDown />
@@ -269,7 +269,7 @@ function Workspace() {
                                                     type: "CBG",
                                                 },
                                                 {
-                                                    permission: "QCCBG",
+                                                    permission: ["QCCBG"],
                                                     link: "/workspace/wood-working/qc",
                                                     icon: <HiBadgeCheck />,
                                                     title: "Kiểm định chất lượng chế biến gỗ",
@@ -278,7 +278,7 @@ function Workspace() {
                                                     type: "CBG",
                                                 },
                                                 {
-                                                    permission: "VCN" || "VCN(CX)",
+                                                    permission: ["VCN","VCN(CX)"],
                                                     link: "/workspace/plywood/finished-goods-receipt",
                                                     icon: (
                                                         <HiArchiveBoxArrowDown />
@@ -289,7 +289,7 @@ function Workspace() {
                                                     type: "VCN",
                                                 },
                                                 {
-                                                    permission: "QCVCN",
+                                                    permission: ["QCVCN"],
                                                     link: "/workspace/plywood/qc",
                                                     icon: <HiBadgeCheck />,
                                                     title: "Kiểm định chất lượng ván công nghiệp",
@@ -298,11 +298,8 @@ function Workspace() {
                                                     type: "VCN",
                                                 },
                                                 {
-                                                    // permission: "CTND",
-                                                    permission: "DAND",
+                                                    permission: ["DAND", "DAND(CX)"],
                                                     select: "ND",
-                                                    // link: "/workspace/inland/finished-details-receipt",
-                                                    // icon: <HiHomeModern />,
                                                     icon: <HiArchiveBoxArrowDown />,
                                                     title: "Sản lượng nội địa",
                                                     description:
@@ -310,8 +307,7 @@ function Workspace() {
                                                     type: "ND",
                                                 },
                                                 {
-                                                    // permission: "LDND",
-                                                    permission: "TDLDND",
+                                                    permission: ["TDLDND"],
                                                     link: "/workspace/inland/installation-progress",
                                                     icon: <HiViewColumns />,
                                                     title: "Tiến độ lắp đặt nội địa",
@@ -329,8 +325,7 @@ function Workspace() {
                                                     type,
                                                     select
                                                 }) =>
-                                                    user.permissions?.includes(
-                                                        permission
+                                                    permission.some((perm) => user.permissions?.includes(perm)
                                                     ) ? (
                                                         select == "ND" ? (
                                                             <div
