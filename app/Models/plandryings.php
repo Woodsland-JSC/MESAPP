@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class plandryings extends Model
+class planDryings extends Model
 {
     use HasFactory;
     protected $primaryKey = 'PlanID';
