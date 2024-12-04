@@ -137,7 +137,7 @@ function CreateRole() {
 
     const nameInputRef = useRef();
 
-    const [permissions, setPermissions] = useState(null);
+    const [permissions, setPermissions] = useState([]);
     const [roleInfo, setRoleInfo] = useState({
         name: "",
         permission: [],
