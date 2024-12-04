@@ -175,19 +175,19 @@ function EditRole() {
         permission: [],
     });
 
-    const updateUserData = async () => {
-        try {
-            const res = await userApi.getUserDetails(user?.id);
-            const newPermissions = res.permissions;
-            setUser((prevUser) => ({
-                ...prevUser,
-                permissions: newPermissions,
-            }));
-        } catch (error) {
-            toast.error("Không thể đồng bộ dữ liệu user. Hãy đăng nhập lại.");
-            console.log(error);
-        }
-    };
+    // const updateUserData = async () => {
+    //     try {
+    //         const res = await userApi.getUserDetails(user?.id);
+    //         const newPermissions = res.permissions;
+    //         setUser((prevUser) => ({
+    //             ...prevUser,
+    //             permissions: newPermissions,
+    //         }));
+    //     } catch (error) {
+    //         toast.error("Không thể đồng bộ dữ liệu user. Hãy đăng nhập lại.");
+    //         console.log(error);
+    //     }
+    // };
 
     const handlePermissionChange = (e, permissionValue) => {
         if (e.target.checked) {
@@ -316,7 +316,7 @@ function EditRole() {
             const res = await roleApi.updateRole(roleId, updatedRoleInfo);
             toast.success("Lưu thông tin thành công.");
             setUpdateRoleLoading(false);
-            updateUserData();
+            // updateUserData();
             navigate("/users?roletab=true");
         } catch (error) {
             toast.error("Có lỗi xảy ra.");
@@ -956,15 +956,16 @@ function EditRole() {
                             <button
                                 type="button"
                                 className="mt-5 self-end flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-2.5 text-center gap-x-2"
-                                onClick={() => {
-                                    toast("Dữ liệu cập nhật");
-                                    console.log(
-                                        "Dữ liệu cập nhật: ",
-                                        updatedRoleInfo.permission
-                                    );
-                                    // handleUpdate
-                                }}
-                                // onClick={handleUpdate}
+                                disabled={updateRoleLoading}
+                                // onClick={() => {
+                                //     toast("Dữ liệu cập nhật");
+                                //     console.log(
+                                //         "Dữ liệu cập nhật: ",
+                                //         updatedRoleInfo.permission
+                                //     );
+                                //     // handleUpdate
+                                // }}
+                                onClick={handleUpdate}
                             >
                                 {updateRoleLoading ? (
                                     <div className="flex items-center space-x-4">
