@@ -143,8 +143,10 @@ const reportPermissions = {
 };
 
 function EditRole() {
-    const { loading, setLoading, user, setUser } = useAppContext();
+    const {  user, setUser } = useAppContext();
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const [roleLoading, setRoleLoading] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -326,66 +328,69 @@ function EditRole() {
         console.log("Role info: ", roleInfo);
     };
 
-    useEffect(() => {
-        setLoading(true);
-        const getPermissions = async () => {
-            try {
-                const res = await roleApi.getRoleById(roleId);
-                setPermissions(res.allPermission);
-                if (res.details) {
-                    setRoleInfo({
-                        name: res.details.name,
-                        permission: res.details.permissions,
-                    });
-                    setUpdatedRoleInfo({
-                        name: res.details.name,
-                        permission: res.details.permissions,
-                    });
-                }
-
-                if (
-                    res.details.permissions.includes("CBG") ||
-                    res.details.permissions.includes("CBG(CX)")
-                ) {
-                    setIsUsingCBG(true);
-                    setSelectedCBGPermission(
-                        res.details.permissions.includes("CBG")
-                            ? "CBG"
-                            : "CBG(CX)"
-                    );
-                }
-                if (
-                    res.details.permissions.includes("VCN") ||
-                    res.details.permissions.includes("VCN(CX)")
-                ) {
-                    setIsUsingVCN(true);
-                    setSelectedVCNPermission(
-                        res.details.permissions.includes("VCN")
-                            ? "VCN"
-                            : "VCN(CX)"
-                    );
-                }
-                if (
-                    res.details.permissions.includes("DAND") ||
-                    res.details.permissions.includes("DAND(CX)")
-                ) {
-                    setIsUsingDAND(true);
-                    setSelectedDANDPermission(
-                        res.details.permissions.includes("DAND")
-                            ? "DAND"
-                            : "DAND(CX)"
-                    );
-                }
-                console.log("Permissions: ", res.details);
-            } catch (error) {
-                toast.error("Có lỗi xảy ra, đang tải lại trang.");
-                navigate(0);
+    const getPermissions = async () => {   
+        try {
+            setRoleLoading(true)
+            const res = await roleApi.getRoleById(roleId);
+            setPermissions(res.allPermission);
+            if (res.details) {
+                setRoleInfo({
+                    name: res.details.name,
+                    permission: res.details.permissions,
+                });
+                setUpdatedRoleInfo({
+                    name: res.details.name,
+                    permission: res.details.permissions,
+                });
             }
-        };
+
+            if (
+                res.details.permissions.includes("CBG") ||
+                res.details.permissions.includes("CBG(CX)")
+            ) {
+                setIsUsingCBG(true);
+                setSelectedCBGPermission(
+                    res.details.permissions.includes("CBG")
+                        ? "CBG"
+                        : "CBG(CX)"
+                );
+            }
+            if (
+                res.details.permissions.includes("VCN") ||
+                res.details.permissions.includes("VCN(CX)")
+            ) {
+                setIsUsingVCN(true);
+                setSelectedVCNPermission(
+                    res.details.permissions.includes("VCN")
+                        ? "VCN"
+                        : "VCN(CX)"
+                );
+            }
+            if (
+                res.details.permissions.includes("DAND") ||
+                res.details.permissions.includes("DAND(CX)")
+            ) {
+                setIsUsingDAND(true);
+                setSelectedDANDPermission(
+                    res.details.permissions.includes("DAND")
+                        ? "DAND"
+                        : "DAND(CX)"
+                );
+            }
+            setRoleLoading(false);
+            console.log("Permissions: ", res.details);
+        } catch (error) {
+            toast.error("Có lỗi xảy ra, đang tải lại trang.");
+            setRoleLoading(false);
+            navigate(0);
+        }
+    };
+
+
+    useEffect(() => {
 
         getPermissions();
-        setLoading(false);
-
+    
         document.title = "Woodsland - Chi tiết quyền";
         const params = new URLSearchParams(window.location.search);
 
@@ -415,12 +420,12 @@ function EditRole() {
     };
 
     useEffect(() => {
-        if (loading) {
+        if (roleLoading) {
             document.body.classList.add("body-no-scroll");
         } else {
             document.body.classList.remove("body-no-scroll");
         }
-    }, [loading]);
+    }, [roleLoading]);
 
     return (
         <Layout>
@@ -1017,7 +1022,7 @@ function EditRole() {
                 </AlertDialog>
                 <div className="py-3"></div>
             </div>
-            {loading && <Loader />}
+            {roleLoading && <Loader />}
         </Layout>
     );
 }

@@ -105,7 +105,7 @@ const reportPermissions = {
             name: "Báo cáo thông tin chi tiết giao nhận",
         },
         {
-            value: "BCCBG_bienphapxulyloi",
+            value: "BCCBG_xulyloi",
             name: "Báo cáo biện pháp xử lý lỗi",
         },
     ],
@@ -115,7 +115,7 @@ const reportPermissions = {
             name: "Báo cáo thông tin chi tiết giao nhận",
         },
         {
-            value: "BCVCN_bienphapxulyloi",
+            value: "BCVCN_xulyloi",
             name: "Báo cáo biện pháp xử lý lỗi",
         },
     ],
@@ -125,7 +125,7 @@ const reportPermissions = {
             name: "Báo cáo thông tin chi tiết giao nhận",
         },
         {
-            value: "BCDAND_bienphapxulyloi",
+            value: "BCDAND_xulyloi",
             name: "Báo cáo biện pháp xử lý lỗi",
         },
     ],
@@ -153,19 +153,19 @@ function CreateRole() {
 
     const handlePermissionChange = (e, permissionValue) => {
         if (e.target.checked) {
-            setPermissions((prev) => [...prev, permissionValue]);
-            console.log("Danh sách quyền đã chọn:", permissions);
+            setRoleInfo.permission((prev) => [...prev, permissionValue]);
+            console.log("Danh sách quyền đã chọn:", roleInfo.permission);
         } else {
-            setPermissions((prev) =>
+            setRoleInfo.permission((prev) =>
                 prev.filter((value) => value !== permissionValue)
             );
-            console.log("Danh sách quyền đã chọn:", permissions);
+            console.log("Danh sách quyền đã chọn:", roleInfo.permission);
         }
     };
 
     const handleSelectCBGPermissionChange = (e, permissionValue) => {
         if (permissionValue === "CBG" || permissionValue === "CBG(CX)") {
-            setPermissions((prev) => {
+            setRoleInfo.permission((prev) => {
                 const filteredList = prev.filter((value) => value !== "CBG" && value !== "CBG(CX)");
                 return [...filteredList, permissionValue];
             });
@@ -178,7 +178,7 @@ function CreateRole() {
             // Nếu chuyển sang !isUsingCBG, loại bỏ CBG hoặc CBG(CX) khỏi permissions
             if (!newIsUsingCBG) {
                 setSelectedCBGPermission("");
-                setPermissions((prevList) =>
+                setRoleInfo.permission((prevList) =>
                     prevList.filter((value) => value !== "CBG" && value !== "CBG(CX)")
                 );
             }
@@ -188,7 +188,7 @@ function CreateRole() {
 
     const handleSelectVCNPermissionChange = (e, permissionValue) => {
         if (permissionValue === "VCN" || permissionValue === "VCN(CX)") {
-            setPermissions((prev) => {
+            setRoleInfo.permission((prev) => {
                 const filteredList = prev.filter((value) => value !== "VCN" && value !== "VCN(CX)");
                 return [...filteredList, permissionValue];
             });
@@ -200,7 +200,7 @@ function CreateRole() {
             const newIsUsingVCN = !prev;
             if (!newIsUsingVCN) {
                 setSelectedVCNPermission("");
-                setPermissions((prevList) =>
+                setRoleInfo.permission((prevList) =>
                     prevList.filter((value) => value !== "VCN" && value !== "VCN(CX)")
                 );
             }
@@ -210,7 +210,7 @@ function CreateRole() {
 
     const handleSelectDANDPermissionChange = (e, permissionValue) => {
         if (permissionValue === "DAND" || permissionValue === "DAND(CX)") {
-            setPermissions((prev) => {
+            setRoleInfo.permission((prev) => {
                 const filteredList = prev.filter((value) => value !== "DAND" && value !== "DAND(CX)");
                 return [...filteredList, permissionValue];
             });
@@ -222,7 +222,7 @@ function CreateRole() {
             const newIsUsingDAND = !prev;
             if (!newIsUsingDAND) {
                 setSelectedDANDPermission("");
-                setPermissions((prevList) =>
+                setRoleInfo.permission((prevList) =>
                     prevList.filter((value) => value !== "DAND" && value !== "DAND(CX)")
                 );
             }
@@ -238,7 +238,6 @@ function CreateRole() {
             nameInputRef?.current?.focus();
             return;
         }
-
         if (permissions.length < 1) {
             toast("Role nên có ít nhất 1 quyền hạn.");
             return;
@@ -248,14 +247,15 @@ function CreateRole() {
 
         try {
             const res = await roleApi.createRole(roleInfo);
-            toast.success("Vai trò được tạo thành công");
-            setRoleInfo({ name: "", permission: [] });
+            toast.success("Vai trò được tạo thành công");  
             setLoading(false);
             navigate("/users?roletab=true");
+            setRoleInfo({ name: "", permission: [] });
         } catch (error) {
             toast.error("Có lỗi xảy ra.");
             setLoading(false);
         }
+        
     };
 
     useEffect(() => {
