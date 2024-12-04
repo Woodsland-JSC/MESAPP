@@ -153,22 +153,31 @@ function CreateRole() {
 
     const handlePermissionChange = (e, permissionValue) => {
         if (e.target.checked) {
-            setRoleInfo.permission((prev) => [...prev, permissionValue]);
+            setRoleInfo((prev) => ({
+                ...prev,
+                permission: [...prev.permission, permissionValue],
+            }));
             console.log("Danh sách quyền đã chọn:", roleInfo.permission);
         } else {
-            setRoleInfo.permission((prev) =>
-                prev.filter((value) => value !== permissionValue)
-            );
+            setRoleInfo((prev) => ({
+                ...prev,
+                permission: prev.permission.filter(
+                    (value) => value !== permissionValue
+                ),
+            }));
             console.log("Danh sách quyền đã chọn:", roleInfo.permission);
         }
     };
 
     const handleSelectCBGPermissionChange = (e, permissionValue) => {
         if (permissionValue === "CBG" || permissionValue === "CBG(CX)") {
-            setRoleInfo.permission((prev) => {
-                const filteredList = prev.filter((value) => value !== "CBG" && value !== "CBG(CX)");
-                return [...filteredList, permissionValue];
-            });
+            const filteredList = updatedRoleInfo.permission.filter(
+                (value) => value !== "CBG" && value !== "CBG(CX)"
+            );
+            setRoleInfo((prev) => ({
+                ...prev,
+                permission: [...filteredList, permissionValue],
+            }));
         }
     };
 
@@ -178,9 +187,12 @@ function CreateRole() {
             // Nếu chuyển sang !isUsingCBG, loại bỏ CBG hoặc CBG(CX) khỏi permissions
             if (!newIsUsingCBG) {
                 setSelectedCBGPermission("");
-                setRoleInfo.permission((prevList) =>
-                    prevList.filter((value) => value !== "CBG" && value !== "CBG(CX)")
-                );
+                setRoleInfo((prev) => ({
+                    ...prev,
+                    permission: prev.permission.filter(
+                        (value) => value !== "CBG" && value !== "CBG(CX)"
+                    ),
+                }));
             }
             return newIsUsingCBG;
         });
@@ -188,10 +200,13 @@ function CreateRole() {
 
     const handleSelectVCNPermissionChange = (e, permissionValue) => {
         if (permissionValue === "VCN" || permissionValue === "VCN(CX)") {
-            setRoleInfo.permission((prev) => {
-                const filteredList = prev.filter((value) => value !== "VCN" && value !== "VCN(CX)");
-                return [...filteredList, permissionValue];
-            });
+            const filteredList = updatedRoleInfo.permission.filter(
+                (value) => value !== "VCN" && value !== "VCN(CX)"
+            );
+            setRoleInfo((prev) => ({
+                ...prev,
+                permission: [...filteredList, permissionValue],
+            }));
         }
     };
 
@@ -200,9 +215,12 @@ function CreateRole() {
             const newIsUsingVCN = !prev;
             if (!newIsUsingVCN) {
                 setSelectedVCNPermission("");
-                setRoleInfo.permission((prevList) =>
-                    prevList.filter((value) => value !== "VCN" && value !== "VCN(CX)")
-                );
+                setRoleInfo((prev) => ({
+                    ...prev,
+                    permission: prev.permission.filter(
+                        (value) => value !== "VCN" && value !== "VCN(CX)"
+                    ),
+                }));
             }
             return newIsUsingVCN;
         });
@@ -210,10 +228,13 @@ function CreateRole() {
 
     const handleSelectDANDPermissionChange = (e, permissionValue) => {
         if (permissionValue === "DAND" || permissionValue === "DAND(CX)") {
-            setRoleInfo.permission((prev) => {
-                const filteredList = prev.filter((value) => value !== "DAND" && value !== "DAND(CX)");
-                return [...filteredList, permissionValue];
-            });
+            const filteredList = updatedRoleInfo.permission.filter(
+                (value) => value !== "DAND" && value !== "DAND(CX)"
+            );
+            setRoleInfo((prev) => ({
+                ...prev,
+                permission: [...filteredList, permissionValue],
+            }));
         }
     };
 
@@ -222,9 +243,12 @@ function CreateRole() {
             const newIsUsingDAND = !prev;
             if (!newIsUsingDAND) {
                 setSelectedDANDPermission("");
-                setRoleInfo.permission((prevList) =>
-                    prevList.filter((value) => value !== "DAND" && value !== "DAND(CX)")
-                );
+                setRoleInfo((prev) => ({
+                    ...prev,
+                    permission: prev.permission.filter(
+                        (value) => value !== "DAND" && value !== "DAND(CX)"
+                    ),
+                }));
             }
             return newIsUsingDAND;
         });
@@ -238,7 +262,7 @@ function CreateRole() {
             nameInputRef?.current?.focus();
             return;
         }
-        if (permissions.length < 1) {
+        if (roleInfo.permissions?.length < 1) {
             toast("Role nên có ít nhất 1 quyền hạn.");
             return;
         }
@@ -250,7 +274,6 @@ function CreateRole() {
             toast.success("Vai trò được tạo thành công");  
             setLoading(false);
             navigate("/users?roletab=true");
-            setRoleInfo({ name: "", permission: [] });
         } catch (error) {
             toast.error("Có lỗi xảy ra.");
             setLoading(false);
@@ -375,7 +398,7 @@ function CreateRole() {
                                                 className=" w-[20%]"
                                                 size="lg"
                                                 value={item.value}
-                                                isChecked={permissions?.includes(
+                                                isChecked={roleInfo.permission?.includes(
                                                     item.value
                                                 )}
                                                 onChange={(e) =>
@@ -587,7 +610,7 @@ function CreateRole() {
                                                     className=" w-[20%]"
                                                     size="lg"
                                                     value={item.value}
-                                                    isChecked={permissions?.includes(
+                                                    isChecked={roleInfo.permission?.includes(
                                                         item.value
                                                     )}
                                                     onChange={(e) =>
@@ -642,7 +665,7 @@ function CreateRole() {
                                                     className=" w-[20%]"
                                                     size="lg"
                                                     value={item.value}
-                                                    isChecked={permissions?.includes(
+                                                    isChecked={roleInfo.permission?.includes(
                                                         item.value
                                                     )}
                                                     onChange={(e) =>
@@ -682,7 +705,7 @@ function CreateRole() {
                                                     className=" w-[20%]"
                                                     size="lg"
                                                     value={item.value}
-                                                    isChecked={permissions?.includes(
+                                                    isChecked={roleInfo.permission?.includes(
                                                         item.value
                                                     )}
                                                     onChange={(e) =>
@@ -722,7 +745,7 @@ function CreateRole() {
                                                     className=" w-[20%]"
                                                     size="lg"
                                                     value={item.value}
-                                                    isChecked={permissions?.includes(
+                                                    isChecked={roleInfo.permission?.includes(
                                                         item.value
                                                     )}
                                                     onChange={(e) =>
@@ -762,7 +785,7 @@ function CreateRole() {
                                                     className=" w-[20%]"
                                                     size="lg"
                                                     value={item.value}
-                                                    isChecked={permissions?.includes(
+                                                    isChecked={roleInfo.permission?.includes(
                                                         item.value
                                                     )}
                                                     onChange={(e) =>
