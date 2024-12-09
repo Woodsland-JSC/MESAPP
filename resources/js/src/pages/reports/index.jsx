@@ -36,94 +36,65 @@ const sizeOptions = [
     { value: "200", label: "200" },
 ];
 
-const woodDryingReports = [
+const SAYReports = [
     {
         id: "0001",
         name: "Biên bản vào lò",
-        link: "/reports/kiln-loading",
+        link: "/reports/wood-drying/kiln-loading",
         priority: true,
     },
-    {
-        id: "0002",
-        name: "Biên bản lịch sử vào lò",
-        link: "/reports/kiln-loading-history",
-        priority: false,
-    },
-    {
-        id: "0003",
-        name: "Biên bản kiểm tra lò sấy",
-        link: "/reports/kiln-checking",
-        priority: false,
-    },
-    {
-        id: "0004",
-        name: "Biên bản kiểm tra độ ẩm",
-        link: "/reports/humidity-check",
-        priority: false,
-    },
-    {
-        id: "0005",
-        name: "Báo cáo lò đang sấy",
-        link: "/reports/drying-kilns",
-        priority: false,
-    },
-    {
-        id: "0006",
-        name: "Báo cáo kế hoạch sấy",
-        link: "/reports/drying-plan",
-        priority: false,
-    },
+    // {
+    //     id: "0002",
+    //     name: "Biên bản lịch sử vào lò",
+    //     link: "/reports/wood-drying/kiln-loading-history",
+    // },
+    // {
+    //     id: "0003",
+    //     name: "Biên bản kiểm tra lò sấy",
+    //     link: "/reports/wood-drying/kiln-checking",
+    // },
+    // {
+    //     id: "0004",
+    //     name: "Biên bản kiểm tra độ ẩm",
+    //     link: "/reports/wood-drying/humidity-check",
+    // },
+    // {
+    //     id: "0005",
+    //     name: "Báo cáo lò đang sấy",
+    //     link: "/reports/wood-drying/drying-kilns",
+    // },
+    // {
+    //     id: "0006",
+    //     name: "Báo cáo kế hoạch sấy",
+    //     link: "/reports/wood-drying/drying-plan",
+    // },
     {
         id: "0007",
         name: "Báo cáo xếp sấy khối CBG",
-        link: "/reports/wood-drying",
+        link: "/reports/wood-drying/wood-drying",
         priority: true,
-    },
-    {
-        id: "0008",
-        name: "Báo cáo sản lượng sấy",
-        link: "/reports/drying-product",
-        priority: false,
-    },
-    {
-        id: "0009",
-        name: "Báo cáo tồn sấy lựa",
-        link: "/reports/dried-wood-inventory",
-        priority: false,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
-        link: "/reports/drying-queue",
+        link: "/reports/wood-drying/drying-queue",
         priority: true,
     },
 ];
 
-const woodProductingReports = [
+const CBGReports = [
     {
         id: "0001",
-        name: "Báo cáo thông tin chi tiết giao nhận",
-        link: "/reports/delivery-detail",
+        name: "Báo cáo thông tin chi tiết giao nhận (CBG)",
+        link: "/reports/wood-working/delivery-detail",
         priority: true,
         responsive: true,
     },
     {
         id: "0002",
-        name: "Báo cáo tổng sản lượng theo ngày - tuần - tháng",
-        link: "/reports/production-volume-by-time",
-        priority: false,
-    },
-    {
-        id: "0003",
-        name: "Báo cáo chi tiết số lượng giao đi",
-        link: "/reports/delivered-quantity-details",
-        priority: false,
-    },
-    {
-        id: "0004",
-        name: "Báo cáo biện pháp xử lý lỗi",
-        link: "/reports/error-handling-measure",
-        priority: false,
+        name: "Báo cáo biện pháp xử lý lỗi (CBG)",
+        link: "/reports/wood-working/defect-resolution",
+        priority: true,
     },
 ];
 
@@ -131,72 +102,61 @@ const QCReports = [
     {
         id: "0001",
         name: "Biên bản xử lý QC",
-        link: "/reports/qc-handling",
+        link: "/reports/plywoods/defect-handling",
         priority: false,
     },
     {
         id: "0002",
         name: "Báo cáo biện pháp xử lý lỗi",
-        link: "/reports/defect-resolution",
+        link: "/reports/plywoods/defect-resolution",
         priority: true,
     },
     {
         id: "0003",
         name: "Báo cáo số lượng lỗi từng công đoạn",
-        link: "/reports/defect-quantity",
+        link: "/reports/plywoods/defect-quantity",
         priority: false,
     },
 ];
 
-const CBGReports = [
-    {
-        id: "0001",
-        name: "Báo cáo chi tiết giao nhận",
-        link: "/reports/qc-handling",
-        priority: false,
-    },
-    {
-        id: "0002",
-        name: "Báo cáo biện pháp xử lý lỗi",
-        link: "/reports/defect-resolution",
-        priority: true,
-    },
-    {
-        id: "0003",
-        name: "Báo cáo số lượng lỗi từng công đoạn",
-        link: "/reports/defect-quantity",
-        priority: false,
-    },
-];
 
 const VCNReports = [
-    {
-        id: "0001",
-        name: "Báo cáo chi tiết thông tin giao nhận",
-        link: "/reports/qc-handling",
-        priority: false,
-    },
-    {
-        id: "0002",
-        name: "Báo cáo biện pháp xử lý lỗi",
-        link: "/reports/defect-resolution",
-        priority: true,
-    },
+        // {
+        //     id: "0001",
+        //     name: "Báo cáo tổng sản lượng ngày - tuần - tháng (VCN)",
+        //     link: "/reports/plywoods/production-volume-by-time",
+        //     priority: false,
+        //     responsive: true,
+        // },
+        // {
+        //     id: "0002",
+        //     name: "Báo cáo chi tiết thông tin giao nhận (VCN)",
+        //     link: "/reports/plywoods/delivered-quantity-details",
+        //     priority: false,
+        //     responsive: false,
+        // },
+        // {
+        //     id: "0003",
+        //     name: "Báo cáo biện pháp xử lý lỗi (VCN)",
+        //     link: "/reports/plywoods/defect-handling",
+        //     priority: false,
+        // },
 ];
 
 const DANDReports = [
-    {
-        id: "0001",
-        name: "Báo cáo chi tiết thông tin giao nhận (Dự kiến)",
-        link: "/reports/qc-handling",
-        priority: false,
-    },
-    {
-        id: "0002",
-        name: "Báo cáo biện pháp xử lý lỗi (Dự kiến)",
-        link: "/reports/defect-resolution",
-        priority: true,
-    },
+    // {
+    //     id: "0001",
+    //     name: "Báo cáo chi tiết thông tin giao nhận (Dự kiến)",
+    //     link: "/reports/domestic/qc-handling",
+    //     temporaty: true,
+    //     responsive: true,
+    // },
+    // {
+    //     id: "0002",
+    //     name: "Báo cáo chi tiết tiến độ lắp đặt (Dự kiến)",
+    //     link: "/reports/domestic/defect-resolution",
+    //     temporaty: true,
+    // },
 ];
 
 
@@ -342,13 +302,21 @@ function Report() {
         );
     };
 
-    const filteredWoodDryingReports = useMemo(
-        () => filterReports(woodDryingReports),
-        [woodDryingReports, searchTerm]
+    const filteredSAYReports = useMemo(
+        () => filterReports(SAYReports),
+        [SAYReports, searchTerm]
     );
-    const filteredWoodProductingReports = useMemo(
-        () => filterReports(woodProductingReports),
-        [woodProductingReports, searchTerm]
+    const filteredCBGReports = useMemo(
+        () => filterReports(CBGReports),
+        [CBGReports, searchTerm]
+    );
+    const filteredVCNReports = useMemo(
+        () => filterReports(VCNReports),
+        [VCNReports, searchTerm]
+    );
+    const filteredDANDReports = useMemo(
+        () => filterReports(DANDReports),
+        [DANDReports, searchTerm]
     );
     const filteredQCReports = useMemo(
         () => filterReports(QCReports),
@@ -479,11 +447,11 @@ function Report() {
                                     style={gridStyle}
                                 >
                                     {/* Report Components */}
-                                    {filteredWoodDryingReports.length === 0 ? (
+                                    {filteredSAYReports.length === 0 ? (
                                         <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
                                     ):(
                                         <div className="flex flex-col gap-y-3">
-                                            {filteredWoodDryingReports.map(
+                                            {filteredSAYReports.map(
                                                 (item, index) => (
                                                     <Link
                                                         to={item.link}
@@ -517,11 +485,11 @@ function Report() {
                                     className="space-y-4"
                                     style={gridStyle}
                                 >
-                                    {filteredWoodProductingReports.length === 0 ? (
+                                    {filteredCBGReports.length === 0 ? (
                                         <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
                                     ):(
                                         <div className="flex flex-col gap-y-3">
-                                            {filteredWoodProductingReports.map(
+                                            {filteredCBGReports.map(
                                                 (item, index) => (
                                                     <Link
                                                         to={item.link}
@@ -559,11 +527,11 @@ function Report() {
                                     className="space-y-4"
                                     style={gridStyle}
                                 >   
-                                    {filteredQCReports.length === 0 ? (
+                                    {filteredVCNReports.length === 0 ? (
                                         <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
                                     ):(
                                         <div className="flex flex-col gap-y-3">
-                                            {filteredQCReports.map(
+                                            {filteredVCNReports .map(
                                                 (item, index) => (
                                                     <Link
                                                         to={item.link}
@@ -582,6 +550,10 @@ function Report() {
                                                                     true && (
                                                                     <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                 )}
+                                                                {item.responsive ==
+                                                                    true && (
+                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}                                                                
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -597,11 +569,11 @@ function Report() {
                                     className="space-y-4"
                                     style={gridStyle}
                                 >   
-                                    {filteredQCReports.length === 0 ? (
+                                    {filteredDANDReports.length === 0 ? (
                                         <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
                                     ):(
                                         <div className="flex flex-col gap-y-3">
-                                            {filteredQCReports.map(
+                                            {filteredDANDReports.map(
                                                 (item, index) => (
                                                     <Link
                                                         to={item.link}

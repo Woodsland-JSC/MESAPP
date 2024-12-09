@@ -94,7 +94,7 @@ const exampleData = [
   },
 ]
 
-function ErrorHandlingMeasureReport() {
+function DefectHandlingMeasureReport() {
   const navigate = useNavigate();
 
   const { user } = useAppContext();
@@ -500,4 +500,4 @@ function ErrorHandlingMeasureReport() {
   )
 }
 
-export default ErrorHandlingMeasureReport
+export default DefectHandlingMeasureReport

@@ -64,17 +64,15 @@ import CBGWoodDryingReport from "../pages/reports/wood-drying/wood-drying";
 import DryingQueueReport from "../pages/reports/wood-drying/drying-queue";
 
 import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail";
-// import ErrorHandlingMeasureReport from "../pages/reports/wood-working/error-handling-measure";
-// import DeliveredQuantityDetailReport from "../pages/reports/wood-working/delivered-quantity-detail";
-// import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 
-// import DefectQuantityReport from "../pages/reports/qc/defect-quantity";
-// import DefectResolutionReport from "../pages/reports/qc/defect-resolution";
-// import QCHandlingReport from "../pages/reports/qc/qc-handling";
+// VCN
+import DefectHandlingMeasureReport from "../pages/reports/plywoods/defect-handling";
+import DeliveredQuantityDetailReport from "../pages/reports/plywoods/delivered-quantity-detail";
+import ProductionVolumeByTimeReport from "../pages/reports/plywoods/production-volume-by-time";
 
-// import FinishedDetailsReceipt from "../pages/workspace/inland/finished-details-receipt";
-// import FinishedPackagingReceipt from "../pages/workspace/inland/finished-packaging-receipt";
-// import InstallationProgress from "../pages/workspace/inland/installation-progress";
+import DefectQuantityReport from "../pages/reports/wood-working/defect-quantity";
+import DefectResolutionReport from "../pages/reports/wood-working/defect-resolution";
+import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
@@ -287,9 +285,9 @@ function AppRoutes() {
                         }
                     />
 
-                    {/* New Report */}
+                    {/* SAY Report */}
                     <Route
-                        path="/reports/dried-wood-inventory"
+                        path="/reports/wood-drying/dried-wood-inventory"
                         element={
                             <ProtectedRoute>
                                 <DriedWoodInventoryReport />
@@ -297,7 +295,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/drying-kilns"
+                        path="/reports/wood-drying/drying-kilns"
                         element={
                             <ProtectedRoute>
                                 <DryingKilnsReport />
@@ -305,7 +303,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/drying-plan"
+                        path="/reports/wood-drying/drying-plan"
                         element={
                             <ProtectedRoute>
                                 <DryingPlanReport />
@@ -313,7 +311,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/drying-product"
+                        path="/reports/wood-drying/drying-product"
                         element={
                             <ProtectedRoute>
                                 <DryingProductReport />
@@ -321,7 +319,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/humidity-check"
+                        path="/reports/wood-drying/humidity-check"
                         element={
                             <ProtectedRoute>
                                 <HumidityCheckReport />
@@ -329,7 +327,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/kiln-checking"
+                        path="/reports/wood-drying/kiln-checking"
                         element={
                             <ProtectedRoute>
                                 <KilnCheckingReport />
@@ -337,7 +335,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/kiln-loading-history"
+                        path="/reports/wood-drying/kiln-loading-history"
                         element={
                             <ProtectedRoute>
                                 <KilnLoadingHistoryReport />
@@ -345,7 +343,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/kiln-loading"
+                        path="/reports/wood-drying/kiln-loading"
                         element={
                             <ProtectedRoute>
                                 <KilnLoadingReport />
@@ -353,7 +351,7 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/wood-drying"
+                        path="/reports/wood-drying/wood-drying"
                         element={
                             <ProtectedRoute>
                                 <CBGWoodDryingReport />
@@ -361,31 +359,35 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/drying-queue"
+                        path="/reports/wood-drying/drying-queue"
                         element={
                             <ProtectedRoute>
                                 <DryingQueueReport />
                             </ProtectedRoute>
                         }
                     />
+
+                    {/* CBG Reports */}
                     <Route
-                        path="/reports/delivery-detail"
+                        path="/reports/wood-working/delivery-detail"
                         element={
                             <ProtectedRoute>
                                 <DeliveryDetailReport />
                             </ProtectedRoute>
                         }
                     />
-                    {/* <Route
-                        path="/reports/error-handling-measure"
+                    <Route
+                        path="/reports/wood-working/defect-resolution"
                         element={
                             <ProtectedRoute>
-                                <ErrorHandlingMeasureReport />
+                                <DefectResolutionReport />
                             </ProtectedRoute>
                         }
                     />
+
+                    {/* VCN Reports */}
                     <Route
-                        path="/reports/delivered-quantity-details"
+                        path="/reports/plywoods/delivered-quantity-details"
                         element={
                             <ProtectedRoute>
                                 <DeliveredQuantityDetailReport />
@@ -393,30 +395,32 @@ function AppRoutes() {
                         }
                     />
                     <Route
-                        path="/reports/production-volume-by-time"
+                        path="/reports/plywoods/defect-handling"
+                        element={
+                            <ProtectedRoute>
+                                <DefectHandlingMeasureReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/plywoods/production-volume-by-time"
                         element={
                             <ProtectedRoute>
                                 <ProductionVolumeByTimeReport />
                             </ProtectedRoute>
                         }
                     />
-                    <Route
+
+                    {/* <Route
                         path="/reports/defect-quantity"
                         element={
                             <ProtectedRoute>
                                 <DefectQuantityReport />
                             </ProtectedRoute>
                         }
-                    />
-                    <Route
-                        path="/reports/defect-resolution"
-                        element={
-                            <ProtectedRoute>
-                                <DefectResolutionReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
+                    /> */}
+                    
+                    {/* <Route
                         path="/reports/qc-handling"
                         element={
                             <ProtectedRoute>
