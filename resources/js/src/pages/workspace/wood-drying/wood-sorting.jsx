@@ -1792,7 +1792,7 @@ function WoodSorting() {
                                     >
                                         Thêm vào pallet
                                     </button>
-                                    <button
+                                    {/* <button
                                         type="button"
                                         onClick={() => {
                                             console.log("Pallet hiện tại đang có: ", quyCachList)
@@ -1801,7 +1801,7 @@ function WoodSorting() {
                                         disabled={createPalletLoading}
                                     >
                                         Kiểm tra
-                                    </button>
+                                    </button> */}
                                 </div>
                             </form>
                         </section>
