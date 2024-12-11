@@ -46,10 +46,10 @@ function PalletCard(props) {
 
     return (
         <div className="border-2 border-[#c6d3da] rounded-xl">
-            <div className="flex items-center justify-between px-2 pr-4 bg-[#F6F8F9] rounded-t-xl ">
-                <div className="text-[#17506B] xl:text-xl font-semibold text-lg px-4 py-3 w-[85%]">
-                    <span>{itemCode} - </span>
-                    {itemName}
+            <div className="flex items-center justify-between  pr-4 bg-[#F6F8F9] rounded-t-xl ">
+                <div className="text-[#17506B] xl:text-xl flex flex-col font-semibold text-lg px-4 py-3 w-[85%]">
+                    <span className="text-xs font-medium text-gray-500">{itemCode}</span>
+                    <span>{itemName}</span>
                 </div>
                 <button
                     className="flex justify-end text-[#17506B] text-3xl cursor-pointer w-fit disabled:text-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"

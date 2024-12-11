@@ -291,7 +291,6 @@ function WoodSorting() {
         if (validateData()) {
             try {
                 setIsLoading(true);
-
                 const data = {
                     woodType: selectedWoodType,
                     batchId: batchId,
@@ -307,29 +306,44 @@ function WoodSorting() {
                     selectedDryingMethod.batchNum
                 );
 
-                console.log("2. Get thông tin từ ItemCode:", response);
+                console.log("2. Thông tin api trả về:", response);
+
+                // Quy ước validate quy cách:
+                // - Một pallet chỉ chứa tối đa 2 quy cách khác nhau
 
                 if (response && response.length > 0) {
-                    response.forEach((item) => {
-                        const quyCach = `${item.CDay}x${item.CRong}x${item.CDai}-${item.BatchNum}`;
-                        if (!quyCachList.includes(quyCach)) {
-                            setQuyCachList((prevList) => [
-                                ...prevList,
-                                quyCach,
-                            ]);
-                        }
-                        if (quyCachList.includes(quyCach)) {
-                            toast.error("Quy cách đã tồn tại trong danh sách.");
-                            return;
-                        } else if (
-                            quyCachList.length >= 2 &&
-                            !quyCachList.includes(quyCach)
-                        ) {
-                            toast.error(
-                                "Một pallet chỉ chứa tối đa 2 quy cách."
-                            );
-                            return;
+                    response.map((item, index) => {
+                        
+                        const quyCach = `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`;
+                        const existingQuyCach = quyCachList.find((item) => item.key === quyCach);
+
+                        if (existingQuyCach) {
+                            // Nếu đã tồn tại quy cách, kiểm tra BatchNum
+                            if (existingQuyCach.batchNums.includes(item.BatchNum)) {
+                                toast.error("Quy cách đã tồn tại trong pallet.");
+                                return; 
+                            } else {
+                                // Nếu chưa có BatchNum, thêm vào danh sách
+                                existingQuyCach.batchNums.push(item.BatchNum);
+                                console.log("BatchNum mới đã được thêm vào quy cách:", quyCach);
+                            }
                         } else {
+                            // Nếu chưa có quy cách, thêm quy cách mới với BatchNum
+                            if (quyCachList.length >= 2) {
+                                toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
+                                return; // Dừng nếu vượt quá 2 quy cách
+                            }
+                        
+                            quyCachList.push({
+                                key: quyCach,
+                                batchNums: [item.BatchNum],
+                            });
+                            console.log("Quy cách mới đã được thêm:", quyCach);
+                        }
+                            console.log(
+                                "3.Danh sách item trong pallet: ",
+                                quyCachList
+                            );
                             const newPalletCard = (
                                 <PalletCard
                                     key={item.WhsCode + item.BatchNum}
@@ -347,7 +361,8 @@ function WoodSorting() {
                                     onDelete={() =>
                                         handleDeletePalletCard(
                                             item.WhsCode + item.BatchNum,
-                                            `${item.CDay}x${item.CRong}x${item.CDai}-${item.BatchNum}`
+                                            `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`,
+                                            item.BatchNum
                                         )
                                     }
                                     onQuantityChange={(quantity) => {
@@ -362,14 +377,10 @@ function WoodSorting() {
                                 ...prevPalletCards,
                                 newPalletCard,
                             ]);
-                            console.log(
-                                "Danh sách item trong pallet: ",
-                                palletCards
-                            );
-                            toast.success("Đã thêm vào danh sách");
-                        }
+                            
+                            toast.success("Quy cách gỗ đã được chất lên pallet.");
+
                     });
-                    console.log("Danh sách Quy Cach: ", quyCachList);
                 } else {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
                     return;
@@ -383,15 +394,26 @@ function WoodSorting() {
         }
     };
 
-    const handleDeletePalletCard = (id, quyCach) => {
-        setQuyCachList((prevList) =>
-            prevList.filter((item) => item !== quyCach)
-        );
-        console.log("Danh sách Quy Cach: ", quyCachList);
+    const handleDeletePalletCard = (id, quyCach, batchNum) => {
+        setQuyCachList((prevList) => {
+            // Tìm quy cách trong danh sách
+            const updatedList = prevList.map((item) => {
+                if (item.key === quyCach) {
+                    const batchNums = item.batchNums.filter((bn) => bn !== batchNum);
+                    if (batchNums.length === 0) {
+                        return null;
+                    }
+                    return { ...item, batchNums };
+                }
+                return item;
+            });
+            return updatedList.filter((item) => item !== null);
+        });
+        console.log("Cập nhật Danh sách Quy Cach sau khi xóa: ", quyCachList);
         setPalletCards((prevPalletCards) =>
             prevPalletCards.filter((card) => card.key !== id)
         );
-        toast("Đã xóa khỏi danh sách");
+        toast("Quy cách đã được xóa khỏi pallet.");
     };
 
     const handlePalletQuantityChange = (id, quantity) => {
@@ -1768,7 +1790,17 @@ function WoodSorting() {
                                         className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                         disabled={createPalletLoading}
                                     >
-                                        Thêm vào danh sách
+                                        Thêm vào pallet
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log("Pallet hiện tại đang có: ", quyCachList)
+                                        } }
+                                        className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                        disabled={createPalletLoading}
+                                    >
+                                        Kiểm tra
                                     </button>
                                 </div>
                             </form>
