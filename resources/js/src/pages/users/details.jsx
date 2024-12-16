@@ -442,7 +442,7 @@ function User() {
             }
 
             if (data.branches) {
-                const res = await usersApi.getFactoriesByBranchId(data.user.branch);
+                const res = await usersApi.getFactoriesByBranchId(data?.user?.branch);
 
                 const options = res.map((item) => ({
                     value: item.Code,

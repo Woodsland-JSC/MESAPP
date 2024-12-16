@@ -424,12 +424,12 @@ class QCController extends Controller
 
         // Tổ chuyển về
         $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
-        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=? and "ResName" is not null AND "U_KHOI"=?;';
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant])) {
+        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant, $request->KHOI])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $teamBack = array();
@@ -507,6 +507,7 @@ class QCController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'TO' => 'required',
+            'KHOI',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
@@ -570,14 +571,16 @@ class QCController extends Controller
             $solution[] = $row;
         }
 
+        $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS' : Auth::user()->plant;
+
         // Tổ chuyển về
         $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
-        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=? and "ResName" is not null AND "U_KHOI"=?;';
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_03, ['N', 'Y', Auth::user()->plant])) {
+        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant, $request->KHOI])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $teamBack = array();
@@ -1261,7 +1264,7 @@ class QCController extends Controller
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             $HistorySL = HistorySL::where('ObjType', 59)->get()->count();
 
-            //payloyd data receipt
+            //payload data receipt
             $ReceiptData = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "U_LSX" => $data->LSX,
@@ -1307,7 +1310,7 @@ class QCController extends Controller
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$dataIssue['BaseQty'] * (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch);
+                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch);
                     $documentCounter++;
                     $IssueData .= "Content-Type: application/http\n";
                     $IssueData .= "Content-Transfer-Encoding: binary\n\n";

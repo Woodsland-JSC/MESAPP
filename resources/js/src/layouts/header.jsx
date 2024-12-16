@@ -92,7 +92,7 @@ function Header(props) {
                         <div className="text-xs !py-0 text-gray-500">
                             Chi nhánh{""}
                         </div>
-                    <div className={`flex items-center uppercase font-bold text-md !py-0 bg-gradient-to-r ${user.branch === "1" ? "from-green-800 via-[#17506B] to-[#512272]" : user.branch === "3" ? "from-black via-[#17506B] to-[#066B9C]" : user.branch === "4" ? "from-violet-800 via-red-800 to-yellow-800" : "from-[#17506B] via-[#066B9C] to-[#17506B]"} bg-clip-text text-transparent`}>
+                    <div className={`flex items-center uppercase font-bold text-md !py-0 bg-gradient-to-r ${user?.branch === "1" ? "from-green-800 via-[#17506B] to-[#512272]" : user?.branch === "3" ? "from-black via-[#17506B] to-[#066B9C]" : user?.branch === "4" ? "from-violet-800 via-red-800 to-yellow-800" : "from-[#17506B] via-[#066B9C] to-[#17506B]"} bg-clip-text text-transparent`}>
                             {user?.branch === "1"
                                 ? "Thuận Hưng"
                                 : user?.branch === "3"

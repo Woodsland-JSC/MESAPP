@@ -67,7 +67,7 @@ if (!function_exists('playloadIssueCBG')) {
         $itemType = $row['ItemType'];
         $stock = $row['Stock'];
         if ($stock < $Qty) {
-            throw new \Exception('tồn kho không đủ để xuất');
+            throw new \Exception('Số lượng tồn ' + $ItemCode + ' tại kho ' + $WarehouseCode + ' không đủ để xuất.');
         }
         //2.allocate data
         $query = 'call "USP_AllocateIssue"(?,?,?,?)';

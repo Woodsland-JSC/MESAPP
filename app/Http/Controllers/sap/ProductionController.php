@@ -170,7 +170,7 @@ class ProductionController extends Controller
                             $awaitingStock = awaitingstocks::create([
                                 'notiId' => $notifi->id,
                                 'SubItemCode' => $subItem['SubItemCode'],
-                                'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                                'AwaitingQty' => $request->RejectQty,
                             ]);
                             break;
                         }
@@ -503,6 +503,7 @@ class ProductionController extends Controller
 
             $groupedResults[$subItemCode]['OnHand'] = $onHand;
         }
+        
          // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
         foreach ($groupedResults as &$item) {
             $awaitingQtySum = awaitingstocks::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');

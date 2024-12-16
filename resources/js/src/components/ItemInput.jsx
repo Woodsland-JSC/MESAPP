@@ -43,7 +43,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FaInstalod } from "react-icons/fa";
 import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
-import { MdDangerous } from "react-icons/md";
+import { MdAssignmentReturn, MdDangerous } from "react-icons/md";
 import { TbTrash } from "react-icons/tb";
 import { FaBox } from "react-icons/fa";
 import { FaClock } from "react-icons/fa";
@@ -1619,6 +1619,8 @@ const ItemInput = ({
                                                                     />
                                                                 </Box>
                                                             </div>
+
+                                                            
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2317,7 +2319,8 @@ const ItemInput = ({
                                                         </div>
                                                     ))}
                                         </div>
-
+                                        
+                                        {/* Ghi nhận lỗi */}
                                         <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-3 items-center">
                                                 <FaExclamationCircle className="w-7 h-7 text-red-700" />
@@ -2712,6 +2715,9 @@ const ItemInput = ({
                                                 />
                                             </Box>
                                         </div>
+
+                                        {/* Lịch sử trả lại */}
+                                        
                                     </>
                                 )}
                             </div>
