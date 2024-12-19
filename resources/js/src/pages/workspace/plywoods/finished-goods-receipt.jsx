@@ -366,6 +366,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             Tổ & Xưởng sản xuất
                                         </div>
                                         <Select
+                                            isDisabled={loadingData}
                                             ref={groupSelectRef}
                                             options={groupListOptions}
                                             defaultValue={selectedGroup}

@@ -493,7 +493,7 @@ function ControllerCard(props) {
             : progress === "ls"
             ? "Chạy lò sấy"
             : progress === "dg"
-            ? "Đánh giá mẻ sấy và xác nhận ra lò"
+            ? "Đánh giá mẻ sấy"
             : "";
 
     const content =
@@ -510,7 +510,7 @@ function ControllerCard(props) {
             </div>
         ) : progress === "vl" ? (
             <div>
-                <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 py-6">
+                <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 p-4">
                     <div className="pt-0 xl:w-[75%] w-full md:w-[85%]">
                         <label
                             htmlFor="company"
@@ -598,7 +598,7 @@ function ControllerCard(props) {
                     {/* ) : null} */}
                 </div>
                 {/* ) : null} */}
-                <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                     <div className="space-y-1 xl:w-[75%]">
                         <div className="font-semibold">Chú ý:</div>
                         <div>
@@ -635,7 +635,7 @@ function ControllerCard(props) {
             <div className="">
                 {status === 2 ? (
                     !dryingInProgress ? (
-                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
                                 <div className="font-semibold">Chú ý:</div>
                                 <div>
@@ -651,7 +651,7 @@ function ControllerCard(props) {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
                                 <div className="font-semibold">Chú ý:</div>
                                 <div>
@@ -666,7 +666,7 @@ function ControllerCard(props) {
                         </div>
                     )
                 ) : status === 3 && isReviewed === 0 ? (
-                        <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                        <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
                                 <div className="font-semibold">Chú ý:</div>
                                 <div>
@@ -680,7 +680,7 @@ function ControllerCard(props) {
                             </div>
                         </div>
                 ) : status === 3 && isReviewed === 1 ? (
-                    <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                    <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className=" space-y-1 w-full xl:w-[75%]">
                                 <div className="font-semibold">
                                     Tình trạng mẻ sấy:
@@ -700,7 +700,7 @@ function ControllerCard(props) {
             </div>
         ) : progress === "dg" ? (
             <div className="">
-                <div className="flex xl:flex-row flex-col items-end gap-x-4 px-6 py-6 xl:space-y-0 space-y-3">
+                <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                     {isReviewed === 1 && status === 3 ? (
                         <>
                             <div className=" space-y-1 w-full xl:w-[75%]">
@@ -741,10 +741,10 @@ function ControllerCard(props) {
     return (
         <div className="bg-white border-2 border-gray-300 rounded-xl">
             {/* Header */}
-            <div className="flex flex-col px-4 py-4 border-b border-gray-200">
+            <div className="flex flex-col p-3 border-b border-gray-200">
                 <div className="flex items-center gap-x-3 font-medium">
                     <PiCaretCircleDoubleRightFill className="text-2xl w-8 h-8 text-[#17506B]" />
-                    <div className="serif font-bold xl:text-2xl xl:w-full w-[70%] text-xl">
+                    <div className="serif font-bold xl:text-2xl xl:w-full w-[70%] text-[23px]">
                         Tiến trình: <span>{progressTitle}</span>
                     </div>
                 </div>

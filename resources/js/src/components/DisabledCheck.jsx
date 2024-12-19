@@ -453,12 +453,12 @@ const DisabledCheck = ({
     return (
         <>
             <div className="bg-white rounded-xl border-2 border-gray-300">
-                <div className="text-xl flex justify-between items-center font-medium border-b px-6 p-4 border-gray-200">
+                <div className="text-xl flex justify-between items-center font-medium border-b px-3 pr-4 p-3 border-gray-200">
                     <div className="flex gap-x-3 items-center ">
                         <div className="w-8 h-8">
                             <MdBuildCircle className="w-full h-full text-[#17506B]" />
                         </div>
-                        <div className="serif xl:text-2xl xl:w-full w-[70%] text-xl">
+                        <div className="serif font-bold xl:text-2xl xl:w-full w-[70%] text-[23px]">
                             Biên bản khảo sát tỉ lệ khuyết tật
                         </div>
                     </div>

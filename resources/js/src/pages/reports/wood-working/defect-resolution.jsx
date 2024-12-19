@@ -255,10 +255,10 @@ function DefectResolution() {
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
                                 <div className="text-sm text-[#17506B]">
-                                    Báo cáo kiểm định chất lượng
+                                    Báo cáo chế biến gỗ
                                 </div>
-                                <div className=" text-2xl font-semibold">
-                                    Báo cáo biện pháp xử lý lỗi (CBG)
+                                <div className="serif font-bold text-3xl">
+                                    Báo cáo biện pháp xử lý lỗi
                                 </div>
                             </div>
                         </div>
@@ -369,8 +369,8 @@ function DefectResolution() {
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
-                                        value="YS1"
-                                        label="Yên Sơn 1"
+                                        value="YS"
+                                        label="Yên Sơn"
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">

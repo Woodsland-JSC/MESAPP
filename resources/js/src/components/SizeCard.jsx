@@ -78,20 +78,20 @@ function SizeCard(props) {
     return (
         <div className="border-2 mb-4 border-gray-300 rounded-xl">
             {/* Header */}
-            <div className="bg-white rounded-t-xl flex justify-between gap-x-3 items-center border-b py-4 px-4  border-gray-300">
-                <div className="flex items-center gap-x-3 font-medium">
+            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col gap-2 bg-white rounded-t-xl justify-between gap-x-3 xl:items-center lg:items-center md:items-center border-b p-3 pr-4 border-gray-300">
+                <div className="flex items-start gap-x-3 font-medium">
                     <div className="w-9 h-9">
                         <IoScanCircleSharp className="text-3xl w-full h-full text-[#17506B]" />
                     </div>
-                    <div className="serif font-bold xl:text-2xl xl:w-full text-xl">
+                    <div className="serif font-bold xl:text-2xl xl:w-full text-[23px]">
                         Các kích thước pallet
                     </div>
                 </div>
                 <button
                     onClick={onOpen}
-                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium"
+                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium xl:mt-o lg:mt-0 md:mt-0 mt-2"
                 >
-                    Xem <span className="xl:inline-block lg:inline-block md:inline-block hidden" >tất cả</span>
+                    Xem tất cả
                 </button>
             </div>
 
@@ -150,34 +150,7 @@ function SizeCard(props) {
                 </ModalContent>
             </Modal>
 
-            <div className="bg-white flex justify-center rounded-b-xl p-6 py-3 space-y-4">
-                {/* List Items */}
-                {/* <div className="grid w-full py-1 overflow-x-auto">
-                        <div className=" flex flex-row mb-2 space-x-4 w-full">
-                        {palletData.length === 0 ? (
-                            <div className="h-[4.5rem] w-full flex flex-col justify-center items-center ">
-                                <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2"/>
-                                <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
-                            </div>
-                        ) : (
-                            <>
-                                {palletData.map((item) => (
-                                    <SizeListItem
-                                        planID={planID}
-                                        id={item.pallet}
-                                        size={item.size}
-                                        pallet={item.pallet}
-                                        Qty={item.Qty}
-                                        weight={item.Mass}
-                                        // onDelete={handleDelete}
-                                        onDelete={loadSizeData}
-                                    />
-                                ))}
-                            </>
-                        )}
-                            
-                        </div>
-                    </div> */}
+            <div className="bg-white flex justify-center rounded-b-xl p-4  py-3 space-y-4">
                 {isPalletLoading ? (
                     <div className="h=[10rem]">
                         <Spinner
@@ -218,8 +191,9 @@ function SizeCard(props) {
                             
                         </div>
                     </div>
-                )}
+                )}               
             </div>
+            
         </div>
     );
 }

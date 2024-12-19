@@ -364,7 +364,7 @@ function FinishedGoodsReceipt() {
                                             Tổ & Xưởng sản xuất
                                         </div>
                                         <Select
-                                            // isDisabled={true}
+                                            isDisabled={loadingData}
                                             ref={groupSelectRef}
                                             options={groupListOptions}
                                             defaultValue={selectedGroup}

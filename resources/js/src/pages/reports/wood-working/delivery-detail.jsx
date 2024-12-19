@@ -37,6 +37,7 @@ import { FaArrowDown } from "react-icons/fa";
 import { FaExclamation } from "react-icons/fa";
 import { FaMobileAlt } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
+import "../../../assets/styles/customTable.css"
 
 const ExampleOptions = [
     {
@@ -455,7 +456,7 @@ function DeliveryDetailReport() {
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
                                 <div className="text-sm mb-1 text-[#17506B]">
-                                    Báo cáo sản lượng
+                                    Báo cáo chế biến gỗ
                                 </div>
                                 <div className="serif text-3xl font-bold">
                                     Báo cáo thông tin chi tiết giao nhận

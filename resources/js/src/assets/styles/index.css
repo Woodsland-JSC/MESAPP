@@ -248,16 +248,6 @@ div:where(.swal2-container) {
     background-color: transparent !important;
 }
 
-/* Chỗ này Phước thêm className vào những <AgGridReact /> mà Phước cần thôi nhé, kh là ảnh hưởng global */
-.custom-grid .ag-row-footer{
-    background-color: #ffffff !important;
-    font-weight: 600;
-}
-
-.custom-grid .ag-row-last{
-    background-color: #B9E0F6 !important;
-} 
-
 /* ============ */
 
 .dots {

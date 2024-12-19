@@ -293,6 +293,7 @@ function WoodProductingQC() {
                                             Tổ & Xưởng sản xuất
                                         </div>
                                         <Select
+                                            isDisabled={loadingData}
                                             options={groupListOptions}
                                             defaultValue={selectedGroup}
                                             onChange={(value) => {

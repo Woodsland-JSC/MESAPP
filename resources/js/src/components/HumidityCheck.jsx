@@ -353,12 +353,12 @@ function HumidityCheck(props) {
     return (
         <div className="bg-white rounded-xl border-2 border-gray-300">
             {/* Header */}
-            <div className="flex justify-between items-center px-6 py-4 font-medium border-b border-gray-200">
+            <div className="flex justify-between items-center px-3 pr-4 py-3 font-medium border-b border-gray-200">
                 <div className="flex items-center gap-x-3">
                     <div className="w-8 h-8">
                         <RiWaterPercentFill className="w-full h-full text-[#17506B]" />
                     </div>
-                    <div className="serif xl:text-2xl xl:w-full w-[70%] text-xl">
+                    <div className="serif font-bold leading-[26px] xl:text-2xl xl:w-full w-[70%] text-[23px]">
                         Danh sách biên bản kiểm tra độ ẩm
                     </div>
                 </div>

@@ -96,13 +96,13 @@ function KilnCheck(props) {
 
     return (
         <div className="bg-white  rounded-xl border-2 border-gray-300 ">
-            <div className="bg-white flex items-center px-6 border-b rounded-t-xl border-gray-200 font-medium py-4">
-                <div className="flex items-center gap-x-3 font-medium">
+            <div className="bg-white flex items-center px-3 border-b rounded-t-xl border-gray-300 font-medium py-2.5">
+                <div className="flex items-center justify-center gap-x-3 font-medium">
                     <div className="w-9 h-9">
                         <HiMiniCheckCircle className="text-2xl w-[97%] h-full text-[#17506B]" />
                     </div>
 
-                    <div className="xl:text-xl xl:w-full  text-lg">
+                    <div className="serif font-bold xl:text-2xl xl:w-full  text-[23px]">
                         Biên bản kiểm tra lò sấy
                     </div>
                 </div>
@@ -113,10 +113,10 @@ function KilnCheck(props) {
                 <div class="relative rounded-b-xl overflow-x-auto">
                     <div className="xl:hidden lg:hidden md:hidden">
                         <div
-                            className="rounded-xl bg-green-50 hover:bg-gray-50 cursor-pointer xl:text-base  border border-green-200"
+                            className="rounded-xl bg-green-50 hover:bg-gray-50 cursor-pointer xl:text-base  border border-green-600"
                             onClick={onOpen}
                         >
-                            <div className="px-4 py-2.5 flex justify-between items-center border-b border-green-200">
+                            <div className="px-4 py-2.5 flex justify-between items-center border-b border-green-600">
                                 <div className="">
                                     <span className="text-lg font-semibold">
                                         #{checkData.NoCheck}
@@ -192,7 +192,7 @@ function KilnCheck(props) {
             </div>
             ) : (
                 <div className="text-center w-full py-5 text-gray-500">
-                    Chưa hoàn thành đánh giá mẻ sấy
+                    Chưa hoàn thành kiểm tra lò sấy
                 </div>
             )}
             

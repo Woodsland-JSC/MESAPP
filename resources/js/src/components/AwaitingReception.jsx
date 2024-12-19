@@ -185,8 +185,7 @@ const AwaitingReception = ({
                 onInputAlertDialogClose();
             }
         }
-    };
-    
+    };  
 
     const handleRejectReceipt = async () => {
         setRejectLoading(true);

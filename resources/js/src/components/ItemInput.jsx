@@ -48,6 +48,9 @@ import { TbTrash } from "react-icons/tb";
 import { FaBox } from "react-icons/fa";
 import { FaClock } from "react-icons/fa";
 import { FaDotCircle } from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "../assets/styles/datepicker.css";
 
 const ItemInput = ({
     data,
@@ -127,6 +130,9 @@ const ItemInput = ({
     const [dialogType, setDialogType] = useState(null);
     const [selectedQCLogging, setSelectedQCLogging] = useState(null);
 
+    const [fromDate, setFromDate] = useState(new Date().setHours(0, 0, 0, 0));
+    const [toDate, setToDate] = useState(new Date().setHours(23, 59, 59, 999));
+
     const openInputModal = async (item) => {
         console.log("Item đã chọn: ", item);
         console.log("Nhà máy hiện tại: ", selectedFactory);
@@ -160,6 +166,7 @@ const ItemInput = ({
                     remainQty: res.remainQty,
                     WaitingConfirmQty: res.WaitingConfirmQty,
                     WaitingQCItemQty: res.WaitingQCItemQty,
+                    returnedData: res.returnedHistory,
                 });
                 onModalOpen();
             } catch (error) {
@@ -272,6 +279,9 @@ const ItemInput = ({
         setFaults({});
         setRongData(null);
         setSelectedItemDetails(null);
+        setFromDate(new Date().setHours(0, 0, 0, 0));
+        setToDate(new Date().setHours(23, 59, 59, 999));
+        setFilteredReturnedData([]);
     };
 
     const handleSubmitQuantityRong = async () => {
@@ -918,6 +928,64 @@ const ItemInput = ({
                 setDeleteProcessingLoading(false);
             }
         }
+    };
+
+    // Lọc hàng trả về
+    const [filteredReturnedData, setFilteredReturnedData] = useState([]);
+    const [returnedFilterLoading, setReturnedFilterLoading] = useState(false);
+
+    // Định dạng ngày giờ
+    const handleFromDateChange = (date) => {
+        if (date) {
+            const fromDateTime = new Date(date);
+            fromDateTime.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00:00
+            setFromDate(fromDateTime);
+        } else {
+            setFromDate(null);
+        }
+    };
+
+    const handleToDateChange = (date) => {
+        if (date) {
+            const toDateTime = new Date(date);
+            toDateTime.setHours(23, 59, 59, 999); // Đặt thời gian về 23:59:59
+            setToDate(toDateTime);
+        } else {
+            setToDate(null);
+        }
+    };
+
+    const handleSearch = () => {
+        if (!fromDate || !toDate) {
+            toast.error("Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+
+        if (fromDate > toDate) {
+            toast.error("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+            return;
+        }
+
+        // Bắt đầu loading
+        setReturnedFilterLoading(true);
+
+        // Đặt thời gian 1 giây để loading kết thúc
+        setTimeout(() => {
+            if (selectedItemDetails?.returnedData) {
+                const filtered = selectedItemDetails.returnedData.filter(
+                    (item) => {
+                        const confirmDate = new Date(item.confirm_at);
+                        return confirmDate >= fromDate && confirmDate <= toDate;
+                    }
+                );
+                setFilteredReturnedData(filtered);
+            } else {
+                setFilteredReturnedData([]);
+            }
+
+            // Kết thúc loading sau 1 giây
+            setReturnedFilterLoading(false);
+        }, 1000);
     };
 
     useEffect(() => {
@@ -1619,8 +1687,6 @@ const ItemInput = ({
                                                                     />
                                                                 </Box>
                                                             </div>
-
-                                                            
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2319,7 +2385,7 @@ const ItemInput = ({
                                                         </div>
                                                     ))}
                                         </div>
-                                        
+
                                         {/* Ghi nhận lỗi */}
                                         <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-3 items-center">
@@ -2334,23 +2400,17 @@ const ItemInput = ({
                                             >
                                                 <div className="w-full flex items-center justify-between gap-3">
                                                     <div className="">
-                                                        Tổng số lượng ghi nhận
-                                                        lỗi:{" "}
+                                                        Tổng số lượng ghi nhận lỗi:{" "}
                                                     </div>
                                                     <div className="rounded-lg cursor-pointer px-3 py-1 text-white bg-red-800 hover:bg-red-500 duration-300">
-                                                        {formatNumber(
-                                                            Number(
-                                                                selectedItemDetails?.pendingErrors?.reduce(
-                                                                    (
-                                                                        total,
-                                                                        item
-                                                                    ) =>
-                                                                        total +
-                                                                        item.amount,
-                                                                    0
-                                                                )
-                                                            )
-                                                        ) || 0}
+                                                    {formatNumber(
+                                                        Number(
+                                                            selectedItemDetails?.notifications.filter(
+                                                                (notif) =>
+                                                                    notif.confirm === 0 && notif.type === 1
+                                                            ).length || 0 // Đóng đúng cặp ở đây
+                                                        )
+                                                    )}
                                                     </div>
                                                 </div>
                                             </Alert>
@@ -2717,7 +2777,155 @@ const ItemInput = ({
                                         </div>
 
                                         {/* Lịch sử trả lại */}
-                                        
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 pb-2 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                            <div className="flex space-x-2 pb-1 items-center">
+                                                <MdAssignmentReturn className="w-8 h-8 text-orange-600" />
+                                                <div className="font-semibold text-lg ">
+                                                    Lịch sử trả hàng
+                                                </div>
+                                            </div>
+
+                                            {/* Tìm kiếm ngày giờ */}
+                                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col items-end  space-x-3 pb-2">
+                                                <div className="flex w-full space-x-3 w-f">
+                                                    <div className="w-full">
+                                                        <label
+                                                            htmlFor="indate"
+                                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                                        >
+                                                            Từ ngày
+                                                        </label>
+                                                        <DatePicker
+                                                            selected={fromDate}
+                                                            onChange={(date) =>
+                                                                handleFromDateChange(
+                                                                    date
+                                                                )
+                                                            }
+                                                            className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-full">
+                                                        <label
+                                                            htmlFor="indate"
+                                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                                        >
+                                                            Đến ngày
+                                                        </label>
+                                                        <DatePicker
+                                                            selected={toDate}
+                                                            onChange={(date) =>
+                                                                handleToDateChange(
+                                                                    date
+                                                                )
+                                                            }
+                                                            className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    className="flex justify-center items-end text-white rounded-lg h-fit p-[7px] px-3 bg-orange-700 xl:w-1/3 lg:w-1/3 md:w-1/3 w-full xl:mt-0 lg:mt-0 md:mt-0 mt-2 active:scale-[.95]  active:duration-75  transition-all"
+                                                    onClick={handleSearch}
+                                                >
+                                                    Tìm kiếm{" "}
+                                                </button>
+                                            </div>
+
+                                            {/* Thông báo kết quả */}
+                                            {returnedFilterLoading ? (
+                                                <div className="flex justify-center space-x-3 py-3">
+                                                    <Spinner                             
+                                                        thickness="4px"
+                                                        speed="0.65s"
+                                                        emptyColor="gray.200"
+                                                        color="#155979"
+                                                    />
+                                                    <div>Đang tải </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {filteredReturnedData.length >
+                                                    0 ? (
+                                                        <div>
+                                                            <div className="text-orange-600 text-sm pb-2">
+                                                                Có{" "}{filteredReturnedData.length}{" "}kết quả
+                                                            </div>
+                                                            {filteredReturnedData.map(
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="bg-orange-50 px-4 py-2 rounded-xl flex items-center border-orange-200 border mb-3"
+                                                                    >
+                                                                        <div className="w-full flex items-center text-[15px] justify-between gap-3">
+                                                                            <div>
+                                                                                <div className="xl:hidden lg:hidden md:hidden block  text-orange-700 text-2xl">
+                                                                                    {Number(item.Quantity)}
+                                                                                </div>
+                                                                                <div className="flex space-x-1 font-semibold">
+                                                                                    <div>
+                                                                                        Người
+                                                                                        trả
+                                                                                        lại:
+                                                                                    </div>
+                                                                                    <div className="text-orange-700">
+                                                                                        {
+                                                                                            item.last_name
+                                                                                        }{" "}
+                                                                                        {
+                                                                                            item.first_name
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex text-sm">
+                                                                                    <span className="font-medium text-gray-600">
+                                                                                        Thời
+                                                                                        gian
+                                                                                        trả:
+                                                                                    </span>
+                                                                                    <span className="ml-1 text-gray-600">
+                                                                                        {
+                                                                                            item.confirm_at
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex text-sm">
+                                                                                    <span className="font-medium text-gray-600">
+                                                                                        Lý
+                                                                                        do
+                                                                                        trả:
+                                                                                    </span>
+                                                                                    <span className="ml-1 text-gray-600">
+                                                                                        {
+                                                                                            item.text
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="xl:block lg:block md:block hidden  rounded-lg cursor-pointer px-3 py-1 font-semibold bg-orange-200 text-orange-700 hover:bg-orange-500 duration-300">
+                                                                                {Number(
+                                                                                    item.Quantity
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center text-gray-600 py-3">
+                                                            Không tìm thấy kết quả.
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </>
                                 )}
                             </div>
@@ -2767,7 +2975,7 @@ const ItemInput = ({
                                 "CBG" || "VCN" || "DAND"
                             ) && (
                                 <button
-                                    className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full text-white"
+                                    className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                     type="button"
                                     onClick={onAlertDialogOpen}
                                 >

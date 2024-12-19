@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use App\Models\plandryings;
+use App\Models\planDryings;
 
 class UniqueOvenStatusRule implements ValidationRule
 {

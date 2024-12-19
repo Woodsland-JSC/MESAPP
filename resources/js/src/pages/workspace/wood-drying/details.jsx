@@ -175,11 +175,11 @@ function Details() {
             <div>
                 <div className="flex justify-center bg-transparent">
                     {/* Section */}
-                    <div className="w-screen p-6 px-5 xl:p-6 xl:px-32 border-t border-gray-200">
+                    <div className="w-screen p-1 px-4 xl:p-3 xl:px-32 border-t border-gray-200">
                         {/* Header */}
-                        <div className="flex items-center text-2xl font-bold mb-6 gap-x-6">
+                        <div className="flex items-center text-2xl font-bold mb-4 gap-x-4">
                             <button
-                                className="p-2 hover:bg-gray-200 rounded-full active:scale-[.95] active:duration-75 transition-all"
+                                className="p-3 bg-gray-300 rounded-full active:scale-[.95] active:duration-75 transition-all"
                                 onClick={goBack}
                             >
                                 <HiArrowLeft />
@@ -194,8 +194,8 @@ function Details() {
                                 skeletonHeight="5"
                                 borderRadius="lg"
                             >
-                                <div>
-                                    <div className="serif xl:text-3xl text-2xl font-bold text-[#17506B] ">
+                                <div className="flex flex-col justify-center">
+                                    <div className="serif xl:text-3xl text-[27px] font-bold text-[#17506B] ">
                                         <div className="text-gray-800 xl:inline-block lg:inline-block md:inline-block hidden">Chi tiết mẻ sấy:</div>
                                         <div className="xl:hidden lg:hidden md:hidden inline-block">Mẻ sấy:</div>{" "}
                                         <span>{BOWData.Code}</span>{" "}
@@ -209,8 +209,8 @@ function Details() {
                         </div>
 
                         {/* Content */}
-                        <div className="gap-6">
-                            <div className="xl:grid xl:grid-cols-3 xl:gap-6 xl:space-y-0 space-y-6">
+                        <div className="gap-4">
+                            <div className="xl:grid xl:grid-cols-3 xl:gap-4  xl:space-y-0 space-y-4">
                                 <Skeleton
                                     isLoaded={!loading}
                                     borderRadius="2xl"

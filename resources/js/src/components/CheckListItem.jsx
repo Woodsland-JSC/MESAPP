@@ -510,7 +510,7 @@ function CheckListItem(props) {
                                         <PopoverBody>
                                             <div className="space-y-2">
                                                 {Object.entries(
-                                                    fixedSamples
+                                                    fixedSamples || {}
                                                 ).map(([key, value], index) => (
                                                     <div key={key}>
                                                         Mẫu {index + 1} :{" "}
@@ -662,7 +662,7 @@ function CheckListItem(props) {
                                         </PopoverHeader>
                                         <PopoverBody>
                                             <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 gap-2 space-y-2">
-                                                {Object.entries(fixedFanValues).map(
+                                                {Object.entries(fixedFanValues || {}).map(
                                                     ([key, value]) => (
                                                         <div
                                                             key={key}
