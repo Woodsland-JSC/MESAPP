@@ -167,7 +167,7 @@ function AppRoutes() {
                     <Route
                         path="/workspace/wood-working/qc"
                         element={
-                            <ProtectedRoute permissionsRequired={['CBG']}>
+                            <ProtectedRoute permissionsRequired={['QCCBG']}>
                                 <WoodProductingQC />
                             </ProtectedRoute>
                         }
