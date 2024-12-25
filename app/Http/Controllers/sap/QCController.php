@@ -100,7 +100,7 @@ class QCController extends Controller
             'SLMau' => 'required',
             'SLMoTop' => 'required',
             'SLCong' => 'required',
-            'note' => 'required',
+            'note',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -221,10 +221,11 @@ class QCController extends Controller
     {
         $result = DB::table('planDryings as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
-            ->join('plants as c', 'b.plant', '=', 'c.Code')
+            // ->join('plants as c', 'b.plant', '=', 'c.Code')
             ->where('a.PlanID', $req->PlanID)
-            ->select('c.Name', 'a.Oven')
+            ->select('a.Oven')
             ->first();
+            
         if ($req->Type == 'DA') {
             $temp =  humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         } else {
@@ -234,7 +235,7 @@ class QCController extends Controller
         $header = [
             'Date' => Carbon::now()->format('Y-m-d'),
             'PlanID' => $req->PlanID,
-            'Factory' => $result->Name,
+            // 'Factory' => $result->Name,
             'Oven' => $result->Oven,
             'TempData' => $temp,
             'No' => 135234
@@ -435,6 +436,22 @@ class QCController extends Controller
         $teamBack = array();
         while ($row = odbc_fetch_array($stmt_03)) {
             $teamBack[] = $row;
+        }
+
+        // If $userPlant is 'YS', add additional result
+        if ($userPlant == 'YS') {
+            $additionalQuery = 'select "VisResCode" "Code","ResName" "Name" 
+            from "ORSC" where "VisResCode" = ?;';
+            $additionalStmt = odbc_prepare($conDB, $additionalQuery);
+            if (!$additionalStmt) {
+            throw new \Exception('Error preparing additional SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($additionalStmt, ['NMYS-XSP-SP1'])) {
+            throw new \Exception('Error executing additional SQL statement: ' . odbc_errormsg($conDB));
+            }
+            while ($additionalRow = odbc_fetch_array($additionalStmt)) {
+            $teamBack[] = $additionalRow;
+            }
         }
 
         // Nguồn lỗi

@@ -35,30 +35,30 @@ function UrlSAPServiceLayer()
     $sapUrl = config('sap.SAP_URL');
     return $sapUrl;
 }
-function WarehouseCS()
-{
+    function WarehouseCS()
+    {
 
-    $conDB = (new ConnectController)->connect_sap();
+        $conDB = (new ConnectController)->connect_sap();
 
-    $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_Flag"=? and "Inactive"=?;';
-    $stmt = odbc_prepare($conDB, $query);
-    if (!$stmt) {
-        throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        $query = 'select TOP 1 "WhsCode","WhsName" from OWHS where "BPLid"=? and "U_FAC"=? and "U_Flag"=? and "Inactive"=?;';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [Auth::user()->branch, Auth::user()->plant, 'CS', 'N'])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $WhsCode = "";
+        if ($stmt && odbc_fetch_row($stmt)) {
+            $WhsCode = odbc_result($stmt, "WhsCode");
+        } else {
+            $WhsCode = "-1";
+        }
+        odbc_close($conDB);
+        return $WhsCode;
     }
-    if (!odbc_execute($stmt, [Auth::user()->branch, 'CS', 'N'])) {
-        // Handle execution error
-        // die("Error executing SQL statement: " . odbc_errormsg());
-        throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-    }
-    $WhsCode = "";
-    if ($stmt && odbc_fetch_row($stmt)) {
-        $WhsCode = odbc_result($stmt, "WhsCode");
-    } else {
-        $WhsCode = "-1";
-    }
-    odbc_close($conDB);
-    return $WhsCode;
-}
 function calculator($id)
 {
     $result = DB::table('plan_detail as b')

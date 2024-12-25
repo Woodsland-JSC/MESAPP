@@ -36,7 +36,7 @@ import { MdWaterDrop } from "react-icons/md";
 import { HiMiniSparkles } from "react-icons/hi2";
 import { MdNoteAlt } from "react-icons/md";
 import { HiOutlineTrash } from "react-icons/hi";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoCloseSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { addDays, format, add } from "date-fns";
 import compareDesc from "date-fns/compareDesc/index.js";
@@ -45,54 +45,6 @@ import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { PiSealWarningFill } from "react-icons/pi";
 import { MdDoNotDisturbOnTotalSilence } from "react-icons/md";
 import { Spinner } from "@chakra-ui/react";
-
-const validationSchema = Yup.object().shape({
-    pallet: Yup.number()
-        .positive("Phải là số nguyên dương")
-        .integer("Phải là số nguyên")
-        .min(1, "Phải là số nguyên dương lớn hơn 0")
-        .required("Trường bắt buộc"),
-    sample: Yup.number()
-        .positive("Phải là số nguyên dương")
-        .integer("Phải là số nguyên")
-        .min(1, "Phải là số nguyên dương lớn hơn 0")
-        .test(
-            "is-less-than-or-equal",
-            "Số lượng mẫu phải ≤ số lượng pallet",
-            function (value) {
-                const palletValue = this.parent.pallet;
-                return !palletValue || !value || value <= palletValue;
-            }
-        )
-        .required("Trường bắt buộc"),
-    disability: Yup.number()
-        .positive("Phải là số nguyên dương")
-        .integer("Phải là số nguyên")
-        .min(0, "Phải là số nguyên dương lớn hơn 0")
-        .test(
-            "is-less-than-or-equal",
-            "Số lượng mo, tóp phải ≤ số lượng mẫu",
-            function (value) {
-                const sampleValue = this.parent.sample;
-                return !sampleValue || !value || value <= sampleValue;
-            }
-        )
-        .required("Trường bắt buộc"),
-    curve: Yup.number()
-        .positive("Phải là số nguyên dương")
-        .integer("Phải là số nguyên")
-        .min(0, "Phải là số nguyên dương lớn hơn 0")
-        .test(
-            "is-less-than-or-equal",
-            "Số lượng cong phải ≤ số lượng mẫu",
-            function (value) {
-                const sampleValue = this.parent.sample;
-                return !sampleValue || !value || value <= sampleValue;
-            }
-        )
-        .required("Trường bắt buộc"),
-    note: Yup.string().max(255, "Độ dài tối đa là 255 kí tự"),
-});
 
 //
 const DisabledCheckCard = (props) => {
@@ -105,12 +57,20 @@ const DisabledCheckCard = (props) => {
         disabledRate,
         curvedRate,
         note,
+        createdDate,
     } = props;
 
     return (
-        <div className="w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 \  min-w-[250px] p-4 px-6 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
-            <div className="rounded-full text-sm font-semibold bg-gray-200 mb-4 p-1 px-4 w-fit">
-                ID: {id}
+        <div className="relative w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 min-w-[250px] p-4 px-4 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
+            <div
+                className="absolute -top-1 -right-2.5 bg-gray-800 text-white flex w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all"
+                // onClick={onOpen}
+            >
+                <IoCloseSharp className="text-white " />
+            </div>
+            <div></div>
+            <div className="rounded-lg text-sm font-semibold bg-gray-300 mb-4 p-1 px-3 w-fit">
+                {createdDate}
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
                 <div className="text-gray-600 font-medium">Số pallet:</div>
@@ -153,12 +113,12 @@ const DisabledCheckCard = (props) => {
 };
 
 const DisabledCheck = ({
+    planID,
     disabilityList,
     generalInfo,
     code,
     oven,
     reason,
-    planID,
 }) => {
     let palletInput = useRef();
     let sampleInput = useRef();
@@ -220,11 +180,22 @@ const DisabledCheck = ({
         totalOfDisabilities: null,
     });
 
-    // Load Data
-    useEffect(() => {
-        loadCurrentDisabledRecords();
-        loadDisabledRecordList();
-    }, []);
+    const loadCurrentDisabledRecords = async () => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const planID = queryParams.get("id"); // Lấy giá trị của 'id' từ URL
+        console.log("2. Giá trị planID nhận được là: ", planID);
+        try {
+            const response = await palletsApi.getTempDisabledRecords(
+                planID,
+                "KT"
+            );
+            setDisabledDetails(response.TempData);
+        } catch (error) {
+            console.error("Lỗi khi gọi API:", error);
+        } finally {
+            setLoadCurrentRecord(false);
+        }
+    };
 
     const loadDisabledRecordList = async () => {
         palletsApi
@@ -239,37 +210,140 @@ const DisabledCheck = ({
             });
     };
 
-    const loadCurrentDisabledRecords = async () => {
-        try {
-            const response = await palletsApi.getTempDisabledRecords(planID);
-            setDisabledDetails(response.TempData);
-        } catch (error) {
-            console.error("Lỗi khi gọi API:", error);
-        } finally {
-            setLoadCurrentRecord(false);
-        }
-    };
+    // Load Data
+    useEffect(() => {
+        loadCurrentDisabledRecords();
+        // loadDisabledRecordList();
+    }, []);
 
     // Handle Add New Record
-    const addNewDisabledDetails = async (values, { resetForm }) => {
+    // const addNewDisabledDetails = async (values, { resetForm }) => {
+    //     if (!values.pallet) {
+    //         toast.error("Vui lòng nhập số pallet.");
+    //         palletInput.current.focus();
+    //         return;
+    //     }
+    //     if (!values.sample) {
+    //         toast.error("Vui lòng nhập số lượng mẫu.");
+    //         sampleInput.current.focus();
+    //         return;
+    //     }
+    //     if (!values.disability) {
+    //         toast.error("Vui lòng nhập số lượng mo, tóp.");
+    //         disabilityInput.current.focus();
+    //         return;
+    //     }
+    //     if (!values.curve || !values.curve) {
+    //         toast.error("Vui lòng nhập số lượng cong.");
+    //         curveInput.current.focus();
+    //         return;
+    //     }
+
+    //     const currentDisabledRate = (
+    //         (values.disability / values.sample) *
+    //         100
+    //     ).toFixed(2);
+    //     const currentCurvedRate = (
+    //         (values.curve / values.sample) *
+    //         100
+    //     ).toFixed(2);
+
+    //     const detailData = {
+    //         disabledRate: currentDisabledRate,
+    //         curvedRate: currentCurvedRate,
+    //     };
+
+    //     const recordData = {
+    //         PlanID: planID,
+    //         SLMau: values.sample,
+    //         SLPallet: values.pallet,
+    //         SLMoTop: values.disability,
+    //         SLCong: values.curve,
+    //         note: values.note,
+    //     };
+
+    //     console.log("Dữ liệu sẽ được gửi đi:", recordData);
+    //     try {
+    //         const response = await palletsApi.addDisabledRecord(recordData);
+    //         console.log("Trả về:", response.plandrying);
+    //         await setDisabledDetails(response.plandrying, detailData);
+    //         toast.success("Thông tin khảo sát đã được ghi nhận");
+
+    //         resetForm();
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //     }
+    // };
+
+    const addNewDisabledDetails = async (values, resetForm) => {
+        // Validation xử lý tại đây
         if (!values.pallet) {
-            toast.error("Vui lòng nhập số pallet.");
-            palletInput.current.focus();
+            toast.error("Vui lòng nhập mã pallet.");
+            if (palletInput.current) {
+                palletInput.current.focus();
+            }
             return;
         }
         if (!values.sample) {
             toast.error("Vui lòng nhập số lượng mẫu.");
-            sampleInput.current.focus();
+            if (sampleInput.current) {
+                sampleInput.current.focus();
+            }
+            return;
+        }
+        if (values.sample <= 0) {
+            toast.error("Số lượng mẫu phải lớn hơn 0.");
+            if (sampleInput.current) {
+                sampleInput.current.focus();
+            }
             return;
         }
         if (!values.disability) {
             toast.error("Vui lòng nhập số lượng mo, tóp.");
-            disabilityInput.current.focus();
+            if (disabilityInput.current) {
+                disabilityInput.current.focus();
+            }
             return;
         }
-        if (!values.curve || !values.curve) {
+        if (values.disability < 0) {
+            toast.error("Số lượng mo, tóp phải lớn hơn hoặc bằng 0.");
+            if (disabilityInput.current) {
+                disabilityInput.current.focus();
+            }
+            return;
+        }
+        if (values.disability > values.sample) {
+            toast.error("Số lượng mo, tóp không được lớn hơn số lượng mẫu.");
+            if (disabilityInput.current) {
+                disabilityInput.current.focus();
+            }
+            return;
+        }
+        if (!values.curve) {
             toast.error("Vui lòng nhập số lượng cong.");
-            curveInput.current.focus();
+            if (curveInput.current) {
+                curveInput.current.focus();
+            }
+            return;
+        }
+        if (values.disability < 0) {
+            toast.error("Số lượng cong phải phải lớn hơn hoặc bằng 0.");
+            if (curveInput.current) {
+                curveInput.current.focus();
+            }
+            return;
+        }
+        if (values.disability > values.sample) {
+            toast.error("Số lượng cong không được lớn hơn số lượng mẫu.");
+            if (curveInput.current) {
+                curveInput.current.focus();
+            }
+            return;
+        }
+        if (Number(values.disability) + Number(values.curve) > values.sample) {
+            toast.error(
+                "Tổng số lượng mo, tóp và cong không được lớn hơn số lượng mẫu."
+            );
             return;
         }
 
@@ -756,7 +830,8 @@ const DisabledCheck = ({
                                                         </div>
                                                     ) : (
                                                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
-                                                            {selectedRecord.detail.length >
+                                                            {selectedRecord
+                                                                .detail.length >
                                                                 0 &&
                                                                 selectedRecord.detail.map(
                                                                     (
@@ -845,19 +920,22 @@ const DisabledCheck = ({
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
+                        <div className=" serif font-bold text-2xl xl:block lg:block md:block hidden ">
                             Biên bản khảo sát tỉ lệ khuyết tật
+                        </div>
+                        <div className=" serif font-bold text-2xl xl:hidden lg:hidden md:hidden block">
+                            Khảo sát tỉ lệ khuyết tật
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody>
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="bg-[#FAFAFA] !px-3.5">
                         <section className="flex flex-col justify-center">
                             {/* Infomation */}
-                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-3 border-[#DADADA] rounded-xl divide-y divide-gray-200 bg-white mb-4">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-3 xl:px-4 lg:px-4 md:px-4">
                                     <FaInfoCircle className="w-7 h-7 text-[]" />
-                                    <div className="text-xl font-semibold">
+                                    <div className="serif text-2xl font-bold">
                                         Thông tin chung
                                     </div>
                                 </div>
@@ -891,10 +969,10 @@ const DisabledCheck = ({
                             </div>
 
                             {/* Result  */}
-                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-7">
-                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 py-3 xl:px-8 lg:px-8 md:px-8 border-red-200 rounded-t-xl">
+                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-4">
+                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-3 py-3 xl:px-4 lg:px-4 md:px-4 border-red-200 rounded-t-xl">
                                     <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
-                                    <div className="font-semibold text-red-600">
+                                    <div className="serif text-[22px] font-bold text-red-600">
                                         Tỉ lệ khuyết tật
                                     </div>
                                 </div>
@@ -905,7 +983,9 @@ const DisabledCheck = ({
                                             Tỉ lệ mo, tóp trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {calculatedValues.avgDisabledRate} %
+                                            {calculatedValues.avgDisabledRate ||
+                                                0}{" "}
+                                            %
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[70%,30%]">
@@ -913,7 +993,9 @@ const DisabledCheck = ({
                                             Tỉ lệ cong trung bình:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {calculatedValues.avgCurvedRate} %
+                                            {calculatedValues.avgCurvedRate ||
+                                                0}{" "}
+                                            %
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[70%,30%]">
@@ -921,261 +1003,157 @@ const DisabledCheck = ({
                                             Tổng khuyết tật:
                                         </div>
                                         <span className="font-bold text-right">
-                                            {calculatedValues.sumDisability}
+                                            {calculatedValues.sumDisability ||
+                                                0}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
-                        <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
-                            <div className="flex gap-x-4 rounded-t-xl items-center p-4 xl:px-6 lg:px-6 md:px-6 px-2">
-                                <MdNoteAlt className="w-8 h-9 text-[]" />
-                                <div className="text-xl font-semibold">
+                        <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-[#DADADA] h-fit w-full p-3 pt-0 mb-4 px-3">
+                            <div className="flex gap-x-3 rounded-t-xl items-center p-3 px-1 ">
+                                <MdNoteAlt className="w-8 h-8 text-[]" />
+                                <div className="serif text-[22px] font-bold">
                                     Ghi nhận khảo sát
                                 </div>
                             </div>
                             {!viewMode && (
                                 <Formik
                                     initialValues={info}
-                                    validationSchema={validationSchema}
-                                    onSubmit={(values, actions) => {
-                                        addNewDisabledDetails(values, actions);
-                                    }}
+                                    onSubmit={() => {}}
                                 >
-                                    {({
-                                        errors,
-                                        touched,
-                                        values,
-                                        setFieldValue,
-                                    }) => {
-                                        return (
-                                            <Form className="flex flex-col p-6 mb-6 bg-white border-2 border-gray-200 rounded-xl">
-                                                <div className="mb-2">
-                                                    <label
-                                                        htmlFor="palletAmount"
-                                                        className="block mb-2 text-md font-medium text-gray-900"
-                                                    >
-                                                        Số pallet{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        ref={palletInput}
-                                                        name="pallet"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={values.pallet}
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "pallet",
-                                                                e.target.value
-                                                            );
-                                                            setInfo((prev) => ({
-                                                                ...prev,
-                                                                pallet: e.target
-                                                                    .value,
-                                                            }));
-                                                        }}
-                                                        render={({ field }) => (
-                                                            <input
-                                                                {...field}
-                                                                type="number"
-                                                                min="1"
-                                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                            />
-                                                        )}
-                                                    />
-                                                    {errors.pallet &&
-                                                    touched.pallet ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="pallet" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="mb-2">
-                                                    <label className="block mb-2 text-md font-medium text-gray-900">
-                                                        Số lượng mẫu{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        ref={sampleInput}
-                                                        name="sample"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={values.sample}
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "sample",
-                                                                e.target.value
-                                                            );
-                                                            setInfo((prev) => ({
-                                                                ...prev,
-                                                                sample: e.target
-                                                                    .value,
-                                                            }));
-                                                        }}
-                                                        render={({ field }) => (
-                                                            <input
-                                                                {...field}
-                                                                type="number"
-                                                                min="1"
-                                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                            />
-                                                        )}
-                                                    />
-                                                    {errors.sample &&
-                                                    touched.sample ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="sample" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="mb-2">
-                                                    <label className="block mb-2 text-md font-medium text-gray-900">
-                                                        Số lượng mo, tóp{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        ref={disabilityInput}
-                                                        name="disability"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={
-                                                            values.disability
-                                                        }
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "disability",
-                                                                e.target.value
-                                                            );
-                                                            setInfo((prev) => ({
-                                                                ...prev,
-                                                                disability:
-                                                                    e.target
-                                                                        .value,
-                                                            }));
-                                                        }}
-                                                        render={({ field }) => (
-                                                            <input
-                                                                {...field}
-                                                                type="number"
-                                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                            />
-                                                        )}
-                                                    />
-                                                    {errors.disability &&
-                                                    touched.disability ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="disability" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="mb-2">
-                                                    <label className="block mb-2 text-md font-medium text-gray-900">
-                                                        Số lượng cong{" "}
-                                                        <span className="text-red-600">
-                                                            *
-                                                        </span>
-                                                    </label>
-                                                    <Field
-                                                        ref={curveInput}
-                                                        name="curve"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={values.curve}
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "curve",
-                                                                e.target.value
-                                                            );
-                                                            setInfo((prev) => ({
-                                                                ...prev,
-                                                                curve: e.target
-                                                                    .value,
-                                                            }));
-                                                        }}
-                                                        render={({ field }) => (
-                                                            <input
-                                                                {...field}
-                                                                type="number"
-                                                                className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                            />
-                                                        )}
-                                                    />
-                                                    {errors.curve &&
-                                                    touched.curve ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="curve" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                <div className="mb-2">
-                                                    <label className="block mb-2 text-md font-medium text-gray-900">
-                                                        Ghi chú{" "}
-                                                    </label>
-                                                    <Field
-                                                        as="textarea"
-                                                        rows="3"
-                                                        ref={noteInput}
-                                                        name="note"
-                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        value={values.note}
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "note",
-                                                                e.target.value
-                                                            );
-                                                            setInfo((prev) => ({
-                                                                ...prev,
-                                                                note: e.target
-                                                                    .value,
-                                                            }));
-                                                        }}
-                                                    />
-                                                    {errors.note &&
-                                                    touched.note ? (
-                                                        <span className="text-xs text-red-600">
-                                                            <ErrorMessage name="note" />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                                    )}
-                                                </div>
-                                                {/* <Button
-                                                    type="submit"
-                                                    colorScheme="whatsapp"
-                                                    className="w-fit self-end mt-2"
+                                    {({ values, setFieldValue, resetForm }) => (
+                                        <div className="flex flex-col p-3 mb-6 bg-gray-50 border-2 gap-y-2 border-gray-200 rounded-xl">
+                                            <div className="mb-2">
+                                                <label
+                                                    htmlFor="palletAmount"
+                                                    className="block mb-2 text-md font-medium text-gray-900"
                                                 >
-                                                    Ghi nhận
-                                                </Button> */}
-                                                <button
-                                                    type="submit"
-                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none w-fit self-end"
-                                                >
-                                                    Ghi nhận
-                                                </button>
-                                            </Form>
-                                        );
-                                    }}
+                                                    Tổng số lượng trên pallet{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    ref={palletInput}
+                                                    name="pallet"
+                                                    type="number"
+                                                    className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    value={values.pallet}
+                                                    onChange={(e) =>
+                                                        setFieldValue(
+                                                            "pallet",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="mb-2">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Số lượng mẫu{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    ref={sampleInput}
+                                                    name="sample"
+                                                    type="number"
+                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    value={values.sample}
+                                                    onChange={(e) =>
+                                                        setFieldValue(
+                                                            "sample",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="mb-2">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Số lượng mo, tóp{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    ref={disabilityInput}
+                                                    name="disability"
+                                                    type="number"
+                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    value={values.disability}
+                                                    onChange={(e) =>
+                                                        setFieldValue(
+                                                            "disability",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="mb-2">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Số lượng cong{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <Field
+                                                    ref={curveInput}
+                                                    name="curve"
+                                                    type="number"
+                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    value={values.curve}
+                                                    onChange={(e) =>
+                                                        setFieldValue(
+                                                            "curve",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="mb-2">
+                                                <label className="block mb-2 text-md font-medium text-gray-900">
+                                                    Ghi chú{" "}
+                                                </label>
+                                                <Field
+                                                    as="textarea"
+                                                    rows="3"
+                                                    ref={noteInput}
+                                                    name="note"
+                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                    value={values.note}
+                                                    onChange={(e) =>
+                                                        setFieldValue(
+                                                            "note",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none w-fit self-end my-2"
+                                                onClick={() =>
+                                                    addNewDisabledDetails(
+                                                        values,
+                                                        resetForm
+                                                    )
+                                                }
+                                            >
+                                                Ghi nhận
+                                            </button>
+                                        </div>
+                                    )}
                                 </Formik>
                             )}
                             <div className="border-b-2 border-gray-200"></div>
 
-                            <section className="my-4">
+                            <section className="my-2">
                                 {loadCurrentRecord ? (
                                     <div className="text-center">
                                         <Spinner
-                                            thickness="4px"
+                                            thickness="6px"
                                             speed="0.65s"
                                             emptyColor="gray.200"
                                             color="#155979"
@@ -1183,7 +1161,7 @@ const DisabledCheck = ({
                                         />
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mt-2 px-1">
                                         {disabledDetails.length > 0 &&
                                             disabledDetails.map(
                                                 (item, index) => {
@@ -1217,6 +1195,9 @@ const DisabledCheck = ({
                                                             curvedRate={
                                                                 curvedRate
                                                             }
+                                                            createdDate={
+                                                                item.created_at
+                                                            }
                                                         />
                                                     );
                                                 }
@@ -1226,7 +1207,7 @@ const DisabledCheck = ({
                             </section>
                         </section>
                     </ModalBody>
-                    <div className="border-b-2 border-gray-100"></div>
+                    <div className="border-b-2 border-gray-200"></div>
                     <ModalFooter className="gap-4">
                         <button
                             onClick={handleModalClose}

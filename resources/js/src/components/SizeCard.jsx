@@ -33,7 +33,6 @@ import {
 
 function SizeCard(props) {
     const { planID, reload, palletDatam, onReload, onReloadPalletList, reason } = props;
-    console.log("Giá trị planID nhận được:", planID);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [sizeData, setSizeData] = useState([]);

@@ -561,7 +561,7 @@ function ControllerCard(props) {
                 {/* {status === 1 ? ( */}
                 <div>
                     {/* {!isCompleteChecking ? ( */}
-                    <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-6 pt-6">
+                    <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-4 pt-6">
                         <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
                             <label
                                 htmlFor="company"

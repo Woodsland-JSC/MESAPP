@@ -107,16 +107,16 @@ function BOWCard(props) {
     return (
         <div className=" rounded-2xl bg-white h-[24rem] shadow-sm">
             {/* Header */}
-            <div className="flex flex-col justify-start rounded-t-xl py-2 px-6 h-[31%]">
+            <div className="flex flex-col justify-start rounded-t-xl py-2 pt-0.5 px-4 h-[31%]">
                 <div className="flex space-x-4">
                     {getStatusContent()}
                 </div>
 
-                <div className="text-[1.25rem] font-bold text-[#17506B] ">
+                <div className="text-[1.25rem] font-bold px-1 text-[#17506B] ">
                     Mẻ sấy số:
                     <span className="ml-2">{batchNumber}</span>
                 </div>
-                <div className="text-lg font-semibold text-gray-700 ">
+                <div className="text-lg font-semibold px-1 text-gray-700 ">
                     Lò số:
                     <span className="ml-2">{kilnNumber}</span>
                 </div>

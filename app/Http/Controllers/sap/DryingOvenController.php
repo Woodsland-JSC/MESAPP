@@ -238,17 +238,17 @@ class DryingOvenController extends Controller
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->toArray();
             $towarehouse = WarehouseCS();
 
-            // Kiểm tra xem quy cách đã tồn tại hay chưa, nếu đã tồn tại lấy thông tin pallet tồn tại
+            // 1.1. Kiểm tra xem quy cách đã tồn tại hay chưa, nếu đã tồn tại lấy thông tin pallet tồn tại
             $existingPallet = Pallet::where('activeStatus', 0)
-            ->where(function ($query) use ($quyCachList) {
-                foreach ($quyCachList as $quyCach) {
-                    $query->where('QuyCach', 'like', '%' . $quyCach . '%');
-                }
-            })
-            ->latest()
-            ->first();
+                ->where(function ($query) use ($quyCachList) {
+                    foreach ($quyCachList as $quyCach) {
+                        $query->where('QuyCach', 'like', '%' . $quyCach . '%');
+                    }
+                })
+                ->latest()
+                ->first();
 
-            // Nếu chưa tồn tại thì tạo pallet mới
+            // 1.2. Nếu chưa tồn tại thì tạo pallet mới
             if ($existingPallet) {
                 $pallet = $existingPallet;
                 $isDuplicate = true;
@@ -266,13 +266,13 @@ class DryingOvenController extends Controller
             // 2. Lấy dữ liệu Details và tạo chi tiết pallet
             $palletDetails = $request->input('Details', []);
 
-            // Khỏi tạo biến để lưu dữ liệu
+            // 2.1. Khỏi tạo biến để lưu dữ liệu
             $ldt = [];
             $ldt2 = [];
             $totalkl = 0;
             $toQty = 0;
 
-            // Thực hiện lưu dữ liệu về data web
+            // 2.2. Thực hiện lưu dữ liệu về data web
             foreach ($palletDetails as $detailData) {
                 $datainsert = [];
                 $datainsert['palletID'] = $pallet->palletID;
@@ -281,7 +281,7 @@ class DryingOvenController extends Controller
                 $datainsert['ItemName'] = $detailData['ItemName'];
                 $datainsert['WhsCode'] = $detailData['WhsCode'];
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
-                
+
                 if ($palletData['LyDo'] === 'SL') {
                     $datainsert['CDai_Site'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
                     $datainsert['CDay_Site'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
@@ -301,10 +301,9 @@ class DryingOvenController extends Controller
                     $datainsert['Qty'] = (float)$detailData['Qty'] * (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
                     $datainsert['Qty_T'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
                 }
-
                 pallet_details::create($datainsert);
 
-                // Các dữ liệu được lưu vào các biến trước khi gửi về SAP
+                // 2.3. Các dữ liệu được lưu vào các biến trước khi gửi về SAP
                 $ldt[] = [
                     "ItemCode" => $detailData['ItemCode'],
                     "WarehouseCode" =>  $towarehouse,
@@ -350,7 +349,57 @@ class DryingOvenController extends Controller
             ];
 
             // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về
-            $response = Http::withOptions([
+            // $response = Http::withOptions([
+            //     'verify' => false,
+            // ])->withHeaders([
+            //     "Content-Type" => "application/json",
+            //     "Accept" => "application/json",
+            //     "Authorization" => "Basic " . BasicAuthToken(),
+            // ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+
+            // $response2 = Http::withOptions([
+            //     'verify' => false,
+            // ])->withHeaders([
+            //     "Content-Type" => "application/json",
+            //     "Accept" => "application/json",
+            //     "Authorization" => "Basic " . BasicAuthToken(),
+            // ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
+
+            // $res = $response->json();
+            // $res2 = $response2->json();
+
+            // 3.1. Kiểm tra kết quả trả về từ SAP
+            // if (!empty($res['error']) && !empty($res2['error'])) {
+            //     DB::rollBack();
+            //     return response()->json([
+            //         'message' => 'Failed to create pallet and details',
+            //         'error' => $res['error'],
+            //     ], 500);
+            // } else {
+            //     if (!$isDuplicate) {
+            //         Pallet::where('palletID', $pallet->palletID)->update([
+            //             'DocNum' => $res['DocNum'],
+            //             'DocEntry' => $res['DocEntry'],
+            //             'palletSAP' => $res2['DocEntry'],
+            //             'CreateBy' => Auth::user()->id,
+            //             'activeStatus' => 0,
+            //         ]);
+            //     }
+            //     DB::commit();
+
+            //     return response()->json([
+            //         'message' => 'Pallet created successfully',
+            //         'data' => [
+            //             'isDuplicate' => $isDuplicate,
+            //             'pallet' => $pallet,
+            //             'res1' => $res,
+            //             'res2' => $res2,
+            //         ]
+            //     ]);
+            // }
+
+            // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về (mới, check kết quả API trước khi thực hiện API kế tiếp)
+            $stockTransferResponse = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
                 "Content-Type" => "application/json",
@@ -358,7 +407,19 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
 
-            $response2 = Http::withOptions([
+            $stockTransferResult = $stockTransferResponse->json();
+
+            // Kiểm tra lỗi API StockTransfers
+            if (!empty($stockTransferResult['error'])) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Failed to create stock transfer in SAP',
+                    'error' => $stockTransferResult['error'],
+                ], 500);
+            }
+
+            // 3.2 Nếu StockTransfers thành công, tiếp tục gọi API Pallet
+            $palletResponse = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
                 "Content-Type" => "application/json",
@@ -366,46 +427,75 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
-            $res = $response->json();
+            $palletResult = $palletResponse->json();
 
-            $res2 = $response2->json();
+            // Kiểm tra lỗi API Pallet
+            if (!empty($palletResult['error'])) {
+                // Thực hiện revert StockTransfers nếu có thể
+                try {
+                    $revertResponse = Http::withOptions([
+                        'verify' => false,
+                    ])->withHeaders([
+                        "Content-Type" => "application/json",
+                        "Accept" => "application/json",
+                        "Authorization" => "Basic " . BasicAuthToken(),
+                    ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
 
-            if (!empty($res['error']) && !empty($res2['error'])) {
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Failed to create pallet and details',
-                    'error' => $res['error'],
-                ], 500);
-            } else {
-                if (!$isDuplicate) {
-                    Pallet::where('palletID', $pallet->palletID)->update([
-                        'DocNum' => $res['DocNum'],
-                        'DocEntry' => $res['DocEntry'],
-                        'palletSAP' => $res2['DocEntry'],
-                        'CreateBy' => Auth::user()->id,
-                        'activeStatus' => 0,
+                    if (!$revertResponse->successful()) {
+                        // Log thông tin về việc không thể revert
+                        \Log::error('Failed to revert StockTransfer', [
+                            'docEntry' => $stockTransferResult['DocEntry'],
+                            'error' => $revertResponse->json()
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Exception when reverting StockTransfer', [
+                        'docEntry' => $stockTransferResult['DocEntry'],
+                        'error' => $e->getMessage()
                     ]);
                 }
-                DB::commit();
 
+                DB::rollBack();
                 return response()->json([
-                    'message' => 'Pallet created successfully',
-                    'data' => [
-                        'isDuplicate' => $isDuplicate,
-                        'pallet' => $pallet,
-                        'res1' => $res,
-                        'res2' => $res2,
-                    ]
+                    'message' => 'Failed to create pallet in SAP',
+                    'error' => $palletResult['error'],
+                    'note' => 'Stock transfer has been attempted to revert'
+                ], 500);
+            }
+
+            // Trường hợp cả 2 API đều thành công
+            if (!$isDuplicate) {
+                Pallet::where('palletID', $pallet->palletID)->update([
+                    'DocNum' => $stockTransferResult['DocNum'],
+                    'DocEntry' => $stockTransferResult['DocEntry'],
+                    'palletSAP' => $palletResult['DocEntry'],
+                    'CreateBy' => Auth::user()->id,
+                    'activeStatus' => 0,
                 ]);
             }
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Pallet created successfully',
+                'data' => [
+                    'isDuplicate' => $isDuplicate,
+                    'pallet' => $pallet,
+                    // 'res1' => $res,
+                    // 'res2' => $res2,
+                    'stockTransferResult' => $stockTransferResponse->json(),
+                    'palletResult' => $palletResponse->json(),
+                ]
+            ]);
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
 
             return response()->json([
                 'message' => 'Failed to create pallet and details',
                 'error' => $e->getMessage(),
-                'res1' => $res,
-                'res2' => $res2,
+                // 'res1' => $res,
+                // 'res2' => $res2,
+                'stockTransferResult' => $stockTransferResponse->json(),
+                'palletResult' => $palletResponse->json(),
             ], 500);
         }
     }
@@ -485,7 +575,7 @@ class DryingOvenController extends Controller
         )
             ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
             ->Join('users as users5', 'users5.id', '=', 'pallets.CreateBy')
-            
+
             ->leftJoin('plan_detail', 'pallets.palletID', '=', 'plan_detail.pallet')
             ->leftJoin('planDryings', 'plan_detail.PlanID', '=', 'planDryings.PlanID')
             ->leftJoin('users', 'users.id', '=', 'planDryings.CheckedBy')
@@ -493,12 +583,14 @@ class DryingOvenController extends Controller
             ->leftJoin('users as users3', 'users3.id', '=', 'planDryings.RunBy')
             ->leftJoin('users as users4', 'users4.id', '=', 'planDryings.CompletedBy')
             ->leftJoin('users as users6', 'users6.id', '=', 'pallets.LoadedBy')
-            ->leftJoinSub(function($query) {
-                $query->select('pallet_details.palletID', 
-                               DB::raw('SUM(pallet_details.Qty) AS Qty'), 
-                               DB::raw('SUM(pallet_details.Qty_T) AS Qty_T'))
-                      ->from('pallet_details')
-                      ->groupBy('pallet_details.palletID');
+            ->leftJoinSub(function ($query) {
+                $query->select(
+                    'pallet_details.palletID',
+                    DB::raw('SUM(pallet_details.Qty) AS Qty'),
+                    DB::raw('SUM(pallet_details.Qty_T) AS Qty_T')
+                )
+                    ->from('pallet_details')
+                    ->groupBy('pallet_details.palletID');
             }, 'totals', function ($join) {
                 $join->on('pallets.palletID', '=', 'totals.palletID');
             })

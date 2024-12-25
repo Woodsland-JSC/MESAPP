@@ -148,6 +148,7 @@ class ReportController extends Controller
         
         return response()->json($updatedData);
     }
+
     function xepsay(Request $request){
         $fromDate = $request->input('fromDate');
         $ToDate = $request->input('toDate');
@@ -223,8 +224,8 @@ class ReportController extends Controller
         
         return response()->json($updatedData);
     }
-    /** chế biến gỗ */
-        
+
+    /** chế biến gỗ */    
     function XuLyLoi(Request $request){
         $branch = $request->input('branch');
         $plant = $request->input('plant');

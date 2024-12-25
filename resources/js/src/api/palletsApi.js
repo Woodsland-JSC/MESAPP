@@ -120,7 +120,7 @@ const palletsApi = {
         return axiosClient().get(url, {
             params: {
                 PlanID,
-                Type : "KT"
+                Type: "KT",
             },
         });
     },   

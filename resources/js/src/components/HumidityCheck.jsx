@@ -188,7 +188,7 @@ function HumidityCheck(props) {
 
     const loadCurrentHumidRecords = async () => {
         try {
-            const response = await palletsApi.getTempHumidRecords(planID);
+            const response = await palletsApi.getTempHumidRecords(planID, "DA");
             setHumidityRecords(response.TempData);
         } catch (error) {
             console.error("Lỗi khi gọi API:", error);
@@ -378,23 +378,24 @@ function HumidityCheck(props) {
                 onClose={onClose}
                 scrollBehavior="inside"
                 size="full"
+                className=""
             >
                 <ModalOverlay />
                 <ModalContent>
                     <div className="top-0 sticky z-20 bg-white border-b-2 border-gray-200">
                         <ModalHeader>
-                            <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
+                            <div className=" serif font-bold text-xl xl:text-2xl ">
                                 Biểu mẫu kiểm tra độ ẩm gỗ sấy
                             </div>
                         </ModalHeader>
                         <ModalCloseButton />
                     </div>
 
-                    <ModalBody className="py-4">
+                    <ModalBody className="py-4 bg-[#FAFAFA]">
                         <section className="flex flex-col justify-center ">
                             {/* Infomation */}
                             <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
                                     <FaInfoCircle className="w-7 h-7 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Thông tin chung
@@ -442,7 +443,7 @@ function HumidityCheck(props) {
 
                             {/* Humid Range */}
                             <div className="xl:mx-auto xl:w-[60%] rounded-xl bg-[#22253d] divide-y-2 divide-[#2B384B] mb-3">
-                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
                                     <div className="flex items-center gap-x-4">
                                         <MdWaterDrop className="w-8 h-8 text-blue-300" />
                                         <div className="text-xl font-semibold">
@@ -584,7 +585,7 @@ function HumidityCheck(props) {
 
                             {/* Input */}
                             <div className="mb-4 xl:mx-auto xl:w-[60%] border-2 border-gray-200 rounded-xl divide-y divide-gray-200 ">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
                                     <MdNoteAlt className="w-8 h-8 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Ghi nhận độ ẩm

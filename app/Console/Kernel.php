@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('sql:run-first')->dailyAt('15:30');
         // $schedule->command('sql:run-second')->dailyAt('16:15');
     }
+
     /**
      * Register the commands for the application.
      */

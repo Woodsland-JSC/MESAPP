@@ -295,7 +295,7 @@ const AwaitingReception = ({
         })));
         setTeamBackOptions(teamBack?.map((item, index) => ({
             value: item?.Code || "",
-            label: item?.Name || "",
+            label: item?.Name + " - " + item?.Code || "",
         })));
         setRootCauseOptions(rootCause?.map((item, index) => ({
             value: item?.id || "",
