@@ -243,29 +243,12 @@ function CreateDryingPlan() {
                             <IoIosArrowBack />
                             <div>Quay lại</div>
                         </div>
-                        <div className="flex space-x-2 items-center xl:hidden lg:hidden md:hidden text-xs p-1 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold h-fit rounded-lg ">
-                            <BiSolidFactory />
-                            {user.plant === "TH" ? "Thuận Hưng"
-                                : user.plant === "YS" ? "Yên Sơn"
-                                : user.plant === "CH" ? "Chiêm Hóa"
-                                : user.plant === "TB" ? "Thái Bình"
-                                : user.plant === "HG" ? "Hà Giang"
-                                : "UNKNOWN"}
-                        </div>
                     </div>
 
                     {/* Header */}
                     <div className="flex justify-between mb-6 items-center">
                         <div className="flex space-x-4">
                             <div className="serif text-4xl font-bold">Tạo kế hoạch sấy</div>
-                            <div className="xl:inline-block lg:inline-block md:inline-block hidden text-[12px] p-0.5 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold uppercase h-fit rounded-lg">
-                                {user.plant === "TH" ? "Thuận Hưng"
-                                : user.plant === "YS" ? "Yên Sơn"
-                                : user.plant === "CH" ? "Chiêm Hóa"
-                                : user.plant === "TB" ? "Thái Bình"
-                                : user.plant === "HG" ? "Hà Giang"
-                                : "UNKNOWN"}
-                            </div>
                         </div>
                         <button
                             className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all"

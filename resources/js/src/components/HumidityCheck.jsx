@@ -170,10 +170,7 @@ function HumidityCheck(props) {
         ];
     }, [selectedRecord]);
 
-    useEffect(() => {
-        loadHumidRecordList();
-        loadCurrentHumidRecords();
-    }, []);
+
 
     const loadHumidRecordList = async () => {
         palletsApi
@@ -187,6 +184,8 @@ function HumidityCheck(props) {
     };
 
     const loadCurrentHumidRecords = async () => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const planID = queryParams.get("id");
         try {
             const response = await palletsApi.getTempHumidRecords(planID, "DA");
             setHumidityRecords(response.TempData);
@@ -196,6 +195,11 @@ function HumidityCheck(props) {
             setLoadCurrentRecord(false);
         }
     };
+
+    useEffect(() => {
+        // loadHumidRecordList();
+        loadCurrentHumidRecords();
+    }, []);
 
     const handleRecord = async () => {
         const recordData = {

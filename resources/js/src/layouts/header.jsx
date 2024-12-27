@@ -11,12 +11,13 @@ import {
     TbInfoSquareRounded,
     TbAnalyze,
     TbReportAnalytics,
+    TbCircleKeyFilled,
 } from "react-icons/tb";
 import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { HiMenuAlt3 } from "react-icons/hi";
-import { Divider } from '@chakra-ui/react'
+import { Divider } from "@chakra-ui/react";
 
 import useAppContext from "../store/AppContext";
 import usersApi from "../api/userApi";
@@ -31,6 +32,7 @@ import {
     useDisclosure,
     Box,
     IconButton,
+    Tooltip,
 } from "@chakra-ui/react";
 
 import {
@@ -44,6 +46,8 @@ import {
     MenuDivider,
 } from "@chakra-ui/react";
 import { IoClose } from "react-icons/io5";
+import { FaCircle, FaKey } from "react-icons/fa";
+import { BiSolidTag } from "react-icons/bi";
 
 function Header(props) {
     const { isOpen, onToggle } = useDisclosure();
@@ -88,28 +92,46 @@ function Header(props) {
                         className="flex items-center w-14 h-14"
                     ></img>
                     <div className="h-[36px] border-r border-gray-400"></div>
-                    <div className="flex flex-col">
-                        <div className="text-xs !py-0 text-gray-500">
-                            Chi nhánh{""}
+                    <div className="flex flex-col justify-center !leading-0">
+                        
+                        <div className="flex items-center space-x-2">
+                            <div
+                                className={` flex items-center uppercase font-bold text-md !py-0 bg-gradient-to-r ${
+                                    user?.branch === "1"
+                                        ? "from-green-800 via-[#17506B] to-[#512272]"
+                                        : user?.branch === "3"
+                                        ? "from-black via-[#17506B] to-[#066B9C]"
+                                        : user?.branch === "4"
+                                        ? "from-violet-800 via-red-800 to-yellow-800"
+                                        : "from-[#17506B] via-[#066B9C] to-[#17506B]"
+                                } bg-clip-text text-transparent`}
+                            >
+                                {user?.branch === "1"
+                                    ? "Thuận Hưng"
+                                    : user?.branch === "3"
+                                    ? "Tuyên Quang"
+                                    : user?.branch === "4"
+                                    ? "Viforex"
+                                    : user?.branch === ""
+                                    ? "Không xác định"
+                                    : ""} 
+                            </div>        
                         </div>
-                    <div className={`flex items-center uppercase font-bold text-md !py-0 bg-gradient-to-r ${user?.branch === "1" ? "from-green-800 via-[#17506B] to-[#512272]" : user?.branch === "3" ? "from-black via-[#17506B] to-[#066B9C]" : user?.branch === "4" ? "from-violet-800 via-red-800 to-yellow-800" : "from-[#17506B] via-[#066B9C] to-[#17506B]"} bg-clip-text text-transparent`}>
-                            {user?.branch === "1"
-                                ? "Thuận Hưng"
-                                : user?.branch === "3"
-                                ? "Tuyên Quang"
-                                : user?.branch === "4"
-                                ? "Viforex"
-                                : user?.branch === ""
-                                ? "Không xác định"
-                                : ""}
-                            {/* <span className="flex items-center  font-medium rounded-xl px-2">/{user?.plant}</span> */}
-                        </div>
+                        <div className="text-xs !py-0 text-gray-700">
+                            Nhà máy{" "}
+                            {user.plant === "TH" ? "Thuận Hưng" 
+                            : user.plant === "YS" ? "Yên Sơn"
+                            : user.plant === "CH" ? "Chiêm Hóa"
+                            : user.plant === "TB" ? "Thái Bình"
+                            : user.plant === "HG" ? "Hà Giang"
+                            :  "Không xác định"}
+                        </div> 
                     </div>
                 </div>
 
                 {/* Navigator Menu */}
-                <div className="hidden xl:flex lg:flex h-full">
-                    <ul className="flex items-center flex-row space-x-4 ">
+                <div className="hidden xl:flex lg:flex bg-[#F7F7F7] rounded-full py-1.5 px-1.5 ">
+                    <ul className="flex  items-center flex-row space-x-2 ">
                         <NavLink to="/workspace" className="flex items-center">
                             {({ isActive }) => (
                                 <li
@@ -180,7 +202,7 @@ function Header(props) {
                 </div>
 
                 {/* Right*/}
-                <div className="flex items-center space-x-2 h-full min-w-1/3">
+                <div className="flex items-center h-full min-w-1/3">
                     {isAuthenticated ? (
                         <>
                             {/* Responsive Menu */}
@@ -188,7 +210,7 @@ function Header(props) {
                                 <IconButton
                                     variant="ghost"
                                     onClick={onToggle}
-                                    className="w-fit ml-2"
+                                    className="w-fit ml-2 mr-3"
                                 >
                                     <HiMenuAlt3 className="text-2xl" />
                                 </IconButton>
@@ -220,8 +242,8 @@ function Header(props) {
                                                     ? "Viforex"
                                                     : user?.branch === ""
                                                     ? "Chưa có chi nhánh"
-                                                    : ""}
-                                                {" "}- {user?.plant}
+                                                    : ""}{" "}
+                                                - {user?.plant}
                                             </div>
                                         </div>
 
@@ -236,7 +258,7 @@ function Header(props) {
                                                         }
                                                         alt="user"
                                                         className="w-6 h-6 rounded-full object-cover"
-                                                    ></img>
+                                                    />
                                                     <div>Trang cá nhân</div>
                                                 </div>
                                             </Link>
@@ -284,8 +306,8 @@ function Header(props) {
                                 </Slide>
                             </div>
 
-                            <div className="hidden xl:flex">
-                                <Menu>
+                            <div className="hidden xl:flex ">
+                                <Menu className="!mr-4">
                                     <MenuButton righticon={<TbChevronDown />}>
                                         <Button
                                             variant="ghost"
@@ -307,7 +329,10 @@ function Header(props) {
                                             </div>
                                         </Button>
                                     </MenuButton>
-                                    <MenuList>
+                                    <MenuList className="!w-[200px] text-[15px]">
+                                        {/* <div className="px-3 py-2">
+                                            <div className="font-semibold">Nhà máy Yên Sơn</div>
+                                        </div> */}
                                         <MenuItem>
                                             <Link to="/profile">
                                                 Trang cá nhân
@@ -321,12 +346,26 @@ function Header(props) {
                                     </MenuList>
                                 </Menu>
                             </div>
-
-                            <img
-                                src={user?.avatar ? user.avatar : defaultUser}
-                                alt="user"
-                                className="w-8 h-8 rounded-full object-cover"
-                            ></img>
+                            <div className="relative rounded-full w-fit h-fit">
+                                <img
+                                    src={
+                                        user?.avatar ? user.avatar : defaultUser
+                                    }
+                                    alt="user"
+                                    className="w-9 h-9 rounded-full  object-cover"
+                                />
+                                {user?.role == 1 && (
+                                    <Tooltip
+                                        hasArrow
+                                        label="Người quản trị"
+                                        bg="black"
+                                    >
+                                        <div className="absolute -bottom-1 -right-2 rounded-full bg-white w-fit h-fit">
+                                            <TbCircleKeyFilled className="w-5 h-5 text-[black]"></TbCircleKeyFilled>
+                                        </div>
+                                    </Tooltip>
+                                )}
+                            </div>
                         </>
                     ) : (
                         <>

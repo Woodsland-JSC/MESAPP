@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Layout from "../../layouts/layout";
 import { MdPlaylistAddCheckCircle } from "react-icons/md";
-import { FaPallet } from "react-icons/fa";
+import { FaCalendar, FaPallet, FaRegCalendar } from "react-icons/fa";
 import { FaCalendarCheck } from "react-icons/fa6";
 import { HiSearchCircle, HiBadgeCheck } from "react-icons/hi";
 import {
@@ -58,6 +58,16 @@ function Workspace() {
         }
     }
 
+    const getCurrentDateTime = () => {
+        const days = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+        const now = new Date();
+        const day = days[now.getDay()];
+        const date = now.getDate();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+        return `${day}, ngày ${date} tháng ${month} năm ${year}.`;
+    };
+
     useEffect(() => {
         document.title = "Woodsland - Workspace";
         const params = new URLSearchParams(window.location.search);
@@ -78,15 +88,25 @@ function Workspace() {
             {/* Container */}
             <div className="flex overflow-x-hidden justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen  xl:p-12 lg:p-12 md:p-10 p-6 py-4 px-5 xl:px-32 ">
+                <div className="w-screen  xl:p-10 lg:p-10 md:p-8 p-6 py-4 px-5 xl:px-32 ">
                     {/* Header */}
-                    <div className="xl:mb-8 lg:mb-8 md:mb-8 mb-5">
-                        <div className="text-gray-600">Xin chào,</div>
-                        <div className="xl:text-4xl lg:text-3xl md:text-3xl text-4xl  xl:mb-2 lg:mb-2 md:mb-2">
-                            <span className="serif font-bold">
-                                {user?.first_name}!
-                            </span>
+                    <div className="flex items-center justify-between xl:mb-8 lg:mb-8 md:mb-8 mb-5">
+                        <div className="">
+                            <div className="text-gray-600 mb-0">{getCurrentDateTime()}</div>
+                            <div className="xl:text-4xl lg:text-3xl md:text-3xl text-3xl  xl:mb-2 lg:mb-2 md:mb-2">
+                                <span className="serif font-bold">
+                                    Chào, {user?.first_name}!
+                                </span>
+                            </div>
                         </div>
+                        {/* <div className="pr-10 xl:flex lg:flex md:flex items-center hidden space-x-2">
+                            <FaRegCalendar className="text-gray-500 text-3xl" />
+                            <div>
+                                <div className="text-sm text-gray-500 font-medium">Tuần làm việc</div>
+                                <div className="uppercase font-bold text-gray-800">Tuần 1</div>
+                            </div>    
+                        </div> */}
+                        
                     </div>
 
                     {/* Card Fields */}

@@ -21,7 +21,7 @@ import {
     TabPanels,
     Tab,
     TabPanel,
-    Switch,
+    Tooltip,
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import Layout from "../../layouts/layout";
@@ -41,12 +41,14 @@ const SAYReports = [
         id: "0001",
         name: "Biên bản vào lò",
         link: "/reports/wood-drying/kiln-loading",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
         priority: true,
     },
     // {
     //     id: "0002",
     //     name: "Biên bản lịch sử vào lò",
     //     link: "/reports/wood-drying/kiln-loading-history",
+    
     // },
     // {
     //     id: "0003",
@@ -72,12 +74,14 @@ const SAYReports = [
         id: "0007",
         name: "Báo cáo xếp sấy khối CBG",
         link: "/reports/wood-drying/wood-drying",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
         priority: true,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
         link: "/reports/wood-drying/drying-queue",
+        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
         priority: true,
     },
 ];
@@ -87,6 +91,7 @@ const CBGReports = [
         id: "0001",
         name: "Báo cáo thông tin chi tiết giao nhận (CBG)",
         link: "/reports/wood-working/delivery-detail",
+        description: "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
         priority: true,
         responsive: true,
     },
@@ -94,6 +99,7 @@ const CBGReports = [
         id: "0002",
         name: "Báo cáo biện pháp xử lý lỗi (CBG)",
         link: "/reports/wood-working/defect-resolution",
+        description: "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
         priority: true,
     },
 ];
@@ -356,7 +362,7 @@ function Report() {
         <Layout>
             <div className="flex justify-center bg-transparent h-screen ">
                 {/* Section */}
-                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-4 xl:px-32 ">
+                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-8 xl:px-32 ">
                     {/* Header */}
                     <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:items-center lg:items-center md:items-center xl:justify-between lg:justify-between md:justify-between mb-3">
                         <div className="serif text-4xl font-bold">
@@ -458,17 +464,23 @@ function Report() {
                                                         key={index}
                                                         className=""
                                                     >
-                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl w-full ">
-                                                            <div className="flex items-center gap-x-4">
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2.5 px-4 bg-gray-100 rounded-xl w-full ">
+                                                            <div className="flex items-center gap-x-6">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />
                                                                 </div>
-                                                                <div className="text-[16px] group-hover:text-white">
-                                                                    {item.name}
+                                                                <div className="flex flex-col justify-center ">
+                                                                    <div className="text-[17px] font-semibold group-hover:text-white">
+                                                                        {item.name}
+                                                                    </div>
+                                                                    <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
+                                                                        {item.description}
+                                                                    </div>
                                                                 </div>
-                                                                {item.priority == true && (
+                                                                
+                                                                {/* {item.priority == true && (
                                                                     <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+                                                                )} */}
                                                             </div>
                                                             
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -496,22 +508,32 @@ function Report() {
                                                         key={index}
                                                         className=""
                                                     >
-                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
-                                                            <div className="flex items-center gap-x-4">
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2.5 px-4 bg-gray-100 rounded-xl ">
+                                                            <div className="flex items-center w-[95%] xl:gap-x-6 lg:gap-x-6 md:gap-x-6 gap-x-4">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />
                                                                 </div>
-                                                                <div className="text-[16px] group-hover:text-white">
-                                                                    {item.name}
+
+                                                                <div className="flex w-full justify-between items-center">
+                                                                    <div className="flex flex-col justify-center ">
+                                                                        <div className="text-[17px] font-semibold group-hover:text-white">
+                                                                            {item.name}
+                                                                        </div>
+                                                                        <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
+                                                                            {item.description}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {item.responsive ==
+                                                                        true && (
+                                                                        <Tooltip label='Tương thích trên di động.' fontSize='sm'>
+                                                                            <span>
+                                                                                <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                            </span>           
+                                                                        </Tooltip>
+                                                                    )}
                                                                 </div>
-                                                                {item.priority ==
-                                                                    true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
-                                                                {item.responsive ==
-                                                                    true && (
-                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>

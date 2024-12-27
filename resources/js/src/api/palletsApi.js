@@ -17,14 +17,6 @@ const palletsApi = {
         const url = `/reasons`;
         return axiosClient().get(url, {});
     },
-    // getStockByItem: (item, reason) => {
-    //     const url = `/stock/${item}`;
-    //     return axiosClient().get(url, {
-    //         params: {
-    //             reason: reason || "SL",
-    //         },
-    //     });
-    // },
     getStockByItem: (item, reason, batchnum) => {
         const url = `v2/stock/${item}`;
         return axiosClient().get(url, {
@@ -132,9 +124,12 @@ const palletsApi = {
         const url = `dgm/ghinhankt`;
         return axiosClient().post(url, data);
     },
-    addDisabledRecord: (data) => {
-        const url = `dgm/ghinhankt`;
-        return axiosClient().post(url, data);
+    deleteDisabledRecord: (PlanID, id) => {
+        const url = `pallets/delete-disabled-record`;
+        return axiosClient().post(url, { 
+            PlanID,
+            id
+        });
     },
     completeDisabledRecord: (data) => {
         const url = `dgm/hoanthanhkt`;

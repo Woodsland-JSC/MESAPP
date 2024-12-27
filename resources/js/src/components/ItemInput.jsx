@@ -748,18 +748,21 @@ const ItemInput = ({
                     ItemCode: choosenItem.ItemChild,
                     TO: choosenItem.TO,
                 };
-                const res = await productionApi.deleteReceiptCBG(payload);
-                toast.success("Thao tác thành công.");
+                const res = await productionApi.deleteReceiptCBG(payload);   
                 setSelectedItemDetails((prev) => ({
                     ...prev,
-                    notifications: prev.notifications.filter(
-                        (notification) => notification.id !== selectedDelete
+                    notifications: prev.notifications?.filter(
+                        (notification) => notification?.id !== selectedDelete
                     ),
+                    returnedData: res.returnedHistory,
                     stocks: res.stocks,
                     WaitingConfirmQty: res.WaitingConfirmQty,
                     WaitingQCItemQty: res.WaitingQCItemQty,
                     maxQty: res.maxQty,
+
                 }));
+                setFilteredReturnedData((prev) => prev.filter(item => item.id !== selectedDelete));
+                toast.success("Thao tác thành công.");
             } catch (error) {
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
             }
@@ -867,6 +870,7 @@ const ItemInput = ({
                     stocks: res.stocks,
                     WaitingConfirmQty: res.WaitingConfirmQty,
                     WaitingQCItemQty: res.WaitingQCItemQty,
+                    returnedData: res.returnedHistory,
                 }));
             } catch (error) {
                 toast.error("Có lỗi xảy ra. Vui lòng thử lại");
@@ -1035,7 +1039,6 @@ const ItemInput = ({
                                                   </span>
                                               ) : (
                                                   <span className="">
-                                                      {/* ({item.CDay % 10 > 0 ? parseFloat(item.CDay) : parseInt(item.CDay)}*{item.CRong % 10 > 0 ? parseFloat(item.CRong) : parseInt(item.CRong)}*{item.CDai % 10 > 0 ? parseFloat(item.CDai) : parseInt(item.CDai)}) */}
                                                       ({item.CDay}*{item.CRong}*
                                                       {item.CDai})
                                                   </span>
@@ -1791,8 +1794,7 @@ const ItemInput = ({
                                                                             <div className="py-1 flex justify-between space-x-5">
                                                                                 <div className="">
                                                                                     <div className="text-sm">
-                                                                                        Người
-                                                                                        giao:{" "}
+                                                                                        Người giao:{" "}
                                                                                         <span className="font-medium text-[#15803D]">
                                                                                             {
                                                                                                 item.fullname
@@ -1924,7 +1926,7 @@ const ItemInput = ({
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="flex flex-col md:flex-row justify-between pt-4 items-center xl:px-0 md:px-0 lg:px-0 px-4">
+                                        <div className="flex flex-col md:flex-row justify-between pt-4 items-center xl:px-0 md:px-0 lg:px-0 px-3">
                                             <div className="flex flex-col  w-full">
                                                 <label className="font-medium">
                                                     Sản phẩm/Chi tiết
@@ -1936,7 +1938,7 @@ const ItemInput = ({
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] shadow-sm rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-4 bg-white">
+                                        <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] shadow-sm rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-3 bg-white">
                                             <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
                                                 <label className="font-medium uppercase text-sm text-gray-400">
                                                     Chiều Dày
@@ -1966,7 +1968,7 @@ const ItemInput = ({
                                             </div>
                                         </div>
 
-                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex justify-between pb-3 ">
                                                 <div className="flex items-center space-x-2">
                                                     <FaCircleRight className="w-7 h-7 text-blue-700" />
@@ -2131,7 +2133,7 @@ const ItemInput = ({
                                                                         "Processing_" +
                                                                         index
                                                                     }
-                                                                    className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                                    className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
                                                                 >
                                                                     <div className="flex flex-col">
                                                                         <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
@@ -2205,6 +2207,7 @@ const ItemInput = ({
                                                                                 item?.Quantity
                                                                             )}
                                                                         </div>
+                                                                        
                                                                         <button
                                                                             onClick={() => {
                                                                                 onDeleteProcessingDialogOpen();
@@ -2215,9 +2218,9 @@ const ItemInput = ({
                                                                                     "product"
                                                                                 );
                                                                             }}
-                                                                            className="rounded-full  duration-200 ease hover:bg-slate-100 px-2"
+                                                                            className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
                                                                         >
-                                                                            <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                                            <TbTrash className="text-white text-2xl" />
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -2314,81 +2317,10 @@ const ItemInput = ({
                                                     </NumberInput>
                                                 )}
                                             </Box>
-
-                                            {selectedItemDetails?.notifications &&
-                                                selectedItemDetails?.notifications.filter(
-                                                    (notif) =>
-                                                        notif.confirm == 3 &&
-                                                        notif.type == 2
-                                                )?.length > 0 &&
-                                                selectedItemDetails?.notifications
-                                                    .filter(
-                                                        (notif) =>
-                                                            notif.confirm ==
-                                                                3 &&
-                                                            notif.type == 2
-                                                    )
-                                                    ?.map((item, index) => (
-                                                        <div
-                                                            key={
-                                                                "Return_" +
-                                                                index
-                                                            }
-                                                            className="flex justify-between items-center p-3 py-2 my-4 mx-3 border bg-red-50 border-red-600 rounded-xl"
-                                                        >
-                                                            <div className="flex flex-col gap-2">
-                                                                <div className="flex gap-4">
-                                                                    <Text className="font-semibold">
-                                                                        Phôi trả
-                                                                        lại:{" "}
-                                                                    </Text>{" "}
-                                                                    <Badge
-                                                                        colorScheme="red"
-                                                                        fontSize="1.2rem"
-                                                                    >
-                                                                        {formatNumber(
-                                                                            Number(
-                                                                                item?.Quantity
-                                                                            )
-                                                                        )}
-                                                                    </Badge>
-                                                                </div>
-                                                                <Text>
-                                                                    tạo bởi:{" "}
-                                                                    {item?.last_name +
-                                                                        " " +
-                                                                        item?.first_name}
-                                                                </Text>
-                                                                <div className="flex flex-col">
-                                                                    <Text className="font-semibold">
-                                                                        Lý do:{" "}
-                                                                    </Text>
-                                                                    <span className="ml-1">
-                                                                        {
-                                                                            item?.text
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        onDeleteErrorDialogOpen();
-                                                                        setSelectedError(
-                                                                            item?.id
-                                                                        );
-                                                                    }}
-                                                                    className="rounded-full p-2 duration-200 ease hover:bg-slate-100"
-                                                                >
-                                                                    <AiTwotoneDelete className="text-red-700 text-2xl" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
                                         </div>
 
                                         {/* Ghi nhận lỗi */}
-                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-3 items-center">
                                                 <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                                 <div className="font-semibold text-lg ">
@@ -2457,7 +2389,7 @@ const ItemInput = ({
                                                                     "Error_" +
                                                                     index
                                                                 }
-                                                                className="flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
+                                                                className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
                                                             >
                                                                 {/*  */}
                                                                 <div className="flex flex-col">
@@ -2504,7 +2436,7 @@ const ItemInput = ({
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex gap-x-6 items-center">
-                                                                    <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit">
+                                                                    <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit mr-6">
                                                                         {Number(
                                                                             item?.Quantity
                                                                         )}
@@ -2519,9 +2451,9 @@ const ItemInput = ({
                                                                                 "qc"
                                                                             );
                                                                         }}
-                                                                        className="rounded-full p-2 duration-200 ease hover:bg-red-100"
+                                                                        className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
                                                                     >
-                                                                        <AiTwotoneDelete className="text-red-700 text-2xl" />
+                                                                        <TbTrash className="text-white text-2xl" />
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -2778,7 +2710,7 @@ const ItemInput = ({
                                         </div>
 
                                         {/* Lịch sử trả lại */}
-                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-4 p-4 pb-2 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 pb-2 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
                                             <div className="flex space-x-2 pb-1 items-center">
                                                 <MdAssignmentReturn className="w-8 h-8 text-orange-600" />
                                                 <div className="font-semibold text-lg ">
@@ -2786,7 +2718,7 @@ const ItemInput = ({
                                                 </div>
                                             </div>
 
-                                            {/* Tìm kiếm ngày giờ */}
+                                            {/* Date Filter*/}
                                             <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col items-end  space-x-3 pb-2">
                                                 <div className="flex w-full space-x-3 w-f">
                                                     <div className="w-full">
@@ -2862,7 +2794,7 @@ const ItemInput = ({
                                                                         key={
                                                                             index
                                                                         }
-                                                                        className="bg-orange-50 px-4 py-2 rounded-xl flex items-center border-orange-200 border mb-3"
+                                                                        className="relative bg-orange-50 px-4 py-2 rounded-xl flex items-center border-orange-200 border mb-3"
                                                                     >
                                                                         <div className="w-full flex items-center text-[15px] justify-between gap-3">
                                                                             <div>
@@ -2871,9 +2803,7 @@ const ItemInput = ({
                                                                                 </div>
                                                                                 <div className="flex space-x-1 font-semibold">
                                                                                     <div>
-                                                                                        Người
-                                                                                        trả
-                                                                                        lại:
+                                                                                        Người trả lại:
                                                                                     </div>
                                                                                     <div className="text-orange-700">
                                                                                         {
@@ -2886,9 +2816,7 @@ const ItemInput = ({
                                                                                 </div>
                                                                                 <div className="flex text-sm">
                                                                                     <span className="font-medium text-gray-600">
-                                                                                        Thời
-                                                                                        gian
-                                                                                        trả:
+                                                                                        Thời gian trả:
                                                                                     </span>
                                                                                     <span className="ml-1 text-gray-600">
                                                                                         {
@@ -2898,9 +2826,7 @@ const ItemInput = ({
                                                                                 </div>
                                                                                 <div className="flex text-sm">
                                                                                     <span className="font-medium text-gray-600">
-                                                                                        Lý
-                                                                                        do
-                                                                                        trả:
+                                                                                        Lý do trả:
                                                                                     </span>
                                                                                     <span className="ml-1 text-gray-600">
                                                                                         {
@@ -2914,6 +2840,20 @@ const ItemInput = ({
                                                                                     item.Quantity
                                                                                 )}
                                                                             </div>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    onDeleteProcessingDialogOpen();
+                                                                                    setSelectedDelete(
+                                                                                        item?.id
+                                                                                    );
+                                                                                    setDialogType(
+                                                                                        "return"
+                                                                                    );
+                                                                                }}
+                                                                                className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
+                                                                            >
+                                                                                <TbTrash className="text-white text-2xl" />
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 )
@@ -3171,7 +3111,8 @@ const ItemInput = ({
                             <div className="text-red-700">
                                 {dialogType === "product"
                                     ? "Bạn chắc chắn muốn xoá số lượng đã giao chờ xác nhận?"
-                                    : "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"}
+                                    : dialogType === "qc" ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
+                                    : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">

@@ -537,9 +537,7 @@ function WoodSorting() {
                 console.log("4. Kết quả tạo pallet:", response);
                 Swal.fire({
                     title: response.data.data.pallet.Code,
-                    text: response.data.data.isDuplicate
-                        ? "Số lượng đã được thêm vào pallet"
-                        : "Mã pallet đã được tạo!",
+                    text: "Mã pallet đã được tạo!",
                     icon: "success",
                 });
 
@@ -707,15 +705,6 @@ function WoodSorting() {
                             <IoIosArrowBack />
                             <div>Quay lại</div>
                         </div>
-                        <div className="flex space-x-2 items-center xl:hidden lg:hidden md:hidden text-xs p-1 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold h-fit rounded-lg ">
-                            <BiSolidFactory />
-                            {user.plant === "TH" ? "Thuận Hưng"
-                                : user.plant === "YS" ? "Yên Sơn"
-                                : user.plant === "CH" ? "Chiêm Hóa"
-                                : user.plant === "TB" ? "Thái Bình"
-                                : user.plant === "HG" ? "Hà Giang"
-                                : "UNKNOWN"}
-                        </div>
                     </div>
                     
 
@@ -723,14 +712,6 @@ function WoodSorting() {
                     <div className="flex justify-between xl:mb-4 lg:mb-4 md:mb-4 mb-0 items-center">
                         <div className="flex space-x-4">
                             <div className="serif text-4xl font-bold">Tạo pallet xếp sấy</div>
-                            <div className="xl:inline-block lg:inline-block md:inline-block hidden text-[12px] p-0.5 px-2 bg-[#E1D0FF] text-[#6A1ED4] border-2 border-[#c6a3f7] font-semibold uppercase h-fit rounded-lg">
-                                {user.plant === "TH" ? "Thuận Hưng"
-                                : user.plant === "YS" ? "Yên Sơn"
-                                : user.plant === "CH" ? "Chiêm Hóa"
-                                : user.plant === "TB" ? "Thái Bình"
-                                : user.plant === "HG" ? "Hà Giang"
-                                : "UNKNOWN"}
-                            </div>
                         </div>
 
                         <div className="flex gap-x-2 ">

@@ -279,6 +279,13 @@ class ProductionController extends Controller
             }
         }
 
+        // Sắp xếp kết quả trả về theo thứ tự tăng dần của ItemChild
+        foreach ($results as &$result) {
+            usort($result['Details'], function ($a, $b) {
+                return strcmp($a['ItemChild'], $b['ItemChild']);
+            });
+        }
+
         // collect stock pending
         $stockpending = SanLuong::join('notireceipt', 'sanluong.id', '=', 'notireceipt.baseID')
             ->where('notireceipt.type', 0)
@@ -606,7 +613,7 @@ class ProductionController extends Controller
 
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        // Danh sách sản lượng lỗi        
+        // Danh sách sản lượng trả lại     
         $dataReturn = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -622,7 +629,7 @@ class ProductionController extends Controller
                 'CRong',
                 'CDai',
                 'b.Quantity',
-                'b.confirmBy', 
+                'b.confirmBy',
                 'b.confirm_at',
                 'c.first_name',
                 'c.last_name',
@@ -810,72 +817,9 @@ class ProductionController extends Controller
 
         $groupedResults = array_values($groupedResults);
 
-        $Datareceipt = DB::table('sanluong as a')
-            ->join('notireceipt as b', function ($join) {
-                $join->on('a.id', '=', 'b.baseID')
-                    ->where('b.deleted', '=', 0);
-            })
-            ->join('users as c', 'a.create_by', '=', 'c.id')
-            ->select(
-                'a.FatherCode',
-                'a.ItemCode',
-                'a.ItemName',
-                'b.SubItemName',
-                'b.SubItemCode',
-                'a.team',
-                'CDay',
-                'CRong',
-                'CDai',
-                'b.Quantity',
-                'a.created_at',
-                'c.first_name',
-                'c.last_name',
-                'b.text',
-                'b.id',
-                'b.type',
-                'b.confirm'
-            )
-            ->where('b.deleted', '=', 0)
-            ->where('b.confirm', '!=', 1)
-            ->where('b.type', '=', 0)
-            ->where('a.FatherCode', '=', $request->SPDICH)
-            ->where('a.ItemCode', '=', $request->ItemCode)
-            ->where('a.Team', '=', $request->TO);
-        $dataqc = DB::table('sanluong as a')
-            ->join('notireceipt as b', function ($join) {
-                $join->on('a.id', '=', 'b.baseID')
-                    ->where('b.deleted', '=', 0);
-            })
-            ->join('users as c', 'a.create_by', '=', 'c.id')
-            ->select(
-                'a.FatherCode',
-                'a.ItemCode',
-                'a.ItemName',
-                'b.SubItemName',
-                'b.SubItemCode',
-                'a.team',
-                'CDay',
-                'CRong',
-                'CDai',
-                'b.Quantity',
-                'a.created_at',
-                'c.first_name',
-                'c.last_name',
-                'b.text',
-                'b.id',
-                'b.type',
-                'b.confirm'
-            )
-            ->where('b.deleted', '=', 0)
-            ->where('b.confirm', '!=', 1)
-            ->where('b.type', '=', 1)
-            ->where('b.isPushSAP', '=', 0)
-            ->where('a.FatherCode', '=', $request->SPDICH)
-            ->where('a.ItemCode', '=', $request->ItemCode)
-            ->where('a.Team', '=', $request->TO);
-        $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        // 4. Lấy danh sách sản lượng và lỗi đã ghi nhận
+
+        // 4. Lấy danh sách sản lượng, lỗi đã ghi nhận và trả lại
         $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -941,13 +885,38 @@ class ProductionController extends Controller
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        $ItemInfo = DB::table('sanluong as a')
+        // Danh sách sản lượng trả lại     
+        $dataReturn = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'b.confirmBy', '=', 'c.id')
             ->select(
+                'a.FatherCode',
                 'a.ItemCode',
                 'a.ItemName',
+                'a.team',
+                'CDay',
+                'CRong',
+                'CDai',
+                'b.Quantity',
+                'b.confirmBy',
+                'b.confirm_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'b.type',
+                'b.confirm'
             )
-            ->where('ItemCode', $request->ItemCode)
-            ->first();
+            ->where('b.confirm', '=', 2)
+            ->where('b.type', '=', 0)
+            ->where('b.isPushSAP', '=', 0)
+            ->where('a.FatherCode', '=', $request->SPDICH)
+            ->where('a.ItemCode', '=', $request->ItemCode)
+            ->where('a.Team', '=', $request->TO)
+            ->get();
 
         $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
@@ -1037,6 +1006,7 @@ class ProductionController extends Controller
             'WaitingQCItemQty' => $WaitingQCItemQty,
             'maxQty' =>   $maxQty,
             'stocks' => $groupedResults,
+            'returnedHistory' => $dataReturn,
         ], 200);
     }
     function collectdata($spdich, $item, $to)

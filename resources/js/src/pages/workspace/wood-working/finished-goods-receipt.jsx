@@ -444,7 +444,9 @@ function FinishedGoodsReceipt() {
                                 <div className="special-spinner"></div>
                             </div>
                         ) : searchResult.length > 0 ? (
-                            searchResult.map((item, index) => (
+                            searchResult
+                            .sort((a, b) => a?.ItemChild?.localeCompare(b.ItemChild))
+                            .map((item, index) => (
                                 <ItemInput
                                     data={item}
                                     MaThiTruong={item.MaThiTruong}
@@ -546,7 +548,7 @@ function FinishedGoodsReceipt() {
                 </AlertDialogOverlay>
             </AlertDialog>
             <div
-                className={`progress-wrap fixed right-12 bottom-12 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${
+                className={`progress-wrap fixed xl:right-12 lg:right-12 md:right-12 right-8 xl:bottom-12 lg:bottom-12 md:bottom-12 bottom-8 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${
                     isActive
                         ? "opacity-100 visible translate-y-0"
                         : "opacity-0 invisible translate-y-4"

@@ -38,13 +38,15 @@ import { MdNoteAlt } from "react-icons/md";
 import { HiOutlineTrash } from "react-icons/hi";
 import { IoClose, IoCloseSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
-import { addDays, format, add } from "date-fns";
+import { addDays, format, add, set } from "date-fns";
 import compareDesc from "date-fns/compareDesc/index.js";
 import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { PiSealWarningFill } from "react-icons/pi";
 import { MdDoNotDisturbOnTotalSilence } from "react-icons/md";
 import { Spinner } from "@chakra-ui/react";
+import { TbTrash } from "react-icons/tb";
+import { id } from "date-fns/locale";
 
 //
 const DisabledCheckCard = (props) => {
@@ -58,22 +60,30 @@ const DisabledCheckCard = (props) => {
         curvedRate,
         note,
         createdDate,
+        setSelectedDeleteRecord,
+        isDeleteDisabledRecordOpen,
+        onDeleteDisabledRecordOpen,
     } = props;
 
     return (
-        <div className="relative w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 min-w-[250px] p-4 px-4 shadow-gray-400 drop-shadow-sm duration-300 hover:-translate-y-1">
+        <div className="relative w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 min-w-[250px] p-4 px-4 shadow-gray-400 drop-shadow-sm ">
             <div
-                className="absolute -top-1 -right-2.5 bg-gray-800 text-white flex w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all"
-                // onClick={onOpen}
+                className="absolute -top-1 -right-2 bg-gray-800 text-white flex w-8 h-8 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 hover:bg-red-600 transition-all"
+                onClick={() => {
+                    onDeleteDisabledRecordOpen();
+                    setSelectedDeleteRecord(id);
+                }}
             >
-                <IoCloseSharp className="text-white " />
+                <TbTrash className="text-white text-2xl " />
             </div>
             <div></div>
             <div className="rounded-lg text-sm font-semibold bg-gray-300 mb-4 p-1 px-3 w-fit">
                 {createdDate}
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
-                <div className="text-gray-600 font-medium">Số pallet:</div>
+                <div className="text-gray-600 font-medium">
+                    Tổng số lượng trên pallet:
+                </div>
                 <span className="text-right font-semibold">{pallet}</span>
             </div>
             <div className="grid grid-cols-[70%,30%] pb-2">
@@ -134,6 +144,13 @@ const DisabledCheck = ({
     });
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const {
+        isOpen: isDeleteDisabledRecordOpen,
+        onOpen: onDeleteDisabledRecordOpen,
+        onClose: onDeleteDisabledRecordClose,
+    } = useDisclosure();
+
     const {
         isOpen: isConfirmOpen,
         onOpen: onConfirmOpen,
@@ -151,10 +168,9 @@ const DisabledCheck = ({
     const [disabledDetails, setDisabledDetails] = useState([]);
     const [disabledList, setDisabledList] = useState([]);
     const [loadCurrentRecord, setLoadCurrentRecord] = useState(true);
-    const [avgDisabledRate, setAvgDisabledRate] = useState(null);
-    const [avgCurvedRate, setAvgCurvedRate] = useState(null);
-    const [sumDisability, setSumDisability] = useState(null);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [selectedDeleteRecord, setSelectedDeleteRecord] = useState(null);
+    const [isDeleteRecordLoading, setIsDeleteRecordLoading] = useState(false);
 
     const handleRecordClick = (record) => {
         setSelectedRecord(record);
@@ -183,7 +199,6 @@ const DisabledCheck = ({
     const loadCurrentDisabledRecords = async () => {
         const queryParams = new URLSearchParams(window.location.search);
         const planID = queryParams.get("id"); // Lấy giá trị của 'id' từ URL
-        console.log("2. Giá trị planID nhận được là: ", planID);
         try {
             const response = await palletsApi.getTempDisabledRecords(
                 planID,
@@ -213,72 +228,13 @@ const DisabledCheck = ({
     // Load Data
     useEffect(() => {
         loadCurrentDisabledRecords();
-        // loadDisabledRecordList();
     }, []);
 
-    // Handle Add New Record
-    // const addNewDisabledDetails = async (values, { resetForm }) => {
-    //     if (!values.pallet) {
-    //         toast.error("Vui lòng nhập số pallet.");
-    //         palletInput.current.focus();
-    //         return;
-    //     }
-    //     if (!values.sample) {
-    //         toast.error("Vui lòng nhập số lượng mẫu.");
-    //         sampleInput.current.focus();
-    //         return;
-    //     }
-    //     if (!values.disability) {
-    //         toast.error("Vui lòng nhập số lượng mo, tóp.");
-    //         disabilityInput.current.focus();
-    //         return;
-    //     }
-    //     if (!values.curve || !values.curve) {
-    //         toast.error("Vui lòng nhập số lượng cong.");
-    //         curveInput.current.focus();
-    //         return;
-    //     }
-
-    //     const currentDisabledRate = (
-    //         (values.disability / values.sample) *
-    //         100
-    //     ).toFixed(2);
-    //     const currentCurvedRate = (
-    //         (values.curve / values.sample) *
-    //         100
-    //     ).toFixed(2);
-
-    //     const detailData = {
-    //         disabledRate: currentDisabledRate,
-    //         curvedRate: currentCurvedRate,
-    //     };
-
-    //     const recordData = {
-    //         PlanID: planID,
-    //         SLMau: values.sample,
-    //         SLPallet: values.pallet,
-    //         SLMoTop: values.disability,
-    //         SLCong: values.curve,
-    //         note: values.note,
-    //     };
-
-    //     console.log("Dữ liệu sẽ được gửi đi:", recordData);
-    //     try {
-    //         const response = await palletsApi.addDisabledRecord(recordData);
-    //         console.log("Trả về:", response.plandrying);
-    //         await setDisabledDetails(response.plandrying, detailData);
-    //         toast.success("Thông tin khảo sát đã được ghi nhận");
-
-    //         resetForm();
-    //     } catch (error) {
-    //         console.error("Error:", error);
-    //     }
-    // };
-
     const addNewDisabledDetails = async (values, resetForm) => {
+        console.log("Dữ liệu nhận được từ form:", values);
         // Validation xử lý tại đây
         if (!values.pallet) {
-            toast.error("Vui lòng nhập mã pallet.");
+            toast.error("Vui lòng nhập tổng số lượng trên pallet.");
             if (palletInput.current) {
                 palletInput.current.focus();
             }
@@ -394,27 +350,30 @@ const DisabledCheck = ({
         onClose();
     };
 
-    const handleSubmitReport = async () => {
-        if (disabledDetails.length <= 0) {
-            console.log("Submit nè");
-            toast.error("Vui lòng nhập thông tin khảo sát.");
-        } else {
-            toast.sucess("Thông tin khảo sát đã được lưu lại.");
-            setRate({
-                disabledRate: null,
-                curvedRate: null,
-            });
-            setInfo({
-                pallet: null,
-                sample: null,
-                disability: null,
-                curve: null,
-                note: "",
-            });
-            setDisabledDetails([]);
-            onClose();
+    const handleDeleteDisabledRecord = async () => {
+        const deleteData = {
+            PlanID: planID,
+            id: selectedDeleteRecord,
+        }; 
+
+        try {
+            setIsDeleteRecordLoading(true);
+            const response = await palletsApi.deleteDisabledRecord(
+                deleteData.PlanID,
+                deleteData.id,
+            );
+            console.log("Trả về:", response);
+            toast.success("Xóa thông tin khảo sát thành công");
+            loadCurrentDisabledRecords();
+            onDeleteDisabledRecordClose();   
+            setIsDeleteRecordLoading(false);
+        } catch (error) {
+            toast.error("Đã có lỗi ghi xóa bản ghi. Hãy thử lại sau.");
+            onDeleteDisabledRecordClose();
+            setIsDeleteRecordLoading(false);
+            console.error("Error:", error);
         }
-    };
+    }
 
     //Calculate disabled and curved items
     const [calculatedValues, setCalculatedValues] = useState({
@@ -697,6 +656,7 @@ const DisabledCheck = ({
                         </tbody>
                     </table>
                 </div>
+                {/* View Disabled Record Modal */}
                 {Array.isArray(disabledList) &&
                     disabledList.map((item, index) => (
                         <Modal
@@ -728,7 +688,7 @@ const DisabledCheck = ({
                                                             Thông tin chung
                                                         </div>
                                                     </div>
-                                                    <div className="grid grid-cols-2 p-3 px-8">
+                                                    <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
                                                         <div className=" flex font-semibold items-center">
                                                             <LuCalendarRange className="w-5 h-5 mr-3" />
                                                             Ngày kiểm tra:
@@ -740,7 +700,7 @@ const DisabledCheck = ({
                                                             )}
                                                         </span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 p-2.5 px-8">
+                                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
                                                         <div className="font-semibold flex items-center">
                                                             <LuStretchHorizontal className="w-5 h-5 mr-3" />
                                                             Mẻ sấy số:
@@ -749,7 +709,7 @@ const DisabledCheck = ({
                                                             {code}
                                                         </span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 p-2.5 px-8">
+                                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
                                                         <div className="font-semibold flex items-center">
                                                             <LuWarehouse className="w-5 h-5 mr-3" />
                                                             Nhà máy:
@@ -829,7 +789,7 @@ const DisabledCheck = ({
                                                             />
                                                         </div>
                                                     ) : (
-                                                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
+                                                        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
                                                             {selectedRecord
                                                                 .detail.length >
                                                                 0 &&
@@ -909,7 +869,7 @@ const DisabledCheck = ({
                     ))}
             </div>
 
-            {/* Modal */}
+            {/* Create Record Modal */}
             <Modal
                 size="full"
                 isOpen={isOpen}
@@ -939,7 +899,7 @@ const DisabledCheck = ({
                                         Thông tin chung
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 p-3 px-8">
+                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
                                     <div className=" flex font-semibold items-center">
                                         <LuCalendarRange className="w-5 h-5 mr-3" />
                                         Ngày kiểm tra:
@@ -948,7 +908,7 @@ const DisabledCheck = ({
                                         {format(new Date(), "yyyy-MM-dd")}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
                                     <div className="font-semibold flex items-center">
                                         <LuStretchHorizontal className="w-5 h-5 mr-3" />
                                         Mẻ sấy số:
@@ -957,7 +917,7 @@ const DisabledCheck = ({
                                         {code}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 p-2.5 px-8">
+                                <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
                                     <div className="font-semibold flex items-center">
                                         <LuWarehouse className="w-5 h-5 mr-3" />
                                         Nhà máy:
@@ -977,7 +937,7 @@ const DisabledCheck = ({
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 px-6 pb-5 pt-4">
+                                <div className="space-y-3 xl:px-8 lg:px-8 md:px-8 px-4 pb-5 pt-4">
                                     <div className="grid grid-cols-[70%,30%]">
                                         <div className="font-bold">
                                             Tỉ lệ mo, tóp trung bình:
@@ -1198,6 +1158,12 @@ const DisabledCheck = ({
                                                             createdDate={
                                                                 item.created_at
                                                             }
+                                                            onDeleteDisabledRecordOpen={
+                                                                onDeleteDisabledRecordOpen
+                                                            }
+                                                            setSelectedDeleteRecord={
+                                                                setSelectedDeleteRecord
+                                                            }
                                                         />
                                                     );
                                                 }
@@ -1235,7 +1201,8 @@ const DisabledCheck = ({
                                     <ModalOverlay />
                                     <ModalContent>
                                         <ModalHeader>
-                                            Bạn chắc chắn muốn lưu kết quả này?
+                                            Bạn chắc chắn muốn xác nhận kết quả
+                                            này?
                                         </ModalHeader>
                                         <ModalBody pb={6}>
                                             Sau khi bấm xác nhận sẽ không thể
@@ -1243,24 +1210,68 @@ const DisabledCheck = ({
                                         </ModalBody>
                                         <ModalFooter>
                                             <Button
+                                                colorScheme="gray"
+                                                mr={3}
+                                                onClick={onConfirmClose}
+                                                disabled={isDeleteRecordLoading}
+                                            >
+                                                Đóng
+                                            </Button>
+                                            <Button
                                                 colorScheme="blue"
                                                 mr={3}
                                                 onClick={finishDisabledCheck}
                                             >
                                                 Xác nhận
                                             </Button>
-                                            <Button
-                                                colorScheme="gray"
-                                                mr={3}
-                                                onClick={onConfirmClose}
-                                            >
-                                                Đóng
-                                            </Button>
                                         </ModalFooter>
                                     </ModalContent>
                                 </Modal>
                             </>
                         )}
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Delete Disabled Confirm Modal */}
+            <Modal
+                isCentered
+                blockScrollOnMount={false}
+                closeOnOverlayClick={false}
+                isOpen={isDeleteDisabledRecordOpen}
+                onClose={onDeleteDisabledRecordClose}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Bạn có chắc muốn xóa bản ghi nhận khảo sát?</ModalHeader>
+                    <ModalBody>
+                        <div>
+                            Sau khi bấm xác nhận sẽ không thể thu hồi hành động.
+                        </div>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <Button
+                            colorScheme="gray"
+                            mr={3}
+                            onClick={onDeleteDisabledRecordClose}
+                        >
+                            Đóng
+                        </Button>
+                        <Button 
+                            colorScheme="blue" 
+                            mr={3}
+                            onClick={handleDeleteDisabledRecord}
+                        >
+                            {isDeleteRecordLoading ? (
+                                <div className="flex gap-x-2 items-center">
+                                    <Spinner size="sm" />
+                                    <div>Đang xóa</div>
+                                </div>
+                            ) : (
+                                "Xác nhận"
+                            )}  
+                        </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

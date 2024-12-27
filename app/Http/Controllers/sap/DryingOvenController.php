@@ -238,30 +238,17 @@ class DryingOvenController extends Controller
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->toArray();
             $towarehouse = WarehouseCS();
 
-            // 1.1. Kiểm tra xem quy cách đã tồn tại hay chưa, nếu đã tồn tại lấy thông tin pallet tồn tại
-            $existingPallet = Pallet::where('activeStatus', 0)
-                ->where(function ($query) use ($quyCachList) {
-                    foreach ($quyCachList as $quyCach) {
-                        $query->where('QuyCach', 'like', '%' . $quyCach . '%');
-                    }
-                })
-                ->latest()
-                ->first();
+            // 1.1. Tạo pallet mới
+            $recordCount = Pallet::whereYear('created_at', $current_year)
+                ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+                ->count() + 1;
 
-            // 1.2. Nếu chưa tồn tại thì tạo pallet mới
-            if ($existingPallet) {
-                $pallet = $existingPallet;
-                $isDuplicate = true;
-            } else {
-                $recordCount = Pallet::whereYear('created_at', $current_year)
-                    ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-                    ->count() + 1;
+            $combinedQuyCach = implode('_', $quyCachList);
 
-                $combinedQuyCach = implode('_', $quyCachList);
-
-                $pallet = Pallet::create($palletData + ['Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT), 'QuyCach' => $combinedQuyCach]);
-                $isDuplicate = false;
-            }
+            $pallet = Pallet::create($palletData + [
+                'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
+                'QuyCach' => $combinedQuyCach
+            ]);
 
             // 2. Lấy dữ liệu Details và tạo chi tiết pallet
             $palletDetails = $request->input('Details', []);
@@ -348,56 +335,6 @@ class DryingOvenController extends Controller
                 "G_PALLETLCollection" => $ldt2
             ];
 
-            // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về
-            // $response = Http::withOptions([
-            //     'verify' => false,
-            // ])->withHeaders([
-            //     "Content-Type" => "application/json",
-            //     "Accept" => "application/json",
-            //     "Authorization" => "Basic " . BasicAuthToken(),
-            // ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
-
-            // $response2 = Http::withOptions([
-            //     'verify' => false,
-            // ])->withHeaders([
-            //     "Content-Type" => "application/json",
-            //     "Accept" => "application/json",
-            //     "Authorization" => "Basic " . BasicAuthToken(),
-            // ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
-
-            // $res = $response->json();
-            // $res2 = $response2->json();
-
-            // 3.1. Kiểm tra kết quả trả về từ SAP
-            // if (!empty($res['error']) && !empty($res2['error'])) {
-            //     DB::rollBack();
-            //     return response()->json([
-            //         'message' => 'Failed to create pallet and details',
-            //         'error' => $res['error'],
-            //     ], 500);
-            // } else {
-            //     if (!$isDuplicate) {
-            //         Pallet::where('palletID', $pallet->palletID)->update([
-            //             'DocNum' => $res['DocNum'],
-            //             'DocEntry' => $res['DocEntry'],
-            //             'palletSAP' => $res2['DocEntry'],
-            //             'CreateBy' => Auth::user()->id,
-            //             'activeStatus' => 0,
-            //         ]);
-            //     }
-            //     DB::commit();
-
-            //     return response()->json([
-            //         'message' => 'Pallet created successfully',
-            //         'data' => [
-            //             'isDuplicate' => $isDuplicate,
-            //             'pallet' => $pallet,
-            //             'res1' => $res,
-            //             'res2' => $res2,
-            //         ]
-            //     ]);
-            // }
-
             // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về (mới, check kết quả API trước khi thực hiện API kế tiếp)
             $stockTransferResponse = Http::withOptions([
                 'verify' => false,
@@ -464,24 +401,19 @@ class DryingOvenController extends Controller
             }
 
             // Trường hợp cả 2 API đều thành công
-            if (!$isDuplicate) {
-                Pallet::where('palletID', $pallet->palletID)->update([
-                    'DocNum' => $stockTransferResult['DocNum'],
-                    'DocEntry' => $stockTransferResult['DocEntry'],
-                    'palletSAP' => $palletResult['DocEntry'],
-                    'CreateBy' => Auth::user()->id,
-                    'activeStatus' => 0,
-                ]);
-            }
+            Pallet::where('palletID', $pallet->palletID)->update([
+                'DocNum' => $stockTransferResult['DocNum'],
+                'DocEntry' => $stockTransferResult['DocEntry'],
+                'palletSAP' => $palletResult['DocEntry'],
+                'CreateBy' => Auth::user()->id,
+                'activeStatus' => 0,
+            ]);
             DB::commit();
 
             return response()->json([
                 'message' => 'Pallet created successfully',
                 'data' => [
-                    'isDuplicate' => $isDuplicate,
                     'pallet' => $pallet,
-                    // 'res1' => $res,
-                    // 'res2' => $res2,
                     'stockTransferResult' => $stockTransferResponse->json(),
                     'palletResult' => $palletResponse->json(),
                 ]
@@ -492,8 +424,6 @@ class DryingOvenController extends Controller
             return response()->json([
                 'message' => 'Failed to create pallet and details',
                 'error' => $e->getMessage(),
-                // 'res1' => $res,
-                // 'res2' => $res2,
                 'stockTransferResult' => $stockTransferResponse->json(),
                 'palletResult' => $palletResponse->json(),
             ], 500);
@@ -527,6 +457,38 @@ class DryingOvenController extends Controller
                 'error' => false,
                 'status_code' => 500,
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Delete Disabled Record
+    function deleteDisabledRecord(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PlanID' => 'required',
+            'id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        };
+
+        try {
+            DB::table('disability_rates_detail')->where('id', $request->id)->delete();
+
+            $updatedData = DB::table('disability_rates_detail')
+                ->where('PlanID', $request->PlanID)
+                ->get();
+
+            return response()->json([
+                'status_code' => 200,
+                'message' => 'Record deleted successfully',
+                'updatedData' => $updatedData,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status_code' => 500,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
