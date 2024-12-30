@@ -424,16 +424,24 @@ class QCController extends Controller
         $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS' : Auth::user()->plant;
 
         // Tổ chuyển về
-        $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
-        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=? and "ResName" is not null AND "U_KHOI"=?;';
+        $query_03 = '
+            SELECT "U_FAC", "VisResCode" AS "Code", "ResName" AS "Name"
+            FROM "ORSC"
+            WHERE "U_QC" = ? AND "validFor" = ? AND "ResName" IS NOT NULL AND "U_KHOI" = ? AND "U_FAC" IS NOT NULL
+            ORDER BY 
+                CASE WHEN "U_FAC" = ? THEN 0 ELSE 1 END, -- Đưa nhóm U_FAC = $userPlant lên đầu
+                "U_FAC" ASC;';
+        
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant, $request->KHOI])) {
+        
+        if (!odbc_execute($stmt_03, ['N', 'Y', $request->KHOI, $userPlant])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        $teamBack = array();
+        
+        $teamBack = [];
         while ($row = odbc_fetch_array($stmt_03)) {
             $teamBack[] = $row;
         }
@@ -450,7 +458,7 @@ class QCController extends Controller
             throw new \Exception('Error executing additional SQL statement: ' . odbc_errormsg($conDB));
             }
             while ($additionalRow = odbc_fetch_array($additionalStmt)) {
-            $teamBack[] = $additionalRow;
+                $teamBack[] = $additionalRow;
             }
         }
 

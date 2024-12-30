@@ -27,7 +27,7 @@ class ConnectController extends Controller
             $db_name = config('sap.DB_NAME');
             $username = 'SYSTEM';
             // Password
-            $password = "S@p@Systemb1";
+            $password = "S@p@WL@2025";
             $constring = "Driver={" . $driver . "};ServerNode=" . $host . ";UID=" . $username . ";PWD=" . $password . ";CS=" . $db_name . ";char_as_utf8=true";
             //return odbc_connect("Driver=$driver;ServerNode=$host;Database=$db_name;", $username, $password, SQL_CUR_USE_ODBC);
             return   odbc_connect($constring, ' SQL_CUR_USE_ODBC', '');

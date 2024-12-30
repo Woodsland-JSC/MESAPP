@@ -42,8 +42,9 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+
         $toqc = "";
-        if (Auth::user()->plant == 'YS2') {
+        if (Auth::user()->plant == 'YS') {
             $toqc = 'YS2-QC';
         } else if (Auth::user()->plant == 'CH') {
             $toqc = 'CH-QC';
@@ -53,6 +54,7 @@ class VCNController extends Controller
         } else {
             $toqc = 'HG-QC';
         }
+
         try {
             DB::beginTransaction();
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
@@ -2489,6 +2491,7 @@ class VCNController extends Controller
             'message' => 'Successful',
         ], 200);
     }
+    
     function AcceiptRongv2(Request $request)
     {
         $validator = Validator::make($request->all(), [

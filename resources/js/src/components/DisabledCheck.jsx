@@ -63,19 +63,22 @@ const DisabledCheckCard = (props) => {
         setSelectedDeleteRecord,
         isDeleteDisabledRecordOpen,
         onDeleteDisabledRecordOpen,
+        viewMode,
     } = props;
 
     return (
         <div className="relative w-full rounded-xl cursor-pointer h-[20rem] bg-gray-100 min-w-[250px] p-4 px-4 shadow-gray-400 drop-shadow-sm ">
-            <div
-                className="absolute -top-1 -right-2 bg-gray-800 text-white flex w-8 h-8 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 hover:bg-red-600 transition-all"
-                onClick={() => {
-                    onDeleteDisabledRecordOpen();
-                    setSelectedDeleteRecord(id);
-                }}
-            >
-                <TbTrash className="text-white text-2xl " />
-            </div>
+            {!viewMode && (
+                <div
+                    className="absolute -top-1 -right-2 bg-gray-800 text-white flex w-8 h-8 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 hover:bg-red-600 transition-all"
+                    onClick={() => {
+                        onDeleteDisabledRecordOpen();
+                        setSelectedDeleteRecord(id);
+                    }}
+                >
+                    <TbTrash className="text-white text-2xl " />
+                </div>
+            )}
             <div></div>
             <div className="rounded-lg text-sm font-semibold bg-gray-300 mb-4 p-1 px-3 w-fit">
                 {createdDate}
@@ -354,18 +357,18 @@ const DisabledCheck = ({
         const deleteData = {
             PlanID: planID,
             id: selectedDeleteRecord,
-        }; 
+        };
 
         try {
             setIsDeleteRecordLoading(true);
             const response = await palletsApi.deleteDisabledRecord(
                 deleteData.PlanID,
-                deleteData.id,
+                deleteData.id
             );
             console.log("Trả về:", response);
             toast.success("Xóa thông tin khảo sát thành công");
             loadCurrentDisabledRecords();
-            onDeleteDisabledRecordClose();   
+            onDeleteDisabledRecordClose();
             setIsDeleteRecordLoading(false);
         } catch (error) {
             toast.error("Đã có lỗi ghi xóa bản ghi. Hãy thử lại sau.");
@@ -373,7 +376,7 @@ const DisabledCheck = ({
             setIsDeleteRecordLoading(false);
             console.error("Error:", error);
         }
-    }
+    };
 
     //Calculate disabled and curved items
     const [calculatedValues, setCalculatedValues] = useState({
@@ -517,9 +520,10 @@ const DisabledCheck = ({
                                     disabledList.map((item, index) => (
                                         <div
                                             className="rounded-xl bg-red-50 hover:bg-white cursor-pointer xl:text-base   border border-red-200"
-                                            onClick={() =>
-                                                handleRecordClick(item)
-                                            }
+                                            onClick={() => {
+                                                setViewMode(true);
+                                                handleRecordClick(item);
+                                            }}
                                         >
                                             <div className="px-4 py-2.5 flex justify-between items-center border-b border-red-200">
                                                 <div className="">
@@ -656,217 +660,6 @@ const DisabledCheck = ({
                         </tbody>
                     </table>
                 </div>
-                {/* View Disabled Record Modal */}
-                {Array.isArray(disabledList) &&
-                    disabledList.map((item, index) => (
-                        <Modal
-                            size="full"
-                            isOpen={isDetailOpen}
-                            onClose={onDetailClose}
-                            scrollBehavior="inside"
-                            isCentered
-                            blockScrollOnMount={false}
-                        >
-                            <ModalOverlay />
-                            <ModalContent>
-                                <ModalHeader>
-                                    <div className="xl:ml-10 xl:text-center text-lg uppercase xl:text-xl ">
-                                        Biên bản khảo sát tỉ lệ khuyết tật
-                                    </div>
-                                </ModalHeader>
-                                <ModalCloseButton />
-                                <div className="border-b-2 border-gray-100"></div>
-                                <ModalBody>
-                                    {selectedRecord && (
-                                        <>
-                                            <section className="flex flex-col justify-center">
-                                                {/* Infomation */}
-                                                <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                                    <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-8 lg:px-8 md:px-8">
-                                                        <FaInfoCircle className="w-7 h-7 text-[]" />
-                                                        <div className="text-xl font-semibold">
-                                                            Thông tin chung
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
-                                                        <div className=" flex font-semibold items-center">
-                                                            <LuCalendarRange className="w-5 h-5 mr-3" />
-                                                            Ngày kiểm tra:
-                                                        </div>
-                                                        <span className=" text-base ">
-                                                            {format(
-                                                                new Date(),
-                                                                "yyyy-MM-dd"
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
-                                                        <div className="font-semibold flex items-center">
-                                                            <LuStretchHorizontal className="w-5 h-5 mr-3" />
-                                                            Mẻ sấy số:
-                                                        </div>
-                                                        <span className="font-normal text-base ">
-                                                            {code}
-                                                        </span>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
-                                                        <div className="font-semibold flex items-center">
-                                                            <LuWarehouse className="w-5 h-5 mr-3" />
-                                                            Nhà máy:
-                                                        </div>
-                                                        <span className="font-normal text-base ">
-                                                            {oven}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Result  */}
-                                                <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-7">
-                                                    <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 py-3 xl:px-8 lg:px-8 md:px-8 border-red-200 rounded-t-xl">
-                                                        <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
-                                                        <div className="font-semibold text-red-600">
-                                                            Tỉ lệ khuyết tật
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-3 px-6 pb-5 pt-4">
-                                                        <div className="grid grid-cols-[70%,30%]">
-                                                            <div className="font-bold">
-                                                                Tỉ lệ mo, tóp
-                                                                trung bình:
-                                                            </div>
-                                                            <span className="font-bold text-right">
-                                                                {
-                                                                    selectedRecord.TLMoTop
-                                                                }{" "}
-                                                                %
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-[70%,30%]">
-                                                            <div className="font-bold">
-                                                                Tỉ lệ cong trung
-                                                                bình:
-                                                            </div>
-                                                            <span className="font-bold text-right">
-                                                                {
-                                                                    selectedRecord.TLCong
-                                                                }{" "}
-                                                                %
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-[70%,30%]">
-                                                            <div className="font-bold">
-                                                                Tổng khuyết tật:
-                                                            </div>
-                                                            <span className="font-bold text-right">
-                                                                {
-                                                                    selectedRecord.TotalMau
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </section>
-
-                                            <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
-                                                <div className="flex gap-x-4 rounded-t-xl items-center p-4 xl:px-6 lg:px-6 md:px-6 px-2">
-                                                    <MdNoteAlt className="w-8 h-9 text-[]" />
-                                                    <div className="text-xl font-semibold">
-                                                        Ghi nhận khảo sát
-                                                    </div>
-                                                </div>
-                                                <div className="border-b-2 border-gray-200"></div>
-
-                                                <section className="my-4">
-                                                    {loadCurrentRecord ? (
-                                                        <div className="text-center">
-                                                            <Spinner
-                                                                thickness="4px"
-                                                                speed="0.65s"
-                                                                emptyColor="gray.200"
-                                                                color="#155979"
-                                                                size="xl"
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
-                                                            {selectedRecord
-                                                                .detail.length >
-                                                                0 &&
-                                                                selectedRecord.detail.map(
-                                                                    (
-                                                                        item,
-                                                                        index
-                                                                    ) => {
-                                                                        const disabledRate =
-                                                                            (
-                                                                                (item.SLMoTop /
-                                                                                    item.SLMau) *
-                                                                                100
-                                                                            ).toFixed(
-                                                                                2
-                                                                            );
-                                                                        const curvedRate =
-                                                                            (
-                                                                                (item.SLCong /
-                                                                                    item.SLMau) *
-                                                                                100
-                                                                            ).toFixed(
-                                                                                2
-                                                                            );
-
-                                                                        return (
-                                                                            <DisabledCheckCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                id={
-                                                                                    item.id
-                                                                                }
-                                                                                pallet={
-                                                                                    item.SLPallet
-                                                                                }
-                                                                                sample={
-                                                                                    item.SLMau
-                                                                                }
-                                                                                disability={
-                                                                                    item.SLMoTop
-                                                                                }
-                                                                                curve={
-                                                                                    item.SLCong
-                                                                                }
-                                                                                note={
-                                                                                    item.note
-                                                                                }
-                                                                                disabledRate={
-                                                                                    disabledRate
-                                                                                }
-                                                                                curvedRate={
-                                                                                    curvedRate
-                                                                                }
-                                                                            />
-                                                                        );
-                                                                    }
-                                                                )}
-                                                        </div>
-                                                    )}
-                                                </section>
-                                            </section>
-                                        </>
-                                    )}
-                                </ModalBody>
-                                <div className="border-b-2 border-gray-100"></div>
-                                <ModalFooter className="gap-4">
-                                    <button
-                                        onClick={onDetailClose}
-                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
-                                    >
-                                        Đóng
-                                    </button>
-                                </ModalFooter>
-                            </ModalContent>
-                        </Modal>
-                    ))}
             </div>
 
             {/* Create Record Modal */}
@@ -890,288 +683,490 @@ const DisabledCheck = ({
                     <ModalCloseButton />
                     <div className="border-b-2 border-gray-200"></div>
                     <ModalBody className="bg-[#FAFAFA] !px-3.5">
-                        <section className="flex flex-col justify-center">
-                            {/* Infomation */}
-                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-3 border-[#DADADA] rounded-xl divide-y divide-gray-200 bg-white mb-4">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-3 xl:px-4 lg:px-4 md:px-4">
-                                    <FaInfoCircle className="w-7 h-7 text-[]" />
-                                    <div className="serif text-2xl font-bold">
-                                        Thông tin chung
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
-                                    <div className=" flex font-semibold items-center">
-                                        <LuCalendarRange className="w-5 h-5 mr-3" />
-                                        Ngày kiểm tra:
-                                    </div>
-                                    <span className=" text-base ">
-                                        {format(new Date(), "yyyy-MM-dd")}
-                                    </span>
-                                </div>
-                                <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
-                                    <div className="font-semibold flex items-center">
-                                        <LuStretchHorizontal className="w-5 h-5 mr-3" />
-                                        Mẻ sấy số:
-                                    </div>
-                                    <span className="font-normal text-base ">
-                                        {code}
-                                    </span>
-                                </div>
-                                <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
-                                    <div className="font-semibold flex items-center">
-                                        <LuWarehouse className="w-5 h-5 mr-3" />
-                                        Nhà máy:
-                                    </div>
-                                    <span className="font-normal text-base ">
-                                        {oven}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Result  */}
-                            <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-4">
-                                <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-3 py-3 xl:px-4 lg:px-4 md:px-4 border-red-200 rounded-t-xl">
-                                    <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
-                                    <div className="serif text-[22px] font-bold text-red-600">
-                                        Tỉ lệ khuyết tật
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3 xl:px-8 lg:px-8 md:px-8 px-4 pb-5 pt-4">
-                                    <div className="grid grid-cols-[70%,30%]">
-                                        <div className="font-bold">
-                                            Tỉ lệ mo, tóp trung bình:
+                        {/* Create Mode */}
+                        {!viewMode ? (
+                            <div className="flex mt-2 space-y-4 flex-col justify-center">
+                                {/* General Information */}
+                                <div className="xl:mx-auto text-base xl:w-[60%] border-2 border-[#DADADA] rounded-xl divide-y divide-gray-200 bg-white ">
+                                    <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-3 xl:px-4 lg:px-4 md:px-4">
+                                        <FaInfoCircle className="w-7 h-7 text-[]" />
+                                        <div className="serif text-2xl font-bold">
+                                            Thông tin chung
                                         </div>
-                                        <span className="font-bold text-right">
-                                            {calculatedValues.avgDisabledRate ||
-                                                0}{" "}
-                                            %
+                                    </div>
+                                    <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
+                                        <div className=" flex font-semibold items-center">
+                                            <LuCalendarRange className="w-5 h-5 mr-3" />
+                                            Ngày kiểm tra:
+                                        </div>
+                                        <span className=" text-base ">
+                                            {format(new Date(), "yyyy-MM-dd")}
                                         </span>
                                     </div>
-                                    <div className="grid grid-cols-[70%,30%]">
-                                        <div className="font-bold">
-                                            Tỉ lệ cong trung bình:
+                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
+                                        <div className="font-semibold flex items-center">
+                                            <LuStretchHorizontal className="w-5 h-5 mr-3" />
+                                            Mẻ sấy số:
                                         </div>
-                                        <span className="font-bold text-right">
-                                            {calculatedValues.avgCurvedRate ||
-                                                0}{" "}
-                                            %
+                                        <span className="font-normal text-base ">
+                                            {code}
                                         </span>
                                     </div>
-                                    <div className="grid grid-cols-[70%,30%]">
-                                        <div className="font-bold">
-                                            Tổng khuyết tật:
+                                    <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
+                                        <div className="font-semibold flex items-center">
+                                            <LuWarehouse className="w-5 h-5 mr-3" />
+                                            Nhà máy:
                                         </div>
-                                        <span className="font-bold text-right">
-                                            {calculatedValues.sumDisability ||
-                                                0}
+                                        <span className="font-normal text-base ">
+                                            {oven}
                                         </span>
                                     </div>
                                 </div>
-                            </div>
-                        </section>
-
-                        <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-[#DADADA] h-fit w-full p-3 pt-0 mb-4 px-3">
-                            <div className="flex gap-x-3 rounded-t-xl items-center p-3 px-1 ">
-                                <MdNoteAlt className="w-8 h-8 text-[]" />
-                                <div className="serif text-[22px] font-bold">
-                                    Ghi nhận khảo sát
-                                </div>
-                            </div>
-                            {!viewMode && (
-                                <Formik
-                                    initialValues={info}
-                                    onSubmit={() => {}}
-                                >
-                                    {({ values, setFieldValue, resetForm }) => (
-                                        <div className="flex flex-col p-3 mb-6 bg-gray-50 border-2 gap-y-2 border-gray-200 rounded-xl">
-                                            <div className="mb-2">
-                                                <label
-                                                    htmlFor="palletAmount"
-                                                    className="block mb-2 text-md font-medium text-gray-900"
-                                                >
-                                                    Tổng số lượng trên pallet{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    ref={palletInput}
-                                                    name="pallet"
-                                                    type="number"
-                                                    className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    value={values.pallet}
-                                                    onChange={(e) =>
-                                                        setFieldValue(
-                                                            "pallet",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div className="mb-2">
-                                                <label className="block mb-2 text-md font-medium text-gray-900">
-                                                    Số lượng mẫu{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    ref={sampleInput}
-                                                    name="sample"
-                                                    type="number"
-                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    value={values.sample}
-                                                    onChange={(e) =>
-                                                        setFieldValue(
-                                                            "sample",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div className="mb-2">
-                                                <label className="block mb-2 text-md font-medium text-gray-900">
-                                                    Số lượng mo, tóp{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    ref={disabilityInput}
-                                                    name="disability"
-                                                    type="number"
-                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    value={values.disability}
-                                                    onChange={(e) =>
-                                                        setFieldValue(
-                                                            "disability",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div className="mb-2">
-                                                <label className="block mb-2 text-md font-medium text-gray-900">
-                                                    Số lượng cong{" "}
-                                                    <span className="text-red-600">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <Field
-                                                    ref={curveInput}
-                                                    name="curve"
-                                                    type="number"
-                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    value={values.curve}
-                                                    onChange={(e) =>
-                                                        setFieldValue(
-                                                            "curve",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div className="mb-2">
-                                                <label className="block mb-2 text-md font-medium text-gray-900">
-                                                    Ghi chú{" "}
-                                                </label>
-                                                <Field
-                                                    as="textarea"
-                                                    rows="3"
-                                                    ref={noteInput}
-                                                    name="note"
-                                                    className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                    value={values.note}
-                                                    onChange={(e) =>
-                                                        setFieldValue(
-                                                            "note",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <button
-                                                type="button"
-                                                className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none w-fit self-end my-2"
-                                                onClick={() =>
-                                                    addNewDisabledDetails(
-                                                        values,
-                                                        resetForm
-                                                    )
-                                                }
-                                            >
-                                                Ghi nhận
-                                            </button>
+                                {/* Disability Rates */}
+                                <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 ">
+                                    <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-3 py-3 xl:px-4 lg:px-4 md:px-4 border-red-200 rounded-t-xl">
+                                        <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
+                                        <div className="serif text-[22px] font-bold text-red-600">
+                                            Tỉ lệ khuyết tật
                                         </div>
-                                    )}
-                                </Formik>
-                            )}
-                            <div className="border-b-2 border-gray-200"></div>
-
-                            <section className="my-2">
-                                {loadCurrentRecord ? (
-                                    <div className="text-center">
-                                        <Spinner
-                                            thickness="6px"
-                                            speed="0.65s"
-                                            emptyColor="gray.200"
-                                            color="#155979"
-                                            size="xl"
-                                        />
                                     </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mt-2 px-1">
-                                        {disabledDetails.length > 0 &&
-                                            disabledDetails.map(
-                                                (item, index) => {
-                                                    const disabledRate = (
-                                                        (item.SLMoTop /
-                                                            item.SLMau) *
-                                                        100
-                                                    ).toFixed(2);
-                                                    const curvedRate = (
-                                                        (item.SLCong /
-                                                            item.SLMau) *
-                                                        100
-                                                    ).toFixed(2);
 
-                                                    return (
-                                                        <DisabledCheckCard
-                                                            key={index}
-                                                            id={item.id}
-                                                            pallet={
-                                                                item.SLPallet
+                                    <div className="space-y-3 xl:px-8 lg:px-8 md:px-8 px-4 pb-5 pt-4">
+                                        <div className="grid grid-cols-[70%,30%]">
+                                            <div className="font-bold">
+                                                Tỉ lệ mo, tóp trung bình:
+                                            </div>
+                                            <span className="font-bold text-right">
+                                                {calculatedValues.avgDisabledRate ||
+                                                    0}{" "}
+                                                %
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-[70%,30%]">
+                                            <div className="font-bold">
+                                                Tỉ lệ cong trung bình:
+                                            </div>
+                                            <span className="font-bold text-right">
+                                                {calculatedValues.avgCurvedRate ||
+                                                    0}{" "}
+                                                %
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-[70%,30%]">
+                                            <div className="font-bold">
+                                                Tổng khuyết tật:
+                                            </div>
+                                            <span className="font-bold text-right">
+                                                {calculatedValues.sumDisability ||
+                                                    0}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Form */}
+                                <div className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-[#DADADA] h-fit w-full p-3 pt-0  px-3">
+                                    <div className="flex gap-x-3 rounded-t-xl items-center p-3 px-1 ">
+                                        <MdNoteAlt className="w-8 h-8 text-[]" />
+                                        <div className="serif text-[22px] font-bold">
+                                            Ghi nhận khảo sát
+                                        </div>
+                                    </div>
+                                    {!viewMode && (
+                                        <Formik
+                                            initialValues={info}
+                                            onSubmit={() => {}}
+                                        >
+                                            {({
+                                                values,
+                                                setFieldValue,
+                                                resetForm,
+                                            }) => (
+                                                <div className="flex flex-col p-3 mb-6 bg-gray-50 border-2 gap-y-2 border-gray-200 rounded-xl">
+                                                    <div className="mb-2">
+                                                        <label
+                                                            htmlFor="palletAmount"
+                                                            className="block mb-2 text-md font-medium text-gray-900"
+                                                        >
+                                                            Tổng số lượng trên
+                                                            pallet{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            ref={palletInput}
+                                                            name="pallet"
+                                                            type="number"
+                                                            className="border border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            value={
+                                                                values.pallet
                                                             }
-                                                            sample={item.SLMau}
-                                                            disability={
-                                                                item.SLMoTop
-                                                            }
-                                                            curve={item.SLCong}
-                                                            note={item.note}
-                                                            disabledRate={
-                                                                disabledRate
-                                                            }
-                                                            curvedRate={
-                                                                curvedRate
-                                                            }
-                                                            createdDate={
-                                                                item.created_at
-                                                            }
-                                                            onDeleteDisabledRecordOpen={
-                                                                onDeleteDisabledRecordOpen
-                                                            }
-                                                            setSelectedDeleteRecord={
-                                                                setSelectedDeleteRecord
+                                                            onChange={(e) =>
+                                                                setFieldValue(
+                                                                    "pallet",
+                                                                    e.target
+                                                                        .value
+                                                                )
                                                             }
                                                         />
-                                                    );
-                                                }
+                                                    </div>
+                                                    <div className="mb-2">
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
+                                                            Số lượng mẫu{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            ref={sampleInput}
+                                                            name="sample"
+                                                            type="number"
+                                                            className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            value={
+                                                                values.sample
+                                                            }
+                                                            onChange={(e) =>
+                                                                setFieldValue(
+                                                                    "sample",
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="mb-2">
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
+                                                            Số lượng mo, tóp{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            ref={
+                                                                disabilityInput
+                                                            }
+                                                            name="disability"
+                                                            type="number"
+                                                            className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            value={
+                                                                values.disability
+                                                            }
+                                                            onChange={(e) =>
+                                                                setFieldValue(
+                                                                    "disability",
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="mb-2">
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
+                                                            Số lượng cong{" "}
+                                                            <span className="text-red-600">
+                                                                *
+                                                            </span>
+                                                        </label>
+                                                        <Field
+                                                            ref={curveInput}
+                                                            name="curve"
+                                                            type="number"
+                                                            className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            value={values.curve}
+                                                            onChange={(e) =>
+                                                                setFieldValue(
+                                                                    "curve",
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="mb-2">
+                                                        <label className="block mb-2 text-md font-medium text-gray-900">
+                                                            Ghi chú{" "}
+                                                        </label>
+                                                        <Field
+                                                            as="textarea"
+                                                            rows="3"
+                                                            ref={noteInput}
+                                                            name="note"
+                                                            className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                                            value={values.note}
+                                                            onChange={(e) =>
+                                                                setFieldValue(
+                                                                    "note",
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none w-fit self-end my-2"
+                                                        onClick={() =>
+                                                            addNewDisabledDetails(
+                                                                values,
+                                                                resetForm
+                                                            )
+                                                        }
+                                                    >
+                                                        Ghi nhận
+                                                    </button>
+                                                </div>
                                             )}
-                                    </div>
-                                )}
-                            </section>
-                        </section>
+                                        </Formik>
+                                    )}
+                                    <div className="border-b-2 border-gray-200"></div>
+
+                                    <section className="my-2">
+                                        {loadCurrentRecord ? (
+                                            <div className="text-center">
+                                                <Spinner
+                                                    thickness="6px"
+                                                    speed="0.65s"
+                                                    emptyColor="gray.200"
+                                                    color="#155979"
+                                                    size="xl"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mt-2 px-1">
+                                                {disabledDetails.length > 0 &&
+                                                    disabledDetails.map(
+                                                        (item, index) => {
+                                                            const disabledRate =
+                                                                (
+                                                                    (item.SLMoTop /
+                                                                        item.SLMau) *
+                                                                    100
+                                                                ).toFixed(2);
+                                                            const curvedRate = (
+                                                                (item.SLCong /
+                                                                    item.SLMau) *
+                                                                100
+                                                            ).toFixed(2);
+
+                                                            return (
+                                                                <DisabledCheckCard
+                                                                    key={index}
+                                                                    id={item.id}
+                                                                    pallet={
+                                                                        item.SLPallet
+                                                                    }
+                                                                    sample={
+                                                                        item.SLMau
+                                                                    }
+                                                                    disability={
+                                                                        item.SLMoTop
+                                                                    }
+                                                                    curve={
+                                                                        item.SLCong
+                                                                    }
+                                                                    note={
+                                                                        item.note
+                                                                    }
+                                                                    disabledRate={
+                                                                        disabledRate
+                                                                    }
+                                                                    curvedRate={
+                                                                        curvedRate
+                                                                    }
+                                                                    createdDate={
+                                                                        item.created_at
+                                                                    }
+                                                                    onDeleteDisabledRecordOpen={
+                                                                        onDeleteDisabledRecordOpen
+                                                                    }
+                                                                    setSelectedDeleteRecord={
+                                                                        setSelectedDeleteRecord
+                                                                    }
+                                                                    viewMode={
+                                                                        false
+                                                                    }
+                                                                />
+                                                            );
+                                                        }
+                                                    )}
+                                            </div>
+                                        )}
+                                    </section>
+                                </div>
+                            </div>
+                        ) : (
+                            selectedRecord && (
+                                <>
+                                    <section className="flex flex-col justify-center">
+                                        {/* Infomation */}
+                                        <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-2 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-4">
+                                            <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
+                                                <FaInfoCircle className="w-7 h-7 text-[]" />
+                                                <div className="text-xl font-semibold">
+                                                    Thông tin chung
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8 px-4">
+                                                <div className=" flex font-semibold items-center">
+                                                    <LuCalendarRange className="w-5 h-5 mr-3" />
+                                                    Ngày kiểm tra:
+                                                </div>
+                                                <span className=" text-base ">
+                                                    {format(
+                                                        new Date(),
+                                                        "yyyy-MM-dd"
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
+                                                <div className="font-semibold flex items-center">
+                                                    <LuStretchHorizontal className="w-5 h-5 mr-3" />
+                                                    Mẻ sấy số:
+                                                </div>
+                                                <span className="font-normal text-base ">
+                                                    {code}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 p-2.5 xl:px-8 lg:px-8 md:px-8 px-4">
+                                                <div className="font-semibold flex items-center">
+                                                    <LuWarehouse className="w-5 h-5 mr-3" />
+                                                    Nhà máy:
+                                                </div>
+                                                <span className="font-normal text-base ">
+                                                    {oven}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Result  */}
+                                        <div className="xl:mx-auto xl:w-[60%] bg-white rounded-xl border-2 border-red-200 h-fit w-full md:w-1/2 mb-4">
+                                            <div className="flex bg-red-100 items-center gap-x-3 text-xl font-medium border-b p-4 py-3 xl:px-8 lg:px-8 md:px-8 border-red-200 rounded-t-xl">
+                                                <MdDoNotDisturbOnTotalSilence className="text-red-500 text-4xl " />
+                                                <div className="font-semibold text-red-600">
+                                                    Tỉ lệ khuyết tật
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3 px-6 pb-5 pt-4">
+                                                <div className="grid grid-cols-[70%,30%]">
+                                                    <div className="font-bold">
+                                                        Tỉ lệ mo, tóp trung
+                                                        bình:
+                                                    </div>
+                                                    <span className="font-bold text-right">
+                                                        {selectedRecord.TLMoTop}{" "}
+                                                        %
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-[70%,30%]">
+                                                    <div className="font-bold">
+                                                        Tỉ lệ cong trung bình:
+                                                    </div>
+                                                    <span className="font-bold text-right">
+                                                        {selectedRecord.TLCong}{" "}
+                                                        %
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-[70%,30%]">
+                                                    <div className="font-bold">
+                                                        Tổng khuyết tật:
+                                                    </div>
+                                                    <span className="font-bold text-right">
+                                                        {
+                                                            selectedRecord.TotalMau
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section className="xl:mx-auto xl:w-[60%] bg-white flex flex-col rounded-2xl border-2 border-gray-200 h-fit w-full p-4 pt-0 mb-4 px-4">
+                                        <div className="flex gap-x-4 rounded-t-xl items-center p-4 xl:px-6 lg:px-6 md:px-6 px-2">
+                                            <MdNoteAlt className="w-8 h-9 text-[]" />
+                                            <div className="text-xl font-semibold">
+                                                Ghi nhận khảo sát
+                                            </div>
+                                        </div>
+                                        <div className="border-b-2 border-gray-200"></div>
+
+                                        <section className="my-4">
+                                            {loadCurrentRecord ? (
+                                                <div className="text-center">
+                                                    <Spinner
+                                                        thickness="4px"
+                                                        speed="0.65s"
+                                                        emptyColor="gray.200"
+                                                        color="#155979"
+                                                        size="xl"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 xl:px-3 lg:px-3 mt-2 md:px-3">
+                                                    {selectedRecord.detail
+                                                        .length > 0 &&
+                                                        selectedRecord.detail.map(
+                                                            (item, index) => {
+                                                                const disabledRate =
+                                                                    (
+                                                                        (item.SLMoTop /
+                                                                            item.SLMau) *
+                                                                        100
+                                                                    ).toFixed(
+                                                                        2
+                                                                    );
+                                                                const curvedRate =
+                                                                    (
+                                                                        (item.SLCong /
+                                                                            item.SLMau) *
+                                                                        100
+                                                                    ).toFixed(
+                                                                        2
+                                                                    );
+
+                                                                return (
+                                                                    <DisabledCheckCard
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        id={
+                                                                            item.id
+                                                                        }
+                                                                        pallet={
+                                                                            item.SLPallet
+                                                                        }
+                                                                        sample={
+                                                                            item.SLMau
+                                                                        }
+                                                                        disability={
+                                                                            item.SLMoTop
+                                                                        }
+                                                                        curve={
+                                                                            item.SLCong
+                                                                        }
+                                                                        note={
+                                                                            item.note
+                                                                        }
+                                                                        disabledRate={
+                                                                            disabledRate
+                                                                        }
+                                                                        curvedRate={
+                                                                            curvedRate
+                                                                        }
+                                                                        viewMode={
+                                                                            true
+                                                                        }
+                                                                    />
+                                                                );
+                                                            }
+                                                        )}
+                                                </div>
+                                            )}
+                                        </section>
+                                    </section>
+                                </>
+                            )
+                        )}
                     </ModalBody>
                     <div className="border-b-2 border-gray-200"></div>
                     <ModalFooter className="gap-4">
@@ -1243,7 +1238,9 @@ const DisabledCheck = ({
             >
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Bạn có chắc muốn xóa bản ghi nhận khảo sát?</ModalHeader>
+                    <ModalHeader>
+                        Bạn có chắc muốn xóa bản ghi nhận khảo sát?
+                    </ModalHeader>
                     <ModalBody>
                         <div>
                             Sau khi bấm xác nhận sẽ không thể thu hồi hành động.
@@ -1258,8 +1255,8 @@ const DisabledCheck = ({
                         >
                             Đóng
                         </Button>
-                        <Button 
-                            colorScheme="blue" 
+                        <Button
+                            colorScheme="blue"
                             mr={3}
                             onClick={handleDeleteDisabledRecord}
                         >
@@ -1270,7 +1267,7 @@ const DisabledCheck = ({
                                 </div>
                             ) : (
                                 "Xác nhận"
-                            )}  
+                            )}
                         </Button>
                     </ModalFooter>
                 </ModalContent>

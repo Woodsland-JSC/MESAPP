@@ -196,7 +196,6 @@ const AwaitingReception = ({
             };
             switch (selectedReason) {
                 case "1":
-                    // console.log("Dô đây");
                     payload.reason = reasonOfReturn.find(
                         (r) => r.value == 1
                     )?.label;
@@ -293,10 +292,12 @@ const AwaitingReception = ({
             value: item?.id || "",
             label: item?.name || "",
         })));
-        setTeamBackOptions(teamBack?.map((item, index) => ({
-            value: item?.Code || "",
-            label: item?.Name + " - " + item?.Code || "",
-        })));
+        setTeamBackOptions(
+            teamBack?.map((item) => ({
+                value: item?.Code || "",
+                label: `${item?.Name} - ${item?.Code}` || "",
+            }))
+        );
         setRootCauseOptions(rootCause?.map((item, index) => ({
             value: item?.id || "",
             label: item?.name || "",
@@ -329,7 +330,6 @@ const AwaitingReception = ({
                             </span>
                             <span></span>
                         </div>
-
                         {type == "plywood" ? (
                             <div className="flex gap-2">
                                 <span>Mã thành phẩm: </span>
@@ -652,13 +652,8 @@ const AwaitingReception = ({
                     <div className="flex flex-col">
                         <RadioGroup
                             onChange={(value) => {
-                                // if (value == selectedReason) {
-                                //     console.log("Dô 1: ", value);
-                                //     setSelectedReason(null);
-                                // } else {
                                 setSelectedReason(value);
                                 setIsReturnSelect(true);
-                                // }
                             }}
                             value={selectedReason}
                         >
@@ -687,7 +682,6 @@ const AwaitingReception = ({
                                             />
                                             {item.label}
                                         </div>
-                                        // <Radio onClick={() => console.log("Dô")} value={item.value}>{item.label}</Radio>
                                     ))}
                             </Stack>
                         </RadioGroup>

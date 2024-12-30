@@ -395,11 +395,11 @@ function HumidityCheck(props) {
                         <ModalCloseButton />
                     </div>
 
-                    <ModalBody className="py-4 bg-[#FAFAFA]">
+                    <ModalBody className="!p-3.5 !py-1 bg-[#FAFAFA]">
                         <section className="flex flex-col justify-center ">
                             {/* Infomation */}
-                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-7">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
+                            <div className="xl:mx-auto text-base xl:w-[60%] border-2 mt-4 border-gray-200 rounded-xl divide-y divide-gray-200 bg-white mb-4">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-3 lg:px-3 md:px-3">
                                     <FaInfoCircle className="w-7 h-7 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Thông tin chung
@@ -447,7 +447,7 @@ function HumidityCheck(props) {
 
                             {/* Humid Range */}
                             <div className="xl:mx-auto xl:w-[60%] rounded-xl bg-[#22253d] divide-y-2 divide-[#2B384B] mb-3">
-                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
+                                <div className="flex gap-x-4 justify-between text-white rounded-xl items-center p-3 xl:px-4 lg:px-4 md:px-4">
                                     <div className="flex items-center gap-x-4">
                                         <MdWaterDrop className="w-8 h-8 text-blue-300" />
                                         <div className="text-xl font-semibold">

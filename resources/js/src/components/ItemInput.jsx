@@ -636,7 +636,7 @@ const ItemInput = ({
                     CongDoan: selectedItemDetails.NameTO,
                     NexTeam: selectedItemDetails.TOTT,
                     ErrorData: ErrorData,
-                    Type: "CBG",
+                    Type: variant,
                     version: choosenItem.Version || "",
                     ProdType: selectedItemDetails.ProdType || "",
                     LSX: selectedItemDetails.LSX[0].LSX,
@@ -2202,7 +2202,7 @@ const ItemInput = ({
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex gap-x-6">
-                                                                        <div className="xl:block lg;block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold">
+                                                                        <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
                                                                             {Number(
                                                                                 item?.Quantity
                                                                             )}
@@ -2835,7 +2835,7 @@ const ItemInput = ({
                                                                                     </span>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="xl:block lg:block md:block hidden  rounded-lg cursor-pointer px-3 py-1 font-semibold bg-orange-200 text-orange-700 hover:bg-orange-500 duration-300">
+                                                                            <div className="xl:block lg:block md:block hidden  rounded-lg cursor-pointer px-3 py-1 font-semibold bg-orange-200 text-orange-700 hover:bg-orange-500 duration-300 !mr-6">
                                                                                 {Number(
                                                                                     item.Quantity
                                                                                 )}
