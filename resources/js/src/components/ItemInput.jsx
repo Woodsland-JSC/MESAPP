@@ -520,6 +520,8 @@ const ItemInput = ({
         if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             amount < 0
         ) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
@@ -528,6 +530,8 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             amount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng có thể ghi nhận");
@@ -536,6 +540,8 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             amount >
                 selectedItemDetails.remainQty -
                     selectedItemDetails.WaitingConfirmQty
@@ -557,6 +563,8 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             faultyAmount < 0
         ) {
             toast.error("Số lượng lỗi phải lớn hơn 0");
@@ -566,6 +574,8 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
             selectedFaultItem.ItemCode !== "" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             faultyAmount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
@@ -574,6 +584,8 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             selectedFaultItem.SubItemCode === "" &&
             selectedFaultItem.ItemCode === "" &&
             faultyAmount
@@ -584,6 +596,8 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             selectedFaultItem.ItemCode !== "" &&
             parseInt(faultyAmount) + parseInt(amount) >
                 parseInt(selectedItemDetails.maxQty)
@@ -1232,12 +1246,11 @@ const ItemInput = ({
             >
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent className="!px-0">
-                    <ModalHeader>
-                        <div class="xl:ml-6 serif font-bold text-2xl ">
+                    <ModalHeader className="h-[50px] flex items-center justify-center">
+                        <div class="xl:ml-6 serif font-bold text-2xl  ">
                             Ghi nhận sản lượng
                         </div>
                     </ModalHeader>
-                    <ModalCloseButton />
                     <div className="border-b-2 border-[#DADADA]"></div>
                     <ModalBody px={0} py={0}>
                         <div className="flex flex-col justify-center pb-4 bg-[#FAFAFA] ">
@@ -1926,7 +1939,7 @@ const ItemInput = ({
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="flex flex-col md:flex-row justify-between pt-4 items-center xl:px-0 md:px-0 lg:px-0 px-3">
+                                        <div className="flex flex-col md:flex-row justify-between pt-2 items-center xl:px-0 md:px-0 lg:px-0 px-3">
                                             <div className="flex flex-col  w-full">
                                                 <label className="font-medium">
                                                     Sản phẩm/Chi tiết
