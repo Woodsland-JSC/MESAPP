@@ -782,6 +782,7 @@ const AwaitingReception = ({
                                 <Button
                                     className="bg-[#edf2f7]"
                                     onClick={onInputAlertDialogClose}
+                                    isDisabled={acceptLoading}
                                 >
                                     Thoát
                                 </Button>
