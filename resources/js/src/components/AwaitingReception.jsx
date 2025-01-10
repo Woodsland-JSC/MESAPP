@@ -605,7 +605,7 @@ const AwaitingReception = ({
                         >
                             <div>
                                 <div className="font-semibold text-red-700">
-                                    Nguồn lỗi
+                                    Tổ gây ra lỗi
                                 </div>
                                 <Select
                                     ref={rootCauseRef}

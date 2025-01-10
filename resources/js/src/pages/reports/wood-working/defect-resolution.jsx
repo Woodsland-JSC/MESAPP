@@ -87,14 +87,16 @@ function DefectResolution() {
                 defect_type: item.LoiLoai,
                 resolution: item.HXL,
                 itemname: item.ItemName,
-                thickness: item.CDay,
-                width: item.CRong,
-                height: item.CDai,
+                thickness: Number(item.CDay),
+                width: Number(item.CRong),
+                height: Number(item.CDai),
                 quantity: parseInt(item.Quantity),
                 m3: item.M3,
                 sender: item.NguoiGiao,
                 send_date: item.created_at,
                 receiver: item.NguoiNhan,
+                defect_causing_team: item.ToGayRaLoi || "Không xác định",
+                receiving_team: item.ToChuyenVe,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -142,7 +144,7 @@ function DefectResolution() {
         {
             headerName: "Tuần",
             field: "week",
-            width: 80,
+            width: 70,
             suppressHeaderMenuButton: true,
         },
         {
@@ -155,21 +157,21 @@ function DefectResolution() {
         {
             headerName: "Nơi báo lỗi",
             field: "root_place",
-            width: 180,
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
             headerName: "Loại lỗi",
             field: "defect_type",
-            width: 120,
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
             headerName: "Biện pháp xử lý",
             field: "resolution",
-            width: 180,
+            width: 370,
             suppressHeaderMenuButton: true,
             filter: true,
         },
@@ -205,6 +207,8 @@ function DefectResolution() {
             suppressHeaderMenuButton: true,
         },
         { headerName: "M3", field: "m3", width: 120 },
+        { headerName: "Tổ gây ra lỗi", field: "defect_causing_team", width: 160 },
+        { headerName: "Tổ chuyển về", field: "receiving_team", width: 160 },
         { headerName: "Người tạo", field: "sender" },
         { headerName: "Ngày tạo", field: "send_date" },
         { headerName: "Người nhận", field: "receiver" },
