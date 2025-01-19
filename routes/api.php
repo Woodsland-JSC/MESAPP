@@ -11,6 +11,7 @@ use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
 use App\Http\Controllers\api\ReportController;
+use App\Http\Controllers\sap\GoodsManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -138,7 +139,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
 
-    // Report
+    // Goods Management
+    Route::get('/get-bin-managed-warehouse', [GoodsManagementController::class, 'getBinManagedWarehouses']);
+    Route::get('/get-bin-by-warehouse', [GoodsManagementController::class, 'getBinByWarehouse']);
+    Route::get('/get-default-bin-items-by-warehouse', [GoodsManagementController::class, 'getDefaultBinItemsByWarehouse']);
+
+    // Others
     Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);
 
     Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');

@@ -77,6 +77,9 @@ import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
 
+// Transfer
+import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-warehouse-transfer";
+
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
     const Wrapper = ({ children }) => {
@@ -218,6 +221,16 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     /> */}
+
+                    {/* Goods Management */}
+                    <Route
+                        path="/workspace/goods-management/bin-warehouse-transfer"
+                        element={
+                            <ProtectedRoute>
+                                <BinWarehouseTransfer />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Reports */}
                     <Route

@@ -15,7 +15,8 @@ import {
     HiMiniBanknotes,
     HiArchiveBoxArrowDown,
     HiViewColumns,
-    HiArchiveBox
+    HiArchiveBox,
+    HiMiniTruck
 } from "react-icons/hi2";
 import { LuLayers } from "react-icons/lu";
 import { Tabs, TabList, TabPanels, Tab, TabPanel, Box, Text, Flex, IconButton, Button, VStack } from "@chakra-ui/react";
@@ -30,6 +31,7 @@ function Workspace() {
 
     const FirstTab = useRef();
     const SecondTab = useRef();
+    const ThirdTab = useRef();
 
     const [openInlandSelect, setOpenInlandSelect] = useState(false);
 
@@ -116,7 +118,7 @@ function Workspace() {
                             variant="soft-rounded"
                             colorScheme="blackAlpha"
                         >
-                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3 max-w-sm w-full">
+                            <TabList className="xl:overflow-x-hidden lg:overflow-x-hidden md:overflow-hidden overflow-x-scroll overscroll-x-contain xl:pb-0 lg-pb-0 md:pb-0 pb-3 xl:max-w-full max-w-sm w-full">
                                 <Tab
                                     className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap "
                                     ref={FirstTab}
@@ -133,6 +135,15 @@ function Workspace() {
                                 >
                                     <div className="w-[137px]">
                                         Quản lý sản xuất
+                                    </div>
+                                </Tab>
+                                <Tab
+                                    className="xl:w-fit md:w-full lg:w-full xl:h-fit md:h-fit lg:h-fit flex-nowrap h-fit "
+                                    ref={ThirdTab}
+                                    onClick={() => handleTabClick(true)}
+                                >
+                                    <div className="w-[147px]">
+                                        Quản lý hàng hóa
                                     </div>
                                 </Tab>
                             </TabList>
@@ -328,6 +339,175 @@ function Workspace() {
                                                 },
                                                 {
                                                     permission: ["TDLDND"],
+                                                    link: "/workspace/inland/installation-progress",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Tiến độ lắp đặt nội địa",
+                                                    description:
+                                                        "Báo cáo tiến độ lắp đặt đồ nội thất.",
+                                                    type: "ND",
+                                                },
+                                            ].map(
+                                                ({
+                                                    permission,
+                                                    link,
+                                                    icon,
+                                                    title,
+                                                    description,
+                                                    type,
+                                                    select
+                                                }) =>
+                                                    permission.some((perm) => user.permissions?.includes(perm)
+                                                    ) ? (
+                                                        select == "ND" ? (
+                                                            <div
+                                                                key={title}
+                                                                className="cursor-pointer"
+                                                                onClick={() => handleMenuClick("ND")}
+                                                            >
+                                                                <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                    <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                        <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                            <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                {
+                                                                                    title
+                                                                                }
+                                                                            </h5>
+                                                                            <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                {
+                                                                                    description
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                            <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
+                                                                                {
+                                                                                    icon
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <Link
+                                                                to={link}
+                                                                key={title}
+                                                            >
+                                                                <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                    <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                        <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                            <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                {
+                                                                                    title
+                                                                                }
+                                                                            </h5>
+                                                                            <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                {
+                                                                                    description
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                            <div className={`text-3xl h-fit rounded-full m-1 p-3  ${type === "CBG" ? "bg-[#DAF1E8] text-green-900" : type === "VCN" ? "bg-[#f9eeff] text-violet-900" : type === "ND" ? "bg-[#ffeef2] text-red-900" : "bg-[#F5F5F5]"}`} >
+                                                                                {
+                                                                                    icon
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </Link>
+                                                        )
+                                                    ) : (
+                                                        <div key={title}>
+                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
+                                                                            {
+                                                                                title
+                                                                            }
+                                                                        </h5>
+                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-transparent">
+                                                                            {
+                                                                                description
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                        <div className=" text-3xl h-fit rounded-full m-1 p-3 bg-transparent text-transparent">
+                                                                            {
+                                                                                icon
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                            )}
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                {/* Quản lý hàng hóa */}
+                                <TabPanel
+                                    className="xl:p-4 lg:p-4 md:p-4 p-0"
+                                    style={{ padding: "1rem 0rem" }}
+                                >
+                                    <div className="cusTabs w-full  flex justify-center mt-1 xl:justify-normal">
+                                        <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
+                                            {[
+                                                {
+                                                    permission: ["CBG"],
+                                                    link: "/workspace/goods-management/bin-warehouse-transfer",
+                                                    icon: (
+                                                        <HiMiniTruck />
+                                                    ),
+                                                    title: "Điều chuyển hàng hóa",
+                                                    description:
+                                                        "Điều chuyển hàng hóa và quản lý theo bin.",
+                                                    type: "DCHH",
+                                                },
+                                                {
+                                                    permission: ["X"],
+                                                    link: "/workspace/wood-working/qc",
+                                                    icon: <HiBadgeCheck />,
+                                                    title: "Kiểm định chất lượng chế biến gỗ",
+                                                    description:
+                                                        "Xử lý lỗi nhập thành phẩm.",
+                                                    type: "CBG",
+                                                },
+                                                {
+                                                    permission: ["X"],
+                                                    link: "/workspace/plywood/finished-goods-receipt",
+                                                    icon: (
+                                                        <HiArchiveBoxArrowDown />
+                                                    ),
+                                                    title: "Sản lượng ván công nghiệp",
+                                                    description:
+                                                        "Nhập sản lượng theo công đoạn.",
+                                                    type: "VCN",
+                                                },
+                                                {
+                                                    permission: ["X"],
+                                                    link: "/workspace/plywood/qc",
+                                                    icon: <HiBadgeCheck />,
+                                                    title: "Kiểm định chất lượng ván công nghiệp",
+                                                    description:
+                                                        "Xử lý lỗi nhập thành phẩm.",
+                                                    type: "VCN",
+                                                },
+                                                {
+                                                    permission: ["X"],
+                                                    select: "ND",
+                                                    icon: <HiArchiveBoxArrowDown />,
+                                                    title: "Sản lượng nội địa",
+                                                    description:
+                                                        "Nhập sản lượng lắp đặt khối nội địa.",
+                                                    type: "ND",
+                                                },
+                                                {
+                                                    permission: ["X"],
                                                     link: "/workspace/inland/installation-progress",
                                                     icon: <HiViewColumns />,
                                                     title: "Tiến độ lắp đặt nội địa",
