@@ -196,6 +196,7 @@ function DeliveryDetailReport() {
                 receiver: item.NguoiNhan,
                 receive_date: item.ngaynhan,
                 production_order: item.LSX,
+                m3_sap: item.M3SAP,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -360,10 +361,22 @@ function DeliveryDetailReport() {
             field: "quantity",
             maxWidth: 110,
             suppressHeaderMenuButton: true,
+            valueFormatter: params => {
+                return params.value ? params.value.toLocaleString('en-US') : '';
+            },
             aggFunc: 'sum',
             headerComponentParams: { displayName: "Số lượng" }
         },
-        { headerName: "M3", field: "m3", width: 120, aggFunc: 'sum', headerComponentParams: { displayName: "M3" }  },
+        { 
+            headerName: "M3", 
+            field: "m3_sap", 
+            width: 120, 
+            aggFunc: 'sum', 
+            headerComponentParams: { displayName: "M3" },
+            valueFormatter: params => {
+                return params.value ? params.value.toFixed(6) : '0.000000';
+            },
+        },
         { headerName: "Người giao", field: "sender", filter: true, minWidth: 240, },
         { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
         { headerName: "Người nhận", field: "receiver", minWidth: 240, },
@@ -692,10 +705,11 @@ function DeliveryDetailReport() {
                                             emptyColor="gray.200"
                                             color="#155979"
                                             size="xl"
+                                            
                                         />
                                     </div>
                                 ) : (
-                                    <>
+                                    <div className={isDataReportLoading ? "opacity-50 pointer-events-none" : ""}>
                                         <div className="flex items-center justify-between space-x-3">
                                             <div className="font-semibold">
                                                 Chọn các tổ thực hiện:
@@ -854,7 +868,7 @@ function DeliveryDetailReport() {
                                                     ))}
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         )}

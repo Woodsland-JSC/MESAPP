@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\sap\ConnectController;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 class ReportController extends Controller
 {
@@ -24,10 +26,6 @@ class ReportController extends Controller
             $query->where('branch', $branch);
         }
     
-        // if ($plant) {
-        //     $query->where('plant', $plant);
-        // }
-    
         if ($to) {
             $toArray = is_array($to) ? $to : explode(',', trim($to, '[]'));
             $query->whereIn('ToHT', $toArray);
@@ -36,17 +34,6 @@ class ReportController extends Controller
         if (isset($statusCode)) {
             $query->where('statuscode', $statusCode);
         }
-
-        // if ($statusCode == 0) {
-        //     if ($fromDate && $toDate) {
-        //         $query->whereBetween('ngaygiao', [$fromDate, $toDate]);
-        //     }
-        // } else {
-        //     if ($fromDate && $toDate) {
-        //         $query->whereBetween('ngaygiao', [$fromDate, $toDate])
-        //               ->whereBetween('ngaynhan', [$fromDate, $toDate]);
-        //     }
-        // }
 
         if ($statusCode == 0) {
             if ($fromDate && $toDate) {
@@ -77,6 +64,25 @@ class ReportController extends Controller
         foreach ($dataQuyCach as $item) {
             $dataQuyCachMap[$item['ItemCode']] = $item;
         }
+
+        // Bổ sung thông tin M3 từ SAP
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT "ItemCode", "U_M3SP" FROM OITM';
+        
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt)) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+    
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
         
         // Lặp qua originalData và thay thế các giá trị
         $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
@@ -85,11 +91,16 @@ class ReportController extends Controller
                 $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
                 $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
             }
+
+            // Thêm trường M3SAP
+            $item->M3SAP = isset($m3Map[$item->ItemCode]) ? round($m3Map[$item->ItemCode], 6) : 0;
             return $item;
         });
+
+        odbc_close($conDB);
         
         return response()->json($updatedData);
-    }  
+    } 
 
     //báo cáo xếp chờ xấy
     function xepchosay(Request $request){
