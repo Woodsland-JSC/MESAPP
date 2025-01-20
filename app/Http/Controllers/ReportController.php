@@ -65,7 +65,7 @@ class ReportController extends Controller
             $dataQuyCachMap[$item['ItemCode']] = $item;
         }
 
-        // Bổ sung thông tin M3 từ SAP
+        // Bổ sung thông tin M3 từ SAP và dd ra kết quả truy vấn
         $conDB = (new ConnectController)->connect_sap();
 
         $query = 'SELECT "ItemCode", "U_M3SP" FROM OITM';
@@ -78,23 +78,27 @@ class ReportController extends Controller
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        $results = array();
-    
+        $m3sapMap = [];
         while ($row = odbc_fetch_array($stmt)) {
-            $results[] = $row;
+            $m3sapMap[$row['ItemCode']] = $row['U_M3SP'];
         }
         
         // Lặp qua originalData và thay thế các giá trị
-        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap, $m3sapMap) {
+            // Copy the item to prevent modifying the original
+            $newItem = clone $item;
+            
+            // Add existing dimensions if available
             if (isset($dataQuyCachMap[$item->ItemCode])) {
-                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
-                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
-                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+                $newItem->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $newItem->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $newItem->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
             }
-
-            // Thêm trường M3SAP
-            $item->M3SAP = isset($m3Map[$item->ItemCode]) ? round($m3Map[$item->ItemCode], 6) : 0;
-            return $item;
+            
+            // Add M3SAP value if available and multiply it with Quantity
+            $newItem->M3SAP = isset($m3sapMap[$item->ItemCode]) ? round((float)$m3sapMap[$item->ItemCode] * (float)$item->Quantity, 6) : null;
+            
+            return $newItem;
         });
 
         odbc_close($conDB);
