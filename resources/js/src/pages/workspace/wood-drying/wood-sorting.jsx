@@ -458,9 +458,7 @@ function WoodSorting() {
                 CDai: formatNumber(card.props.height),
                 CDay: formatNumber(card.props.thickness),
                 CRong: formatNumber(card.props.width),
-                QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(
-                    card.props.width
-                )}x${formatNumber(card.props.height)}`,
+                QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(card.props.width)}x${formatNumber(card.props.height)}`,
             })),
         };
         return palletObject;

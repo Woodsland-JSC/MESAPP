@@ -235,7 +235,7 @@ class DryingOvenController extends Controller
 
             // 1. Lấy dữ liệu từ request và thông tin kho
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
-            $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->toArray();
+            $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
             $towarehouse = WarehouseCS();
 
             // 1.1. Tạo pallet mới

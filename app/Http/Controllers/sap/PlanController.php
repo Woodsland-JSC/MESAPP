@@ -167,7 +167,7 @@ class PlanController extends Controller
                 throw new \Exception('Pallet đã được assign.');
             }
             $data = pallet_details::where('palletID', $pallet)->first();
-            $quyCach = Pallet::where('PalletID', $pallet)->pluck('QuyCach')->first();
+            $quyCach = Pallet::where('PalletID', $pallet)->pluck('QuyCach')->unique()->first();
             $totalQty = pallet_details::where('palletID', $pallet)->sum('Qty_T');
             $totalMass = pallet_details::where('palletID', $pallet)->sum('Qty');
 
