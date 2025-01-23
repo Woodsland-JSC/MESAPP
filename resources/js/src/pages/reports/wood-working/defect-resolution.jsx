@@ -97,6 +97,8 @@ function DefectResolution() {
                 receiver: item.NguoiNhan,
                 defect_causing_team: item.ToGayRaLoi || "Không xác định",
                 receiving_team: item.ToChuyenVe,
+                m3sap: item.M3SAP,
+                handle_date: item.ngaynhan,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -206,12 +208,14 @@ function DefectResolution() {
             width: 100,
             suppressHeaderMenuButton: true,
         },
-        { headerName: "M3", field: "m3", width: 120 },
+        // { headerName: "M3", field: "m3", width: 120 },
+        { headerName: "M3", field: "m3sap", width: 120 },
         { headerName: "Tổ gây ra lỗi", field: "defect_causing_team", width: 160 },
         { headerName: "Tổ chuyển về", field: "receiving_team", width: 160 },
         { headerName: "Người tạo", field: "sender" },
         { headerName: "Ngày tạo", field: "send_date" },
-        { headerName: "Người nhận", field: "receiver" },
+        { headerName: "Người xử lý", field: "receiver" },
+        { headerName: "Ngày xử lý", field: "handle_date" },
     ]);
 
     const FactoryOption = ({ value, label }) => (

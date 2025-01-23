@@ -94,7 +94,7 @@ class PlanController extends Controller
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
-            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo')
+            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach')
             ->where('b.plant', '=', Auth::user()->plant)
             ->whereNull('c.pallet');
         if ($request->reason == 'INDOOR') {

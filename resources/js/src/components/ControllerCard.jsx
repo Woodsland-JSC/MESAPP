@@ -893,7 +893,7 @@ function ControllerCard(props) {
                                 ) : (
                                     <button
                                         onClick={handleSave}
-                                        className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                        className="bg-gray-800 text-white p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Lưu lại
                                     </button>
