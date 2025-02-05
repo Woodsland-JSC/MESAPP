@@ -11,11 +11,12 @@ import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
-import { BiSolidFactory } from "react-icons/bi";
+import { IoSearch } from "react-icons/io5";
 
 function DryingWoodChecking() {
     const [loading, setLoading] = useState(true);
     const [bowCards, setBowCards] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const { user } = useAppContext();
     const navigate = useNavigate();
 
@@ -36,6 +37,10 @@ function DryingWoodChecking() {
             });
     }, []);
 
+    const filteredBowCards = bowCards.filter(bowCard =>
+        bowCard.Oven.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <Layout>
             {/* Container */}
@@ -54,50 +59,37 @@ function DryingWoodChecking() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex space-x-4 mb-6">
+                    <div className="flex space-x-4 mb-4">
                         <div className="serif text-4xl font-bold ">Đánh giá mẻ sấy</div>   
                     </div>
 
-                    {/* Controller */}
-                    {/* <div className=" my-4 mb-6 xl:w-full">
+                    {/* Search & Filter */}
+                    <div className=" my-2 mb-6 xl:w-full">
                         <label
-                            for="search"
+                            for="Tìm kiếm kế hoạch sấy"
                             className="mb-2 text-sm font-medium text-gray-900 sr-only"
                         >
                             Search
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                    />
-                                </svg>
+                                <IoSearch className="text-gray-500 ml-1 w-5 h-5" />
                             </div>
                             <input
                                 type="search"
                                 id="search"
-                                className="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Search"
-                                required
+                                className="block w-full p-2.5 pl-12 text-[16px] text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Tìm kiếm kế hoạch sấy theo lò sấy"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* Content */}
-                    {((bowCards.some(card => card.Status === 3) || bowCards.some(card => card.Status === 4)) && bowCards.some(card => card.plant === user.plant)) ? (
+                    {((filteredBowCards.some(card => card.Status === 1) || bowCards.some(card => card.isReviewed === 1)) && bowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                            {bowCards
+                            {filteredBowCards
                             ?.map(
                                 (bowCard, index) =>
                                     ((bowCard.Status === 3 ||
@@ -131,7 +123,7 @@ function DryingWoodChecking() {
                                 <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
                                     <div className="  text-xl text-gray-400"> 
-                                        Tiến trình hiện tại của nhà máy không có hoạt động nào.
+                                        {filteredBowCards.length === 0 && searchTerm !== "" ? "Không tìm thấy kết quả nào phù hợp" : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
                                     </div>
                                 </div>
                             )}        

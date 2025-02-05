@@ -633,7 +633,7 @@ function ControllerCard(props) {
             </div>
         ) : progress === "ls" ? (
             <div className="">
-                {status === 2 ? (
+                {status === 0 ? (
                     !dryingInProgress ? (
                         <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
@@ -665,7 +665,7 @@ function ControllerCard(props) {
                             </div>
                         </div>
                     )
-                ) : status === 3 && isReviewed === 0 ? (
+                ) : status === 1 && isReviewed === 0 ? (
                         <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className="space-y-1 xl:w-[75%]">
                                 <div className="font-semibold">Chú ý:</div>
@@ -679,7 +679,7 @@ function ControllerCard(props) {
                                 <div className="font-medium">Đang sấy...</div>
                             </div>
                         </div>
-                ) : status === 3 && isReviewed === 1 ? (
+                ) : status === 1 && isReviewed === 1 ? (
                     <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
                             <div className=" space-y-1 w-full xl:w-[75%]">
                                 <div className="font-semibold">
@@ -701,7 +701,7 @@ function ControllerCard(props) {
         ) : progress === "dg" ? (
             <div className="">
                 <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
-                    {isReviewed === 1 && status === 3 ? (
+                    {isReviewed === 1 && status === 1 ? (
                         <>
                             <div className=" space-y-1 w-full xl:w-[75%]">
                                 <div className="font-semibold">

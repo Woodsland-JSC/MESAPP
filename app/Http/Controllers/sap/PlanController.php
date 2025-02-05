@@ -203,7 +203,7 @@ class PlanController extends Controller
                 ->selectRaw('COUNT(*) as count, SUM(Mass) as sumMass')->first();
 
             planDryings::where('PlanID', $id)->update([
-                'Status' => 1,
+                // 'Status' => 1,
                 'TotalPallet' => $aggregateData->count,
                 'Mass' => $aggregateData->sumMass ?: 0,
             ]);
@@ -243,7 +243,7 @@ class PlanController extends Controller
             if ($record->count() > 0) {
                 planDryings::where('PlanID', $id)->update(
                     [
-                        'Status' => 2,
+                        // 'Status' => 2,
                         'Checked' => 1,
                         'CheckedBy' => Auth::user()->id,
                         'CT1' => 1, 'CT2' => 1,
@@ -282,6 +282,7 @@ class PlanController extends Controller
             ], 500);
         }
     }
+
     //chạy lò
     function runOven(Request $request)
     {
@@ -306,7 +307,7 @@ class PlanController extends Controller
 
                 planDryings::where('PlanID', $id)->update(
                     [
-                        'Status' => 3,
+                        'Status' => 1,
                         'RunBy' => Auth::user()->id,
                         'runDate' => now()
                     ]
@@ -388,7 +389,7 @@ class PlanController extends Controller
             if ($record->count() > 0) {
                 planDryings::where('PlanID', $id)->update(
                     [
-                        'Status' => 4,
+                        'Status' => 2,
                         'CompletedBy' => Auth::user()->id,
                         'CompletedDate' => now(),
                     ]

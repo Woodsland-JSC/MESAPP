@@ -45,9 +45,17 @@ function BOWCard(props) {
     const getStatusContent = () => {
         return status === 0 ? (
             <>
-                { isChecked === 1 ?(
+                { isChecked === 1 ? (
                     <div className="bow-status p-1 px-3 text-xs text-orange-600 font-semibold bg-orange-100 w-fit rounded-full justify-end my-4">
                         Đã kiểm tra lò
+                    </div>
+                ) : palletQty !== 0 ?(
+                    <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
+                        Đã vào lò
+                    </div>
+                ) : (isChecked === 1 && palletQty !== 0) ?(
+                    <div className="bow-status p-1 px-3 text-xs text-pink-600 font-semibold bg-pink-100 w-fit rounded-full justify-end my-4">
+                        Đã vào lò và kiểm tra lò
                     </div>
                 ) : (
                     <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">
@@ -57,49 +65,19 @@ function BOWCard(props) {
             </>      
         ) : status === 1 ? (
             <>
-                { palletQty !== 0  && isChecked === 1 ? (
-                    <div className="bow-status p-1 px-3 text-xs text-pink-600 font-semibold bg-pink-100 w-fit rounded-full justify-end my-4">
-                        Đã vào lò và kiểm tra lò
-                    </div>
-                ) : palletQty === 0  ? (
-                    <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">
-                        Tạo mới kế hoạch sấy
+                { isReviewed === 1 ? (
+                    <div className="bow-status p-1 px-3 text-xs text-green-500 font-semibold bg-green-50 w-fit rounded-full justify-end my-4">
+                        Đang sấy và đã đánh giá
                     </div>
                 ) : (
-                    <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
-                        Đã vào lò
+                    <div className="bow-status p-1 px-3 text-xs text-red-500 font-semibold bg-red-100 w-fit rounded-full justify-end my-4">
+                        Đang sấy chưa đánh giá
                     </div>
                 )}
             </>   
-        ) : status === 2 ? (
-            <>
-                { isChecked === 1 && palletQty !== 0 ? (
-                    <div className="bow-status p-1 px-3 text-xs text-pink-600 font-semibold bg-pink-100 w-fit rounded-full justify-end my-4">
-                        Đã vào lò và kiểm tra lò
-                    </div>
-                ) : isChecked === 1 && palletQty === 0 ? (
-                    <div className="bow-status p-1 px-3 text-xs text-orange-600 font-semibold bg-orange-100 w-fit rounded-full justify-end my-4">
-                        Đã kiểm tra lò
-                    </div>
-                ) : (
-                    <div className="bow-status p-1 px-3 text-xs text-gray-600 font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">
-                        Unknown Status
-                    </div>
-                )}
-            </>        
-        ) : status === 3 ? (
-            isReviewed === 1 ? (
-                <div className="bow-status p-1 px-3 text-xs text-green-500 font-semibold bg-green-50 w-fit rounded-full justify-end my-4">
-                Đang sấy và đã đánh giá
-            </div>
-            ) : (
-                <div className="bow-status p-1 px-3 text-xs text-red-500 font-semibold bg-red-100 w-fit rounded-full justify-end my-4">
-                Đang sấy chưa đánh giá
-            </div>
-            )
         ) : (
             <div className="bow-status p-1 px-3 text-xs text-gray-600 font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">
-                Unknown Status
+                Trạng thái không xác định
             </div>
         );
     };

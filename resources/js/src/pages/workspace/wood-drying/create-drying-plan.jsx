@@ -27,12 +27,13 @@ import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
-import { BiSolidFactory } from "react-icons/bi";
+import { IoSearch } from "react-icons/io5";
 
 function CreateDryingPlan() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [loading, setLoading] = useState(false);
     const [isKilnLoading, setIsKilnLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { user } = useAppContext();
     const navigate = useNavigate();
@@ -106,7 +107,7 @@ function CreateDryingPlan() {
         setIsKilnLoading(false);
     };
 
-    const filteredBowCards = bowCards.filter((bowCard) => bowCard.Status === 0 && bowCard.plant === user.plant);
+
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
@@ -228,6 +229,13 @@ function CreateDryingPlan() {
         }
     };
 
+    const combinedBowCards = [...createdBowCards, ...bowCards];
+
+    // Filter combinedBowCards based on the search term
+    const filteredBowCards = combinedBowCards?.filter(bowCard =>
+        bowCard.Oven.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <Layout>
             {/* Container */}
@@ -246,7 +254,7 @@ function CreateDryingPlan() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between mb-6 items-center">
+                    <div className="flex justify-between mb-4 items-center">
                         <div className="flex space-x-4">
                             <div className="serif text-4xl font-bold">Tạo kế hoạch sấy</div>
                         </div>
@@ -361,14 +369,37 @@ function CreateDryingPlan() {
                             </ModalFooter>
                         </ModalContent>
                     </Modal>
+                    
+                    {/* Search & Filter */}
+                    <div className=" my-2 mb-6 xl:w-full">
+                        <label
+                            for="Tìm kiếm kế hoạch sấy"
+                            className="mb-2 text-sm font-medium text-gray-900 sr-only"
+                        >
+                            Search
+                        </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <IoSearch className="text-gray-500 ml-1 w-5 h-5" />
+                            </div>
+                            <input
+                                type="search"
+                                id="search"
+                                className="block w-full p-2.5 pl-12 text-[16px] text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Tìm kiếm kế hoạch sấy theo lò sấy"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
                     {/* BOW Card List */}
-                    {((createdBowCards?.length > 0 || bowCards.some(card => card.Status === 0)) && bowCards.some(card => card.plant === user.plant)) ? (
+                    {((filteredBowCards?.length > 0 || bowCards.some(card => card.Status === 0)) && bowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                            {createdBowCards.map((createdbowCard, index) => (
+                            {/* {createdBowCards.map((createdbowCard, index) => (
                                 <BOWCard key={index} {...createdbowCard} />
-                            ))}
-                            {bowCards
+                            ))} */}
+                            {filteredBowCards
                                 ?.map((bowCard, index) => ((
                                     bowCard.Status === 0) && bowCard.plant === user.plant) && (
                                     <BOWCard
@@ -395,8 +426,8 @@ function CreateDryingPlan() {
                             {!loading && (
                                 <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
-                                    <div className="  text-xl text-gray-400"> 
-                                        Tiến trình hiện tại của nhà máy không có hoạt động nào.
+                                    <div className="text-xl text-gray-400"> 
+                                        {filteredBowCards.length === 0 && searchTerm !== "" ? "Không tìm thấy kết quả nào phù hợp" : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
                                     </div>
                                 </div>
                             )}        

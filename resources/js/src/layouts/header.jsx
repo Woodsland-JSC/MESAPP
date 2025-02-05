@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import "../assets/styles/index.css";
 import { Button } from "@chakra-ui/react";
@@ -48,6 +48,9 @@ import {
 import { IoClose } from "react-icons/io5";
 import { FaCircle, FaKey } from "react-icons/fa";
 import { BiSolidTag } from "react-icons/bi";
+import GoodNetwork from "../components/custom-icon/GoodNetwork";
+import MediumNetwork from "../components/custom-icon/MediumNetwork";
+import BadNetwork from "../components/custom-icon/BadNetwork";
 
 function Header(props) {
     const { isOpen, onToggle } = useDisclosure();
@@ -56,6 +59,56 @@ function Header(props) {
         useAppContext();
 
     const { variant } = props;
+
+    // Network Checking
+    const [networkStatus, setNetworkStatus] = useState({
+        speed: 0,
+        status: "Đang kiểm tra...",
+    });
+
+    useEffect(() => {
+        const updateNetworkStatus = () => {
+            if (navigator.connection) {
+                const { downlink } = navigator.connection;
+                let status = "Tốt";
+
+                if (!navigator.onLine || downlink === 0) {
+                    status = "Không thể kết nối";
+                } else if (downlink >= 3 && downlink < 10) {
+                    status = "Trung bình";
+                } else if (downlink < 3) {
+                    status = "Kém";
+                }
+
+                setNetworkStatus({ speed: downlink, status });
+            }
+        };
+
+        updateNetworkStatus();
+        window.addEventListener("online", updateNetworkStatus);
+        window.addEventListener("offline", () =>
+            setNetworkStatus({ speed: 0, status: "Không thể kết nối" })
+        );
+        if (navigator.connection) {
+            navigator.connection.addEventListener(
+                "change",
+                updateNetworkStatus
+            );
+        }
+
+        return () => {
+            window.removeEventListener("online", updateNetworkStatus);
+            window.removeEventListener("offline", () =>
+                setNetworkStatus({ speed: 0, status: "Không thể kết nối" })
+            );
+            if (navigator.connection) {
+                navigator.connection.removeEventListener(
+                    "change",
+                    updateNetworkStatus
+                );
+            }
+        };
+    }, []);
 
     // console.log(user.permissions?.includes("monitor"))
 
@@ -93,7 +146,6 @@ function Header(props) {
                     ></img>
                     <div className="h-[36px] border-r border-gray-400"></div>
                     <div className="flex flex-col justify-center !leading-0">
-                        
                         <div className="flex items-center space-x-2">
                             <div
                                 className={` flex items-center uppercase font-bold text-md !py-0 bg-gradient-to-r ${
@@ -114,18 +166,23 @@ function Header(props) {
                                     ? "Viforex"
                                     : user?.branch === ""
                                     ? "Không xác định"
-                                    : ""} 
-                            </div>        
+                                    : ""}
+                            </div>
                         </div>
                         <div className="text-xs !py-0 text-gray-700">
                             Nhà máy{" "}
-                            {user.plant === "TH" ? "Thuận Hưng" 
-                            : user.plant === "YS" ? "Yên Sơn"
-                            : user.plant === "CH" ? "Chiêm Hóa"
-                            : user.plant === "TB" ? "Thái Bình"
-                            : user.plant === "HG" ? "Hà Giang"
-                            :  "Không xác định"}
-                        </div> 
+                            {user.plant === "TH"
+                                ? "Thuận Hưng"
+                                : user.plant === "YS"
+                                ? "Yên Sơn"
+                                : user.plant === "CH"
+                                ? "Chiêm Hóa"
+                                : user.plant === "TB"
+                                ? "Thái Bình"
+                                : user.plant === "HG"
+                                ? "Hà Giang"
+                                : "Không xác định"}
+                        </div>
                     </div>
                 </div>
 
@@ -207,10 +264,15 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
+                                <div className={`text-sm mx-2 flex gap-x-2 font-medium items-center`}>
+                                    {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                </div>
                                 <IconButton
                                     variant="ghost"
                                     onClick={onToggle}
-                                    className="w-fit ml-2 mr-3"
+                                    className="w-fit ml-2 mr-2"
                                 >
                                     <HiMenuAlt3 className="text-2xl" />
                                 </IconButton>
@@ -307,7 +369,18 @@ function Header(props) {
                             </div>
 
                             <div className="hidden xl:flex ">
-                                <Menu className="!mr-4">
+                                <Menu className="!mr-4 flex items-center ">
+                                    <Tooltip
+                                        hasArrow
+                                        label={`Tín hiệu mạng: ${networkStatus.status}`}
+                                        bg="black"
+                                    >
+                                        <div className={`text-sm mx-2 flex gap-x-2 font-medium items-center`}>
+                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                        </div>
+                                    </Tooltip>
                                     <MenuButton righticon={<TbChevronDown />}>
                                         <Button
                                             variant="ghost"
@@ -329,6 +402,7 @@ function Header(props) {
                                             </div>
                                         </Button>
                                     </MenuButton>
+
                                     <MenuList className="!w-[200px] text-[15px]">
                                         {/* <div className="px-3 py-2">
                                             <div className="font-semibold">Nhà máy Yên Sơn</div>
@@ -346,13 +420,13 @@ function Header(props) {
                                     </MenuList>
                                 </Menu>
                             </div>
-                            <div className="relative rounded-full w-fit h-fit">
+                            <div className="relative rounded-full border-white border-2 w-fit h-fit">
                                 <img
                                     src={
                                         user?.avatar ? user.avatar : defaultUser
                                     }
                                     alt="user"
-                                    className="w-9 h-9 rounded-full  object-cover"
+                                    className=" w-9 h-9 rounded-full object-cover"
                                 />
                                 {user?.role == 1 && (
                                     <Tooltip
