@@ -281,20 +281,21 @@ function BinWarehouseTransfer() {
         setInitialLoading(true);
         try {
             const res = await goodsManagementApi.getBinManagedWarehouse();
-    
-            const fromWarehouseOptions = res
-                ?.filter((item) => item.U_FAC === user.plant)
-                .map((item) => ({
+
+            const fromWarehouseOptions =
+                res
+                    ?.filter((item) => item.U_FAC === user.plant)
+                    .map((item) => ({
+                        value: item.WhsCode,
+                        label: item.WhsName,
+                    })) || [];
+
+            const toWarehouseOptions =
+                res?.map((item) => ({
                     value: item.WhsCode,
                     label: item.WhsName,
                 })) || [];
-    
-            const toWarehouseOptions = res
-                ?.map((item) => ({
-                    value: item.WhsCode,
-                    label: item.WhsName,
-                })) || [];
-    
+
             setFromWarehouseOptions(fromWarehouseOptions);
             setToWarehouseOptions(toWarehouseOptions);
             setInitialLoading(false);
@@ -306,13 +307,15 @@ function BinWarehouseTransfer() {
 
     const getDefaultBinItemsByWarehouse = async (warehouse) => {
         try {
-            const res = await goodsManagementApi.getDefaultBinItemsByWarehouse(warehouse);
+            const res = await goodsManagementApi.getDefaultBinItemsByWarehouse(
+                warehouse
+            );
             console.log(res);
-            const itemOptions = res.ItemData
-            ?.map((item) => ({
-                value: item.ItemCode,
-                label: `${item.ItemCode} - ${item.ItemName}`,
-            })) || [];
+            const itemOptions =
+                res.ItemData?.map((item) => ({
+                    value: item.ItemCode,
+                    label: `${item.ItemCode} - ${item.ItemName}`,
+                })) || [];
 
             setItemOptions(itemOptions);
         } catch (error) {
@@ -323,20 +326,21 @@ function BinWarehouseTransfer() {
     const getFromBinByWarehouse = async (warehouse) => {
         try {
             const res = await goodsManagementApi.getBinByWarehouse(warehouse);
-    
-            const fromWarehouseOptions = res
-                ?.filter((item) => item.U_FAC === user.plant)
-                .map((item) => ({
+
+            const fromWarehouseOptions =
+                res
+                    ?.filter((item) => item.U_FAC === user.plant)
+                    .map((item) => ({
+                        value: item.WhsCode,
+                        label: item.WhsName,
+                    })) || [];
+
+            const toWarehouseOptions =
+                res?.map((item) => ({
                     value: item.WhsCode,
                     label: item.WhsName,
                 })) || [];
-    
-            const toWarehouseOptions = res
-                ?.map((item) => ({
-                    value: item.WhsCode,
-                    label: item.WhsName,
-                })) || [];
-    
+
             setFromWarehouseOptions(fromWarehouseOptions);
             setToWarehouseOptions(toWarehouseOptions);
         } catch (error) {
@@ -349,11 +353,11 @@ function BinWarehouseTransfer() {
         try {
             const res = await goodsManagementApi.getBinByWarehouse(warehouse);
 
-            const toBinOptions = res
-            ?.map((item) => ({
-                value: item.AbsEntry,
-                label: item.BinCode,
-            })) || [];
+            const toBinOptions =
+                res?.map((item) => ({
+                    value: item.AbsEntry,
+                    label: item.BinCode,
+                })) || [];
 
             setToBinOptions(toBinOptions);
         } catch (error) {
@@ -364,15 +368,15 @@ function BinWarehouseTransfer() {
 
     useEffect(() => {
         let isMounted = true;
-    
+
         const fetchData = async () => {
             if (isMounted) {
                 await getBinManagedWarehouse();
             }
         };
-    
+
         fetchData();
-    
+
         return () => {
             isMounted = false;
         };
@@ -422,156 +426,351 @@ function BinWarehouseTransfer() {
                             </TabList>
                             <TabPanels className="!px-0">
                                 <TabPanel>
-                                    <div className=" ">
-                                        {BinStackingData.length > 0 && (
-                                            <div className="pb-4 items-center flex justify-between">
-                                                <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                    onClick={() => {
-                                                        onOpen();
-                                                        setType("bin_stacking");
-                                                    }}
-                                                >
-                                                    <FaPlus className="w-3 h-3" />
-                                                    <p className="text-[15px]">
-                                                        Thêm thông tin
-                                                    </p>
-                                                </button>
+                                    <div className="px-2 ">
+                                        <div className="space-y-4">
+                                            <div className="flex gap-x-3 w-full">
+                                                <div className="col-span-1 w-1/3 flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Kho xếp bin{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={fromWarehouseOptions.find(
+                                                            (warehouse) =>
+                                                                warehouse.value ==
+                                                                BinStackingRecord.warehouse
+                                                        )}
+                                                        placeholder="Chọn kho xếp bin"
+                                                        className=" text-[15px]"
+                                                        options={
+                                                            fromWarehouseOptions
+                                                        }
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Warehouse:",
+                                                                option
+                                                            );
+                                                            getDefaultBinItemsByWarehouse(
+                                                                option?.value
+                                                            );
+                                                            getToBinByWarehouse(
+                                                                option?.value
+                                                            );
+                                                            changeBinStackingRecord(
+                                                                "warehouse",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="col-span-1 w-2/3 flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Sản phẩm điều chuyển{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={itemOptions.find(
+                                                            (item) =>
+                                                                item.value ==
+                                                                BinStackingRecord.item
+                                                        )}
+                                                        placeholder="Chọn sản phẩm"
+                                                        className=" text-[15px]"
+                                                        options={itemOptions}
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Item:",
+                                                                option
+                                                            );
+                                                            changeBinStackingRecord(
+                                                                "item",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
 
+                                            <div className="grid grid-cols-3 gap-x-3">
+                                                <div className="col-span-1 w-full flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Mã lô hàng
+                                                    </div>
+                                                    <Select
+                                                        value={batch.find(
+                                                            (batch) =>
+                                                                batch.value ===
+                                                                BinStackingRecord.batch
+                                                        )}
+                                                        placeholder="Chọn mã lô hàng"
+                                                        className=" text-[15px]"
+                                                        options={batch}
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Batch:",
+                                                                option
+                                                            );
+                                                            changeBinStackingRecord(
+                                                                "batch",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="col-span-1 w-full flex flex-col justify-between ">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Số lượng{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <input
+                                                        type="number"
+                                                        id="batch_id"
+                                                        placeholder="Nhập số lượng"
+                                                        className=" border border-gray-300 text-gray-900 text-[15px] rounded-md focus:ring-blue-500 focus:border-blue-500 block  p-[7px] px-3"
+                                                        value={
+                                                            BinStackingRecord.quantity
+                                                        }
+                                                        onChange={(e) => {
+                                                            changeBinStackingRecord(
+                                                                "quantity",
+                                                                Number(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div className="col-span-1 w-full flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Chuyển đến bin{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={toBinOptions.find(
+                                                            (bin) =>
+                                                                bin.value ===
+                                                                BinStackingRecord.bin
+                                                        )}
+                                                        placeholder="Chọn bin chuyển đến"
+                                                        options={toBinOptions}
+                                                        className="text-[15px]"
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Bin:",
+                                                                option
+                                                            );
+                                                            changeBinStackingRecord(
+                                                                "bin",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4 items-center flex justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                {BinStackingRecord.item && (
+                                                    <div className="flex items-start">
+                                                        <div className=" text-red-500 text-[15px]">
+                                                            Số lượng tồn:{" "}
+                                                            {items.find(
+                                                                (item) =>
+                                                                    item.value ===
+                                                                    BinStackingRecord.item
+                                                            )?.onHand || 0}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                    className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                                     onClick={() => {
-                                                        console.log(BinStackingData);
-                                                        console.log("Danh sách kho đi", fromWarehouseOptions)
-                                                        console.log("Danh sách kho đến", toWarehouseOptions)
+                                                        console.log(
+                                                            BinStackingData
+                                                        );
+                                                        console.log(
+                                                            "Danh sách kho đi",
+                                                            fromWarehouseOptions
+                                                        );
+                                                        console.log(
+                                                            "Danh sách kho đến",
+                                                            toWarehouseOptions
+                                                        );
                                                     }}
                                                 >
                                                     <div className="text-[15px]">
                                                         In ra dữ liệu
                                                     </div>
                                                 </button>
-                                                <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-[#17506B] p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                    onClick={() => {
-                                                        onConfirmOpen();
-                                                    }}
-                                                >
-                                                    <p className="text-[15px]">
-                                                        Xếp bin
-                                                    </p>
-                                                    <FaArrowRight className="w-4 h-4" />
-                                                </button>
                                             </div>
-                                        )}
+
+                                            <button
+                                                className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                onClick={() => {
+                                                    onOpen();
+                                                    setType("bin_stacking");
+                                                }}
+                                            >
+                                                <FaPlus className="w-3 h-3" />
+                                                <p className="text-[15px]">
+                                                    Thêm thông tin
+                                                </p>
+                                            </button>
+                                        </div>
+
+                                        <div className="my-4 border-b border-gray-200"></div>
+
                                         <div className="overflow-x-auto">
                                             {BinStackingData.length > 0 ? (
-                                                <table className="min-w-full border border-gray-300 text-[15px] text-left text-gray-700">
-                                                    <thead className="bg-gray-100">
-                                                        <tr>
-                                                            <th className="w-[180px] px-6 py-3 border border-gray-300">
-                                                                Kho xếp bin
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Sản phẩm điều
-                                                                chuyển
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Mã lô hàng
-                                                            </th>
-                                                            <th className="w-[120px] px-6 py-3 border border-gray-300">
-                                                                Số lượng
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Bin chuyển đến
-                                                            </th>
-                                                            <th className="w-[120px] px-3 text-center py-3 border border-gray-300">
-                                                                Hành động
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {BinStackingData.map(
-                                                            (row, index) => (
-                                                                <tr
-                                                                    key={index}
-                                                                    className={index % 2 === 0 ? "bg-gray-50" : ""}
-                                                                >
-                                                                    <td className="text-bottom px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.warehouse
+                                                <>
+                                                    <table className="min-w-full border border-gray-300 text-[15px] text-left text-gray-700">
+                                                        <thead className="bg-gray-100">
+                                                            <tr>
+                                                                <th className="w-[180px] px-6 py-3 border border-gray-300">
+                                                                    Kho xếp bin
+                                                                </th>
+                                                                <th className="px-6 py-3 border border-gray-300">
+                                                                    Sản phẩm
+                                                                    điều chuyển
+                                                                </th>
+                                                                <th className="px-6 py-3 border border-gray-300">
+                                                                    Mã lô hàng
+                                                                </th>
+                                                                <th className="w-[120px] px-6 py-3 border border-gray-300">
+                                                                    Số lượng
+                                                                </th>
+                                                                <th className="px-6 py-3 border border-gray-300">
+                                                                    Bin chuyển
+                                                                    đến
+                                                                </th>
+                                                                <th className="w-[120px] px-3 text-center py-3 border border-gray-300">
+                                                                    Hành động
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {BinStackingData.map(
+                                                                (
+                                                                    row,
+                                                                    index
+                                                                ) => (
+                                                                    <tr
+                                                                        key={
+                                                                            index
                                                                         }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        <div className="flex flex-col justify-start gap-x-2">
-                                                                            <div className="text-xs text-gray-500">
-                                                                                {row.item}
+                                                                        className={
+                                                                            index %
+                                                                                2 ===
+                                                                            0
+                                                                                ? "bg-gray-50"
+                                                                                : ""
+                                                                        }
+                                                                    >
+                                                                        <td className="text-bottom px-6 py-3 border border-gray-300">
+                                                                            {
+                                                                                row.warehouse
+                                                                            }
+                                                                        </td>
+                                                                        <td className="px-6 py-3 border border-gray-300">
+                                                                            <div className="flex flex-col justify-start gap-x-2">
+                                                                                <div className="text-xs text-gray-500">
+                                                                                    {
+                                                                                        row.item
+                                                                                    }
+                                                                                </div>
+                                                                                <div className="font-medium">
+                                                                                    {items.find(
+                                                                                        (
+                                                                                            item
+                                                                                        ) =>
+                                                                                            item.value ===
+                                                                                            row.item
+                                                                                    )
+                                                                                        ?.label ||
+                                                                                        "Không tìm thấy"}
+                                                                                </div>
                                                                             </div>
-                                                                            <div className="font-medium">
-                                                                                {items.find(item => item.value === row.item)?.label || "Không tìm thấy"}
-                                                                            </div>
-                                                                            {/* <Tooltip
-                                                                                hasArrow
-                                                                                label={items.find(item => item.value === row.item)?.label || "Không tìm thấy"}
+                                                                        </td>
+                                                                        <td className="px-6 py-3 border border-gray-300">
+                                                                            {row.batch ||
+                                                                                "Không xác định"}
+                                                                        </td>
+                                                                        <td className="px-6 py-3 border text-center border-gray-300">
+                                                                            {
+                                                                                row.quantity
+                                                                            }
+                                                                        </td>
+                                                                        <td className="px-6 py-3 border border-gray-300">
+                                                                            {
+                                                                                row.bin
+                                                                            }
+                                                                        </td>
+                                                                        <td className="px-6 py-3 space-x-2 border border-gray-300 text-center">
+                                                                            <button
+                                                                                className="text-orange-500 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all "
+                                                                                onClick={() => {
+                                                                                    setType(
+                                                                                        "bin_stacking"
+                                                                                    ),
+                                                                                        editBinStackingRecord(
+                                                                                            index
+                                                                                        );
+                                                                                }}
                                                                             >
-                                                                                <span>
-                                                                                    <HiEye className="w-5 h-5 text-[#17506B]" />
-                                                                                </span>
-                                                                            </Tooltip> */}                                                                            
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {row.batch ||
-                                                                            "Không xác định"}
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border text-center border-gray-300">
-                                                                        {
-                                                                            row.quantity
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.bin
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 space-x-2 border border-gray-300 text-center">
-                                                                        <button
-                                                                            className="text-orange-500 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all "
-                                                                            onClick={() => {
-                                                                                setType(
-                                                                                    "bin_stacking"
-                                                                                ),
-                                                                                    editBinStackingRecord(
-                                                                                        index
-                                                                                    );
-                                                                            }}
-                                                                        >
-                                                                            <HiOutlinePencilAlt className="w-6 h-6" />
-                                                                        </button>
-                                                                        <button
-                                                                            className=" text-red-600 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
-                                                                            onClick={() => {
-                                                                                setType(
-                                                                                    "bin_stacking"
-                                                                                ),
-                                                                                    deleteBinStackingRecord(
-                                                                                        index
-                                                                                    );
-                                                                            }}
-                                                                        >
-                                                                            <HiOutlineTrash className="w-6 h-6" />
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            )
-                                                        )}
-                                                    </tbody>
-                                                </table>
+                                                                                <HiOutlinePencilAlt className="w-6 h-6" />
+                                                                            </button>
+                                                                            <button
+                                                                                className=" text-red-600 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
+                                                                                onClick={() => {
+                                                                                    setType(
+                                                                                        "bin_stacking"
+                                                                                    ),
+                                                                                        deleteBinStackingRecord(
+                                                                                            index
+                                                                                        );
+                                                                                }}
+                                                                            >
+                                                                                <HiOutlineTrash className="w-6 h-6" />
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                    <button
+                                                        className="w-fit h-full space-x-2 flex items-center bg-[#17506B] p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                        onClick={() => {
+                                                            onConfirmOpen();
+                                                        }}
+                                                    >
+                                                        <p className="text-[15px]">
+                                                            Xếp bin
+                                                        </p>
+                                                        <FaArrowRight className="w-4 h-4" />
+                                                    </button>
+                                                </>
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center py-4 pb-14 gap-y-3">
+                                                <div className="flex flex-col items-center justify-center py-4 pb-8 gap-y-3">
                                                     <img
                                                         src={EmptyState}
                                                         alt="EmptyState"
-                                                        className="w-[150px] h-[150px] opacity-60 object-contain"
+                                                        className="w-[135px] h-[135px] opacity-60 object-contain"
                                                     />
                                                     <div className="text-center">
                                                         <div className="font-semibold text-xl">
@@ -586,29 +785,232 @@ function BinWarehouseTransfer() {
                                                             thị tại đây.
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                        onClick={() => {
-                                                            onOpen();
-                                                            setType(
-                                                                "bin_stacking"
-                                                            );
-                                                        }}
-                                                    >
-                                                        <FaPlus className="w-3 h-3" />
-                                                        <p className="text-[15px]">
-                                                            Thêm mới thông tin
-                                                        </p>
-                                                    </button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </TabPanel>
                                 <TabPanel>
-                                    <div className=" ">
-                                        {BinTransferData.length > 0 && (
-                                            <div className="pb-4 items-center flex justify-between">
+                                    <div className="px-2">
+                                        {/* Bin Transfrom Input */}
+                                        <div className=" space-y-3">
+                                            <div className="grid grid-cols-2 gap-x-3">
+                                                <div className="col-span-1 w-full flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Chuyển từ kho{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={fromWarehouseOptions.find(
+                                                            (warehouse) =>
+                                                                warehouse.value ===
+                                                                BinTransferRecord.fromWarehouse
+                                                        )}
+                                                        placeholder="Chọn kho"
+                                                        className="text-[15px]"
+                                                        options={
+                                                            fromWarehouseOptions
+                                                        }
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected From Warehouse:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "fromWarehouse",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="col-span-1 w-full flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Chuyển từ bin{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={bins.find(
+                                                            (bin) =>
+                                                                bin.value ===
+                                                                BinTransferRecord.fromBin
+                                                        )}
+                                                        placeholder="Chọn bin"
+                                                        className="text-[15px]"
+                                                        options={bins}
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected From Bin:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "fromBin",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1">
+                                                <div className="col-span-1 w-full flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Sản phẩm điều chuyển{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={items.find(
+                                                            (item) =>
+                                                                item.value ===
+                                                                BinTransferRecord.item
+                                                        )}
+                                                        placeholder="Chọn sản phẩm"
+                                                        className="text-[15px]"
+                                                        options={items}
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Item:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "item",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex w-full gap-x-3">
+                                                <div className="col-span-1 w-1/2 flex flex-col justify-between">
+                                                    <div className=" text-[15px] font-medium">
+                                                        Mã lô hàng
+                                                    </div>
+                                                    <Select
+                                                        value={batch.find(
+                                                            (batch) =>
+                                                                batch.value ===
+                                                                BinTransferRecord.batch
+                                                        )}
+                                                        placeholder="Chọn mã lô hàng"
+                                                        className="mt-1 text-[15px]"
+                                                        options={batch}
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected Batch:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "batch",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div className="col-span-1 w-1/2 flex flex-col justify-between">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Số lượng{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <input
+                                                        type="number"
+                                                        id="batch_id"
+                                                        placeholder="Nhập số lượng"
+                                                        className=" border border-gray-300 text-gray-900 text-[15px] rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-[7px] px-3"
+                                                        value={
+                                                            BinTransferRecord.quantity
+                                                        }
+                                                        onChange={(e) => {
+                                                            changeBinTransferRecord(
+                                                                "quantity",
+                                                                Number(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-x-3 ">
+                                                <div className="">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Chuyển đến kho{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={toWarehouseOptions.find(
+                                                            (warehouse) =>
+                                                                warehouse.value ===
+                                                                BinTransferRecord.toWarehouse
+                                                        )}
+                                                        placeholder="Chọn kho chuyến đến"
+                                                        options={
+                                                            toWarehouseOptions
+                                                        }
+                                                        className="text-[15px]"
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected To Warehouse:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "toWarehouse",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="">
+                                                    <div className="mb-1 text-[15px] font-medium">
+                                                        Chuyển đến bin{" "}
+                                                        <span className="text-lg text-red-600">
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    </div>
+                                                    <Select
+                                                        value={bins.find(
+                                                            (bin) =>
+                                                                bin.value ===
+                                                                BinTransferRecord.toBin
+                                                        )}
+                                                        placeholder="Chọn bin chuyển đến"
+                                                        options={bins}
+                                                        className="text-[15px]"
+                                                        onChange={(option) => {
+                                                            console.log(
+                                                                "Selected To Bin:",
+                                                                option
+                                                            );
+                                                            changeBinTransferRecord(
+                                                                "toBin",
+                                                                option?.value
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex pt-4">
+                                            <div className=" items-center flex justify-between">
                                                 <button
                                                     className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                                     onClick={() => {
@@ -621,169 +1023,196 @@ function BinWarehouseTransfer() {
                                                         Thêm thông tin
                                                     </p>
                                                 </button>
-                                                <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-[#17506B] p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                    onClick={() => {
-                                                        onConfirmOpen();
-                                                    }}
-                                                >
-                                                    <p className="text-[15px]">
-                                                        Điều chuyển
-                                                    </p>
-                                                    <FaArrowRight className="w-4 h-4" />
-                                                </button>
                                             </div>
-                                        )}
-                                        <div className="overflow-x-auto">
-                                            {BinTransferData.length > 0 ? (
-                                                <table className="min-w-full border border-gray-300 text-[15px] text-left text-gray-700">
-                                                    <thead className="bg-gray-100">
-                                                        <tr>
-                                                            <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
-                                                                Chuyển từ kho
-                                                            </th>
-                                                            <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
-                                                                Chuyển từ bin
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Sản phẩm điều
-                                                                chuyển
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Mã lô hàng
-                                                            </th>
-                                                            <th className="px-6 py-3 border border-gray-300">
-                                                                Số lượng
-                                                            </th>
-                                                            <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
-                                                                Chuyển tới kho
-                                                            </th>
-                                                            <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
-                                                                Chuyển tới bin
-                                                            </th>
-                                                            <th className="w-[120px] px-3 text-center py-3 border border-gray-300">
-                                                                Hành động
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {BinTransferData.map(
-                                                            (row, index) => (
-                                                                <tr
-                                                                    key={index}
-                                                                    className={index % 2 === 0 ? "bg-gray-50" : ""}
-                                                                >
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.fromWarehouse
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.fromBin
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        <div className="flex flex-col justify-start gap-x-2">
-                                                                            <div className="text-xs text-gray-500">
-                                                                                {row.item}
-                                                                            </div>
-                                                                            <div className="font-medium">
-                                                                                {items.find(item => item.value === row.item)?.label || "Không tìm thấy"}
-                                                                            </div>
-                                                                            {/* <Tooltip
-                                                                                hasArrow
-                                                                                label={items.find(item => item.value === row.item)?.label || "Không tìm thấy"}
-                                                                            >
-                                                                                <span>
-                                                                                    <HiEye className="w-5 h-5 text-[#17506B]" />
-                                                                                </span>
-                                                                            </Tooltip> */}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {row.batch ||
-                                                                            "Không xác định"}
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.quantity
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.toWarehouse
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 border border-gray-300">
-                                                                        {
-                                                                            row.toBin
-                                                                        }
-                                                                    </td>
-                                                                    <td className="px-6 py-3 space-x-2 border border-gray-300 text-center">
-                                                                        <button
-                                                                            className="text-orange-500 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
-                                                                            onClick={() =>
-                                                                                editBinTransferRecord(
-                                                                                    index
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <HiOutlinePencilAlt className="w-6 h-6" />
-                                                                        </button>
-                                                                        <button
-                                                                            className="text-red-600 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
-                                                                            onClick={() =>
-                                                                                deleteBinTransferRecord(
-                                                                                    index
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <HiOutlineTrash className="w-6 h-6" />
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            )
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center py-4 pb-14 gap-y-3">
-                                                    <img
-                                                        src={EmptyState}
-                                                        alt="EmptyState"
-                                                        className="w-[150px] h-[150px] opacity-60 object-contain"
-                                                    />
-                                                    <div className="text-center">
-                                                        <div className="font-semibold text-xl">
-                                                            Hiện tại không có
-                                                            thông tin ghi nhận
-                                                            nào.
-                                                        </div>
-                                                        <div className="text-gray-500 mt-1">
-                                                            Khi bạn thêm mới
-                                                            thông tin điều
-                                                            chuyển, dữ liệu sẽ
-                                                            được hiển thị tại
-                                                            đây.
-                                                        </div>
+                                        </div>
+
+                                        <div className="my-4 border-b border-gray-200"></div>
+
+                                        {/* Bin Transfrom Records*/}
+                                        <div className="">
+                                            {BinTransferRecord.item && (
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-[30%] text-[15px] font-medium"></div>
+                                                    <div className="w-[70%] text-red-500 !mt-0 !pt-0 text-[15px]">
+                                                        Số lượng tồn:{" "}
+                                                        {items.find(
+                                                            (item) =>
+                                                                item.value ===
+                                                                BinTransferRecord.item
+                                                        )?.onHand || 0}
                                                     </div>
-                                                    <button
-                                                        className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                        onClick={() => {
-                                                            onOpen();
-                                                            setType(
-                                                                "bin_transfer"
-                                                            );
-                                                        }}
-                                                    >
-                                                        <FaPlus className="w-3 h-3" />
-                                                        <p className="text-[15px]">
-                                                            Thêm mới thông tin
-                                                        </p>
-                                                    </button>
                                                 </div>
                                             )}
+                                            <div className="overflow-x-auto">
+                                                {BinTransferData.length > 0 ? (
+                                                    <>
+                                                        <table className="min-w-full border border-gray-300 text-[15px] text-left text-gray-700">
+                                                            <thead className="bg-gray-100">
+                                                                <tr>
+                                                                    <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
+                                                                        Chuyển
+                                                                        từ kho
+                                                                    </th>
+                                                                    <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
+                                                                        Chuyển
+                                                                        từ bin
+                                                                    </th>
+                                                                    <th className="px-6 py-3 border border-gray-300">
+                                                                        Sản phẩm
+                                                                        điều
+                                                                        chuyển
+                                                                    </th>
+                                                                    <th className="px-6 py-3 border border-gray-300">
+                                                                        Mã lô
+                                                                        hàng
+                                                                    </th>
+                                                                    <th className="px-6 py-3 border border-gray-300">
+                                                                        Số lượng
+                                                                    </th>
+                                                                    <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
+                                                                        Chuyển
+                                                                        tới kho
+                                                                    </th>
+                                                                    <th className="w-[150px] px-3 text-center py-3 border border-gray-300">
+                                                                        Chuyển
+                                                                        tới bin
+                                                                    </th>
+                                                                    <th className="w-[120px] px-3 text-center py-3 border border-gray-300">
+                                                                        Hành
+                                                                        động
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {BinTransferData.map(
+                                                                    (
+                                                                        row,
+                                                                        index
+                                                                    ) => (
+                                                                        <tr
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            className={
+                                                                                index %
+                                                                                    2 ===
+                                                                                0
+                                                                                    ? "bg-gray-50"
+                                                                                    : ""
+                                                                            }
+                                                                        >
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {
+                                                                                    row.fromWarehouse
+                                                                                }
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {
+                                                                                    row.fromBin
+                                                                                }
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                <div className="flex flex-col justify-start gap-x-2">
+                                                                                    <div className="text-xs text-gray-500">
+                                                                                        {
+                                                                                            row.item
+                                                                                        }
+                                                                                    </div>
+                                                                                    <div className="font-medium">
+                                                                                        {items.find(
+                                                                                            ({
+                                                                                                value,
+                                                                                            }) =>
+                                                                                                value ===
+                                                                                                row.item
+                                                                                        )
+                                                                                            ?.label ||
+                                                                                            "Không tìm thấy"}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {row.batch ||
+                                                                                    "Không xác định"}
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {
+                                                                                    row.quantity
+                                                                                }
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {
+                                                                                    row.toWarehouse
+                                                                                }
+                                                                            </td>
+                                                                            <td className="px-6 py-3 border border-gray-300">
+                                                                                {
+                                                                                    row.toBin
+                                                                                }
+                                                                            </td>
+                                                                            <td className="px-6 py-3 space-x-2 border border-gray-300 text-center">
+                                                                                <button
+                                                                                    className="text-orange-500 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
+                                                                                    onClick={() =>
+                                                                                        editBinTransferRecord(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <HiOutlinePencilAlt className="w-6 h-6" />
+                                                                                </button>
+                                                                                <button
+                                                                                    className="text-red-600 py-1 rounded-md active:scale-[.95] active:duration-75 transition-all"
+                                                                                    onClick={() =>
+                                                                                        deleteBinTransferRecord(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <HiOutlineTrash className="w-6 h-6" />
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    )
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                        <button
+                                                            className="w-fit h-full space-x-2 flex items-center bg-[#17506B] p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                            onClick={() => {
+                                                                onConfirmOpen();
+                                                            }}
+                                                        >
+                                                            <p className="text-[15px]">
+                                                                Điều chuyển
+                                                            </p>
+                                                            <FaArrowRight className="w-4 h-4" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-4 pb-8 gap-y-3">
+                                                        <img
+                                                            src={EmptyState}
+                                                            alt="EmptyState"
+                                                            className="w-[135px] h-[135px] opacity-60 object-contain pointer-events-none"
+                                                        />
+                                                        <div className="text-center">
+                                                            <div className="font-semibold text-xl">
+                                                                Hiện tại không
+                                                                có thông tin ghi
+                                                                nhận nào.
+                                                            </div>
+                                                            <div className="text-gray-500 mt-1">
+                                                                Khi bạn thêm mới
+                                                                thông tin điều
+                                                                chuyển, dữ liệu
+                                                                sẽ được hiển thị
+                                                                tại đây.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </TabPanel>
@@ -833,8 +1262,12 @@ function BinWarehouseTransfer() {
                                                         "Selected Warehouse:",
                                                         option
                                                     );
-                                                    getDefaultBinItemsByWarehouse(option?.value);
-                                                    getToBinByWarehouse(option?.value);
+                                                    getDefaultBinItemsByWarehouse(
+                                                        option?.value
+                                                    );
+                                                    getToBinByWarehouse(
+                                                        option?.value
+                                                    );
                                                     changeBinStackingRecord(
                                                         "warehouse",
                                                         option?.value
