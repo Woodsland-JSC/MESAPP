@@ -231,7 +231,6 @@ function CreateDryingPlan() {
 
     const combinedBowCards = [...createdBowCards, ...bowCards];
 
-    // Filter combinedBowCards based on the search term
     const filteredBowCards = combinedBowCards?.filter(bowCard =>
         bowCard.Oven.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -394,7 +393,7 @@ function CreateDryingPlan() {
                     </div>
 
                     {/* BOW Card List */}
-                    {((filteredBowCards?.length > 0 || filteredBowCards.some(card => card.Status === 0)) && filteredBowCards.some(card => card.plant === user.plant)) ? (
+                    {((createdBowCards?.length > 0 || filteredBowCards.some(card => card.Status === 0)) && filteredBowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {/* {createdBowCards.map((createdbowCard, index) => (
                                 <BOWCard key={index} {...createdbowCard} />

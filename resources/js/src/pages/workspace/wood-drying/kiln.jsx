@@ -93,13 +93,7 @@ function Kiln() {
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                         {filteredBowCards
                             ?.map(
-                                (bowCard, index) =>
-                                    (bowCard.Status === 2 || bowCard.Status === 3 ||
-                                        (bowCard.Status === 3 &&
-                                            bowCard.Review === 0) ||
-                                        (bowCard.Status === 3 &&
-                                            bowCard.Review === 1)) &&
-                                    bowCard.plant === user.plant && (
+                                (bowCard, index) => (
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}

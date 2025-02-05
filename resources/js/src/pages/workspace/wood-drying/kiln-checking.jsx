@@ -101,9 +101,7 @@ function KilnChecking() {
                                 filteredBowCards
                                     ?.map(
                                         (bowCard, index) =>
-                                            (bowCard.Status === 0 ||
-                                                bowCard.Status === 1 ||
-                                                bowCard.Status === 2) &&
+                                            (bowCard.Status === 0) &&
                                             bowCard.plant === user.plant && (
                                                 <BOWCard
                                                     key={index}
