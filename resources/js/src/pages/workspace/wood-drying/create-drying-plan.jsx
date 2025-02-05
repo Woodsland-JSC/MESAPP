@@ -401,7 +401,7 @@ function CreateDryingPlan() {
                             ))} */}
                             {filteredBowCards
                                 ?.map((bowCard, index) => ((
-                                    bowCard.Status === 0) && bowCard.plant === user.plant) && (
+                                    bowCard.Status === 0 && bowCard.isChecked === 0 && bowCard.TotalPallet === 0) && bowCard.plant === user.plant) && (
                                     <BOWCard
                                         key={index}
                                         planID={bowCard.PlanID}
