@@ -45,17 +45,17 @@ function BOWCard(props) {
     const getStatusContent = () => {
         return status === 0 ? (
             <>
-                { isChecked === 1 ? (
+                {(isChecked === 1 && Number(palletQty) > 0) ? (
+                    <div className="bow-status p-1 px-3 text-xs text-pink-600 font-semibold bg-pink-100 w-fit rounded-full justify-end my-4">
+                        Đã vào lò và kiểm tra lò
+                    </div>
+                ) : isChecked === 1 ? (
                     <div className="bow-status p-1 px-3 text-xs text-orange-600 font-semibold bg-orange-100 w-fit rounded-full justify-end my-4">
                         Đã kiểm tra lò
                     </div>
                 ) : palletQty > 0 ?(
                     <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
                         Đã vào lò
-                    </div>
-                ) : (isChecked === 1 && palletQty > 0) ?(
-                    <div className="bow-status p-1 px-3 text-xs text-pink-600 font-semibold bg-pink-100 w-fit rounded-full justify-end my-4">
-                        Đã vào lò và kiểm tra lò
                     </div>
                 ) : (
                     <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">

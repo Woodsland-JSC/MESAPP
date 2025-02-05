@@ -393,14 +393,13 @@ function CreateDryingPlan() {
                     </div>
 
                     {/* BOW Card List */}
-                    {((createdBowCards?.length > 0 || filteredBowCards.some(card => card.Status === 0)) && filteredBowCards.some(card => card.plant === user.plant)) ? (
+                    {((createdBowCards?.length > 0 || ((filteredBowCards.some(card => card.Status === 0)) && (filteredBowCards.some(card => card.isChecked === 0)) || filteredBowCards.some(card => card.TotalPallet === 0) ) ) && filteredBowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {/* {createdBowCards.map((createdbowCard, index) => (
                                 <BOWCard key={index} {...createdbowCard} />
                             ))} */}
                             {filteredBowCards
-                                ?.map((bowCard, index) => ((
-                                    bowCard.Status === 0 && bowCard.isChecked === 0 && bowCard.TotalPallet === 0) && bowCard.plant === user.plant) && (
+                                ?.map((bowCard, index) => (
                                     <BOWCard
                                         key={index}
                                         planID={bowCard.PlanID}

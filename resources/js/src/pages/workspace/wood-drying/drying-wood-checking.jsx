@@ -87,13 +87,11 @@ function DryingWoodChecking() {
                     </div>
 
                     {/* Content */}
-                    {((filteredBowCards.some(card => card.Status === 1)) && bowCards.some(card => card.plant === user.plant)) ? (
+                    {((filteredBowCards.some(card => card.Status === 1) || (filteredBowCards.some(card => card.isReviewed === 0) || filteredBowCards.some(card => card.isReviewed === 1))) && bowCards.some(card => card.plant === user.plant)) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {filteredBowCards
                             ?.map(
-                                (bowCard, index) =>
-                                    ((bowCard.isReviewed === 1 ||
-                                        bowCard.isReviewed === 0)) && (
+                                (bowCard, index) => (
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}
