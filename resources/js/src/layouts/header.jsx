@@ -265,7 +265,7 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <div className={`text-sm mx-2 mr-0 flex gap-x-2 font-medium items-center`}>
+                                <div className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}>
                                     {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
