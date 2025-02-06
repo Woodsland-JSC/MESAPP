@@ -79,6 +79,8 @@ function Header(props) {
                     status = "Trung bình";
                 } else if (downlink < 3) {
                     status = "Kém";
+                }   else if (downlink >= 10) {
+                    status = "Tốt";
                 }
 
                 setNetworkStatus({ speed: downlink, status });
@@ -88,7 +90,7 @@ function Header(props) {
         updateNetworkStatus();
         window.addEventListener("online", updateNetworkStatus);
         window.addEventListener("offline", () =>
-            setNetworkStatus({ speed: 0, status: "Không thể kết nối" })
+            setNetworkStatus({ speed: 0, status: "Không có mạng" })
         );
         if (navigator.connection) {
             navigator.connection.addEventListener(
@@ -100,7 +102,7 @@ function Header(props) {
         return () => {
             window.removeEventListener("online", updateNetworkStatus);
             window.removeEventListener("offline", () =>
-                setNetworkStatus({ speed: 0, status: "Không thể kết nối" })
+                setNetworkStatus({ speed: 0, status: "Không có mạng" })
             );
             if (navigator.connection) {
                 navigator.connection.removeEventListener(
@@ -267,7 +269,7 @@ function Header(props) {
                             <div className="flex xl:hidden">
                                 <div className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}>
                                     {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                 </div>
@@ -379,7 +381,7 @@ function Header(props) {
                                     >
                                         <div className={`text-sm flex gap-x-2 font-medium items-center`}>
                                             {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                         </div>

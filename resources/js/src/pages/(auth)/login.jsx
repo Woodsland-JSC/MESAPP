@@ -12,6 +12,7 @@ import { FaCircle } from "react-icons/fa";
 import GoodNetwork from "../../components/custom-icon/GoodNetwork";
 import MediumNetwork from "../../components/custom-icon/MediumNetwork";
 import BadNetwork from "../../components/custom-icon/BadNetwork";
+import Offline from "../../components/custom-icon/Offline";
 
 function Login() {
     const emailInputRef = useRef();
@@ -42,11 +43,13 @@ function Login() {
             let status = "Tốt";
     
             if (!navigator.onLine || downlink === 0) {
-              status = "Không có mạng";
+                status = "Không có mạng";
             } else if (downlink >= 3 && downlink < 10) {
-              status = "Trung bình";
+                status = "Trung bình";
             } else if (downlink < 3) {
-              status = "Kém";
+                status = "Kém";
+            }   else if (downlink >= 10) {
+                status = "Tốt";
             }
     
             setNetworkStatus({ speed: downlink, status });
@@ -55,14 +58,14 @@ function Login() {
     
         updateNetworkStatus();
         window.addEventListener("online", updateNetworkStatus);
-        window.addEventListener("offline", () => setNetworkStatus({ speed: 0, status: "Không thể kết nối" }));
+        window.addEventListener("offline", () => setNetworkStatus({ speed: 0, status: "Không có mạng" }));
         if (navigator.connection) {
           navigator.connection.addEventListener("change", updateNetworkStatus);
         }
     
         return () => {
           window.removeEventListener("online", updateNetworkStatus);
-          window.removeEventListener("offline", () => setNetworkStatus({ speed: 0, status: "Không thể kết nối" }));
+          window.removeEventListener("offline", () => setNetworkStatus({ speed: 0, status: "Không có mạng" }));
           if (navigator.connection) {
             navigator.connection.removeEventListener("change", updateNetworkStatus);
           }
@@ -156,12 +159,12 @@ function Login() {
         <section className="h-screen  ">
             <div className="relative xl:pt-0 pt-20">
                 <div className="absolute top-2 left-0 right-0 px-4 py-2 flex items-center justify-between" style={{ borderColor: networkStatus.status === "Tốt" ? "green" : "red" }}>   
-                    <div className={`text-sm flex gap-x-2 font-medium items-center p-1 px-2 rounded-full ${networkStatus.status === "Tốt" ? "bg-[#C4E9D0] text-green-700" : networkStatus.status === "Trung bình" ? "bg-[#FCE4C8] text-orange-600" : networkStatus.status === "Kém" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"}`}>
+                    <div className={`text-sm flex gap-x-2 font-medium items-center  rounded-full ${networkStatus.status === "Tốt" ? " text-green-700" : networkStatus.status === "Trung bình" ? " text-orange-600" : networkStatus.status === "Kém" ? " text-red-600" : " text-gray-600"}`}>
                         {networkStatus.status === "Tốt" && <GoodNetwork className={"w-4 h-4"} />}
-                        {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-4 h-4"} />}
+                        {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-4 h-4"} />}
                         {networkStatus.status === "Kém" && <BadNetwork className={"w-4 h-4"} />}
-                        {networkStatus.status === "Không có mạng" && <BadNetwork className={"w-4 h-4"} />}
-                        <div>Tín hiệu: {networkStatus.status}</div>
+                        {networkStatus.status === "Không có mạng" && <Offline className={"w-4 h-4"} />}
+                        <div>Kết nối: {networkStatus.status}</div>
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-center px-6 py-4 md:pt-10 mx-auto md:h-screen lg:py-0">
