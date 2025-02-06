@@ -98,6 +98,8 @@ function LoadIntoKiln() {
                                 filteredBowCards
                                     ?.map(
                                         (bowCard, index) => (
+                                            // ((bowCard.Checked === 0 || bowCard.Checked === 1) || (bowCard.TotalPallet > 0 || bowCard.TotalPallet === 0)) &&
+                                            (bowCard.Status === 0) &&
                                                 <BOWCard
                                                     key={index}
                                                     planID={bowCard.PlanID}
