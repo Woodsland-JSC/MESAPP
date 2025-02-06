@@ -51,6 +51,7 @@ import { BiSolidTag } from "react-icons/bi";
 import GoodNetwork from "../components/custom-icon/GoodNetwork";
 import MediumNetwork from "../components/custom-icon/MediumNetwork";
 import BadNetwork from "../components/custom-icon/BadNetwork";
+import Offline from "../components/custom-icon/Offline";
 
 function Header(props) {
     const { isOpen, onToggle } = useDisclosure();
@@ -73,7 +74,7 @@ function Header(props) {
                 let status = "Tốt";
 
                 if (!navigator.onLine || downlink === 0) {
-                    status = "Không thể kết nối";
+                    status = "Không có mạng";
                 } else if (downlink >= 3 && downlink < 10) {
                     status = "Trung bình";
                 } else if (downlink < 3) {
@@ -264,10 +265,11 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <div className={`text-sm mx-2 flex gap-x-2 font-medium items-center`}>
+                                <div className={`text-sm mx-2 mr-0 flex gap-x-2 font-medium items-center`}>
                                     {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                     {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                 </div>
                                 <IconButton
                                     variant="ghost"
@@ -375,10 +377,11 @@ function Header(props) {
                                         label={`Tín hiệu mạng: ${networkStatus.status}`}
                                         bg="black"
                                     >
-                                        <div className={`text-sm mx-2 flex gap-x-2 font-medium items-center`}>
+                                        <div className={`text-sm flex gap-x-2 font-medium items-center`}>
                                             {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Trung Bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                         </div>
                                     </Tooltip>
                                     <MenuButton righticon={<TbChevronDown />}>

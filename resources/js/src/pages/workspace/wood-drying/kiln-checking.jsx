@@ -92,8 +92,8 @@ function KilnChecking() {
 
                     {/* Content */}
                     {(filteredBowCards.some((card) => card.Status === 0) ||
-                        filteredBowCards.some((card) => card.TotalPallet > 1) ||
-                        filteredBowCards.some((card) => card.isChecked === 1)) &&
+                    (filteredBowCards.some((card) => card.Status === 0) && (filteredBowCards.some((card) => card.TotalPallet > 1) || filteredBowCards.some((card) => card.TotalPallet === 0))) ||
+                    (filteredBowCards.some((card) => card.Status === 0) && (filteredBowCards.some((card) => card.Checked === 1) || filteredBowCards.some((card) => card.Checked === 0)))) &&
                         filteredBowCards.some((card) => card.plant === user.plant) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {filteredBowCards &&
