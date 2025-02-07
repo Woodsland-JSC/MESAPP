@@ -785,4 +785,36 @@ class MasterDataController extends Controller
         }
         return response()->json($results, 200);
     }
+
+    // Lấy danh sách nhà máy chế biến gỗ
+    function getCBGFactory() {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            // $query = 'select "WhsCode","WhsName" from OWHS';
+            $query = 'SELECT DISTINCT U_FAC, Fac."Name"  FROM OWOR LEFT JOIN "@G_SAY4" Fac ON Fac."Code" = U_FAC WHERE  "U_LLSX" = \'CBG\' AND "CmpltQty" > 0';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

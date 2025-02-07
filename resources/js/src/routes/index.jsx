@@ -68,7 +68,7 @@ import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail"
 // VCN
 import DefectHandlingMeasureReport from "../pages/reports/plywoods/defect-handling";
 import DeliveredQuantityDetailReport from "../pages/reports/plywoods/delivered-quantity-detail";
-import ProductionVolumeByTimeReport from "../pages/reports/plywoods/production-volume-by-time";
+import ProductionVolumeByTimePlywoodsReport from "../pages/reports/plywoods/production-volume-by-time";
 
 import DefectQuantityReport from "../pages/reports/wood-working/defect-quantity";
 import DefectResolutionReport from "../pages/reports/wood-working/defect-resolution";
@@ -76,6 +76,8 @@ import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
+import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
+import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -384,6 +386,22 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/reports/wood-working/wip-production-order"
+                        element={
+                            <ProtectedRoute>
+                                <WipProductionOrderReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/production-volume-by-time"
+                        element={
+                            <ProtectedRoute>
+                                <ProductionVolumeByTimeReport />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* VCN Reports */}
                     <Route
@@ -406,7 +424,7 @@ function AppRoutes() {
                         path="/reports/plywoods/production-volume-by-time"
                         element={
                             <ProtectedRoute>
-                                <ProductionVolumeByTimeReport />
+                                <ProductionVolumeByTimePlywoodsReport />
                             </ProtectedRoute>
                         }
                     />

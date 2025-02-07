@@ -319,4 +319,76 @@ class ReportController extends Controller
 
         return response()->json($updatedData);
     }
+
+    function sanluongtheothoigian(Request $request) 
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+        
+        $conDB = (new ConnectController)->connect_sap();
+    
+        $query = 'CALL USP_GT_BC_NGAYTUANTHANG(?, ?, ?)';
+        
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        
+        $defaultParam = null; // You can change this to your desired default value
+        
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        
+        odbc_close($conDB);
+        
+        return $results;
+    }
+
+    function sanluongtheongay(Request $request) 
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+        
+        $conDB = (new ConnectController)->connect_sap();
+    
+        $query = 'CALL USP_GT_BC_NGAY(?, ?, ?)';
+        
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        
+        $defaultParam = null; // You can change this to your desired default value
+        
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+        
+        odbc_close($conDB);
+        
+        return $results;
+    }
 }
