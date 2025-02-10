@@ -127,6 +127,20 @@ function HumidityCheck(props) {
         ];
     }, [humidityRecords]);
 
+    const checkHumidityRequirement = () => {
+        if (reason === "INDOOR") {
+            return (
+                humidityAnalysis[0].percentage +
+                    humidityAnalysis[1].percentage >=
+                85
+            );
+        } else if (reason === "OUTDOOR") {
+            const outdoorHighCount = humidityRecords.filter((record) => record.value > 14).length;
+            const outdoorHighPercentage = (outdoorHighCount / total) * 100;
+            return outdoorHighPercentage >= 85;
+        }
+    };
+
     const selectedAnalysis = useMemo(() => {
         if (!selectedRecord || !selectedRecord.detail) {
             return [];
@@ -237,21 +251,7 @@ function HumidityCheck(props) {
         }
     };
 
-    const checkHumidityRequirement = () => {
-        if (reason === "INDOOR") {
-            return (
-                humidityAnalysis[0].percentage +
-                    humidityAnalysis[1].percentage >=
-                85
-            );
-        } else if (reason === "OUTDOOR") {
-            return (
-                humidityAnalysis[2].percentage +
-                    humidityAnalysis[3].percentage >=
-                85
-            );
-        }
-    };
+
 
     const handleComplete = () => {
         if (humidityRecords.length === 0) {
@@ -582,8 +582,8 @@ function HumidityCheck(props) {
                             <div className="xl:mx-auto xl:w-[60%] text-gray-500 text-[15px] mb-7">
                                 <span className="font-semibold">Chú ý:</span>{" "}
                                 Đối với mẻ sấy INDOOR nếu MC% {`<`} 10 chiếm tỉ
-                                lệ lớn hơn 85% thì cho ra lò. Đối với mẻ sấy
-                                OUTDOOR nếu MC% {`>`} 14 chiếm tỉ lệ lớn hơn 85%
+                                lệ từ 85% trở lên thì cho ra lò. Đối với mẻ sấy
+                                OUTDOOR nếu MC% {`<`} 14 chiếm tỉ lệ từ 85% trở lên
                                 thì cho ra lò.
                             </div>
 
