@@ -106,7 +106,7 @@ function SizeListItem(props) {
             <div className="text-gray-600 space-y-2 py-3 p-4">
                 {/* <div className="">Pallet: {pallet}</div> */}
                 <div className="">SL: {Qty} (T)</div>
-                <div className="">KL: {weight} (m³)</div>
+                <div className="">KL: {parseFloat(weight).toFixed(4)} (m³)</div>
             </div>
         </div>
     );
