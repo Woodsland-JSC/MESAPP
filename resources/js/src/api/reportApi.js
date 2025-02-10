@@ -63,6 +63,31 @@ const reportApi = {
             }
         });
     },
+
+    getCBGFactory: () => {
+        const url = `/cbg-factory`;
+        return axiosClient().get(url);
+    },
+
+    getProductionVolumeByTime: (fromDate, toDate) => {
+        const url = `/report/cbg-sanluongtheothoigian`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate
+            }
+        });
+    },
+
+    getProductionVolumeByDay: (fromDate, toDate) => {
+        const url = `/report/cbg-sanluongtheongay`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate
+            }
+        });
+    }
 }
 
 export default reportApi;

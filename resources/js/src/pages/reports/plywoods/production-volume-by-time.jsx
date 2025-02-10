@@ -45,7 +45,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import Chart from 'chart.js/auto';
 import { Bar } from 'react-chartjs-2';
-
+import debounce from "../../../utils/debounce";
 import useAppContext from "../../../store/AppContext";
 
 function generateWeeksData() {
@@ -130,7 +130,7 @@ const exampleData = [
   },
 ];
 
-const exampleGroup = [
+const exampleGroup1 = [
   {
     value: "All",
     label: "Tất cả"
@@ -138,6 +138,25 @@ const exampleGroup = [
   {
     value: "TV",
     label: "Tạo ván"
+  },
+  {
+    value: "HT",
+    label: "Hoàn thiện"
+  },
+  {
+    value: "TP",
+    label: "Kho thành phẩm"
+  }
+]
+
+const exampleGroup2 = [
+  {
+    value: "All",
+    label: "Tất cả"
+  },
+  {
+    value: "TV",
+    label: "Sấy"
   },
   {
     value: "HT",
@@ -162,8 +181,10 @@ function ProductionVolumeByTimeReport() {
     return new Date(date.getFullYear(), date.getMonth(), 1);
   };
 
+  const [groupData, setGroupData] = useState([]);
   const [selectedTimeRange, setSelectedTimeRange] = useState("day");
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [keyword, setKeyword] = useState("");
 
   const [fromDate, setFromDate] = useState(getFirstDayOfCurrentMonth());
   const [toDate, setToDate] = useState(new Date());
@@ -177,7 +198,7 @@ function ProductionVolumeByTimeReport() {
       ...item,
       id: item.id + i * exampleData.length,
     }))
-  ).flat() || []); // Ví dụ dữ liệu nhiều
+  ).flat() || []);
   const colDefs = useMemo(() => {
     if (!selectedTimeRange) return [];
 
@@ -405,6 +426,30 @@ function ProductionVolumeByTimeReport() {
     }
   }, [selectedTimeRange, selectedUnit]);
 
+  const excelStyles = [
+    {
+      id: 'header',
+      font: { bold: true, size: 12 },
+      alignment: { wrapText: true, horizontal: 'Center', vertical: 'Center' },
+      borders: {
+        borderBottom: { style: 'thin', color: '#000000' },
+        borderTop: { style: 'thin', color: '#000000' },
+        borderLeft: { style: 'thin', color: '#000000' },
+        borderRight: { style: 'thin', color: '#000000' },
+      },
+    },
+    {
+      id: 'cell',
+      alignment: { wrapText: true },
+      borders: {
+        borderBottom: { style: 'thin', color: '#000000' },
+        borderTop: { style: 'thin', color: '#000000' },
+        borderLeft: { style: 'thin', color: '#000000' },
+        borderRight: { style: 'thin', color: '#000000' },
+      },
+    },
+  ];
+
   const [reportData, setReportData] = useState(exampleData || []);
 
   const getRowStyle = (params) => {
@@ -465,15 +510,11 @@ function ProductionVolumeByTimeReport() {
 
   const handleGroupSelect = async (group) => {
     if (group == "All") {
-      if (selectedGroup?.length < exampleGroup?.length) {
-        console.log("Test 1", [
-          ...exampleGroup.map(group => group.value)
-        ]);
+      if (selectedGroup?.length < groupData?.length) {
         setSelectedGroup([
-          ...exampleGroup.map(group => group.value)
+          ...groupData.map(group => group.value)
         ])
       } else {
-        console.log("Test 2", selectedGroup);
         setSelectedGroup([])
       }
       return;
@@ -485,7 +526,12 @@ function ProductionVolumeByTimeReport() {
         const updated = prevSelected.filter((w) => (w !== group) && (w !== "All"));
         return updated;
       } else {
-        return [...prevSelected.filter((w) => w !== "All"), group];
+        const newValue = [...prevSelected.filter((w) => w !== "All"), group]
+        if (newValue.length == groupData.length - 1) {
+          return [
+            ...groupData.map(group => group.value)
+          ]
+        } else return newValue;
       }
     });
     const pickRandomRows = (data, n) => {
@@ -646,6 +692,27 @@ function ProductionVolumeByTimeReport() {
     navigate(-1);
   };
 
+  const handleQuickFilterDebounced = debounce((value, api) => {
+    if (api) {
+      api.setGridOption('quickFilterText', value);
+    }
+  }, 300);
+
+  const handleQuickFilter = (event) => {
+    const value = event.target.value;
+    setKeyword(value);
+    if (gridRef?.current?.api) {
+      handleQuickFilterDebounced(value, gridRef.current.api);
+    }
+  };
+
+  const handleClearQuickFilter = () => {
+    setKeyword('');
+    if (gridRef?.current?.api) {
+      gridRef.current.api.setGridOption('quickFilterText', '')
+    }
+  }
+
   const data = {
     labels: Array.from({ length: 53 }, (_, index) => `${index + 1}`),
     datasets: [
@@ -780,6 +847,14 @@ function ProductionVolumeByTimeReport() {
     onClose: onModalClose,
   } = useDisclosure();
 
+  const autoSizeAll = () => {
+    const allColumnIds = [];
+    gridRef.current.columnApi.getAllColumns().forEach((column) => {
+      allColumnIds.push(column.getId());
+    });
+    gridRef.current.columnApi.autoSizeColumns(allColumnIds);
+  };
+
   useEffect(() => {
     if (selectedTimeRange) {
       switch (selectedTimeRange) {
@@ -794,6 +869,19 @@ function ProductionVolumeByTimeReport() {
       }
     }
   }, [selectedTimeRange])
+
+  useEffect(() => {
+    if (selectedWorkshop) {
+      const groups = [exampleGroup1, exampleGroup2];
+      setGroupData(groups[Math.floor(Math.random() * groups.length)])
+    }
+  }, [selectedWorkshop])
+
+  useEffect(() => {
+    if (gridRef.current) {
+      // autoSizeAll();
+    }
+  }, [rowData]);
 
   return (
     <Layout>
@@ -819,14 +907,17 @@ function ProductionVolumeByTimeReport() {
             </div>
 
             {/* Search & Export */}
-            <div className="w-full tablet:w-1/2 flex items-center justify-between border-2 border-gray-300 p-2 px-4 pr-1  rounded-lg bg-[#F9FAFB]">
+            <div className="w-full tablet:w-fit gap-4 flex items-center justify-between border-2 border-gray-300 p-2 px-4 pr-1  rounded-lg bg-[#F9FAFB]">
               <div className="flex items-center space-x-3 w-2/3">
                 <IoSearch className="w-6 h-6 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm tất cả..."
-                  className=" w-full focus:ring-transparent !outline-none bg-[#F9FAFB]  border-gray-30 ring-transparent border-transparent focus:border-transparent focus:ring-0"
+                  className="w-full tablet:w-72 focus:ring-transparent !outline-none bg-[#F9FAFB]  border-gray-30 ring-transparent border-transparent focus:border-transparent focus:ring-0"
+                  value={keyword}
+                  onChange={handleQuickFilter}
                 />
+                <IoClose className={`${keyword.length > 0 ? 'visible' : 'invisible'} hover:cursor-pointer`} onClick={handleClearQuickFilter} />
               </div>
 
               <div className="flex justify-end items-center divide-x-2 w-1/3">
@@ -898,7 +989,7 @@ function ProductionVolumeByTimeReport() {
                       <div className="col-span-1 w-full flex items-end">
                         <UnitOption
                           value="sl"
-                          label="Sản lượng"
+                          label="Số lượng"
                         />
                       </div>
                       <div className="col-span-1 w-full">
@@ -1051,7 +1142,7 @@ function ProductionVolumeByTimeReport() {
               </div>
             </div>
             <div className="flex flex-col lg:flex-row flex-wrap 2xl:flex-nowrap items-center px-4 mt-1 gap-3 mb-3">
-              <div className="flex flex-col w-full lg:w-[80%] 2xl:w-2/3">
+              <div className="flex flex-col w-full lg:w-[80%] 2xl:w-2/3 mt-1">
                 <label
                   htmlFor="indate"
                   className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
@@ -1060,7 +1151,7 @@ function ProductionVolumeByTimeReport() {
                 </label>
                 <div className="flex flex-col sm:flex-row gap-3">
                   {
-                    exampleGroup && exampleGroup.length > 0 && exampleGroup.map(group => (
+                    groupData && groupData.length > 0 && groupData.map(group => (
                       <div className="col-span-1 w-full">
                         <GroupOption
                           value={group.value}
@@ -1119,6 +1210,7 @@ function ProductionVolumeByTimeReport() {
                       autoGroupColumnDef={{
                         headerName: 'Tổ'
                       }}
+                      excelStyles={excelStyles}
                       // groupDisplayType="groupRows"
                       animateRows={true}
                       suppressAggFuncInHeader

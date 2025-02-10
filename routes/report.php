@@ -11,5 +11,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/say-bienbanvaolo', [ReportController::class, 'bienbanvaolo']);
         Route::get('/say-xepsay-cbg', [ReportController::class, 'xepsay']);
         Route::get('/say-xepchosay', [ReportController::class, 'xepchosay']);
+        Route::get('/cbg-sanluongtheothoigian', [ReportController::class, 'sanluongtheothoigian']);
+        Route::get('/cbg-sanluongtheongay', [ReportController::class, 'sanluongtheongay']);
     });
 });
