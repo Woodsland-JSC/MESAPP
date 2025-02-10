@@ -94,6 +94,7 @@ function Kiln() {
                         {filteredBowCards
                             ?.map(
                                 (bowCard, index) => (
+                                    (bowCard.Status === 1) &&
                                         <BOWCard
                                             key={index}
                                             planID={bowCard.PlanID}
