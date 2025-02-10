@@ -604,7 +604,7 @@ class PlanController extends Controller
 
 
         if ($check) {
-            if ($check->Status == 1) {
+            if ($check->Status == 0) {
                 // Set 'LoadedBy' and 'LoadedIntoKilnDate' to null
                 Pallet::where('palletID', $request->PalletID)
                     ->update([
