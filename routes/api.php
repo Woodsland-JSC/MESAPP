@@ -142,7 +142,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Goods Management
     Route::get('/get-bin-managed-warehouse', [GoodsManagementController::class, 'getBinManagedWarehouses']);
     Route::get('/get-bin-by-warehouse', [GoodsManagementController::class, 'getBinByWarehouse']);
+    Route::get('/get-all-bin-by-warehouse', [GoodsManagementController::class, 'getAllBinByWarehouse']);
     Route::get('/get-default-bin-items-by-warehouse', [GoodsManagementController::class, 'getDefaultBinItemsByWarehouse']);
+    Route::get('/get-batch-by-item-default-bin', [GoodsManagementController::class, 'getBatchByItemDefaultBin']);
+    Route::get('/get-batch-by-item', [GoodsManagementController::class, 'getBatchByItem']);
+    Route::get('/get-item-by-bin', [GoodsManagementController::class, 'getItemsByBin']);
+    
 
     // Others
     Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);

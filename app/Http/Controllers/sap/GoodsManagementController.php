@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Validator;
 class GoodsManagementController extends Controller
 {
     // 1. Lấy danh sách kho quản lý bin
-    function getBinManagedWarehouses (Request $request)
+    function getBinManagedWarehouses(Request $request)
     {
         try {
             $conDB = (new ConnectController)->connect_sap();
 
             $query = 'SELECT "WhsCode", "WhsName", "U_FAC" FROM OWHS WHERE "BPLid" = ? AND "BinActivat" = ?;';
-            
+
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -42,8 +42,8 @@ class GoodsManagementController extends Controller
         }
     }
 
-    // 2. Lấy danh sách bin trong kho
-    function getBinByWarehouse (Request $request)
+    // 2. Lấy danh sách bin trong kho (ngoại trừ bin default)
+    function getBinByWarehouse(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'warehouse' => 'required'
@@ -57,8 +57,8 @@ class GoodsManagementController extends Controller
             $conDB = (new ConnectController)->connect_sap();
 
             $query = 'SELECT t1."WhsCode", t0."AbsEntry", t0."BinCode", case When t1."DftBinAbs"=t0."AbsEntry" then \'Y\' ELSE \'N\' end "isDefaultBin" FROM OBIN T0 JOIN OWHS T1 ON T0."WhsCode"=T1."WhsCode" AND T0."Deleted"=\'N\' WHERE T1."WhsCode"=? AND T0."SysBin"=?';
-            
-            
+
+
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -82,8 +82,48 @@ class GoodsManagementController extends Controller
         }
     }
 
-    // 3. Lấy danh sách Item trong bin mặc định khi có mã kho (Đối với trường hợp xếp bin)
-    function getDefaultBinItemsByWarehouse (Request $request)
+    // 2. Lấy tất cả bin trong kho (kể cả bin default)
+    function getAllBinByWarehouse(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warehouse' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'SELECT t1."WhsCode", t0."AbsEntry", t0."BinCode", case When t1."DftBinAbs"=t0."AbsEntry" then \'Y\' ELSE \'N\' end "isDefaultBin" FROM OBIN T0 JOIN OWHS T1 ON T0."WhsCode"=T1."WhsCode" AND T0."Deleted"=\'N\' WHERE T1."WhsCode"=?';
+
+
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$request->warehouse])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Lấy danh sách Item trong bin mặc định khi có mã kho (Đối với trường hợp xếp bin)
+    function getDefaultBinItemsByWarehouse(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'warehouse' => 'required'
@@ -98,8 +138,8 @@ class GoodsManagementController extends Controller
 
             // Lấy thông tin bin mặc định
             $getBinQuery = 'SELECT t1."WhsCode", t0."AbsEntry", t0."BinCode", case When t1."DftBinAbs"=t0."AbsEntry" then \'Y\' ELSE \'N\' end "isDefaultBin" FROM OBIN T0 JOIN OWHS T1 ON T0."WhsCode"=T1."WhsCode" AND T0."Deleted"=\'N\' WHERE T1."WhsCode"=?;';
-            
-            
+
+
             $getBinStmt = odbc_prepare($conDB, $getBinQuery);
             if (!$getBinStmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -126,12 +166,12 @@ class GoodsManagementController extends Controller
             }
 
             $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
-                      
+
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            if (!odbc_execute($stmt, [$request->warehouse, $DefaultBinCode ])) {
+            if (!odbc_execute($stmt, [$request->warehouse, $DefaultBinCode])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
@@ -154,10 +194,229 @@ class GoodsManagementController extends Controller
         }
     }
 
-    // 4. Lấy danh sách Item trong bin và tồn kho
+    // Lấy danh sách Item trong bin bất kỳ
+    function getItemsByBin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warehouse' => 'required',
+            'bin' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $BinCode = $request->bin;
+
+            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$request->warehouse, $BinCode])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json([
+                "ItemData" => $results
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Lấy danh sách batch của item
+    function getBatchByItemDefaultBin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warehouse' => 'required',
+            'code' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            // Lấy thông tin bin mặc định
+            $getBinQuery = 'SELECT t1."WhsCode", t0."AbsEntry", t0."BinCode", case When t1."DftBinAbs"=t0."AbsEntry" then \'Y\' ELSE \'N\' end "isDefaultBin" FROM OBIN T0 JOIN OWHS T1 ON T0."WhsCode"=T1."WhsCode" AND T0."Deleted"=\'N\' WHERE T1."WhsCode"=?;';
 
 
-    // 5. Điều chuyển kho
+            $getBinStmt = odbc_prepare($conDB, $getBinQuery);
+            if (!$getBinStmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($getBinStmt, [$request->warehouse])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $BinList = array();
+            while ($row = odbc_fetch_array($getBinStmt)) {
+                $BinList[] = $row;
+            }
+
+            $DefaultBinCode = null;
+
+            // Lặp qua danh sách BinList để tìm bản ghi có isDefaultBin = 'Y'
+            foreach ($BinList as $bin) {
+                if ($bin['isDefaultBin'] === 'Y') {
+                    $DefaultBinCode = $bin['BinCode'];
+                    break; // Dừng lặp khi đã tìm thấy giá trị
+                }
+            }
+            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+            $stmt = odbc_prepare($conDB, $query);
+
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            if (!odbc_execute($stmt, [$request->warehouse, $DefaultBinCode, $request->code])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = [];
+            $hasBatch = false;
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+                if (!empty($row['BatchNum'])) {
+                    $hasBatch = true;
+                }
+            }
+
+            $results = array_filter($results, fn($item) => $item['ItemCode'] === $request->code);
+
+            odbc_close($conDB);
+
+            $response = [];
+
+            // dd($results);
+
+            if ($hasBatch) {
+                // Trả về danh sách BatchNum và OnHand tương ứng
+                $response = array_map(function ($item) {
+                    return [
+                        'BatchNum' => $item['BatchNum'],
+                        'OnHand'   => $item['Quantity']
+                    ];
+                }, array_filter($results, fn($item) => !empty($item['BatchNum'])));
+            } else {
+                $totalOnHand = array_sum(array_column($results, 'Quantity'));
+                $response = [];
+            }
+
+            $responsePayload = [
+                'BatchData' => $response
+            ];
+
+            if (!$hasBatch) {
+                $responsePayload['OnHand'] = $totalOnHand;
+            }
+
+            return response()->json($responsePayload, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Lấy danh sách batch của item
+    function getBatchByItem(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warehouse' => 'required',
+            'bin' => 'required',
+            'code' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+            $stmt = odbc_prepare($conDB, $query);
+
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            if (!odbc_execute($stmt, [$request->warehouse, $request->bin, $request->code])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = [];
+            $hasBatch = false;
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+                if (!empty($row['BatchNum'])) {
+                    $hasBatch = true;
+                }
+            }
+
+            $results = array_filter($results, fn($item) => $item['ItemCode'] === $request->code);
+
+            odbc_close($conDB);
+
+            $response = [];
+
+            // dd($results);
+
+            if ($hasBatch) {
+                // Trả về danh sách BatchNum và OnHand tương ứng
+                $response = array_map(function ($item) {
+                    return [
+                        'BatchNum' => $item['BatchNum'],
+                        'OnHand'   => $item['Quantity']
+                    ];
+                }, array_filter($results, fn($item) => !empty($item['BatchNum'])));
+            } else {
+                $totalOnHand = array_sum(array_column($results, 'Quantity'));
+                $response = [];
+            }
+
+            $responsePayload = [
+                'BatchData' => $response
+            ];
+
+            if (!$hasBatch) {
+                $responsePayload['OnHand'] = $totalOnHand;
+            }
+
+            return response()->json($responsePayload, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // Điều chuyển kho
     public function transfer(Request $request)
     {
         $validator = Validator::make($request->all(), [
