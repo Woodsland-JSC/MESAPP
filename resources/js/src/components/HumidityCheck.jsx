@@ -37,6 +37,7 @@ import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { Spinner } from "@chakra-ui/react";
 import { bg } from "date-fns/locale";
+import { use } from "react";
 
 function HumidityCheck(props) {
     const { planID, code, oven, reason, humidList, onCallback } = props;
@@ -96,35 +97,33 @@ function HumidityCheck(props) {
                 },
             };
         }
-        if (reason === "INDOOR") {
-            return {
-                low: { min: -Infinity, max: 7, label: "Thấp (<7)" },
-                target: { min: 7, max: 9, label: "Đích (7-9)" },
-                high: { min: 10, max: 15, label: "Cao (10-15)" },
-                veryHigh: { min: 15, max: Infinity, label: "Rất cao (>15)" },
-            };
-        }
+        return {
+            low: { min: -Infinity, max: 7, label: "Thấp (<7)" },
+            target: { min: 7, max: 9, label: "Đích (7-9)" },
+            high: { min: 10, max: 15, label: "Cao (10-15)" },
+            veryHigh: { min: 15, max: Infinity, label: "Rất cao (>15)" },
+        };
     };
 
     const analyzeHumidity = (records, reason) => {
         const ranges = getHumidityRanges(reason);
         const total = records.length;
 
-        const low = records.filter(
+        const low = records?.filter(
             (record) => record.value < ranges.low.max
         ).length;
-        const target = records.filter(
+        const target = records?.filter(
             (record) =>
                 record.value >= ranges.target.min &&
                 record.value <= ranges.target.max
         ).length;
-        const high = records.filter(
+        const high = records?.filter(
             (record) =>
                 record.value >= ranges.high.min &&
                 record.value <= ranges.high.max
         ).length;
-        const veryHigh = records.filter(
-            (record) => record.value > ranges.veryHigh.min
+        const veryHigh = records?.filter(
+            (record) => record?.value > ranges.veryHigh.min
         ).length;
 
         return [
@@ -418,6 +417,10 @@ function HumidityCheck(props) {
         }
     };
 
+    useEffect(() => {
+        console.log("Mục đích sấy hiện tại là: ", reason)
+    }, [reason]);
+
     return (
         <div className="bg-white rounded-xl border-2 border-gray-300">
             {/* Header */}
@@ -552,28 +555,43 @@ function HumidityCheck(props) {
                                             </thead>
 
                                             <tbody className=" ">
-                                                {humidityAnalysis?.map((data, index) => (
+                                                {humidityAnalysis?.map(
+                                                    (data, index) => (
                                                         <tr
                                                             className={`w-full bg-[${data.bgColor}]`}
                                                         >
                                                             <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
-                                                                {data?.label.split("(")[0]}{" "}
+                                                                {
+                                                                    data?.label.split(
+                                                                        "("
+                                                                    )[0]
+                                                                }{" "}
                                                                 {/* <span className="xl:inline-block hidden">
                                                                     ({data.label.split("(")[1]})
                                                                 </span> */}
                                                                 <span className="inline-block ml-1 ">
-                                                                    {data?.shortLabel}
+                                                                    {
+                                                                        data?.shortLabel
+                                                                    }
                                                                 </span>
-                                                                {data?.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
+                                                                {data?.label.includes(
+                                                                    "Đích"
+                                                                ) && (
+                                                                    <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                )}
                                                             </td>
                                                             <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
-                                                                {data?.count || 0}
+                                                                {data?.count ||
+                                                                    0}
                                                             </td>
                                                             <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
-                                                                {`${data?.percentage.toFixed(2)}%` || 0}
+                                                                {`${data?.percentage.toFixed(
+                                                                    2
+                                                                )}%` || "0.00%"}
                                                             </td>
                                                         </tr>
-                                                ))}
+                                                    )
+                                                )}
 
                                                 {/* <tr className=" w-full bg-[#22253d]">
                                                     <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
@@ -1129,28 +1147,46 @@ function HumidityCheck(props) {
                                                         </thead>
 
                                                         <tbody className=" ">
-                                                            {selectedAnalysis?.map((data, index) => (
+                                                            {selectedAnalysis?.map(
+                                                                (
+                                                                    data,
+                                                                    index
+                                                                ) => (
                                                                     <tr
                                                                         className={`w-full bg-[${data?.bgColor}]`}
                                                                     >
                                                                         <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
-                                                                            {data?.label.split("(")[0]}{" "}
+                                                                            {
+                                                                                data?.label.split(
+                                                                                    "("
+                                                                                )[0]
+                                                                            }{" "}
                                                                             {/* <span className="xl:inline-block hidden">
                                                                                 ({data.label.split("(")[1]})
                                                                             </span> */}
                                                                             <span className="inline-block ml-1 ">
-                                                                                {data?.shortLabel}
+                                                                                {
+                                                                                    data?.shortLabel
+                                                                                }
                                                                             </span>
-                                                                            {data.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
+                                                                            {data.label.includes(
+                                                                                "Đích"
+                                                                            ) && (
+                                                                                <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                            )}
                                                                         </td>
                                                                         <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
-                                                                            {data?.count || 0}
+                                                                            {data?.count ||
+                                                                                0}
                                                                         </td>
                                                                         <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
-                                                                            {`${data?.percentage.toFixed(2)}%` || 0} 
+                                                                            {`${data?.percentage.toFixed(
+                                                                                2
+                                                                            )}%` || "0.00%"}
                                                                         </td>
                                                                     </tr>
-                                                            ))}
+                                                                )
+                                                            )}
                                                             {/* <tr className=" w-full bg-[#22253d]">
                                                                 <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
                                                                     Thấp{" "}

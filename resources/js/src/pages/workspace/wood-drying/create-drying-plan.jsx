@@ -232,7 +232,7 @@ function CreateDryingPlan() {
     const combinedBowCards = [...createdBowCards, ...bowCards];
 
     const filteredBowCards = combinedBowCards?.filter(bowCard =>
-        bowCard.Oven.toLowerCase().includes(searchTerm.toLowerCase())
+        bowCard.Oven.toLowerCase().includes(searchTerm?.toLowerCase())
     );
 
     return (
@@ -426,7 +426,7 @@ function CreateDryingPlan() {
                                 <div className="h-full mt-20 flex flex-col items-center justify-center text-center">
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2"/>
                                     <div className="text-xl text-gray-400"> 
-                                        {filteredBowCards.length === 0 && searchTerm !== "" ? "Không tìm thấy kết quả nào phù hợp" : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
+                                        {filteredBowCards?.length === 0 && searchTerm !== "" ? "Không tìm thấy kết quả nào phù hợp" : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
                                     </div>
                                 </div>
                             )}        
