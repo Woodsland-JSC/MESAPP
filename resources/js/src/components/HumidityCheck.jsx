@@ -557,20 +557,20 @@ function HumidityCheck(props) {
                                                             className={`w-full bg-[${data.bgColor}]`}
                                                         >
                                                             <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
-                                                                {data.label.split("(")[0]}{" "}
+                                                                {data?.label.split("(")[0]}{" "}
                                                                 {/* <span className="xl:inline-block hidden">
                                                                     ({data.label.split("(")[1]})
                                                                 </span> */}
                                                                 <span className="inline-block ml-1 ">
-                                                                    {data.shortLabel}
+                                                                    {data?.shortLabel}
                                                                 </span>
-                                                                {data.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
+                                                                {data?.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
                                                             </td>
                                                             <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
-                                                                {data.count}
+                                                                {data?.count || 0}
                                                             </td>
                                                             <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
-                                                                {`${data.percentage.toFixed(2)}%`}
+                                                                {`${data?.percentage.toFixed(2)}%` || 0}
                                                             </td>
                                                         </tr>
                                                 ))}
@@ -1131,23 +1131,23 @@ function HumidityCheck(props) {
                                                         <tbody className=" ">
                                                             {selectedAnalysis?.map((data, index) => (
                                                                     <tr
-                                                                        className={`w-full bg-[${data.bgColor}]`}
+                                                                        className={`w-full bg-[${data?.bgColor}]`}
                                                                     >
                                                                         <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
-                                                                            {data.label.split("(")[0]}{" "}
+                                                                            {data?.label.split("(")[0]}{" "}
                                                                             {/* <span className="xl:inline-block hidden">
                                                                                 ({data.label.split("(")[1]})
                                                                             </span> */}
                                                                             <span className="inline-block ml-1 ">
-                                                                                {data.shortLabel}
+                                                                                {data?.shortLabel}
                                                                             </span>
                                                                             {data.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
                                                                         </td>
                                                                         <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
-                                                                            {data.count}
+                                                                            {data?.count || 0}
                                                                         </td>
                                                                         <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
-                                                                            {`${data.percentage.toFixed(2)}%`}
+                                                                            {`${data?.percentage.toFixed(2)}%` || 0} 
                                                                         </td>
                                                                     </tr>
                                                             ))}
