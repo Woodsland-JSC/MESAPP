@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 import palletsApi from "../api/palletsApi";
-import axios from "axios";
 import {
     Modal,
     ModalOverlay,
@@ -10,19 +9,6 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
-    Button,
-    Divider,
-} from "@chakra-ui/react";
-import {
-    Popover,
-    PopoverTrigger,
-    PopoverContent,
-    PopoverHeader,
-    PopoverBody,
-    PopoverFooter,
-    PopoverArrow,
-    PopoverCloseButton,
-    PopoverAnchor,
 } from "@chakra-ui/react";
 import {
     NumberInput,
@@ -30,17 +16,6 @@ import {
     NumberInputStepper,
     NumberIncrementStepper,
     NumberDecrementStepper,
-} from "@chakra-ui/react";
-import {
-    Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,
 } from "@chakra-ui/react";
 import { RiWaterPercentFill } from "react-icons/ri";
 import { FaPlus } from "react-icons/fa6";
@@ -61,6 +36,7 @@ import compareDesc from "date-fns/compareDesc/index.js";
 import { Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { Spinner } from "@chakra-ui/react";
+import { bg } from "date-fns/locale";
 
 function HumidityCheck(props) {
     const { planID, code, oven, reason, humidList, onCallback } = props;
@@ -90,43 +66,6 @@ function HumidityCheck(props) {
         onDetailOpen();
     };
 
-    const humidityAnalysis = useMemo(() => {
-        const total = humidityRecords.length;
-        const low = humidityRecords.filter((record) => record.value < 7).length;
-        const target = humidityRecords.filter(
-            (record) => record.value >= 7 && record.value <= 9
-        ).length;
-        const high = humidityRecords.filter(
-            (record) => record.value >= 10 && record.value <= 15
-        ).length;
-        const veryHigh = humidityRecords.filter(
-            (record) => record.value > 15
-        ).length;
-
-        return [
-            {
-                label: "Thấp (nhỏ hơn 7)",
-                count: low,
-                percentage: (low / total) * 100,
-            },
-            {
-                label: "Đích (7-9)",
-                count: target,
-                percentage: (target / total) * 100,
-            },
-            {
-                label: "Cao (10-15)",
-                count: high,
-                percentage: (high / total) * 100,
-            },
-            {
-                label: "Rất cao (trên 15)",
-                count: veryHigh,
-                percentage: (veryHigh / total) * 100,
-            },
-        ];
-    }, [humidityRecords]);
-
     const checkHumidityRequirement = () => {
         if (reason === "INDOOR") {
             return (
@@ -135,56 +74,184 @@ function HumidityCheck(props) {
                 85
             );
         } else if (reason === "OUTDOOR") {
-            const outdoorHighCount = humidityRecords.filter((record) => record.value > 14).length;
-            const outdoorHighPercentage = (outdoorHighCount / humidityRecords?.length) * 100;
+            const outdoorHighCount = humidityRecords.filter(
+                (record) => record.value > 14
+            ).length;
+            const outdoorHighPercentage =
+                (outdoorHighCount / humidityRecords?.length) * 100;
             return outdoorHighPercentage >= 85;
         }
     };
+
+    const getHumidityRanges = (reason) => {
+        if (reason === "OUTDOOR") {
+            return {
+                low: { min: -Infinity, max: 8, label: "Thấp (<8)" },
+                target: { min: 8, max: 13, label: "Đích (8-13)" },
+                high: { min: 14, max: 17, label: "Cao (14-17)" },
+                veryHigh: {
+                    min: 17,
+                    max: Infinity,
+                    label: "Rất cao (>17)",
+                },
+            };
+        }
+        if (reason === "INDOOR") {
+            return {
+                low: { min: -Infinity, max: 7, label: "Thấp (<7)" },
+                target: { min: 7, max: 9, label: "Đích (7-9)" },
+                high: { min: 10, max: 15, label: "Cao (10-15)" },
+                veryHigh: { min: 15, max: Infinity, label: "Rất cao (>15)" },
+            };
+        }
+    };
+
+    const analyzeHumidity = (records, reason) => {
+        const ranges = getHumidityRanges(reason);
+        const total = records.length;
+
+        const low = records.filter(
+            (record) => record.value < ranges.low.max
+        ).length;
+        const target = records.filter(
+            (record) =>
+                record.value >= ranges.target.min &&
+                record.value <= ranges.target.max
+        ).length;
+        const high = records.filter(
+            (record) =>
+                record.value >= ranges.high.min &&
+                record.value <= ranges.high.max
+        ).length;
+        const veryHigh = records.filter(
+            (record) => record.value > ranges.veryHigh.min
+        ).length;
+
+        return [
+            {
+                label: ranges.low.label,
+                shortLabel: `(<${ranges.low.max})`,
+                count: low,
+                percentage: (low / total) * 100,
+                bgColor: "#22253d",
+            },
+            {
+                label: ranges.target.label,
+                shortLabel: `(${ranges.target.min}-${ranges.target.max})`,
+                count: target,
+                percentage: (target / total) * 100,
+                bgColor: "#2d3254",
+            },
+            {
+                label: ranges.high.label,
+                shortLabel: `(${ranges.high.min}-${ranges.high.max})`,
+                count: high,
+                percentage: (high / total) * 100,
+                bgColor: "#3f4477",
+            },
+            {
+                label: ranges.veryHigh.label,
+                shortLabel: `(>${ranges.veryHigh.min})`,
+                count: veryHigh,
+                percentage: (veryHigh / total) * 100,
+                bgColor: "#48519c",
+            },
+        ];
+    };
+
+    // Updated useMemo hooks
+    const humidityAnalysis = useMemo(() => {
+        return analyzeHumidity(humidityRecords, reason);
+    }, [humidityRecords, reason]);
 
     const selectedAnalysis = useMemo(() => {
         if (!selectedRecord || !selectedRecord.detail) {
             return [];
         }
+        return analyzeHumidity(selectedRecord.detail, reason);
+    }, [selectedRecord, reason]);
 
-        const total = selectedRecord.detail.length;
-        const low = selectedRecord.detail.filter(
-            (record) => record.value < 7
-        ).length;
-        const target = selectedRecord.detail.filter(
-            (record) => record.value >= 7 && record.value <= 9
-        ).length;
-        const high = selectedRecord.detail.filter(
-            (record) => record.value >= 10 && record.value <= 15
-        ).length;
-        const veryHigh = selectedRecord.detail.filter(
-            (record) => record.value > 15
-        ).length;
+    // Create Mode
+    // const humidityAnalysis = useMemo(() => {
+    //     const total = humidityRecords.length;
+    //     const low = humidityRecords.filter((record) => record.value < 7).length;
+    //     const target = humidityRecords.filter(
+    //         (record) => record.value >= 7 && record.value <= 9
+    //     ).length;
+    //     const high = humidityRecords.filter(
+    //         (record) => record.value >= 10 && record.value <= 15
+    //     ).length;
+    //     const veryHigh = humidityRecords.filter(
+    //         (record) => record.value > 15
+    //     ).length;
 
-        return [
-            {
-                label: "Thấp (nhỏ hơn 7)",
-                count: low,
-                percentage: (low / total) * 100,
-            },
-            {
-                label: "Đích (7-9)",
-                count: target,
-                percentage: (target / total) * 100,
-            },
-            {
-                label: "Cao (10-15)",
-                count: high,
-                percentage: (high / total) * 100,
-            },
-            {
-                label: "Rất cao (trên 15)",
-                count: veryHigh,
-                percentage: (veryHigh / total) * 100,
-            },
-        ];
-    }, [selectedRecord]);
+    //     return [
+    //         {
+    //             label: "Thấp (nhỏ hơn 7)",
+    //             count: low,
+    //             percentage: (low / total) * 100,
+    //         },
+    //         {
+    //             label: "Đích (7-9)",
+    //             count: target,
+    //             percentage: (target / total) * 100,
+    //         },
+    //         {
+    //             label: "Cao (10-15)",
+    //             count: high,
+    //             percentage: (high / total) * 100,
+    //         },
+    //         {
+    //             label: "Rất cao (trên 15)",
+    //             count: veryHigh,
+    //             percentage: (veryHigh / total) * 100,
+    //         },
+    //     ];
+    // }, [humidityRecords]);
 
+    // View mode
+    // const selectedAnalysis = useMemo(() => {
+    //     if (!selectedRecord || !selectedRecord.detail) {
+    //         return [];
+    //     }
 
+    //     const total = selectedRecord.detail.length;
+    //     const low = selectedRecord.detail.filter(
+    //         (record) => record.value < 7
+    //     ).length;
+    //     const target = selectedRecord.detail.filter(
+    //         (record) => record.value >= 7 && record.value <= 9
+    //     ).length;
+    //     const high = selectedRecord.detail.filter(
+    //         (record) => record.value >= 10 && record.value <= 15
+    //     ).length;
+    //     const veryHigh = selectedRecord.detail.filter(
+    //         (record) => record.value > 15
+    //     ).length;
+
+    //     return [
+    //         {
+    //             label: "Thấp (nhỏ hơn 7)",
+    //             count: low,
+    //             percentage: (low / total) * 100,
+    //         },
+    //         {
+    //             label: "Đích (7-9)",
+    //             count: target,
+    //             percentage: (target / total) * 100,
+    //         },
+    //         {
+    //             label: "Cao (10-15)",
+    //             count: high,
+    //             percentage: (high / total) * 100,
+    //         },
+    //         {
+    //             label: "Rất cao (trên 15)",
+    //             count: veryHigh,
+    //             percentage: (veryHigh / total) * 100,
+    //         },
+    //     ];
+    // }, [selectedRecord]);
 
     const loadHumidRecordList = async () => {
         palletsApi
@@ -211,7 +278,6 @@ function HumidityCheck(props) {
     };
 
     useEffect(() => {
-        // loadHumidRecordList();
         loadCurrentHumidRecords();
     }, []);
 
@@ -251,8 +317,6 @@ function HumidityCheck(props) {
         }
     };
 
-
-
     const handleComplete = () => {
         if (humidityRecords.length === 0) {
             toast.error("Hãy ghi nhận độ ẩm trước khi hoàn thành");
@@ -268,7 +332,7 @@ function HumidityCheck(props) {
         reason === "INDOOR"
             ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
             : reason === "OUTDOOR"
-            ? humidityAnalysis[2].percentage + humidityAnalysis[3].percentage
+            ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
             : "";
 
     const requirementMetHandle = () => {
@@ -375,7 +439,7 @@ function HumidityCheck(props) {
                 </button>
             </div>
 
-            {/* Modal View all sizes */}
+            {/* Create Modal */}
             <Modal
                 closeOnOverlayClick={false}
                 isOpen={isOpen}
@@ -426,7 +490,7 @@ function HumidityCheck(props) {
                                 <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                     <div className="font-semibold flex items-center">
                                         <LuWarehouse className="w-5 h-5 mr-3" />
-                                        Địa điểm (Lò số):
+                                        Địa điểm:
                                     </div>
                                     <span className="font-normal text-base ">
                                         {oven}
@@ -488,7 +552,30 @@ function HumidityCheck(props) {
                                             </thead>
 
                                             <tbody className=" ">
-                                                <tr className=" w-full bg-[#22253d]">
+                                                {humidityAnalysis?.map((data, index) => (
+                                                        <tr
+                                                            className={`w-full bg-[${data.bgColor}]`}
+                                                        >
+                                                            <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
+                                                                {data.label.split("(")[0]}{" "}
+                                                                {/* <span className="xl:inline-block hidden">
+                                                                    ({data.label.split("(")[1]})
+                                                                </span> */}
+                                                                <span className="inline-block ml-1 ">
+                                                                    {data.shortLabel}
+                                                                </span>
+                                                                {data.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
+                                                            </td>
+                                                            <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
+                                                                {data.count}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
+                                                                {`${data.percentage.toFixed(2)}%`}
+                                                            </td>
+                                                        </tr>
+                                                ))}
+
+                                                {/* <tr className=" w-full bg-[#22253d]">
                                                     <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
                                                         Thấp{" "}
                                                         <span className="xl:inline-block hidden">
@@ -571,7 +658,7 @@ function HumidityCheck(props) {
                                                         )}
                                                         %
                                                     </td>
-                                                </tr>
+                                                </tr> */}
                                             </tbody>
                                         </table>
                                     </div>
@@ -583,13 +670,13 @@ function HumidityCheck(props) {
                                 <span className="font-semibold">Chú ý:</span>{" "}
                                 Đối với mẻ sấy INDOOR nếu MC% {`<`} 10 chiếm tỉ
                                 lệ từ 85% trở lên thì cho ra lò. Đối với mẻ sấy
-                                OUTDOOR nếu MC% {`<`} 14 chiếm tỉ lệ từ 85% trở lên
-                                thì cho ra lò.
+                                OUTDOOR nếu MC% {`<`} 14 chiếm tỉ lệ từ 85% trở
+                                lên thì cho ra lò.
                             </div>
 
                             {/* Input */}
                             <div className="mb-4 xl:mx-auto xl:w-[60%] border-2 border-gray-200 rounded-xl divide-y divide-gray-200 ">
-                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-4 xl:px-4 lg:px-4 md:px-4">
+                                <div className="flex gap-x-4 bg-gray-100 rounded-t-xl items-center p-2.5 xl:px-4 lg:px-4 md:px-4">
                                     <MdNoteAlt className="w-8 h-8 text-[]" />
                                     <div className="text-xl font-semibold">
                                         Ghi nhận độ ẩm
@@ -625,11 +712,11 @@ function HumidityCheck(props) {
                                         </button>
                                     </div>
 
-                                    <div className="bg-white my-4 rounded-b-xl text-base font-medium  space-y-3 max-h-[400px] overflow-auto">
+                                    <div className="w-full my-4 rounded-b-xl text-base font-medium  space-y-3 max-h-[400px] overflow-auto">
                                         {loadCurrentRecord ? (
-                                            <div className="text-center">
+                                            <div className=" py-4 text-center overflow-hidden">
                                                 <Spinner
-                                                    thickness="4px"
+                                                    thickness="8px"
                                                     speed="0.65s"
                                                     emptyColor="gray.200"
                                                     color="#155979"
@@ -780,26 +867,24 @@ function HumidityCheck(props) {
                                         >
                                             Đóng
                                         </button>
-                                        
+
                                         {checkHumidityRequirement() ? (
                                             <button
-                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
-                                            onClick={requirementMetHandle}
+                                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                                onClick={requirementMetHandle}
                                             >
                                                 Duyệt ra lò
                                             </button>
                                         ) : (
                                             <button
-                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
-                                            onClick={
-                                                requirementFailedHandle
-                                            }
+                                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                                                onClick={
+                                                    requirementFailedHandle
+                                                }
                                             >
                                                 Xác nhận
                                             </button>
                                         )}
-
-                                        
                                     </ModalFooter>
                                 </ModalContent>
                             </Modal>
@@ -808,6 +893,7 @@ function HumidityCheck(props) {
                 </ModalContent>
             </Modal>
 
+            {/* View Modal */}
             <div class="bg-white xl:p-0 lg:p-0 md:p-0 p-4 relative rounded-b-xl max-h-[35rem] overflow-y-auto ">
                 <div class="xl:hidden lg:hidden md:hidden">
                     {recordsList.length > 0 ? (
@@ -889,7 +975,10 @@ function HumidityCheck(props) {
                         recordsList.length > 0 ? (
                             <>
                                 {recordsList.map((item, index) => (
-                                    <tr class="bg-white hover:bg-gray-50 cursor-pointer xl:text-base text-[15px] border-b " onClick={() => handleRecordClick(item)}>
+                                    <tr
+                                        class="bg-white hover:bg-gray-50 cursor-pointer xl:text-base text-[15px] border-b "
+                                        onClick={() => handleRecordClick(item)}
+                                    >
                                         <th
                                             scope="row"
                                             class="py-4 xl:text-left text-center xl:px-6 font-medium text-gray-900 whitespace-nowrap "
@@ -980,7 +1069,7 @@ function HumidityCheck(props) {
                                             <div className="grid grid-cols-2 p-3 xl:px-8 lg:px-8 md:px-8">
                                                 <div className="font-semibold flex items-center">
                                                     <LuWarehouse className="w-5 h-5 mr-3" />
-                                                    Địa điểm (Lò số):
+                                                    Địa điểm:
                                                 </div>
                                                 <span className="font-normal text-base ">
                                                     {oven}
@@ -1040,7 +1129,29 @@ function HumidityCheck(props) {
                                                         </thead>
 
                                                         <tbody className=" ">
-                                                            <tr className=" w-full bg-[#22253d]">
+                                                            {selectedAnalysis?.map((data, index) => (
+                                                                    <tr
+                                                                        className={`w-full bg-[${data.bgColor}]`}
+                                                                    >
+                                                                        <td className="flex px-6 py-3 whitespace-nowrap w-[40%] font-medium text-[#D2D6FF] text-left">
+                                                                            {data.label.split("(")[0]}{" "}
+                                                                            {/* <span className="xl:inline-block hidden">
+                                                                                ({data.label.split("(")[1]})
+                                                                            </span> */}
+                                                                            <span className="inline-block ml-1 ">
+                                                                                {data.shortLabel}
+                                                                            </span>
+                                                                            {data.label.includes("Đích") && <HiMiniSparkles className="ml-2 text-blue-300" />}
+                                                                        </td>
+                                                                        <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
+                                                                            {data.count}
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-left whitespace-nowrap w-[25%] text-[#D2D6FF]">
+                                                                            {`${data.percentage.toFixed(2)}%`}
+                                                                        </td>
+                                                                    </tr>
+                                                            ))}
+                                                            {/* <tr className=" w-full bg-[#22253d]">
                                                                 <td className="px-6 py-3 whitespace-nowrap w-[40%]font-medium text-[#D2D6FF] text-left ">
                                                                     Thấp{" "}
                                                                     <span className="xl:inline-block hidden">
@@ -1127,7 +1238,7 @@ function HumidityCheck(props) {
                                                                     )}
                                                                     %
                                                                 </td>
-                                                            </tr>
+                                                            </tr> */}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -1180,8 +1291,7 @@ function HumidityCheck(props) {
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex justify-end xl:w-[33%] lg:w-[33%] md:w-[33%]">
-                                                                    <button
-                                                                    >
+                                                                    <button>
                                                                         <IoClose className="w-7 h-7 p-1 rounded-full hover:bg-gray-200" />
                                                                     </button>
                                                                 </div>
