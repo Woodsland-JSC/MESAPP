@@ -79,6 +79,9 @@ import HumidityCheck from "../components/HumidityCheck";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 
+// Transfer
+import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-warehouse-transfer";
+
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
     const Wrapper = ({ children }) => {
@@ -220,6 +223,16 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     /> */}
+
+                    {/* Goods Management */}
+                    <Route
+                        path="/workspace/goods-management/bin-warehouse-transfer"
+                        element={
+                            <ProtectedRoute>
+                                <BinWarehouseTransfer />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Reports */}
                     <Route

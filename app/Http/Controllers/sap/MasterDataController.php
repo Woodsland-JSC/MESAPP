@@ -22,68 +22,6 @@ use PhpOffice\PhpWord\Shared\Validate;
  */
 class MasterDataController extends Controller
 {
-    // function ItemMasterData(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'reason' => 'required'
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-    //         // Return validation errors with a 422 Unprocessable Entity status code
-    //     }
-    //     $conDB = (new ConnectController)->connect_sap();
-
-    //     try {
-    //         // change request, add filter with reason
-    //         $flag = 'TS';
-    //         $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum", T1."WhsCode" FROM OITW T0
-    //             INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-    //             INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-    //             INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-    //             WHERE (T1."Quantity"*1000000000/(T1."U_CDai"*T1."U_CRong"*T1."U_CDay")) > 1 AND
-    //             T3."U_Flag" IN (?) AND
-    //             T3."BPLid" = ? AND
-    //             T3."U_FAC" = ? ';
-    //         if ($request->reason == 'SL') {
-    //             $flag = 'SL';
-    //             $query = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" "ItemName", T1."BatchNum" FROM OITW T0
-    //                 INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-    //                 INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-    //                 INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-    //                 WHERE (T1."Quantity"*1000000000/(T1."U_CDai"*T1."U_CRong"*T1."U_CDay")) > 1 AND
-    //                 T3."U_Flag" IN (?) AND
-    //                 T3."BPLid" = ? AND
-    //                 T3."U_FAC" = ? ';
-    //         }        
-
-    //         $stmt = odbc_prepare($conDB, $query);
-    //         if (!$stmt) {
-    //             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-    //         }
-    //         $branch = Auth::user()->branch;
-    //         $plant = Auth::user()->plant;
-    //         if (!odbc_execute($stmt, [' ', $flag, $branch, $plant])) {
-    //             // Handle execution error
-    //             // die("Error executing SQL statement: " . odbc_errormsg());
-    //             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-    //         }
-
-    //         $results = array();
-    //         while ($row = odbc_fetch_array($stmt)) {
-    //             $results[] = $row;
-    //         }
-
-    //         odbc_close($conDB);
-    //         return response()->json($results, 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'error' => false,
-    //             'status_code' => 500,
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     function ItemMasterData(Request $request)
     {
         $validator = Validator::make($request->all(), [

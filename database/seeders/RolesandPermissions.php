@@ -57,6 +57,9 @@ class RolesandPermissions extends Seeder
       ['id' => '29', 'name' => 'BCVCN_xulyloi', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
       ['id' => '30', 'name' => 'BCDAND_chitietgiaonhan', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
       ['id' => '31', 'name' => 'BCDAND_xulyloi', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
+
+      // QLHH
+      ['id' => '32', 'name' => 'DCHH', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
     ];
     DB::table("permissions")->insert($permissionData);
 
@@ -78,7 +81,7 @@ class RolesandPermissions extends Seeder
       ['id' => '15', 'name' => 'Công nhân kiểm định VCN', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
       ['id' => '16', 'name' => 'Công nhân ghi nhận DAND', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
       ['id' => '17', 'name' => 'Công nhân lắp đặt', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
-
+      ['id' => '18', 'name' => 'Thủ kho', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
 
     ];
     DB::table("roles")->insert($roleData);
@@ -113,6 +116,7 @@ class RolesandPermissions extends Seeder
       ['role_id' => '1', 'permission_id' => '29'],
       ['role_id' => '1', 'permission_id' => '30'],
       ['role_id' => '1', 'permission_id' => '31'],
+      ['role_id' => '1', 'permission_id' => '32'],
 
       // Giám đốc/phó giám đốc
       ['role_id' => '2', 'permission_id' => '1'],
@@ -351,6 +355,8 @@ class RolesandPermissions extends Seeder
       //Công nhân lắp đặt DAND
       ['role_id' => '17', 'permission_id' => '15'],
       ['role_id' => '17', 'permission_id' => '31'],
+
+      ['role_id' => '17', 'permission_id' => '32'],
 
     ];
     DB::table("role_has_permissions")->insert($rolesAndPermissionsData);

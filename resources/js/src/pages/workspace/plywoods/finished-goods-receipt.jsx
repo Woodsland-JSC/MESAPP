@@ -128,7 +128,7 @@ function PlywoodFinishedGoodsReceipt() {
 
     const handleBackNavigation = (event) => {
       if (event.type === 'popstate') {
-        navigate('/workspace?production=true');
+        navigate('/workspace?tab=wood-working');
       }
     };
   
