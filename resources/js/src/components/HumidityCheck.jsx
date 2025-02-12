@@ -76,7 +76,7 @@ function HumidityCheck(props) {
             );
         } else if (reason === "OUTDOOR") {
             const outdoorHighCount = humidityRecords.filter(
-                (record) => record.value > 14
+                (record) => record.value < 14
             ).length;
             const outdoorHighPercentage =
                 (outdoorHighCount / humidityRecords?.length) * 100;
