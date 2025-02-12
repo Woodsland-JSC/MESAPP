@@ -147,7 +147,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/get-batch-by-item-default-bin', [GoodsManagementController::class, 'getBatchByItemDefaultBin']);
     Route::get('/get-batch-by-item', [GoodsManagementController::class, 'getBatchByItem']);
     Route::get('/get-item-by-bin', [GoodsManagementController::class, 'getItemsByBin']);
-    
+    Route::post('/stock-transfer', [GoodsManagementController::class, 'StockTransfer']);
 
     // Others
     Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);

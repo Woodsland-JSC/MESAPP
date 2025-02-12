@@ -63,6 +63,11 @@ const goodsManagementApi = {
             },
         });
     },
+
+    handleStockTransfer: (transferData) => {
+        const url = `/stock-transfer`;
+        return axiosClient().post(url, transferData);
+    },
 };
 
 export default goodsManagementApi;

@@ -31,8 +31,9 @@ import {
 import goodsManagementApi from "../../../api/goodsManagementApi";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
-import { set } from "date-fns";
-import { is } from "date-fns/locale";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/src/sweetalert2.scss";
+import { Spinner } from "@chakra-ui/react";
 
 const warehouses = [
     { value: "WTH.001", label: "Warehouse 1" },
@@ -99,6 +100,7 @@ function BinWarehouseTransfer() {
 
     const [BinStackingRecord, setBinStackingRecord] = useState({
         warehouse: "",
+        defaultBin: "",
         item: "",
         batch: "",
         quantity: "",
@@ -106,6 +108,7 @@ function BinWarehouseTransfer() {
     });
     const [editingBinStackingRecord, setEditingBinStackingRecord] = useState({
         warehouse: "",
+        defaultBin: "",
         item: "",
         batch: "",
         quantity: "",
@@ -169,6 +172,9 @@ function BinWarehouseTransfer() {
     const [isToBinByWarehouseLoading, setIsToBinByWarehouseLoading] = useState(false);
     const [isGetItemByBinLoading, setIsGetItemByBinLoading] = useState(false);
 
+    const [isBinStackingLoading, setIsBinStackingLoading] = useState(false);
+    const [isBinTransferLoading, setIsBinTransferLoading] = useState(false);
+
     const handleTabChange = (index) => {
         const hasData =
             tabIndex === 0
@@ -188,7 +194,7 @@ function BinWarehouseTransfer() {
         const isEditing = editingBinStackingIndex !== null;
         const recordToSave = isEditing ? editingBinStackingRecord : BinStackingRecord;
         
-        const { warehouse, item, quantity, bin } = recordToSave;
+        const { warehouse, item, quantity, bin, defaultBin } = recordToSave;
 
         // Validation checks
         if (!warehouse) {
@@ -248,8 +254,10 @@ function BinWarehouseTransfer() {
                 setBatchOptions([]);
                 // Reset form
                 const inheritedWarehouse = BinStackingData.length > 0 ? BinStackingData[0].warehouse : warehouse;
+                const inheritedDefaultBin = BinStackingData.length > 0 ? BinStackingData[0].defaultBin : defaultBin;
                 setBinStackingRecord({
                     warehouse: inheritedWarehouse,
+                    defaultBin: inheritedDefaultBin,
                     item: "",
                     batch: "",
                     quantity: "",
@@ -287,6 +295,7 @@ function BinWarehouseTransfer() {
             setBinStackingRecord((prev) => ({
                 ...prev,
                 warehouse: "",
+                defaultBin: "",
                 item: "",
                 batch: "",
                 quantity: "",
@@ -455,6 +464,10 @@ function BinWarehouseTransfer() {
 
             setItemOptions(itemOptions);
             setTempItemOptions(itemOptions);
+            setBinStackingRecord(prevState => ({
+                ...prevState,
+                defaultBin: res.DefaultBinID,
+            }));
             setIsDefaultBinItemsLoading(false);
         } catch (error) {
             console.log(error);
@@ -663,21 +676,102 @@ function BinWarehouseTransfer() {
         }
     };
 
-    const handleExecuteBinStacking = (e) => {
+    const handleExecuteBinStacking = async (e) => {
         const data = {
-            fromWarehouse: BinStackingData[0].warehouse,
-            toWarehouse: BinStackingData[0].warehouse,
-            body: BinStackingData.map((item) => ({
-                item: item.item,
-                batch: item.batch,
-                quantity: item.quantity,
-                bin: item.bin,
-            })),
+            // fromWarehouse: BinStackingData[0].warehouse,
+            // toWarehouse: BinStackingData[0].warehouse,
+            // body: BinStackingData.map((item) => ({
+            //     fromBin: item.defaultBin,
+            //     toBin: item.bin,
+            //     item: item.item,
+            //     batch: item.batch,
+            //     quantity: item.quantity,
+            // })),
+            transferData: {
+                fromWarehouse: BinStackingData[0].warehouse,
+                toWarehouse: BinStackingData[0].warehouse,
+                body: BinStackingData.map((item) => ({
+                    fromBin: item.defaultBin,
+                    toBin: item.bin,
+                    item: item.item,
+                    batch: item.batch,
+                    quantity: item.quantity,
+                })),
+            }
         }
         console.log(data);
+        setIsBinStackingLoading(true);
+        try {
+            // const res = await goodsManagementApi.handleStockTransfer(data);
+            // Swal.fire({
+            //     title: "Điều chuyển thành công!",
+            //     text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+            //     icon: "success",
+            // });
+            // setIsBinStackingLoading(false);
+            // onConfirmClose();
+            // setBinStackingData([]);
+            // setBinStackingRecord(
+            //     {
+            //         warehouse: "",
+            //         defaultBin: "",
+            //         bin: "",
+            //         item: "",
+            //         batch: "",
+            //         quantity: "",
+            //     }
+            // );
+            // getBinManagedWarehouse();
+            // console.log(res);
+            setTimeout(() => {
+                Swal.fire({
+                    title: "Điều chuyển thành công!",
+                    text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+                    icon: "success",
+                });
+                setIsBinStackingLoading(false);
+                onConfirmClose();
+                setBinStackingData([]);
+                setBinStackingRecord(
+                    {
+                        warehouse: "",
+                        defaultBin: "",
+                        bin: "",
+                        item: "",
+                        batch: "",
+                        quantity: "",
+                    }
+                );
+                getBinManagedWarehouse();
+                console.log(res);
+            }, 2000);
+        } catch (error) {
+            console.error("Lỗi điều chuyển:", error);
+            setIsBinStackingLoading(false);
+            onConfirmClose();
+            const errorMessage =
+            error;
+            const systemError = error?.response?.data?.error;
+            const displayError = errorMessage
+                ? errorMessage
+                : systemError
+                ? systemError
+                : "";
+            Swal.fire({
+                title: "Điều chuyển thất bại!",
+                html: `
+                    <p>Chi tiết lỗi:<br></p>
+                    <p>
+                        ${displayError ? "<li>" + displayError + "</li>" : ""}
+
+                    </p>
+                `,
+                icon: "error",
+            });
+        }
     };
 
-    const handleExecuteBinTransfer = (e) => {
+    const handleExecuteBinTransfer = async (e) => {
         const data = {
             fromWarehouse: BinTransferData[0]?.fromWarehouse,
             toWarehouse: BinTransferData[0]?.toWarehouse,
@@ -690,6 +784,76 @@ function BinWarehouseTransfer() {
             })),
         }
         console.log(data);
+        setIsBinTransferLoading(true);
+        try {
+            // const res = await goodsManagementApi.handleStockTransfer(data);
+            // Swal.fire({
+            //     title: "Điều chuyển thành công!",
+            //     text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+            //     icon: "success",
+            // });
+            // onConfirmClose();
+            // setIsBinTransferLoading(false);
+            // setBinTransferData([]);
+            // setBinTransferRecord(
+            //     {
+            //         fromWarehouse: "",
+            //         toWarehouse: "",
+            //         fromBin: "",
+            //         toBin: "",
+            //         item: "",
+            //         batch: "",
+            //         quantity: "",
+            //     }
+            // );
+            // getBinManagedWarehouse();
+            // console.log(res);
+            setTimeout(() => {
+                Swal.fire({
+                    title: "Điều chuyển thành công!",
+                    text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+                    icon: "success",
+                });
+                setIsBinStackingLoading(false);
+                onConfirmClose();
+                setBinStackingData([]);
+                setBinStackingRecord(
+                    {
+                        warehouse: "",
+                        defaultBin: "",
+                        bin: "",
+                        item: "",
+                        batch: "",
+                        quantity: "",
+                    }
+                );
+                getBinManagedWarehouse();
+                console.log(res);
+            }, 2000);
+        } catch (error) {
+            console.log(error);
+            onConfirmClose();
+            setIsBinTransferLoading(false);
+            const errorMessage =
+            error?.response?.data?.res1?.error?.message?.value;
+            const systemError = error?.response?.data?.error;
+            const displayError = errorMessage
+                ? errorMessage
+                : systemError
+                ? systemError
+                : "";
+            Swal.fire({
+                title: "Điều chuyển thất bại!",
+                html: `
+                    <p>Chi tiết lỗi:<br></p>
+                    <p>
+                        ${displayError ? "<li>" + displayError + "</li>" : ""}
+
+                    </p>
+                `,
+                icon: "error",
+            });
+        }
     };
 
     useEffect(() => {
@@ -731,7 +895,7 @@ function BinWarehouseTransfer() {
                     {/* Header */}
                     <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center">
                         <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
-                            Điều chuyển hàng hóa{" "}
+                            Điều chuyển hàng hóa theo bin{" "}
                         </div>
                     </div>
 
@@ -743,8 +907,7 @@ function BinWarehouseTransfer() {
                             <TabList className="bg-gray-100 rounded-t-lg">
                                 <Tab onClick={() => {
                                     handleTabChange(0);
-                                    setType("bin_stacking");
-                                    console.log(type);
+                                    // setType("bin_stacking");
                                 }}>
                                     <div className="py-1 flex items-center space-x-2 font-medium">
                                         <BiSolidCabinet className="w-5 h-5" />
@@ -756,8 +919,7 @@ function BinWarehouseTransfer() {
                                 <Tab 
                                     onClick={() => {
                                         handleTabChange(1)
-                                        setType("bin_transfer");
-                                        console.log(type);
+                                        // setType("bin_transfer");
                                     }}
                                     className="py-2"
                                 >
@@ -1100,7 +1262,7 @@ function BinWarehouseTransfer() {
                                                                                     }
                                                                                 </td>
                                                                                 <td className="w-[240px] px-6 py-3 border border-gray-300">
-                                                                                    {toBinOptions.find(
+                                                                                    {stackBinOptions.find(
                                                                                         (
                                                                                             item
                                                                                         ) =>
@@ -2186,6 +2348,7 @@ function BinWarehouseTransfer() {
                                             onConfirmClose();
                                         }}
                                         className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled={isBinStackingLoading || isBinTransferLoading}
                                     >
                                         Đóng
                                     </button>
@@ -2193,16 +2356,23 @@ function BinWarehouseTransfer() {
                                         className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                         type="button"
                                         onClick={() => {
-                                            console.log("Type: ", type);
-                                            if(type == "bin_stacking"){
+                                            if(BinStackingData.length > 0){
                                                 handleExecuteBinStacking();
                                             }else{
                                                 handleExecuteBinTransfer();
                                             }
-                                            onConfirmClose();
                                         }}
                                     >
-                                        Xác nhận
+                                        {isBinStackingLoading || isBinTransferLoading ? (
+                                            <div className="flex items-center space-x-4">
+                                                <Spinner size="sm" color="white" />
+                                                <div>Đang thực hiện</div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                Xác nhận
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </ModalFooter>
@@ -2302,6 +2472,7 @@ function BinWarehouseTransfer() {
                                             setTabIndex(nextTabIndex);
                                             setBinStackingRecord({
                                                 warehouse: "",
+                                                defaultBin: "",
                                                 item: "",
                                                 batch: "",
                                                 quantity: "",

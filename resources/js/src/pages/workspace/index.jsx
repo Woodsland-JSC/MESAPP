@@ -548,7 +548,7 @@ function Workspace() {
                                                     permission: ["DCHH"],
                                                     link: "/workspace/goods-management/bin-warehouse-transfer",
                                                     icon: <HiMiniTruck />,
-                                                    title: "Điều chuyển hàng hóa",
+                                                    title: "Điều chuyển hàng hóa theo bin",
                                                     description:
                                                         "Điều chuyển hàng hóa và quản lý theo bin.",
                                                     type: "DCHH",

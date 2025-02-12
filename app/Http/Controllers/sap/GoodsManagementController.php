@@ -415,76 +415,153 @@ class GoodsManagementController extends Controller
         }
     }
 
-
     // Điều chuyển kho
-    public function transfer(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'from_warehouse' => 'required',
-            'from_bin' => 'required',
-            'to_warehouse' => 'required',
-            'item_code' => 'required',
-            'batch_num',
-            'to_warehouse' => 'required',
-            'to_bin' => 'required',
-            'quantity' => 'required|numeric',
-        ]);
+    // public function StockTransfer(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'transferData' => 'required',
+    //     ]);
 
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+    //     }
+
+    //     try {
+    //         $conDB = (new ConnectController)->connect_sap();
+
+    //         $url = 'https://sap.woodsland.com.vn:50000/b1s/v2/StockTransfers';
+    //         $headers = [
+    //             'Content-Type' => 'application/json',
+    //             'Authorization' => 'Bearer ' . config('services.sap.token')
+    //         ];
+    //         $data = [
+    //             'DocumentDate' => date('d.m.y'),
+    //             'Comments' => 'Điều chuyển hàng hóa trên Web Portal',
+    //             'StockTransferLines' => [
+    //                 [
+    //                     "ItemCode" => $request->item_code,
+    //                     "Quantity" => $request->quantity,
+    //                     "FromWarehouseCode" => $request->from_warehouse,
+    //                     "WarehouseCode" => $request->to_warehouse,
+    //                     "StockTransferLinesBinAllocations" => [
+    //                         [
+    //                             "BinAbsEntry" => $request->from_bin,
+    //                             "Quantity" => $request->quantity,
+    //                             "AllowNegativeQuantity" => "tNO",
+    //                             "SerialAndBatchNumbersBaseLine" => -1,
+    //                             "BinActionType" => "batFromWarehouse",
+    //                             "BaseLineNumber" => 0
+    //                         ],
+    //                         [
+    //                             "BinAbsEntry" => $request->to_bin,
+    //                             "Quantity" => $request->quantity,
+    //                             "AllowNegativeQuantity" => "tNO",
+    //                             "SerialAndBatchNumbersBaseLine" => -1,
+    //                             "BinActionType" => "batToWarehouse",
+    //                             "BaseLineNumber" => 0
+    //                         ]
+    //                     ],
+    //                 ]
+    //             ]
+    //         ];
+
+    //         $data = json_encode($data);
+
+    //         $response = Http::withHeaders($headers)->post($url, $data);
+    //         if ($response->status() != 200) {
+    //             return response()->json([
+    //                 'error' => true,
+    //                 'status_code' => $response->status(),
+    //                 'message' => 'L i khi chuyen kho'
+    //             ], $response->status());
+    //         }
+
+    //         return response()->json($response->json(), 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    public function StockTransfer(Request $request)
+    {    
+        // Validator kiểm tra trường 'transferData'
+        $validator = Validator::make($request->all(), [
+            'transferData' => 'required|array',
+            'transferData.fromWarehouse' => 'required|string',
+            'transferData.toWarehouse' => 'required|string',
+            'transferData.body' => 'required|array',
+        ]);
+    
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-
+    
         try {
-            $conDB = (new ConnectController)->connect_sap();
-
-            $url = 'https://sap.woodsland.com.vn:50000/b1s/v2/StockTransfers';
-            $headers = [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . config('services.sap.token')
-            ];
-            $data = [
-                'DocumentDate' => date('d.m.y'),
-                'Comments' => 'Điều chuyển hàng hóa trên Web Portal',
-                'StockTransferLines' => [
-                    [
-                        "ItemCode" => $request->item_code,
-                        "Quantity" => $request->quantity,
-                        "FromWarehouseCode" => $request->from_warehouse,
-                        "WarehouseCode" => $request->to_warehouse,
-                        "StockTransferLinesBinAllocations" => [
-                            [
-                                "BinAbsEntry" => $request->from_bin,
-                                "Quantity" => $request->quantity,
-                                "AllowNegativeQuantity" => "tNO",
-                                "SerialAndBatchNumbersBaseLine" => -1,
-                                "BinActionType" => "batFromWarehouse",
-                                "BaseLineNumber" => 0
-                            ],
-                            [
-                                "BinAbsEntry" => $request->to_bin,
-                                "Quantity" => $request->quantity,
-                                "AllowNegativeQuantity" => "tNO",
-                                "SerialAndBatchNumbersBaseLine" => -1,
-                                "BinActionType" => "batToWarehouse",
-                                "BaseLineNumber" => 0
-                            ]
+            $transferData = $request->input('transferData');
+            $stockTransferLines = [];
+    
+            // Tạo dữ liệu StockTransferLines
+            foreach ($transferData['body'] as $index => $item) {
+                $stockTransferLine = [
+                    "ItemCode" => $item['item'],
+                    "Quantity" => floatval($item['quantity']),
+                    "FromWarehouseCode" => $transferData['fromWarehouse'],
+                    "WarehouseCode" => $transferData['toWarehouse'],
+                    "UseBaseUnits" => "tYES",
+                    "StockTransferLinesBinAllocations" => [
+                        [
+                            "BinAbsEntry" => intval($item['fromBin']),
+                            "Quantity" => floatval($item['quantity']),
+                            "AllowNegativeQuantity" => "tNO",
+                            "SerialAndBatchNumbersBaseLine" => -1,
+                            "BinActionType" => "batFromWarehouse",
+                            "BaseLineNumber" => $index 
                         ],
+                        [
+                            "BinAbsEntry" => intval($item['toBin']),
+                            "Quantity" => floatval($item['quantity']),
+                            "AllowNegativeQuantity" => "tNO",
+                            "SerialAndBatchNumbersBaseLine" => -1,
+                            "BinActionType" => "batToWarehouse",
+                            "BaseLineNumber" => $index 
+                        ]
                     ]
-                ]
+                ];
+    
+                $stockTransferLines[] = $stockTransferLine;
+            }
+
+            $body = [
+                "BPLID" => Auth::user()->branch,
+                'Comments' => 'Điều chuyển hàng hóa trên Web Portal',
+                'FromWarehouse' => $transferData['fromWarehouse'],
+                'ToWarehouse' => $transferData['toWarehouse'],
+                'StockTransferLines' => $stockTransferLines
             ];
 
-            $data = json_encode($data);
-
-            $response = Http::withHeaders($headers)->post($url, $data);
+            // dd($body);
+            $response = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+                "Authorization" => "Basic " . BasicAuthToken(),
+            ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+    
             if ($response->status() != 200) {
                 return response()->json([
                     'error' => true,
                     'status_code' => $response->status(),
-                    'message' => 'L i khi chuyen kho'
+                    'message' => $response->json()['error']['message'] 
                 ], $response->status());
             }
-
+    
             return response()->json($response->json(), 200);
+    
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -493,4 +570,5 @@ class GoodsManagementController extends Controller
             ], 500);
         }
     }
+    
 }
