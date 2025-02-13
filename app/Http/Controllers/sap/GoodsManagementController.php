@@ -487,7 +487,7 @@ class GoodsManagementController extends Controller
     // }
 
     public function StockTransfer(Request $request)
-    {    
+    {
         // Validator kiểm tra trường 'transferData'
         $validator = Validator::make($request->all(), [
             'transferData' => 'required|array',
@@ -495,15 +495,15 @@ class GoodsManagementController extends Controller
             'transferData.toWarehouse' => 'required|string',
             'transferData.body' => 'required|array',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-    
+
         try {
             $transferData = $request->input('transferData');
             $stockTransferLines = [];
-    
+
             // Tạo dữ liệu StockTransferLines
             foreach ($transferData['body'] as $index => $item) {
                 $stockTransferLine = [
@@ -519,7 +519,7 @@ class GoodsManagementController extends Controller
                             "AllowNegativeQuantity" => "tNO",
                             "SerialAndBatchNumbersBaseLine" => -1,
                             "BinActionType" => "batFromWarehouse",
-                            "BaseLineNumber" => $index 
+                            "BaseLineNumber" => $index
                         ],
                         [
                             "BinAbsEntry" => intval($item['toBin']),
@@ -527,11 +527,23 @@ class GoodsManagementController extends Controller
                             "AllowNegativeQuantity" => "tNO",
                             "SerialAndBatchNumbersBaseLine" => -1,
                             "BinActionType" => "batToWarehouse",
-                            "BaseLineNumber" => $index 
+                            "BaseLineNumber" => $index
                         ]
-                    ]
+                    ],
+                    "BatchNumbers"  => [
+                        "BatchNumber" => $item['batch'] || "",
+                        "Quantity" => floatval($item['quantity']) || 0,
+                    ],
                 ];
-    
+
+                // Chỉ thêm BatchNumbers nếu có batch number
+                if (!empty($item['batch'])) {
+                    $stockTransferLine["BatchNumbers"] = [
+                        "BatchNumber" => $item['batch'],
+                        "Quantity" => floatval($item['quantity'])
+                    ];
+                }
+
                 $stockTransferLines[] = $stockTransferLine;
             }
 
@@ -544,6 +556,7 @@ class GoodsManagementController extends Controller
             ];
 
             // dd($body);
+
             $response = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
@@ -551,17 +564,29 @@ class GoodsManagementController extends Controller
                 "Accept" => "application/json",
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
-    
-            if ($response->status() != 200) {
+
+            $responseBody = $response->json();
+
+            // Kiểm tra xem response có chứa thông tin lỗi không
+            if (isset($responseBody['error']) || 
+                (isset($responseBody['message']) && str_contains(strtolower($responseBody['message']), 'error'))) {
+                
+                $errorMessage = $this->extractErrorMessage($responseBody);
+                
                 return response()->json([
-                    'error' => true,
-                    'status_code' => $response->status(),
-                    'message' => $response->json()['error']['message'] 
-                ], $response->status());
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'data' => null
+                ], 400);
             }
     
-            return response()->json($response->json(), 200);
-    
+            // Nếu không có lỗi, trả về kết quả thành công
+            return response()->json([
+                'success' => true,
+                'message' => 'Điều chuyển hàng hóa thành công',
+                'data' => $responseBody
+            ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -570,5 +595,4 @@ class GoodsManagementController extends Controller
             ], 500);
         }
     }
-    
 }
