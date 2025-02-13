@@ -352,6 +352,12 @@ function BinWarehouseTransfer() {
             );
             return;
         }
+        if(fromWarehouse === toWarehouse && fromBin === toBin) {
+            toast.error(
+                `Kho nguồn và kho đích, cùng với bin nguồn và bin đích không thể trùng nhau.`
+            );
+            return;
+        }
 
         try {
             if (isEditing) {
@@ -555,8 +561,8 @@ function BinWarehouseTransfer() {
     const getFromBinByWarehouse = async (warehouse) => {
         setIsFromBinByWarehouseLoading(true);
         try {
-            // const res = await goodsManagementApi.getBinByWarehouse(warehouse);
-            const res = await goodsManagementApi.getAllBinByWarehouse(warehouse);
+            const res = await goodsManagementApi.getBinByWarehouse(warehouse);
+            // const res = await goodsManagementApi.getAllBinByWarehouse(warehouse);
 
             const fromBinOptions =
             res?.map((item) => ({
@@ -702,49 +708,49 @@ function BinWarehouseTransfer() {
         console.log(data);
         setIsBinStackingLoading(true);
         try {
-            // const res = await goodsManagementApi.handleStockTransfer(data);
-            // Swal.fire({
-            //     title: "Điều chuyển thành công!",
-            //     text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
-            //     icon: "success",
-            // });
-            // setIsBinStackingLoading(false);
-            // onConfirmClose();
-            // setBinStackingData([]);
-            // setBinStackingRecord(
-            //     {
-            //         warehouse: "",
-            //         defaultBin: "",
-            //         bin: "",
-            //         item: "",
-            //         batch: "",
-            //         quantity: "",
-            //     }
-            // );
-            // getBinManagedWarehouse();
-            // console.log(res);
-            setTimeout(() => {
-                Swal.fire({
-                    title: "Điều chuyển thành công!",
-                    text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
-                    icon: "success",
-                });
-                setIsBinStackingLoading(false);
-                onConfirmClose();
-                setBinStackingData([]);
-                setBinStackingRecord(
-                    {
-                        warehouse: "",
-                        defaultBin: "",
-                        bin: "",
-                        item: "",
-                        batch: "",
-                        quantity: "",
-                    }
-                );
-                getBinManagedWarehouse();
-                console.log(res);
-            }, 2000);
+            const res = await goodsManagementApi.handleStockTransfer(data);
+            Swal.fire({
+                title: "Điều chuyển thành công!",
+                text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+                icon: "success",
+            });
+            setIsBinStackingLoading(false);
+            onConfirmClose();
+            setBinStackingData([]);
+            setBinStackingRecord(
+                {
+                    warehouse: "",
+                    defaultBin: "",
+                    bin: "",
+                    item: "",
+                    batch: "",
+                    quantity: "",
+                }
+            );
+            getBinManagedWarehouse();
+            console.log(res);
+            // setTimeout(() => {
+            //     Swal.fire({
+            //         title: "Điều chuyển thành công!",
+            //         text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+            //         icon: "success",
+            //     });
+            //     setIsBinStackingLoading(false);
+            //     onConfirmClose();
+            //     setBinStackingData([]);
+            //     setBinStackingRecord(
+            //         {
+            //             warehouse: "",
+            //             defaultBin: "",
+            //             bin: "",
+            //             item: "",
+            //             batch: "",
+            //             quantity: "",
+            //         }
+            //     );
+            //     getBinManagedWarehouse();
+            //     console.log(res);
+            // }, 2000);
         } catch (error) {
             console.error("Lỗi điều chuyển:", error);
             setIsBinStackingLoading(false);
@@ -773,63 +779,65 @@ function BinWarehouseTransfer() {
 
     const handleExecuteBinTransfer = async (e) => {
         const data = {
-            fromWarehouse: BinTransferData[0]?.fromWarehouse,
-            toWarehouse: BinTransferData[0]?.toWarehouse,
-            body: BinTransferData.map((item) => ({
-                fromBin: item.fromBin,
-                toBin: item.toBin,
-                item: item.item,
-                batch: item.batch,
-                quantity: item.quantity,    
-            })),
+            transferData: {
+                fromWarehouse: BinTransferData[0]?.fromWarehouse,
+                toWarehouse: BinTransferData[0]?.toWarehouse,
+                body: BinTransferData.map((item) => ({
+                    fromBin: item.fromBin,
+                    toBin: item.toBin,
+                    item: item.item,
+                    batch: item.batch,
+                    quantity: item.quantity,    
+                })),
+            }
         }
         console.log(data);
         setIsBinTransferLoading(true);
         try {
-            // const res = await goodsManagementApi.handleStockTransfer(data);
-            // Swal.fire({
-            //     title: "Điều chuyển thành công!",
-            //     text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
-            //     icon: "success",
-            // });
-            // onConfirmClose();
-            // setIsBinTransferLoading(false);
-            // setBinTransferData([]);
-            // setBinTransferRecord(
-            //     {
-            //         fromWarehouse: "",
-            //         toWarehouse: "",
-            //         fromBin: "",
-            //         toBin: "",
-            //         item: "",
-            //         batch: "",
-            //         quantity: "",
-            //     }
-            // );
-            // getBinManagedWarehouse();
+            const res = await goodsManagementApi.handleStockTransfer(data);
+            Swal.fire({
+                title: "Điều chuyển thành công!",
+                text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+                icon: "success",
+            });
+            onConfirmClose();
+            setIsBinTransferLoading(false);
+            setBinTransferData([]);
+            setBinTransferRecord(
+                {
+                    fromWarehouse: "",
+                    toWarehouse: "",
+                    fromBin: "",
+                    toBin: "",
+                    item: "",
+                    batch: "",
+                    quantity: "",
+                }
+            );
+            getBinManagedWarehouse();
             // console.log(res);
-            setTimeout(() => {
-                Swal.fire({
-                    title: "Điều chuyển thành công!",
-                    text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
-                    icon: "success",
-                });
-                setIsBinStackingLoading(false);
-                onConfirmClose();
-                setBinStackingData([]);
-                setBinStackingRecord(
-                    {
-                        warehouse: "",
-                        defaultBin: "",
-                        bin: "",
-                        item: "",
-                        batch: "",
-                        quantity: "",
-                    }
-                );
-                getBinManagedWarehouse();
-                console.log(res);
-            }, 2000);
+            // setTimeout(() => {
+            //     Swal.fire({
+            //         title: "Điều chuyển thành công!",
+            //         text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
+            //         icon: "success",
+            //     });
+            //     setIsBinStackingLoading(false);
+            //     onConfirmClose();
+            //     setBinStackingData([]);
+            //     setBinStackingRecord(
+            //         {
+            //             warehouse: "",
+            //             defaultBin: "",
+            //             bin: "",
+            //             item: "",
+            //             batch: "",
+            //             quantity: "",
+            //         }
+            //     );
+            //     getBinManagedWarehouse();
+            //     console.log(res);
+            // }, 2000);
         } catch (error) {
             console.log(error);
             onConfirmClose();
@@ -1143,27 +1151,27 @@ function BinWarehouseTransfer() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                    onClick={() => {
-                                                        console.log(
-                                                            "Thống tin xếp bin",
-                                                            BinStackingRecord
-                                                        );
-                                                        console.log(
-                                                            "Danh sách kho đi",
-                                                            fromWarehouseOptions
-                                                        );
-                                                        console.log(
-                                                            "Danh sách kho đến",
-                                                            toWarehouseOptions
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="text-[15px]">
-                                                        In ra dữ liệu
-                                                    </div>
-                                                </button>
+                                                    {/* <button
+                                                        className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                        onClick={() => {
+                                                            console.log(
+                                                                "Thống tin xếp bin",
+                                                                BinStackingRecord
+                                                            );
+                                                            console.log(
+                                                                "Danh sách kho đi",
+                                                                fromWarehouseOptions
+                                                            );
+                                                            console.log(
+                                                                "Danh sách kho đến",
+                                                                toWarehouseOptions
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div className="text-[15px]">
+                                                            In ra dữ liệu
+                                                        </div>
+                                                    </button> */}
                                             </div>
 
                                             <button
@@ -1628,26 +1636,26 @@ function BinWarehouseTransfer() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                <button
-                                                    className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                    onClick={() => {
-                                                        console.log(
-                                                            BinTransferRecord
-                                                        );
-                                                        console.log(
-                                                            "Danh sách kho đi",
-                                                            fromWarehouseOptions
-                                                        );
-                                                        console.log(
-                                                            "Danh sách kho đến",
-                                                            toWarehouseOptions
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="text-[15px]">
-                                                        In ra dữ liệu
-                                                    </div>
-                                                </button>
+                                                    {/* <button
+                                                        className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                        onClick={() => {
+                                                            console.log(
+                                                                BinTransferRecord
+                                                            );
+                                                            console.log(
+                                                                "Danh sách kho đi",
+                                                                fromWarehouseOptions
+                                                            );
+                                                            console.log(
+                                                                "Danh sách kho đến",
+                                                                toWarehouseOptions
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div className="text-[15px]">
+                                                            In ra dữ liệu
+                                                        </div>
+                                                    </button> */}
                                             </div>
                                             <div className=" items-center flex justify-between">
                                                 <button
