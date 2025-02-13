@@ -373,7 +373,7 @@ class PlanController extends Controller
         try {
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
-                'PlanID' => 'required', // new UniqueOvenStatusRule
+                'PlanID' => 'required', 
                 'result' => 'required'
             ]);
             if ($validator->fails()) {
