@@ -448,7 +448,7 @@ function WoodSorting() {
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
             NgayNhap: formattedStartDate,
-            MaNhaMay: user.plant,
+            MaNhaMay: user?.plant,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 ItemName: card.props.itemName,

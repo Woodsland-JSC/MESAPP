@@ -433,7 +433,7 @@ function BinWarehouseTransfer() {
 
             const fromWarehouseOptions =
                 res
-                    ?.filter((item) => item.U_FAC === user.plant)
+                    ?.filter((item) => item.U_FAC === user?.plant)
                     .map((item) => ({
                         value: item.WhsCode,
                         label: item.WhsName,

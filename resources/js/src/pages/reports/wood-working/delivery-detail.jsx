@@ -218,7 +218,7 @@ function DeliveryDetailReport() {
             from_date: format(fromDateMobile, "yyyy-MM-dd"),
             to_date: format(toDateMobile, "yyyy-MM-dd"),
             To: selectedTeamMobile.value,
-            plant: user.plant === "YS1" || user.plant === "YS2" ? "YS" : user.plant,
+            plant: user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant,
         };
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
@@ -276,7 +276,7 @@ function DeliveryDetailReport() {
 
     // New Get All Group
     useEffect(() => {
-        const userPlant = user.plant === "YS1" || user.plant === "YS2" ? "YS" : user.plant;
+        const userPlant = user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
     
         reportApi
             .getTeamByFactory(userPlant)

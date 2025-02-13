@@ -174,15 +174,15 @@ function Header(props) {
                         </div>
                         <div className="text-xs !py-0 text-gray-700">
                             Nhà máy{" "}
-                            {user.plant === "TH"
+                            {user?.plant === "TH"
                                 ? "Thuận Hưng"
-                                : user.plant === "YS"
+                                : user?.plant === "YS"
                                 ? "Yên Sơn"
-                                : user.plant === "CH"
+                                : user?.plant === "CH"
                                 ? "Chiêm Hóa"
-                                : user.plant === "TB"
+                                : user?.plant === "TB"
                                 ? "Thái Bình"
-                                : user.plant === "HG"
+                                : user?.plant === "HG"
                                 ? "Hà Giang"
                                 : "Không xác định"}
                         </div>
