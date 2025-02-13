@@ -380,11 +380,7 @@ class PlanController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
             $id = $request->input('PlanID');
-            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 1, 2, 4])->get();
-            // Lấy kho sấy
-            // $towarehouseS = Warehouse::where('flag', 'SS')->WHERE('branch', Auth::user()->branch)
-            //     ->where('FAC', Auth::user()->plant)
-            //     ->first()->WhsCode;
+            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 2])->get();
             $towarehouse =  GetWhsCode(Auth::user()->plant,'SS');
             if ($record->count() > 0) {
                 planDryings::where('PlanID', $id)->update(
