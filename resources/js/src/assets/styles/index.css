@@ -240,12 +240,12 @@ div:where(.swal2-container) {
 
 /* Custom Group Table */
 .ag-theme-quartz .ag-row-group {
-    background-color: #d4eefc !important;
+    background-color: #e4f2fd !important;
     font-weight: 600;
 }
 
 .ag-theme-quartz .ag-row-group:hover {
-    background-color: transparent !important;
+    background-color: inherit !important;
 }
 
 /* ============ */

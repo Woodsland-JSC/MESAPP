@@ -84,6 +84,7 @@ function DefectResolution() {
                 week: item.week,
                 root_cause: item.NguonLoi,
                 root_place: item.NoiBaoLoi,
+                root_place_name: item.TenToBaoLoi,
                 defect_type: item.LoiLoai,
                 resolution: item.HXL,
                 itemname: item.ItemName,
@@ -144,17 +145,21 @@ function DefectResolution() {
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
+            headerName: "Tổ báo lỗi",
+            field: "root_place_name",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            rowGroup: true,
+            filter: true,
+            sort: "asc",
+            hide: true,
+            headerComponentParams: { displayName: "Tổ báo lỗi" },
+        },
+        {
             headerName: "Tuần",
             field: "week",
             width: 70,
             suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Nguồn lỗi",
-            field: "root_cause",
-            width: 150,
-            suppressHeaderMenuButton: true,
-            filter: true,
         },
         {
             headerName: "Nơi báo lỗi",
@@ -162,20 +167,7 @@ function DefectResolution() {
             width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
-        },
-        {
-            headerName: "Loại lỗi",
-            field: "defect_type",
-            width: 150,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Biện pháp xử lý",
-            field: "resolution",
-            width: 370,
-            suppressHeaderMenuButton: true,
-            filter: true,
+            hide: true,
         },
         {
             headerName: "Chi tiết cụm",
@@ -207,16 +199,69 @@ function DefectResolution() {
             field: "quantity",
             width: 100,
             suppressHeaderMenuButton: true,
+            valueFormatter: params => {
+                return params.value ? params.value.toLocaleString('en-US') : '';
+            },
+            aggFunc: 'sum',
+            headerComponentParams: { displayName: "Số lượng" }
         },
         // { headerName: "M3", field: "m3", width: 120 },
-        { headerName: "M3", field: "m3sap", width: 120 },
-        { headerName: "Tổ gây ra lỗi", field: "defect_causing_team", width: 160 },
+        { 
+            headerName: "M3", 
+            field: "m3sap", 
+            width: 120, 
+            aggFunc: 'sum', 
+            headerComponentParams: { displayName: "M3" },
+            valueFormatter: params => {
+                return params.value ? params.value.toFixed(6) : '0.000000';
+            }, 
+        },
+        {
+            headerName: "Loại lỗi",
+            field: "defect_type",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Biện pháp xử lý",
+            field: "resolution",
+            width: 370,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Tổ gây ra lỗi",
+            field: "defect_causing_team",
+            width: 160,
+        },
         { headerName: "Tổ chuyển về", field: "receiving_team", width: 160 },
         { headerName: "Người tạo", field: "sender" },
         { headerName: "Ngày tạo", field: "send_date" },
         { headerName: "Người xử lý", field: "receiver" },
         { headerName: "Ngày xử lý", field: "handle_date" },
     ]);
+
+    const groupDisplayType = "multipleColumns";
+    const getRowStyle = (params) => {
+        if (params.node.rowIndex % 2 === 0) {
+            return { background: "#F6F6F6" };
+        }
+        return { background: "#ffffff" };
+    };
+
+    const defaultColDef = useMemo(() => {
+        return {
+            flex: 1,
+            minWidth: 150,
+        };
+    }, []);
+
+    const autoGroupColumnDef = useMemo(() => {
+        return {
+            minWidth: 300,
+        };
+    }, []);
 
     const FactoryOption = ({ value, label }) => (
         <div
@@ -296,12 +341,12 @@ function DefectResolution() {
                                         onClick={handleExportExcel}
                                     />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <PiFilePdfBold
                                         className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
                                         onClick={handleExportPDF}
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -376,10 +421,7 @@ function DefectResolution() {
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="YS"
-                                        label="Yên Sơn"
-                                    />
+                                    <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
@@ -412,6 +454,12 @@ function DefectResolution() {
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
+                                            autoGroupColumnDef={
+                                                autoGroupColumnDef
+                                            }
+                                            groupDisplayType={groupDisplayType}
+                                            getRowStyle={getRowStyle}
+                                            grandTotalRow={"bottom"} 
                                         />
                                     </div>
                                 </div>
@@ -422,125 +470,6 @@ function DefectResolution() {
                             )}
                         </>
                     )}
-
-                    {/* <div className="flex flex-col">
-                        <div className="overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                <div className="overflow-auto border-2 rounded-xl border-gray-500">
-                                    <table className="min-w-full   text-center font-light text-surface">
-                                        <thead className="rounded-t-xl bg-[#DBDCDD] border-b-2 border-gray-500 font-medium">
-                                            <tr className="rounded-t-xl">
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    #
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    First
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Last
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="font-normal">
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    1
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Mark
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Otto
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @mdo
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    2
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Jacob
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Thornton
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @fat
-                                                </td>
-                                            </tr>
-                                            <tr className="border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    3
-                                                </td>
-                                                <td
-                                                    colSpan="2"
-                                                    className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Larry the Bird
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @twitter
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
                 {/* <div className="py-4"></div> */}
             </div>

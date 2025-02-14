@@ -387,9 +387,9 @@ function DeliveryDetailReport() {
     const groupDisplayType = 'multipleColumns';
     const getRowStyle = params => {
         if (params.node.rowIndex % 2 === 0) {
-            return { background: '#F6F6F6' };  // Dòng chẵn
+            return { background: '#F6F6F6' }; 
         }
-        return { background: '#ffffff' };  // Dòng lẻ
+        return { background: '#ffffff' };  
     };
     
     const defaultColDef = useMemo(() => {
@@ -502,12 +502,12 @@ function DeliveryDetailReport() {
                                         onClick={handleExportExcel}
                                     />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <PiFilePdfBold
                                         className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all xl:display:inline-block lg:inline-block md:inline-block hidden"
                                         onClick={handleExportPDF}
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
