@@ -157,6 +157,7 @@ function WoodSorting() {
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isItemsLoading, setIsItemsLoading] = useState(false);
     const [isInvalidQuantity, setIsInvalidQuantity] = useState(false);
 
     const [palletQuantities, setPalletQuantities] = useState({});
@@ -219,12 +220,8 @@ function WoodSorting() {
     };
 
     const loadDryingMethodsData = async (dryingReasonValue) => {
+        setIsItemsLoading(true);
         try {
-            //   if (!dryingReasonValue) {
-            //     setDryingMethodsOptions([]);
-            //     return;
-            //   }
-
             const dryingMethodsData = await palletsApi.getDryingMethod(
                 dryingReasonValue
             );
@@ -236,12 +233,13 @@ function WoodSorting() {
             }));
 
             setDryingMethodsOptions(options);
+            setIsItemsLoading(false);
         } catch (error) {
             console.error("Error fetching drying methods:", error);
             toast.error(
                 "Không thể lấy dữ liệu quy cách thô. " + error?.response?.data?.message
             );
-
+            setIsItemsLoading(false);
             setDryingMethodsOptions([]);
         }
     };
@@ -1731,6 +1729,7 @@ function WoodSorting() {
                                                 dryingMethodSelectRef = ref;
                                             }}
                                             cacheOptions
+                                            isDisabled={isItemsLoading}
                                             defaultOptions={
                                                 dryingMethodsOptions
                                             } // Sử dụng options đã load sẵn
@@ -1800,7 +1799,7 @@ function WoodSorting() {
                                 {isLoading ? (
                                     <div className="text-center">
                                         <Spinner
-                                            thickness="4px"
+                                            thickness="7px"
                                             speed="0.65s"
                                             emptyColor="gray.200"
                                             color="#155979"

@@ -1335,7 +1335,7 @@ class QCController extends Controller
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch);
+                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX,$data->Team,$U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name,$data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
                     $documentCounter++;
                     $IssueData .= "Content-Type: application/http\n";
                     $IssueData .= "Content-Transfer-Encoding: binary\n\n";
