@@ -756,7 +756,7 @@ function BinWarehouseTransfer() {
             setIsBinStackingLoading(false);
             onConfirmClose();
             const errorMessage =
-            error;
+            error.response?.data?.message;
             const systemError = error?.response?.data?.error;
             const displayError = errorMessage
                 ? errorMessage
