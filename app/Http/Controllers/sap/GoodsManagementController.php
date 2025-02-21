@@ -486,6 +486,23 @@ class GoodsManagementController extends Controller
     //     }
     // }
 
+    private function extractErrorMessage($response)
+    {
+        if (isset($response['error']['message']['value'])) {
+            return $response['error']['message']['value'];
+        }
+        
+        if (isset($response['error']['message'])) {
+            return $response['error']['message'];
+        }
+        
+        if (isset($response['message'])) {
+            return $response['message'];
+        }
+        
+        return 'Có lỗi xảy ra trong quá trình xử lý';
+    }
+
     public function StockTransfer(Request $request)
     {
         // Validator kiểm tra trường 'transferData'
