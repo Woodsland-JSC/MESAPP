@@ -755,21 +755,13 @@ function BinWarehouseTransfer() {
             console.error("Lỗi điều chuyển:", error);
             setIsBinStackingLoading(false);
             onConfirmClose();
-            const errorMessage =
-            error.response?.data?.message;
-            const systemError = error?.response?.data?.error;
-            const displayError = errorMessage
-                ? errorMessage
-                : systemError
-                ? systemError
-                : "";
+            const systemError = error?.response?.data?.error ? error?.response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
                     <p>
-                        ${displayError ? "<li>" + displayError + "</li>" : ""}
-
+                        ${systemError ? "<li>" + systemError + "</li>" : ""}
                     </p>
                 `,
                 icon: "error",
@@ -842,21 +834,13 @@ function BinWarehouseTransfer() {
             console.log(error);
             onConfirmClose();
             setIsBinTransferLoading(false);
-            const errorMessage =
-            error?.response?.data?.res1?.error?.message?.value;
-            const systemError = error?.response?.data?.error;
-            const displayError = errorMessage
-                ? errorMessage
-                : systemError
-                ? systemError
-                : "";
+            const systemError = error?.response?.data?.error ? error?.response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
                     <p>
-                        ${displayError ? "<li>" + displayError + "</li>" : ""}
-
+                        ${systemError ? "<li>" + systemError + "</li>" : ""}
                     </p>
                 `,
                 icon: "error",
