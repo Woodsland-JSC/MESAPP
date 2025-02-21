@@ -59,7 +59,7 @@ class RolesandPermissions extends Seeder
       ['id' => '31', 'name' => 'BCDAND_xulyloi', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
 
       // QLHH
-      ['id' => '32', 'name' => 'DCHH', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
+      ['id' => '32', 'name' => 'dieuchuyenbinkho', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
     ];
     DB::table("permissions")->insert($permissionData);
 

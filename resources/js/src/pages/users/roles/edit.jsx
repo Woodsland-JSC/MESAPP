@@ -20,7 +20,7 @@ import Loader from "../../../components/Loader";
 import roleApi from "../../../api/roleApi";
 import userApi from "../../../api/userApi";
 import { Spinner } from "@chakra-ui/react";
-import { FaWarehouse } from "react-icons/fa6";
+import { FaBox, FaWarehouse } from "react-icons/fa6";
 import { FaUserGear } from "react-icons/fa6";
 import { FaIndustry } from "react-icons/fa6";
 import { BiSolidReport } from "react-icons/bi";
@@ -59,6 +59,14 @@ const dryingPermissions = [
         value: "danhgiame",
         name: "Đánh giá mẻ sấy",
         description: "Đánh giá mẻ sấy trong lò",
+    },
+];
+
+const goodsManagementPermissions = [
+    {
+        value: "dieuchuyenbinkho",
+        name: "Điều chuyển hàng hóa theo bin, kho",
+        description: "Xếp bin và điều chuyển bin, kho",
     },
 ];
 
@@ -727,6 +735,56 @@ function EditRole() {
                                             </p>
                                         </Checkbox>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Transfer */}
+                            <div className="mb-3">
+                                <div className="w-full flex bg-[#F8FAFC] border-gray-200 border-t-2 border-b-2 py-1.5 items-center justify-between px-6">
+                                    <div className="flex items-center space-x-3 w-[60%] uppercase py-1 font-bold text-lg">
+                                        <div className="flex space-x-3">
+                                            <FaBox className="w-6 h-6 text-[#17506B]" />
+                                            <div>Chức năng quản lý hàng hóa</div>
+                                        </div>
+                                        <span className="text-base text-gray-400">
+                                            {""}/VẬN HÀNH
+                                        </span>
+                                    </div>
+
+                                    <div className="text-left  w-[20%] rounded-lg">
+                                        {/* <Checkbox size="lg">
+                                            Chọn tất cả
+                                        </Checkbox> */}
+                                    </div>
+                                </div>
+
+                                <div className="py-2">
+                                    {goodsManagementPermissions?.map(
+                                        (item, index) => (
+                                            <div className="flex px-6 py-3">
+                                                <div className="font-medium w-[40%] pl-8">
+                                                    {item.name}
+                                                </div>
+                                                <div className="w-[40%] text-[16px]">
+                                                    {item.description}
+                                                </div>
+                                                <Checkbox
+                                                    className=" w-[20%]"
+                                                    size="lg"
+                                                    value={item.value}
+                                                    isChecked={updatedRoleInfo?.permission?.includes(
+                                                        item.value
+                                                    )}
+                                                    onChange={(e) =>
+                                                        handlePermissionChange(
+                                                            e,
+                                                            item.value
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             </div>
 
