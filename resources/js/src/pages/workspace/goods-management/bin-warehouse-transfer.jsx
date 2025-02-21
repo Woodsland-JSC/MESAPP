@@ -755,7 +755,7 @@ function BinWarehouseTransfer() {
             console.error("Lỗi điều chuyển:", error);
             setIsBinStackingLoading(false);
             onConfirmClose();
-            const systemError = error?.response?.data?.error ? error?.response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
+            const systemError = response?.data?.error ? response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
@@ -834,7 +834,7 @@ function BinWarehouseTransfer() {
             console.log(error);
             onConfirmClose();
             setIsBinTransferLoading(false);
-            const systemError = error?.response?.data?.error ? error?.response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
+            const systemError = response?.data?.error ? response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
