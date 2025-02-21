@@ -755,14 +755,12 @@ function BinWarehouseTransfer() {
             console.error("Lỗi điều chuyển:", error);
             setIsBinStackingLoading(false);
             onConfirmClose();
-            const systemError = response?.data?.error ? response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
+            const errorMessage = error?.response?.data?.message || "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
-                    <p>
-                        ${systemError ? "<li>" + systemError + "</li>" : ""}
-                    </p>
+                    <p><li>${errorMessage}</li></p>
                 `,
                 icon: "error",
             });
@@ -834,14 +832,12 @@ function BinWarehouseTransfer() {
             console.log(error);
             onConfirmClose();
             setIsBinTransferLoading(false);
-            const systemError = response?.data?.error ? response?.data?.error : "Lỗi kết nối hoặc lỗi hệ thống.";
+            const errorMessage = error?.response?.data?.message || "Lỗi kết nối hoặc lỗi hệ thống.";
             Swal.fire({
                 title: "Điều chuyển thất bại!",
                 html: `
                     <p>Chi tiết lỗi:<br></p>
-                    <p>
-                        ${systemError ? "<li>" + systemError + "</li>" : ""}
-                    </p>
+                    <p><li>${errorMessage}</li></p>
                 `,
                 icon: "error",
             });
