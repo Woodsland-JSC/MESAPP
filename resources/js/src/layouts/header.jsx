@@ -380,8 +380,8 @@ function Header(props) {
                                         label={`Tín hiệu mạng: ${networkStatus.status}`}
                                         bg="black"
                                     >
-                                        <div className={`text-sm flex gap-x-2 font-medium items-center`}>
-                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
+                                        <div className={`text-sm flex gap-x-2 font-medium items-center p-2 px-[9px] bg-[#F7F7F7] rounded-full`}>
+                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[21px] h-[21px]"} />}
                                             {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
                                             {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}

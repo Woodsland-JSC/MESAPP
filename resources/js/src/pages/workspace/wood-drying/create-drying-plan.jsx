@@ -21,7 +21,7 @@ import AsyncSelect from "react-select/async";
 import palletsApi from "../../../api/palletsApi";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { addDays, format, add } from "date-fns";
+import { addDays, format, add, set } from "date-fns";
 import moment from "moment";
 import Loader from "../../../components/Loader";
 import useAppContext from "../../../store/AppContext";
@@ -163,7 +163,7 @@ function CreateDryingPlan() {
         return true;
     };
 
-    const handleCompletion = () => {
+    const handleCompletion = async () => {
         if (validateData()) {
             console.log("1. Dữ liệu thu thập được:", {
                 "Mã Lò": selectedKiln.value,
@@ -208,7 +208,7 @@ function CreateDryingPlan() {
                     };
 
                     setCreatedBowCards([newBowCard, ...createdBowCards]);
-
+                    getBOWLists();
                     toast.success("Tạo kế hoạch sấy thành công.");
 
                     setSelectedKiln(null);
@@ -232,7 +232,7 @@ function CreateDryingPlan() {
     const combinedBowCards = [...createdBowCards, ...bowCards];
 
     const filteredBowCards = combinedBowCards?.filter(bowCard =>
-        bowCard.Oven.toLowerCase().includes(searchTerm?.toLowerCase())
+        bowCard?.Oven?.toLowerCase().includes(searchTerm?.toLowerCase())
     );
 
     return (

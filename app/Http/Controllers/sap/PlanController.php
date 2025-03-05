@@ -76,7 +76,7 @@ class PlanController extends Controller
             ->select('a.*')
             ->where('b.branch', '=', Auth::user()->branch)
             ->where('b.plant', '=', Auth::user()->plant)
-            ->where('a.Status', '<>', '4')
+            ->where('a.Status', '<>', '2')
             ->get();
 
         return response()->json($plans, 200);

@@ -20,8 +20,6 @@ function BOWCard(props) {
         type,
     } = props;
 
-    console.log("Review:", isReviewed)
-
     const location = useLocation();
 
     let detailLink = "/workspace/details";
@@ -39,8 +37,6 @@ function BOWCard(props) {
     } else if (location.pathname === "/workspace/kiln") {
         detailLink = `/workspace/details?id=${planID}&type=ls`;
     }
-
-    console.log("Giá trị số lượng tổng: ", palletQty)
 
     const getStatusContent = () => {
         return status === 0 ? (

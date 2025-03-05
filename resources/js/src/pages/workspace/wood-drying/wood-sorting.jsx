@@ -45,6 +45,7 @@ function WoodSorting() {
         onOpen: onPalletTracingOpen,
         onClose: onPalletTracingClose,
     } = useDisclosure();
+    const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
 
     // States
     const [loading, setLoading] = useState(false);
@@ -254,13 +255,6 @@ function WoodSorting() {
             method.label.toLowerCase().includes(inputValue.toLowerCase())
         );
     };
-
-    // Sử dụng useEffect để load data khi selectedDryingReason thay đổi
-    // useEffect(() => {
-    //     if (selectedDryingReason?.value) {
-    //       loadDryingMethodsData(selectedDryingReason.value);
-    //     }
-    // }, [selectedDryingReason]);
 
     // Validating
     const validateData = () => {
@@ -473,6 +467,7 @@ function WoodSorting() {
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
             toast.error("Danh sách không được để trống.");
+            onConfirmClose();
             return;
         }
 
@@ -515,14 +510,13 @@ function WoodSorting() {
         if (hasInvalidQuantity) {
             setIsInvalidQuantity(true);
             toast.error("Giá trị số lượng không hợp lệ.");
+            onConfirmClose();
             return;
         } else {
             setIsInvalidQuantity(false);
         }
 
         const palletObject = createPalletObject();
-        console.log("2.5. Thông tin pallet sẽ được gửi đi:", palletObject);
-
         setCreatePalletLoading(true);
 
         try {
@@ -707,7 +701,6 @@ function WoodSorting() {
                         </div>
                     </div>
                     
-
                     {/* Header */}
                     <div className="flex justify-between xl:mb-4 lg:mb-4 md:mb-4 mb-0 items-center">
                         <div className="flex space-x-4">
@@ -1820,7 +1813,7 @@ function WoodSorting() {
                             </div>
                             <button
                                 type="button"
-                                onClick={handleCreatePallet}
+                                onClick={onConfirmOpen}
                                 className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
                                 {createPalletLoading ? (
@@ -1837,6 +1830,62 @@ function WoodSorting() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Confirm Modal */}
+                    <Modal
+                        isCentered
+                        isOpen={isConfirmOpen}
+                        onClose={onConfirmClose}
+                        size="xl"
+                        blockScrollOnMount={false}
+                        closeOnOverlayClick={false}
+                    >
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>
+                                Bạn chắc chắn muốn thực hiện hành động này?
+                            </ModalHeader>
+                            <ModalBody>
+                                <div className="space-y-4">
+                                    <div>
+                                        Sau khi xác nhận sẽ không thể thu hồi hành động.
+                                    </div>
+                                </div>
+                            </ModalBody>
+
+                            <ModalFooter>
+                                <div className="flex items-center space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            onConfirmClose();
+                                        }}
+                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled={createPalletLoading}
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        type="button"
+                                        onClick={() => {
+                                            handleCreatePallet();
+                                        }}
+                                    >
+                                        {createPalletLoading? (
+                                            <div className="flex items-center space-x-4">
+                                                <Spinner size="sm" color="white" />
+                                                <div>Đang thực hiện</div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                Xác nhận
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>                    
                 </div>
             </div>
             {
