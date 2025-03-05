@@ -942,7 +942,7 @@ function DeliveryDetailReport() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-4 bg-[#dbdcdd] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
+                        <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
                             <div className="dots my-1"></div>
                         </div>
                     ) : (
@@ -970,7 +970,7 @@ function DeliveryDetailReport() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
+                                <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}
@@ -984,7 +984,7 @@ function DeliveryDetailReport() {
                         </div>
                         {/* Data */}
                         {isDataReportLoading ? (
-                            <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                            <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                                 <div className="dots my-1"></div>
                             </div>
                         ) : (
@@ -1093,7 +1093,7 @@ function DeliveryDetailReport() {
                                         <div className="pb-3"></div>
                                     </>
                                 ) : (
-                                    <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                    <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                                         Không có dữ liệu để hiển thị.
                                     </div>
                                 )}

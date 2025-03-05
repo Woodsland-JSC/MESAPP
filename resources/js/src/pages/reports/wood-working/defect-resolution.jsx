@@ -435,7 +435,7 @@ function DefectResolution() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                        <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                             {/* <div>Đang tải dữ liệu</div> */}
                             <div class="dots"></div>
                         </div>
@@ -464,7 +464,7 @@ function DefectResolution() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}

@@ -534,6 +534,7 @@ function WoodSorting() {
                     text: "Mã pallet đã được tạo!",
                     icon: "success",
                 });
+                onConfirmClose();
 
                 if (woodTypeSelectRef) {
                     woodTypeSelectRef.clearValue();
@@ -564,6 +565,7 @@ function WoodSorting() {
                 ? systemError
                 : "";
             setCreatePalletLoading(false);
+            onConfirmClose();
             Swal.fire({
                 title: "Có lỗi khi tạo pallet.",
                 html: `
@@ -1816,17 +1818,8 @@ function WoodSorting() {
                                 onClick={onConfirmOpen}
                                 className="flex items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center gap-x-2 active:scale-[.95] active:duration-75 transition-all"
                             >
-                                {createPalletLoading ? (
-                                    <div className="flex items-center space-x-4">
-                                        <Spinner size="sm" color="white" />
-                                        <div>Đang tạo pallet</div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <HiPlus className="text-xl" />
-                                        Tạo pallet
-                                    </>
-                                )}
+                                <HiPlus className="text-xl" />
+                                Tạo pallet
                             </button>
                         </div>
                     </div>
