@@ -135,7 +135,7 @@ function Header(props) {
     return (
         <div className="sticky top-0 z-50">
             <div
-                className={`flex h-[69px] bg-transparent items-center ${
+                className={`flex h-[69px] bg-[#eaeaed]/30 backdrop-blur-lg items-center ${
                     variant == "homepage"
                         ? "border-b-2 border-white"
                         : "border-b-2 border-none"

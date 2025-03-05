@@ -693,7 +693,7 @@ function WoodSorting() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex mb-4 xl:mb-0 justify-center h-screen bg-transparent">
+            <div className="flex mb-4 xl:mb-0 justify-center bg-transparent">
                 {/* Section */}
                 <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}

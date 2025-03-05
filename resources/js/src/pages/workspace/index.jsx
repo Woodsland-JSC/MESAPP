@@ -295,7 +295,7 @@ function Workspace() {
                                                     ) : (
                                                         <div key={permission}>
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#bbbbc3] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
                                                                         <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
                                                                             {
@@ -508,7 +508,7 @@ function Workspace() {
                                                     ) : (
                                                         <div key={title}>
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#bbbbc3]rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
                                                                         <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
                                                                             {
@@ -710,7 +710,7 @@ function Workspace() {
                                                     ) : (
                                                         <div key={title}>
                                                             <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#D5D5DB] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
+                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#bbbbc3] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
                                                                     <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
                                                                         <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
                                                                             {

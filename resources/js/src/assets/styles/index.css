@@ -8,12 +8,24 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-hmtl {
-    min-height: 100vh;
-}
+html {
+    background: linear-gradient(
+        180deg, 
+        #eaeaed 0%,                   
+        #e7e7ee ,   
+        #d4d4de                       
+    ), transparent 0;
+    background-repeat:no-repeat;
+    min-height: 100%;
+    min-width: 1024px;
+  
+    width: 100%;
+    height: auto;
+  }
 
 body {
-    background: #eaeaed !important;
+    /* background: #eaeaed !important; */
+    background: transparent !important;
 }
 
 .ag-root-wrapper-body.ag-layout-normal {
