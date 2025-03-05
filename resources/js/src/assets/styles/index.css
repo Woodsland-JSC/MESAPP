@@ -8,6 +8,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+hmtl {
+    min-height: 100vh;
+}
+
 body {
     background: #eaeaed !important;
 }

@@ -50,6 +50,7 @@ function WoodSorting() {
     const [loading, setLoading] = useState(false);
     const [createPalletLoading, setCreatePalletLoading] = useState(false);
     const [palletHistoryLoading, setPalletHistoryLoading] = useState(false);
+    const [palletListLoading, setPalletListLoading] = useState(false);
     const [palletTracingLoading, setPalletTracingLoading] = useState(false);
 
     const [woodTypes, setWoodTypes] = useState([]);
@@ -98,6 +99,7 @@ function WoodSorting() {
     );
 
     const loadPalletCallback = async (inputValue, callback) => {
+        setPalletListLoading(true);
         if (selectedYear && selectedWeek) {
             try {
                 const response = await axios.get(
@@ -125,9 +127,11 @@ function WoodSorting() {
                         "Error fetching pallets: Invalid response format"
                     );
                 }
+                setPalletListLoading(false);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 toast.error("Có lỗi trong quá trình load dữ liệu.");
+                setPalletListLoading(false);
             }
         }
     };
@@ -689,7 +693,7 @@ function WoodSorting() {
     return (
         <Layout>
             {/* Container */}
-            <div className="flex mb-4 xl:mb-0 justify-center h-full bg-transparent">
+            <div className="flex mb-4 xl:mb-0 justify-center h-screen bg-transparent">
                 {/* Section */}
                 <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
                     {/* Go back */}
@@ -997,7 +1001,7 @@ function WoodSorting() {
                         <ModalOverlay />
                         <ModalContent>
                             <ModalHeader className="border-b border-gray-200 shadow-sm">
-                                <div className="uppercase">
+                                <div className="serif text-2xl font-bold">
                                     Truy nguyên pallet
                                 </div>
                             </ModalHeader>
@@ -1057,18 +1061,12 @@ function WoodSorting() {
                                                     />
                                                 </div>
                                                 <div className="col-span-2 3">
-                                                    <AsyncSelect
+                                                    <Select
                                                         placeholder="Chọn pallet"
-                                                        key={asyncSelectKey}
-                                                        loadingMessage={() =>
-                                                            "Đang tải..."
-                                                        }
                                                         // id="pallet"
                                                         defaultOptions
-                                                        // options={palletOptions}
-                                                        loadOptions={
-                                                            loadPalletOptions
-                                                        }
+                                                        options={palletOptions}
+                                                        isDisabled={palletListLoading}
                                                         onChange={(value) => {
                                                             console.log(
                                                                 "Selected Pallet:",

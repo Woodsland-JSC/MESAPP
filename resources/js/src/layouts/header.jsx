@@ -34,6 +34,7 @@ import {
     IconButton,
     Tooltip,
 } from "@chakra-ui/react";
+import { RiExpandUpDownLine } from "react-icons/ri";
 
 import {
     Menu,
@@ -79,7 +80,7 @@ function Header(props) {
                     status = "Trung bình";
                 } else if (downlink < 3) {
                     status = "Kém";
-                }   else if (downlink >= 10) {
+                } else if (downlink >= 10) {
                     status = "Tốt";
                 }
 
@@ -134,7 +135,7 @@ function Header(props) {
     return (
         <div className="sticky top-0 z-50">
             <div
-                className={`flex h-[69px] bg-[#eaeaed] items-center ${
+                className={`flex h-[69px] bg-transparent items-center ${
                     variant == "homepage"
                         ? "border-b-2 border-white"
                         : "border-b-2 border-none"
@@ -267,11 +268,30 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <div className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}>
-                                    {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
+                                <div
+                                    className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}
+                                >
+                                    {networkStatus.status === "Tốt" && (
+                                        <GoodNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status === "Trung bình" && (
+                                        <MediumNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status === "Kém" && (
+                                        <BadNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status ===
+                                        "Không có mạng" && (
+                                        <Offline
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
                                 </div>
                                 <IconButton
                                     variant="ghost"
@@ -379,11 +399,39 @@ function Header(props) {
                                         label={`Tín hiệu mạng: ${networkStatus.status}`}
                                         bg="black"
                                     >
-                                        <div className={`text-sm flex gap-x-2 font-medium items-center`}>
-                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
+                                        <div
+                                            className={`text-sm flex gap-x-2 p-2 px-[9px] bg-[#F7F7F7] rounded-full font-medium items-center`}
+                                        >
+                                            {networkStatus.status === "Tốt" && (
+                                                <GoodNetwork
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status ===
+                                                "Trung bình" && (
+                                                <MediumNetwork
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status === "Kém" && (
+                                                <BadNetwork
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status ===
+                                                "Không có mạng" && (
+                                                <Offline
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
                                         </div>
                                     </Tooltip>
                                     <MenuButton righticon={<TbChevronDown />}>
@@ -391,24 +439,50 @@ function Header(props) {
                                             variant="ghost"
                                             fontWeight="regular"
                                         >
-                                            <div className="space-y-0">
-                                                <div className="text-[16px] font-medium text-right">
-                                                    {(user?.last_name
-                                                        ? user?.last_name + " "
-                                                        : "") +
-                                                        (user?.first_name
-                                                            ? user?.first_name
-                                                            : "")}
+                                            <div className="flex items-center space-x-4 bg-[#F7F7F7] p-1 px-3.5 pl-1 rounded-full font-medium">
+                                                <div className="relative rounded-full border-white border-2 w-fit h-fit">
+                                                    <img
+                                                        src={
+                                                            user?.avatar
+                                                                ? user.avatar
+                                                                : defaultUser
+                                                        }
+                                                        alt="user"
+                                                        className=" w-8 h-8 rounded-full object-cover"
+                                                    />
+                                                    {user?.role == 1 && (
+                                                        <Tooltip
+                                                            hasArrow
+                                                            label="Người quản trị"
+                                                            bg="black"
+                                                        >
+                                                            <div className="absolute -bottom-1 -right-2 rounded-full bg-white w-fit h-fit">
+                                                                <TbCircleKeyFilled className="w-5 h-5 text-[black]"></TbCircleKeyFilled>
+                                                            </div>
+                                                        </Tooltip>
+                                                    )}
                                                 </div>
-                                                <div className="text-xs text-right text-gray-600">
-                                                    {user?.email ||
-                                                        "Không xác định"}
+                                                <div className="space-y-0">
+                                                    <div className="text-[15px] font-semibold text-left">
+                                                        {(user?.last_name
+                                                            ? user?.last_name +
+                                                              " "
+                                                            : "") +
+                                                            (user?.first_name
+                                                                ? user?.first_name
+                                                                : "")}
+                                                    </div>
+                                                    <div className="text-xs font-regular text-right text-gray-500">
+                                                        {user?.email ||
+                                                            "Không xác định"}
+                                                    </div>
                                                 </div>
+                                                <RiExpandUpDownLine className="text-lg"/>
                                             </div>
                                         </Button>
                                     </MenuButton>
 
-                                    <MenuList className="!w-[200px] text-[15px]">
+                                    <MenuList className="relative !left-2 !w-[150px] text-[15px]">
                                         {/* <div className="px-3 py-2">
                                             <div className="font-semibold">Nhà máy Yên Sơn</div>
                                         </div> */}
@@ -424,26 +498,6 @@ function Header(props) {
                                         </MenuItem>
                                     </MenuList>
                                 </Menu>
-                            </div>
-                            <div className="relative rounded-full border-white border-2 w-fit h-fit">
-                                <img
-                                    src={
-                                        user?.avatar ? user.avatar : defaultUser
-                                    }
-                                    alt="user"
-                                    className=" w-9 h-9 rounded-full object-cover"
-                                />
-                                {user?.role == 1 && (
-                                    <Tooltip
-                                        hasArrow
-                                        label="Người quản trị"
-                                        bg="black"
-                                    >
-                                        <div className="absolute -bottom-1 -right-2 rounded-full bg-white w-fit h-fit">
-                                            <TbCircleKeyFilled className="w-5 h-5 text-[black]"></TbCircleKeyFilled>
-                                        </div>
-                                    </Tooltip>
-                                )}
                             </div>
                         </>
                     ) : (

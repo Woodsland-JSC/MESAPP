@@ -132,7 +132,7 @@ function Workspace() {
             {/* Container */}
             <div className="flex overflow-x-hidden justify-center bg-transparent ">
                 {/* Section */}
-                <div className="w-screen  xl:p-10 lg:p-10 md:p-8 p-6 py-4 px-5 xl:px-32 ">
+                <div className="w-screen bg-transparent xl:p-10 lg:p-10 md:p-8 p-6 py-4 px-5 xl:px-32 ">
                     {/* Header */}
                     <div className="flex items-center justify-between xl:mb-8 lg:mb-8 md:mb-8 mb-5">
                         <div className="">
