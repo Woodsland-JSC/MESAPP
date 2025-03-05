@@ -135,7 +135,7 @@ function Header(props) {
     return (
         <div className="sticky top-0 z-50">
             <div
-                className={`flex h-[69px] bg-[#eaeaed]/30 backdrop-blur-lg items-center ${
+                className={`flex h-[69px] xl:bg-[#eaeaed]/30 lg:bg-[#eaeaed]/30 md:bg-[#eaeaed]/30 xl:backdrop-blur-lg lg:backdrop-blur-lg md:backdrop-blur-lg items-center ${
                     variant == "homepage"
                         ? "border-b-2 border-white"
                         : "border-b-2 border-none"
@@ -268,30 +268,11 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <div
-                                    className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}
-                                >
-                                    {networkStatus.status === "Tốt" && (
-                                        <GoodNetwork
-                                            className={"w-[22px] h-[22px]"}
-                                        />
-                                    )}
-                                    {networkStatus.status === "Trung bình" && (
-                                        <MediumNetwork
-                                            className={"w-[22px] h-[22px]"}
-                                        />
-                                    )}
-                                    {networkStatus.status === "Kém" && (
-                                        <BadNetwork
-                                            className={"w-[22px] h-[22px]"}
-                                        />
-                                    )}
-                                    {networkStatus.status ===
-                                        "Không có mạng" && (
-                                        <Offline
-                                            className={"w-[22px] h-[22px]"}
-                                        />
-                                    )}
+                                <div className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}>
+                                    {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                    {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                 </div>
                                 <IconButton
                                     variant="ghost"
@@ -399,39 +380,11 @@ function Header(props) {
                                         label={`Tín hiệu mạng: ${networkStatus.status}`}
                                         bg="black"
                                     >
-                                        <div
-                                            className={`text-sm flex gap-x-2 p-2 px-[9px] bg-[#F7F7F7] rounded-full font-medium items-center`}
-                                        >
-                                            {networkStatus.status === "Tốt" && (
-                                                <GoodNetwork
-                                                    className={
-                                                        "w-[22px] h-[22px]"
-                                                    }
-                                                />
-                                            )}
-                                            {networkStatus.status ===
-                                                "Trung bình" && (
-                                                <MediumNetwork
-                                                    className={
-                                                        "w-[22px] h-[22px]"
-                                                    }
-                                                />
-                                            )}
-                                            {networkStatus.status === "Kém" && (
-                                                <BadNetwork
-                                                    className={
-                                                        "w-[22px] h-[22px]"
-                                                    }
-                                                />
-                                            )}
-                                            {networkStatus.status ===
-                                                "Không có mạng" && (
-                                                <Offline
-                                                    className={
-                                                        "w-[22px] h-[22px]"
-                                                    }
-                                                />
-                                            )}
+                                        <div className={`text-sm flex gap-x-2 font-medium items-center`}>
+                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
+                                            {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
                                         </div>
                                     </Tooltip>
                                     <MenuButton righticon={<TbChevronDown />}>
@@ -482,7 +435,7 @@ function Header(props) {
                                         </Button>
                                     </MenuButton>
 
-                                    <MenuList className="relative !left-2 !w-[150px] text-[15px]">
+                                    <MenuList className="xl:relative lg:relative md:relative xl:!left-2 lg:!left-2 md:!left-2 !w-[150px] text-[15px]">
                                         {/* <div className="px-3 py-2">
                                             <div className="font-semibold">Nhà máy Yên Sơn</div>
                                         </div> */}

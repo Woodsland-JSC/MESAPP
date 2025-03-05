@@ -542,7 +542,7 @@ function CreateUser() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-transparent h-screen">
+            <div className="flex justify-center bg-transparent">
                 {/* Section */}
                 <div className="w-screen xl:p-12 xl:pt-6 p-4 px-5 xl:px-32 border-t border-gray-200">
                     {/* Go back */}

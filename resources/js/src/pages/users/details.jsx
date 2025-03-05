@@ -619,7 +619,7 @@ function User() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-transparent h-screen ">
+            <div className="flex justify-center bg-transparent">
                 {/* Section */}
                 <div className="w-screen px-0 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 xl:px-32 border-t border-gray-200">
                     {/* Go back */}

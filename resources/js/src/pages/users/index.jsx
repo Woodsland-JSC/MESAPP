@@ -458,7 +458,7 @@ function Users() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-transparent h-screen ">
+            <div className="flex justify-center bg-transparent">
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-8 xl:px-32 ">
                     {/* Header */}
