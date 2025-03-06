@@ -382,7 +382,7 @@ function Workspace() {
                                                         "DAND",
                                                         "DAND(CX)",
                                                     ],
-                                                    select: "ND",
+                                                    link: "/workspace/domestic/finished-goods-receipt",
                                                     icon: (
                                                         <HiArchiveBoxArrowDown />
                                                     ),
@@ -392,7 +392,7 @@ function Workspace() {
                                                     type: "ND",
                                                 },
                                                 {
-                                                    permission: ["TDLDND"],
+                                                    permission: ["X"],
                                                     link: "/workspace/inland/installation-progress",
                                                     icon: <HiViewColumns />,
                                                     title: "Tiến độ lắp đặt nội địa",
@@ -545,7 +545,7 @@ function Workspace() {
                                         <div className="grid xl:grid-cols-3 xl:gap-x-6 gap-2 xl:gap-y-6 grid-cols-2">
                                             {[
                                                 {
-                                                    permission: ["DCHH"],
+                                                    permission: ["dieuchuyenbinkho"],
                                                     link: "/workspace/goods-management/bin-warehouse-transfer",
                                                     icon: <HiMiniTruck />,
                                                     title: "Điều chuyển hàng hóa theo bin",
@@ -755,7 +755,7 @@ function Workspace() {
                     </div> */}
                 </div>
             </div>
-            {openInlandSelect && (
+            {/* {openInlandSelect && (
                 <div
                     className="loader bg-[#eaeaed] bg-opacity-75 backdrop-blur-sm flex justify-center items-center"
                     onClick={() => setOpenInlandSelect(false)}
@@ -803,7 +803,7 @@ function Workspace() {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
         </Layout>
     );
 }

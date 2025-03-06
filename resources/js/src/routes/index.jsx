@@ -79,6 +79,9 @@ import HumidityCheck from "../components/HumidityCheck";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 
+// Domestic
+import DomesticFinishedGoodsReceipt from "../pages/workspace/domestic/finished-goods-receipt";
+
 // Transfer
 import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-warehouse-transfer";
 
@@ -195,7 +198,15 @@ function AppRoutes() {
                         }
                     />
 
-                    {/* Inland  */}
+                    {/* Domestic  */}
+                    <Route
+                        path="/workspace/domestic/finished-goods-receipt"
+                        element={
+                            <ProtectedRoute>
+                                <DomesticFinishedGoodsReceipt />
+                            </ProtectedRoute>
+                        }
+                    />
                     {/* <Route
                         path="/workspace/inland/finished-details-receipt"
                         element={

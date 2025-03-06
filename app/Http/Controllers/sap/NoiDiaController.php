@@ -56,10 +56,7 @@ class NoiDiaController extends Controller
                 'error' => $res['error'],
                 'body' => $body
             ], 500);
-
         }
-
-
     }
 
     public function DanhSachLenh()
@@ -85,6 +82,7 @@ class NoiDiaController extends Controller
         odbc_close($conDB);
         return response()->json($data);
     }
+    
     public function ChiTietLenh($id)
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -106,7 +104,7 @@ class NoiDiaController extends Controller
                 'LineId' => (integer)odbc_result($stmt, "LineId"),
                 'PlanQty' =>(float) odbc_result($stmt, "PlanQty"),
                 'CompletedQty' => (float)odbc_result($stmt, "ComplQty"),
-                'RemaingQty' => (float) odbc_result($stmt, "RemainQty")
+                'RemainQty' => (float) odbc_result($stmt, "RemainQty")
             ];
         }
         odbc_close($conDB);
