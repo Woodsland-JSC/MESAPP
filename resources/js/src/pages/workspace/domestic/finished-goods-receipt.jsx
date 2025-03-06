@@ -22,15 +22,6 @@ import { Spinner } from "@chakra-ui/react";
 import EmptyData from "../../../assets/images/empty-data.svg";
 import { set } from "date-fns";
 
-const options = [
-    { value: "SP01", label: "Solid wood furniture" },
-    { value: "SP02", label: "Plywood" },
-    { value: "SP03", label: "Medium-density fiberboard (MDF)" },
-    { value: "SP04", label: "Laminated wood" },
-    { value: "SP05", label: "Veneered wood" },
-    { value: "SP06", label: "Wood pellets" },
-];
-
 const FinishedGoodsReceipt = () => {
     const navigate = useNavigate();
     const [selectedGroup, setSelectedGroup] = useState(null);
@@ -95,7 +86,25 @@ const FinishedGoodsReceipt = () => {
     };
     
     const handleSubmit = async() => {
-        setIsSubmitting(true);
+        for (let i = 0; i < productList.length; i++) {
+            const item = productList[i];
+            const soLuong = inputValues[i].quantity ? parseInt(inputValues[i].quantity) : 0;
+    
+            if (soLuong > item.RemainQty) {
+                toast.error(`Số lượng ghi nhận của ${item.MACT} không được lớn hơn số lượng còn lại phải sản xuất (${item.RemainQty}).`);
+                setIsSubmitting(false);
+                onClose();
+                return;
+            }
+    
+            if (soLuong <= 0) {
+                toast.error(`Số lượng ghi nhận của ${item.MACT} phải lớn hơn 0.`);
+                setIsSubmitting(false);
+                onClose();
+                return;
+            }
+        }
+        
         const submittedData = {
             "LSX": selectedDocEntry,
             "SPDich": selectedSPDich,
@@ -103,14 +112,31 @@ const FinishedGoodsReceipt = () => {
                 "MaCT": item.MACT,
                 "SoLuong": inputValues[index].quantity ? parseInt(inputValues[index].quantity) : 0,
                 "LineId": item.LineId,
-                "MaHop": inputValues[index].boxCode || undefined 
+                "MaHop": inputValues[index].boxCode || "Không có mã hộp"
             }))
         };
-
         console.log("Dữ liệu ghi nhận:", submittedData);
-        toast.success("Dữ liệu đã được ghi nhận.");
-        setIsSubmitting(false);
-        onClose();
+        setIsSubmitting(true);
+
+        try {
+            await domesticApi.handleReceipt(submittedData);
+            
+            toast.success("Dữ liệu đã được ghi nhận.");
+            setInputValues([]);
+            setProductionOrderList([]);
+            setProductList([]);
+            setSelectedDocEntry(null);
+            setSelectedSPDich(null); 
+            getProductionOrderList();   
+            setIsSubmitting(false);
+            onClose();
+        } catch (error) {
+            console.error(error);
+            toast.error("Lỗi khi ghi nhận dữ liệu");
+            setIsSubmitting(false);
+            onClose();
+        }
+
     };
 
     useEffect(() => {
@@ -181,6 +207,10 @@ const FinishedGoodsReceipt = () => {
                                         <>
                                             {productList?.length > 0 ? (
                                                 <div>
+                                                    <div className=" pb-3">
+                                                        <div className="text-sm text-gray-500 uppercase font-medium">Mã lệnh: {selectedDocEntry}</div>
+                                                        <div className="text-lg font-bold text-[#17506B]">Sản phẩm: {selectedSPDich}</div>
+                                                    </div>
                                                     <div className="border border-gray-300 rounded-lg">
                                                         <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
                                                             <thead>
@@ -207,10 +237,6 @@ const FinishedGoodsReceipt = () => {
                                                                     </th>
                                                                     <th className="px-4 py-2 border border-gray-300">
                                                                         Mã hộp
-                                                                        <span className="text-red-500">
-                                                                            {" "}
-                                                                            *
-                                                                        </span>
                                                                     </th>
                                                                 </tr>
                                                             </thead>
@@ -219,8 +245,8 @@ const FinishedGoodsReceipt = () => {
                                                                 <tbody key={index}>
                                                                     <tr className={index % 2 === 0 ? "bg-gray-50" : ""}>
                                                                         <td className="px-4 py-3 border border-gray-300">
-                                                                            <div className="uppercase text-sm text-gray-500">000000{item.MACT || "Không xác định"}</div>
-                                                                            <div className="font-semibold truncate">Sản phẩm {item.NameCT || "Không xác định"}</div>
+                                                                            <div className="uppercase text-sm text-gray-500">{item.MACT || "Không xác định"}</div>
+                                                                            <div className="font-semibold truncate">{item.NameCT || "Không xác định"}</div>
                                                                         </td>
                                                                         <td className="px-4 py-3 border border-gray-300">
                                                                             {item.PlanQty || 0}

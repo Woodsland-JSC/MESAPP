@@ -56,7 +56,6 @@ class NoiDiaController extends Controller
                 'error' => $res['error'],
                 'body' => $body
             ], 500);
-
         }
     }
 
