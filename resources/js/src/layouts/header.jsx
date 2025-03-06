@@ -135,7 +135,7 @@ function Header(props) {
     return (
         <div className="sticky top-0 z-50">
             <div
-                className={`flex h-[69px] xl:bg-[#eaeaed]/30 lg:bg-[#eaeaed]/30 md:bg-[#eaeaed]/30 xl:backdrop-blur-lg lg:backdrop-blur-lg md:backdrop-blur-lg items-center ${
+                className={`flex h-[69px] xl:bg-[#eaeaed]/30 lg:bg-[#eaeaed]/30 md:bg-[#eaeaed]/30 bg-[#eaeaed] xl:backdrop-blur-lg lg:backdrop-blur-lg md:backdrop-blur-lg items-center ${
                     variant == "homepage"
                         ? "border-b-2 border-white"
                         : "border-b-2 border-none"
