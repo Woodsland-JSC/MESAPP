@@ -126,18 +126,23 @@ const AwaitingReception = ({
                 zIndex: 50001,
             });
         };
-    
+
         const checkAndDisplayError = (errorMessage) => {
             toast.error(errorMessage);
             onInputAlertDialogClose();
         };
 
         console.log("Số lượng lỗi:", faults.Qty, data?.Quantity, variant);
-    
+
         if ((!faults.Qty || faults.Qty <= 0) && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
-        } else if ((parseInt(faults.Qty) > parseInt(data?.Quantity)) && variant === "QC") {
-            checkAndDisplayError("Số lượng lỗi không được lớn hơn số lượng ghi nhận.");
+        } else if (
+            parseInt(faults.Qty) > parseInt(data?.Quantity) &&
+            variant === "QC"
+        ) {
+            checkAndDisplayError(
+                "Số lượng lỗi không được lớn hơn số lượng ghi nhận."
+            );
         } else if (!faults.errorType && variant === "QC") {
             checkAndDisplayError("Loại lỗi không được bỏ trống.");
         } else if (!faults.solution && variant === "QC") {
@@ -165,10 +170,14 @@ const AwaitingReception = ({
                 if (payload.id) {
                     switch (type) {
                         case "plywood":
-                            res = await (variant === "QC" ? productionApi.acceptReceiptsVCNQC(payload) : productionApi.acceptReceiptsVCN(payload));
+                            res = await (variant === "QC"
+                                ? productionApi.acceptReceiptsVCNQC(payload)
+                                : productionApi.acceptReceiptsVCN(payload));
                             break;
                         default:
-                            res = await (variant === "QC" ? productionApi.acceptReceiptsCBGQC(payload) : productionApi.acceptReceiptsCBG(payload));
+                            res = await (variant === "QC"
+                                ? productionApi.acceptReceiptsCBGQC(payload)
+                                : productionApi.acceptReceiptsCBG(payload));
                             break;
                     }
                     setAcceptLoading(false);
@@ -178,14 +187,19 @@ const AwaitingReception = ({
                     showErrorAlert("Có lỗi xảy ra. Vui lòng thử lại");
                 }
             } catch (error) {
-                const errorMessage = error.response?.data?.error?.message?.value || error.response?.data?.message || error.response?.data?.error;
-                showErrorAlert(`${errorMessage? errorMessage : "Lỗi kết nối mạng."}`);
+                const errorMessage =
+                    error.response?.data?.error?.message?.value ||
+                    error.response?.data?.message ||
+                    error.response?.data?.error;
+                showErrorAlert(
+                    `${errorMessage ? errorMessage : "Lỗi kết nối mạng."}`
+                );
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
                 onInputAlertDialogClose();
             }
         }
-    };  
+    };
 
     const handleRejectReceipt = async () => {
         setRejectLoading(true);
@@ -281,59 +295,100 @@ const AwaitingReception = ({
     // errorTypeOptions, solutionOptions, teamBackOptions, rootCauseOptions, returnCodeOptions
 
     useEffect(() => {
-        setErrorTypeOptions(errorType?.map((item) => ({
-            value: item?.id || "",
-            label: item?.name || "",
-        })));
+        setErrorTypeOptions(
+            errorType?.map((item) => ({
+                value: item?.id || "",
+                label: item?.name || "",
+            }))
+        );
 
         // console.log("errorTypeOptions: ",filteredErrorTypes);
 
-        setSolutionOptions(solution?.map((item, index) => ({
-            value: item?.id || "",
-            label: item?.name || "",
-        })));
+        setSolutionOptions(
+            solution?.map((item, index) => ({
+                value: item?.id || "",
+                label: item?.name || "",
+            }))
+        );
         setTeamBackOptions(
             teamBack?.map((item) => ({
                 value: item?.Code || "",
                 label: `${item?.Name} - ${item?.Code}` || "",
             }))
         );
-        setRootCauseOptions(rootCause?.map((item, index) => ({
-            value: item?.id || "",
-            label: item?.name || "",
-        })));
-        setReturnCodeOptions(returnCode?.map((item, index) => ({
-            value: item?.ItemCode || "",
-            label: item?.ItemName || "",
-        })));
+        setRootCauseOptions(
+            rootCause?.map((item, index) => ({
+                value: item?.id || "",
+                label: item?.name || "",
+            }))
+        );
+        setReturnCodeOptions(
+            returnCode?.map((item, index) => ({
+                value: item?.ItemCode || "",
+                label: item?.ItemName || "",
+            }))
+        );
     }, [type, errorType]);
 
     return (
         <>
             <div
-                className={`bg-[#F7F7F7] rounded-xl ${
+                className={`bg-white rounded-3xl ${
                     variant === "QC"
                         ? " border-2 border-gray-200 !shadow-md"
                         : " border-2 border-gray-200 !shadow-md"
                 } `}
             >
-                <div className="!px-4 !py-3">
-                    <Stack mt="1" spacing="1">
-                        <div className="flex gap-2">
-                            {/* <span>Tên: </span> */}
-                            <span className="font-bold text-[19px] text-[#155979]">
-                                {variant === "QC" ? (
-                                    data?.SubItemName || data?.ItemName || "Sản phẩm không xác định"
-                                ) : (
-                                    data?.ItemName || (data?.CDay + "x" + data?.CRong + "x" + data?.CDai) || "Sản phẩm không xác định"
-                                )}
+                <div className="!px-5 !py-3.5">
+                    <Stack mt="1" spacing="4.5px">
+                        <div className="flex flex-col">
+                            <span className="uppercase text-xs font-semibold text-gray-500">
+                                {data?.SubItemName
+                                    ? "Bán thành phẩm"
+                                    : "Thành phẩm"}
                             </span>
-                            <span></span>
+                            <span className="font-bold text-[20px] text-[#155979]">
+                                {variant === "QC"
+                                    ? data?.SubItemName ||
+                                      data?.ItemName ||
+                                      "Sản phẩm không xác định"
+                                    : data?.ItemName ||
+                                      data?.CDay +
+                                          "x" +
+                                          data?.CRong +
+                                          "x" +
+                                          data?.CDai ||
+                                      "Sản phẩm không xác định"}
+                            </span>
+                            <div className="flex gap-4">
+                                <div className="flex grid-cols-1 items-center space-x-1">
+                                    <TbClock className="w-5 h-5 text-gray-500" />
+                                    <Text
+                                        color="gray.500"
+                                        fontWeight="600"
+                                        fontSize="sm"
+                                        className=""
+                                    >
+                                        {moment(
+                                            data?.created_at,
+                                            "YYYY-MM-DD HH:mm:ss"
+                                        ).format("HH:mm:ss") || ""}
+                                        {"  "}
+                                        {moment(
+                                            data?.created_at,
+                                            "YYYY-MM-DD HH:mm:ss"
+                                        ).format("DD/MM/YYYY") || ""}
+                                    </Text>
+                                </div>
+                            </div>
                         </div>
+                        <div className=""></div>
                         {type == "plywood" ? (
-                            <div className="flex gap-2">
-                                <span>Mã thành phẩm: </span>
-                                <span className="font-bold">
+                            <div className="flex w-full gap-2">
+                                <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-500">
+                                    Mã thành phẩm:{" "}
+                                </span>
+                                <span className="w-[65%] font-bold">
                                     {data?.ItemCode || "????"}
                                 </span>
                             </div>
@@ -347,93 +402,86 @@ const AwaitingReception = ({
                                                 {data?.SubItemCode || "???"}
                                             </span>
                                         </>
-                                        
                                     ) : (
                                         <>
-                                            <span>Mã thành phẩm: </span>
-                                            <span className="font-bold">
-                                                {data?.ItemCode || "????"}
+                                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                                Item Code:{" "}
+                                            </span>
+                                            <span className="w-[65%] font-bold">
+                                                {data?.ItemCode || "???"}
                                             </span>
                                         </>
-                                    )} 
-                                    <span className="font-bold text-gray-500 pentagon-container">{data?.MaThiTruong? "- " + data.MaThiTruong : ""}</span>
+                                    )}
+                                    <span className="font-bold text-gray-500 pentagon-container">
+                                        {data?.MaThiTruong
+                                            ? "- " + data.MaThiTruong
+                                            : ""}
+                                    </span>
                                 </div>
                             </>
                         )}
 
-                        <div className="flex gap-2">
-                            <span>Quy cách: </span>
-                            <span className="font-bold">
+                        <div className="flex ">
+                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                Quy cách:{" "}
+                            </span>
+                            <span className="w-[65%] font-bold">
                                 {data?.QuyCach || "0*0*0"}
                             </span>
                         </div>
 
-                        {CongDoan == "TP" && (<div className="flex gap-2">
-                            <span>Mã Thị Trường: </span>
-                            <span className="font-bold">
-                                {data?.MaThiTruong || "Chưa định nghĩa"}
-                            </span>
-                        </div>)}
+                        {CongDoan == "TP" && (
+                            <div className="flex">
+                                <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                    Mã Thị Trường:{" "}
+                                </span>
+                                <span className="w-[65%] font-bold">
+                                    {data?.MaThiTruong || "Chưa định nghĩa"}
+                                </span>
+                            </div>
+                        )}
 
-                        <div className="flex gap-2">
-                            <span>Công đoạn giao: </span>
-                            <span className="font-bold">
-                                {data?.CongDoan || "Không xác định"}
-                            </span>
-                        </div>
 
-                        <div className="flex gap-2">
-                            <span>Số lượng giao: </span>
-                            <span className="font-bold">
+
+                        <div className="flex ">
+                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                Số lượng giao:{" "}
+                            </span>
+                            <span className="w-[65%] font-bold">
                                 {Number(data?.Quantity) || 0}
                             </span>
                         </div>
 
-                        {data?.SLDG && (<div className="flex gap-2">
-                            <span>Số lượng đã đóng gói chờ giao: </span>
-                            <span className="font-bold">
-                                {Number(data?.SLDG) || 0}
-                            </span>
-                        </div>)}
-
-                        <span className="rounded-lg cursor-pointer px-2 py-2 text-white bg-[#155979] hover:bg-[#1A6D94] duration-300">
-                            Người tạo:{" "}
-                            <span className="font-medium">
-                                {data?.last_name + " " + data?.first_name}
-                            </span>
-                        </span>
-
-                        <div className="grid grid-cols-2">
-                            <div className="flex grid-cols-1 items-center space-x-2">
-                                <TbCalendarFilled className="w-5 h-5 text-" />
-                                <Text
-                                    color="gray.700"
-                                    fontWeight="700"
-                                    fontSize="md"
-                                >
-                                    {moment(
-                                        data?.created_at,
-                                        "YYYY-MM-DD HH:mm:ss"
-                                    ).format("DD/MM/YYYY") || ""}
-                                </Text>
+                        {data?.SLDG && (
+                            <div className="flex">
+                                <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                    Đã đóng gói:{" "}
+                                </span>
+                                <span className="w-[65%] font-bold">
+                                    {Number(data?.SLDG) || 0}
+                                </span>
                             </div>
+                        )}
 
-                            <div className="flex grid-cols-1 items-center space-x-2">
-                                <TbClock className="w-5 h-5 text-" />
-                                <Text
-                                    color="gray.700"
-                                    fontWeight="700"
-                                    fontSize="md"
-                                >
-                                    {moment(
-                                        data?.created_at,
-                                        "YYYY-MM-DD HH:mm:ss"
-                                    ).format("HH:mm:ss") || ""}
-                                </Text>
-                            </div>
+                        <div className="flex ">
+                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                Giao từ:{" "}
+                            </span>
+                            <span className="w-[65%] font-bold">
+                                {data?.CongDoan || "Không xác định"}
+                            </span>
                         </div>
 
-                        <div className="grid grid-cols-2 space-x-3">
+                        <div className="w-full flex duration-300">
+                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                Người giao:
+                            </span>
+                            <span className="w-[65%] font-bold text-[#155979]">
+                                {data?.last_name + " " + data?.first_name}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 space-x-3 mt-1">
                             <div className="items-center gap-x-4">
                                 <label
                                     htmlFor="errorType"
@@ -699,7 +747,7 @@ const AwaitingReception = ({
                 </div>
 
                 <Divider />
-                <div className="flex space-x-3 justify-end p-[20px]">
+                <div className="flex space-x-3 justify-center text-center w-full p-[20px]">
                     <Button
                         className={`${selectedReason ? "!block" : "!hidden"}`}
                         variant="ghost"
@@ -715,7 +763,7 @@ const AwaitingReception = ({
                         isDisabled={!selectedReason}
                         variant="solid"
                         colorScheme="red"
-                        className="bg-[#e53e3e]"
+                        className="bg-[#e53e3e] w-full"
                         onClick={onDismissAlertDialogOpen}
                         backgroundColor="red !important"
                     >
@@ -725,11 +773,11 @@ const AwaitingReception = ({
                         isDisabled={selectedReason}
                         variant="solid"
                         colorScheme="green"
-                        className="bg-[#38a169]"
+                        className="bg-[#38a169] w-full"
                         onClick={onInputAlertDialogOpen}
                         backgroundColor="#2f855a !important"
                     >
-                        Xác nhận
+                        Nhận phôi
                     </Button>
                 </div>
             </div>
@@ -749,21 +797,28 @@ const AwaitingReception = ({
                                 Bạn có chắc muốn{" "}
                                 {variant == "QC" ? (
                                     <>
-                                        ghi nhận <span className="font-bold">
-                                        {Number(faults?.Qty) || ""}
-                                        </span>{" "} lỗi từ {" "}
+                                        ghi nhận{" "}
+                                        <span className="font-bold">
+                                            {Number(faults?.Qty) || ""}
+                                        </span>{" "}
+                                        lỗi từ{" "}
                                     </>
                                 ) : (
                                     <>
-                                        xác nhận <span className="font-bold">
+                                        xác nhận{" "}
+                                        <span className="font-bold">
                                             {Number(data?.Quantity) || ""}
                                         </span>{" "}
-                                    </> 
+                                    </>
                                 )}
-                                sản phẩm <span className="font-bold">{data?.SubItemName || data?.ItemName}</span>
+                                sản phẩm{" "}
+                                <span className="font-bold">
+                                    {data?.SubItemName || data?.ItemName}
+                                </span>
                                 {faults && faults.errorType && (
                                     <span>
-                                         {" "}với lý do{" "}
+                                        {" "}
+                                        với lý do{" "}
                                         <b>{faults.errorType.label}</b>
                                     </span>
                                 )}

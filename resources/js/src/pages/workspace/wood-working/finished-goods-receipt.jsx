@@ -483,14 +483,14 @@ function FinishedGoodsReceipt() {
             >
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent>
-                    <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
+                    <ModalHeader className="!p-2.5 ">
+                        <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
                             Danh sách phôi chờ nhận
                         </h1>
                     </ModalHeader>
                     <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody className="!p-4">
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="xl:!p-4 lg:!p-4 md:!p-4 !p-2.5 bg-gray-100">
                         <div className="flex gap-4 justify-center h-full">
                             {selectedGroup && awaitingReception?.length > 0 ? (
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
@@ -512,8 +512,11 @@ function FinishedGoodsReceipt() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex w-full h-full justify-center items-center">
-                                    Không có dữ liệu
+                                <div className="flex w-full min-h-[80vh] justify-center items-center">
+                                    <div className="text-center text-gray-600">
+                                        <div className="text-xl font-semibold">Hệ thống chưa nhận được dữ liệu ghi nhận nào.</div>
+                                        <div>Vui lòng ghi nhận và thử lại sau.</div>
+                                    </div>
                                 </div>
                             )}
                         </div>

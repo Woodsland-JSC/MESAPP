@@ -100,6 +100,7 @@ function DefectResolution() {
                 receiving_team: item.ToChuyenVe,
                 m3sap: item.M3SAP,
                 handle_date: item.ngaynhan,
+                lsx_from: item.LSX,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -240,6 +241,7 @@ function DefectResolution() {
         { headerName: "Ngày tạo", field: "send_date" },
         { headerName: "Người xử lý", field: "receiver" },
         { headerName: "Ngày xử lý", field: "handle_date" },
+        { headerName: "LSX ghi nhận lỗi", field: "lsx_from" },
     ]);
 
     const groupDisplayType = "multipleColumns";

@@ -1024,14 +1024,14 @@ const ItemInput = ({
 
     return (
         <>
-            <div className="shadow-md relative  rounded-lg bg-white z-1">
+            <div className="shadow-md relative  rounded-lg bg-white/30 backdrop-blur-xs z-1">
                 <div
                     className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5
                  xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
                 >
                     {data.NameSPDich || "Sản phẩm không xác định"}
                 </div>
-                <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white">
+                <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
                               <section
@@ -2886,8 +2886,8 @@ const ItemInput = ({
                         </div>
                     </ModalBody>
 
-                    <ModalFooter className="flex flex-col !p-0">
-                        <Alert status="info">
+                    <ModalFooter className="flex flex-col !p-0 ">
+                        <Alert status="info" className="!py-2 !bg-[#A3DEFF]">
                             <TbPlayerTrackNextFilled className="text-[#155979] xl:mr-2 lg:mr-2 md:mr-2 mr-4 xl:text-xl lg:text-xl md:text-xl text-2xl" />
                             <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col">
                                 <span className="text-[15px] mr-1 sm:text-base">
