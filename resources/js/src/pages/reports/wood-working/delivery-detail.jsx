@@ -184,6 +184,7 @@ function DeliveryDetailReport() {
             );
             const formattedData = res.map((item) => ({
                 resource: item.TenTo,
+                itemcode: item.ItemCode,
                 itemname: item.ItemName,
                 thickness: item.CDay,
                 width: item.CRong,
@@ -331,6 +332,13 @@ function DeliveryDetailReport() {
             headerComponentParams: { displayName: "Tổ sản xuất" }
         },
         {
+            headerName: "Mã chi tiết",
+            field: "itemcode",
+            minWidth: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
             headerName: "Tên chi tiết",
             field: "itemname",
             minWidth: 400,
@@ -377,9 +385,9 @@ function DeliveryDetailReport() {
                 return params.value ? params.value.toFixed(6) : '0.000000';
             },
         },
-        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240, },
+        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240, filter: true, },
         { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
-        { headerName: "Người nhận", field: "receiver", minWidth: 240, },
+        { headerName: "Người nhận", field: "receiver", minWidth: 240, filter: true,},
         { headerName: "Ngày giờ nhận", field: "receive_date", minWidth: 200, },
         { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200 },
     ]);
