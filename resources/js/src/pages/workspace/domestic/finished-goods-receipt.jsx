@@ -34,7 +34,8 @@ const FinishedGoodsReceipt = () => {
     const [inputValues, setInputValues] = useState([]);
 
     // Loading
-    const [isProductionOrderLoading, setIsProductionOrderLoading] = useState(false);
+    const [isProductionOrderLoading, setIsProductionOrderLoading] =
+        useState(false);
     const [isProductsLoading, setIsProductsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,9 +68,9 @@ const FinishedGoodsReceipt = () => {
             setIsProductsLoading(false);
             setProductList(res);
 
-            const initialInputs = res.map(item => ({
-                quantity: "", 
-                boxCode: ""   
+            const initialInputs = res.map((item) => ({
+                quantity: "",
+                boxCode: "",
             }));
             setInputValues(initialInputs);
         } catch (error) {
@@ -84,50 +85,58 @@ const FinishedGoodsReceipt = () => {
         newInputValues[index][field] = value;
         setInputValues(newInputValues);
     };
-    
-    const handleSubmit = async() => {
+
+    const handleSubmit = async () => {
         for (let i = 0; i < productList.length; i++) {
             const item = productList[i];
-            const soLuong = inputValues[i].quantity ? parseInt(inputValues[i].quantity) : 0;
-    
+            const soLuong = inputValues[i].quantity
+                ? parseInt(inputValues[i].quantity)
+                : 0;
+
             if (soLuong > item.RemainQty) {
-                toast.error(`Số lượng ghi nhận của ${item.MACT} không được lớn hơn số lượng còn lại phải sản xuất (${item.RemainQty}).`);
+                toast.error(
+                    `Số lượng ghi nhận của ${item.MACT} không được lớn hơn số lượng còn lại phải sản xuất (${item.RemainQty}).`
+                );
                 setIsSubmitting(false);
                 onClose();
                 return;
             }
-    
+
             if (soLuong <= 0) {
-                toast.error(`Số lượng ghi nhận của ${item.MACT} phải lớn hơn 0.`);
+                toast.error(
+                    `Số lượng ghi nhận của ${item.MACT} phải lớn hơn 0.`
+                );
                 setIsSubmitting(false);
                 onClose();
                 return;
             }
         }
-        
+
         const submittedData = {
-            "LSX": selectedDocEntry,
-            "SPDich": selectedSPDich,
-            "Detail": productList.map((item, index) => ({
-                "MaCT": item.MACT,
-                "SoLuong": inputValues[index].quantity ? parseInt(inputValues[index].quantity) : 0,
-                "LineId": item.LineId,
-                "MaHop": inputValues[index].boxCode || "Không có mã hộp"
-            }))
+            LSX: selectedDocEntry,
+            SPDich: selectedSPDich,
+            Detail: productList.map((item, index) => ({
+                MaCT: item.MACT,
+                SoLuong: inputValues[index].quantity
+                    ? parseInt(inputValues[index].quantity)
+                    : 0,
+                LineId: item.LineId,
+                MaHop: inputValues[index].boxCode || "Không có mã hộp",
+            })),
         };
         console.log("Dữ liệu ghi nhận:", submittedData);
         setIsSubmitting(true);
 
         try {
             await domesticApi.handleReceipt(submittedData);
-            
+
             toast.success("Dữ liệu đã được ghi nhận.");
             setInputValues([]);
             setProductionOrderList([]);
             setProductList([]);
             setSelectedDocEntry(null);
-            setSelectedSPDich(null); 
-            getProductionOrderList();   
+            setSelectedSPDich(null);
+            getProductionOrderList();
             setIsSubmitting(false);
             onClose();
         } catch (error) {
@@ -136,7 +145,6 @@ const FinishedGoodsReceipt = () => {
             setIsSubmitting(false);
             onClose();
         }
-
     };
 
     useEffect(() => {
@@ -184,7 +192,9 @@ const FinishedGoodsReceipt = () => {
                                                 getProductsByProductionOrder(
                                                     value.value
                                                 );
-                                                setSelectedDocEntry(value.value);
+                                                setSelectedDocEntry(
+                                                    value.value
+                                                );
                                                 setSelectedSPDich(value.SPDich);
                                             }}
                                             placeholder="Tìm kiếm"
@@ -208,10 +218,16 @@ const FinishedGoodsReceipt = () => {
                                             {productList?.length > 0 ? (
                                                 <div>
                                                     <div className=" pb-3">
-                                                        <div className="text-sm text-gray-500 uppercase font-medium">Mã lệnh: {selectedDocEntry}</div>
-                                                        <div className="text-lg font-bold text-[#17506B]">Sản phẩm: {selectedSPDich}</div>
+                                                        <div className="text-sm text-gray-500 uppercase font-medium">
+                                                            Mã lệnh:{" "}
+                                                            {selectedDocEntry}
+                                                        </div>
+                                                        <div className="text-lg font-bold text-[#17506B]">
+                                                            Sản phẩm:{" "}
+                                                            {selectedSPDich}
+                                                        </div>
                                                     </div>
-                                                    <div className="border border-gray-300 rounded-lg">
+                                                    <div className="border border-gray-300 rounded-lg xl:block lg:block md:block hidden">
                                                         <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
                                                             <thead>
                                                                 <tr className="bg-gray-200 text-left">
@@ -219,7 +235,8 @@ const FinishedGoodsReceipt = () => {
                                                                         Chi tiết
                                                                     </th>
                                                                     <th className="px-4 py-2 w-[120px] border border-gray-300">
-                                                                        Sản lượng
+                                                                        Sản
+                                                                        lượng
                                                                     </th>
                                                                     <th className="px-4 py-2 w-[120px] border border-gray-300">
                                                                         Đã làm
@@ -241,40 +258,206 @@ const FinishedGoodsReceipt = () => {
                                                                 </tr>
                                                             </thead>
                                                             {productList.map(
-                                                                (item, index) => (
-                                                                <tbody key={index}>
-                                                                    <tr className={index % 2 === 0 ? "bg-gray-50" : ""}>
-                                                                        <td className="px-4 py-3 border border-gray-300">
-                                                                            <div className="uppercase text-sm text-gray-500">{item.MACT || "Không xác định"}</div>
-                                                                            <div className="font-semibold truncate">{item.NameCT || "Không xác định"}</div>
-                                                                        </td>
-                                                                        <td className="px-4 py-3 border border-gray-300">
-                                                                            {item.PlanQty || 0}
-                                                                        </td>
-                                                                        <td className="px-4 py-3 border border-gray-300">
-                                                                            {item.CompletedQty || 0}
-                                                                        </td>
-                                                                        <td className="px-4 py-3 border border-gray-300">
-                                                                            {item.RemainQty || 0}
-                                                                        </td>
-                                                                        <td className="px-4 py-2 border border-gray-300">
-                                                                            <input 
-                                                                                className="w-full px-2 py-1 border border-gray-300 rounded-md" 
-                                                                                value={inputValues[index]?.quantity || ""}
-                                                                                onChange={(e) => handleInputChange(index, "quantity", e.target.value)}
-                                                                            />
-                                                                        </td>
-                                                                        <td className="px-4 py-2 border border-gray-300">
-                                                                            <input 
-                                                                                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-                                                                                value={inputValues[index]?.boxCode || ""}
-                                                                                onChange={(e) => handleInputChange(index, "boxCode", e.target.value)}
-                                                                            />
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            ))}
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <tbody
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                    >
+                                                                        <tr
+                                                                            className={
+                                                                                index %
+                                                                                    2 ===
+                                                                                0
+                                                                                    ? "bg-gray-50"
+                                                                                    : ""
+                                                                            }
+                                                                        >
+                                                                            <td className="px-4 py-3 border border-gray-300">
+                                                                                <div className="uppercase text-sm text-gray-500">
+                                                                                    {item.MACT ||
+                                                                                        "Không xác định"}
+                                                                                </div>
+                                                                                <div className="font-semibold truncate">
+                                                                                    {item.NameCT ||
+                                                                                        "Không xác định"}
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-4 py-3 border border-gray-300">
+                                                                                {item.PlanQty ||
+                                                                                    0}
+                                                                            </td>
+                                                                            <td className="px-4 py-3 border border-gray-300">
+                                                                                {item.CompletedQty ||
+                                                                                    0}
+                                                                            </td>
+                                                                            <td className="px-4 py-3 border border-gray-300">
+                                                                                {item.RemainQty ||
+                                                                                    0}
+                                                                            </td>
+                                                                            <td className="px-4 py-2 border border-gray-300">
+                                                                                <input
+                                                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                                                                                    value={
+                                                                                        inputValues[
+                                                                                            index
+                                                                                        ]
+                                                                                            ?.quantity ||
+                                                                                        ""
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        e
+                                                                                    ) =>
+                                                                                        handleInputChange(
+                                                                                            index,
+                                                                                            "quantity",
+                                                                                            e
+                                                                                                .target
+                                                                                                .value
+                                                                                        )
+                                                                                    }
+                                                                                />
+                                                                            </td>
+                                                                            <td className="px-4 py-2 border border-gray-300">
+                                                                                <input
+                                                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                                                                                    value={
+                                                                                        inputValues[
+                                                                                            index
+                                                                                        ]
+                                                                                            ?.boxCode ||
+                                                                                        ""
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        e
+                                                                                    ) =>
+                                                                                        handleInputChange(
+                                                                                            index,
+                                                                                            "boxCode",
+                                                                                            e
+                                                                                                .target
+                                                                                                .value
+                                                                                        )
+                                                                                    }
+                                                                                />
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                )
+                                                            )}
                                                         </table>
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        {productList.map(
+                                                            (item, index) => (
+                                                                <div className="border border-gray-300 bg-gray-50 rounded-lg xl:hidden lg:hidden md:hidden flex flex-col p-3 gap-y-2">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="uppercase text-xs font-medium text-gray-500">
+                                                                            {item.MACT ||
+                                                                                "Không xác định"}
+                                                                        </span>
+                                                                        <span className="text-lg font-bold">
+                                                                            {item.NameCT ||
+                                                                                "Không xác định"}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div className="flex flex-col gap-y-1">
+                                                                        <div className=" grid grid-cols-2">
+                                                                            <span className="">
+                                                                                Sản
+                                                                                lượng
+                                                                            </span>
+                                                                            <span className=" font-bold">
+                                                                                {item.PlanQty ||
+                                                                                    0}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2">
+                                                                            <span className="">
+                                                                                Đã
+                                                                                làm
+                                                                            </span>
+                                                                            <span className="font-bold">
+                                                                                {item.CompletedQty ||
+                                                                                    0}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2">
+                                                                            <span className="grid grid-cols-2">
+                                                                                Còn
+                                                                                lại
+                                                                            </span>
+                                                                            <span className="font-bold">
+                                                                                {item.RemainQty ||
+                                                                                    0}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex flex-col">
+                                                                        <span className=" font-medium text-gray-800">
+                                                                            Số
+                                                                            lượng
+                                                                            ghi
+                                                                            nhận
+                                                                        </span>
+                                                                        <input
+                                                                            className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                                                                            value={
+                                                                                inputValues[
+                                                                                    index
+                                                                                ]
+                                                                                    ?.quantity ||
+                                                                                ""
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                handleInputChange(
+                                                                                    index,
+                                                                                    "quantity",
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <span className=" font-medium text-gray-800">
+                                                                            Mã
+                                                                            hộp
+                                                                        </span>
+                                                                        <input
+                                                                            className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                                                                            value={
+                                                                                inputValues[
+                                                                                    index
+                                                                                ]
+                                                                                    ?.boxCode ||
+                                                                                ""
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                handleInputChange(
+                                                                                    index,
+                                                                                    "boxCode",
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
                                                     </div>
 
                                                     <div className="flex justify-end mt-4">
@@ -302,19 +485,33 @@ const FinishedGoodsReceipt = () => {
                                                         0 ? (
                                                             <>
                                                                 <div className="font-semibold text-xl">
-                                                                    Chúng tôi không tìm thấy bất kỳ thông tin sản phẩm nào.
+                                                                    Chúng tôi
+                                                                    không tìm
+                                                                    thấy bất kỳ
+                                                                    thông tin
+                                                                    sản phẩm
+                                                                    nào.
                                                                 </div>
                                                                 <div className="text-gray-500 mt-1">
-                                                                    Hãy thử chọn một lệnh sản xuất khác.
+                                                                    Hãy thử chọn
+                                                                    một lệnh sản
+                                                                    xuất khác.
                                                                 </div>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <div className="font-semibold text-xl">
-                                                                    Hiện tại không có bất kỳ thông tin sản phẩm nào.
+                                                                    Hiện tại
+                                                                    không có bất
+                                                                    kỳ thông tin
+                                                                    sản phẩm
+                                                                    nào.
                                                                 </div>
                                                                 <div className="text-gray-500 mt-1">
-                                                                    Hãy chọn một lệnh sản xuất để bắt đầu.
+                                                                    Hãy chọn một
+                                                                    lệnh sản
+                                                                    xuất để bắt
+                                                                    đầu.
                                                                 </div>
                                                             </>
                                                         )}

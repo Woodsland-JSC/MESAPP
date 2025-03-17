@@ -385,7 +385,7 @@ function DeliveryDetailReport() {
                 return params.value ? params.value.toFixed(6) : '0.000000';
             },
         },
-        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240, filter: true, },
+        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240 },
         { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
         { headerName: "Người nhận", field: "receiver", minWidth: 240, filter: true,},
         { headerName: "Ngày giờ nhận", field: "receive_date", minWidth: 200, },
