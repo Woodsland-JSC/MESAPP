@@ -19,6 +19,7 @@ class NoiDiaController extends Controller
             'Detail.*.MaCT' => 'required|string',
             'Detail.*.SoLuong' => 'required|numeric',
             'Detail.*.LineId' => 'required|integer',
+            'Detail.*.BANGKE' => 'required|string',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -35,6 +36,7 @@ class NoiDiaController extends Controller
                 'U_Quantity' => $item['SoLuong'],
                 'U_BaseLine' => $item['LineId'],
                 'U_MaHop' => $item['MaHop']??'',
+                'U_BANGKE' => $item['BANGKE']??'',
             ];
         }
         $response = Http::withOptions([
@@ -82,7 +84,7 @@ class NoiDiaController extends Controller
         odbc_close($conDB);
         return response()->json($data);
     }
-    
+
     public function ChiTietLenh($id)
     {
         $conDB = (new ConnectController)->connect_sap();
@@ -102,6 +104,7 @@ class NoiDiaController extends Controller
                 'MACT' => odbc_result($stmt, "MACT"),
                 'NameCT' => odbc_result($stmt, "NameCT"),
                 'LineId' => (integer)odbc_result($stmt, "LineId"),
+                'BANGKE' => (integer)odbc_result($stmt, "BANGKE"),
                 'PlanQty' =>(float) odbc_result($stmt, "PlanQty"),
                 'CompletedQty' => (float)odbc_result($stmt, "ComplQty"),
                 'RemainQty' => (float) odbc_result($stmt, "RemainQty")
