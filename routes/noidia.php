@@ -9,6 +9,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/ghinhan-sanluong', [NoiDiaController::class, 'GhiNhanSanluong']);
         Route::get('/lenh-san-xuat', [NoiDiaController::class, 'DanhSachLenh']);
         Route::get('/lenh-san-xuat/{id}', [NoiDiaController::class, 'ChiTietLenh']);
+        Route::get('/danh-sach-masd', [NoiDiaController::class, 'DanhSachMaSoDo']);
+        Route::post('/update-status-masd', [NoiDiaController::class, 'CapNhatTrangThai']);
     });
 
 });

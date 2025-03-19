@@ -113,4 +113,57 @@ class NoiDiaController extends Controller
         odbc_close($conDB);
         return response()->json($data);
     }
+    public function DanhSachMaSoDo()
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from GT_NOIDIA_DS_MASD';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $data = [];
+        while (odbc_fetch_row($stmt)) {
+            $data[] = [
+                'MASD' => odbc_result($stmt, "MASD"),
+            ];
+        }
+        odbc_close($conDB);
+        return response()->json($data);
+    }
+    public function CapNhatTrangThai(Request $request)
+    {
+        // Kiểm tra đầu vào
+        $masd = $request->input('MASD');
+        if (!$masd) {
+            return response()->json(['error' => 'MASD is required'], 400);
+        }
+
+        // Kết nối SAP
+        $conDB = (new ConnectController)->connect_sap();
+
+        // Câu lệnh SQL với tham số
+        $query = "UPDATE ZGT_SLNOIDIA_STL SET Status = 'Y' WHERE MASD = ?";
+
+        // Chuẩn bị statement
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        // Thực thi câu lệnh SQL với tham số
+        if (!odbc_execute($stmt, [$masd])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        // Đóng kết nối
+        odbc_close($conDB);
+
+        return response()->json(['message' => 'Cập nhật trạng thái thành công']);
+    }
+
 }
