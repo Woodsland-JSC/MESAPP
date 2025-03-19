@@ -105,6 +105,11 @@ class NoiDiaController extends Controller
                 'NameCT' => odbc_result($stmt, "NameCT"),
                 'LineId' => (integer)odbc_result($stmt, "LineId"),
                 'BANGKE' => (integer)odbc_result($stmt, "BANGKE"),
+                'MASD' => (integer)odbc_result($stmt, "BANGKE"),
+                'Dai' => (integer)odbc_result($stmt, "Dai"),
+                'Day' => (integer)odbc_result($stmt, "Day"),
+                'Rong' => (integer)odbc_result($stmt, "Rong"),
+                'KHOILUONG' => (integer)odbc_result($stmt, "KHOILUONG"),
                 'PlanQty' =>(float) odbc_result($stmt, "PlanQty"),
                 'CompletedQty' => (float)odbc_result($stmt, "ComplQty"),
                 'RemainQty' => (float) odbc_result($stmt, "RemainQty")
