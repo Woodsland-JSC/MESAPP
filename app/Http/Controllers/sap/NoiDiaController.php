@@ -143,16 +143,19 @@ class NoiDiaController extends Controller
     public function CapNhatTrangThai(Request $request)
     {
         // Kiểm tra đầu vào
-        $masd = $request->input('MASD');
-        if (!$masd) {
-            return response()->json(['error' => 'MASD is required'], 400);
+        $masdArray = $request->input('MASD');
+        if (!is_array($masdArray) || empty($masdArray)) {
+            return response()->json(['error' => 'MASD must be a non-empty array'], 400);
         }
 
         // Kết nối SAP
         $conDB = (new ConnectController)->connect_sap();
 
-        // Câu lệnh SQL với tham số
-        $query = "UPDATE ZGT_SLNOIDIA_STL SET Status = 'Y' WHERE MASD = ?";
+        // Tạo danh sách placeholder `?` tương ứng với số lượng phần tử trong mảng
+        $placeholders = implode(',', array_fill(0, count($masdArray), '?'));
+
+        // Câu lệnh SQL sử dụng IN (...) để cập nhật nhiều dòng cùng lúc
+        $query = "UPDATE ZGT_SLNOIDIA_STL SET Status = 'Y' WHERE MASD IN ($placeholders)";
 
         // Chuẩn bị statement
         $stmt = odbc_prepare($conDB, $query);
@@ -160,15 +163,15 @@ class NoiDiaController extends Controller
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        // Thực thi câu lệnh SQL với tham số
-        if (!odbc_execute($stmt, [$masd])) {
+        // Thực thi câu lệnh SQL với tham số từ mảng
+        if (!odbc_execute($stmt, $masdArray)) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
         // Đóng kết nối
         odbc_close($conDB);
 
-        return response()->json(['message' => 'Cập nhật trạng thái thành công']);
+        return response()->json(['message' => 'Cập nhật trạng thái thành công']);
     }
 
 }
