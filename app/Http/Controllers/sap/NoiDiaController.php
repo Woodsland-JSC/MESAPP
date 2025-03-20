@@ -118,10 +118,11 @@ class NoiDiaController extends Controller
         odbc_close($conDB);
         return response()->json($data);
     }
+
     public function DanhSachMaSoDo()
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from GT_NOIDIA_DS_MASD';
+        $query = 'select * from GT_NOIDIA_DS_MASD WHERE "MASD" <> \'\' AND "MASD" IS NOT NULL';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -140,6 +141,7 @@ class NoiDiaController extends Controller
         odbc_close($conDB);
         return response()->json($data);
     }
+
     public function CapNhatTrangThai(Request $request)
     {
         // Kiểm tra đầu vào
@@ -155,7 +157,7 @@ class NoiDiaController extends Controller
         $placeholders = implode(',', array_fill(0, count($masdArray), '?'));
 
         // Câu lệnh SQL sử dụng IN (...) để cập nhật nhiều dòng cùng lúc
-        $query = "UPDATE ZGT_SLNOIDIA_STL SET Status = 'Y' WHERE MASD IN ($placeholders)";
+        $query = "UPDATE ZGT_SLNOIDIA_STL SET \"Status\" = 'Y'  WHERE \"MASD\" IN ($placeholders)";
 
         // Chuẩn bị statement
         $stmt = odbc_prepare($conDB, $query);
@@ -164,7 +166,7 @@ class NoiDiaController extends Controller
         }
 
         // Thực thi câu lệnh SQL với tham số từ mảng
-        if (!odbc_execute($stmt, $masdArray)) {
+        if (!odbc_execute($stmt, $masdArray )) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
@@ -173,5 +175,4 @@ class NoiDiaController extends Controller
 
         return response()->json(['message' => 'Cập nhật trạng thái thành công']);
     }
-
 }

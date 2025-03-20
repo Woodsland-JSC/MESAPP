@@ -1217,10 +1217,6 @@ class QCController extends Controller
     }
 
 
-    /**
-     * v2 AcceptQC chế biên gỗ
-     * 
-     */
     function acceptTeamQCCBGV2(Request $request)
     {
         // 1. Check dữ liệu đầu vào

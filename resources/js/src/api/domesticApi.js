@@ -19,6 +19,16 @@ const domesticApi = {
         const url = `/noidia/ghinhan-sanluong`;
         return axiosClient().post(url, transferData);
     },
+
+    getAllAssemblyDiagrams: () => {
+        const url = `/noidia/danh-sach-masd`;
+        return axiosClient().get(url, {});
+    },
+
+    executeAssemblyDiagrams: (assemblyDiagrams) => {
+        const url = `/noidia/update-status-masd`;
+        return axiosClient().post(url, assemblyDiagrams);
+    },
 };
 
 export default domesticApi;
