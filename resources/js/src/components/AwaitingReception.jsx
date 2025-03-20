@@ -132,7 +132,7 @@ const AwaitingReception = ({
             onInputAlertDialogClose();
         };
 
-        console.log("Số lượng lỗi:", faults.Qty, data?.Quantity, variant);
+        console.log("Số lượng lỗi:", data);
 
         if ((!faults.Qty || faults.Qty <= 0) && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
@@ -154,6 +154,8 @@ const AwaitingReception = ({
             try {
                 const payload = {
                     id: data?.id,
+                    ItemCode: data?.ItemCode,
+                    Quantity: data?.Quantity,
                     loailoi: faults.errorType || null,
                     huongxuly: faults.solution || null,
                     teamBack: faults.teamBack || null,
@@ -333,7 +335,7 @@ const AwaitingReception = ({
     return (
         <>
             <div
-                className={`bg-white rounded-3xl ${
+                className={`bg-white rounded-xl ${
                     variant === "QC"
                         ? " border-2 border-gray-200 !shadow-md"
                         : " border-2 border-gray-200 !shadow-md"
@@ -777,7 +779,7 @@ const AwaitingReception = ({
                         onClick={onInputAlertDialogOpen}
                         backgroundColor="#2f855a !important"
                     >
-                        Nhận phôi
+                        Xác nhận
                     </Button>
                 </div>
             </div>

@@ -30,11 +30,11 @@ function HeaderAPISAP()
     return $headers;
 }
 
-function UrlSAPServiceLayer()
-{
-    $sapUrl = config('sap.SAP_URL');
-    return $sapUrl;
-}
+    function UrlSAPServiceLayer()
+    {
+        $sapUrl = config('sap.SAP_URL');
+        return $sapUrl;
+    }
     function WarehouseCS()
     {
 

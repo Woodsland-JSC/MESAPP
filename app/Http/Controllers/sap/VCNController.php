@@ -1906,6 +1906,7 @@ class VCNController extends Controller
             if (!$data) {
                 throw new \Exception('data không hợp lệ.');
             }
+            // Validate phân bổ
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
                 $allocates = $this->allocate_v2($dataallocate, $data->Quantity);
@@ -2005,8 +2006,7 @@ class VCNController extends Controller
                             'confirm_at' => Carbon::now()->format('YmdHis')
                         ]);
                         awaitingstocksvcn::where('notiId', $request->id)->delete();
-                        DB::commit();
-                        
+                        DB::commit();                  
                     }
                     else
                     {
@@ -2022,8 +2022,6 @@ class VCNController extends Controller
                             } 
                         } 
                     }
-                   
-                   
                 }
                 return response()->json('success', 200);
             } else {
