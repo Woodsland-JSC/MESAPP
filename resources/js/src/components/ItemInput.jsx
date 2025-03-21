@@ -2285,6 +2285,7 @@ const ItemInput = ({
                                                 <label className="mt-6 font-semibold">
                                                     Số lượng ghi nhận sản phẩm:
                                                 </label>
+                                                <span className="font-bold text-red-500">{" "}*</span>
                                                 {selectedItemDetails?.CongDoan !==
                                                     "SC" &&
                                                 selectedItemDetails?.CongDoan !==
@@ -3046,7 +3047,7 @@ const ItemInput = ({
                                             )}
                                             {amount && (
                                                 <div className="text-green-700">
-                                                    Ghi nhận sản lượng:{" "}
+                                                    Ghi nhận sản lượng:{" "}                                           
                                                     <span className="font-bold">
                                                         {amount}
                                                     </span>

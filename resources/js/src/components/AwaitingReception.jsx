@@ -24,6 +24,7 @@ import {
 import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
 import { TbCalendarFilled, TbClock } from "react-icons/tb";
+import { FaCopy } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Swal from "sweetalert2/dist/sweetalert2.js";
@@ -124,8 +125,50 @@ const AwaitingReception = ({
                 `,
                 icon: "error",
                 zIndex: 50001,
+                confirmButtonColor: '#3085d6',
             });
         };
+
+        const showRequireQuantityAlert = (message, requiredItems) => { 
+            const tableRows = requiredItems.map((item, index) => 
+                `<tr style="font-size: 14px; max-height: 280px; overflow-y: auto;">
+                    <td style="border: 1px solid #ddd; padding: 6px; user-select: text; text-align: center;">${item.SubItemCode}</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right; user-select: text;">${item.requiredQuantity}</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; user-select: text;">${item.wareHouse}</td>
+                </tr>`
+            ).join('');
+        
+            Swal.fire({
+                title: "Nguyên vật liệu không đủ.",
+                html: 
+                    `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung nguyên vật liệu:</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #ddd; user-select: text;">
+                        <thead>
+                            <tr style="font-size: 14px;">
+                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Sản phẩm</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Số lượng</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Kho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>`,
+                icon: "error",
+                zIndex: 50001,
+                confirmButtonColor: '#3085d6',
+                width: '500px',
+                didOpen: () => {
+                    window.copyToClipboard = (id, button) => {
+                        const text = document.getElementById(id).innerText;
+                        navigator.clipboard.writeText(text).then(() => {
+                            button.querySelector('.copy-icon').style.backgroundColor = '#d1e7dd';
+                        });
+                    };
+                }
+            });
+        };
+        
 
         const checkAndDisplayError = (errorMessage) => {
             toast.error(errorMessage);
@@ -190,12 +233,19 @@ const AwaitingReception = ({
                 }
             } catch (error) {
                 const errorMessage =
-                    error.response?.data?.error?.message?.value ||
                     error.response?.data?.message ||
-                    error.response?.data?.error;
-                showErrorAlert(
-                    `${errorMessage ? errorMessage : "Lỗi kết nối mạng."}`
-                );
+                    error.response?.data?.error?.message?.value ||
+                    error.response?.data?.error ||
+                    "Lỗi kết nối mạng.";
+            
+                if (error.response?.data?.status_code === 40001) {
+                    showRequireQuantityAlert(errorMessage, error.response?.data?.required_items || []);
+                } else if (error.response?.data?.status_code === 500){
+                    showErrorAlert("Server hiện tại không thể xử lý yêu cầu. Vui lòng thử lại.");
+                } else {
+                    showErrorAlert(errorMessage);
+                }
+            
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
                 onInputAlertDialogClose();

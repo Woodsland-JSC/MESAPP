@@ -1847,25 +1847,25 @@ function WoodSorting() {
                             </ModalBody>
 
                             <ModalFooter>
-                                <div className="flex items-center space-x-3">
+                                <div className="flex w-full items-center space-x-3">
                                     <button
                                         onClick={() => {
                                             onConfirmClose();
                                         }}
-                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-1/3 disabled:cursor-not-allowed disabled:opacity-50"
                                         disabled={createPalletLoading}
                                     >
                                         Đóng
                                     </button>
                                     <button
-                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white"
                                         type="button"
                                         onClick={() => {
                                             handleCreatePallet();
                                         }}
                                     >
                                         {createPalletLoading? (
-                                            <div className="flex items-center space-x-4">
+                                            <div className="flex items-center justify-center w-full space-x-4">
                                                 <Spinner size="sm" color="white" />
                                                 <div>Đang thực hiện</div>
                                             </div>

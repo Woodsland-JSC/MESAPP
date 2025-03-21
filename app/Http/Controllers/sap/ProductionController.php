@@ -1425,28 +1425,36 @@ class ProductionController extends Controller
             
             // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
             if (strpos($e->getMessage(), 'SAP code:-5002') !== false && 
-                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
-                
-                // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
-                $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
-                
-                // Tạo thông báo chi tiết về thiếu hàng
-                $message = "Nguyên vật liệu không đủ để giao nhận!\n\nCần nhập tối thiểu:\n";
-                
-                if (empty($requiredItems)) {
-                    $message .= "Không tìm thấy thông tin về sản phẩm thiếu.";
-                } else {
-                    foreach ($requiredItems as $item) {
-                        $message .= "+ " . $item['requiredQuantity'] . " mã " . $item['SubItemCode'] . " vào kho " . $item['wareHouse'] . ".\n";
-                    }
+            strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
+
+            // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
+            $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
+
+            // Tạo thông báo chi tiết về thiếu hàng
+            $message = "Nguyên vật liệu không đủ để giao nhận!";
+            $itemDetails = [];
+
+            if (empty($requiredItems)) {
+                $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
+            } else {
+                foreach ($requiredItems as $item) {
+                    $itemDetails[] = [
+                        'SubItemCode' => $item['SubItemCode'],
+                        'SubItemName' => $item['SubItemName'] ?? '',
+                        'requiredQuantity' => $item['requiredQuantity'],
+                        'wareHouse' => $item['wareHouse']
+                    ];
                 }
-                
-                return response()->json([
-                    'error' => false,
-                    'status_code' => 500,
-                    'message' => $message,
-                    'original_error' => $e->getMessage()
-                ], 500);
+            }
+
+            return response()->json([
+                'error' => true,
+                'status_code' => 40001, // Mã lỗi riêng cho trường hợp tồn kho không đủ
+                'error_type' => 'INSUFFICIENT_INVENTORY',
+                'message' => $message,
+                'required_items' => $itemDetails,
+                'original_error' => $e->getMessage()
+            ], 400); // Trả về 400 Bad Request thay vì 500 Internal Server Error
             }
             
             // Trả về lỗi thông thường nếu không phải lỗi tồn kho
@@ -1461,9 +1469,10 @@ class ProductionController extends Controller
     private function getRequiredInventory($itemCode, $quantity, $factory)
     {
         $requiredItems = [];
-
+        $groupedItems = [];
+    
         $conDB = (new ConnectController)->connect_sap();
-
+    
         // Truy vấn view UV_TONKHOSAP để lấy thông tin
         $query ="
             SELECT
@@ -1484,11 +1493,11 @@ class ProductionController extends Controller
                 ROUND((\"PlannedQty\" - \"IssuedQty\") - \"OnHand\") AS \"SoLuongToiThieuCanBoSung\"
             FROM UV_TONKHOSAP
             WHERE \"ItemCode\" = ?
-            AND \"U_CDOAN\" = 'DG'
             AND \"Factory\" = ?
+            AND \"U_CDOAN\" = 'DG'
             AND ROUND((\"PlannedQty\" - \"IssuedQty\") - \"OnHand\") > 0
         ";
-
+    
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -1496,30 +1505,40 @@ class ProductionController extends Controller
         if (!odbc_execute($stmt, [$itemCode, $factory])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
+        
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
-
+    
+        // Nhóm dữ liệu theo SubItemCode và wareHouse
         foreach ($results as $item) {
             // Tính toán số lượng tối thiểu cần bổ sung
             $requiredQuantity = (float)$item['SoLuongToiThieuCanBoSung'];
             
-            // Nếu số lượng tối thiểu < số lượng cần sản xuất * định mức
-            $minimumRequired = $quantity * (float)$item['DinhMuc'];
-            if ($requiredQuantity < $minimumRequired) {
-                $requiredQuantity = $minimumRequired;
-            }
+            $key = $item['SubItemCode'] . '_' . $item['wareHouse'];
             
-            $requiredItems[] = [
-                'SubItemCode' => $item['SubItemCode'],
-                'SubItemName' => $item['SubItemName'],
-                'wareHouse' => $item['wareHouse'],
-                'requiredQuantity' => $requiredQuantity,
-                'DinhMuc' => (float)$item['DinhMuc']
-            ];
+            if (!isset($groupedItems[$key])) {
+                $groupedItems[$key] = [
+                    'SubItemCode' => $item['SubItemCode'],
+                    'SubItemName' => $item['SubItemName'],
+                    'wareHouse' => $item['wareHouse'],
+                    'requiredQuantity' => $requiredQuantity,
+                    'DinhMuc' => (float)$item['DinhMuc']
+                ];
+            } else {
+                // Cộng dồn số lượng cần bổ sung nếu đã có cùng SubItemCode và wareHouse
+                $groupedItems[$key]['requiredQuantity'] += $requiredQuantity;
+            }
         }
-
+    
+        // Chuyển từ mảng kết hợp sang mảng tuần tự
+        foreach ($groupedItems as $item) {
+            // Làm tròn số lượng để dễ đọc
+            $item['requiredQuantity'] = round($item['requiredQuantity'], 2);
+            $requiredItems[] = $item;
+        }
+    
         odbc_close($conDB);
         
         return $requiredItems;
