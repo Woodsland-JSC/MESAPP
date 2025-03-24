@@ -223,13 +223,224 @@ class DryingOvenController extends Controller
         }
     }
     // Tạo pallet
+    // function StorePalletNew(Request $request)
+    // {
+    //     try {
+    //         // 0. Khởi tạo giao dịch và khởi tạo biến 
+    //         DB::beginTransaction();
+    //         $res = null;
+    //         $res2 = null;
+    //         $current_week = now()->format('W');
+    //         $current_year = now()->year;
+
+    //         // 1. Lấy dữ liệu từ request và thông tin kho
+    //         $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
+    //         $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
+    //         $towarehouse = WarehouseCS();
+
+    //         // 1.1. Tạo pallet mới
+    //         $recordCount = Pallet::whereYear('created_at', $current_year)
+    //             ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+    //             ->count() + 1;
+
+    //         $combinedQuyCach = implode('_', $quyCachList);
+
+    //         $pallet = Pallet::create($palletData + [
+    //             'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
+    //             'QuyCach' => $combinedQuyCach
+    //         ]);
+
+    //         // 2. Lấy dữ liệu Details và tạo chi tiết pallet
+    //         $palletDetails = $request->input('Details', []);
+
+    //         // 2.1. Khỏi tạo biến để lưu dữ liệu
+    //         $ldt = [];
+    //         $ldt2 = [];
+    //         $totalkl = 0;
+    //         $toQty = 0;
+
+    //         // 2.2. Thực hiện lưu dữ liệu về data web
+    //         foreach ($palletDetails as $detailData) {
+    //             $datainsert = [];
+    //             $datainsert['palletID'] = $pallet->palletID;
+    //             $datainsert['WhsCode2'] = $towarehouse;
+    //             $datainsert['ItemCode'] = $detailData['ItemCode'];
+    //             $datainsert['ItemName'] = $detailData['ItemName'];
+    //             $datainsert['WhsCode'] = $detailData['WhsCode'];
+    //             $datainsert['BatchNum'] = $detailData['BatchNum'];
+
+    //             if ($palletData['LyDo'] === 'SL') {
+    //                 $datainsert['CDai_Site'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
+    //                 $datainsert['CDay_Site'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
+    //                 $datainsert['CRong_Site'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
+    //                 $datainsert['CDai'] =  0;
+    //                 $datainsert['CDay'] = 0;
+    //                 $datainsert['CRong'] = 0;
+    //                 $quyCachSite = $detailData['CDay'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDai'];
+    //                 $datainsert['QuyCachSite'] = $quyCachSite;
+    //                 // Save the Qty
+    //                 $datainsert['Qty'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
+    //                 $datainsert['Qty_T'] = 0;
+    //             } else {
+    //                 $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
+    //                 $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
+    //                 $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
+    //                 $datainsert['Qty'] = (float)$detailData['Qty'] * (float)$datainsert['CDai'] * (float)$datainsert['CDay'] * (float)$datainsert['CRong'] / 1000000000;
+    //                 $datainsert['Qty_T'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
+    //             }
+    //             pallet_details::create($datainsert);
+
+    //             // 2.3. Các dữ liệu được lưu vào các biến trước khi gửi về SAP
+    //             $ldt[] = [
+    //                 "ItemCode" => $detailData['ItemCode'],
+    //                 "WarehouseCode" =>  $towarehouse,
+    //                 "FromWarehouseCode" => $detailData['WhsCode'],
+    //                 "Quantity" =>  $datainsert['Qty'],
+    //                 "BatchNumbers" => [
+    //                     [
+    //                         "BatchNumber" => $detailData['BatchNum'],
+    //                         "Quantity" => $datainsert['Qty']
+    //                     ]
+    //                 ]
+    //             ];
+    //             // dd($ldt);
+    //             $ldt2[] = [
+    //                 "U_Item" => $detailData['ItemCode'],
+    //                 "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
+    //                 "U_CDay" => $detailData['CDay'] ? $detailData['CDay'] : 0,
+    //                 "U_CDai" => $detailData['CDai'] ? $detailData['CDai'] : 0,
+    //                 "U_Batch" => $detailData['BatchNum'],
+    //                 "U_Quant" => $datainsert['Qty'],
+    //             ];
+    //             $toQty += (float)$datainsert['Qty'];
+    //             $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'] / 1000000000;
+    //         }
+
+    //         $body = [
+    //             "U_Pallet" => $pallet->Code,
+    //             "U_PalletCreatedBy" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
+    //             "BPLID" => Auth::user()->branch,
+    //             "ToWarehouse" =>  $towarehouse,
+    //             "FromWarehouse" => $detailData['WhsCode'],
+    //             "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+    //             "StockTransferLines" => $ldt
+    //         ];
+    //         // dd($body);
+    //         $body2 = [
+    //             "U_Code" => $pallet->Code,
+    //             "U_Status" => "CS",
+    //             "U_Quant" => $toQty,
+    //             "U_Vol" => max($totalkl, 1),
+    //             "U_USER" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
+    //             "G_PALLETLCollection" => $ldt2
+    //         ];
+
+    //         // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về (mới, check kết quả API trước khi thực hiện API kế tiếp)
+    //         $stockTransferResponse = Http::withOptions([
+    //             'verify' => false,
+    //         ])->withHeaders([
+    //             "Content-Type" => "application/json",
+    //             "Accept" => "application/json",
+    //             "Authorization" => "Basic " . BasicAuthToken(),
+    //         ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+
+    //         $stockTransferResult = $stockTransferResponse->json();
+
+    //         // Kiểm tra lỗi API StockTransfers
+    //         if (!empty($stockTransferResult['error'])) {
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'message' => 'Failed to create stock transfer in SAP',
+    //                 'error' => $stockTransferResult['error'],
+    //             ], 500);
+    //         }
+
+    //         // 3.2 Nếu StockTransfers thành công, tiếp tục gọi API Pallet
+    //         $palletResponse = Http::withOptions([
+    //             'verify' => false,
+    //         ])->withHeaders([
+    //             "Content-Type" => "application/json",
+    //             "Accept" => "application/json",
+    //             "Authorization" => "Basic " . BasicAuthToken(),
+    //         ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
+
+    //         $palletResult = $palletResponse->json();
+
+    //         // Kiểm tra lỗi API Pallet
+    //         if (!empty($palletResult['error'])) {
+    //             // Thực hiện revert StockTransfers nếu có thể
+    //             try {
+    //                 $revertResponse = Http::withOptions([
+    //                     'verify' => false,
+    //                 ])->withHeaders([
+    //                     "Content-Type" => "application/json",
+    //                     "Accept" => "application/json",
+    //                     "Authorization" => "Basic " . BasicAuthToken(),
+    //                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
+
+    //                 if (!$revertResponse->successful()) {
+    //                     // Log thông tin về việc không thể revert
+    //                     \Log::error('Failed to revert StockTransfer', [
+    //                         'docEntry' => $stockTransferResult['DocEntry'],
+    //                         'error' => $revertResponse->json()
+    //                     ]);
+    //                 }
+    //             } catch (\Exception $e) {
+    //                 \Log::error('Exception when reverting StockTransfer', [
+    //                     'docEntry' => $stockTransferResult['DocEntry'],
+    //                     'error' => $e->getMessage()
+    //                 ]);
+    //             }
+
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'message' => 'Failed to create pallet in SAP',
+    //                 'error' => $palletResult['error'],
+    //                 'note' => 'Stock transfer has been attempted to revert'
+    //             ], 500);
+    //         }
+
+    //         // Trường hợp cả 2 API đều thành công
+    //         Pallet::where('palletID', $pallet->palletID)->update([
+    //             'DocNum' => $stockTransferResult['DocNum'],
+    //             'DocEntry' => $stockTransferResult['DocEntry'],
+    //             'palletSAP' => $palletResult['DocEntry'],
+    //             'CreateBy' => Auth::user()->id,
+    //             'activeStatus' => 0,
+    //         ]);
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'message' => 'Pallet created successfully',
+    //             'data' => [
+    //                 'pallet' => $pallet,
+    //                 'stockTransferResult' => $stockTransferResponse->json(),
+    //                 'palletResult' => $palletResponse->json(),
+    //             ]
+    //         ]);
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'message' => 'Failed to create pallet and details',
+    //             'error' => $e->getMessage(),
+    //             'stockTransferResult' => $stockTransferResponse->json(),
+    //             'palletResult' => $palletResponse->json(),
+    //         ], 500);
+    //     }
+    // }
+
     function StorePalletNew(Request $request)
     {
+        // Initialize response variables outside try block to make them accessible in catch
+        $stockTransferResponse = null;
+        $palletResponse = null;
+        $stockTransferResult = null;
+        $pallet = null;
+
         try {
             // 0. Khởi tạo giao dịch và khởi tạo biến 
             DB::beginTransaction();
-            $res = null;
-            $res2 = null;
             $current_week = now()->format('W');
             $current_year = now()->year;
 
@@ -303,7 +514,7 @@ class DryingOvenController extends Controller
                         ]
                     ]
                 ];
-                // dd($ldt);
+                
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
                     "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
@@ -325,7 +536,7 @@ class DryingOvenController extends Controller
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "StockTransferLines" => $ldt
             ];
-            // dd($body);
+            
             $body2 = [
                 "U_Code" => $pallet->Code,
                 "U_Status" => "CS",
@@ -335,7 +546,7 @@ class DryingOvenController extends Controller
                 "G_PALLETLCollection" => $ldt2
             ];
 
-            // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về (mới, check kết quả API trước khi thực hiện API kế tiếp)
+            // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về
             $stockTransferResponse = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
@@ -344,16 +555,12 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
 
-            $stockTransferResult = $stockTransferResponse->json();
-
-            // Kiểm tra lỗi API StockTransfers
-            if (!empty($stockTransferResult['error'])) {
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Failed to create stock transfer in SAP',
-                    'error' => $stockTransferResult['error'],
-                ], 500);
+            if (!$stockTransferResponse->successful()) {
+                throw new \Exception('Failed to create stock transfer in SAP: ' . 
+                    ($stockTransferResponse->json()['error']['message'] ?? $stockTransferResponse->body()));
             }
+
+            $stockTransferResult = $stockTransferResponse->json();
 
             // 3.2 Nếu StockTransfers thành công, tiếp tục gọi API Pallet
             $palletResponse = Http::withOptions([
@@ -364,43 +571,30 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
-            $palletResult = $palletResponse->json();
-
-            // Kiểm tra lỗi API Pallet
-            if (!empty($palletResult['error'])) {
-                // Thực hiện revert StockTransfers nếu có thể
-                try {
-                    $revertResponse = Http::withOptions([
-                        'verify' => false,
-                    ])->withHeaders([
-                        "Content-Type" => "application/json",
-                        "Accept" => "application/json",
-                        "Authorization" => "Basic " . BasicAuthToken(),
-                    ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
-
-                    if (!$revertResponse->successful()) {
-                        // Log thông tin về việc không thể revert
-                        \Log::error('Failed to revert StockTransfer', [
-                            'docEntry' => $stockTransferResult['DocEntry'],
-                            'error' => $revertResponse->json()
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    \Log::error('Exception when reverting StockTransfer', [
+            if (!$palletResponse->successful()) {
+                // Thực hiện revert StockTransfers
+                $revertResponse = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    "Content-Type" => "application/json",
+                    "Accept" => "application/json",
+                    "Authorization" => "Basic " . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
+                
+                if (!$revertResponse->successful()) {
+                    \Log::error('Failed to revert StockTransfer', [
                         'docEntry' => $stockTransferResult['DocEntry'],
-                        'error' => $e->getMessage()
+                        'error' => $revertResponse->json()
                     ]);
                 }
-
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Failed to create pallet in SAP',
-                    'error' => $palletResult['error'],
-                    'note' => 'Stock transfer has been attempted to revert'
-                ], 500);
+                
+                throw new \Exception('Failed to create pallet in SAP: ' . 
+                    ($palletResponse->json()['error']['message'] ?? $palletResponse->body()));
             }
 
-            // Trường hợp cả 2 API đều thành công
+            $palletResult = $palletResponse->json();
+
+            // 4. Trường hợp cả 2 API đều thành công, cập nhật thông tin pallet
             Pallet::where('palletID', $pallet->palletID)->update([
                 'DocNum' => $stockTransferResult['DocNum'],
                 'DocEntry' => $stockTransferResult['DocEntry'],
@@ -408,25 +602,42 @@ class DryingOvenController extends Controller
                 'CreateBy' => Auth::user()->id,
                 'activeStatus' => 0,
             ]);
+            
             DB::commit();
 
             return response()->json([
                 'message' => 'Pallet created successfully',
                 'data' => [
                     'pallet' => $pallet,
-                    'stockTransferResult' => $stockTransferResponse->json(),
-                    'palletResult' => $palletResponse->json(),
+                    'stockTransferResult' => $stockTransferResult,
+                    'palletResult' => $palletResult,
                 ]
             ]);
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
-
-            return response()->json([
-                'message' => 'Failed to create pallet and details',
+            \Log::error('Error creating pallet', [
                 'error' => $e->getMessage(),
-                'stockTransferResult' => $stockTransferResponse->json(),
-                'palletResult' => $palletResponse->json(),
-            ], 500);
+                'trace' => $e->getTraceAsString(),
+                'stockTransferResponse' => $stockTransferResponse ? $stockTransferResponse->json() : null,
+                'palletResponse' => $palletResponse ? $palletResponse->json() : null,
+            ]);
+
+            // Prepare error response with details
+            $errorResponse = [
+                'message' => 'Failed to create pallet and details',
+                'error' => $e->getMessage()
+            ];
+            
+            // Include API responses if available
+            if ($stockTransferResponse) {
+                $errorResponse['stockTransferResult'] = $stockTransferResponse->json();
+            }
+            
+            if ($palletResponse) {
+                $errorResponse['palletResult'] = $palletResponse->json();
+            }
+            
+            return response()->json($errorResponse, 500);
         }
     }
 

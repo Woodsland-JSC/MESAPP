@@ -1847,7 +1847,7 @@ function WoodSorting() {
                             </ModalBody>
 
                             <ModalFooter>
-                                <div className="flex w-full items-center space-x-3">
+                                <div className="flex w-full items-center xl:justify-end lg:justify-end md:justify-end  space-x-3">
                                     <button
                                         onClick={() => {
                                             onConfirmClose();
