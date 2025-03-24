@@ -114,6 +114,7 @@ if (!function_exists('playloadBatch')) {
                         [
                             "ItemCode" => $ItemCode,
                             "Quantity" => $Qty,
+                            "CostingCode" => "CBG",
                             "WarehouseCode" => $WarehouseCode,
                         ]
                     ]
@@ -131,6 +132,7 @@ if (!function_exists('playloadBatch')) {
                             "ItemCode" => $ItemCode,
                             "Quantity" => $Qty,
                             "WarehouseCode" => $WarehouseCode,
+                            "CostingCode" => "CBG",
                             "BatchNumbers" =>  $serial_batch
                         ]
                     ]
@@ -143,6 +145,7 @@ if (!function_exists('playloadBatch')) {
                     "U_NGiao" => $NGIAO,
                     "U_NNhan" => $NNHAN,
                     "U_QCN" => $QCNUMBER,
+                    "CostingCode" => "CBG",
                     "DocumentLines" => [
                         [
                             "ItemCode" => $ItemCode,

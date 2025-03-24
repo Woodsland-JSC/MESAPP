@@ -225,7 +225,7 @@ class QCController extends Controller
             ->where('a.PlanID', $req->PlanID)
             ->select('a.Oven')
             ->first();
-            
+
         if ($req->Type == 'DA') {
             $temp =  humidityDetails::where('PlanID', $req->PlanID)->where('refID', -1)->get();
         } else {
@@ -324,7 +324,7 @@ class QCController extends Controller
             'Factory'=> 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return
         };
 
         // 2. Lấy tên tổ QC theo nhà máy
@@ -367,11 +367,11 @@ class QCController extends Controller
                 'a.CRong',
                 'a.CDai',
                 DB::raw('(b.openQty - (
-                SELECT COALESCE(SUM(quantity), 0) 
-                FROM historySL 
+                SELECT COALESCE(SUM(quantity), 0)
+                FROM historySL
                 WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.ItemCode END
                 AND isQualityCheck = 1
-                AND notiId = b.id                
+                AND notiId = b.id
             )) as Quantity'),
                 'a.created_at',
                 'c.first_name',
@@ -387,9 +387,9 @@ class QCController extends Controller
             ->where('a.Team', '=',  $request->TO)
             ->havingRaw('Quantity > 0')
             ->get();
-        
+
         //4. Truy vấn các thông tin dưới SAP
-        $conDB = (new ConnectController)->connect_sap();    
+        $conDB = (new ConnectController)->connect_sap();
 
         // Loại lỗi
         $query_01 = 'select "Code" "id", "Name" "name", "U_Type" from "@V_LLVCN" where "U_ObjType" = ?';
@@ -428,19 +428,19 @@ class QCController extends Controller
             SELECT "U_FAC", "VisResCode" AS "Code", "ResName" AS "Name"
             FROM "ORSC"
             WHERE "U_QC" = ? AND "validFor" = ? AND "ResName" IS NOT NULL AND "U_KHOI" = ? AND "U_FAC" IS NOT NULL
-            ORDER BY 
+            ORDER BY
                 CASE WHEN "U_FAC" = ? THEN 0 ELSE 1 END, -- Đưa nhóm U_FAC = $userPlant lên đầu
                 "U_FAC" ASC;';
-        
+
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         if (!odbc_execute($stmt_03, ['N', 'Y', $request->KHOI, $userPlant])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $teamBack = [];
         while ($row = odbc_fetch_array($stmt_03)) {
             $teamBack[] = $row;
@@ -448,7 +448,7 @@ class QCController extends Controller
 
         // If $userPlant is 'YS', add additional result
         if ($userPlant == 'YS') {
-            $additionalQuery = 'select "VisResCode" "Code","ResName" "Name" 
+            $additionalQuery = 'select "VisResCode" "Code","ResName" "Name"
             from "ORSC" where "VisResCode" = ?;';
             $additionalStmt = odbc_prepare($conDB, $additionalQuery);
             if (!$additionalStmt) {
@@ -535,7 +535,7 @@ class QCController extends Controller
             'KHOI',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return
         }
         $data = DB::table('notireceiptVCN as a')
             ->join('users as b', 'a.CreatedBy', '=', 'b.id')
@@ -599,7 +599,7 @@ class QCController extends Controller
         $userPlant = Auth::user()->plant == 'YS1' || Auth::user()->plant == 'YS2' ? 'YS' : Auth::user()->plant;
 
         // Tổ chuyển về
-        $query_03 = 'select "VisResCode" "Code","ResName" "Name" 
+        $query_03 = 'select "VisResCode" "Code","ResName" "Name"
         from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=? and "ResName" is not null AND "U_KHOI"=?;';
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
@@ -685,7 +685,7 @@ class QCController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return
         }
 
         $factory = $request->factory;
@@ -694,18 +694,18 @@ class QCController extends Controller
 
         $conDB = (new ConnectController)->connect_sap();
         $query =
-            'SELECT 
-            "VisResCode" AS "Code", 
-            "ResName" AS "Name", 
+            'SELECT
+            "VisResCode" AS "Code",
+            "ResName" AS "Name",
             "U_CDOAN" AS "CongDoan",
-            "U_FAC" AS "Factory", 
-            CASE WHEN "U_QC" = ? THEN TRUE ELSE FALSE END AS QC 
-        FROM 
-            "ORSC" A 
+            "U_FAC" AS "Factory",
+            CASE WHEN "U_QC" = ? THEN TRUE ELSE FALSE END AS QC
+        FROM
+            "ORSC" A
             JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
-            JOIN OHEM C ON B."EmpID" = C."empID" 
-        WHERE 
-            c."empID" = ? 
+            JOIN OHEM C ON B."EmpID" = C."empID"
+        WHERE
+            c."empID" = ?
             AND "validFor" = ?
             AND "U_QC" <> ?
         ';
@@ -856,7 +856,7 @@ class QCController extends Controller
         $res = $response->json();
         // dd($res);
 
-        // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về  
+        // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về
         if ($response->successful()) {
             awaitingstocks::where('notiId', $request->id)->delete();
             SanLuong::where('id', $data->id)->update(
@@ -1304,6 +1304,7 @@ class QCController extends Controller
                     "Quantity" => $request->Qty,
                     "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     "WarehouseCode" =>  $warehouse,
+                    "CostingCode" => "CBG",
                     "BatchNumbers" => [[
                         "BatchNumber" => Carbon::now()->format('YmdHis'),
                         "Quantity" => $request->Qty,
