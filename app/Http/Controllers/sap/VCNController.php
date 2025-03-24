@@ -356,13 +356,13 @@ class VCNController extends Controller
         if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $results = array();
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
         // dd($results);
-        
+
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
         $CongDoan = null;
@@ -625,7 +625,7 @@ class VCNController extends Controller
         //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
         $query2 = 'call UV_WEB_StockRong(?)';
         $stmt = odbc_prepare($conDB, $query2);
-       
+
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
@@ -644,7 +644,7 @@ class VCNController extends Controller
         else{
             $TotalFather = $stockFather[0]['Qty'];
         }
-    
+
         // Lấy dữ liệu đã ghi nhận trên web
         $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
         ->where('deleted', 0)
@@ -655,7 +655,7 @@ class VCNController extends Controller
         // Trả về tồn thực tế
         $TotalFather=$TotalFather-$databtp;
 
-        // lấy data dở dàng 
+        // lấy data dở dàng
         $data = $data = NotiReceiptVCN::query()
         ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
         ->select(
@@ -689,7 +689,7 @@ class VCNController extends Controller
             'b.ItemCode'
         )
         ->get();
-      
+
         //data noti
         $notification = NotiReceiptVCN::query()
         ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
@@ -727,7 +727,7 @@ class VCNController extends Controller
             'b.ItemCode',
             'b.ItemName',
             'b.type',
-            'fullname',     
+            'fullname',
         )
         ->get()
         ->groupBy('id')  // Nhóm theo id
@@ -768,7 +768,7 @@ class VCNController extends Controller
                     }
                 }
                 $item1['ConLai'] = (float) $item1['ConLai'];
-              
+
             }
             return response()->json([
                 'CongDoan' => $CongDoan,
@@ -1281,7 +1281,7 @@ class VCNController extends Controller
                 }
             }
 
-            // lấy data dở dàng 
+            // lấy data dở dàng
             $data = notireceiptVCN::select('ItemCode', 'version')
                 ->selectRaw('SUM(CASE WHEN type = 1 THEN openQty ELSE Quantity END) AS TotalQuantity')
                 ->where('FatherCode', $request->FatherCode)
@@ -1439,7 +1439,7 @@ class VCNController extends Controller
         ], 200);
     }
 
-    
+
      /*
     *********************************
     version 2: thay doi yeu cau nhập xuất cùng lúc
@@ -1617,8 +1617,8 @@ class VCNController extends Controller
                         ->select('ItemCode','ItemName','QuyCach', 'Quantity')
                         ->where('type', '=', 0)
                         ->get();
-                   
-            
+
+
                     return $item;
                 });
         }
@@ -1657,7 +1657,7 @@ class VCNController extends Controller
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
             }
-            
+
             //3. Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
@@ -1677,7 +1677,7 @@ class VCNController extends Controller
             // Lấy công đoạn hiện tại
             $CongDoan = null;
             foreach ($results as $result) {
-               
+
                 $U_CDOAN = $result['U_CDOAN'];
 
                 if ($CongDoan === null) {
@@ -1688,11 +1688,11 @@ class VCNController extends Controller
                     }
                 }
             }
-            
+
             //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
             $query2 = 'call UV_WEB_StockRong(?)';
             $stmt = odbc_prepare($conDB, $query2);
-           
+
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
@@ -1711,7 +1711,7 @@ class VCNController extends Controller
             else{
                 $TotalFather = $stockFather[0]['Qty'];
             }
-        
+
             // Lấy dữ liệu đã ghi nhận trên web
             $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
             ->where('deleted', 0)
@@ -1722,7 +1722,7 @@ class VCNController extends Controller
             // Trả về tồn thực tế
             $TotalFather=$TotalFather-$databtp;
 
-            
+
             // =============
             // 1. Lấy data dở dang??
             // $data = $data = NotiReceiptVCN::query()
@@ -1760,7 +1760,7 @@ class VCNController extends Controller
             // ->get();
 
             // dd($data);
-          
+
             //data noti
             $notification = NotiReceiptVCN::query()
             ->leftJoin('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
@@ -1802,7 +1802,7 @@ class VCNController extends Controller
                 'b.ItemCode',
                 'b.ItemName',
                 'Type',
-                'fullname',     
+                'fullname',
             )
             ->get()
             ->groupBy('id')  // Nhóm theo id
@@ -1835,7 +1835,7 @@ class VCNController extends Controller
                 }
             })
             ->values()
-            ->toArray(); 
+            ->toArray();
 
             // dd($notification);
 
@@ -1864,7 +1864,7 @@ class VCNController extends Controller
             //             }
             //         }
             //         $item1['ConLai'] = (float) $item1['ConLai'];
-                  
+
             //     }
             //     return response()->json([
             //         'CongDoan' => $CongDoan,
@@ -1943,6 +1943,7 @@ class VCNController extends Controller
                                 "TransactionType" => "C",
                                 "BaseEntry" => $allocate['DocEntry'],
                                 "BaseType" => 202,
+                                "CostingCode" => "VCN",
                                 "BatchNumbers" => [
                                     [
                                         "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
@@ -1974,7 +1975,7 @@ class VCNController extends Controller
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
             ];
-            
+
            $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
            $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
@@ -1999,14 +2000,14 @@ class VCNController extends Controller
                     $res = $response->getBody()->getContents();
                     // kiểm tra sussess hay faild hơi quăng nha
                     if (strpos($res, 'ETag') !== false) {
-                     
+
                         notireceiptVCN::where('id', $request->id)->update([
                             'confirm' => 1,
                             'confirmBy' => Auth::user()->id,
                             'confirm_at' => Carbon::now()->format('YmdHis')
                         ]);
                         awaitingstocksvcn::where('notiId', $request->id)->delete();
-                        DB::commit();                  
+                        DB::commit();
                     }
                     else
                     {
@@ -2014,13 +2015,13 @@ class VCNController extends Controller
                         if (isset($matches[0])) {
                             $jsonString = $matches[0];
                             $errorData = json_decode($jsonString, true);
-                        
+
                             if (isset($errorData['error'])) {
                                 $errorCode = $errorData['error']['code'];
                                 $errorMessage = $errorData['error']['message']['value'];
                                 throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                            } 
-                        } 
+                            }
+                        }
                     }
                 }
                 return response()->json('success', 200);
@@ -2039,9 +2040,9 @@ class VCNController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-      
+
     }
-    
+
     function collectStockAllocate($stringIssue)
     {
             $conDB = (new ConnectController)->connect_sap();
@@ -2062,7 +2063,7 @@ class VCNController extends Controller
             if (empty($dataIssue)) {
                 return null;
             }
-           
+
             if(isset($dataIssue[0]['ItemError']))
             {
                 throw new \Exception(  $dataIssue[0]['ItemError']);
@@ -2074,12 +2075,12 @@ class VCNController extends Controller
             $uniqueDocEntries = array_unique(array_column($inputArray, 'DocEntry'));
             $data = [];
             foreach ($uniqueDocEntries as $docEntry) {
-               
+
                 $data[] = [
                     'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
                     'DocumentLines' => [],
                     'DocEntry' => $docEntry
-                  
+
                 ];
             }
             // Step 2: Group the data by DocEntry
@@ -2097,6 +2098,7 @@ class VCNController extends Controller
                         'BaseType' => 202, // Assuming BaseType is always 202
                         'BaseLine' => $item['BaseLine'],
                         'Quantity'=>$item['QtyTotal'],
+                        "CostingCode" => "VCN",
                         'BatchNumbers' => [],
                         'SerialNumbers' => []
                     ];
@@ -2127,7 +2129,7 @@ class VCNController extends Controller
             }
             // Output the final data structure
             $output = $data;
-        return $output;  
+        return $output;
     }
     function AcceptQCVCNV2(Request $request)
     {
@@ -2216,6 +2218,7 @@ class VCNController extends Controller
                         "TransactionType" => "R",
                         "BaseEntry" => $allocate['DocEntry'],
                         "BaseType" => 202,
+                        "CostingCode" => "VCN",
                         "WarehouseCode" => $whs,
                         "BatchNumbers" => [
                             [
@@ -2232,7 +2235,7 @@ class VCNController extends Controller
                         ]
                     ]]
                     ];
-                  
+
                     historySLVCN::create(
                         [
                         // 'LSX' => $data->LSX,
@@ -2247,7 +2250,7 @@ class VCNController extends Controller
                         ]
                     );
             }
-            
+
             if($string==''){
                 DB::rollBack();
                 return response()->json([
@@ -2264,7 +2267,7 @@ class VCNController extends Controller
             'InventoryGenEntries' => $dataReceipt,
             'InventoryGenExits' => $stockissue
         ];
-        
+
        $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
        $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
@@ -2314,8 +2317,8 @@ class VCNController extends Controller
                         $request->note,
                         $teamBack
                     );
-                } 
-                
+                }
+
                 else
                 {
                     preg_match('/\{.*\}/s', $res, $matches);
@@ -2326,8 +2329,8 @@ class VCNController extends Controller
                             $errorCode = $errorData['error']['code'];
                             $errorMessage = $errorData['error']['message']['value'];
                             throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                        } 
-                    } 
+                        }
+                    }
                 }
             }
             return response()->json('success', 200);
@@ -2386,7 +2389,7 @@ class VCNController extends Controller
             'Data.*.CRong' => 'required|numeric',
             'Data.*.CDai' => 'required|numeric',
         ]);
-        
+
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
@@ -2489,7 +2492,7 @@ class VCNController extends Controller
             'message' => 'Successful',
         ], 200);
     }
-    
+
     function AcceiptRongv2(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -2515,7 +2518,7 @@ class VCNController extends Controller
                 ], 500);
             }
             //Item father issue
-         
+
             $dataissueRong=$this->collecteEntryIssueRong($data->FatherCode,$data->team,$data->version);
             $dataAllocateIssue=$this->allocatedIssueRong($dataissueRong,$data->QtyIssueRong);
             if (count($dataAllocateIssue) == 0) {
@@ -2556,12 +2559,13 @@ class VCNController extends Controller
                     $quantity = $allocate['Allocated'];
                     if (isset($allocates[$docEntry])) {
                         // Append the item to DocumentLines if DocEntry exists
-                        $allocates[$docEntry]['DocumentLines'][] = [    
+                        $allocates[$docEntry]['DocumentLines'][] = [
                             "Qty" => $quantity,
                             "BaseEntry" => $docEntry,
                             'BaseLine'=> $allocate['LineNum'],
                             "BaseType" => 202,
                             "Quantity"=>$quantity,
+                            "CostingCode" => "VCN",
                             "BatchNumbers"=>[[
                                 "ItemCode" => $itemCode,
                                 "BatchNumber"=>Carbon::now()->format('YmdHis').$docEntry,
@@ -2577,7 +2581,7 @@ class VCNController extends Controller
                             // "Version" => $allocate['Version'],
                             // "TO" => $allocate['TO'],
                             "DocumentLines" => [
-                                
+
                                 [
                                     "BaseEntry" => $docEntry,
                                     "BaseType" => 202,
@@ -2626,14 +2630,14 @@ class VCNController extends Controller
                 $res = $response->getBody()->getContents();
                 // kiểm tra sussess hay faild hơi quăng nha
                 if (strpos($res, 'ETag') !== false) {
-                 
+
                     notireceiptVCN::where('id', $request->id)->update([
                         'confirm' => 1,
                         'confirmBy' => Auth::user()->id,
                         'confirm_at' => Carbon::now()->format('YmdHis')
                     ]);
                     DB::commit();
-                    
+
                 }
                 else
                 {
@@ -2641,16 +2645,16 @@ class VCNController extends Controller
                     if (isset($matches[0])) {
                         $jsonString = $matches[0];
                         $errorData = json_decode($jsonString, true);
-                    
+
                         if (isset($errorData['error'])) {
                             $errorCode = $errorData['error']['code'];
                             $errorMessage = $errorData['error']['message']['value'];
                             throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                        } 
-                    } 
+                        }
+                    }
                 }
-               
-               
+
+
             }
             return response()->json('success', 200);
 
@@ -2668,7 +2672,7 @@ class VCNController extends Controller
     }
     function AcceiptQCRongv2(Request $request)
     {
-        
+
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'Qty' => 'required',
@@ -2677,7 +2681,7 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
-    
+
         $loailoi = $request->loailoi['label'] ?? '';
         $huongxuly = $request->huongxuly['label'] ?? '';
         $teamBack = $request->teamBack['value'] ?? '';
@@ -2692,7 +2696,7 @@ class VCNController extends Controller
                 'message' => "Không tìm thấy kho QC do user chưa được chỉ định nhà máy hoặc Hệ thống SAP chưa được cấu hình UserId: " . Auth::user()->id
             ], 500);
         }
-      
+
         try
         {
             $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', -1)->first();
@@ -2702,7 +2706,7 @@ class VCNController extends Controller
             // check xem item đó số lượng qty có lớn hơn số lượng openQty không và openQty >0
             $ctrong = ChiTietRong::where('baseID', $request->id)->where('type', '=', 1)
                 ->where('openQty', '>=', $request->Qty)->first();
-               
+
             if (!$ctrong) {
                 throw new \Exception('data không hợp lệ');
             }
@@ -2735,7 +2739,7 @@ class VCNController extends Controller
             }
             // if( )
             $dataallocate = $this->collectdatadetailrong($data->FatherCode, $ctrong->ItemCode, $data->team, $data->version);
-         
+
             if (count($dataallocate) == 0) {
                 return response()->json([
                     'error' => false,
@@ -2746,7 +2750,7 @@ class VCNController extends Controller
                         $data->FatherCode . " LSX." . $data->LSX
                 ], 500);
             }
-           
+
             $newAllocates = $this->allocatedIssueRong($dataallocate, $request->Qty);
             if (count($newAllocates) == 0) {
                 return response()->json([
@@ -2777,6 +2781,7 @@ class VCNController extends Controller
                     "TransactionType" => "R",
                     "BaseEntry" => $allocate['DocEntry'],
                     "BaseType" => 202,
+                    "CostingCode" => "VCN",
                     "WarehouseCode" => $whs,
                     "BatchNumbers" => [
                         [
@@ -2793,7 +2798,7 @@ class VCNController extends Controller
                     ]
                 ]]
                 ];
-              
+
                 historySLVCN::create(
                     [
                     // 'LSX' => $data->LSX,
@@ -2812,7 +2817,7 @@ class VCNController extends Controller
             'InventoryGenEntries' => $dataReceipt,
             'InventoryGenExits' => $stockissue
         ];
-       
+
        $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
        $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer().'/b1s/v1/$batch', [
@@ -2842,12 +2847,12 @@ class VCNController extends Controller
                         'confirmBy' => Auth::user()->id,
                         'isQCConfirmed' => 1,
                     ]);
-                    ChiTietRong::where('baseID', $request->id)->where('ItemCode',$request->ItemCode)->where('type',1)->update([   
+                    ChiTietRong::where('baseID', $request->id)->where('ItemCode',$request->ItemCode)->where('type',1)->update([
                         'openQty' => $ctrong->openQty - $request->Qty
                     ]);
                     DB::commit();
-                } 
-                
+                }
+
                 else
                 {
                     preg_match('/\{.*\}/s', $res, $matches);
@@ -2858,12 +2863,12 @@ class VCNController extends Controller
                             $errorCode = $errorData['error']['code'];
                             $errorMessage = $errorData['error']['message']['value'];
                             throw new \Exception('SAP code:'.$errorCode.' chi tiết'.$errorMessage);
-                        } 
-                    } 
+                        }
+                    }
                 }
             }
             return response()->json('success', 200);
-          
+
         }
         catch (\Exception | QueryException $e) {
             DB::rollBack();
@@ -2873,7 +2878,7 @@ class VCNController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-      
+
     }
     // xử lý lấy lệnh rong cần issu và allocate
     function allocatedIssueRong($data, $totalQty)
@@ -2926,7 +2931,7 @@ class VCNController extends Controller
         };
         odbc_close($conDB);
         return  $results;
-      
+
     }
     function collectdatadetailrong($spdich, $item, $to, $version)
     {

@@ -577,7 +577,7 @@ class ProductionController extends Controller
             ->where('a.ItemCode', '=', $request->ItemCode)
             ->where('a.Team', '=', $request->TO);
 
-        // Danh sách sản lượng lỗi        
+        // Danh sách sản lượng lỗi
         $dataqc = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -613,7 +613,7 @@ class ProductionController extends Controller
 
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        // Danh sách sản lượng trả lại     
+        // Danh sách sản lượng trả lại
         $dataReturn = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -885,7 +885,7 @@ class ProductionController extends Controller
             ->where('a.Team', '=', $request->TO);
         $notification = $Datareceipt->unionAll($dataqc)->get();
 
-        // Danh sách sản lượng trả lại     
+        // Danh sách sản lượng trả lại
         $dataReturn = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {
                 $join->on('a.id', '=', 'b.baseID')
@@ -1185,7 +1185,7 @@ class ProductionController extends Controller
     {
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'select "VisResCode" "Code","ResName" "Name" 
+        $query = 'select "VisResCode" "Code","ResName" "Name"
         from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=?;';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -1259,10 +1259,10 @@ class ProductionController extends Controller
             'CongDoan' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); 
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
             // Return validation errors with a 422 Unprocessable Entity status code
         }
-        // 
+        //
         try {
             // 2. Xử lý xác nhận
             DB::beginTransaction();
@@ -1279,7 +1279,7 @@ class ProductionController extends Controller
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             $U_Item = $data->ItemCode;
             $U_Qty = $data->SLDG ?? 0;
-            
+
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC" && $data->NextTeam != "TB-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
@@ -1308,6 +1308,7 @@ class ProductionController extends Controller
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
                             "BaseEntry" => $allocate['DocEntry'],
+                            "CostingCode" => "CBG",
                             "BaseType" => 202,
                             "BatchNumbers" => [
                                 [
@@ -1353,7 +1354,7 @@ class ProductionController extends Controller
                     'InventoryGenExits' => $stockissue
                 ];
 
-                $payload = playloadBatch($dataSendPayload); 
+                $payload = playloadBatch($dataSendPayload);
                 // Assuming `playloadBatch()` function prepares the payload
                 $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
@@ -1363,7 +1364,7 @@ class ProductionController extends Controller
                         'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $payload['uid'],
                         'Authorization' => 'Basic ' . BasicAuthToken(),
                     ],
-                    'body' => $payload['payload'], 
+                    'body' => $payload['payload'],
                     // Đảm bảo $pl được định dạng đúng cách với boundary
                 ]);
                 if ($response->getStatusCode() == 400) {
@@ -1422,9 +1423,9 @@ class ProductionController extends Controller
             }
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
-            
+
             // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
-            if (strpos($e->getMessage(), 'SAP code:-5002') !== false && 
+            if (strpos($e->getMessage(), 'SAP code:-5002') !== false &&
             strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
 
             // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
@@ -1456,7 +1457,7 @@ class ProductionController extends Controller
                 'original_error' => $e->getMessage()
             ], 400); // Trả về 400 Bad Request thay vì 500 Internal Server Error
             }
-            
+
             // Trả về lỗi thông thường nếu không phải lỗi tồn kho
             return response()->json([
                 'error' => false,
@@ -1470,9 +1471,9 @@ class ProductionController extends Controller
     {
         $requiredItems = [];
         $groupedItems = [];
-    
+
         $conDB = (new ConnectController)->connect_sap();
-    
+
         // Truy vấn view UV_TONKHOSAP để lấy thông tin
         $query ="
             SELECT
@@ -1497,7 +1498,7 @@ class ProductionController extends Controller
             AND \"U_CDOAN\" = 'DG'
             AND ROUND((\"PlannedQty\" - \"IssuedQty\") - \"OnHand\") > 0
         ";
-    
+
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -1505,19 +1506,19 @@ class ProductionController extends Controller
         if (!odbc_execute($stmt, [$itemCode, $factory])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
-    
+
         // Nhóm dữ liệu theo SubItemCode và wareHouse
         foreach ($results as $item) {
             // Tính toán số lượng tối thiểu cần bổ sung
             $requiredQuantity = (float)$item['SoLuongToiThieuCanBoSung'];
-            
+
             $key = $item['SubItemCode'] . '_' . $item['wareHouse'];
-            
+
             if (!isset($groupedItems[$key])) {
                 $groupedItems[$key] = [
                     'SubItemCode' => $item['SubItemCode'],
@@ -1531,16 +1532,16 @@ class ProductionController extends Controller
                 $groupedItems[$key]['requiredQuantity'] += $requiredQuantity;
             }
         }
-    
+
         // Chuyển từ mảng kết hợp sang mảng tuần tự
         foreach ($groupedItems as $item) {
             // Làm tròn số lượng để dễ đọc
             $item['requiredQuantity'] = round($item['requiredQuantity'], 2);
             $requiredItems[] = $item;
         }
-    
+
         odbc_close($conDB);
-        
+
         return $requiredItems;
     }
 
