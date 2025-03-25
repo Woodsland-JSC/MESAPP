@@ -16,7 +16,7 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../../assets/styles/datepicker.css";
-import { format, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay, set } from "date-fns";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/src/sweetalert2.scss";
 import BigSelect from "../../../components/Select/BigSelect";
@@ -34,6 +34,10 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import { BiSolidFactory } from "react-icons/bi";
+import { SiConfluence, SiElasticstack, SiKoyeb } from "react-icons/si";
+import { TbTrash } from "react-icons/tb";
+import { is } from "date-fns/locale";
+import { FaWarehouse } from "react-icons/fa";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -45,11 +49,21 @@ function WoodSorting() {
         onOpen: onPalletTracingOpen,
         onClose: onPalletTracingClose,
     } = useDisclosure();
-    const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
+    const {
+        isOpen: isConfirmOpen,
+        onOpen: onConfirmOpen,
+        onClose: onConfirmClose,
+    } = useDisclosure();
+    const {
+        isOpen: isDeletePalletConfirmOpen,
+        onOpen: onDeletePalletConfirmOpen,
+        onClose: onDeletePalletConfirmClose,
+    } = useDisclosure();
 
     // States
     const [loading, setLoading] = useState(false);
     const [createPalletLoading, setCreatePalletLoading] = useState(false);
+    const [deletePalletLoading, setDeletePalletLoading] = useState(false);
     const [palletHistoryLoading, setPalletHistoryLoading] = useState(false);
     const [palletListLoading, setPalletListLoading] = useState(false);
     const [palletTracingLoading, setPalletTracingLoading] = useState(false);
@@ -63,6 +77,7 @@ function WoodSorting() {
     const [searchTerm, setSearchTerm] = useState("");
 
     const [selectedPallet, setSelectedPallet] = useState(null);
+    const [selectedDeletePallet, setSelectedDeletePallet] = useState(null);
     const [palletOptions, setPalletOptions] = useState([]);
     const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
     const [reloadDryingMethodsKey, setReloadDryingMethodsKey] = useState(0);
@@ -242,7 +257,8 @@ function WoodSorting() {
         } catch (error) {
             console.error("Error fetching drying methods:", error);
             toast.error(
-                "Không thể lấy dữ liệu quy cách thô. " + error?.response?.data?.message
+                "Không thể lấy dữ liệu quy cách thô. " +
+                    error?.response?.data?.message
             );
             setIsItemsLoading(false);
             setDryingMethodsOptions([]);
@@ -309,73 +325,88 @@ function WoodSorting() {
 
                 if (response && response.length > 0) {
                     response.map((item, index) => {
-                        
-                        const quyCach = `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`;
-                        const existingQuyCach = quyCachList.find((item) => item.key === quyCach);
+                        const quyCach = `${Number(item.CDay)}x${Number(
+                            item.CRong
+                        )}x${Number(item.CDai)}`;
+                        const existingQuyCach = quyCachList.find(
+                            (item) => item.key === quyCach
+                        );
 
                         if (existingQuyCach) {
                             // Nếu đã tồn tại quy cách, kiểm tra BatchNum
-                            if (existingQuyCach.batchNums.includes(item.BatchNum)) {
-                                toast.error("Quy cách đã tồn tại trong pallet.");
-                                return; 
+                            if (
+                                existingQuyCach.batchNums.includes(
+                                    item.BatchNum
+                                )
+                            ) {
+                                toast.error(
+                                    "Quy cách đã tồn tại trong pallet."
+                                );
+                                return;
                             } else {
                                 // Nếu chưa có BatchNum, thêm vào danh sách
                                 existingQuyCach.batchNums.push(item.BatchNum);
-                                console.log("BatchNum mới đã được thêm vào quy cách:", quyCach);
+                                console.log(
+                                    "BatchNum mới đã được thêm vào quy cách:",
+                                    quyCach
+                                );
                             }
                         } else {
                             // Nếu chưa có quy cách, thêm quy cách mới với BatchNum
                             if (quyCachList.length >= 2) {
-                                toast.error("Một pallet chỉ chứa tối đa 2 quy cách.");
+                                toast.error(
+                                    "Một pallet chỉ chứa tối đa 2 quy cách."
+                                );
                                 return; // Dừng nếu vượt quá 2 quy cách
                             }
-                        
+
                             quyCachList.push({
                                 key: quyCach,
                                 batchNums: [item.BatchNum],
                             });
                             console.log("Quy cách mới đã được thêm:", quyCach);
                         }
-                            console.log(
-                                "3.Danh sách item trong pallet: ",
-                                quyCachList
-                            );
-                            const newPalletCard = (
-                                <PalletCard
-                                    key={item.WhsCode + item.BatchNum}
-                                    itemCode={selectedDryingMethod.code}
-                                    itemName={selectedDryingMethod.label}
-                                    batchNum={item.BatchNum}
-                                    inStock={item.Quantity}
-                                    whsCode={item.WhsCode}
-                                    height={item.CDai}
-                                    width={item.CRong}
-                                    flag={item.Flag}
-                                    thickness={item.CDay}
-                                    isInvalidQuantity={isInvalidQuantity}
-                                    createPalletLoading={createPalletLoading}
-                                    onDelete={() =>
-                                        handleDeletePalletCard(
-                                            item.WhsCode + item.BatchNum,
-                                            `${Number(item.CDay)}x${Number(item.CRong)}x${Number(item.CDai)}`,
-                                            item.BatchNum
-                                        )
-                                    }
-                                    onQuantityChange={(quantity) => {
-                                        handlePalletQuantityChange(
-                                            item.WhsCode + item.BatchNum,
-                                            quantity
-                                        );
-                                    }}
-                                />
-                            );
-                            setPalletCards((prevPalletCards) => [
-                                ...prevPalletCards,
-                                newPalletCard,
-                            ]);
-                            
-                            toast.success("Quy cách gỗ đã được chất lên pallet.");
+                        console.log(
+                            "3.Danh sách item trong pallet: ",
+                            quyCachList
+                        );
+                        const newPalletCard = (
+                            <PalletCard
+                                key={item.WhsCode + item.BatchNum}
+                                itemCode={selectedDryingMethod.code}
+                                itemName={selectedDryingMethod.label}
+                                batchNum={item.BatchNum}
+                                inStock={item.Quantity}
+                                whsCode={item.WhsCode}
+                                height={item.CDai}
+                                width={item.CRong}
+                                flag={item.Flag}
+                                thickness={item.CDay}
+                                isInvalidQuantity={isInvalidQuantity}
+                                createPalletLoading={createPalletLoading}
+                                onDelete={() =>
+                                    handleDeletePalletCard(
+                                        item.WhsCode + item.BatchNum,
+                                        `${Number(item.CDay)}x${Number(
+                                            item.CRong
+                                        )}x${Number(item.CDai)}`,
+                                        item.BatchNum
+                                    )
+                                }
+                                onQuantityChange={(quantity) => {
+                                    handlePalletQuantityChange(
+                                        item.WhsCode + item.BatchNum,
+                                        quantity
+                                    );
+                                }}
+                            />
+                        );
+                        setPalletCards((prevPalletCards) => [
+                            ...prevPalletCards,
+                            newPalletCard,
+                        ]);
 
+                        toast.success("Quy cách gỗ đã được chất lên pallet.");
                     });
                 } else {
                     toast("Gỗ đã hết. Xin hãy chọn quy cách khác.");
@@ -395,7 +426,9 @@ function WoodSorting() {
             // Tìm quy cách trong danh sách
             const updatedList = prevList.map((item) => {
                 if (item.key === quyCach) {
-                    const batchNums = item.batchNums.filter((bn) => bn !== batchNum);
+                    const batchNums = item.batchNums.filter(
+                        (bn) => bn !== batchNum
+                    );
                     if (batchNums.length === 0) {
                         return null;
                     }
@@ -454,7 +487,9 @@ function WoodSorting() {
                 CDai: formatNumber(card.props.height),
                 CDay: formatNumber(card.props.thickness),
                 CRong: formatNumber(card.props.width),
-                QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(card.props.width)}x${formatNumber(card.props.height)}`,
+                QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(
+                    card.props.width
+                )}x${formatNumber(card.props.height)}`,
             })),
         };
         return palletObject;
@@ -686,6 +721,41 @@ function WoodSorting() {
         }
     };
 
+    // Delete pallet
+    const handleDeletePallet = async () => {
+        setDeletePalletLoading(true);
+
+        if(selectedDeletePallet === null){
+            toast.error("Xin hãy chọn một pallet");
+            setDeletePalletLoading(false);
+            onDeletePalletConfirmClose();
+            return;
+        } else if (selectedDeletePallet.activeStatus == 1) {
+            toast.error("Pallet này đã vào lò, không thể phân rã.");
+            setDeletePalletLoading(false);
+            onDeletePalletConfirmClose();
+            return;
+        }
+
+        const deleteData = {
+            palletID: selectedDeletePallet.pallet_id,
+        };
+
+        try {
+            const res = await palletsApi.deletePallet(deleteData);
+            toast.success("Phân rã pallet thành công.");
+            handleSearch();
+            setDeletePalletLoading(false);
+            onDeletePalletConfirmClose();
+            setSelectedDeletePallet(null);
+        } catch (error) {
+            console.error("Error deleting pallet:", error);
+            toast.error("Không thể phân rã pallet, hãy thử lại sau.");
+            setDeletePalletLoading(false);
+            onDeletePalletConfirmClose();
+        }
+    };
+
     return (
         <Layout>
             {/* Container */}
@@ -702,11 +772,13 @@ function WoodSorting() {
                             <div>Quay lại</div>
                         </div>
                     </div>
-                    
+
                     {/* Header */}
                     <div className="flex justify-between xl:mb-4 lg:mb-4 md:mb-4 mb-0 items-center">
                         <div className="flex space-x-4">
-                            <div className="serif text-4xl font-bold">Tạo pallet xếp sấy</div>
+                            <div className="serif text-4xl font-bold">
+                                Tạo pallet xếp sấy
+                            </div>
                         </div>
 
                         <div className="flex gap-x-2 ">
@@ -910,18 +982,35 @@ function WoodSorting() {
                                                             searchTerm.toLowerCase()
                                                         )
                                                 )
-                                                .map((pallet) => (
-                                                    <div className="border-gray-300 bg-gray-100 max-h-[14rem]  border-2 rounded-xl">
-                                                        <div className="p-4 pt-2 pb-0">
-                                                            <div className="rounded-md my-2 w-fit px-3 text-white bg-[#335b6f]">
-                                                                Pallet:{" "}
-                                                                <span>
+                                                .map((pallet, index) => (
+                                                    <div className="relative border-gray-300 bg-gray-100 max-h-[14rem]  border-2 rounded-xl">
+                                                        <div 
+                                                            className="absolute -right-2 -top-3 hover:cursor-pointer p-1.5 bg-black duration-200 ease hover:bg-red-600 rounded-full active:scale-[.95]  active:duration-75  transition-all"
+                                                            onClick={() =>{
+                                                                setSelectedDeletePallet(pallet);
+                                                                onDeletePalletConfirmOpen();
+                                                            }}
+                                                        >
+                                                            <TbTrash className="text-3xl text-white" />
+                                                        </div>
+                                                        <div className="p-2 pb-0">
+                                                            <div className="flex items-center space-x-3 rounded-lg w-full px-3 py-2  text-[#155979] bg-[#E0E1E3]">
+                                                                {pallet.activeStatus == "1" ? (
+                                                                    <SiConfluence className="text-xl text-[#4d4d4d]" />
+                                                                ) : (
+                                                                    <SiElasticstack className="text-xl text-[#4d4d4d]" />
+                                                                )}
+                                                                
+                                                                <span className="text-xl font-semibold black">
                                                                     {
                                                                         pallet.pallet_code
                                                                     }
                                                                 </span>
                                                             </div>
-                                                            <div className="text-lg font-semibold">
+                                                        </div>
+
+                                                        <div className="p-4 pt-2 space-y-1">
+                                                            <div className="text-md font-semibold">
                                                                 Quy cách:{" "}
                                                                 <span>
                                                                     {
@@ -929,8 +1018,6 @@ function WoodSorting() {
                                                                     }
                                                                 </span>
                                                             </div>
-                                                        </div>
-                                                        <div className="p-4 pt-2 space-y-1">
                                                             <div className="grid grid-cols-2">
                                                                 <div>
                                                                     Số lượng:{" "}
@@ -979,6 +1066,64 @@ function WoodSorting() {
                                         className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
                                     >
                                         Đóng
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
+
+                    {/* Delete Pallet Confirmation Modal */}
+                    <Modal
+                        isCentered
+                        isOpen={isDeletePalletConfirmOpen}
+                        onClose={onDeletePalletConfirmClose}
+                        size="xl"
+                        blockScrollOnMount={false}
+                        closeOnOverlayClick={false}
+                    >
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>
+                                Bạn chắc chắn muốn phân rã pallet này?
+                            </ModalHeader>
+                            <ModalBody>
+                                <div className="space-y-4">
+                                    <div>
+                                        Sau khi xác nhận sẽ không thể thu hồi
+                                        hành động.
+                                    </div>
+                                </div>
+                            </ModalBody>
+
+                            <ModalFooter>
+                                <div className="flex w-full items-center xl:justify-end lg:justify-end md:justify-end  space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            onDeletePalletConfirmClose();
+                                        }}
+                                        className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-1/3 disabled:cursor-not-allowed disabled:opacity-50"
+                                        disabled={deletePalletLoading}
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white"
+                                        type="button"
+                                        onClick={() => {
+                                            handleDeletePallet();
+                                        }}
+                                    >
+                                        {deletePalletLoading ? (
+                                            <div className="flex items-center justify-center w-full space-x-4">
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
+                                                <div>Đang thực hiện</div>
+                                            </div>
+                                        ) : (
+                                            <>Xác nhận</>
+                                        )}
                                     </button>
                                 </div>
                             </ModalFooter>
@@ -1061,7 +1206,9 @@ function WoodSorting() {
                                                         // id="pallet"
                                                         defaultOptions
                                                         options={palletOptions}
-                                                        isDisabled={palletListLoading}
+                                                        isDisabled={
+                                                            palletListLoading
+                                                        }
                                                         onChange={(value) => {
                                                             console.log(
                                                                 "Selected Pallet:",
@@ -1841,7 +1988,8 @@ function WoodSorting() {
                             <ModalBody>
                                 <div className="space-y-4">
                                     <div>
-                                        Sau khi xác nhận sẽ không thể thu hồi hành động.
+                                        Sau khi xác nhận sẽ không thể thu hồi
+                                        hành động.
                                     </div>
                                 </div>
                             </ModalBody>
@@ -1864,26 +2012,25 @@ function WoodSorting() {
                                             handleCreatePallet();
                                         }}
                                     >
-                                        {createPalletLoading? (
+                                        {createPalletLoading ? (
                                             <div className="flex items-center justify-center w-full space-x-4">
-                                                <Spinner size="sm" color="white" />
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
                                                 <div>Đang thực hiện</div>
                                             </div>
                                         ) : (
-                                            <>
-                                                Xác nhận
-                                            </>
+                                            <>Xác nhận</>
                                         )}
                                     </button>
                                 </div>
                             </ModalFooter>
                         </ModalContent>
-                    </Modal>                    
+                    </Modal>
                 </div>
             </div>
-            {
-                loading && <Loader />
-            }
+            {loading && <Loader />}
         </Layout>
     );
 }

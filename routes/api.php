@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/v2/create', [DryingOvenController::class, 'StorePalletNew'])->name('tao-xep-say2');
         Route::get('/pallet-history', [DryingOvenController::class, 'getPalletHistory'])->name('lich-su-xep-say');
         Route::get('/pallet-lifecyle', [DryingOvenController::class, 'lifecyleDrying'])->name('truy-nguyen');
+        Route::post('/delete-pallet', [DryingOvenController::class, 'DeletePallet'])->name('delete-pallet');
         Route::get('/get-pallet-by-year-week', [DryingOvenController::class, 'getPalletsByYearAndWeek'])->name('get-pallet-by-year-week');
         Route::post('/delete-disabled-record', [DryingOvenController::class, 'deleteDisabledRecord']);
     });

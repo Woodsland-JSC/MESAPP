@@ -135,6 +135,10 @@ const palletsApi = {
         const url = `dgm/hoanthanhkt`;
         return axiosClient().post(url, data);
     },
+    deletePallet: (data) => {
+        const url = `pallets/delete-pallet`;
+        return axiosClient().post(url, data);
+    },
 };
 
 export default palletsApi;
