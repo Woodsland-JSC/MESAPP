@@ -1305,6 +1305,7 @@ class QCController extends Controller
                     "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     "WarehouseCode" =>  $warehouse,
                     "CostingCode" => "CBG",
+                    "CostingCode4" => "Default",
                     "BatchNumbers" => [[
                         "BatchNumber" => Carbon::now()->format('YmdHis'),
                         "Quantity" => $request->Qty,

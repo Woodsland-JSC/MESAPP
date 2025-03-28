@@ -1309,6 +1309,7 @@ class ProductionController extends Controller
                             "TransactionType" => "C",
                             "BaseEntry" => $allocate['DocEntry'],
                             "CostingCode" => "CBG",
+                            "CostingCode4" => "Default",
                             "BaseType" => 202,
                             "BatchNumbers" => [
                                 [

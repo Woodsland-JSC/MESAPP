@@ -440,7 +440,7 @@ class DryingOvenController extends Controller
         $pallet = null;
 
         try {
-            // 0. Khởi tạo giao dịch và khởi tạo biến 
+            // 0. Khởi tạo giao dịch và khởi tạo biến
             DB::beginTransaction();
             $current_week = now()->format('W');
             $current_year = now()->year;
@@ -508,6 +508,7 @@ class DryingOvenController extends Controller
                     "WarehouseCode" =>  $towarehouse,
                     "FromWarehouseCode" => $detailData['WhsCode'],
                     "Quantity" =>  $datainsert['Qty'],
+
                     "BatchNumbers" => [
                         [
                             "BatchNumber" => $detailData['BatchNum'],
@@ -535,6 +536,7 @@ class DryingOvenController extends Controller
                 "ToWarehouse" =>  $towarehouse,
                 "FromWarehouse" => $detailData['WhsCode'],
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                "U_MoveType"=>'DC_SAY',
                 "StockTransferLines" => $ldt
             ];
             
