@@ -97,13 +97,13 @@ class TuBepController extends Controller
         }
         switch ($request->CD) {
             case 'CD1':
-                $query = 'select *,"QtyCD1" "RemainQty"  from ZGT_SLWO_STL where "DocEntry"=? and "CD1"=? and "TYPE"=?';
+                $query = 'select *,"PlanQty"-"QtyCD1" "RemainQty"  from ZGT_SLWO_STL where "DocEntry"=? and "CD1"=? and "TYPE"=?';
                 break;
             case 'CD2':
-                $query = 'select * ,"QtyCD2" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD2"=? and ("CD1"=? or "CD1"=?) and "TYPE"=?';
+                $query = 'select * ,"PlanQty"-"QtyCD2" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD2"=? and ("CD1"=? or "CD1"=?) and "TYPE"=?';
                 break;
             case 'CD3':
-                $query = 'select *,"QtyCD3" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD3"=? and  ("CD2"=?or "CD2"=?) and ("CD1"=? or "CD1"=?) and "TYPE"=?';
+                $query = 'select *,"PlanQty"-"QtyCD3" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD3"=? and  ("CD2"=?or "CD2"=?) and ("CD1"=? or "CD1"=?) and "TYPE"=?';
                 break;
             default:
                 // Không khớp với bất kỳ giá trị nào
@@ -184,37 +184,4 @@ class TuBepController extends Controller
 
     }
 
-    public function CapNhatTrangThai(Request $request)
-    {
-        // Kiểm tra đầu vào
-        $masdArray = $request->input('MASD');
-        if (!is_array($masdArray) || empty($masdArray)) {
-            return response()->json(['error' => 'MASD must be a non-empty array'], 400);
-        }
-
-        // Kết nối SAP
-        $conDB = (new ConnectController)->connect_sap();
-
-        // Tạo danh sách placeholder `?` tương ứng với số lượng phần tử trong mảng
-        $placeholders = implode(',', array_fill(0, count($masdArray), '?'));
-
-        // Câu lệnh SQL sử dụng IN (...) để cập nhật nhiều dòng cùng lúc
-        $query = "UPDATE ZGT_SLNOIDIA_STL SET \"Status\" = 'Y'  WHERE \"MASD\" IN ($placeholders)";
-
-        // Chuẩn bị statement
-        $stmt = odbc_prepare($conDB, $query);
-        if (!$stmt) {
-            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
-        }
-
-        // Thực thi câu lệnh SQL với tham số từ mảng
-        if (!odbc_execute($stmt, $masdArray )) {
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
-        }
-
-        // Đóng kết nối
-        odbc_close($conDB);
-
-        return response()->json(['message' => 'Cập nhật trạng thái thành công']);
-    }
 }
