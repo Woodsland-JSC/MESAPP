@@ -97,13 +97,13 @@ class TuBepController extends Controller
         }
         switch ($request->CD) {
             case 'CD1':
-                $query = 'select *,"PlanQty"-"QtyCD1" "RemainQty"  from ZGT_SLWO_STL where "DocEntry"=? and "CD1"=? and "TYPE"=?';
+                $query = 'select *,"PlanQty"-"QtyCD1" "RemainQty",QtyCD1 "CompleteQty"  from ZGT_SLWO_STL where "DocEntry"=? and "CD1"=? and "TYPE"=?';
                 break;
             case 'CD2':
-                $query = 'select * ,"PlanQty"-"QtyCD2" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD2"=? and ("CD1"=? or "CD1"=?) and "TYPE"=?';
+                $query = 'select * ,"PlanQty"-"QtyCD2" "RemainQty",QtyCD2 "CompleteQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD2"=? and ("CD1"=? or "CD1"=?) and "TYPE"=?';
                 break;
             case 'CD3':
-                $query = 'select *,"PlanQty"-"QtyCD3" "RemainQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD3"=? and  ("CD2"=?or "CD2"=?) and ("CD1"=? or "CD1"=?) and "TYPE"=?';
+                $query = 'select *,"PlanQty"-"QtyCD3" "RemainQty", QtyCD3 "CompleteQty" from ZGT_SLWO_STL where "DocEntry"=? and "CD3"=? and  ("CD2"=?or "CD2"=?) and ("CD1"=? or "CD1"=?) and "TYPE"=?';
                 break;
             default:
                 // Không khớp với bất kỳ giá trị nào
@@ -155,7 +155,7 @@ class TuBepController extends Controller
                 'Rong' => (float)odbc_result($stmt, "Rong"),
                 'KHOILUONG' => (float)odbc_result($stmt, "KHOILUONG"),
                 'PlanQty' =>(float) odbc_result($stmt, "PlanQty"),
-                'CompletedQty' => (float)odbc_result($stmt, "ComplQty"),
+                'CompletedQty' => (float)odbc_result($stmt, "CompleteQty"),
                 'RemainQty' => (float) odbc_result($stmt, "RemainQty")
             ];
         }
