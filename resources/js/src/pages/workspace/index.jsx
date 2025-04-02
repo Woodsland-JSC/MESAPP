@@ -392,6 +392,17 @@ function Workspace() {
                                                     type: "ND",
                                                 },
                                                 {
+                                                    permission: ["SLTB"],
+                                                    link: "/workspace/kitchen-cabinet/finished-goods-receipt",
+                                                    icon: (
+                                                        <HiArchiveBoxArrowDown />
+                                                    ),
+                                                    title: "Sản lượng tủ bếp",
+                                                    description:
+                                                        "Nhập sản lượng lắp đặt khối tủ bếp",
+                                                    type: "VCN",
+                                                },
+                                                {
                                                     permission: ["X"],
                                                     link: "/workspace/inland/installation-progress",
                                                     icon: <HiViewColumns />,

@@ -50,7 +50,7 @@ class TuBepController extends Controller
         $res = $response->json();
         // 5. Sau khi lưu dữ liệu về SAP thành công, lưu dữ liệu về
         if ($response->successful()) {
-            return response()->json(['success' => 'Ghi nhận sản lượng thất bại'],status: 200);
+            return response()->json(['success' => 'Ghi nhận sản lượng thành công'],status: 200);
         }
         else
         {
