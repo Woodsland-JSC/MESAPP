@@ -395,7 +395,7 @@ class VCNController extends Controller
         // Lấy loại ván
         $ProdType = null;
         foreach ($results as $result) {
-            $prodType = $result['ProdType'];
+            $prodType = $result['ProType'];
 
             if ($ProdType === null) {
                 $ProdType = $prodType;
