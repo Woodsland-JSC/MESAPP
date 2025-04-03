@@ -116,6 +116,20 @@ const CBGReports = [
         description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
         priority: true,
     },
+    {
+        id: "0005",
+        name: "Báo cáo chi tiết nhập tồn",
+        link: "/reports/wood-working/details-receipt",
+        description: "Theo dõi chi tiết nhập tồn đầu kỳ",
+        priority: true,
+    },
+    {
+        id: "0006",
+        name: "Báo cáo sản lượng nhập các nhà máy",
+        link: "/reports/wood-working/factory-receipt-volume",
+        description: "",
+        priority: true,
+    },
 ];
 
 const QCReports = [

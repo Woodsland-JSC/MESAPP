@@ -115,6 +115,7 @@ if (!function_exists('playloadBatch')) {
                             "ItemCode" => $ItemCode,
                             "Quantity" => $Qty,
                             "CostingCode" => "CBG",
+                            "CostingCode4" => "Default",
                             "WarehouseCode" => $WarehouseCode,
                         ]
                     ]
@@ -133,6 +134,7 @@ if (!function_exists('playloadBatch')) {
                             "Quantity" => $Qty,
                             "WarehouseCode" => $WarehouseCode,
                             "CostingCode" => "CBG",
+                            "CostingCode4" => "Default",
                             "BatchNumbers" =>  $serial_batch
                         ]
                     ]
@@ -146,6 +148,7 @@ if (!function_exists('playloadBatch')) {
                     "U_NNhan" => $NNHAN,
                     "U_QCN" => $QCNUMBER,
                     "CostingCode" => "CBG",
+                    "CostingCode4" => "Default",
                     "DocumentLines" => [
                         [
                             "ItemCode" => $ItemCode,

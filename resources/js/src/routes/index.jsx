@@ -78,12 +78,17 @@ import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
+import DetailsReceiptReport from "../pages/reports/wood-working/details-receipt";
+import FactoryReceiptVolumelReport from "../pages/reports/wood-working/factory-receipt-volume";
 
 // Domestic
 import DomesticFinishedGoodsReceipt from "../pages/workspace/domestic/finished-goods-receipt";
 
 // Transfer
 import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-warehouse-transfer";
+
+// Kichen cabinet
+import KitchenCabinetFinishedGoodsReceipt from "../pages/workspace/kitchen-cabinet/finished-goods-receipt";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -241,6 +246,16 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <BinWarehouseTransfer />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* Kichen Cabinet */}
+                    <Route
+                        path="/workspace/kitchen-cabinet/finished-goods-receipt"
+                        element={
+                            <ProtectedRoute>
+                                <KitchenCabinetFinishedGoodsReceipt />
                             </ProtectedRoute>
                         }
                     />
@@ -423,6 +438,22 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <ProductionVolumeByTimeReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/details-receipt"
+                        element={
+                            <ProtectedRoute>
+                                <DetailsReceiptReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/factory-receipt-volume"
+                        element={
+                            <ProtectedRoute>
+                                <FactoryReceiptVolumelReport />
                             </ProtectedRoute>
                         }
                     />

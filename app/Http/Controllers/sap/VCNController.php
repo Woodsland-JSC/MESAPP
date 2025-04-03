@@ -1944,6 +1944,7 @@ class VCNController extends Controller
                                 "BaseEntry" => $allocate['DocEntry'],
                                 "BaseType" => 202,
                                 "CostingCode" => "VCN",
+                                "CostingCode4" => "Default",
                                 "BatchNumbers" => [
                                     [
                                         "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
@@ -2099,6 +2100,7 @@ class VCNController extends Controller
                         'BaseLine' => $item['BaseLine'],
                         'Quantity'=>$item['QtyTotal'],
                         "CostingCode" => "VCN",
+                        "CostingCode4" => "Default",
                         'BatchNumbers' => [],
                         'SerialNumbers' => []
                     ];
@@ -2219,6 +2221,7 @@ class VCNController extends Controller
                         "BaseEntry" => $allocate['DocEntry'],
                         "BaseType" => 202,
                         "CostingCode" => "VCN",
+                        "CostingCode4" => "Default",
                         "WarehouseCode" => $whs,
                         "BatchNumbers" => [
                             [
@@ -2566,6 +2569,7 @@ class VCNController extends Controller
                             "BaseType" => 202,
                             "Quantity"=>$quantity,
                             "CostingCode" => "VCN",
+                            "CostingCode4" => "Default",
                             "BatchNumbers"=>[[
                                 "ItemCode" => $itemCode,
                                 "BatchNumber"=>Carbon::now()->format('YmdHis').$docEntry,
@@ -2782,6 +2786,7 @@ class VCNController extends Controller
                     "BaseEntry" => $allocate['DocEntry'],
                     "BaseType" => 202,
                     "CostingCode" => "VCN",
+                    "CostingCode4" => "Default",
                     "WarehouseCode" => $whs,
                     "BatchNumbers" => [
                         [
