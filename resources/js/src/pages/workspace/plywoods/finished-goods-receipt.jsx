@@ -343,7 +343,7 @@ function PlywoodFinishedGoodsReceipt() {
                         <div className="my-4 mb-2 mt-3 w-full pb-4 rounded-xl bg-white ">
                             <div className="flex flex-col p-4 pb-0  w-full justify-end ">
                                 <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 ">
-                                    {user.role == 1 && (<div className="px-0 w-full">
+                                    {(user.role == 1 || user.role == 4)  && (<div className="px-0 w-full">
                                         <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
                                             Nhà máy sản xuất
                                         </div>

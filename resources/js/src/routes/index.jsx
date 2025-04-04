@@ -189,7 +189,7 @@ function AppRoutes() {
                     <Route
                         path="/workspace/plywood/finished-goods-receipt"
                         element={
-                            <ProtectedRoute permissionsRequired={['VCN']}>
+                            <ProtectedRoute >
                                 <PlywoodFinishedGoodsReceipt />
                             </ProtectedRoute>
                         }
