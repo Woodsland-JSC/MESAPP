@@ -600,12 +600,12 @@ class QCController extends Controller
 
         // Tổ chuyển về
         $query_03 = 'select "VisResCode" "Code","ResName" "Name"
-        from "ORSC" where "U_QC" =? AND "validFor"=? and "U_FAC"=? and "ResName" is not null AND "U_KHOI"=?;';
+        from "ORSC" where "U_QC" =? AND "validFor"=? and "ResName" is not null AND "U_KHOI"=?;';
         $stmt_03 = odbc_prepare($conDB, $query_03);
         if (!$stmt_03) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt_03, ['N', 'Y', $userPlant, $request->KHOI])) {
+        if (!odbc_execute($stmt_03, ['N', 'Y', 'VCN'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $teamBack = array();

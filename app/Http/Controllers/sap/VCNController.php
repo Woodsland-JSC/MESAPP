@@ -196,7 +196,7 @@ class VCNController extends Controller
                 'ChildName' => $row['ChildName'],
                 'QuyCach2' => $row['QuyCach2'],
                 'Version' => $row['Version'],
-                'ProdType' => $row['ProType'],
+                'ProdType' => $row['ProdType'],
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],
@@ -395,7 +395,7 @@ class VCNController extends Controller
         // Lấy loại ván
         $ProdType = null;
         foreach ($results as $result) {
-            $prodType = $result['ProType'];
+            $prodType = $result['ProdType'];
 
             if ($ProdType === null) {
                 $ProdType = $prodType;
@@ -1493,7 +1493,7 @@ class VCNController extends Controller
                 'ItemChild' => $row['ItemChild'],
                 'ChildName' => $row['ChildName'],
                 'Version' => $row['Version'],
-                'ProdType' => $row['ProType'],
+                'ProdType' => $row['ProdType'],
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],

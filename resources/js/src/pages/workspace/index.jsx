@@ -402,15 +402,15 @@ function Workspace() {
                                                         "Nhập sản lượng lắp đặt khối tủ bếp",
                                                     type: "VCN",
                                                 },
-                                                {
-                                                    permission: ["X"],
-                                                    link: "/workspace/inland/installation-progress",
-                                                    icon: <HiViewColumns />,
-                                                    title: "Tiến độ lắp đặt nội địa",
-                                                    description:
-                                                        "Báo cáo tiến độ lắp đặt đồ nội thất.",
-                                                    type: "ND",
-                                                },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     link: "/workspace/inland/installation-progress",
+                                                //     icon: <HiViewColumns />,
+                                                //     title: "Tiến độ lắp đặt nội địa",
+                                                //     description:
+                                                //         "Báo cáo tiến độ lắp đặt đồ nội thất.",
+                                                //     type: "ND",
+                                                // },
                                             ].map(
                                                 ({
                                                     permission,
