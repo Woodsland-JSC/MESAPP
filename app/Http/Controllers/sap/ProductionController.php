@@ -1264,7 +1264,7 @@ class ProductionController extends Controller
         }
         // thêm tính năng check 1 user không được xử lý trùng lắp 1 id cùng lúc
         $userId = Auth::id();
-        $lockKey = "accept_request_lock:{$userId}:{$request->id}";
+        $lockKey = "accept_request_lock:{$request->id}";
 
         // Check if this user already processing the request
                 if (Cache::has($lockKey)) {
