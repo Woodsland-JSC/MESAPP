@@ -1453,7 +1453,6 @@ class ProductionController extends Controller
             // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
             if (strpos($e->getMessage(), 'SAP code:-5002') !== false &&
                 strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
-                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
 
                 // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
                 $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
