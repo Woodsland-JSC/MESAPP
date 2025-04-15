@@ -574,11 +574,11 @@ function CreateRole() {
                                             size="lg"
                                             onChange={(e) =>
                                                 handlePermissionChange(
-                                                    e, "TDLDND"
+                                                    e, "SLTBND"
                                                 )
                                             }
                                         >
-                                            {" "}<p className="text-[16px] font-medium">Tiến độ lắp đặt</p>
+                                            {" "}<p className="text-[16px] font-medium">Sản lượng tủ bếp</p>
                                         </Checkbox>
                                     </div>
                                 </div>

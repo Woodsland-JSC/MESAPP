@@ -35,7 +35,7 @@ class RolesandPermissions extends Seeder
       // DAND
       ['id' => '13', 'name' => 'DAND', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
       ['id' => '14', 'name' => 'DAND(CX)', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
-      ['id' => '15', 'name' => 'TDLDND', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
+      ['id' => '15', 'name' => 'SLTBND', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
 
       // Manager
       ['id' => '16', 'name' => 'quanlyuser', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],

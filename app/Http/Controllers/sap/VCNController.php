@@ -1913,7 +1913,7 @@ class VCNController extends Controller
                 if (count($allocates) == 0) {
                     return response()->json([
                         'error' => false,
-                        'status_code' => 500,
+                        'status_code' => 506,
                         'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
                             $data->team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .
@@ -1923,7 +1923,7 @@ class VCNController extends Controller
                 if (isset($allocates['error']) && $allocates['error']) {
                     return response()->json([
                         'error' => true,
-                        'status_code' => 500,
+                        'status_code' => 506,
                         'message' => "Vượt hạn mức. kiểm tra tổ:".$data->team . " sản phẩm: " .
                         $data->ItemCode . " sản phẩm đích: " .
                         $data->FatherCode . " LSX." . $data->LSX
@@ -1964,7 +1964,7 @@ class VCNController extends Controller
                 if($string==''){
                     return response()->json([
                         'error' => false,
-                        'status_code' => 500,
+                        'status_code' => 506,
                         'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
                             $data->Team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .

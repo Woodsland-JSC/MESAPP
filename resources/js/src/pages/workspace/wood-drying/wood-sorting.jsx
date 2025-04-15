@@ -36,8 +36,7 @@ import {
 import { BiSolidFactory } from "react-icons/bi";
 import { SiConfluence, SiElasticstack, SiKoyeb } from "react-icons/si";
 import { TbTrash } from "react-icons/tb";
-import { is } from "date-fns/locale";
-import { FaWarehouse } from "react-icons/fa";
+import LoadedPallet from "../../../components/custom-icon/LoadedPallet";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -742,7 +741,7 @@ function WoodSorting() {
         };
 
         try {
-            const res = await palletsApi.deletePallet(deleteData);
+            const res = await palletsApi.dismantlePallet(deleteData);
             toast.success("Phân rã pallet thành công.");
             handleSearch();
             setDeletePalletLoading(false);
@@ -996,7 +995,7 @@ function WoodSorting() {
                                                         <div className="p-2 pb-0">
                                                             <div className="flex items-center space-x-3 rounded-lg w-full px-3 py-2  text-[#155979] bg-[#E0E1E3]">
                                                                 {pallet.activeStatus == "1" ? (
-                                                                    <SiConfluence className="text-xl text-[#4d4d4d]" />
+                                                                    <LoadedPallet className="text-xl text-[#4d4d4d]" />
                                                                 ) : (
                                                                     <SiElasticstack className="text-xl text-[#4d4d4d]" />
                                                                 )}

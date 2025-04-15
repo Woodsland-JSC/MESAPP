@@ -1286,7 +1286,7 @@ class ProductionController extends Controller
                 if (count($allocates) == 0) {
                     return response()->json([
                         'error' => false,
-                        'status_code' => 500,
+                        'status_code' => 506,
                         'message' => "Không có sản phẩm còn lại để phân bổ. Vui lòng kiểm tra tổ:" .
                             $data->Team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .
@@ -1332,6 +1332,7 @@ class ProductionController extends Controller
                             'itemchild' => $allocate['ItemChild'],
                             'SPDich' => $data->FatherCode,
                             'to' => $data->Team,
+                            'notiID' => $data->notiID,
                             'quantity' => $allocate['Allocate'],
                             'ObjType' => 202,
                             'DocEntry' => ''
@@ -1342,7 +1343,7 @@ class ProductionController extends Controller
                     DB::rollBack();
                     return response()->json([
                         'error' => false,
-                        'status_code' => 500,
+                        'status_code' => 506,
                         'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
                             $data->Team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .
@@ -1427,36 +1428,36 @@ class ProductionController extends Controller
 
             // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
             if (strpos($e->getMessage(), 'SAP code:-5002') !== false &&
-            strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
+                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
 
-            // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
-            $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
+                // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
+                $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
 
-            // Tạo thông báo chi tiết về thiếu hàng
-            $message = "Nguyên vật liệu không đủ để giao nhận!";
-            $itemDetails = [];
+                // Tạo thông báo chi tiết về thiếu hàng
+                $message = "Nguyên vật liệu không đủ để giao nhận!";
+                $itemDetails = [];
 
-            if (empty($requiredItems)) {
-                $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
-            } else {
-                foreach ($requiredItems as $item) {
-                    $itemDetails[] = [
-                        'SubItemCode' => $item['SubItemCode'],
-                        'SubItemName' => $item['SubItemName'] ?? '',
-                        'requiredQuantity' => $item['requiredQuantity'],
-                        'wareHouse' => $item['wareHouse']
-                    ];
+                if (empty($requiredItems)) {
+                    $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
+                } else {
+                    foreach ($requiredItems as $item) {
+                        $itemDetails[] = [
+                            'SubItemCode' => $item['SubItemCode'],
+                            'SubItemName' => $item['SubItemName'] ?? '',
+                            'requiredQuantity' => $item['requiredQuantity'],
+                            'wareHouse' => $item['wareHouse']
+                        ];
+                    }
                 }
-            }
 
-            return response()->json([
-                'error' => true,
-                'status_code' => 40001, // Mã lỗi riêng cho trường hợp tồn kho không đủ
-                'error_type' => 'INSUFFICIENT_INVENTORY',
-                'message' => $message,
-                'required_items' => $itemDetails,
-                'original_error' => $e->getMessage()
-            ], 400); // Trả về 400 Bad Request thay vì 500 Internal Server Error
+                return response()->json([
+                    'error' => true,
+                    'status_code' => 40001,
+                    'error_type' => 'INSUFFICIENT_INVENTORY',
+                    'message' => $message,
+                    'required_items' => $itemDetails,
+                    'original_error' => $e->getMessage()
+                ], 400); 
             }
 
             // Trả về lỗi thông thường nếu không phải lỗi tồn kho

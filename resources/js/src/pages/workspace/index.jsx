@@ -17,6 +17,7 @@ import {
     HiViewColumns,
     HiArchiveBox,
     HiMiniTruck,
+    HiMiniWrenchScrewdriver,
 } from "react-icons/hi2";
 import { LuLayers } from "react-icons/lu";
 import {
@@ -392,15 +393,17 @@ function Workspace() {
                                                     type: "ND",
                                                 },
                                                 {
-                                                    permission: ["SLTB"],
+                                                    permission: [
+                                                        "SLTBND",
+                                                    ],
                                                     link: "/workspace/kitchen-cabinet/finished-goods-receipt",
                                                     icon: (
-                                                        <HiArchiveBoxArrowDown />
+                                                        <HiMiniWrenchScrewdriver />
                                                     ),
                                                     title: "Sản lượng tủ bếp",
                                                     description:
                                                         "Nhập sản lượng lắp đặt khối tủ bếp",
-                                                    type: "VCN",
+                                                    type: "ND",
                                                 },
                                                 // {
                                                 //     permission: ["X"],

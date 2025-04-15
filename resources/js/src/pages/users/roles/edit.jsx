@@ -717,21 +717,21 @@ function EditRole() {
                                             className=" w-[20%]"
                                             size="lg"
                                             isChecked={updatedRoleInfo?.permission?.includes(
-                                                "TDLDND"
+                                                "SLTBND"
                                             )}
                                             value={updatedRoleInfo?.permission?.includes(
-                                                "TDLDND"
+                                                "SLTBND"
                                             )}
                                             onChange={(e) =>
                                                 handlePermissionChange(
                                                     e,
-                                                    "TDLDND"
+                                                    "SLTBND"
                                                 )
                                             }
                                         >
                                             {" "}
                                             <p className="text-[16px] font-medium">
-                                                Tiến độ lắp đặt
+                                                Sản lượng tủ bếp
                                             </p>
                                         </Checkbox>
                                     </div>

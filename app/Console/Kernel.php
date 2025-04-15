@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\RefreshRolesPermissions::class,
         \App\Console\Commands\UpdateUserRole::class,
         \App\Console\Commands\UpdateUserFactory::class,
+        \App\Console\Commands\UpdatePermissionTemp::class,
     ];
 
 }

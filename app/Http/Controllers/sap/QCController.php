@@ -1328,8 +1328,8 @@ class QCController extends Controller
             $IssueData = '';
             // dd($data->ErrorData);
             if ($data->ErrorData != null) {
-
                 $dataIssues = json_decode($data->ErrorData, true);
+
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
@@ -1452,7 +1452,7 @@ class QCController extends Controller
                     }
                 }
             } else {
-                throw new \Exception('thiếu dữ liệu xuất kho, vui lòng kiểm tra lại dữ liệu.');
+                throw new \Exception('Thiếu dữ liệu xuất kho, vui lòng kiểm tra lại dữ liệu.');
             }
             return response()->json('success', 200);
         } catch (\Exception $e) {

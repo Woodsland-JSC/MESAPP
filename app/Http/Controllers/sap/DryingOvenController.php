@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
+use Illuminate\Support\Facades\Log;
+
 
 class DryingOvenController extends Controller
 {
@@ -516,7 +518,7 @@ class DryingOvenController extends Controller
                         ]
                     ]
                 ];
-                
+
                 $ldt2[] = [
                     "U_Item" => $detailData['ItemCode'],
                     "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
@@ -536,10 +538,10 @@ class DryingOvenController extends Controller
                 "ToWarehouse" =>  $towarehouse,
                 "FromWarehouse" => $detailData['WhsCode'],
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
-                "U_MoveType"=>'DC_SAY',
+                "U_MoveType" => 'DC_SAY',
                 "StockTransferLines" => $ldt
             ];
-            
+
             $body2 = [
                 "U_Code" => $pallet->Code,
                 "U_Status" => "CS",
@@ -559,7 +561,7 @@ class DryingOvenController extends Controller
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
 
             if (!$stockTransferResponse->successful()) {
-                throw new \Exception('Failed to create stock transfer in SAP: ' . 
+                throw new \Exception('Failed to create stock transfer in SAP: ' .
                     ($stockTransferResponse->json()['error']['message'] ?? $stockTransferResponse->body()));
             }
 
@@ -583,15 +585,15 @@ class DryingOvenController extends Controller
                     "Accept" => "application/json",
                     "Authorization" => "Basic " . BasicAuthToken(),
                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
-                
+
                 if (!$revertResponse->successful()) {
                     \Log::error('Failed to revert StockTransfer', [
                         'docEntry' => $stockTransferResult['DocEntry'],
                         'error' => $revertResponse->json()
                     ]);
                 }
-                
-                throw new \Exception('Failed to create pallet in SAP: ' . 
+
+                throw new \Exception('Failed to create pallet in SAP: ' .
                     ($palletResponse->json()['error']['message'] ?? $palletResponse->body()));
             }
 
@@ -605,7 +607,7 @@ class DryingOvenController extends Controller
                 'CreateBy' => Auth::user()->id,
                 'activeStatus' => 0,
             ]);
-            
+
             DB::commit();
 
             return response()->json([
@@ -630,28 +632,146 @@ class DryingOvenController extends Controller
                 'message' => 'Failed to create pallet and details',
                 'error' => $e->getMessage()
             ];
-            
+
             // Include API responses if available
             if ($stockTransferResponse) {
                 $errorResponse['stockTransferResult'] = $stockTransferResponse->json();
             }
-            
+
             if ($palletResponse) {
                 $errorResponse['palletResult'] = $palletResponse->json();
             }
-            
+
             return response()->json($errorResponse, 500);
         }
     }
 
-    function DeletePallet(Request $request)
+    // function DismantlePallet(Request $request)
+    // {
+    //     // Tạo biến để lưu trữ trạng thái của các bước vận hành 
+    //     $stockTransferCancelResponse = null;
+    //     $palletCancelResponse = null;
+    //     $pallet = null;
+
+    //     // dd($request->all());
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $pallet = Pallet::findOrFail($request->input('palletID'));
+
+    //         if ($pallet->activeStatus != 0) {
+    //             throw new \Exception('Only inactive pallets can be deleted');
+    //         }
+
+    //         // dd($pallet->DocEntry);
+    //         // $docEntry = intval($pallet->DocEntry);
+    //         // // Hùy phiếu Stock Transfer ở SAP
+    //         // if ($pallet->DocNum) {
+    //         //     $url = UrlSAPServiceLayer() . "/b1s/v2/StockTransfers({$docEntry})/Cancel";
+
+    //         //     $stockTransferCancelResponse = Http::withOptions([
+    //         //         'verify' => false,
+    //         //     ])->withHeaders([
+    //         //         "Content-Type" => "application/json",
+    //         //         "Accept" => "application/json",
+    //         //         "Authorization" => "Basic " . BasicAuthToken(),
+    //         //     ])->send('POST', $url); 
+
+    //         //     if (!$stockTransferCancelResponse->successful()) {
+    //         //         throw new \Exception('Failed to cancel Stock Transfer in SAP: ' . 
+    //         //             ($stockTransferCancelResponse->json()['error']['message'] ?? $stockTransferCancelResponse->body()));
+    //         //     }
+    //         // }
+
+    //         $docEntry = intval($pallet->DocEntry);
+
+    //         // Huỷ phiếu Stock Transfer ở SAP
+    //         if ($pallet->DocNum) {
+    //             $url = UrlSAPServiceLayer() . "/b1s/v2/StockTransfers({$docEntry})/Cancel";
+
+    //             $stockTransferCancelResponse = Http::withOptions([
+    //                 'verify' => false,
+    //             ])->withHeaders([
+    //                 "Content-Type" => "application/json",
+    //                 "Accept" => "application/json",
+    //                 "Authorization" => "Basic " . BasicAuthToken(),
+    //             ])->post($url, []);
+
+
+    //             if (!$stockTransferCancelResponse->successful()) {
+    //                 throw new \Exception(json_encode($stockTransferCancelResponse->json()));
+    //             }
+    //         }
+
+    //         // Xóa pallet ở SAP
+    //         if ($pallet->palletSAP) {
+    //             $palletCancelResponse = Http::withOptions([
+    //                 'verify' => false,
+    //             ])->withHeaders([
+    //                 "Content-Type" => "application/json",
+    //                 "Accept" => "application/json",
+    //                 "Authorization" => "Basic " . BasicAuthToken(),
+    //             ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet({$pallet->palletSAP})/Cancel");
+
+    //             if (!$palletCancelResponse->successful()) {
+    //                 throw new \Exception('Failed to cancel Pallet in SAP: ' .
+    //                     ($palletCancelResponse->json()['error']['message'] ?? $palletCancelResponse->body()));
+    //             }
+    //         }
+
+    //         // 5. Delete pallet details
+    //         pallet_details::where('palletID', $pallet->palletID)->delete();
+
+    //         // 6. Delete pallet
+    //         $pallet->delete();
+
+    //         // Commit the transaction
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'message' => 'Pallet deleted successfully',
+    //             'data' => [
+    //                 'palletCode' => $pallet->Code,
+    //                 'stockTransferCancelStatus' => $stockTransferCancelResponse ? $stockTransferCancelResponse->successful() : null,
+    //                 'palletCancelStatus' => $palletCancelResponse ? $palletCancelResponse->successful() : null
+    //             ]
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         // Rollback the transaction
+    //         DB::rollBack();
+
+    //         // Log the error
+    //         \Log::error('Error deleting pallet', [
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString(),
+    //             'stockTransferCancelResponse' => $stockTransferCancelResponse ? $stockTransferCancelResponse->json() : null,
+    //             'palletCancelResponse' => $palletCancelResponse ? $palletCancelResponse->json() : null,
+    //         ]);
+
+    //         // Prepare error response
+    //         $errorResponse = [
+    //             'message' => 'Failed to delete pallet',
+    //             'error' => $e->getMessage()
+    //         ];
+
+    //         // Include API responses if available
+    //         if ($stockTransferCancelResponse) {
+    //             $errorResponse['stockTransferCancelResult'] = $stockTransferCancelResponse->json();
+    //         }
+
+    //         if ($palletCancelResponse) {
+    //             $errorResponse['palletCancelResult'] = $palletCancelResponse->json();
+    //         }
+
+    //         return response()->json($errorResponse, 500);
+    //     }
+    // }
+
+    function DismantlePallet(Request $request)
     {
-        // Tạo biến để lưu trữ trạng thái của các bước vận hành 
         $stockTransferCancelResponse = null;
         $palletCancelResponse = null;
-        $pallet = null;
-
-        // dd($request->all());
 
         try {
             DB::beginTransaction();
@@ -659,88 +779,78 @@ class DryingOvenController extends Controller
             $pallet = Pallet::findOrFail($request->input('palletID'));
 
             if ($pallet->activeStatus != 0) {
-                throw new \Exception('Only inactive pallets can be deleted');
+                throw new \Exception('Only inactive pallets can be deleted.');
             }
 
-            dd($pallet->DocNum);
+            // 1. Cancel Stock Transfer in SAP if exists
+            if ($pallet->DocNum && $pallet->DocEntry) {
+                $docEntry = intval($pallet->DocEntry);
+                $stockTransferUrl = UrlSAPServiceLayer() . "/b1s/v2/StockTransfers({$docEntry})/Cancel";
 
-            // Hùy phiếu Stock Transfer ở SAP
-            if ($pallet->DocNum) {
-                $stockTransferCancelResponse = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    "Content-Type" => "application/json",
-                    "Accept" => "application/json",
-                    "Authorization" => "Basic " . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$pallet->DocEntry})/Cancel");
+                $stockTransferCancelResponse = Http::withOptions(['verify' => false])
+                    ->withHeaders([
+                        "Content-Type" => "application/json",
+                        "Accept" => "application/json",
+                        "Authorization" => "Basic " . BasicAuthToken(),
+                    ])
+                    ->post($stockTransferUrl, new \stdClass()); // JSON {}
 
                 if (!$stockTransferCancelResponse->successful()) {
-                    throw new \Exception('Failed to cancel Stock Transfer in SAP: ' . 
-                        ($stockTransferCancelResponse->json()['error']['message'] ?? $stockTransferCancelResponse->body()));
+                    $sapError = $stockTransferCancelResponse->json();
+                    throw new \Exception("Failed to cancel Stock Transfer in SAP: " . json_encode($sapError));
                 }
             }
 
-            // Xóa pallet ở SAP
+            // 2. Cancel pallet in SAP if exists
             if ($pallet->palletSAP) {
-                $palletCancelResponse = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    "Content-Type" => "application/json",
-                    "Accept" => "application/json",
-                    "Authorization" => "Basic " . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet({$pallet->palletSAP})/Cancel");
+                $palletCancelUrl = UrlSAPServiceLayer() . "/b1s/v1/Pallet({$pallet->palletSAP})/Cancel";
+
+                $palletCancelResponse = Http::withOptions(['verify' => false])
+                    ->withHeaders([
+                        "Content-Type" => "application/json",
+                        "Accept" => "application/json",
+                        "Authorization" => "Basic " . BasicAuthToken(),
+                    ])
+                    ->post($palletCancelUrl, new \stdClass()); // JSON {}
 
                 if (!$palletCancelResponse->successful()) {
-                    throw new \Exception('Failed to cancel Pallet in SAP: ' . 
-                        ($palletCancelResponse->json()['error']['message'] ?? $palletCancelResponse->body()));
+                    $sapError = $palletCancelResponse->json();
+                    throw new \Exception("Failed to cancel Pallet in SAP: " . json_encode($sapError));
                 }
             }
 
-            // 5. Delete pallet details
+            // 3. Delete pallet details
             pallet_details::where('palletID', $pallet->palletID)->delete();
 
-            // 6. Delete pallet
+            // 4. Delete pallet
             $pallet->delete();
 
-            // Commit the transaction
             DB::commit();
 
             return response()->json([
                 'message' => 'Pallet deleted successfully',
                 'data' => [
                     'palletCode' => $pallet->Code,
-                    'stockTransferCancelStatus' => $stockTransferCancelResponse ? $stockTransferCancelResponse->successful() : null,
-                    'palletCancelStatus' => $palletCancelResponse ? $palletCancelResponse->successful() : null
+                    'stockTransferCancelStatus' => $stockTransferCancelResponse?->successful(),
+                    'palletCancelStatus' => $palletCancelResponse?->successful()
                 ]
             ]);
         } catch (\Exception $e) {
-            // Rollback the transaction
             DB::rollBack();
 
-            // Log the error
-            \Log::error('Error deleting pallet', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'stockTransferCancelResponse' => $stockTransferCancelResponse ? $stockTransferCancelResponse->json() : null,
-                'palletCancelResponse' => $palletCancelResponse ? $palletCancelResponse->json() : null,
+            Log::error('Error deleting pallet', [
+                'exceptionMessage' => $e->getMessage(),
+                'exceptionTrace' => $e->getTraceAsString(),
+                'stockTransferCancelResponse' => $stockTransferCancelResponse?->json(),
+                'palletCancelResponse' => $palletCancelResponse?->json(),
             ]);
 
-            // Prepare error response
-            $errorResponse = [
+            return response()->json([
                 'message' => 'Failed to delete pallet',
-                'error' => $e->getMessage()
-            ];
-
-            // Include API responses if available
-            if ($stockTransferCancelResponse) {
-                $errorResponse['stockTransferCancelResult'] = $stockTransferCancelResponse->json();
-            }
-            
-            if ($palletCancelResponse) {
-                $errorResponse['palletCancelResult'] = $palletCancelResponse->json();
-            }
-            
-            return response()->json($errorResponse, 500);
+                'error' => $e->getMessage(),
+                'stockTransferCancelResult' => $stockTransferCancelResponse?->json(),
+                'palletCancelResult' => $palletCancelResponse?->json()
+            ], 500);
         }
     }
 
