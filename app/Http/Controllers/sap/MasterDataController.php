@@ -34,7 +34,7 @@ class MasterDataController extends Controller
 
         $flag = 'TS';
         if ($request->reason == 'SL') {
-            $flag = 'SL' ;
+            $flag = 'SL';
         }
 
         $branch = Auth::user()->branch;
@@ -66,7 +66,7 @@ class MasterDataController extends Controller
                     'message' => 'Đang có nhiều hơn 1 kho cùng hoạt động, hãy vô hiệu các kho không cần thiết.'
                 ], 422);
             }
-            
+
             if (count($warehouses) === 0) {
                 return response()->json([
                     'error' => true,
@@ -81,10 +81,11 @@ class MasterDataController extends Controller
                         INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
                         INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
                         INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                        WHERE (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1 
+                        WHERE (T1."U_CDai" * T1."U_CRong" * T1."U_CDay") <> 0
+                        AND (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1
                             AND T3."U_Flag" IN (?) 
                             AND T3."BPLid" = ? 
-                            AND T3."U_FAC" = ?'; 
+                            AND T3."U_FAC" = ?';
 
             if ($request->reason == 'SL') {
                 $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum"
@@ -92,7 +93,9 @@ class MasterDataController extends Controller
                             INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
                             INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
                             INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                            WHERE (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1 
+                            WHERE (T1."U_CDai" * T1."U_CRong" * T1."U_CDay") <> 0
+                            AND (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1
+                            END > 1
                                 AND T3."U_Flag" IN (?) 
                                 AND T3."BPLid" = ? 
                                 AND T3."U_FAC" = ? ';
@@ -428,7 +431,7 @@ class MasterDataController extends Controller
 
             $query = 'SELECT "Code", "Name" FROM "@G_SAY4" WHERE "U_BranchID" = ?';
             $params = [$id];
-        
+
             // Kiểm tra giá trị của $KHOI để thêm các điều kiện phù hợp
             if ($KHOI === 'CBG') {
                 $query .= ' AND "U_CBG" = ?';
@@ -503,9 +506,9 @@ class MasterDataController extends Controller
                 }
             } else {
                 $userData = User::whereNotNull('sap_id')
-                        ->pluck('sap_id')
-                        ->map(fn($item) => "'$item'")
-                        ->implode(',');
+                    ->pluck('sap_id')
+                    ->map(fn($item) => "'$item'")
+                    ->implode(',');
 
                 $query = 'select "USER_CODE", "NAME" from "UV_OHEM" where "USER_CODE" NOT IN (' . $userData . ')';
             }
@@ -725,7 +728,8 @@ class MasterDataController extends Controller
     }
 
     // Lấy danh sách nhà máy chế biến gỗ
-    function getCBGFactory() {
+    function getCBGFactory()
+    {
         try {
             $conDB = (new ConnectController)->connect_sap();
 
