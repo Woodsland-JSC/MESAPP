@@ -18,7 +18,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
 use App\Jobs\SyncSLDGToSAP;
 use App\Http\Controllers\sap\ConnectController;
-
+use Illuminate\Support\Facades\Cache;
 class ProductionController extends Controller
 {
 
@@ -1262,6 +1262,20 @@ class ProductionController extends Controller
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
             // Return validation errors with a 422 Unprocessable Entity status code
         }
+        // thêm tính năng check 1 user không được xử lý trùng lắp 1 id cùng lúc
+        $userId = Auth::id();
+        $lockKey = "accept_request_lock:{$request->id}";
+
+        // Check if this user already processing the request
+                if (Cache::has($lockKey)) {
+                    return response()->json([
+                        'error' => true,
+                        'status_code' => 429,
+                        'message' => 'Bạn đang xử lý yêu cầu này. Vui lòng đợi hoàn tất.'
+                    ], 429);
+                }
+        // Đặt lock trong 30 giây
+        Cache::put($lockKey, true, now()->addSeconds(30));
         //
         try {
             // 2. Xử lý xác nhận
@@ -1274,6 +1288,7 @@ class ProductionController extends Controller
                 ->first();
 
             if (!$data) {
+                Cache::forget($lockKey);
                 throw new \Exception('data không hợp lệ.');
             }
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
@@ -1284,6 +1299,7 @@ class ProductionController extends Controller
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $allocates = $this->allocate($dataallocate, $data->CompleQty);
                 if (count($allocates) == 0) {
+                    Cache::forget($lockKey);
                     return response()->json([
                         'error' => false,
                         'status_code' => 506,
@@ -1341,6 +1357,7 @@ class ProductionController extends Controller
                 }
                 if ($string == '') {
                     DB::rollBack();
+                    Cache::forget($lockKey);
                     return response()->json([
                         'error' => false,
                         'status_code' => 506,
@@ -1370,15 +1387,19 @@ class ProductionController extends Controller
                     // Đảm bảo $pl được định dạng đúng cách với boundary
                 ]);
                 if ($response->getStatusCode() == 400) {
+                    Cache::forget($lockKey);
                     throw new \Exception('SAP ERROR Incomplete batch request body.');
                 }
                 if ($response->getStatusCode() == 500) {
+                    Cache::forget($lockKey);
                     throw new \Exception('SAP ERROR ' . $response->getBody()->getContents());
                 }
                 if ($response->getStatusCode() == 401) {
+                    Cache::forget($lockKey);
                     throw new \Exception('SAP authen ' . $response->getBody()->getContents());
                 }
                 if ($response->getStatusCode() == 202) {
+
                     $res = $response->getBody()->getContents();
                     // kiểm tra sussess hay faild hơi quăng nha
                     if (strpos($res, 'ETag') !== false) {
@@ -1396,6 +1417,7 @@ class ProductionController extends Controller
                         awaitingstocks::where('notiId', $data->notiID)->delete();
 
                         DB::commit();
+                        Cache::forget($lockKey);
                     } else {
                         preg_match('/\{.*\}/s', $res, $matches);
                         if (isset($matches[0])) {
@@ -1415,8 +1437,10 @@ class ProductionController extends Controller
                 if ($request->CongDoan == 'TP' && $U_Qty != 0) {
                     $this->dispatch(new SyncSLDGToSAP($U_Item, $U_Qty, Auth::user()->branch, now()->format('Ymd')));
                 }
+                Cache::forget($lockKey);
                 return response()->json('Yêu cầu được thực hiện thành công', 200);
             } else {
+                Cache::forget($lockKey);
                 return response()->json([
                     'error' => false,
                     'status_code' => 500,
@@ -1429,14 +1453,32 @@ class ProductionController extends Controller
             // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
             if (strpos($e->getMessage(), 'SAP code:-5002') !== false &&
                 strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
+                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
 
+                // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
+                $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
                 // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
                 $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
 
                 // Tạo thông báo chi tiết về thiếu hàng
                 $message = "Nguyên vật liệu không đủ để giao nhận!";
                 $itemDetails = [];
+                // Tạo thông báo chi tiết về thiếu hàng
+                $message = "Nguyên vật liệu không đủ để giao nhận!";
+                $itemDetails = [];
 
+                if (empty($requiredItems)) {
+                    $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
+                } else {
+                    foreach ($requiredItems as $item) {
+                        $itemDetails[] = [
+                            'SubItemCode' => $item['SubItemCode'],
+                            'SubItemName' => $item['SubItemName'] ?? '',
+                            'requiredQuantity' => $item['requiredQuantity'],
+                            'wareHouse' => $item['wareHouse']
+                        ];
+                    }
+                }
                 if (empty($requiredItems)) {
                     $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
                 } else {
