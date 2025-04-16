@@ -1456,12 +1456,7 @@ class ProductionController extends Controller
 
                 // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
                 $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
-                // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
-                $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
 
-                // Tạo thông báo chi tiết về thiếu hàng
-                $message = "Nguyên vật liệu không đủ để giao nhận!";
-                $itemDetails = [];
                 // Tạo thông báo chi tiết về thiếu hàng
                 $message = "Nguyên vật liệu không đủ để giao nhận!";
                 $itemDetails = [];

@@ -240,8 +240,6 @@ const AwaitingReception = ({
             
                 if (error.response?.data?.status_code === 40001) {
                     showRequireQuantityAlert(errorMessage, error.response?.data?.required_items || []);
-                } else if (error.response?.data?.status_code === 500){
-                    showErrorAlert("Server hiện tại không thể xử lý yêu cầu. Vui lòng thử lại.");
                 } else {
                     showErrorAlert(errorMessage);
                 }
