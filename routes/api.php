@@ -34,9 +34,10 @@ Route::get('/handle-auth', function (Request $request) {
 
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::middleware(['auth:sanctum',])->group(function () {
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-});
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::post(['auth:sanctum',])->group(function () {
+    
+// });
 //'permission'
 Route::middleware(['auth:sanctum'])->group(function () {
     //Route::middleware(['auth:sanctum'])->group(function () {

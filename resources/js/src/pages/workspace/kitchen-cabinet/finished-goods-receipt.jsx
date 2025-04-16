@@ -426,7 +426,7 @@ const KitchenCabinetFinishedGoodsReceipt = () => {
                                                                                     "Không xác định"}
                                                                             </div>
                                                                             <div className="font-semibold truncate">
-                                                                                {item.NameCT ? `${item.NameCT} (${item.Dai}x${item.Rong}x${item.Day}) ` : "Không xác định"}
+                                                                                {item.NameCT ? `${item.NameCT} (${item.Day}x${item.Rong}x${item.Dai}) ` : "Không xác định"}
 
                                                                             </div>
                                                                         </td>

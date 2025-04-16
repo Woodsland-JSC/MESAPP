@@ -1963,7 +1963,7 @@ class VCNController extends Controller
                 }
                 if($string==''){
                     return response()->json([
-                        'error' => false,
+                        'error' => true,
                         'status_code' => 506,
                         'message' => "Lỗi lấy dữ liệu phiếu xuất:" .
                             $data->Team . " sản phẩm: " .
@@ -2028,7 +2028,7 @@ class VCNController extends Controller
                 return response()->json('success', 200);
             } else {
                 return response()->json([
-                    'error' => false,
+                    'error' => true,
                     'status_code' => 500,
                     'message' => "Tổ không hợp lệ."
                 ], 500);
@@ -2036,7 +2036,7 @@ class VCNController extends Controller
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
             return response()->json([
-                'error' => false,
+                'error' => true,
                 'status_code' => 500,
                 'message' => $e->getMessage()
             ], 500);

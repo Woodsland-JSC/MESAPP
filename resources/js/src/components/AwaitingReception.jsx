@@ -169,7 +169,6 @@ const AwaitingReception = ({
             });
         };
         
-
         const checkAndDisplayError = (errorMessage) => {
             toast.error(errorMessage);
             onInputAlertDialogClose();
@@ -236,14 +235,13 @@ const AwaitingReception = ({
                     error.response?.data?.message ||
                     error.response?.data?.error?.message?.value ||
                     error.response?.data?.error ||
-                    "Lỗi kết nối mạng.";
+                    "Lỗi kết nối mạng, vui lòng thử lại sau.";
             
                 if (error.response?.data?.status_code === 40001) {
                     showRequireQuantityAlert(errorMessage, error.response?.data?.required_items || []);
                 } else {
                     showErrorAlert(errorMessage);
                 }
-            
                 console.error("Error when confirming receipt:", error);
                 setAcceptLoading(false);
                 onInputAlertDialogClose();
