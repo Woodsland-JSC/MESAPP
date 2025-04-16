@@ -11,6 +11,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/lenh-san-xuat/{id}', [NoiDiaController::class, 'ChiTietLenh']);
         Route::get('/danh-sach-masd', [NoiDiaController::class, 'DanhSachMaSoDo']);
         Route::post('/update-status-masd', [NoiDiaController::class, 'CapNhatTrangThai']);
+        Route::get('/du-an', [NoiDiaController::class, 'DanhSachDuAn']);
+        Route::get('/can-ho', [NoiDiaController::class, 'DanhSachCan']);
+        Route::get('/tien-do-lap-dat', [NoiDiaController::class, 'DanhSachTienDo']);
+        Route::post('/tien-do-lap-dat', [NoiDiaController::class, 'CapNhatTienDo']);
     });
 
 });

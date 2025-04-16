@@ -175,4 +175,121 @@ class NoiDiaController extends Controller
 
         return response()->json(['message' => 'Cập nhật trạng thái thành công']);
     }
+    public function DanhSachDuAn()
+    {
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from UV_PROJECTND ';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $data = [];
+        while (odbc_fetch_row($stmt)) {
+            $data[] = [
+                'PrjCode' => odbc_result($stmt, "PrjCode"),
+            ];
+        }
+        odbc_close($conDB);
+        return response()->json($data);
+
+    }
+    public function DanhSachCan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PrjCode' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from UV_CANHO WHERE "PrjCode" = ?';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$request->PrjCode])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $data = [];
+        while (odbc_fetch_row($stmt)) {
+            $data[] = [
+                'MaCan' => odbc_result($stmt, "MaCan"),
+            ];
+        }
+        odbc_close($conDB);
+        return response()->json($data);
+    }
+    public function DanhSachTienDo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PrjCode' => 'required',
+            'MaCan' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+        $query = 'select * from GT_TIENDOLAPDAT WHERE "PrjCode" = ? and "MaCan" = ? and "TienDo" <> 100 ';
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt, [$request->PrjCode, $request->MaCan])) {
+            // Handle execution error
+            // die("Error executing SQL statement: " . odbc_errormsg());
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        $data = [];
+        while (odbc_fetch_row($stmt)) {
+            $data[] = [
+                'SPDich' => odbc_result($stmt, "SPDich"),
+                'Qty' =>(int) odbc_result($stmt, "Qty"),
+                'TienDo' => (int)odbc_result($stmt, "TienDo"),
+            ];
+        }
+        odbc_close($conDB);
+        return response()->json($data);
+    }
+    public function CapNhatTienDo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'PrjCode' => 'required',
+            'MaCan' => 'required',
+            'Details' => 'required|array',
+            'Details.*.SPDich' => 'required|string',
+            'Details.*.TienDo' => 'required|integer|min:0|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        foreach ($request->Details as $detail) {
+            $query = 'UPDATE GT_TIENDOLAPDAT SET "TienDo" = ? WHERE "PrjCode" = ? AND "MaCan" = ? AND "SPDICH" = ?';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$detail['TienDo'], $request->PrjCode, $request->MaCan, $detail['SPDich']])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+        }
+
+        odbc_close($conDB);
+
+        return response()->json(['message' => 'Cập nhật tiến độ thành công']);
+    }
 }
