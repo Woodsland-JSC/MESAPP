@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
 use App\Jobs\SyncSLDGToSAP;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Cache;
+
 class ProductionController extends Controller
 {
 
@@ -1267,13 +1268,13 @@ class ProductionController extends Controller
         $lockKey = "accept_request_lock:{$request->id}";
 
         // Check if this user already processing the request
-                if (Cache::has($lockKey)) {
-                    return response()->json([
-                        'error' => true,
-                        'status_code' => 429,
-                        'message' => 'Bạn đang xử lý yêu cầu này. Vui lòng đợi hoàn tất.'
-                    ], 429);
-                }
+        if (Cache::has($lockKey)) {
+            return response()->json([
+                'error' => true,
+                'status_code' => 429,
+                'message' => 'Bạn đang xử lý yêu cầu này. Vui lòng đợi hoàn tất.'
+            ], 429);
+        }
         // Đặt lock trong 30 giây
         Cache::put($lockKey, true, now()->addSeconds(30));
         //
@@ -1450,62 +1451,85 @@ class ProductionController extends Controller
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
 
-            // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
-            if (strpos($e->getMessage(), 'SAP code:-5002') !== false &&
-                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false) {
+            // Kiểm tra lỗi 502 Proxy Error (mất kết nối server)
+            if (strpos($e->getMessage(), '502 Proxy Error') !== false) {
+                return response()->json([
+                    'error' => true,
+                    'status_code' => 500,
+                    'error_type' => 'PROXY_CONNECTION_FAILED',
+                    'message' => 'Đường truyền tới máy chủ bị gián đoạn, vui lòng thử lại sau giây lát.',
+                    'original_error' => $errorMessage
+                ], 500);
+            }
 
-                // Lấy thông tin sản phẩm từ view UV_TONKHOSAP
-                $requiredItems = $this->getRequiredInventory($request->ItemCode, $request->Quantity ?? 0, Auth::user()->plant);
+            // Kiểm tra lỗi SAP code:-5002 (tồn kho không đủ)
+            if (
+                strpos($e->getMessage(), 'SAP code:-5002') !== false &&
+                strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false
+            ) {
 
                 // Tạo thông báo chi tiết về thiếu hàng
                 $message = "Nguyên vật liệu không đủ để giao nhận!";
                 $itemDetails = [];
 
-                if (empty($requiredItems)) {
-                    $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
-                } else {
-                    foreach ($requiredItems as $item) {
-                        $itemDetails[] = [
-                            'SubItemCode' => $item['SubItemCode'],
-                            'SubItemName' => $item['SubItemName'] ?? '',
-                            'requiredQuantity' => $item['requiredQuantity'],
-                            'wareHouse' => $item['wareHouse']
-                        ];
-                    }
-                }
-                if (empty($requiredItems)) {
-                    $itemDetails[] = "Không tìm thấy thông tin về sản phẩm thiếu.";
-                } else {
-                    foreach ($requiredItems as $item) {
-                        $itemDetails[] = [
-                            'SubItemCode' => $item['SubItemCode'],
-                            'SubItemName' => $item['SubItemName'] ?? '',
-                            'requiredQuantity' => $item['requiredQuantity'],
-                            'wareHouse' => $item['wareHouse']
-                        ];
-                    }
-                }
+                preg_match('/Production Order no:\s*(\d{9})/', $e->getMessage(), $matches);
+                $productionOrderNumber = $matches[1] ?? null;
 
                 return response()->json([
                     'error' => true,
                     'status_code' => 40001,
                     'error_type' => 'INSUFFICIENT_INVENTORY',
                     'message' => $message,
-                    'required_items' => $itemDetails,
+                    'item_code' => $request->ItemCode,
+                    'production_order' => $productionOrderNumber,
                     'original_error' => $e->getMessage()
-                ], 400); 
+                ], 400);
             }
 
             // Trả về lỗi thông thường nếu không phải lỗi tồn kho
             return response()->json([
-                'error' => false,
+                'error' => true,
                 'status_code' => 500,
                 'message' => $e->getMessage(),
             ], 500);
         }
     }
 
-    private function getRequiredInventory($itemCode, $quantity, $factory)
+    function checkInventory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'ItemCode' => 'required',
+            'Quantity' => 'required|numeric|min:0',
+            'CongDoan' => 'required',
+            'Factory' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+        $itemCode = $request->ItemCode;
+        $quantity = $request->quantity;
+        $factory = $request->Factory;
+        $step = $request->CongDoan;
+        $requiredInventory = $this->getRequiredInventory($itemCode, $quantity, $factory, $step);
+
+        // Kiểm tra xem có nguyên vật liệu nào không đủ
+        if (empty($requiredInventory)) {
+            return response()->json([
+                'message' => 'Nguyên vật liệu đã đủ để giao nhận.',
+                'requiredInventory' => [],
+            ], 200);
+        } else {
+            return response()->json([
+                'error' => true,
+                'status_code' => 40001,
+                'message' => 'Nguyên vật liệu không đủ để giao nhận',
+                'requiredInventory' => $requiredInventory,
+            ], 500);
+        }
+    }
+
+    private function getRequiredInventory($itemCode, $quantity, $factory, $step)
     {
         $requiredItems = [];
         $groupedItems = [];
@@ -1513,7 +1537,7 @@ class ProductionController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         // Truy vấn view UV_TONKHOSAP để lấy thông tin
-        $query ="
+        $query = "
             SELECT
                 \"DocNum\",
                 \"U_GRID\",
@@ -1533,7 +1557,6 @@ class ProductionController extends Controller
             FROM UV_TONKHOSAP
             WHERE \"ItemCode\" = ?
             AND \"Factory\" = ?
-            AND \"U_CDOAN\" = 'DG'
             AND ROUND((\"PlannedQty\" - \"IssuedQty\") - \"OnHand\") > 0
         ";
 

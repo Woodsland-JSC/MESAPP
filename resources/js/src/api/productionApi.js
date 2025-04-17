@@ -12,7 +12,7 @@ const productionApi = {
             .join("&");
 
         // const url = `/v2/production/receipts-productions?${queryStringParams}`;
-        const url = `/production/receipts-productions?${queryStringParams}`; 
+        const url = `/production/receipts-productions?${queryStringParams}`;
         return axiosClient().get(url);
     },
     getFinishedGoodsListByGroup: (param, KHOI, Factory) => {
@@ -21,7 +21,7 @@ const productionApi = {
             params: {
                 TO: param,
                 KHOI: KHOI,
-                Factory: Factory
+                Factory: Factory,
             },
         });
     },
@@ -125,6 +125,7 @@ const productionApi = {
         // const url = `/production/accept-receipts`;
         return axiosClient().post(url, data);
     },
+
     acceptReceiptsCBGQC: (data) => {
         const url = `/v2/production/confirm-qc-cbg`;
         // const url = `/confirm-qc-cbg`;
@@ -139,6 +140,19 @@ const productionApi = {
         const url = `/v2/vcn/confirm-qc-vcn`;
         // const url = `/confirm-qc-vcn`;
         return axiosClient().post(url, data);
+    },
+    checkReceiptsCBG: ({id, ItemCode, Quantity, CongDoan, Factory}) => {
+        const url = `/production/check-receipts`;
+        // const url = `/production/accept-receipts`;
+        return axiosClient().get(url, {
+            params: {
+                id,
+                ItemCode,
+                Quantity,
+                CongDoan,
+                Factory,
+            },
+        });
     },
     getErrorTypes: () => {
         const url = `/loailoi`;
@@ -156,27 +170,24 @@ const productionApi = {
     getAllGroupWithoutQC: (factory, KHOI) => {
         const url = `/getlist-team-exclude-qc`;
         return axiosClient().get(url, {
-            params:{
+            params: {
                 factory: factory,
-                KHOI: KHOI
-            }
+                KHOI: KHOI,
+            },
         });
     },
-    getTeamBacks: () =>
-    {
-        const url =`/production/allteam`
+    getTeamBacks: () => {
+        const url = `/production/allteam`;
         return axiosClient().get(url);
     },
-    getRootCauses: () =>
-    {
-        const url =`/production/rootCause`
+    getRootCauses: () => {
+        const url = `/production/rootCause`;
         return axiosClient().get(url);
     },
-    getReturnCode: () =>
-    {
-        const url =`/items-route`
+    getReturnCode: () => {
+        const url = `/items-route`;
         return axiosClient().get(url);
-    }
+    },
 };
 
 export default productionApi;

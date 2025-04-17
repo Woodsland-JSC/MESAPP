@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
     AlertDialog,
     AlertDialogBody,
@@ -6,6 +6,13 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
     Badge,
     Button,
     ButtonGroup,
@@ -23,15 +30,15 @@ import {
 } from "@chakra-ui/react";
 import Select from "react-select";
 import { MdRefresh } from "react-icons/md";
-import { TbCalendarFilled, TbClock } from "react-icons/tb";
-import { FaCopy } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/src/sweetalert2.scss";
 import productionApi from "../api/productionApi";
 import "../assets/styles/index.css";
-import { Input } from "postcss";
+import useAppContext from "../store/AppContext";
+import { TbClock } from "react-icons/tb";
+import { id } from "date-fns/locale";
 
 const reasonOfReturn = [
     {
@@ -99,6 +106,26 @@ const AwaitingReception = ({
         onOpen: onDismissAlertDialogOpen,
         onClose: onDismissAlertDialogClose,
     } = useDisclosure();
+    const {
+        isOpen: isStockCheckingOpen,
+        onOpen: onStockCheckingOpen,
+        onClose: onStockCheckingClose,
+    } = useDisclosure();
+    const [reason, setReason] = useState("");
+    const [acceptLoading, setAcceptLoading] = useState(false);
+    const [rejectLoading, setRejectLoading] = useState(false);
+    const [checkingLoading, setCheckingLoading] = useState(false);
+
+    const [isReturnSelect, setIsReturnSelect] = useState(false);
+
+    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
+    const [solutionOptions, setSolutionOptions] = useState([]);
+    const [teamBackOptions, setTeamBackOptions] = useState([]);
+    const [rootCauseOptions, setRootCauseOptions] = useState([]);
+    const [returnCodeOptions, setReturnCodeOptions] = useState([]);
+    const [weekOptions, setWeekOptions] = useState(weeks);
+
+    const { user } = useAppContext();
 
     const [faults, setFaults] = useState({
         errorType: null,
@@ -125,50 +152,35 @@ const AwaitingReception = ({
                 `,
                 icon: "error",
                 zIndex: 50001,
-                confirmButtonColor: '#3085d6',
+                confirmButtonColor: "#3085d6",
             });
         };
 
-        const showRequireQuantityAlert = (message, requiredItems) => { 
-            const tableRows = requiredItems.map((item, index) => 
-                `<tr style="font-size: 14px; max-height: 280px; overflow-y: auto;">
-                    <td style="border: 1px solid #ddd; padding: 6px; user-select: text; text-align: center;">${item.SubItemCode}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right; user-select: text;">${item.requiredQuantity}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; user-select: text;">${item.wareHouse}</td>
-                </tr>`
-            ).join('');
-        
+        const showRequireQuantityAlert = (
+            message,
+            productionOrder,
+            itemCode
+        ) => {
             Swal.fire({
                 title: "Nguyên vật liệu không đủ.",
-                html: 
-                    `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung nguyên vật liệu:</p>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #ddd; user-select: text;">
-                        <thead>
-                            <tr style="font-size: 14px;">
-                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Sản phẩm</th>
-                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Số lượng</th>
-                                <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Kho</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>`,
+                html: `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung vật tư nguyên liệu cho lệnh sản xuất (<b>${productionOrder}</b>) để hoàn thành sản xuất sản phẩm <b>${itemCode}</b>.</p>`,
                 icon: "error",
                 zIndex: 50001,
-                confirmButtonColor: '#3085d6',
-                width: '500px',
+                confirmButtonColor: "#3085d6",
+                width: "500px",
                 didOpen: () => {
                     window.copyToClipboard = (id, button) => {
                         const text = document.getElementById(id).innerText;
                         navigator.clipboard.writeText(text).then(() => {
-                            button.querySelector('.copy-icon').style.backgroundColor = '#d1e7dd';
+                            button.querySelector(
+                                ".copy-icon"
+                            ).style.backgroundColor = "#d1e7dd";
                         });
                     };
-                }
+                },
             });
         };
-        
+
         const checkAndDisplayError = (errorMessage) => {
             toast.error(errorMessage);
             onInputAlertDialogClose();
@@ -236,9 +248,13 @@ const AwaitingReception = ({
                     error.response?.data?.error?.message?.value ||
                     error.response?.data?.error ||
                     "Lỗi kết nối mạng, vui lòng thử lại sau.";
-            
+
                 if (error.response?.data?.status_code === 40001) {
-                    showRequireQuantityAlert(errorMessage, error.response?.data?.required_items || []);
+                    showRequireQuantityAlert(
+                        errorMessage,
+                        error.response?.data?.production_order,
+                        error.response?.data?.item_code
+                    );
                 } else {
                     showErrorAlert(errorMessage);
                 }
@@ -314,18 +330,96 @@ const AwaitingReception = ({
         setRejectLoading(false);
     };
 
-    const [reason, setReason] = useState("");
-    const [acceptLoading, setAcceptLoading] = useState(false);
-    const [rejectLoading, setRejectLoading] = useState(false);
+    const handleCheckingReceipt = async () => {
+        setCheckingLoading(true);
+        const showstockCheckingInfo = () => {
+            Swal.fire({
+                title: "Đã có thể ghi nhận.",
+                html: `
+                    <p>Nguyên vật liệu đã đủ để đáp ứng ghi nhận.</p>
+                `,
+                icon: "success",
+                zIndex: 50001,
+                confirmButtonColor: "#3085d6",
+            });
+        };
 
-    const [isReturnSelect, setIsReturnSelect] = useState(false);
-
-    const [errorTypeOptions, setErrorTypeOptions] = useState([]);
-    const [solutionOptions, setSolutionOptions] = useState([]);
-    const [teamBackOptions, setTeamBackOptions] = useState([]);
-    const [rootCauseOptions, setRootCauseOptions] = useState([]);
-    const [returnCodeOptions, setReturnCodeOptions] = useState([]);
-    const [weekOptions, setWeekOptions] = useState(weeks);
+        try {
+            let res;
+            switch (type) {
+                case "plywood":
+                    res = await productionApi.checkReceiptsVCN({
+                        id: data?.id,
+                        ItemCode: data?.ItemCode,
+                        Quantity: data?.Quantity,
+                        CongDoan: CongDoan || null,
+                        Factory: Factory || null,
+                    });
+                    break;
+                default:
+                    res = await productionApi.checkReceiptsCBG({
+                        id: data?.id,
+                        ItemCode: data?.ItemCode,
+                        Quantity: data?.Quantity,
+                        CongDoan: CongDoan || null,
+                        Factory: Factory || null,
+                    });
+                    break;
+            }
+            // console.log("Checking receipt successful", res);
+            if(res?.requiredInventory?.length == 0) {
+                showstockCheckingInfo();
+                onStockCheckingClose();
+            }
+            setCheckingLoading(false);
+        } catch (error) {
+            const showRequireQuantityAlert = (requiredItems) => { 
+                const tableRows = requiredItems.map((item, index) => 
+                    `<tr style="font-size: 14px; max-height: 280px; overflow-y: auto;">
+                        <td style="border: 1px solid #ddd; padding: 6px; user-select: text; text-align: center;">${item.SubItemCode}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right; user-select: text;">${item.requiredQuantity}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; user-select: text;">${item.wareHouse}</td>
+                    </tr>`
+                ).join('');
+            
+                Swal.fire({
+                    title: "Nguyên vật liệu không đủ.",
+                    html: 
+                        `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung nguyên vật liệu:</p>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #ddd; user-select: text;">
+                            <thead>
+                                <tr style="font-size: 14px;">
+                                    <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Sản phẩm</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Số lượng</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2; user-select: text;">Kho</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>`,
+                    zIndex: 50001,
+                    confirmButtonColor: '#3085d6',
+                    width: '500px',
+                    didOpen: () => {
+                        window.copyToClipboard = (id, button) => {
+                            const text = document.getElementById(id).innerText;
+                            navigator.clipboard.writeText(text).then(() => {
+                                button.querySelector('.copy-icon').style.backgroundColor = '#d1e7dd';
+                            });
+                        };
+                    }
+                });
+            };
+            if (error.response?.data?.status_code === 40001) {
+                showRequireQuantityAlert( error.response?.data?.requiredInventory || []);
+            } else {
+                toast.error("Có lỗi xảy ra khi kiểm tra.");
+            }
+            onStockCheckingClose();
+            setCheckingLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (selectedReason != "3") {
@@ -488,8 +582,6 @@ const AwaitingReception = ({
                                 </span>
                             </div>
                         )}
-
-
 
                         <div className="flex ">
                             <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
@@ -827,8 +919,20 @@ const AwaitingReception = ({
                     >
                         Xác nhận
                     </Button>
+                    {user?.role == 1 && variant !== "QC" && (
+                        <Button
+                            variant="solid"
+                            colorScheme="blue"
+                            className="bg-[#3854a1] w-full"
+                            onClick={onStockCheckingOpen}
+                            backgroundColor="#3854a1 !important"
+                        >
+                            Kiểm tra
+                        </Button>
+                    )}
                 </div>
             </div>
+            {/* Receipt Dialog */}
             <AlertDialog
                 isOpen={isInputAlertDialogOpen}
                 onClose={onInputAlertDialogClose}
@@ -891,7 +995,7 @@ const AwaitingReception = ({
                                 </Button>
                                 <button
                                     disabled={acceptLoading}
-                                    className="w-fit bg-[#38a169] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    className="w-fit bg-[#38a169] p-2 font-semibold rounded-lg text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
                                     onClick={handleConfirmReceipt}
                                 >
                                     {acceptLoading ? (
@@ -908,6 +1012,7 @@ const AwaitingReception = ({
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+            {/* Return Dialog */}
             <AlertDialog
                 isOpen={isDismissAlertDialogOpen}
                 onClose={onDismissAlertDialogClose}
@@ -970,6 +1075,48 @@ const AwaitingReception = ({
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+            {/* Stock Checking Dialog */}
+            <Modal
+                isOpen={isStockCheckingOpen}
+                onClose={onStockCheckingClose}
+                isCentered
+                closeOnOverlayClick={false}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Kiểm tra nguyên vật liệu</ModalHeader>
+                    <ModalBody>
+                        Hệ thống sẽ kiểm tra nguyên vật liệu xem có đủ để ghi
+                        nhận sản phẩm này hay không.
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <div className="flex gap-4">
+                            <Button
+                                className="bg-[#edf2f7]"
+                                onClick={onStockCheckingClose}
+                                isDisabled={checkingLoading}
+                            >
+                                Thoát
+                            </Button>
+                            <button
+                                disabled={checkingLoading}
+                                className="w-fit bg-black p-2 font-semibold rounded-lg text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleCheckingReceipt}
+                            >
+                                {checkingLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </div>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </>
     );
 };

@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('remove-receipt', [ProductionController::class, 'delete']);
         Route::post('/accept-receipts', [ProductionController::class, 'accept']);
         Route::post('/reject-receipts', [ProductionController::class, 'reject']);
+        Route::get('/check-receipts', [ProductionController::class, 'checkInventory'])->name('check-receipts');
         Route::get('/danh-sach-phoi-cho-nhan', [ProductionController::class, 'dsphoipending']);
         Route::get('/allteam', [ProductionController::class, 'getAllTeam']);
         Route::get('/rootCause', [ProductionController::class, 'getRootCause']);

@@ -500,6 +500,7 @@ function FinishedGoodsReceipt() {
                                             data={item}
                                             key={index}
                                             index={index}
+                                            Factory={selectedGroup.Factory}
                                             CongDoan={selectedGroup.CongDoan}
                                             isQualityCheck={isQualityCheck}
                                             onConfirmReceipt={
