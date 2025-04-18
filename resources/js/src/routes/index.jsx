@@ -83,6 +83,7 @@ import FactoryReceiptVolumelReport from "../pages/reports/wood-working/factory-r
 
 // Domestic
 import DomesticFinishedGoodsReceipt from "../pages/workspace/domestic/finished-goods-receipt";
+import InstallationProgress from "../pages/workspace/domestic/installation-progress";
 
 // Transfer
 import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-warehouse-transfer";
@@ -229,7 +230,7 @@ function AppRoutes() {
                                 <FinishedPackagingReceipt />
                             </ProtectedRoute>
                         }
-                    />
+                    /> */}
                     <Route
                         path="/workspace/inland/installation-progress"
                         element={
@@ -238,7 +239,7 @@ function AppRoutes() {
                                 <InstallationProgress />
                             </ProtectedRoute>
                         }
-                    /> */}
+                    />
 
                     {/* Goods Management */}
                     <Route

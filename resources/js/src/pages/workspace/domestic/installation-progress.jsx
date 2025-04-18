@@ -1,24 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Layout from "../../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
 import {
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogContent,
-    AlertDialogOverlay,
-    AlertDialogCloseButton,
-    Alert,
-    AlertIcon,
-    AlertTitle,
-    AlertDescription,
     ModalOverlay,
     Modal,
     ModalHeader,
     ModalContent,
-    ModalCloseButton,
     ModalBody,
     ModalFooter,
     NumberInput,
@@ -26,107 +14,65 @@ import {
     NumberInputStepper,
     NumberIncrementStepper,
     NumberDecrementStepper,
-    Badge,
-    Button,
-    Box,
-    Text,
-    Skeleton,
-    SkeletonCircle,
-    SkeletonText,
-    Stack,
     useDisclosure,
 } from "@chakra-ui/react";
+import {
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
+    SliderMark,
+} from '@chakra-ui/react'
 import { HiMiniBellAlert } from "react-icons/hi2";
 import Select, { components } from "react-select";
 import { Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import productionApi from "../../../api/productionApi";
 import Loader from "../../../components/Loader";
-import useAppContext from "../../../store/AppContext";
-import ItemInput from "../../../components/ItemInput";
-import DomesticAwaitingReception from "../../../components/DomesticAwaitingReception";
-import DomesticOutputCard from "../../../components/DomesticOutputCard";
-import { BiConfused, BiSearchAlt } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { FaArrowUp } from "react-icons/fa";
+import domesticApi from "../../../api/domesticApi";
+import EmptyData from "../../../assets/images/empty-data.svg";
 
-// IMPORTANT: Fake data
-const fakeDomesticDetails = [
-    {
-        id: 1,
-        detailsCode: "001",
-        projectName: "Chung cư 1",
-        cuttingDiagram: "Test 1",
-        plannedAmount: 10009,
-        receivedAmount: 80,
-        currentStageId: 1,
-        nextStageId: 2,
-        currentProgress: 30
-    },
-    {
-        id: 2,
-        detailsCode: "002",
-        projectName: "Chung cư 1",
-        cuttingDiagram: "Test 2",
-        plannedAmount: 121,
-        receivedAmount: 45,
-        currentStageId: 1,
-        nextStageId: 2,
-        currentProgress: 30
-    },
-    {
-        id: 3,
-        detailsCode: "003",
-        projectName: "Chung cư 2",
-        cuttingDiagram: "Test 3",
-        plannedAmount: 56,
-        receivedAmount: 6,
-        currentStageId: 2,
-        nextStageId: 3,
-        currentProgress: 30
-    },
-    {
-        id: 4,
-        detailsCode: "004",
-        projectName: "Chung cư 2",
-        cuttingDiagram: "Test 4",
-        plannedAmount: 100,
-        receivedAmount: 80,
-        currentStageId: 1,
-        nextStageId: 2,
-        currentProgress: 45
-    },
-];
+function getChangedTienDoItems(progressReceipt, productList) {
+    if (!progressReceipt || !progressReceipt.Details || !Array.isArray(progressReceipt.Details) ||
+        !productList || !Array.isArray(productList)) {
+        console.error("Invalid input data");
+        return [];
+    }
 
-const fakeProjects = [
-    {
-        id: 1,
-        code: "1",
-        name: "Chung cư ABC",
-    },
-    {
-        id: 2,
-        code: "2",
-        name: "Chung cư CBA",
-    },
-    {
-        id: 3,
-        code: "3",
-        name: "Chung cư XYZ",
-    },
-    {
-        id: 4,
-        code: "4",
-        name: "Chung cư ZYX",
-    },
-];
+    const changedItems = [];
+
+    progressReceipt.Details.forEach((detailItem, index) => {
+        if (index < productList.length) {
+            const productItem = productList[index];
+
+            if (detailItem.SPDich === productItem.SPDich) {
+                if (detailItem.TienDo !== productItem.TienDo) {
+                    changedItems.push({
+                        index: index,
+                        SPDich: detailItem.SPDich,
+                        oldTienDo: productItem.TienDo,
+                        newTienDo: detailItem.TienDo,
+                        difference: detailItem.TienDo - productItem.TienDo
+                    });
+                }
+            }
+        }
+    });
+
+    return changedItems;
+}
+
+const labelStyles = {
+    mt: '4',
+    fontSize: 'sm',
+}
 
 function InstallationProgress() {
     const navigate = useNavigate();
-    // const { loading, setLoading } = useAppContext();
-    const stageSelectRef = useRef();
     const projectSelectRef = useRef();
-    const cuttingDiagramSelectRef = useRef();
+    const apartmentSelectRef = useRef();
+    const progressInputRef = useRef();
 
     const {
         isOpen: isAlertDialogOpen,
@@ -134,61 +80,43 @@ function InstallationProgress() {
         onClose: onAlertDialogClose,
     } = useDisclosure();
 
-    const {
-        isOpen: isModalOpen,
-        onOpen: onModalOpen,
-        onClose: onModalClose,
-    } = useDisclosure();
-
     const [awaitingReception, setAwaitingReception] = useState([]);
 
-    const [data, setData] = useState(fakeDomesticDetails || []);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [finishedDetailsData, setFinishedDetailsData] = useState(fakeDomesticDetails || []);
+    // const [data, setData] = useState(fakeDomesticDetails || []);
+    // const [searchTerm, setSearchTerm] = useState("");
+    // const [searchResults, setSearchResults] = useState([]);
+    // const [finishedDetailsData, setFinishedDetailsData] = useState(fakeDomesticDetails || []);
     const [loading, setLoading] = useState(true);
     const [isFirstTime, setIsFirstTime] = useState(true);
     const [loadingData, setLoadingData] = useState(false);
+    const [apartmentLoading, setApartmentLoading] = useState(false);
+    const [processLoading, setProcessLoading] = useState(false);
 
-    const [stageListOptions, setStageListOptions] = useState([]);
-    const [stageList, setStageList] = useState([]);
-    const [selectedStage, setSelectedStage] = useState(null);
+    // const [stageListOptions, setStageListOptions] = useState([]);
+    // const [stageList, setStageList] = useState([]);
+    // const [selectedStage, setSelectedStage] = useState(null);
 
     const [projectListOptions, setProjectListOptions] = useState([]);
+    const [apartmentListOptions, setApartmentListOptions] = useState([]);
+    const [apartmentList, setApartmentList] = useState([]);
     const [projectList, setProjectList] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedApartment, setSelectedApartment] = useState(null);
 
-    const [selectedProductCode, setSelectedProductCode] = useState(null);
+    const [progressReceipt, setProgressReceipt] = useState(null);
+    const [productList, setProductList] = useState([]);
+    const [changedItems, setChangedItems] = useState([]);
 
-    const [isQualityCheck, setIsQualityCheck] = useState(false);
+    // const [selectedProductCode, setSelectedProductCode] = useState(null);
 
-    const handleRejectFromChild = (data, faults) => {
-        getDataFollowingGroup(params);
-    };
+    // const [isQualityCheck, setIsQualityCheck] = useState(false);
 
-    const handleConfirmReceipt = (id) => {
-        if (selectedStage) {
-            setAwaitingReception((prev) =>
-                prev.filter((item) => item.id !== id)
-            );
-            toast.success("Ghi nhận thành công.");
-        }
-        if (awaitingReception.length <= 0) {
-            onModalClose();
-        }
-    };
+    const format = (val) => val + `%`
+    const parse = (val) => val ? val : val.replace(/^\%/, '')
 
-    const handleRejectReceipt = (id) => {
-        if (selectedStage) {
-            setAwaitingReception((prev) =>
-                prev.filter((item) => item.id !== id)
-            );
-            toast.success("Huỷ bỏ & chuyển lại thành công.");
-        }
-        if (awaitingReception.length <= 0) {
-            onModalClose();
-        }
-    };
+    // const handleRejectFromChild = (data, faults) => {
+    //     getDataFollowingGroup(params);
+    // };
 
     const handleBackNavigation = (event) => {
         if (event.type === "popstate") {
@@ -204,7 +132,6 @@ function InstallationProgress() {
         };
     }, [navigate]);
 
-    // Get All Stage, Cutting Diagram, Production Order, Details Code
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -219,25 +146,44 @@ function InstallationProgress() {
                 const stageRes = await productionApi.getAllGroupWithoutQC();
 
                 // Process All Stage
-                const stageOptions = stageRes.map((item) => ({
-                    value: item.Code,
-                    label: item.Name + " - " + item.Code,
-                    CongDoan: item.CongDoan,
-                }));
-                setStageList(stageRes);
-                stageOptions.sort((a, b) => a.label.localeCompare(b.label));
-                setStageListOptions(stageOptions);
-                stageSelectRef?.current?.setValue(stageOptions[0]);
+                // const stageOptions = stageRes.map((item) => ({
+                //     value: item.Code,
+                //     label: item.Name + " - " + item.Code,
+                //     CongDoan: item.CongDoan,
+                // }));
+                // setStageList(stageRes);
+                // stageOptions.sort((a, b) => a.label.localeCompare(b.label));
+                // setStageListOptions(stageOptions);
+                // stageSelectRef?.current?.setValue(stageOptions[0]);
 
                 // Process Project
-                const projectRes = [...fakeProjects];
+                const projectRes = await domesticApi.getAllProject();
+                // const projectRes = [...fakeProjects];
                 const projectOptions = projectRes.map((item) => ({
-                    value: item.id,
-                    label: item.name,
+                    value: item.PrjCode,
+                    label: item.PrjCode,
                 }));
+                // const projectOptions = projectRes.map((item) => ({
+                //     value: item.code,
+                //     label: item.name,
+                // }));
                 setProjectList(projectRes);
                 setProjectListOptions(projectOptions);
                 projectSelectRef?.current?.setValue(projectOptions[0]);
+                setSelectedProject(projectOptions[0])
+
+                const firstProjectId = projectOptions[0]?.value;
+
+                // Apartment Project
+                if (firstProjectId) {
+                    const apartmentRes = await domesticApi.getApartmentByProjectId(firstProjectId);
+                    const apartmentOptions = apartmentRes.map((item) => ({
+                        value: item.MaCan,
+                        label: item.MaCan,
+                    }));
+                    setApartmentList(apartmentRes);
+                    setApartmentListOptions(apartmentOptions);
+                }
 
             } catch (error) {
                 toast.error("Có lỗi xảy ra khi load dữ liệu.");
@@ -263,120 +209,255 @@ function InstallationProgress() {
         }
     }, [loading]);
 
-    const getDataFollowingGroup = async (params) => {
-        // setLoadingData(true);
+    // const getDataFollowingGroup = async (params) => {
+    //     // setLoadingData(true);
+    //     try {
+    //         let params = {
+    //             TO: selectedStage?.value,
+    //             CongDoan: selectedStage?.CongDoan,
+    //         }
+    //         const res = await productionApi.getFinishedGoodsList(params);
+    //         if (typeof res?.data === "object") {
+    //             setData(Object.values(res.data));
+    //         } else {
+    //             setData([]);
+    //         }
+
+    //         // if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
+    //         //     setAwaitingReception(res?.noti_choxacnhan);
+    //         // } else {
+    //         //     setAwaitingReception([]);
+    //         // }
+    //         console.log("Data: ", res?.data);
+    //         // setData(res.data);
+    //     } catch (error) {
+    //         toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+    //     }
+    //     // setLoadingData(false);
+    // };
+
+    // useEffect(() => {
+    //     (async () => {
+    //         if (selectedStage) {
+    //             const isQC = stageList.find(
+    //                 (group) => group.Code == selectedStage.value
+    //             )?.QC;
+    //             if (isQC) {
+    //                 setIsQualityCheck(true);
+    //             } else {
+    //                 setIsQualityCheck(false);
+    //             }
+    //             // setLoadingData(true);
+    //             const params = {
+    //                 TO: selectedStage.value,
+    //             };
+    //             getDataFollowingGroup(params);
+    //         }
+    //     })();
+    // }, [selectedStage]);
+
+    // const handleSearchFinishedDetails = () => {
+    //     setLoadingData(true)
+    //     // Hàm handle filter, fetch,... ra data rồi
+    //     setTimeout(() => {
+    //         setSearchResults(fakeDomesticDetails);
+    //         setLoadingData(false);
+    //     }, 3000)
+    // }
+
+    // const searchItems = (data, searchTerm) => {
+    //     if (!searchTerm) {
+    //         return data;
+    //     }
+
+    //     const filteredData = [];
+
+    //     for (const key in data) {
+    //         const item = data[key];
+    //         const filteredDetails = item.Details.filter((detail) => {
+    //             const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+
+    //             // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
+    //             const searchTermLower = searchTerm.toLowerCase();
+    //             const subitemLower = subitem.toLowerCase();
+
+    //             return subitemLower.includes(searchTermLower);
+    //         });
+
+    //         if (filteredDetails.length > 0) {
+    //             filteredData[key] = { ...item, Details: filteredDetails };
+    //         }
+    //     }
+
+    //     return filteredData;
+    // };
+
+    // const searchResult = searchItems(data, searchTerm);
+
+    // const [isActive, setIsActive] = useState(false);
+
+    // useEffect(() => {
+    //     const progressPath = document.querySelector('.progress-circle path');
+    //     const pathLength = progressPath.getTotalLength();
+
+    //     progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
+    //     progressPath.style.strokeDashoffset = pathLength;
+
+    //     const updateProgress = () => {
+    //         const scroll = window.scrollY;
+    //         const height = document.documentElement.scrollHeight - window.innerHeight;
+    //         const progress = pathLength - (scroll * pathLength) / height;
+    //         progressPath.style.strokeDashoffset = progress;
+
+    //         setIsActive(scroll > 50);
+    //     };
+
+    //     updateProgress();
+    //     window.addEventListener('scroll', updateProgress);
+
+    //     return () => {
+    //         window.removeEventListener('scroll', updateProgress);
+    //     };
+    // }, []);
+
+    const getProcessByApartmentId = async () => {
+        const selectedApartmentId = selectedApartment?.value;
+        const selectedProjectId = selectedProject?.value;
+
+        setProcessLoading(true);
+
         try {
-            let params = {
-                TO: selectedStage?.value,
-                CongDoan: selectedStage?.CongDoan,
-            }
-            const res = await productionApi.getFinishedGoodsList(params);
-            if (typeof res?.data === "object") {
-                setData(Object.values(res.data));
+            if (selectedApartmentId) {
+                setProductList([]);
+                const res = await domesticApi.getProcessByApartmentId(selectedProjectId, selectedApartmentId);
+                // const options = res.map((item) => ({
+                //     value: item.MaCan,
+                //     label: item.MaCan,
+                // }));
+
+                setProductList(res);
+                setProgressReceipt({
+                    PrjCode: selectedProjectId,
+                    MaCan: selectedApartmentId,
+                    Details: [
+                        ...res.map((item) => ({
+                            SPDich: item.SPDich,
+                            TienDo: item.TienDo,
+                        })),
+                    ]
+                })
+
             } else {
-                setData([]);
+                setProductList([]);
+                setProgressReceipt(null);
             }
-
-            // if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
-            //     setAwaitingReception(res?.noti_choxacnhan);
-            // } else {
-            //     setAwaitingReception([]);
-            // }
-            console.log("Data: ", res?.data);
-            // setData(res.data);
         } catch (error) {
-            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+            console.error(error);
+        } finally {
+            setProcessLoading(false);
         }
-        // setLoadingData(false);
     };
 
-    useEffect(() => {
-        (async () => {
-            if (selectedStage) {
-                const isQC = stageList.find(
-                    (group) => group.Code == selectedStage.value
-                )?.QC;
-                if (isQC) {
-                    setIsQualityCheck(true);
-                } else {
-                    setIsQualityCheck(false);
+    const handleConfirmReceipt = async () => {
+        if (changedItems.length > 0) {
+            console.log(changedItems)
+            try {
+                setLoadingData(true);
+                const payload = {
+                    ...progressReceipt,
+                    Details: changedItems.map((item) => ({
+                        SPDich: item.SPDich,
+                        TienDo: item.newTienDo,
+                    })),
                 }
-                // setLoadingData(true);
-                const params = {
-                    TO: selectedStage.value,
-                };
-                getDataFollowingGroup(params);
-            }
-        })();
-    }, [selectedStage]);
-
-    const handleSearchFinishedDetails = () => {
-        setLoadingData(true)
-        // Hàm handle filter, fetch,... ra data rồi
-        setTimeout(() => {
-            setSearchResults(fakeDomesticDetails);
-            setLoadingData(false);
-        }, 3000)
-    }
-
-    const searchItems = (data, searchTerm) => {
-        if (!searchTerm) {
-            return data;
-        }
-
-        const filteredData = [];
-
-        for (const key in data) {
-            const item = data[key];
-            const filteredDetails = item.Details.filter((detail) => {
-                const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
-
-                // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
-                const searchTermLower = searchTerm.toLowerCase();
-                const subitemLower = subitem.toLowerCase();
-
-                return subitemLower.includes(searchTermLower);
-            });
-
-            if (filteredDetails.length > 0) {
-                filteredData[key] = { ...item, Details: filteredDetails };
+                const res = await domesticApi.receiveProcess(payload);
+                console.log("Response: ", res);
+                toast.success("Ghi nhận thành công.");
+                onAlertDialogClose();
+                getProcessByApartmentId();
+            } catch (error) {
+                toast.error("Có lỗi xảy ra trong quá trình ghi nhận.");
+            } finally {
+                setLoadingData(false);
             }
         }
-
-        return filteredData;
     };
-
-    const searchResult = searchItems(data, searchTerm);
-
-    const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
-        const progressPath = document.querySelector('.progress-circle path');
-        const pathLength = progressPath.getTotalLength();
+        const selectedProjectId = selectedProject?.value;
 
-        progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
-        progressPath.style.strokeDashoffset = pathLength;
+        const getApartmentByProjectId = async () => {
+            setApartmentLoading(true);
+            try {
+                if (selectedProjectId) {
+                    setApartmentList([]);
+                    setApartmentListOptions([]);
+                    setSelectedApartment(null);
+                    apartmentSelectRef.current.clearValue();
+                    const res = await domesticApi.getApartmentByProjectId(selectedProjectId);
+                    const options = res.map((item) => ({
+                        value: item.MaCan,
+                        label: item.MaCan,
+                    }));
 
-        const updateProgress = () => {
-            const scroll = window.scrollY;
-            const height = document.documentElement.scrollHeight - window.innerHeight;
-            const progress = pathLength - (scroll * pathLength) / height;
-            progressPath.style.strokeDashoffset = progress;
+                    setApartmentList(res);
+                    setApartmentListOptions(options);
+                    setSelectedApartment(null);
 
-            setIsActive(scroll > 50);
+                } else {
+                    setApartmentList([]);
+                    setApartmentListOptions([]);
+                    setSelectedApartment(null);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setApartmentLoading(false);
+            }
+
         };
 
-        updateProgress();
-        window.addEventListener('scroll', updateProgress);
+        if (!isFirstTime) getApartmentByProjectId();
+    }, [selectedProject])
 
-        return () => {
-            window.removeEventListener('scroll', updateProgress);
-        };
-    }, []);
+    useEffect(() => {
+        getProcessByApartmentId();
+    }, [selectedApartment])
 
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    useEffect(() => {
+        if (progressReceipt && productList.length > 0) {
+            const changed = getChangedTienDoItems(progressReceipt, productList);
+            setChangedItems(changed);
+        }
+    }, [progressReceipt]);
+
+    // const scrollToTop = () => {
+    //     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // };
+
+    const handleProgressInputClick = useCallback(() => {
+        if (progressInputRef.current) {
+            const input = progressInputRef.current
+            const isFullySelected = input.selectionStart === 0 &&
+                input.selectionEnd === input.value.length
+
+            if (!isFullySelected) {
+                input.select()
+            }
+        }
+    }, [])
+
+    const handleChangeInput = (valueString, idx) => {
+        setProgressReceipt((prev) => {
+            const newDetails = [...prev.Details];
+            // newDetails[idx].TienDo = parse(valueString);
+            newDetails[idx].TienDo = valueString ? Number(valueString) : 0;
+            return {
+                ...prev,
+                Details: newDetails,
+            };
+        })
+    }
 
     return (
         <Layout>
@@ -403,130 +484,309 @@ function InstallationProgress() {
                     {/* Controller */}
                     <div className="flex flex-col justify-between mb-3 px-4 xl:px-0 lg:px-0 md:px-0 items-center gap-4">
                         <div className="my-4 mb-2 w-full pb-4 rounded-xl bg-white ">
-                            <div className="flex flex-col p-4 pb-0  w-full justify-end ">
-                                <div className="px-0">
-                                    <div className="block text-md font-medium text-gray-900 ">
-                                        Mã dự án
-                                    </div>
-                                    <Select
-                                        ref={projectSelectRef}
-                                        options={projectListOptions}
-                                        defaultValue={selectedProject}
-                                        onChange={(value) => {
-                                            setSelectedProject(value);
-                                        }}
-                                        placeholder="Chọn dự án"
-                                        className="mt-2 mb-4 "
-                                    />
-                                </div>
-                                <div className="px-0 flex flex-col gap-2">
-                                    <div className="block text-md font-medium text-gray-900 ">
-                                        Mã sản phẩm đích
-                                    </div>
+                            <div className="flex flex-col pb-0  w-full justify-end ">
+                                <div className=" ">
+                                    <div className="p-4 rounded-tl-xl rounded-tr-xl pb-1 w-full bg-[#F6F6F6] border-b border-gray-200">
 
-                                    <input
-                                        placeholder="Nhập mã sản phẩm đích"
-                                        type="text"
-                                        id="details-input"
-                                        value={selectedProductCode}
-                                        onChange={(e) => setSelectedProductCode(e.target.value)}
-                                        className="border pl-3 border-gray-300 text-gray-900  rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                    />
-
-                                </div>
-                                <div className="flex sm:flex-row flex-col-reverse pb-0 w-full justify-between gap-4 mt-4">
-                                    {/* <div className="w-full">
-                                        <label
-                                            htmlFor="search"
-                                            className="mb-2 font-medium text-gray-900 sr-only"
-                                        >
-                                            Tìm kiếm
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                <svg
-                                                    className="w-4 h-4 text-gray-500"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 20 20"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                    />
-                                                </svg>
+                                        <div className="px-0">
+                                            <div className="block text-md font-medium text-gray-900 ">
+                                                Mã dự án
                                             </div>
-                                            <input
-                                                type="search"
-                                                id="search"
-                                                className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Tìm kiếm"
-                                                onChange={(e) =>
-                                                    setSearchTerm(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                required
+                                            <Select
+                                                ref={projectSelectRef}
+                                                options={projectListOptions}
+                                                defaultValue={selectedProject}
+                                                onChange={(value) => {
+                                                    setSelectedProject(value);
+                                                }}
+                                                placeholder="Chọn dự án"
+                                                className="mt-2 mb-4 z-20"
                                             />
                                         </div>
-                                    </div> */}
-                                    {selectedStage &&
-                                        !loadingData &&
-                                        awaitingReception?.length > 0 && (
-                                            <button
-                                                onClick={onModalOpen}
-                                                className="!ml-0 mt-0 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                            >
-                                                <HiMiniBellAlert className="text-xl" />
-                                                <div className="w-full whitespace-nowrap">
-                                                    <span className="hidden sm:inline-block">Thông báo:</span> Có sản lượng chờ xác
-                                                    nhận
-                                                </div>
-                                            </button>
-                                        )}
-                                    <div className="flex w-full justify-end items-end">
-                                        <button
-                                            type="button"
-                                            disabled={loadingData}
-                                            onClick={handleSearchFinishedDetails}
-                                            className={`text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none 
-                                                ${loadingData ? "bg-gray-100" : " bg-[#eef9fe]"}`}
-                                        >
-                                            Tìm kiếm
-                                        </button>
-                                    </div>
+                                        {
+                                            selectedProject && (
+                                                <div className="px-0 flex flex-col gap-2">
+                                                    <div className="block text-md font-medium text-gray-900">
+                                                        Mã căn
+                                                    </div>
 
-                                </div>
-                                <div className="my-4 border-b border-gray-200"></div>
-                                <div className="flex flex-col gap-4">
-                                    {loadingData ? (
-                                        <div className="flex justify-center my-6">
-                                            <div className="special-spinner"></div>
-                                        </div>
-                                    ) : searchResults.length > 0 ? (
-                                        searchResults.map((item, index) => (
-                                            // Đổi ID
-                                            <DomesticOutputCard key={index} detailsData={item} type="LD" />
-                                        ))
-                                    ) : isFirstTime ? (
-                                        <div className="h-full my-6 flex flex-col items-center justify-center text-center">
-                                            <BiSearchAlt className="text-center text-gray-400 w-12 h-12 mb-2" />
-                                            <div className="text-lg text-gray-400">
-                                                Tìm kiếm chi tiết cần nhập sản lượng.
+                                                    <Select
+                                                        ref={apartmentSelectRef}
+                                                        options={apartmentListOptions}
+                                                        defaultValue={selectedApartment}
+                                                        onChange={(value) => {
+                                                            setSelectedApartment(value);
+                                                        }}
+                                                        isLoading={apartmentLoading}
+                                                        placeholder="Chọn mã căn"
+                                                        className="mt-2 mb-4 z-10"
+                                                    />
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+                                    {
+                                        processLoading ? (
+                                            <div className="p-6 flex justify-center items-center py-6">
+                                                <Spinner
+                                                    thickness="7px"
+                                                    className="mt-3"
+                                                    speed="0.65s"
+                                                    emptyColor="gray.200"
+                                                    color="blue.500"
+                                                    size="xl"
+                                                />
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="h-full my-6 flex flex-col items-center justify-center text-center">
-                                            <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
-                                            <div className="text-lg text-gray-400">
-                                                Không tìm thấy dữ liệu để hiển thị.
-                                            </div>
-                                        </div>
-                                    )}
+                                        ) : <>
+                                            {productList?.length > 0 ? (
+                                                <div className="p-4 pb-0">
+                                                    <div className="border border-gray-300 rounded-lg xl:block lg:block md:block hidden">
+                                                        <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+                                                            <thead>
+                                                                <tr className="bg-gray-200 text-left">
+                                                                    <th className="px-4 py-2 w-[300px] border border-gray-300">
+                                                                        Mã SP đích
+                                                                    </th>
+                                                                    <th className="px-4 py-2 w-[120px] border border-gray-300">
+                                                                        Số
+                                                                        lượng
+                                                                    </th>
+                                                                    <th className="px-4 py-2 border border-gray-300">
+                                                                        Tiến độ lắp đặt <span className="text-red-500">
+                                                                            {" "}
+                                                                            *
+                                                                        </span>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            {progressReceipt?.Details?.map(
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <tbody
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                    >
+                                                                        <tr
+                                                                            className={
+                                                                                index %
+                                                                                    2 ===
+                                                                                    0
+                                                                                    ? "bg-gray-50"
+                                                                                    : ""
+                                                                            }
+                                                                        >
+                                                                            <td className="px-4 py-3 border border-gray-300">
+                                                                                <div className="uppercase text-sm text-gray-500">
+                                                                                    {item.SPDich ||
+                                                                                        "Không xác định"}
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-4 py-3 border text-center border-gray-300">
+                                                                                {productList[index]?.Qty ||
+                                                                                    0}
+                                                                            </td>
+                                                                            <td className="px-4 py-4 border border-gray-300">
+                                                                                <div className="flex flex-col md:flex-row gap-8">
+                                                                                    <NumberInput
+                                                                                        value={format(item.TienDo)}
+                                                                                        min={0}
+                                                                                        max={100} className="w-[250px] md:w-[300px]"
+                                                                                        onChange={(value) => handleChangeInput(value, index)}
+                                                                                    >
+                                                                                        <NumberInputField ref={progressInputRef} onClick={handleProgressInputClick} />
+                                                                                        <NumberInputStepper>
+                                                                                            <NumberIncrementStepper />
+                                                                                            <NumberDecrementStepper />
+                                                                                        </NumberInputStepper>
+                                                                                    </NumberInput>
+
+                                                                                    <Slider focusThumbOnChange={false} className="mt-8 md:mt-0 top-1.5" aria-label='slider-ex-6' value={item.TienDo} onChange={(value) => handleChangeInput(value, index)}>
+                                                                                        <SliderMark value={0} {...labelStyles}>
+                                                                                            0%
+                                                                                        </SliderMark>
+                                                                                        <SliderMark value={50} {...labelStyles}>
+                                                                                            50%
+                                                                                        </SliderMark>
+                                                                                        <SliderMark value={100} fontSize='sm' mt='4' ml='-10'>
+                                                                                            100%
+                                                                                        </SliderMark>
+                                                                                        <SliderMark
+                                                                                            value={item.TienDo}
+                                                                                            textAlign='center'
+                                                                                            bg='blue.500'
+                                                                                            color='white'
+                                                                                            mt='-6'
+                                                                                            ml='-4'
+                                                                                            w='8'
+                                                                                            fontSize='xs'
+                                                                                        >
+                                                                                            {item.TienDo}%
+                                                                                        </SliderMark>
+                                                                                        <SliderTrack className="md:-mt-2">
+                                                                                            <SliderFilledTrack />
+                                                                                        </SliderTrack>
+                                                                                        <SliderThumb bg='blue.800' className="md:-mt-2" />
+                                                                                    </Slider>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                )
+                                                            )}
+                                                        </table>
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        {progressReceipt?.Details?.map(
+                                                            (
+                                                                item,
+                                                                index
+                                                            ) => (
+                                                                <div className="border border-gray-300 bg-gray-50 rounded-lg xl:hidden lg:hidden md:hidden flex flex-col p-3 gap-y-2">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-lg font-bold">
+                                                                            {
+                                                                                item.SPDich || "Không xác định"}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div className="flex flex-col gap-y-1">
+                                                                        <div className="grid grid-cols-2">
+                                                                            <span className="grid grid-cols-2">
+                                                                                Số lượng:
+                                                                            </span>
+                                                                            <span className="font-bold">
+                                                                                {productList[index]?.Qty ||
+                                                                                    0}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-full border-b border-gray-200"></div>
+
+                                                                    <div className="flex flex-col">
+                                                                        <span className="pb-1 font-medium text-gray-800">
+                                                                            Tiến độ lắp đặt
+                                                                        </span>
+                                                                        <NumberInput
+                                                                            value={format(item.TienDo)}
+                                                                            min={0}
+                                                                            max={100} className="w-[250px] md:w-[300px]"
+                                                                            onChange={(value) => handleChangeInput(value, index)}
+                                                                        >
+                                                                            <NumberInputField ref={progressInputRef} onClick={handleProgressInputClick} />
+                                                                            <NumberInputStepper>
+                                                                                <NumberIncrementStepper />
+                                                                                <NumberDecrementStepper />
+                                                                            </NumberInputStepper>
+                                                                        </NumberInput>
+                                                                        <Slider focusThumbOnChange={false} className="my-8" aria-label='slider-ex-6' value={item.TienDo} onChange={(value) => handleChangeInput(value, index)}>
+                                                                            <SliderMark value={0} {...labelStyles}>
+                                                                                0%
+                                                                            </SliderMark>
+                                                                            <SliderMark value={50} {...labelStyles}>
+                                                                                50%
+                                                                            </SliderMark>
+                                                                            <SliderMark value={100} fontSize='sm' mt='4' ml='-10'>
+                                                                                100%
+                                                                            </SliderMark>
+                                                                            <SliderMark
+                                                                                value={item.TienDo}
+                                                                                textAlign='center'
+                                                                                bg='blue.500'
+                                                                                color='white'
+                                                                                mt='-8'
+                                                                                ml='-4'
+                                                                                w='8'
+                                                                                fontSize='xs'
+                                                                            >
+                                                                                {item.TienDo}%
+                                                                            </SliderMark>
+                                                                            <SliderTrack className="md:-mt-2">
+                                                                                <SliderFilledTrack />
+                                                                            </SliderTrack>
+                                                                            <SliderThumb bg='blue.800' className="md:-mt-2" />
+                                                                        </Slider>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex justify-end mt-4">
+                                                        <button
+                                                            className="w-fit h-full space-x-2 flex items-center bg-[#17506B] p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                            onClick={() => {
+                                                                onAlertDialogOpen();
+                                                            }}
+                                                            disabled={changedItems.length === 0}
+                                                        >
+                                                            <p className="text-[15px]">
+                                                                Ghi nhận
+                                                            </p>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center py-8">
+                                                    <img
+                                                        src={EmptyData}
+                                                        alt="No data"
+                                                        className="w-[135px] h-[135px] opacity-60 object-contain mx-auto"
+                                                    />
+                                                    <div className="p-6 text-center">
+                                                        {productList.length ===
+                                                            0 ? (
+                                                            <>
+                                                                <div className="font-semibold xl:text-xl lg:text-xl md:text-lg text-lg">
+                                                                    Không
+                                                                    tìm
+                                                                    thấy
+                                                                    thông tin.
+                                                                </div>
+                                                                <div className="text-gray-500 mt-1">
+                                                                    Hãy
+                                                                    thử
+                                                                    chọn
+                                                                    một mã căn/dự án khác.
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div className="font-semibold text-xl">
+                                                                    Hiện
+                                                                    tại
+                                                                    không
+                                                                    có
+                                                                    bất
+                                                                    kỳ
+                                                                    thông
+                                                                    tin
+                                                                    sản
+                                                                    phẩm
+                                                                    nào.
+                                                                </div>
+                                                                <div className="text-gray-500 mt-1">
+                                                                    Hãy
+                                                                    chọn
+                                                                    một
+                                                                    lệnh
+                                                                    sản
+                                                                    xuất
+                                                                    để
+                                                                    bắt
+                                                                    đầu.
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -535,129 +795,57 @@ function InstallationProgress() {
             </div>
             <Modal
                 isCentered
-                isOpen={isModalOpen}
-                size="full"
-                // size=""
-                onClose={onModalClose}
-                scrollBehavior="inside"
+                isOpen={isAlertDialogOpen}
+                onClose={onAlertDialogClose}
+                size="xl"
+                blockScrollOnMount={false}
+                closeOnOverlayClick={false}
             >
-                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
-                            Danh sách chi tiết chờ nhận
-                        </h1>
+                        Xác nhận
                     </ModalHeader>
-                    <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody className="!p-4">
-                        <div className="flex gap-4 justify-center h-full">
-                            {/* {selectedStage && awaitingReception?.length > 0 ? ( */}
-                            <div className="flex flex-col w-full sm:w-auto sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
-                                {awaitingReception.map((item, index) => (
-                                    <DomesticAwaitingReception
-                                        type="CT"
-                                        data={item}
-                                        key={item.id || index}
-                                    // index={index}
-                                    // CongDoan={item.CongDoan}
-                                    // isQualityCheck={isQualityCheck}
-                                    // onConfirmReceipt={
-                                    //     handleConfirmReceipt
-                                    // }
-                                    // onRejectReceipt={
-                                    //     handleRejectReceipt
-                                    // }
-                                    />
-                                ))}
+                    <ModalBody>
+                        <div className="space-y-4">
+                            <div>
+                                Bạn chắc chắn muốn ghi nhận tiến độ?
                             </div>
-                            {/* ) : (
-                                <div className="flex w-full h-full justify-center items-center">
-                                    Không có dữ liệu
-                                </div>
-                            )} */}
                         </div>
                     </ModalBody>
-                    <ModalFooter className="flex flex-col !p-0">
-                        <div className="border-b-2 border-gray-100"></div>
-                        <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
-                            <button
-                                className="bg-gray-800 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full text-white"
-                                type="button"
-                            // onClick={onAlertDialogOpen}
-                            >
-                                Xác nhận tất cả
-                            </button>
+
+                    <ModalFooter>
+                        <div className="flex w-full items-center space-x-3">
                             <button
                                 onClick={() => {
-                                    onModalClose();
-                                    // setSelectedFaultItem({
-                                    //     ItemName: "",
-                                    //     ItemCode: "",
-                                    //     SubItemName: "",
-                                    //     SubItemCode: "",
-                                    //     SubItemBaseQty: "",
-                                    //     OnHand: "",
-                                    // });
-                                    // setFaultyAmount("");
-                                    // setIsItemCodeDetech(false);
-                                    // setRongData(null);
+                                    onAlertDialogClose();
                                 }}
-                                className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-1/3 disabled:cursor-not-allowed disabled:opacity-50"
+                                disabled={loadingData}
                             >
                                 Đóng
                             </button>
-
+                            <button
+                                className="flex items-center justify-center bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white"
+                                type="button"
+                                onClick={handleConfirmReceipt}
+                            >
+                                {loadingData ? (
+                                    <div className="flex w-full items-center justify-center space-x-4">
+                                        <Spinner
+                                            size="sm"
+                                            color="white"
+                                        />
+                                        <div>Đang thực hiện</div>
+                                    </div>
+                                ) : (
+                                    <>Xác nhận</>
+                                )}
+                            </button>
                         </div>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-            {/* <AlertDialog
-                isOpen={isAlertDialogOpen}
-                onClose={onAlertDialogClose}
-                closeOnOverlayClick={false}
-            >
-                <AlertDialogOverlay>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>Xác nhận </AlertDialogHeader>
-                        <AlertDialogBody>
-                            <div className="text-green-700">
-                                Ghi nhận sản lượng:{" "}
-                                <span className="font-bold">52</span>{" "}
-                            </div>
-                        </AlertDialogBody>
-                        <AlertDialogFooter>
-                            <Button onClick={onAlertDialogClose}>Huỷ bỏ</Button>
-                            <Button
-                                colorScheme="red"
-                                ml={3}
-                            >
-                                Xác nhận
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog> */}
-            <div
-                className={`progress-wrap fixed right-12 bottom-12 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${isActive
-                    ? "opacity-100 visible translate-y-0"
-                    : "opacity-0 invisible translate-y-4"
-                    }`}
-                onClick={scrollToTop}
-            >
-                <svg
-                    className="progress-circle svg-content w-full h-full p-1"
-                    viewBox="-1 -1 102 102"
-                >
-                    <path
-                        d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
-                        className="stroke-[#ABC8D6] stroke-[4] fill-none transition-all duration-200"
-                    />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[18px]  text-white ">
-                    <FaArrowUp className="w-6 h-6" />
-                </span>
-            </div>
             {loading && <Loader />}
         </Layout>
     );

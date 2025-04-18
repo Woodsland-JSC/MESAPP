@@ -29,6 +29,35 @@ const domesticApi = {
         const url = `/noidia/update-status-masd`;
         return axiosClient().post(url, assemblyDiagrams);
     },
+
+    getAllProject: () => {
+        const url = `/noidia/du-an`;
+        return axiosClient().get(url, {});
+    },
+
+    getApartmentByProjectId: (id) => {
+        const url = `/noidia/can-ho`;
+        return axiosClient().get(url, {
+            params: {
+                PrjCode: id
+            },
+        });
+    },
+
+    getProcessByApartmentId: (projectId, apartmentId) => {
+        const url = `/noidia/tien-do-lap-dat`;
+        return axiosClient().get(url, {
+            params: {
+                PrjCode: projectId,
+                MaCan: apartmentId
+            },
+        });
+    },
+
+    receiveProcess: (payload) => {
+        const url = `/noidia/tien-do-lap-dat`;
+        return axiosClient().post(url, payload);
+    }
 };
 
 export default domesticApi;
