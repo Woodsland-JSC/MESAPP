@@ -157,7 +157,7 @@ class NoiDiaController extends Controller
         $placeholders = implode(',', array_fill(0, count($masdArray), '?'));
 
         // Câu lệnh SQL sử dụng IN (...) để cập nhật nhiều dòng cùng lúc
-        $query = "UPDATE ZGT_SLNOIDIA_STL SET \"Status\" = 'Y'  WHERE \"MASD\" IN ($placeholders)";
+        $query = "UPDATE ZGT_SLWO_STL SET \"Status\" = 'Y'  WHERE \"MASD\" IN ($placeholders)";
 
         // Chuẩn bị statement
         $stmt = odbc_prepare($conDB, $query);
