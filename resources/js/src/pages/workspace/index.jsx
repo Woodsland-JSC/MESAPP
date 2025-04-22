@@ -91,9 +91,8 @@ function Workspace() {
 
         if (!params.get("tab")) {
             params.set("tab", "wood-drying");
-            const defaultUrl = `${
-                window.location.pathname
-            }?${params.toString()}`;
+            const defaultUrl = `${window.location.pathname
+                }?${params.toString()}`;
             window.history.replaceState({}, "", defaultUrl);
         }
 
@@ -405,15 +404,18 @@ function Workspace() {
                                                         "Nhập sản lượng lắp đặt khối tủ bếp",
                                                     type: "ND",
                                                 },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     link: "/workspace/inland/installation-progress",
-                                                //     icon: <HiViewColumns />,
-                                                //     title: "Tiến độ lắp đặt nội địa",
-                                                //     description:
-                                                //         "Báo cáo tiến độ lắp đặt đồ nội thất.",
-                                                //     type: "ND",
-                                                // },
+                                                {
+                                                    permission: [
+                                                        "DAND",
+                                                        "DAND(CX)"
+                                                    ],
+                                                    link: "/workspace/inland/installation-progress",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Tiến độ lắp đặt nội địa",
+                                                    description:
+                                                        "Báo cáo tiến độ lắp đặt đồ nội thất.",
+                                                    type: "ND",
+                                                },
                                             ].map(
                                                 ({
                                                     permission,
@@ -455,18 +457,17 @@ function Workspace() {
                                                                         </div>
                                                                         <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
                                                                             <div
-                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${
-                                                                                    type ===
+                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
                                                                                     "CBG"
-                                                                                        ? "bg-[#DAF1E8] text-green-900"
-                                                                                        : type ===
-                                                                                          "VCN"
+                                                                                    ? "bg-[#DAF1E8] text-green-900"
+                                                                                    : type ===
+                                                                                        "VCN"
                                                                                         ? "bg-[#f9eeff] text-violet-900"
                                                                                         : type ===
-                                                                                          "ND"
-                                                                                        ? "bg-[#ffeef2] text-red-900"
-                                                                                        : "bg-[#F5F5F5]"
-                                                                                }`}
+                                                                                            "ND"
+                                                                                            ? "bg-[#ffeef2] text-red-900"
+                                                                                            : "bg-[#F5F5F5]"
+                                                                                    }`}
                                                                             >
                                                                                 {
                                                                                     icon
@@ -497,18 +498,17 @@ function Workspace() {
                                                                         </div>
                                                                         <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
                                                                             <div
-                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${
-                                                                                    type ===
+                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
                                                                                     "CBG"
-                                                                                        ? "bg-[#DAF1E8] text-green-900"
-                                                                                        : type ===
-                                                                                          "VCN"
+                                                                                    ? "bg-[#DAF1E8] text-green-900"
+                                                                                    : type ===
+                                                                                        "VCN"
                                                                                         ? "bg-[#f9eeff] text-violet-900"
                                                                                         : type ===
-                                                                                          "ND"
-                                                                                        ? "bg-[#ffeef2] text-red-900"
-                                                                                        : "bg-[#F5F5F5]"
-                                                                                }`}
+                                                                                            "ND"
+                                                                                            ? "bg-[#ffeef2] text-red-900"
+                                                                                            : "bg-[#F5F5F5]"
+                                                                                    }`}
                                                                             >
                                                                                 {
                                                                                     icon
@@ -657,18 +657,17 @@ function Workspace() {
                                                                         </div>
                                                                         <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
                                                                             <div
-                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${
-                                                                                    type ===
+                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
                                                                                     "CBG"
-                                                                                        ? "bg-[#DAF1E8] text-green-900"
-                                                                                        : type ===
-                                                                                          "VCN"
+                                                                                    ? "bg-[#DAF1E8] text-green-900"
+                                                                                    : type ===
+                                                                                        "VCN"
                                                                                         ? "bg-[#f9eeff] text-violet-900"
                                                                                         : type ===
-                                                                                          "ND"
-                                                                                        ? "bg-[#ffeef2] text-red-900"
-                                                                                        : "bg-[#F5F5F5]"
-                                                                                }`}
+                                                                                            "ND"
+                                                                                            ? "bg-[#ffeef2] text-red-900"
+                                                                                            : "bg-[#F5F5F5]"
+                                                                                    }`}
                                                                             >
                                                                                 {
                                                                                     icon
@@ -699,18 +698,17 @@ function Workspace() {
                                                                         </div>
                                                                         <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
                                                                             <div
-                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${
-                                                                                    type ===
+                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
                                                                                     "CBG"
-                                                                                        ? "bg-[#DAF1E8] text-green-900"
-                                                                                        : type ===
-                                                                                          "VCN"
+                                                                                    ? "bg-[#DAF1E8] text-green-900"
+                                                                                    : type ===
+                                                                                        "VCN"
                                                                                         ? "bg-[#f9eeff] text-violet-900"
                                                                                         : type ===
-                                                                                          "ND"
-                                                                                        ? "bg-[#ffeef2] text-red-900"
-                                                                                        : "bg-[#F5F5F5]"
-                                                                                }`}
+                                                                                            "ND"
+                                                                                            ? "bg-[#ffeef2] text-red-900"
+                                                                                            : "bg-[#F5F5F5]"
+                                                                                    }`}
                                                                             >
                                                                                 {
                                                                                     icon
