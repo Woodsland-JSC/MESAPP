@@ -2017,6 +2017,10 @@ class VCNController extends Controller
                             $jsonString = $matches[0];
                             $errorData = json_decode($jsonString, true);
 
+                            // Khởi tạo biến $errorMessage với giá trị mặc định
+                            $errorCode = '';
+                            $errorMessage = 'Không có tìm thấy thông tin lỗi từ SAP';
+
                             if (isset($errorData['error'])) {
                                 $errorCode = $errorData['error']['code'];
                                 $errorMessage = $errorData['error']['message']['value'];
