@@ -2926,9 +2926,7 @@ const ItemInput = ({
                             >
                                 Đóng
                             </button>
-                            {user.permissions.includes(
-                                "CBG" || "VCN" || "DAND"
-                            ) && (
+                            {(["CBG", "VCN", "DAND"].some(permission => user.permissions.includes(permission))) && (
                                 <button
                                     className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                     type="button"
