@@ -327,10 +327,6 @@ class ProductionController extends Controller
         $data = null;
         $data2 = null;
 
-        // 3. Tạo mảng results[] và trả về dữ liệu
-        $results = [];
-
-
         // Dữ liệu chờ xác nhận
         if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
             $data = null;
