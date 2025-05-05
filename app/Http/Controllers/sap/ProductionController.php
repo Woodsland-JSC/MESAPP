@@ -327,12 +327,16 @@ class ProductionController extends Controller
         $data = null;
         $data2 = null;
 
-        //data need confirm
+        // 3. Tạo mảng results[] và trả về dữ liệu
+        $results = [];
+
+
+        // Dữ liệu chờ xác nhận
         if ($request->TO == "TH-QC" || $request->TO == "TQ-QC" || $request->TO == "HG-QC") {
             $data = null;
         } else {
-            $data =
-                DB::table('sanluong as a')
+            // Truy vấn dữ liệu từ cơ sở dữ liệu Laravel
+            $rawData = DB::table('sanluong as a')
                 ->join('notireceipt as b', function ($join) {
                     $join->on('a.id', '=', 'b.baseID')
                         ->where('b.deleted', '=', 0);
@@ -349,7 +353,6 @@ class ProductionController extends Controller
                     'CDai',
                     'b.Quantity',
                     'a.SLDG',
-                    'b.MaThiTruong',
                     'a.created_at',
                     'c.first_name',
                     'c.last_name',
@@ -362,8 +365,41 @@ class ProductionController extends Controller
                 ->where('b.type', 0)
                 ->where('b.team', '=', $request->TO)
                 ->get();
-            $data2
-                = DB::table('sanluong as a')
+
+            // Kết nối đến SAP
+            $conDB = (new ConnectController)->connect_sap();
+
+            // Tạo mảng kết quả mới có thêm trường MaThiTruong
+            $data = collect();
+
+            foreach ($rawData as $item) {
+                // Truy vấn đến bảng OITM trong SAP để lấy U_SKU
+                $query = 'SELECT "U_SKU" FROM OITM WHERE "ItemCode" = ?';
+                $stmt = odbc_prepare($conDB, $query);
+
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                if (!odbc_execute($stmt, [$item->ItemCode])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                $maThiTruong = null;
+                if ($row = odbc_fetch_array($stmt)) {
+                    $maThiTruong = $row['U_SKU'];
+                }
+
+                // Thêm thuộc tính MaThiTruong vào item
+                $itemWithMarket = (object) array_merge((array) $item, ['MaThiTruong' => $maThiTruong]);
+                $data->push($itemWithMarket);
+            }
+
+            // Đóng kết nối SAP sau khi hoàn thành
+            odbc_close($conDB);
+
+            // Xử lý data2 như trước
+            $data2 = DB::table('sanluong as a')
                 ->join('notireceipt as b', function ($join) {
                     $join->on('a.id', '=', 'b.baseID')
                         ->where('b.deleted', '=', 0);
@@ -393,8 +429,7 @@ class ProductionController extends Controller
                 ->get();
         }
 
-        //data need handle
-
+        // Return response
         return response()->json([
             'CongDoan' => $request->CongDoan,
             'data' => $results,
@@ -454,8 +489,6 @@ class ProductionController extends Controller
         while ($rowstock = odbc_fetch_array($stmtstock)) {
             $results[] = $rowstock;
         }
-
-        // dd($results);
 
         // 3. Lấy danh sách số lượng tồn, các giá trị sản lượng tối đa, còn lại và các thông tin cần thiết
         // Lấy công đoạn hiện tại
