@@ -1089,7 +1089,30 @@ class ProductionController extends Controller
 
         return array_values($filteredData);
     }
-
+    function allocate_v2($data, $totalQty)
+    {
+        $nev = 0; // Khởi tạo nev
+        foreach ($data as &$item) {
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
+            } else {
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
+            }
+        }
+        // Kiểm tra nếu totalQty còn lại và không thể phân bổ
+        if ($totalQty > 0) {
+            $nev = 1; // Đặt nev = 1
+            return ['error' => 'Vượt hạn mức', 'nev' => $nev];
+        }
+        $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
+        return ['allocatedData' => array_values($filteredData), 'nev' => $nev];
+    }
     function accept(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1331,8 +1354,20 @@ class ProductionController extends Controller
 
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC" && $data->NextTeam != "TB-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
-                $allocates = $this->allocate($dataallocate, $data->CompleQty);
-                if (count($allocates) == 0) {
+                $result = $this->allocate_v2($dataallocate, $data->CompleQty);
+                $allocates = $result['allocatedData'] ?? [];
+                if (isset($allocates['error']) && $allocates['error']) {
+                    Cache::forget($lockKey);
+                    return response()->json([
+                        'error' => true,
+                        'status_code' => 500,
+                        'message' => "Vượt hạn mức. kiểm tra tổ:".$data->team . " sản phẩm: " .
+                            $data->ItemCode . " sản phẩm đích: " .
+                            $data->FatherCode . " LSX." . $data->LSX
+                    ], 500);
+                }
+               // if (count($allocates) == 0) {
+                if (empty($allocates)) {
                     Cache::forget($lockKey);
                     return response()->json([
                         'error' => false,
