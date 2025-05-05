@@ -102,34 +102,34 @@ const CBGReports = [
         description: "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
         priority: true,
     },
-    {
-        id: "0003",
-        name: "Báo cáo lệnh sản xuất đang thực hiện",
-        link: "/reports/wood-working/wip-production-order",
-        description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
-        priority: true,
-    },
-    {
-        id: "0004",
-        name: "Báo cáo sản lượng theo ngày/tuần/tháng",
-        link: "/reports/wood-working/production-volume-by-time",
-        description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
-        priority: true,
-    },
-    {
-        id: "0005",
-        name: "Báo cáo chi tiết nhập tồn",
-        link: "/reports/wood-working/details-receipt",
-        description: "Theo dõi chi tiết nhập tồn đầu kỳ",
-        priority: true,
-    },
-    {
-        id: "0006",
-        name: "Báo cáo sản lượng nhập các nhà máy",
-        link: "/reports/wood-working/factory-receipt-volume",
-        description: "",
-        priority: true,
-    },
+    // {
+    //     id: "0003",
+    //     name: "Báo cáo lệnh sản xuất đang thực hiện",
+    //     link: "/reports/wood-working/wip-production-order",
+    //     description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
+    //     priority: true,
+    // },
+    // {
+    //     id: "0004",
+    //     name: "Báo cáo sản lượng theo ngày/tuần/tháng",
+    //     link: "/reports/wood-working/production-volume-by-time",
+    //     description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
+    //     priority: true,
+    // },
+    // {
+    //     id: "0005",
+    //     name: "Báo cáo chi tiết nhập tồn",
+    //     link: "/reports/wood-working/details-receipt",
+    //     description: "Theo dõi chi tiết nhập tồn đầu kỳ",
+    //     priority: true,
+    // },
+    // {
+    //     id: "0006",
+    //     name: "Báo cáo sản lượng nhập các nhà máy",
+    //     link: "/reports/wood-working/factory-receipt-volume",
+    //     description: "",
+    //     priority: true,
+    // },
 ];
 
 const QCReports = [

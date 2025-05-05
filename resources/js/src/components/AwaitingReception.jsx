@@ -536,29 +536,24 @@ const AwaitingReception = ({
                             </div>
                         ) : (
                             <>
-                                <div className="flex gap-2">
+                                <div className="flex">
                                     {data?.SubItemName ? (
                                         <>
                                             <span>Mã bán thành phẩm: </span>
                                             <span className="font-bold">
-                                                {data?.SubItemCode || "???"}
+                                                {data?.SubItemCode || "Không xác định"}
                                             </span>
                                         </>
                                     ) : (
                                         <>
                                             <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
-                                                Item Code:{" "}
+                                                Mã thành phẩm:{" "}
                                             </span>
                                             <span className="w-[65%] font-bold">
-                                                {data?.ItemCode || "???"}
+                                                {data?.ItemCode || "Không xác định"}
                                             </span>
                                         </>
                                     )}
-                                    <span className="font-bold text-gray-500 pentagon-container">
-                                        {data?.MaThiTruong
-                                            ? "- " + data.MaThiTruong
-                                            : ""}
-                                    </span>
                                 </div>
                             </>
                         )}
