@@ -73,43 +73,37 @@ function Header(props) {
             if (navigator.connection) {
                 const { downlink } = navigator.connection;
                 let status = "Tốt";
-
+    
                 if (!navigator.onLine || downlink === 0) {
                     status = "Không có mạng";
-                } else if (downlink >= 3 && downlink < 10) {
-                    status = "Trung bình";
-                } else if (downlink < 3) {
-                    status = "Kém";
-                } else if (downlink >= 10) {
-                    status = "Tốt";
+                } else if (downlink < 1.2) {
+                    status = "Kém"; // Tương ứng 3G hoặc yếu hơn
+                } else if (downlink >= 1.2 && downlink < 3.5) {
+                    status = "Trung bình"; // Tương ứng Slow 4G
+                } else {
+                    status = "Tốt"; // Fast 4G hoặc No Throttling
                 }
-
+    
                 setNetworkStatus({ speed: downlink, status });
             }
         };
-
+    
         updateNetworkStatus();
         window.addEventListener("online", updateNetworkStatus);
         window.addEventListener("offline", () =>
             setNetworkStatus({ speed: 0, status: "Không có mạng" })
         );
         if (navigator.connection) {
-            navigator.connection.addEventListener(
-                "change",
-                updateNetworkStatus
-            );
+            navigator.connection.addEventListener("change", updateNetworkStatus);
         }
-
+    
         return () => {
             window.removeEventListener("online", updateNetworkStatus);
             window.removeEventListener("offline", () =>
                 setNetworkStatus({ speed: 0, status: "Không có mạng" })
             );
             if (navigator.connection) {
-                navigator.connection.removeEventListener(
-                    "change",
-                    updateNetworkStatus
-                );
+                navigator.connection.removeEventListener("change", updateNetworkStatus);
             }
         };
     }, []);
@@ -143,11 +137,13 @@ function Header(props) {
             >
                 {/* Logo */}
                 <div className="flex space-x-3 items-center h-full ">
-                    <img
-                        src={logo}
-                        alt="logo"
-                        className="flex items-center w-14 h-14"
-                    ></img>
+                    <Link to="/workspace?tab=wood-drying">
+                        <img
+                            src={logo}
+                            alt="logo"
+                            className="flex items-center w-14 h-14"
+                        ></img>
+                    </Link>
                     <div className="h-[36px] border-r border-gray-400"></div>
                     <div className="flex flex-col justify-center !leading-0">
                         <div className="flex items-center space-x-2">
@@ -268,11 +264,30 @@ function Header(props) {
                         <>
                             {/* Responsive Menu */}
                             <div className="flex xl:hidden">
-                                <div className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}>
-                                    {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
-                                    {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
+                                <div
+                                    className={`text-sm mx-2 mr-1 flex gap-x-2 font-medium items-center`}
+                                >
+                                    {networkStatus.status === "Tốt" && (
+                                        <GoodNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status === "Trung bình" && (
+                                        <MediumNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status === "Kém" && (
+                                        <BadNetwork
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
+                                    {networkStatus.status ===
+                                        "Không có mạng" && (
+                                        <Offline
+                                            className={"w-[22px] h-[22px]"}
+                                        />
+                                    )}
                                 </div>
                                 <IconButton
                                     variant="ghost"
@@ -380,11 +395,39 @@ function Header(props) {
                                         label={`Tín hiệu mạng: ${networkStatus.status}`}
                                         bg="black"
                                     >
-                                        <div className={`text-sm flex gap-x-2 font-medium items-center p-2 px-[9px] bg-[#F7F7F7] rounded-full`}>
-                                            {networkStatus.status === "Tốt" && <GoodNetwork className={"w-[21px] h-[21px]"} />}
-                                            {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Kém" && <BadNetwork className={"w-[22px] h-[22px]"} />}
-                                            {networkStatus.status === "Không có mạng" && <Offline className={"w-[22px] h-[22px]"} />}
+                                        <div
+                                            className={`text-sm flex gap-x-2 font-medium items-center p-2 px-[9px] bg-[#F7F7F7] rounded-full`}
+                                        >
+                                            {networkStatus.status === "Tốt" && (
+                                                <GoodNetwork
+                                                    className={
+                                                        "w-[21px] h-[21px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status ===
+                                                "Trung bình" && (
+                                                <MediumNetwork
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status === "Kém" && (
+                                                <BadNetwork
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
+                                            {networkStatus.status ===
+                                                "Không có mạng" && (
+                                                <Offline
+                                                    className={
+                                                        "w-[22px] h-[22px]"
+                                                    }
+                                                />
+                                            )}
                                         </div>
                                     </Tooltip>
                                     <MenuButton righticon={<TbChevronDown />}>
@@ -430,7 +473,7 @@ function Header(props) {
                                                             "Không xác định"}
                                                     </div>
                                                 </div>
-                                                <RiExpandUpDownLine className="text-lg"/>
+                                                <RiExpandUpDownLine className="text-lg" />
                                             </div>
                                         </Button>
                                     </MenuButton>

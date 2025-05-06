@@ -456,7 +456,7 @@ function Report() {
                                         Báo cáo chế biến gỗ
                                     </div>
                                 </Tab>
-                                <Tab
+                                {/* <Tab
                                     ref={recordTab}
                                     // onClick={() => handleTabClick(true)}
                                 >
@@ -471,7 +471,7 @@ function Report() {
                                     <div className="text-base font-medium">
                                         Báo cáo dự án nội địa
                                     </div>
-                                </Tab>
+                                </Tab> */}
                             </TabList>
 
                             <TabPanels>

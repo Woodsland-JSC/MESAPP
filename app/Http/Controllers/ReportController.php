@@ -54,11 +54,7 @@ class ReportController extends Controller
             }
         } else {
             if ($fromDate && $toDate) {
-                $query->whereBetween('ngaygiao', [
-                    Carbon::parse($fromDate)->startOfDay(),
-                    Carbon::parse($toDate)->endOfDay()
-                ])
-                    ->whereBetween('ngaynhan', [
+                $query->whereBetween('ngaynhan', [
                         Carbon::parse($fromDate)->startOfDay(),
                         Carbon::parse($toDate)->endOfDay()
                     ]);
