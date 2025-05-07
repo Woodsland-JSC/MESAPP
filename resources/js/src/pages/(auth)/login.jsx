@@ -13,6 +13,7 @@ import GoodNetwork from "../../components/custom-icon/GoodNetwork";
 import MediumNetwork from "../../components/custom-icon/MediumNetwork";
 import BadNetwork from "../../components/custom-icon/BadNetwork";
 import Offline from "../../components/custom-icon/Offline";
+import { RiEyeFill, RiEyeOffFill } from "react-icons/ri";
 
 function Login() {
     const emailInputRef = useRef();
@@ -34,13 +35,18 @@ function Login() {
     });
 
     // Network Checking
-    const [networkStatus, setNetworkStatus] = useState({ speed: 0, status: "Đang kiểm tra..." });
+    const [networkStatus, setNetworkStatus] = useState({
+        speed: 0,
+        status: "Đang kiểm tra...",
+    });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const updateNetworkStatus = () => {
             const downlink = navigator.connection?.downlink || 0;
             const isOnline = navigator.onLine;
-    
+
             let status = "Tốt";
 
             if (!isOnline || downlink === 0) {
@@ -52,29 +58,35 @@ function Login() {
             } else {
                 status = "Tốt"; // Fast 4G / No throttling
             }
-    
+
             setNetworkStatus({ speed: downlink, status });
         };
-    
+
         updateNetworkStatus();
-    
+
         window.addEventListener("online", updateNetworkStatus);
         window.addEventListener("offline", () =>
             setNetworkStatus({ speed: 0, status: "Không có mạng" })
         );
-    
+
         if (navigator.connection) {
-            navigator.connection.addEventListener("change", updateNetworkStatus);
+            navigator.connection.addEventListener(
+                "change",
+                updateNetworkStatus
+            );
         }
-    
+
         return () => {
             window.removeEventListener("online", updateNetworkStatus);
             window.removeEventListener("offline", () =>
                 setNetworkStatus({ speed: 0, status: "Không có mạng" })
             );
-    
+
             if (navigator.connection) {
-                navigator.connection.removeEventListener("change", updateNetworkStatus);
+                navigator.connection.removeEventListener(
+                    "change",
+                    updateNetworkStatus
+                );
             }
         };
     }, []);
@@ -166,35 +178,62 @@ function Login() {
     ) : (
         <section className="h-screen !overflow-y-hidden">
             <div className="relative xl:pt-0 pt-20">
-                <div className="absolute top-2 left-0 right-0 px-4 py-2 flex items-center justify-between" style={{ borderColor: networkStatus.status === "Tốt" ? "green" : "red" }}>   
-                    <div className={`text-sm flex gap-x-2 font-medium items-center  rounded-full ${networkStatus.status === "Tốt" ? " text-green-700" : networkStatus.status === "Trung bình" ? " text-orange-600" : networkStatus.status === "Kém" ? " text-red-600" : " text-gray-600"}`}>
-                        {networkStatus.status === "Tốt" && <GoodNetwork className={"w-4 h-4"} />}
-                        {networkStatus.status === "Trung bình" && <MediumNetwork className={"w-4 h-4"} />}
-                        {networkStatus.status === "Kém" && <BadNetwork className={"w-4 h-4"} />}
-                        {networkStatus.status === "Không có mạng" && <Offline className={"w-4 h-4"} />}
+                <div
+                    className="absolute top-2 left-0 right-0 px-4 py-2 flex items-center justify-between"
+                    style={{
+                        borderColor:
+                            networkStatus.status === "Tốt" ? "green" : "red",
+                    }}
+                >
+                    <div
+                        className={`text-sm flex gap-x-2 font-medium items-center  rounded-full ${
+                            networkStatus.status === "Tốt"
+                                ? " text-green-700"
+                                : networkStatus.status === "Trung bình"
+                                ? " text-orange-600"
+                                : networkStatus.status === "Kém"
+                                ? " text-red-600"
+                                : " text-gray-600"
+                        }`}
+                    >
+                        {networkStatus.status === "Tốt" && (
+                            <GoodNetwork className={"w-4 h-4"} />
+                        )}
+                        {networkStatus.status === "Trung bình" && (
+                            <MediumNetwork className={"w-4 h-4"} />
+                        )}
+                        {networkStatus.status === "Kém" && (
+                            <BadNetwork className={"w-4 h-4"} />
+                        )}
+                        {networkStatus.status === "Không có mạng" && (
+                            <Offline className={"w-4 h-4"} />
+                        )}
                         <div>Kết nối: {networkStatus.status}</div>
                     </div>
                 </div>
+
                 <div className="flex flex-col items-center justify-center px-6 mx-auto md:h-screen lg:py-0">
                     <Link
                         to="/"
-                        className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
+                        className="xl:mb-6 lg:mb-0 md:mb-0 mb-12 xl:mt-0 lg:mt-0 md:mt-0 mt-8 flex items-center text-2xl font-semibold text-gray-900 dark:text-white"
                     >
                         <img className="w-20 h-20 mr-2" src={Logo} alt="logo" />
                     </Link>
-                    <div className="w-full bg-white rounded-2xl shadow  md:mt-0 sm:max-w-md xl:p-0 ">
-                        <div className="p-5 space-y-3 md:space-y-6 sm:p-8">
-                            <div className="space-y-2 pb-4">
-                                <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
+                    <div className="w-full bg-white rounded-xl md:mt-0 sm:max-w-md xl:p-0 ">
+                        <div className="xl:p-7 lg:p-7 md:p-7 p-5 space-y-3 md:space-y-6 ">
+                            <div className="space-y-2 pb-2">
+                                <h1 className="text-3xl text-left font-bold leading-none tracking-tight text-gray-900  ">
                                     Đăng nhập
+                                    <span className="text-[#20607e] text-4xl">
+                                        .
+                                    </span>
                                 </h1>
-                                <p className=" text-center leading-tight tracking-tight text-gray-500  ">
-                                    Vui lòng đăng nhập để sử dụng ứng dụng
+                                <p className=" text-left leading-tight tracking-tight text-gray-500  ">
+                                    Vui lòng đăng nhập để sử dụng.
                                 </p>
                             </div>
 
-                            
-                            <form className="space-y-2">
+                            <form className="">
                                 <div>
                                     <label
                                         htmlFor="email"
@@ -217,15 +256,8 @@ function Login() {
                                             })
                                         }
                                     />
-                                    {inputError.email ? (
-                                        <span className="text-xs text-red-600">
-                                            {inputError.email}
-                                        </span>
-                                    ) : (
-                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                    )}
                                 </div>
-                                <div className="!mt-2">
+                                <div className="mt-4 mb-5 relative">
                                     <label
                                         htmlFor="password"
                                         className="block mb-2 text-sm font-medium text-gray-900 "
@@ -233,12 +265,15 @@ function Login() {
                                         Mật khẩu
                                     </label>
                                     <input
-                                        type="password"
+                                        type={
+                                            showPassword ? "text" : "password"
+                                        }
                                         name="password"
                                         id="password"
+                                        autoComplete="new-password"
                                         placeholder="••••••••"
-                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                                        required=""
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 pr-10"
+                                        required
                                         onChange={(e) =>
                                             setInfo({
                                                 ...info,
@@ -246,18 +281,24 @@ function Login() {
                                             })
                                         }
                                     />
-                                    {inputError.password ? (
-                                        <span className="text-xs text-red-600">
-                                            {inputError.password}
-                                        </span>
-                                    ) : (
-                                        <span className="block mt-[8px] h-[14.55px]"></span>
-                                    )}
+                                    <div
+                                        className="absolute right-3 top-[40px] cursor-pointer text-gray-500"
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                    >
+                                        {showPassword ? (
+                                            <RiEyeOffFill size={18} />
+                                        ) : (
+                                            <RiEyeFill size={18} />
+                                        )}
+                                    </div>
+
                                 </div>
                                 <button
                                     type="submit"
                                     onClick={handleSubmit}
-                                    className="w-full text-white bg-[#17506B] hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center "
+                                    className="w-full text-white bg-[#17506B] hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all"
                                 >
                                     Xác nhận
                                 </button>

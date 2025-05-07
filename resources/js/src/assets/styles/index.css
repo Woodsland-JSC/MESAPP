@@ -431,3 +431,12 @@ div:where(.swal2-container) {
     background-position: 0 88%;
     transition: background-size 0.25s ease-in;
 }
+
+input::-ms-reveal,
+input::-ms-clear {
+    display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+}

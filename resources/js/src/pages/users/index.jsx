@@ -40,6 +40,9 @@ import {
 } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
 import { set } from "date-fns";
+import { TbTableExport } from "react-icons/tb";
+import { BiExport } from "react-icons/bi";
+import { FiUserPlus } from "react-icons/fi";
 
 const sizeOptions = [
     { value: "20", label: "20" },
@@ -48,13 +51,16 @@ const sizeOptions = [
     { value: "200", label: "200" },
 ];
 
-
 function Users() {
-    const { user,loading, setLoading } = useAppContext();
+    const { user, loading, setLoading } = useAppContext();
     const currentBranch = user?.branch || 0;
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isDeleteUserOpen, onOpen: onDeleteUserOpen, onClose: onDeleteUserClose } = useDisclosure();
-    
+    const {
+        isOpen: isDeleteUserOpen,
+        onOpen: onDeleteUserOpen,
+        onClose: onDeleteUserClose,
+    } = useDisclosure();
+
     const [selectedUser, setSelectedUser] = useState(null);
 
     const [deleteUserLoading, setDeleteUserLoading] = useState(false);
@@ -86,6 +92,11 @@ function Users() {
     const [userColumnDefs, setUserColumnDefs] = useState([
         {
             headerName: "Họ tên",
+            valueGetter: (params) => {
+                const last = params.data?.last_name || "";
+                const first = params.data?.first_name || "";
+                return `${last} ${first}`.trim();
+            },
             cellRenderer: (params) => {
                 return (
                     <Link to={"/user/" + params.data.id}>
@@ -113,12 +124,11 @@ function Users() {
         {
             headerName: "Mã nhân viên",
             field: "employeeecode",
-            minWidth: 210,
-            hide: true,
+            minWidth: 170,
             valueGetter: (params) =>
                 params.data.username ? params.data.username + " " : "",
         },
-        { headerName: "Email", field: "email", minWidth: 170 },
+        // { headerName: "Email", field: "email", minWidth: 170 },
         {
             headerName: "Chi nhánh",
             field: "branch",
@@ -291,27 +301,29 @@ function Users() {
         return "[" + params.value.toLocaleString() + "]";
     }, []);
 
-    // const onUserGridReady = useCallback(async () => {
-    //     // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
-    //     // console.log("currentBranch: ", currentBranch);
-    //     showLoadingUser();
-    //     const res = await usersApi.getAllUsers();
-    //     setUserData(res);
-    //     hideLoadingUser();
-    // }, []);
+    const onUserGridReady = useCallback(
+        async (params) => {
+            showLoadingUser();
+            const res = await usersApi.getAllUsers();
+            setUserData(res);
+            hideLoadingUser();
 
-    const onUserGridReady = useCallback(async (params) => {
-        showLoadingUser();
-        const res = await usersApi.getAllUsers();
-        setUserData(res);
-        hideLoadingUser();
-
-        // Set default filter for branch
-        const branchFilter = currentBranch ? { branch: { filterType: 'text', type: 'equals', filter: currentBranch } } : null;
-        if (branchFilter) {
-            params.api.setFilterModel(branchFilter);
-        }
-    }, [currentBranch]);
+            // Set default filter for branch
+            const branchFilter = currentBranch
+                ? {
+                      branch: {
+                          filterType: "text",
+                          type: "equals",
+                          filter: currentBranch,
+                      },
+                  }
+                : null;
+            if (branchFilter) {
+                params.api.setFilterModel(branchFilter);
+            }
+        },
+        [currentBranch]
+    );
 
     const onRoleGridReady = useCallback(async () => {
         // const res = await usersApi.getAllUsers({ pageSize: 20, page: 1 });
@@ -392,7 +404,7 @@ function Users() {
     };
 
     // Role Actions
-    const deleteUser= async (userId) => {
+    const deleteUser = async (userId) => {
         setDeleteUserLoading(true);
         try {
             const res = await usersApi.deleteUser(userId);
@@ -409,7 +421,7 @@ function Users() {
 
     const deleteRole = async (roleId) => {
         setDeleteRoleLoading(true);
-        if(roleId == 1){
+        if (roleId == 1) {
             toast.error("Bạn không thể xóa vai trò này.");
             setDeleteRoleLoading(false);
             onClose();
@@ -497,20 +509,7 @@ function Users() {
                                     {/* Controller */}
                                     <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
                                         <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
-                                            Số lượng mỗi trang:
-                                            <Select
-                                                id="page-size"
-                                                options={sizeOptions}
-                                                onChange={onUserPageSizeChanged}
-                                                defaultValue={{
-                                                    value: "20",
-                                                    label: "20",
-                                                }}
-                                                className="z-[9]"
-                                            />
-                                        </div>
-                                        <div className="flex w-full justify-between sm:justify-end space-x-4">
-                                            <div className="w-1/2 sm:w-auto">
+                                        <div className="w-1/2 sm:w-auto">
                                                 <label
                                                     for="search"
                                                     className="mb-2 font-medium text-gray-900 sr-only"
@@ -547,14 +546,31 @@ function Users() {
                                                     />
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div className="flex w-full justify-between sm:justify-end space-x-3">
+
+                                            <button 
+                                                className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                                onClick={() => {
+                                                    userGridRef.current.api.exportDataAsExcel({
+                                                        fileName: 'Danh_sach_nguoi_dung.xlsx',
+                                                        sheetName: 'Users',
+                                                    });
+                                                }}
+                                            >
+                                                <BiExport className="w-5 h-5" />
+                                                <div className="text-[15px]">
+                                                    Xuất file
+                                                </div>
+                                            </button>
                                             <Link
                                                 to="/users/create"
                                                 className="h-full w-5/12 sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
-                                                    <FaPlus className="w-3 h-3" />
+                                                    <FiUserPlus className="w-5 h-5" />
                                                     <div className="text-[15px]">
-                                                        Tạo User
+                                                        Thêm người dùng
                                                     </div>
                                                 </button>
                                             </Link>
@@ -587,7 +603,6 @@ function Users() {
                                             includeHiddenColumnsInQuickFilter={
                                                 true
                                             }
-                                            
                                         />
                                     </div>
                                     <Modal
@@ -727,7 +742,7 @@ function Users() {
                                             autoGroupColumnDef={
                                                 autoGroupColumnDef
                                             }
-                                            defaultColDef={defaultColDef} 
+                                            defaultColDef={defaultColDef}
                                             suppressRowClickSelection={true}
                                             groupSelectsChildren={true}
                                             rowSelection={"multiple"}
