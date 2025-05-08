@@ -389,7 +389,7 @@ function DeliveryDetailReport() {
         { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
         { headerName: "Người nhận", field: "receiver", minWidth: 240, filter: true,},
         { headerName: "Ngày giờ nhận", field: "receive_date", minWidth: 200, },
-        { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200 },
+        { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200, filter: true,},
     ]);
 
     const groupDisplayType = 'multipleColumns';

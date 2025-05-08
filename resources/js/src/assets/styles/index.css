@@ -262,6 +262,10 @@ div:where(.swal2-container) {
     background-color: inherit !important;
 }
 
+.chakra-tabs__tab .css-akq0dd{
+    border-top-left-radius: 8px !important;
+}
+
 /* ============ */
 
 .dots {

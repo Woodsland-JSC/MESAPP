@@ -5,6 +5,7 @@ import React, {
     useState,
     useEffect,
 } from "react";
+import "../../assets/css/index.css";
 import { Link } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import { FaPlus } from "react-icons/fa";
@@ -472,7 +473,7 @@ function Users() {
         <Layout>
             <div className="flex justify-center bg-transparent">
                 {/* Section */}
-                <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-8 xl:px-32 ">
+                <div className="w-screen xl:mb-4 mb-6 p-5 px-4 xl:p-8 xl:px-32 ">
                     {/* Header */}
                     <div className="serif text-4xl font-bold mb-4">
                         Quản lý người dùng
@@ -507,55 +508,49 @@ function Users() {
                                     style={gridStyle}
                                 >
                                     {/* Controller */}
-                                    <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
-                                        <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
-                                        <div className="w-1/2 sm:w-auto">
-                                                <label
-                                                    for="search"
-                                                    className="mb-2 font-medium text-gray-900 sr-only"
-                                                >
-                                                    Tìm kiếm
-                                                </label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                        <svg
-                                                            className="w-4 h-4 text-gray-500"
-                                                            aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                    <input
-                                                        type="search"
-                                                        id="user-search"
-                                                        className="block w-[300px] p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg text-[14px] bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Nhập tên hoặc mã nhân viên"
-                                                        onInput={
-                                                            onUserFilterTextBoxChanged
-                                                        }
-                                                        required
-                                                    />
+                                    <div className="xl:flex md:flex justify-between xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-3 items-center">
+                                        <div className="xl:w-1/2 lg:w-1/2 md:w-1/2 w-full">
+                                            <div className="relative w-full">
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <svg
+                                                        className="w-4 h-4 text-gray-500"
+                                                        aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            stroke="currentColor"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                        />
+                                                    </svg>
                                                 </div>
+                                                <input
+                                                    type="search"
+                                                    id="user-search"
+                                                    className="block p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg text-[14px] w-[318px] bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="Nhập tên hoặc mã nhân viên"
+                                                    onInput={
+                                                        onUserFilterTextBoxChanged
+                                                    }
+                                                    required
+                                                />
                                             </div>
                                         </div>
-                                        <div className="flex w-full justify-between sm:justify-end space-x-3">
-
-                                            <button 
-                                                className="w-fit h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                        <div className="flex space-x-3 justify-end">
+                                            <button
+                                                className="w-2/4 xl:w-fit space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                                 onClick={() => {
-                                                    userGridRef.current.api.exportDataAsExcel({
-                                                        fileName: 'Danh_sach_nguoi_dung.xlsx',
-                                                        sheetName: 'Users',
-                                                    });
+                                                    userGridRef.current.api.exportDataAsExcel(
+                                                        {
+                                                            fileName:
+                                                                "Danh_sach_nguoi_dung.xlsx",
+                                                            sheetName: "Users",
+                                                        }
+                                                    );
                                                 }}
                                             >
                                                 <BiExport className="w-5 h-5" />
@@ -565,12 +560,12 @@ function Users() {
                                             </button>
                                             <Link
                                                 to="/users/create"
-                                                className="h-full w-5/12 sm:w-auto"
+                                                className="h-full w-[220px] xl:w-fit"
                                             >
-                                                <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
+                                                <button className=" w-full space-x-2 flex items-center justify-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <FiUserPlus className="w-5 h-5" />
-                                                    <div className="text-[15px]">
-                                                        Thêm người dùng
+                                                    <div className="text-[15px] ">
+                                                        Tạo người dùng
                                                     </div>
                                                 </button>
                                             </Link>
@@ -671,59 +666,47 @@ function Users() {
                                 >
                                     {/* Controller */}
                                     <div className="xl:flex md:flex xl:justify-between xl:space-y-0 space-y-3 items-center">
-                                        <div className="flex xl:w-1/3 md:w-1/3 gap-x-4 items-center ">
-                                            Số lượng mỗi trang:
-                                            <Select
-                                                id="page-size"
-                                                options={sizeOptions}
-                                                onChange={onRolePageSizeChanged}
-                                                defaultValue={{
-                                                    value: "20",
-                                                    label: "20",
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex w-full justify-between sm:justify-end space-x-4">
-                                            <div className="w-1/2 sm:w-auto">
-                                                <label
-                                                    for="search"
-                                                    className="mb-2 font-medium text-gray-900 sr-only"
-                                                >
-                                                    Tìm kiếm
-                                                </label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                        <svg
-                                                            className="w-4 h-4 text-gray-500"
-                                                            aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                    <input
-                                                        type="search"
-                                                        id="role-search"
-                                                        className="block w-[300px] p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 text-[14px]"
-                                                        placeholder="Tìm kiếm tên Role"
-                                                        onInput={
-                                                            onRoleFilterTextBoxChanged
-                                                        }
-                                                        required
-                                                    />
+                                        <div className="w-1/2 sm:w-auto">
+                                            <label
+                                                for="search"
+                                                className="mb-2 font-medium text-gray-900 sr-only"
+                                            >
+                                                Tìm kiếm
+                                            </label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <svg
+                                                        className="w-4 h-4 text-gray-500"
+                                                        aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            stroke="currentColor"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                        />
+                                                    </svg>
                                                 </div>
+                                                <input
+                                                    type="search"
+                                                    id="role-search"
+                                                    className="block w-[318px] p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 text-[14px]"
+                                                    placeholder="Tìm kiếm tên Role"
+                                                    onInput={
+                                                        onRoleFilterTextBoxChanged
+                                                    }
+                                                    required
+                                                />
                                             </div>
+                                        </div>
+                                        <div className="flex space-x-3 justify-end">
                                             <Link
                                                 to="/roles/create"
-                                                className="h-full w-5/12 sm:w-auto"
+                                                className="h-full w-fit sm:w-auto"
                                             >
                                                 <button className="w-full h-full space-x-2 flex items-center bg-gray-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all">
                                                     <FaPlus className="w-3 h-3" />
