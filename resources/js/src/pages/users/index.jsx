@@ -5,7 +5,7 @@ import React, {
     useState,
     useEffect,
 } from "react";
-import "../../assets/css/index.css";
+
 import { Link } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import { FaPlus } from "react-icons/fa";

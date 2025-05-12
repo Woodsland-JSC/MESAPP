@@ -1138,10 +1138,9 @@ class ProductionController extends Controller
                     return response()->json([
                         'error' => false,
                         'status_code' => 500,
-                        'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+                        'message' => "Số lượng ghi nhận vượt số lượng kế hoạch. Vui lòng kiếm tra:" .
                             $data->Team . " sản phẩm: " .
-                            $data->ItemCode . " sản phẩm đích: " .
-                            $data->FatherCode . " LSX." . $data->LSX
+                            $data->ItemCode . " LSX." . $data->LSX
                     ], 500);
                 }
                 foreach ($allocates as $allocate) {
@@ -1522,7 +1521,7 @@ class ProductionController extends Controller
                     'status_code' => 500,
                     'error_type' => 'PROXY_CONNECTION_FAILED',
                     'message' => 'Đường truyền tới máy chủ bị gián đoạn, vui lòng thử lại sau giây lát.',
-                    'original_error' => $errorMessage
+                    'original_error' => $e->getMessage()
                 ], 500);
             }
 
