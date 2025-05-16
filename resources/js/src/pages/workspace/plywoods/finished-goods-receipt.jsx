@@ -127,32 +127,32 @@ function PlywoodFinishedGoodsReceipt() {
     };
 
     const handleBackNavigation = (event) => {
-      if (event.type === 'popstate') {
-        navigate('/workspace?tab=wood-working');
-      }
+        if (event.type === "popstate") {
+            navigate("/workspace?tab=wood-working");
+        }
     };
-  
-    useEffect(() => {
-      window.addEventListener('popstate', handleBackNavigation);
-  
-      return () => {
-        window.removeEventListener('popstate', handleBackNavigation);
-      };
-    }, [navigate]);;
 
+    useEffect(() => {
+        window.addEventListener("popstate", handleBackNavigation);
+
+        return () => {
+            window.removeEventListener("popstate", handleBackNavigation);
+        };
+    }, [navigate]);
 
     useEffect(() => {
         const selectedBranch = user?.branch;
         const selectedDimension = "VCN";
 
-    const getFactoriesByBranchId = async () => {
+        const getFactoriesByBranchId = async () => {
             // setFactoryLoading(true);
             try {
                 if (selectedBranch) {
                     factorySelectRef.current.clearValue();
                     setFactories([]);
                     const res = await usersApi.getFactoriesByBranchId(
-                        selectedBranch, selectedDimension
+                        selectedBranch,
+                        selectedDimension
                     );
 
                     const options = res.map((item) => ({
@@ -171,7 +171,7 @@ function PlywoodFinishedGoodsReceipt() {
         };
         getFactoriesByBranchId();
         // }
-    },[]);       
+    }, []);
 
     // New Get All Group
     useEffect(() => {
@@ -180,7 +180,10 @@ function PlywoodFinishedGoodsReceipt() {
             const factory = selectedFactory?.value || null;
             setLoading(true);
             try {
-                const res = await productionApi.getAllGroupWithoutQC(factory, KHOI);
+                const res = await productionApi.getAllGroupWithoutQC(
+                    factory,
+                    KHOI
+                );
                 const options = res.map((item) => ({
                     value: item.Code,
                     label: item.Name + " - " + item.Code,
@@ -251,7 +254,6 @@ function PlywoodFinishedGoodsReceipt() {
                     TO: selectedGroup.value,
                 };
                 getDataFollowingGroup(params);
-
             }
         })();
     }, [selectedGroup]);
@@ -260,26 +262,26 @@ function PlywoodFinishedGoodsReceipt() {
         if (!searchTerm) {
             return data;
         }
-    
+
         const filteredData = [];
-    
+
         for (const key in data) {
             const item = data[key];
             const filteredDetails = item.Details.filter((detail) => {
                 const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
-    
+
                 // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
                 const searchTermLower = searchTerm.toLowerCase();
                 const subitemLower = subitem.toLowerCase();
-    
+
                 return subitemLower.includes(searchTermLower);
             });
-    
+
             if (filteredDetails.length > 0) {
                 filteredData[key] = { ...item, Details: filteredDetails };
             }
         }
-    
+
         return filteredData;
     };
 
@@ -287,33 +289,34 @@ function PlywoodFinishedGoodsReceipt() {
 
     const [progress, setProgress] = useState(0);
     const [isActive, setIsActive] = useState(false);
-  
+
     useEffect(() => {
-      const progressPath = document.querySelector('.progress-circle path');
-      const pathLength = progressPath.getTotalLength();
-  
-      progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
-      progressPath.style.strokeDashoffset = pathLength;
-  
-      const updateProgress = () => {
-        const scroll = window.scrollY;
-        const height = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = pathLength - (scroll * pathLength) / height;
-        progressPath.style.strokeDashoffset = progress;
-  
-        setIsActive(scroll > 50);
-      };
-  
-      updateProgress();
-      window.addEventListener('scroll', updateProgress);
-  
-      return () => {
-        window.removeEventListener('scroll', updateProgress);
-      };
+        const progressPath = document.querySelector(".progress-circle path");
+        const pathLength = progressPath.getTotalLength();
+
+        progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`;
+        progressPath.style.strokeDashoffset = pathLength;
+
+        const updateProgress = () => {
+            const scroll = window.scrollY;
+            const height =
+                document.documentElement.scrollHeight - window.innerHeight;
+            const progress = pathLength - (scroll * pathLength) / height;
+            progressPath.style.strokeDashoffset = progress;
+
+            setIsActive(scroll > 50);
+        };
+
+        updateProgress();
+        window.addEventListener("scroll", updateProgress);
+
+        return () => {
+            window.removeEventListener("scroll", updateProgress);
+        };
     }, []);
-  
+
     const scrollToTop = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     return (
@@ -323,7 +326,7 @@ function PlywoodFinishedGoodsReceipt() {
                 {/* Section */}
                 <div className="w-screen mb-4 xl:mb-4 pt-2 px-0 xl:p-12 xl:pt-6 lg:pt-6 md:pt-6 lg:p-12 md:p-12 p-4 xl:px-32">
                     {/* Go back */}
-                    <div 
+                    <div
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
                         onClick={() => navigate(-1)}
                     >
@@ -334,7 +337,10 @@ function PlywoodFinishedGoodsReceipt() {
                     {/* Header */}
                     <div className="flex justify-between px-4 xl:px-0 lg:px-0 md:px-0 items-center">
                         <div className="serif xl:text-4xl lg:text-4xl md:text-4xl text-3xl font-bold ">
-                            Nhập sản lượng khối <span className=" text-[#402a62]">ván công nghiệp</span>
+                            Nhập sản lượng khối{" "}
+                            <span className=" text-[#402a62]">
+                                ván công nghiệp
+                            </span>
                         </div>
                     </div>
 
@@ -343,23 +349,28 @@ function PlywoodFinishedGoodsReceipt() {
                         <div className="my-4 mb-2 mt-3 w-full pb-4 rounded-xl bg-white ">
                             <div className="flex flex-col p-4 pb-0  w-full justify-end ">
                                 <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 ">
-                                    {(user.role == 1 || user.role == 4)  && (<div className="px-0 w-full">
-                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
-                                            Nhà máy sản xuất
+                                    {(user.role == 1 || user.role == 4) && (
+                                        <div className="px-0 w-full">
+                                            <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                                Nhà máy sản xuất
+                                            </div>
+                                            <Select
+                                                // isDisabled={true}
+                                                ref={factorySelectRef}
+                                                options={factories}
+                                                defaultValue={factories}
+                                                onChange={(value) => {
+                                                    setSelectedFactory(value);
+                                                    console.log(
+                                                        "Selected factory: ",
+                                                        value
+                                                    );
+                                                }}
+                                                placeholder="Tìm kiếm"
+                                                className="mt-1 mb-3 w-full"
+                                            />
                                         </div>
-                                        <Select
-                                            // isDisabled={true}
-                                            ref={factorySelectRef}
-                                            options={factories}
-                                            defaultValue={factories}
-                                            onChange={(value) => {
-                                                setSelectedFactory(value);
-                                                console.log("Selected factory: ", value);
-                                            }}
-                                            placeholder="Tìm kiếm"
-                                            className="mt-1 mb-3 w-full"
-                                        />
-                                    </div>)} 
+                                    )}
 
                                     <div className="px-0 w-full">
                                         <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900">
@@ -380,58 +391,61 @@ function PlywoodFinishedGoodsReceipt() {
                                 </div>
 
                                 <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col pb-0 w-full justify-end space-x-4">
-                                <div className="w-full">
-                                    <label
-                                        htmlFor="search"
-                                        className="mb-2 font-medium text-gray-900 sr-only"
-                                    >
-                                        Tìm kiếm
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <svg
-                                                className="w-4 h-4 text-gray-500"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            type="search"
-                                            id="search"
-                                            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Tìm kiếm bán thành phẩm"
-                                            onChange={(e) =>
-                                                setSearchTerm(e.target.value)
-                                            }
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                {selectedGroup &&
-                                    !loadingData &&
-                                    awaitingReception?.length > 0 && (
-                                        <button
-                                            onClick={onModalOpen}
-                                            className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                    <div className="w-full">
+                                        <label
+                                            htmlFor="search"
+                                            className="mb-2 font-medium text-gray-900 sr-only"
                                         >
-                                            <HiMiniBellAlert className="text-xl" />
-                                            <div className="w-full whitespace-nowrap">
-                                                Thông báo: Có phôi chờ xác nhận
+                                            Tìm kiếm
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                <svg
+                                                    className="w-4 h-4 text-gray-500"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                    />
+                                                </svg>
                                             </div>
-                                        </button>
-                                    )}
-                                </div>                            
-                            </div>                                                  
+                                            <input
+                                                type="search"
+                                                id="search"
+                                                className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Tìm kiếm bán thành phẩm"
+                                                onChange={(e) =>
+                                                    setSearchTerm(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    {selectedGroup &&
+                                        !loadingData &&
+                                        awaitingReception?.length > 0 && (
+                                            <button
+                                                onClick={onModalOpen}
+                                                className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
+                                            >
+                                                <HiMiniBellAlert className="text-xl" />
+                                                <div className="w-full whitespace-nowrap">
+                                                    Thông báo: Có phôi chờ xác
+                                                    nhận
+                                                </div>
+                                            </button>
+                                        )}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -478,14 +492,14 @@ function PlywoodFinishedGoodsReceipt() {
             >
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent>
-                    <ModalHeader>
-                        <h1 className="text-xl lg:text-2xl text-bold text-[#17506B]">
+                    <ModalHeader className="!p-2.5 ">
+                        <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
                             Danh sách phôi chờ nhận
                         </h1>
                     </ModalHeader>
                     <ModalCloseButton />
-                    <div className="border-b-2 border-gray-100"></div>
-                    <ModalBody className="!p-4">
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="bg-gray-100 !p-4">
                         <div className="flex gap-4 justify-center h-full">
                             {selectedGroup && awaitingReception?.length > 0 ? (
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
@@ -506,8 +520,16 @@ function PlywoodFinishedGoodsReceipt() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-gray-500 flex w-full h-full justify-center items-center">
-                                    Không có dữ liệu để hiển thị.
+                                <div className="flex w-full min-h-[80vh] justify-center items-center">
+                                    <div className="text-center text-gray-600">
+                                        <div className="text-xl font-semibold">
+                                            Hệ thống chưa nhận được dữ liệu ghi
+                                            nhận nào.
+                                        </div>
+                                        <div>
+                                            Vui lòng ghi nhận và thử lại sau.
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -558,8 +580,8 @@ function PlywoodFinishedGoodsReceipt() {
                         className="stroke-[#ABC8D6] stroke-[4] fill-none transition-all duration-200"
                     />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[18px]  text-white " >
-                    <FaArrowUp className="w-6 h-6"/>
+                <span className="absolute inset-0 flex items-center justify-center text-[18px]  text-white ">
+                    <FaArrowUp className="w-6 h-6" />
                 </span>
             </div>
             {loading && <Loader />}

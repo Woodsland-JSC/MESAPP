@@ -86,7 +86,7 @@ const FinishedGoodsReceipt = () => {
 
             const initialInputs = res.map((item) => ({
                 quantity: "",
-                boxCode: "",
+                MaHop: "",
             }));
             setInputValues(initialInputs);
         } catch (error) {
@@ -167,7 +167,7 @@ const FinishedGoodsReceipt = () => {
                     ? parseInt(inputValues[index].quantity)
                     : 0,
                 LineId: item.LineId,
-                MaHop: inputValues[index].boxCode || "Không có mã hộp",
+                MaHop: inputValues[index].MaHop || "Không có mã hộp",
             })),
         };
         console.log("Dữ liệu ghi nhận:", submittedData);
@@ -532,8 +532,7 @@ const FinishedGoodsReceipt = () => {
                                                                                 </span>
                                                                             </th>
                                                                             <th className="px-4 py-2 border border-gray-300">
-                                                                                Mã
-                                                                                hộp
+                                                                                Mã hộp
                                                                             </th>
                                                                         </tr>
                                                                     </thead>
@@ -601,28 +600,9 @@ const FinishedGoodsReceipt = () => {
                                                                                             }
                                                                                         />
                                                                                     </td>
-                                                                                    <td className="px-4 py-2 border border-gray-300">
-                                                                                        <input
-                                                                                            className="w-full px-2 py-1 border border-gray-300 rounded-md"
-                                                                                            value={
-                                                                                                inputValues[
-                                                                                                    index
-                                                                                                ]
-                                                                                                    ?.boxCode ||
-                                                                                                ""
-                                                                                            }
-                                                                                            onChange={(
-                                                                                                e
-                                                                                            ) =>
-                                                                                                handleInputChange(
-                                                                                                    index,
-                                                                                                    "boxCode",
-                                                                                                    e
-                                                                                                        .target
-                                                                                                        .value
-                                                                                                )
-                                                                                            }
-                                                                                        />
+                                                                                    <td className="px-4 py-2 border border-gray-300 w-[180px]">
+                                                                                        {item.MaHop ||
+                                                                                            'Chưa định nghĩa'}
                                                                                     </td>
                                                                                 </tr>
                                                                             </tbody>
@@ -690,6 +670,10 @@ const FinishedGoodsReceipt = () => {
                                                                                     lượng
                                                                                     ghi
                                                                                     nhận
+                                                                                    <span className="text-red-500">
+                                                                                        {" "}
+                                                                                        *
+                                                                                    </span>
                                                                                 </span>
                                                                                 <input
                                                                                     className="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -719,24 +703,14 @@ const FinishedGoodsReceipt = () => {
                                                                                     hộp
                                                                                 </span>
                                                                                 <input
-                                                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md"
+                                                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md "
+                                                                                    disabled
                                                                                     value={
                                                                                         inputValues[
                                                                                             index
                                                                                         ]
-                                                                                            ?.boxCode ||
-                                                                                        ""
-                                                                                    }
-                                                                                    onChange={(
-                                                                                        e
-                                                                                    ) =>
-                                                                                        handleInputChange(
-                                                                                            index,
-                                                                                            "boxCode",
-                                                                                            e
-                                                                                                .target
-                                                                                                .value
-                                                                                        )
+                                                                                            ?.MaHop ||
+                                                                                        "Chưa khai báo"
                                                                                     }
                                                                                 />
                                                                             </div>

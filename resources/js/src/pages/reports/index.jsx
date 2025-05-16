@@ -109,13 +109,13 @@ const CBGReports = [
     //     description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
     //     priority: true,
     // },
-    // {
-    //     id: "0004",
-    //     name: "Báo cáo sản lượng theo ngày/tuần/tháng",
-    //     link: "/reports/wood-working/production-volume-by-time",
-    //     description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
-    //     priority: true,
-    // },
+    {
+        id: "0004",
+        name: "Báo cáo sản lượng theo ngày/tuần/tháng",
+        link: "/reports/wood-working/production-volume-by-time",
+        description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
+        priority: true,
+    },
     // {
     //     id: "0005",
     //     name: "Báo cáo chi tiết nhập tồn",

@@ -40,7 +40,7 @@ import moment from "moment";
 import { formatNumber } from "../utils/numberFormat";
 import { FaCircleRight } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
-import { FaInstalod } from "react-icons/fa";
+import { FaCheckCircle, FaInstalod } from "react-icons/fa";
 import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
 import { MdAssignmentReturn, MdDangerous } from "react-icons/md";
@@ -51,6 +51,7 @@ import { FaDotCircle } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
+import { BiSolidBadgeCheck } from "react-icons/bi";
 
 const ItemInput = ({
     data,
@@ -153,7 +154,7 @@ const ItemInput = ({
                     CDai: item.CDai,
                     ItemInfo: res.ItemInfo,
                     stockQuantity: res.maxQuantity,
-                    totalProcessing: res.remainQty,
+                    remainQty: res.remainQty,
                     CongDoan: res.CongDoan,
                     SubItemWhs: res.SubItemWhs,
                     factories: res.Factorys?.map((item) => ({
@@ -246,7 +247,7 @@ const ItemInput = ({
                         ...item,
                         ItemInfo: res.ItemInfo,
                         stockQuantity: res.maxQuantity,
-                        totalProcessing: res.remainQty,
+                        remainQty: res.remainQty,
                         CongDoan: res.CongDoan,
                         ProdType: res.ProdType,
                         SubItemWhs: res.SubItemWhs,
@@ -2105,7 +2106,7 @@ const ItemInput = ({
                                                 <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
                                                     {formatNumber(
                                                         Number(
-                                                            selectedItemDetails?.totalProcessing
+                                                            selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty
                                                         )
                                                     ) || 0}
                                                 </span>
@@ -2299,6 +2300,15 @@ const ItemInput = ({
                                                         <div>
                                                             Không đủ số lượng để
                                                             ghi nhận
+                                                        </div>
+                                                    </div>
+                                                ) : 
+                                                (selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty) <=
+                                                    0 ? (
+                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
+                                                        <BiSolidBadgeCheck className="w-6 h-6" />
+                                                        <div className="text-white">
+                                                            Đã đủ số lượng hoàn thành của lệnh.
                                                         </div>
                                                     </div>
                                                 ) : (

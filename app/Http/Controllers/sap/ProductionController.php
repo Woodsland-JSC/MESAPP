@@ -1301,18 +1301,15 @@ class ProductionController extends Controller
     version 2: thay doi yeu cau nhập xuất cùng lúc
     *********************************
     */
-
-    // ghi nhận sản lượng công đoạn khác rong
     function acceptV2(Request $request)
     {
-        // 1.0 Validate dữ liệu đầu vào
+        // 1.0 Validate dữ liệu đầu vào để xác định thông báo giao dịch và công đoạn nhận
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'CongDoan' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
-            // Return validation errors with a 422 Unprocessable Entity status code
         }
         // thêm tính năng check 1 user không được xử lý trùng lắp 1 id cùng lúc
         $userId = Auth::id();
@@ -1328,11 +1325,12 @@ class ProductionController extends Controller
         }
         // Đặt lock trong 30 giây
         Cache::put($lockKey, true, now()->addSeconds(30));
-        //
+
+        // 2. Xử lý xác nhận
         try {
-            // 2. Xử lý xác nhận
+
             DB::beginTransaction();
-            // 2.1 Nhận phôi
+            // 2.1 Kiểm tra giao dịch tồn tại và chưa xác nhận, nếu có lấy thông tin giao dịch
             $data = DB::table('sanluong AS b')->join('notireceipt as a', 'a.baseID', '=', 'b.id')
                 ->select('b.*', 'a.id as notiID', 'a.team as NextTeam')
                 ->where('a.id', $request->id)
@@ -1341,13 +1339,14 @@ class ProductionController extends Controller
 
             if (!$data) {
                 Cache::forget($lockKey);
-                throw new \Exception('data không hợp lệ.');
+                throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
             }
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             $U_Item = $data->ItemCode;
             $U_Qty = $data->SLDG ?? 0;
 
-            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC" && $data->NextTeam != "TB-QC") {
+            // Validate phân bổ
+            if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "YS-QC"  && $data->NextTeam != "TB-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $result = $this->allocate_v2($dataallocate, $data->CompleQty);
                 $allocates = $result['allocatedData'] ?? [];
@@ -1356,21 +1355,20 @@ class ProductionController extends Controller
                     return response()->json([
                         'error' => true,
                         'status_code' => 500,
-                        'message' => "Vượt hạn mức. kiểm tra tổ:".$data->team . " sản phẩm: " .
+                        'message' => "Vượt hạn mức. kiểm tra tổ:" . $data->team . " sản phẩm: " .
                             $data->ItemCode . " sản phẩm đích: " .
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-               // if (count($allocates) == 0) {
+                // if (count($allocates) == 0) {
                 if (empty($allocates)) {
                     Cache::forget($lockKey);
                     return response()->json([
                         'error' => false,
                         'status_code' => 506,
-                        'message' => "Không có sản phẩm còn lại để phân bổ. Vui lòng kiểm tra tổ:" .
+                        'message' => "Số lượng ghi nhận vượt số lượng kế hoạch. Vui lòng kiếm tra tổ: " .
                             $data->Team . " sản phẩm: " .
-                            $data->ItemCode . " sản phẩm đích: " .
-                            $data->FatherCode . " LSX: " . $data->LSX
+                            $data->ItemCode . ", lệnh sản xuất:" . $data->LSX
                     ], 500);
                 }
                 $string = '';

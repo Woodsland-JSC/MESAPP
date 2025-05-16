@@ -179,9 +179,9 @@ function Header(props) {
                                 ? "Chiêm Hóa"
                                 : user?.plant === "TB"
                                 ? "Thái Bình"
-                                : user?.plant === "HG"
+                                : user?.plant === "VF"
                                 ? "Hà Giang"
-                                : "Không xác định"}
+                                : "không xác định"}
                         </div>
                     </div>
                 </div>

@@ -102,6 +102,7 @@ class NoiDiaController extends Controller
         while (odbc_fetch_row($stmt)) {
             $data[] = [
                 'MACT' => odbc_result($stmt, "MACT"),
+                'SPDich' => odbc_result($stmt, "SPDich"),
                 'NameCT' => odbc_result($stmt, "NameCT"),
                 'LineId' => (integer)odbc_result($stmt, "LineId"),
                 'BANGKE' => odbc_result($stmt, "BANGKE"),
@@ -110,6 +111,7 @@ class NoiDiaController extends Controller
                 'Day' => (float)odbc_result($stmt, "Day"),
                 'Rong' => (float)odbc_result($stmt, "Rong"),
                 'KHOILUONG' => (float)odbc_result($stmt, "KHOILUONG"),
+                'MaHop' => odbc_result($stmt, "U_MAHOP"),
                 'PlanQty' =>(float) odbc_result($stmt, "PlanQty"),
                 'CompletedQty' => (float)odbc_result($stmt, "ComplQty"),
                 'RemainQty' => (float) odbc_result($stmt, "RemainQty")
