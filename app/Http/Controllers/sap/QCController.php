@@ -321,7 +321,7 @@ class QCController extends Controller
         $validator = Validator::make($request->all(), [
             'TO' => 'required',
             'KHOI',
-            'Factory'=> 'required',
+            'Factory' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return
@@ -452,10 +452,10 @@ class QCController extends Controller
             from "ORSC" where "VisResCode" = ?;';
             $additionalStmt = odbc_prepare($conDB, $additionalQuery);
             if (!$additionalStmt) {
-            throw new \Exception('Error preparing additional SQL statement: ' . odbc_errormsg($conDB));
+                throw new \Exception('Error preparing additional SQL statement: ' . odbc_errormsg($conDB));
             }
             if (!odbc_execute($additionalStmt, ['NMYS-XSP-SP1'])) {
-            throw new \Exception('Error executing additional SQL statement: ' . odbc_errormsg($conDB));
+                throw new \Exception('Error executing additional SQL statement: ' . odbc_errormsg($conDB));
             }
             while ($additionalRow = odbc_fetch_array($additionalStmt)) {
                 $teamBack[] = $additionalRow;
@@ -1155,7 +1155,7 @@ class QCController extends Controller
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [Auth::user()->branch,$Factory, $Flag, $KHOI, 'N'])) {
+        if (!odbc_execute($stmt, [Auth::user()->branch, $Factory, $Flag, $KHOI, 'N'])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -1232,7 +1232,7 @@ class QCController extends Controller
         }
         try {
             DB::beginTransaction();
-            // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu
+            // 2. Truy vấn thông tin từ bảng "sanluong" và bảng "notireceipt" để lấy dữ liệu giao dịch xử lý lỗi
             $data = DB::table('sanluong AS a')
                 ->join('notireceipt as b', 'a.id', '=', 'b.baseID')
                 ->select(
@@ -1261,9 +1261,9 @@ class QCController extends Controller
                 $closed = 1;
             }
 
-            //3. Gán giá trị kho cho biến kho để lưu thông tin kho QC
+            //3. Lấy giá trị kho QC
             $warehouse = '';
-            if ($data->NextTeam = 'QC_TH' || $data->NextTeam = 'QC_YS(CBG)' || $data->NextTeam = 'QC_TB') {
+            if ($data->NextTeam == 'QC_TH' || $data->NextTeam == 'QC_YS(CBG)' || $data->NextTeam == 'QC_TB') {
                 $warehouse = $this->getQCWarehouse('CBG', 'QC', $request->Factory);
             }
             if ($warehouse == "-1") {
@@ -1272,11 +1272,9 @@ class QCController extends Controller
                 ], 500);
             }
 
-            // dd($warehouse);
-
             $output = '';
 
-            //4. Truy vấn dữ liệu sau đó gửi về SAP ->  Trả về kết quả vào biến $res
+            //4. Lấy dữ liệu xử lý lỗi từ request 
             $loailoi = $request->loailoi['label'] ?? '';
             $huongxuly = $request->huongxuly['label'] ?? '';
             $teamBack = $request->teamBack['value'] ?? '';
@@ -1285,7 +1283,7 @@ class QCController extends Controller
             $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
             $HistorySL = HistorySL::where('ObjType', 59)->get()->count();
 
-            //payload data receipt
+            // 5. Tạo payload cho phiếu nhập
             $ReceiptData = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "U_LSX" => $data->LSX,
@@ -1321,26 +1319,28 @@ class QCController extends Controller
                     ]]
                 ]]
             ];
-            // dd($ReceiptData);
-            // dd(json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n");
+
             $uid = uniqid();
             $batchBoundary = '--batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $uid;
+
+            // 5.Tạo payload cho phiếu xuất
             $IssueData = '';
-            // dd($data->ErrorData);
+
             if ($data->ErrorData != null) {
                 $dataIssues = json_decode($data->ErrorData, true);
+
+                // dd($dataIssues);
 
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX,$data->Team,$U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name,$data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
+                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name, $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
                     $documentCounter++;
                     $IssueData .= "Content-Type: application/http\n";
                     $IssueData .= "Content-Transfer-Encoding: binary\n\n";
                     $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
                     $IssueData .= "Content-Type: application/json\n\n";
                     $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
-                    // Chỉ thêm "{$batchBoundary}\n" nếu không phải là vòng lặp cuối
                     if (!($documentCounter === $totalDocuments)) {
                         $IssueData .= "{$batchBoundary}\n";
                     }
@@ -1387,6 +1387,7 @@ class QCController extends Controller
                 if ($response->getStatusCode() == 202) {
                     $res = $response->getBody()->getContents();
                     if (strpos($res, 'ETag') !== false) {
+
                         awaitingstocks::where('notiId', $request->id)->delete();
                         SanLuong::where('id', $data->id)->update(
                             [
@@ -1465,4 +1466,5 @@ class QCController extends Controller
             ], 500);
         }
     }
+
 }

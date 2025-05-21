@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
-import makeAnimated from 'react-select/animated';
+import makeAnimated from "react-select/animated";
 import toast from "react-hot-toast";
 import useAppContext from "../../store/AppContext";
 import Layout from "../../layouts/layout";
@@ -17,6 +17,7 @@ import usersApi from "../../api/userApi";
 import roleApi from "../../api/roleApi";
 import TinyLoader from "../../components/TinyLoader";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { RiEyeFill, RiEyeOffFill } from "react-icons/ri";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -66,8 +67,7 @@ const validationSchema = Yup.object().shape({
             "Mật khẩu phải có từ 8 - 15 ký tự",
             (value) => value && value.length >= 8 && value.length <= 15
         ),
-    authorization: Yup.string()
-        .required('Phân quyền là bắt buộc'),
+    authorization: Yup.string().required("Phân quyền là bắt buộc"),
     sapId: Yup.string().required("SAP ID là bắt buộc"),
     username: Yup.string().required("Username là bắt buộc"),
     // integrationId: Yup.string().required("Integration ID là bắt buộc"),
@@ -75,90 +75,96 @@ const validationSchema = Yup.object().shape({
     branch: Yup.string().required("Chi nhánh là bắt buộc"),
 });
 
-const SelectField = forwardRef(({ options, name, setInput, innerRef, ...props }, ref) => {
-    const [selectedOption, setSelectedOption] = useState();
-    const { setFieldValue } = useFormikContext();
+const SelectField = forwardRef(
+    ({ options, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
 
-    const handleChange = (option) => {
-        setSelectedOption(option);
-        setFieldValue(name, option?.value || "");
-        setInput((prev) => ({
-            ...prev,
-            [name]: option?.value || "",
-        }));
-    };
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option?.value || "");
+            setInput((prev) => ({
+                ...prev,
+                [name]: option?.value || "",
+            }));
+        };
 
-    return (
-        <Select
-            {...props}
-            ref={innerRef || ref}
-            options={options}
-            value={selectedOption}
-            onChange={handleChange}
-            placeholder="Lựa chọn"
-        />
-    );
-});
+        return (
+            <Select
+                {...props}
+                ref={innerRef || ref}
+                options={options}
+                value={selectedOption}
+                onChange={handleChange}
+                placeholder="Lựa chọn"
+            />
+        );
+    }
+);
 
-const AsyncSelectField = forwardRef(({ options, loadOptions, name, setInput, innerRef, ...props }, ref) => {
-    const [selectedOption, setSelectedOption] = useState();
-    const { setFieldValue } = useFormikContext();
+const AsyncSelectField = forwardRef(
+    ({ options, loadOptions, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
 
-    const handleChange = (option) => {
-        setSelectedOption(option);
-        setFieldValue(name, option.value);
-        setInput((prev) => ({
-            ...prev,
-            [name]: option.value,
-        }));
-    };
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option.value);
+            setInput((prev) => ({
+                ...prev,
+                [name]: option.value,
+            }));
+        };
 
-    return (
-        <AsyncSelect
-            {...props}
-            ref={innerRef || ref}
-            cacheOptions
-            defaultOptions
-            loadOptions={loadOptions}
-            value={selectedOption}
-            options={options}
-            placeholder="Lựa chọn"
-            onChange={handleChange}
-        />
-    );
-});
+        return (
+            <AsyncSelect
+                {...props}
+                ref={innerRef || ref}
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
+                value={selectedOption}
+                options={options}
+                placeholder="Lựa chọn"
+                onChange={handleChange}
+            />
+        );
+    }
+);
 
 const animatedComponents = makeAnimated();
 
-const AsyncMultiSelectField = forwardRef(({ loadOptions, name, setInput, innerRef, ...props }, ref) => {
-    const [selectedOption, setSelectedOption] = useState();
-    const { setFieldValue } = useFormikContext();
+const AsyncMultiSelectField = forwardRef(
+    ({ loadOptions, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
+        const { setFieldValue } = useFormikContext();
 
-    const handleChange = (option) => {
-        setSelectedOption(option);
-        setFieldValue(name, option ? option.map((opt) => opt.label) : []);
-        setInput((prev) => ({
-            ...prev,
-            [name]: option ? option.map((opt) => opt.label) : [],
-        }));
-    };
+        const handleChange = (option) => {
+            setSelectedOption(option);
+            setFieldValue(name, option ? option.map((opt) => opt.label) : []);
+            setInput((prev) => ({
+                ...prev,
+                [name]: option ? option.map((opt) => opt.label) : [],
+            }));
+        };
 
-    return (
-        <AsyncSelect
-            {...props}
-            ref={innerRef || ref}
-            cacheOptions
-            defaultOptions
-            loadOptions={loadOptions}
-            value={selectedOption}
-            onChange={handleChange}
-            components={animatedComponents}
-            closeMenuOnSelect={false}
-            isMulti
-            placeholder="Lựa chọn"
-        />
-    );
-});
+        return (
+            <AsyncSelect
+                {...props}
+                ref={innerRef || ref}
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
+                value={selectedOption}
+                onChange={handleChange}
+                components={animatedComponents}
+                closeMenuOnSelect={false}
+                isMulti
+                placeholder="Lựa chọn"
+            />
+        );
+    }
+);
 
 function CreateUser() {
     const navigate = useNavigate();
@@ -204,6 +210,11 @@ function CreateUser() {
     });
     const [signature, setSignature] = useState(null);
     const [previewSignature, setPreviewSignature] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const toggleShowPassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
     const handleChangeAvatar = (event) => {
         setAvatarLoading(true);
@@ -359,19 +370,18 @@ function CreateUser() {
             .then((data) => {
                 const filteredOptions = data.filter((option) => {
                     return (
-                        option.NAME
-                            ?.toLowerCase()
-                            .includes(inputValue.toLowerCase()) ||
-                        option.USER_CODE
-                            ?.toLowerCase()
-                            .includes(inputValue.toLowerCase())
+                        option.NAME?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        ) ||
+                        option.USER_CODE?.toLowerCase().includes(
+                            inputValue.toLowerCase()
+                        )
                     );
                 });
 
                 const asyncOptions = filteredOptions.map((item) => ({
                     value: item.USER_CODE,
-                    label:
-                        item.NAME + ' - ' + item.USER_CODE,
+                    label: item.NAME + " - " + item.USER_CODE,
                 }));
 
                 callback(asyncOptions);
@@ -407,7 +417,6 @@ function CreateUser() {
                 //         );
                 //     });
                 // }
-
 
                 const asyncOptions = filteredOptions.map((item) => ({
                     value: item.Code,
@@ -479,8 +488,7 @@ function CreateUser() {
                 const res = await usersApi.getAllSapId();
                 const options = res.map((item) => ({
                     value: item.USER_CODE,
-                    label:
-                        item.NAME + ' - ' + item.USER_CODE,
+                    label: item.NAME + " - " + item.USER_CODE,
                 }));
                 setSapId(options);
                 // console.log("Ra sap id nè: ", options);
@@ -495,7 +503,7 @@ function CreateUser() {
         document.title = "Woodsland - Tạo mới người dùng";
         return () => {
             document.title = "Woodsland";
-            document.body.classList.remove('body-no-scroll');
+            document.body.classList.remove("body-no-scroll");
         };
     }, []);
 
@@ -508,15 +516,16 @@ function CreateUser() {
                 if (selectedBranch) {
                     setFactories([]);
                     factorySelectRef.current.clearValue();
-                    const res = await usersApi.getFactoriesByBranchId(selectedBranch);
+                    const res = await usersApi.getFactoriesByBranchId(
+                        selectedBranch
+                    );
                     const options = res.map((item) => ({
                         value: item.Code,
                         label: item.Name,
                     }));
 
                     setFactories(options);
-                    setInput(prev => ({ ...prev, factory: "" }))
-
+                    setInput((prev) => ({ ...prev, factory: "" }));
                 } else {
                     setFactories([]);
                     // factorySelectRef.current?.selectOption([]);
@@ -525,7 +534,6 @@ function CreateUser() {
                 console.error(error);
             }
             setFactoryLoading(false);
-
         };
 
         // console.log("Chỗ này call api nè: ", factorySelectRef.current);
@@ -538,7 +546,7 @@ function CreateUser() {
         } else {
             document.body.classList.remove("body-no-scroll");
         }
-    }, [loading])
+    }, [loading]);
 
     return (
         <Layout>
@@ -546,16 +554,18 @@ function CreateUser() {
                 {/* Section */}
                 <div className="w-screen xl:p-12 xl:pt-6 p-4 px-5 xl:px-32 border-t border-gray-200">
                     {/* Go back */}
-                    <div 
+                    <div
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
                         onClick={() => navigate(-1)}
                     >
                         <IoMdArrowRoundBack />
                         <div>Quay lại</div>
-                    </div>  
+                    </div>
 
                     {/* Header */}
-                    <div className="serif text-4xl font-bold mb-4">Tạo mới người dùng</div>
+                    <div className="serif text-4xl font-bold mb-4">
+                        Tạo mới người dùng
+                    </div>
 
                     {/* Main content */}
                     <Formik
@@ -601,7 +611,7 @@ function CreateUser() {
                                                             }}
                                                         />
                                                         {errors.lastName &&
-                                                            touched.lastName ? (
+                                                        touched.lastName ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="lastName" />
                                                             </span>
@@ -637,7 +647,7 @@ function CreateUser() {
                                                             }}
                                                         />
                                                         {errors.firstName &&
-                                                            touched.firstName ? (
+                                                        touched.firstName ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="firstName" />
                                                             </span>
@@ -670,7 +680,7 @@ function CreateUser() {
                                                             }}
                                                         />
                                                         {errors.email &&
-                                                            touched.email ? (
+                                                        touched.email ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="email" />
                                                             </span>
@@ -698,15 +708,16 @@ function CreateUser() {
                                                                 setInput(
                                                                     (prev) => ({
                                                                         ...prev,
-                                                                        username: e
-                                                                            .target
-                                                                            .value,
+                                                                        username:
+                                                                            e
+                                                                                .target
+                                                                                .value,
                                                                     })
                                                                 );
                                                             }}
                                                         />
                                                         {errors.username &&
-                                                            touched.username ? (
+                                                        touched.username ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="username" />
                                                             </span>
@@ -726,7 +737,7 @@ function CreateUser() {
                                                             setInput={setInput}
                                                         />
                                                         {errors.gender &&
-                                                            touched.gender ? (
+                                                        touched.gender ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="gender" />
                                                             </span>
@@ -734,7 +745,7 @@ function CreateUser() {
                                                             <span className="block mt-[8px] h-[14.55px]"></span>
                                                         )}
                                                     </div>
-                                                    <div className="w-full">
+                                                    <div className="w-full relative">
                                                         <label className="block mb-2 text-md font-medium text-gray-900">
                                                             Mật khẩu{" "}
                                                             <span className="text-red-600">
@@ -743,7 +754,11 @@ function CreateUser() {
                                                         </label>
                                                         <Field
                                                             name="password"
-                                                            type="password"
+                                                            type={
+                                                                showPassword
+                                                                    ? "text"
+                                                                    : "password"
+                                                            }
                                                             className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                             onChange={(e) => {
                                                                 setFieldValue(
@@ -762,8 +777,26 @@ function CreateUser() {
                                                                 );
                                                             }}
                                                         />
+                                                        <div
+                                                            className="absolute top-[40px] right-3 cursor-pointer text-gray-600"
+                                                            onClick={
+                                                                toggleShowPassword
+                                                            }
+                                                        >
+                                                            {showPassword ? (
+                                                                <RiEyeOffFill
+                                                                    size={20}
+                                                                    className="text-gray-500"
+                                                                />
+                                                            ) : (
+                                                                <RiEyeFill
+                                                                    size={20}
+                                                                    className="text-gray-500"
+                                                                />
+                                                            )}
+                                                        </div>
                                                         {errors.password &&
-                                                            touched.password ? (
+                                                        touched.password ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="password" />
                                                             </span>
@@ -781,12 +814,15 @@ function CreateUser() {
                                                         <SelectField
                                                             name="authorization"
                                                             placeholder="Chọn vai trò"
-                                                            ref={authorizationInputRef}
+                                                            ref={
+                                                                authorizationInputRef
+                                                            }
                                                             // isMulti
                                                             options={roles}
                                                             setInput={setInput}
-                                                            value={values.authorization}
-
+                                                            value={
+                                                                values.authorization
+                                                            }
                                                         />
                                                         {/* <AsyncMultiSelectField
                                                             ref={authorizationInputRef}
@@ -798,7 +834,7 @@ function CreateUser() {
                                                             setInput={setInput}
                                                         /> */}
                                                         {errors.authorization &&
-                                                            touched.authorization ? (
+                                                        touched.authorization ? (
                                                             <span className="text-xs text-red-600">
                                                                 <ErrorMessage name="authorization" />
                                                             </span>
@@ -877,7 +913,7 @@ function CreateUser() {
                                                         src={
                                                             (avatar.imgSrc ==
                                                                 DefaultAvatar &&
-                                                                avatar.autoImg
+                                                            avatar.autoImg
                                                                 ? avatar.autoImg
                                                                 : avatar.imgSrc) ||
                                                             avatar.autoImg
@@ -916,7 +952,7 @@ function CreateUser() {
                                                         </label>
                                                     </button>
                                                     {avatar.imgSrc &&
-                                                        avatar.imgSrc !=
+                                                    avatar.imgSrc !=
                                                         DefaultAvatar ? (
                                                         <span
                                                             className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
@@ -965,10 +1001,9 @@ function CreateUser() {
                                                     loadOptions={loadSapId}
                                                     options={sapId}
                                                     setInput={setInput}
-
                                                 />
                                                 {errors.sapId &&
-                                                    touched.sapId ? (
+                                                touched.sapId ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="sapId" />
                                                     </span>
@@ -988,20 +1023,20 @@ function CreateUser() {
                                                     className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                                     disabled
                                                     value="1"
-                                                // onChange={(e) => {
-                                                //     setFieldValue(
-                                                //         "integrationId",
-                                                //         e.target.value
-                                                //     );
-                                                //     setInput((prev) => ({
-                                                //         ...prev,
-                                                //         integrationId:
-                                                //             e.target.value,
-                                                //     }));
-                                                // }}
+                                                    // onChange={(e) => {
+                                                    //     setFieldValue(
+                                                    //         "integrationId",
+                                                    //         e.target.value
+                                                    //     );
+                                                    //     setInput((prev) => ({
+                                                    //         ...prev,
+                                                    //         integrationId:
+                                                    //             e.target.value,
+                                                    //     }));
+                                                    // }}
                                                 />
                                                 {errors.integrationId &&
-                                                    touched.integrationId ? (
+                                                touched.integrationId ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="integrationId" />
                                                     </span>
@@ -1022,7 +1057,6 @@ function CreateUser() {
                                                     loadOptions={loadBranches}
                                                     options={branches}
                                                     setInput={setInput}
-
                                                 />
                                                 {/* <Field
                                                     name="branch"
@@ -1040,7 +1074,7 @@ function CreateUser() {
                                                     }}
                                                 /> */}
                                                 {errors.branch &&
-                                                    touched.branch ? (
+                                                touched.branch ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="branch" />
                                                     </span>
@@ -1062,10 +1096,9 @@ function CreateUser() {
                                                     options={factories}
                                                     isLoading={factoryLoading}
                                                     setInput={setInput}
-
                                                 />
                                                 {errors.factory &&
-                                                    touched.factory ? (
+                                                touched.factory ? (
                                                     <span className="text-xs text-red-600">
                                                         <ErrorMessage name="factory" />
                                                     </span>
@@ -1087,7 +1120,6 @@ function CreateUser() {
                     </Formik>
                     <div className="pb-4"></div>
                 </div>
-                
             </div>
             {loading && <Loader />}
         </Layout>

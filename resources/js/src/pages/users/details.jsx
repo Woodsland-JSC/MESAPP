@@ -25,6 +25,8 @@ import roleApi from "../../api/roleApi";
 import { areObjectsEqual } from "../../utils/objectFunctions";
 import DefaultAvatar from "../../assets/images/Default-Avatar.png";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { RiEyeOffFill, RiEyeFill } from "react-icons/ri";
+import { Input, InputGroup, InputRightElement, FormLabel, Box, Text } from "@chakra-ui/react";
 
 const genderOptions = [
     { value: "male", label: "Nam" },
@@ -196,17 +198,22 @@ function User() {
     const { user, setUser } = useAppContext();
 
     const [currentUser, setCurrentUser] = useState([]);
-    
+
     const [originalInfo, setOriginalInfo] = useState(null);
 
     const [formKey, setFormKey] = useState(0);
-    
+
     const [loading, setLoading] = useState(false);
     const [avatarLoading, setAvatarLoading] = useState(false);
     const [factoryLoading, setFactoryLoading] = useState(false);
-    // const [isFirstLoading, setIsFirstLoading] = useState(true);
 
-    const [originalAvatar, setOriginalAvatar] = useState(null);        
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleTogglePassword = () => {
+        setShowPassword((prev) => !prev);
+    };
+
+    const [originalAvatar, setOriginalAvatar] = useState(null);
     const [avatar, setAvatar] = useState({
         file: null,
         imgSrc: DefaultAvatar,
@@ -442,7 +449,9 @@ function User() {
             }
 
             if (data.branches) {
-                const res = await usersApi.getFactoriesByBranchId(data?.user?.branch);
+                const res = await usersApi.getFactoriesByBranchId(
+                    data?.user?.branch
+                );
 
                 const options = res.map((item) => ({
                     value: item.Code,
@@ -502,7 +511,7 @@ function User() {
             }
         }
     }, [userId]);
-    
+
     // Load data cho avatar
     useEffect(() => {
         if (input.lastName && input.firstName && !avatar.file) {
@@ -835,26 +844,58 @@ function User() {
                                                     >
                                                         Mật khẩu{" "}
                                                     </label>
-                                                    <Field
-                                                        name="password"
-                                                        type="password"
-                                                        className="border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                                        placeholder="********"
-                                                        onChange={(e) => {
-                                                            setFieldValue(
-                                                                "password",
-                                                                e.target.value
-                                                            );
-                                                            setInput(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    password:
-                                                                        e.target
-                                                                            .value,
-                                                                })
-                                                            );
-                                                        }}
-                                                    />
+                                                    <InputGroup>
+                                                        <Field
+                                                            as={Input}
+                                                            name="password"
+                                                            id="password"
+                                                            type={
+                                                                showPassword
+                                                                    ? "text"
+                                                                    : "password"
+                                                            }
+                                                            placeholder="********"
+                                                            onChange={(e) => {
+                                                                setFieldValue(
+                                                                    "password",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                                setInput(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        password:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    })
+                                                                );
+                                                            }}
+                                                            borderColor="gray.300"
+                                                            color="gray.900"
+                                                            fontSize="sm"
+                                                            borderRadius="md"
+                                                            _focus={{
+                                                                ring: 1,
+                                                                ringColor:
+                                                                    "blue.500",
+                                                                borderColor:
+                                                                    "blue.500",
+                                                            }}
+                                                        />
+                                                        <InputRightElement
+                                                            cursor="pointer"
+                                                            onClick={
+                                                                handleTogglePassword
+                                                            }
+                                                        >
+                                                            {showPassword ? (
+                                                                <RiEyeOffFill className="w-5 h-5 mr-2 text-gray-500"/>
+                                                            ) : (
+                                                                <RiEyeFill className="w-5 h-5 mr-2 text-gray-500"/>
+                                                            )}
+                                                        </InputRightElement>
+                                                    </InputGroup>
                                                     {errors.password &&
                                                     touched.password ? (
                                                         <span className="text-xs text-red-600">
@@ -886,10 +927,13 @@ function User() {
                                                             ) || null
                                                         }
                                                         onChange={(value) => {
-                                                            setInput((prev) => ({
-                                                                ...prev,
-                                                                authorization: value,
-                                                            }));
+                                                            setInput(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    authorization:
+                                                                        value,
+                                                                })
+                                                            );
                                                         }}
                                                         setInput={setInput}
                                                     />

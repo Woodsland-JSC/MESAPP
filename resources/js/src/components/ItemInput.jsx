@@ -154,7 +154,6 @@ const ItemInput = ({
                     CDai: item.CDai,
                     ItemInfo: res.ItemInfo,
                     stockQuantity: res.maxQuantity,
-                    remainQty: res.remainQty,
                     CongDoan: res.CongDoan,
                     SubItemWhs: res.SubItemWhs,
                     factories: res.Factorys?.map((item) => ({
@@ -539,13 +538,9 @@ const ItemInput = ({
             onAlertDialogClose();
             return;
         } else if (
-            selectedItemDetails.CongDoan !== "SC" &&
-            selectedItemDetails.CongDoan !== "XV" &&
-            (selectedItemDetails?.stocks?.length !== 1 ||
-            selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
-            amount >
-                selectedItemDetails.remainQty -
-                    selectedItemDetails.WaitingConfirmQty
+            (amount >
+                (selectedItemDetails.remainQty -
+                    selectedItemDetails.WaitingConfirmQty))
         ) {
             toast.error(
                 <span>
