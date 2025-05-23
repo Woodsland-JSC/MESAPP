@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
 use App\Jobs\SyncSLDGToSAP;
 use App\Http\Controllers\sap\ConnectController;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
+
 class ProductionController extends Controller
 {
 
@@ -1042,7 +1042,7 @@ class ProductionController extends Controller
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DETAILGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX" asc';
+        $query = 'select * from UV_DETAILGHINHANSL where "SPDICH"=? and "ItemChild"=? and "TO"=? order by "LSX","DocEntry" asc';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -1087,32 +1087,25 @@ class ProductionController extends Controller
     }
     function allocate_v2($data, $totalQty)
     {
-        $nev = 0;
-
-        // Sắp xếp theo DocEntry tăng dần
-        usort($data, fn($a, $b) => (int)$a['DocEntry'] <=> (int)$b['DocEntry']);
-
+        $nev = 0; // Khởi tạo nev
         foreach ($data as &$item) {
-            $item['Allocate'] = 0;
-
-            if (!isset($item['Conlai']) || $item['Conlai'] <= 0 || $totalQty <= 0) {
-                continue;
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
+            } else {
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
+                } else {
+                    $item['Allocate'] = 0;
+                }
             }
-
-            $item['Allocate'] = min($item['Conlai'], $totalQty);
-            $totalQty -= $item['Allocate'];
         }
-
+        // Kiểm tra nếu totalQty còn lại và không thể phân bổ
         if ($totalQty > 0) {
-            $nev = 1;
-            return [
-                'error' => 'Vượt hạn mức: không đủ số lượng có thể phân bổ',
-                'nev' => $nev,
-                'allocatedData' => $data,
-                'remainingQty' => $totalQty
-            ];
+            $nev = 1; // Đặt nev = 1
+            return ['error' => 'Vượt hạn mức', 'nev' => $nev];
         }
-
         $filteredData = array_filter($data, fn($item) => $item['Allocate'] != 0);
         return ['allocatedData' => array_values($filteredData), 'nev' => $nev];
     }
@@ -1357,7 +1350,6 @@ class ProductionController extends Controller
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->Team);
                 $result = $this->allocate_v2($dataallocate, $data->CompleQty);
                 $allocates = $result['allocatedData'] ?? [];
-                Log::info('Show data allocate: {id}, {rs}', ['id' => $request->id,'rs'=>$allocates]);
                 if (isset($allocates['error']) && $allocates['error']) {
                     Cache::forget($lockKey);
                     return response()->json([
@@ -1444,7 +1436,6 @@ class ProductionController extends Controller
                 ];
 
                 $payload = playloadBatch($dataSendPayload);
-                Log::info('payload: {id}, {payload}', ['id' => $request->id,'payload'=>$payload]);
                 // Assuming `playloadBatch()` function prepares the payload
                 $client = new Client();
                 $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
