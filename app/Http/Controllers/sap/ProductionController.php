@@ -1088,6 +1088,7 @@ class ProductionController extends Controller
     function allocate_v2($data, $totalQty)
     {
         $nev = 0; // Khởi tạo nev
+        usort($data, fn($a, $b) => (int)$a['DocEntry'] <=> (int)$b['DocEntry']);
         foreach ($data as &$item) {
             if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
                 $item['Allocate'] = $item['ConLai'];
