@@ -1449,59 +1449,61 @@ class ProductionController extends Controller
                     'body' => $payload['payload'],
                     // Đảm bảo $pl được định dạng đúng cách với boundary
                 ]);
-                if ($response->getStatusCode() == 400) {
-                    Cache::forget($lockKey);
-                    throw new \Exception('SAP ERROR Incomplete batch request body.');
-                }
-                if ($response->getStatusCode() == 500) {
-                    Cache::forget($lockKey);
-                    throw new \Exception('SAP ERROR ' . $response->getBody()->getContents());
-                }
-                if ($response->getStatusCode() == 401) {
-                    Cache::forget($lockKey);
-                    throw new \Exception('SAP authen ' . $response->getBody()->getContents());
-                }
-                if ($response->getStatusCode() == 202) {
+                $statusCode = $response->getStatusCode();
+                $resBody = $response->getBody()->getContents();
+                try {
+                    switch ($statusCode) {
+                        case 400:
+                            throw new \Exception('SAP ERROR Incomplete batch request body.');
 
-                    $res = $response->getBody()->getContents();
-                    // kiểm tra sussess hay faild hơi quăng nha
-                    if (strpos($res, 'ETag') !== false) {
-                        SanLuong::where('id', $data->id)->update(
-                            [
-                                'Status' => 1,
-                            ]
-                        );
-                        notireceipt::where('id', $data->notiID)->update([
-                            'confirm' => 1,
-                            'ObjType' =>   202,
-                            'confirmBy' => Auth::user()->id,
-                            'confirm_at' => Carbon::now()->format('YmdHis'),
-                        ]);
-                        awaitingstocks::where('notiId', $data->notiID)->delete();
+                        case 500:
+                            throw new \Exception('SAP ERROR ' . $resBody);
 
-                        DB::commit();
-                        Cache::forget($lockKey);
-                    } else {
-                        preg_match('/\{.*\}/s', $res, $matches);
-                        if (isset($matches[0])) {
-                            $jsonString = $matches[0];
-                            $errorData = json_decode($jsonString, true);
+                        case 401:
+                            throw new \Exception('SAP authen ' . $resBody);
 
-                            if (isset($errorData['error'])) {
-                                $errorCode = $errorData['error']['code'];
-                                $errorMessage = $errorData['error']['message']['value'];
-                                throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
+                        case 202:
+                            if (strpos($resBody, 'ETag') !== false) {
+                                // Update thành công
+                                SanLuong::where('id', $data->id)->update(['Status' => 1]);
+                                notireceipt::where('id', $data->notiID)->update([
+                                    'confirm' => 1,
+                                    'ObjType' => 202,
+                                    'confirmBy' => Auth::user()->id,
+                                    'confirm_at' => Carbon::now()->format('YmdHis'),
+                                ]);
+                                awaitingstocks::where('notiId', $data->notiID)->delete();
+
+                                DB::commit();
+                            } else {
+                                // Lỗi từ SAP nhưng trả JSON string
+                                preg_match('/\{.*\}/s', $resBody, $matches);
+                                if (isset($matches[0])) {
+                                    $errorData = json_decode($matches[0], true);
+                                    if (isset($errorData['error'])) {
+                                        throw new \Exception(
+                                            'SAP code: ' . $errorData['error']['code'] .
+                                            ' chi tiết: ' . $errorData['error']['message']['value']
+                                        );
+                                    }
+                                }
                             }
-                        }
-                    }
-                }
+                            break;
 
-                // check xem có phải công đoạn đóng gói không nếu có phải thì đẩy về SAP
-                if ($request->CongDoan == 'TP' && $U_Qty != 0) {
-                    $this->dispatch(new SyncSLDGToSAP($U_Item, $U_Qty, Auth::user()->branch, now()->format('Ymd')));
+                        default:
+                            // Nếu không khớp status nào cả
+                            throw new \Exception('Không xác định được trạng thái phản hồi từ SAP.'. $resBody);
+                     }
+
+                    // Nếu là công đoạn TP thì dispatch job
+                    if ($request->CongDoan === 'TP' && $U_Qty != 0) {
+                        $this->dispatch(new SyncSLDGToSAP($U_Item, $U_Qty, Auth::user()->branch, now()->format('Ymd')));
+                    }
+                     return response()->json('Yêu cầu được thực hiện thành công', 200);
+                } finally {
+                    // Đảm bảo luôn clear cache, kể cả khi throw exception
+                    Cache::forget($lockKey);
                 }
-                Cache::forget($lockKey);
-                return response()->json('Yêu cầu được thực hiện thành công', 200);
             } else {
                 Cache::forget($lockKey);
                 return response()->json([
