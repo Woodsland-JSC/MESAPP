@@ -724,7 +724,7 @@ function WoodSorting() {
     const handleDeletePallet = async () => {
         setDeletePalletLoading(true);
 
-        if(selectedDeletePallet === null){
+        if (selectedDeletePallet === null) {
             toast.error("Xin hãy chọn một pallet");
             setDeletePalletLoading(false);
             onDeletePalletConfirmClose();
@@ -983,10 +983,12 @@ function WoodSorting() {
                                                 )
                                                 .map((pallet, index) => (
                                                     <div className="relative border-gray-300 bg-gray-100 max-h-[14rem]  border-2 rounded-xl">
-                                                        <div 
+                                                        <div
                                                             className="absolute -right-2 -top-3 hover:cursor-pointer p-1.5 bg-black duration-200 ease hover:bg-red-600 rounded-full active:scale-[.95]  active:duration-75  transition-all"
-                                                            onClick={() =>{
-                                                                setSelectedDeletePallet(pallet);
+                                                            onClick={() => {
+                                                                setSelectedDeletePallet(
+                                                                    pallet
+                                                                );
                                                                 onDeletePalletConfirmOpen();
                                                             }}
                                                         >
@@ -994,12 +996,13 @@ function WoodSorting() {
                                                         </div>
                                                         <div className="p-2 pb-0">
                                                             <div className="flex items-center space-x-3 rounded-lg w-full px-3 py-2  text-[#155979] bg-[#E0E1E3]">
-                                                                {pallet.activeStatus == "1" ? (
+                                                                {pallet.activeStatus ==
+                                                                "1" ? (
                                                                     <LoadedPallet className="text-xl text-[#4d4d4d]" />
                                                                 ) : (
                                                                     <SiElasticstack className="text-xl text-[#4d4d4d]" />
                                                                 )}
-                                                                
+
                                                                 <span className="text-xl font-semibold black">
                                                                     {
                                                                         pallet.pallet_code
@@ -1106,13 +1109,14 @@ function WoodSorting() {
                                         Đóng
                                     </button>
                                     <button
-                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white"
+                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${deletePalletLoading ? "opacity-100 cursor-not-allowed" : ""}`}
                                         type="button"
                                         onClick={() => {
                                             handleDeletePallet();
                                         }}
+                                        disabled={deletePalletLoading}
                                     >
-                                        {deletePalletLoading ? (
+                                         {deletePalletLoading ? (
                                             <div className="flex items-center justify-center w-full space-x-4">
                                                 <Spinner
                                                     size="sm"
@@ -2005,14 +2009,20 @@ function WoodSorting() {
                                         Đóng
                                     </button>
                                     <button
-                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white"
+                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${
+                                            createPalletLoading
+                                                ? "cursor-not-allowed opacity-100"
+                                                : ""}`}
                                         type="button"
                                         onClick={() => {
                                             handleCreatePallet();
                                         }}
+                                        disabled={createPalletLoading}
                                     >
                                         {createPalletLoading ? (
-                                            <div className="flex items-center justify-center w-full space-x-4">
+                                            <div
+                                                className="flex items-center justify-center w-full space-x-4 "
+                                            >
                                                 <Spinner
                                                     size="sm"
                                                     color="white"

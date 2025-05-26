@@ -1299,7 +1299,7 @@ class QCController extends Controller
                 "U_cmtQC" => $request->Note ?? "",
                 "U_QCN" => $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
                 "DocumentLines" => [[
-                    "Quantity" => $request->Qty,
+                    "Quantity" => (float) $request->Qty,
                     "ItemCode" => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
                     "WarehouseCode" =>  $warehouse,
                     "CostingCode" => "CBG",
@@ -1326,136 +1326,184 @@ class QCController extends Controller
             // 5.Tạo payload cho phiếu xuất
             $IssueData = '';
 
-            if ($data->ErrorData != null) {
-                $dataIssues = json_decode($data->ErrorData, true);
+            $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-                // dd($dataIssues);
-
-                $totalDocuments = count($dataIssues['SubItemQty']);
-                $documentCounter = 0;
-                foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                    $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name, $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
-                    $documentCounter++;
-                    $IssueData .= "Content-Type: application/http\n";
-                    $IssueData .= "Content-Transfer-Encoding: binary\n\n";
-                    $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
-                    $IssueData .= "Content-Type: application/json\n\n";
-                    $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
-                    if (!($documentCounter === $totalDocuments)) {
-                        $IssueData .= "{$batchBoundary}\n";
-                    }
+            $totalDocuments = count($dataIssues['SubItemQty']);
+            $documentCounter = 0;
+            foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+                $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name, $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
+                $documentCounter++;
+                $IssueData .= "Content-Type: application/http\n";
+                $IssueData .= "Content-Transfer-Encoding: binary\n\n";
+                $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
+                $IssueData .= "Content-Type: application/json\n\n";
+                $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
+                if (!($documentCounter === $totalDocuments)) {
+                    $IssueData .= "{$batchBoundary}\n";
                 }
-                if ($data->IsPushSAP == 0) {
-                    $type = 'I';
-                    $qtypush = $data->RejectQty;
-                } else {
-                    $type = 'U';
-                    $qtypush = $request->Qty;
-                }
-                // tạo một payload batch
+            }
+            if ($data->IsPushSAP == 0) {
+                $type = 'I';
+                $qtypush = $data->RejectQty;
+            } else {
+                $type = 'U';
+                $qtypush = $request->Qty;
+            }
+            // tạo một payload batch
 
-                $changeSetBoundary = 'changeset';
-                $output = "{$batchBoundary}\n";
-                $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
-                $output .= "Content-Type: application/http\n";
-                $output .= "Content-Transfer-Encoding: binary\n";
-                $output .= "POST /b1s/v1/InventoryGenEntries\n";
-                $output .= "Content-Type: application/json\n\n";
-                $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
-                $output .= "{$batchBoundary}\n";
-                $output .= $IssueData;
-                $output .= "{$batchBoundary}--";
-                $client = new Client();
-                $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
-                    'verify' => false,
-                    'headers' => [
-                        'Accept' => '*/*',
-                        'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $uid,
-                        'Authorization' => 'Basic ' . BasicAuthToken(),
-                    ],
-                    'body' => $output, // Đảm bảo $pl được định dạng đúng cách với boundary
-                ]);
-                if ($response->getStatusCode() == 400) {
-                    throw new \Exception('SAP ERROR Incomplete batch request body.');
+            $changeSetBoundary = 'changeset';
+            $output = "{$batchBoundary}\n";
+            $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
+            $output .= "Content-Type: application/http\n";
+            $output .= "Content-Transfer-Encoding: binary\n";
+            $output .= "POST /b1s/v1/InventoryGenEntries\n";
+            $output .= "Content-Type: application/json\n\n";
+            $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
+            $output .= "{$batchBoundary}\n";
+            $output .= $IssueData;
+            $output .= "{$batchBoundary}--";
+            $client = new Client();
+            $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
+                'verify' => false,
+                'headers' => [
+                    'Accept' => '*/*',
+                    'Content-Type' => 'multipart/mixed;boundary=batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $uid,
+                    'Authorization' => 'Basic ' . BasicAuthToken(),
+                ],
+                'body' => $output, // Đảm bảo $pl được định dạng đúng cách với boundary
+            ]);
+            $res = $response->getBody()->getContents();
+            if ($response->getStatusCode() == 400) {
+                throw new \Exception('SAP ERROR Incomplete batch request body.');
+            }
+            if ($response->getStatusCode() == 500) {
+                throw new \Exception('SAP ERROR ' . $response->getBody()->getContents());
+            }
+            if ($response->getStatusCode() == 401) {
+                throw new \Exception('SAP authen ' . $response->getBody()->getContents());
+            }
+            if ($response->getStatusCode() == 202) {
+                // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
+                if (strpos($res, 'ETag') === false) {
+                    throw new \Exception("SAP không phản hồi thành công.");
                 }
-                if ($response->getStatusCode() == 500) {
-                    throw new \Exception('SAP ERROR ' . $response->getBody()->getContents());
-                }
-                if ($response->getStatusCode() == 401) {
-                    throw new \Exception('SAP authen ' . $response->getBody()->getContents());
-                }
-                if ($response->getStatusCode() == 202) {
-                    $res = $response->getBody()->getContents();
-                    if (strpos($res, 'ETag') !== false) {
 
-                        awaitingstocks::where('notiId', $request->id)->delete();
-                        SanLuong::where('id', $data->id)->update(
-                            [
-                                'Status' =>  $closed,
-                                'openQty' => $data->openQty - $request->Qty,
-                            ]
-                        );
-                        notireceipt::where('id', $request->id)->update([
-                            'confirm' =>  $closed,
-                            'ObjType' =>  59,
-                            'DocEntry' => '',
-                            'confirmBy' => Auth::user()->id,
-                            'isPushSAP' => 1,
-                            'confirm_at' => Carbon::now()->format('YmdHis')
-                        ]);
+                // Tách các phần của batch response
+                $parts = preg_split('/--batch.*?\r\n/', $res);
 
-                        HistorySL::create(
-                            [
-                                'LSX' => $data->LSX,
-                                'itemchild' => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
-                                'to' => $data->Team,
-                                'quantity' => $request->Qty,
-                                'ObjType' => 59,
-                                'DocEntry' => '',
-                                'SPDich' => $data->FatherCode,
-                                'LL' => $loailoi,
-                                'HXL' => $huongxuly,
-                                "source" => $rootCause,
-                                "TOChuyenVe" => $teamBack,
-                                'isQualityCheck' => 1,
-                                'notiId' => $request->id,
-                            ],
-                        );
-                        HistoryQC::dispatch(
-                            $type,
-                            $request->id,
-                            $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
-                            $qtypush,
-                            $dataIssues['SubItemWhs'],
-                            $qtypush - $request->Qty,
-                            'CBG',
-                            $data->Team,
-                            $loailoi,
-                            $huongxuly,
-                            $rootCause,
-                            $subCode,
-                            $request->note,
-                            $teamBack
-                        );
-                        DB::commit();
-                    } else {
-                        preg_match('/\{.*\}/s', $res, $matches);
-                        if (isset($matches[0])) {
-                            $jsonString = $matches[0];
-                            $errorData = json_decode($jsonString, true);
+                $goodsReceipt = null;
+                $goodsIssues = null;
 
-                            if (isset($errorData['error'])) {
-                                $errorCode = $errorData['error']['code'];
-                                $errorMessage = $errorData['error']['message']['value'];
-                                throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
-                            }
+                // Lặp qua các phần của phản hồi để trích xuất thông tin
+                foreach ($parts as $part) {
+                    if (strpos($part, 'InventoryGenEntries') !== false) {
+                        // Trích xuất thông tin phiếu nhập
+                        preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                        preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                        if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                            $goodsReceipt = [
+                                'DocEntry' => $entryMatches[1],
+                                'DocNum' => $numMatches[1]
+                            ];
+                        }
+                    } elseif (strpos($part, 'InventoryGenExits') !== false) {
+                        // Trích xuất thông tin phiếu xuất
+                        preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                        preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                        if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                            $goodsIssues[] = [
+                                'DocEntry' => $entryMatches[1],
+                                'DocNum' => $numMatches[1]
+                            ];
                         }
                     }
                 }
+
+                // Kiểm tra xem có thông tin phiếu nhập không
+                if (empty($goodsReceipt)) {
+                    throw new \Exception("Không thể trích xuất thông tin phiếu nhập từ phản hồi SAP. Response: " . json_encode($res));
+                }
+
+                // // Kiểm tra xem có thông tin phiếu xuất không
+                // if (empty($goodsIssues)) {
+                //     throw new \Exception("Không thể trích xuất thông tin phiếu xuất từ phản hồi SAP. Response: " . json_encode($res));
+                // }
+
+                // Cấu trúc dữ liệu document_log
+                $documentLog = [
+                    'Goods_Receipt' => $goodsReceipt,
+                    'Goods_Issue' => $goodsIssues,
+                    'timestamp' => now()->toDateTimeString()
+                ];
+
+                // Nếu tới đây là thành công → cập nhật dữ liệu hệ thống
+                awaitingstocks::where('notiId', $request->id)->delete();
+
+                SanLuong::where('id', $data->id)->update([
+                    'Status' => $closed,
+                    'openQty' => $data->openQty - $request->Qty,
+                ]);
+
+                notireceipt::where('id', $request->id)->update([
+                    'confirm' => $closed,
+                    'ObjType' => 59,
+                    // 'DocEntry' => $receiptDocEntry,
+                    'document_log' => json_encode($documentLog),
+                    'confirmBy' => Auth::user()->id,
+                    'isPushSAP' => 1,
+                    'confirm_at' => Carbon::now()->format('YmdHis')
+                ]);
+
+                HistorySL::create([
+                    'LSX' => $data->LSX,
+                    'itemchild' => $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    'to' => $data->Team,
+                    'quantity' => $request->Qty,
+                    'ObjType' => 59,
+                    // 'DocEntry' => $receiptDocEntry,
+                    'SPDich' => $data->FatherCode,
+                    'LL' => $loailoi,
+                    'HXL' => $huongxuly,
+                    'source' => $rootCause,
+                    'TOChuyenVe' => $teamBack,
+                    'isQualityCheck' => 1,
+                    'notiId' => $request->id,
+                ]);
+
+                HistoryQC::dispatch(
+                    $type,
+                    $request->id,
+                    $data->SubItemCode ? $data->SubItemCode : $data->ItemCode,
+                    $qtypush,
+                    $dataIssues['SubItemWhs'],
+                    $qtypush - $request->Qty,
+                    'CBG',
+                    $data->Team,
+                    $loailoi,
+                    $huongxuly,
+                    $rootCause,
+                    $subCode,
+                    $request->note,
+                    $teamBack
+                );
+
+                DB::commit();
             } else {
-                throw new \Exception('Thiếu dữ liệu xuất kho, vui lòng kiểm tra lại dữ liệu.');
+                // Trích lỗi JSON nếu có trong phản hồi
+                preg_match('/\{.*\}/s', $res, $matches);
+                if (isset($matches[0])) {
+                    $jsonString = $matches[0];
+                    $errorData = json_decode($jsonString, true);
+
+                    if (isset($errorData['error'])) {
+                        $errorCode = $errorData['error']['code'];
+                        $errorMessage = $errorData['error']['message']['value'];
+                        throw new \Exception('SAP code: ' . $errorCode . ' chi tiết: ' . $errorMessage);
+                    }
+                }
             }
-            return response()->json('success', 200);
+
+            return response()->json('Xử lý lỗi thành công.', 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -1467,4 +1515,83 @@ class QCController extends Controller
         }
     }
 
+    function getDefectDataFromSAP($ItemCode, $SubItemCode)
+    {
+        $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
+
+        if ($ItemCode && $SubItemCode) {
+            // Trường hợp lỗi bán thành phẩm
+            $sql = <<<SQL
+                SELECT TOP 1 "SubItemCode", "wareHouse", "BaseQty" 
+                FROM "UV_SOLUONGTON" 
+                WHERE "ItemCode" = ?
+            SQL;
+
+            $stmt = odbc_prepare($conDB, $sql);
+            odbc_execute($stmt, [$ItemCode]);
+            $row = odbc_fetch_array($stmt);
+
+            if (!$row) {
+                throw new \Exception("Không tìm thấy dữ liệu tồn kho cho bán thành phẩm.");
+            }
+
+            $dataIssues = [
+                'SubItemWhs' => $row['wareHouse'],
+                'SubItemQty' => [
+                    [
+                        'SubItemCode' => $row['SubItemCode'],
+                        'BaseQty' => (float) $row['BaseQty']
+                    ]
+                ]
+            ];
+        } elseif ($ItemCode && !$SubItemCode) {
+            // Trường hợp lỗi thành phẩm
+            $sql = <<<SQL
+                SELECT "SubItemCode", "wareHouse", "BaseQty"
+                FROM "UV_SOLUONGTON"
+                WHERE "ItemCode" = ?
+            SQL;
+
+            $stmt = odbc_prepare($conDB, $sql);
+            odbc_execute($stmt, [$ItemCode]);
+
+            $subItems = [];
+            $warehouses = [];
+            $subItemCodes = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $subItems[] = [
+                    'SubItemCode' => $row['SubItemCode'],
+                    'BaseQty' => (float) $row['BaseQty']
+                ];
+                $warehouses[] = $row['wareHouse'];
+                $subItemCodes[] = $row['SubItemCode'];
+            }
+
+            $duplicates = array_filter(array_count_values($subItemCodes), function ($count) {
+                return $count > 1;
+            });
+
+            if (count($duplicates) > 0) {
+                throw new \Exception("Định nghĩa BOM của nguyên vật liệu không hợp lệ để xử lý lỗi. Vui lòng kiểm tra lại.");
+            }
+
+            $uniqueWhs = array_unique($warehouses);
+
+            if (count($uniqueWhs) !== 1) {
+                throw new \Exception("Nhiều kho khác nhau được tìm thấy. Dữ liệu không đồng nhất.");
+            }
+
+            $dataIssues = [
+                'SubItemWhs' => $uniqueWhs[0],
+                'SubItemQty' => $subItems
+            ];
+        } else {
+            throw new \Exception("Không đủ dữ kiện để xác định loại lỗi.");
+        }
+
+        odbc_close($conDB);
+
+        return $dataIssues;
+    }
 }

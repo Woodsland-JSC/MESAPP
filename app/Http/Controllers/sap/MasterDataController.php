@@ -76,7 +76,7 @@ class MasterDataController extends Controller
             }
 
             // Thực hiện truy vấn chính
-            $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum", T1."WhsCode" 
+            $mainQuery = 'SELECT DISTINCT T0."ItemCode", T1."BatchNum"  || ? ||  T2."ItemName" AS "ItemName", T1."BatchNum", T1."WhsCode" 
                         FROM OITW T0
                         INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
                         INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
@@ -89,16 +89,15 @@ class MasterDataController extends Controller
 
             if ($request->reason == 'SL') {
                 $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum"
-                            FROM OITW T0
-                            INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
-                            INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
-                            INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                            WHERE (T1."U_CDai" * T1."U_CRong" * T1."U_CDay") <> 0
-                            AND (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1
-                            END > 1
-                                AND T3."U_Flag" IN (?) 
-                                AND T3."BPLid" = ? 
-                                AND T3."U_FAC" = ? ';
+                FROM OITW T0
+                INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
+                INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
+                INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
+                WHERE (T1."U_CDai" * T1."U_CRong" * T1."U_CDay") <> 0
+                AND (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1
+                AND T3."U_Flag" IN (?) 
+                AND T3."BPLid" = ? 
+                AND T3."U_FAC" = ?';
             }
 
             $stmt = odbc_prepare($conDB, $mainQuery);
@@ -106,7 +105,7 @@ class MasterDataController extends Controller
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
 
-            if (!odbc_execute($stmt, [' ', $flag, $branch, $plant])) {
+            if (!odbc_execute($stmt, [' - ', $flag, $branch, $plant])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 

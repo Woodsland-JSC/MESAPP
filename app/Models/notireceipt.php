@@ -30,6 +30,7 @@ class notireceipt extends Model
         'deleted_at',
         'ObjType',
         'DocEntry',
+        'document_log',
         'openQty',
         'MaThiTruong',
         'ErrorData',
