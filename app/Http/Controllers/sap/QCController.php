@@ -1525,10 +1525,11 @@ class QCController extends Controller
                 SELECT TOP 1 "SubItemCode", "wareHouse", "BaseQty" 
                 FROM "UV_SOLUONGTON" 
                 WHERE "ItemCode" = ?
+                AND "SubItemCode" = ?
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
-            odbc_execute($stmt, [$ItemCode]);
+            odbc_execute($stmt, [$ItemCode, $SubItemCode]);
             $row = odbc_fetch_array($stmt);
 
             if (!$row) {
