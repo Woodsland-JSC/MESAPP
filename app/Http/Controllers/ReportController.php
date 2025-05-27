@@ -55,9 +55,9 @@ class ReportController extends Controller
         } else {
             if ($fromDate && $toDate) {
                 $query->whereBetween('ngaynhan', [
-                        Carbon::parse($fromDate)->startOfDay(),
-                        Carbon::parse($toDate)->endOfDay()
-                    ]);
+                    Carbon::parse($fromDate)->startOfDay(),
+                    Carbon::parse($toDate)->endOfDay()
+                ]);
             }
         }
 
@@ -74,7 +74,7 @@ class ReportController extends Controller
         // Bổ sung thông tin M3 từ SAP và dd ra kết quả truy vấn
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'SELECT "ItemCode", "U_M3SP" FROM OITM';
+        $query = 'SELECT "ItemCode", "ItemName", "U_M3SP" FROM OITM';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -86,7 +86,10 @@ class ReportController extends Controller
 
         $m3sapMap = [];
         while ($row = odbc_fetch_array($stmt)) {
-            $m3sapMap[$row['ItemCode']] = $row['U_M3SP'];
+            $m3sapMap[$row['ItemCode']] = [
+                'ItemName' => $row['ItemName'],
+                'M3'       => $row['U_M3SP']
+            ];
         }
 
         // Lặp qua originalData và thay thế các giá trị
@@ -102,7 +105,12 @@ class ReportController extends Controller
             }
 
             // Add M3SAP value if available and multiply it with Quantity
-            $newItem->M3SAP = isset($m3sapMap[$item->ItemCode]) ? round((float)$m3sapMap[$item->ItemCode] * (float)$item->Quantity, 6) : null;
+            if (isset($m3sapMap[$item->ItemCode])) {
+                $newItem->M3SAP = round((float)$m3sapMap[$item->ItemCode]['M3'] * (float)$item->Quantity, 6);
+                $newItem->ItemName = $m3sapMap[$item->ItemCode]['ItemName']; // cập nhật tên
+            } else {
+                $newItem->M3SAP = null;
+            }
 
             return $newItem;
         });
@@ -324,7 +332,7 @@ class ReportController extends Controller
         return response()->json($updatedData);
     }
 
-    function sanluongtheothoigian(Request $request) 
+    function sanluongtheothoigian(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fromDate' => 'required',
@@ -334,33 +342,33 @@ class ReportController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-        
+
         $conDB = (new ConnectController)->connect_sap();
-    
+
         $query = 'CALL USP_GT_BC_NGAYTUANTHANG(?, ?, ?)';
-        
+
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $defaultParam = null; // You can change this to your desired default value
-        
+
         if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
-        
+
         odbc_close($conDB);
-        
+
         return $results;
     }
 
-    function sanluongtheongay(Request $request) 
+    function sanluongtheongay(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fromDate' => 'required',
@@ -370,29 +378,29 @@ class ReportController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-        
+
         $conDB = (new ConnectController)->connect_sap();
-    
+
         $query = 'CALL USP_GT_BC_NGAY(?, ?, ?)';
-        
+
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $defaultParam = null; // You can change this to your desired default value
-        
+
         if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
-        
+
         $results = array();
         while ($row = odbc_fetch_array($stmt)) {
             $results[] = $row;
         }
-        
+
         odbc_close($conDB);
-        
+
         return $results;
     }
 
