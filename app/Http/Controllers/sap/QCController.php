@@ -1522,7 +1522,7 @@ class QCController extends Controller
         if ($ItemCode && $SubItemCode) {
             // Trường hợp lỗi bán thành phẩm
             $sql = <<<SQL
-                SELECT TOP 1 "SubItemCode", "wareHouse", "BaseQty" 
+                SELECT DISTINCT TOP 1 "SubItemCode", "wareHouse", "BaseQty" 
                 FROM "UV_SOLUONGTON" 
                 WHERE "ItemCode" = ?
                 AND "SubItemCode" = ?
@@ -1548,7 +1548,7 @@ class QCController extends Controller
         } elseif ($ItemCode && !$SubItemCode) {
             // Trường hợp lỗi thành phẩm
             $sql = <<<SQL
-                SELECT "SubItemCode", "wareHouse", "BaseQty"
+                SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty"
                 FROM "UV_SOLUONGTON"
                 WHERE "ItemCode" = ?
             SQL;
