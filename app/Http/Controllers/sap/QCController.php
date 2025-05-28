@@ -1522,10 +1522,10 @@ class QCController extends Controller
         if ($ItemCode && $SubItemCode) {
             // Trường hợp lỗi bán thành phẩm
             $sql = <<<SQL
-                SELECT DISTINCT TOP 1 "SubItemCode", "wareHouse", "BaseQty" 
-                FROM "UV_SOLUONGTON" 
-                WHERE "ItemCode" = ?
-                AND "SubItemCode" = ?
+                SELECT "SubItemCode", "wareHouse", "BaseQty"
+                FROM "UV_SOLUONGTON"
+                WHERE "ItemCode" = ? AND "SubItemCode" = ?
+                LIMIT 1
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
