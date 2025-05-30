@@ -126,15 +126,33 @@ function CBGWoodDryingReports() {
         {
             headerName: "Tên",
             field: "itemname",
-            width: 350,
-            suppressHeaderMenuButton: true,
+            minWidth: 400,
+            headerComponentParams: { displayName: "Tên" },
+            rowGroup: true,
+            hide: true,
+            filter: true,
         },
         {
             headerName: "Quy cách",
             children: [
-                { headerName: "Dày", field: "thickness", width: 120 },
-                { headerName: "Rộng", field: "width", width: 120 },
-                { headerName: "Dài", field: "height", width: 120 },
+                {
+                    headerName: "Dày",
+                    field: "thickness",
+                    width: 150,
+                    filter: true,
+                },
+                {
+                    headerName: "Rộng",
+                    field: "width",
+                    width: 150,
+                    filter: true,
+                },
+                {
+                    headerName: "Dài",
+                    field: "height",
+                    width: 150,
+                    filter: true,
+                },
             ],
         },
         {
@@ -145,41 +163,87 @@ function CBGWoodDryingReports() {
                     field: "th_xepsay",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Xếp sấy" },
                 },
                 {
                     headerName: "Vào lò",
                     field: "th_vaolo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Vào lò" },
                 },
                 {
                     headerName: "Ra lò",
                     field: "th_daralo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Ra lò" },
                 },
             ],
         },
         {
-            headerName: "Yên Sơn 1",
+            headerName: "Yên Sơn",
             children: [
                 {
                     headerName: "Xếp sấy",
                     field: "ys_xepsay",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Xếp sấy" },
                 },
                 {
                     headerName: "Vào lò",
                     field: "ys_vaolo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Vào lò" },
                 },
                 {
                     headerName: "Ra lò",
                     field: "ys_daralo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Ra lò" },
                 },
             ],
         },
@@ -191,46 +255,84 @@ function CBGWoodDryingReports() {
                     field: "tb_xepsay",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Xếp sấy" },
                 },
                 {
                     headerName: "Vào lò",
                     field: "tb_vaolo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Vào lò" },
                 },
                 {
                     headerName: "Ra lò",
                     field: "tb_daralo",
                     width: 120,
                     suppressHeaderMenuButton: true,
+
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? params.value.toLocaleString("en-US")
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Ra lò" },
                 },
             ],
         },
     ]);
 
+    const groupDisplayType = "multipleColumns";
+
     const onGridReady = useCallback(async () => {
         showLoading();
-        const res = await reportApi.getCBGWoodDryingReport(
-            format(fromDate, "yyyy-MM-dd"),
-            format(toDate, "yyyy-MM-dd")
-        );
-        const formattedData = res.map((item) => ({
-            itemname: item.ItemName,
-            thickness: item.CDay,
-            width: item.CRong,
-            height: item.CDai,
-            th_xepsay: item.sepxay || 0,
-            th_vaolo: item.vaolo || 0,
-            th_daralo: item.ralo || 0,
-            ys_xepsay: 0,
-            ys_vaolo: 0,
-            ys_daralo: 0,
-            tb_xepsay: 0,
-            tb_vaolo: 0,
-            tb_daralo: 0,
-        }));
-        setRowData(formattedData);
-        hideLoading();
+        try {
+            const res = await reportApi.getCBGWoodDryingReport(
+                format(fromDate, "yyyy-MM-dd"),
+                format(toDate, "yyyy-MM-dd")
+            );
+            const formattedData = res.map((item) => {
+                const plant = item.plant || ""; // Đảm bảo plant không undefined
+                return {
+                    itemname: item.ItemName,
+                    thickness: item.CDay,
+                    width: item.CRong,
+                    height: item.CDai,
+                    // Thuận Hưng
+                    th_xepsay: plant === "TH" ? Number(item.sepxay) || 0 : 0,
+                    th_vaolo: plant === "TH" ? Number(item.vaolo) || 0 : 0,
+                    th_daralo: plant === "TH" ? Number(item.ralo) || 0 : 0,
+                    // Yên Sơn
+                    ys_xepsay: plant === "YS" ? Number(item.sepxay) || 0 : 0,
+                    ys_vaolo: plant === "YS" ? Number(item.vaolo) || 0 : 0,
+                    ys_daralo: plant === "YS" ? Number(item.ralo) || 0 : 0,
+                    // Thái Bình
+                    tb_xepsay: plant === "TB" ? Number(item.sepxay) || 0 : 0,
+                    tb_vaolo: plant === "TB" ? Number(item.vaolo) || 0 : 0,
+                    tb_daralo: plant === "TB" ? Number(item.ralo) || 0 : 0,
+                };
+            });
+            setRowData(formattedData);
+        } catch (error) {
+            console.error("Error fetching report data:", error);
+            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+        } finally {
+            hideLoading();
+        }
     }, []);
 
     const showLoading = useCallback(() => {
@@ -262,7 +364,7 @@ function CBGWoodDryingReports() {
                                 <div className="text-sm text-[#17506B]">
                                     Báo cáo sấy phôi
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Báo cáo xếp sấy khối CBG
                                 </div>
                             </div>
@@ -291,12 +393,6 @@ function CBGWoodDryingReports() {
                                     <FaArrowUpRightFromSquare
                                         className="mx-2.5 w-5 h-5 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
                                         onClick={handleExportExcel}
-                                    />
-                                </div>
-                                <div>
-                                    <PiFilePdfBold
-                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
-                                        onClick={handleExportPDF}
                                     />
                                 </div>
                             </div>
@@ -365,7 +461,6 @@ function CBGWoodDryingReports() {
                     {/* Content */}
                     {isDataReportLoading ? (
                         <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                            {/* <div>Đang tải dữ liệu</div> */}
                             <div class="dots"></div>
                         </div>
                     ) : (
@@ -382,131 +477,21 @@ function CBGWoodDryingReports() {
                                     rowData={rowData}
                                     columnDefs={colDefs}
                                     onGridReady={onGridReady}
+                                    groupDisplayType={groupDisplayType}
+                                    grandTotalRow={"bottom"}
+                                    autoGroupColumnDef={{
+                                        headerName: "Tên nhóm",
+                                        field: "itemname",
+                                        width: 450,
+                                        cellRendererParams: {
+                                            suppressCount: false, // hiển thị số lượng bản ghi trong nhóm
+                                        },
+                                    }}
                                 />
                             </div>
                         </div>
                     )}
-
-                    {/* <div className="flex flex-col">
-                        <div className="overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                <div className="overflow-auto border-2 rounded-xl border-gray-500">
-                                    <table className="min-w-full   text-center font-light text-surface">
-                                        <thead className="rounded-t-xl bg-[#DBDCDD] border-b-2 border-gray-500 font-medium">
-                                            <tr className="rounded-t-xl">
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    #
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    First
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Last
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="font-normal">
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    1
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Mark
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Otto
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @mdo
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    2
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Jacob
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Thornton
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @fat
-                                                </td>
-                                            </tr>
-                                            <tr className="border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    3
-                                                </td>
-                                                <td
-                                                    colSpan="2"
-                                                    className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Larry the Bird
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @twitter
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
-                {/* <div className="py-4"></div> */}
             </div>
         </Layout>
     );

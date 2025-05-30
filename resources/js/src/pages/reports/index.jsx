@@ -41,7 +41,7 @@ const SAYReports = [
         id: "0001",
         name: "Biên bản vào lò",
         link: "/reports/wood-drying/kiln-loading",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
+        description: "Thông tin biên bản vào lò.",
         priority: true,
     },
     // {
@@ -74,14 +74,14 @@ const SAYReports = [
         id: "0007",
         name: "Báo cáo xếp sấy khối CBG",
         link: "/reports/wood-drying/wood-drying",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
+        description: "Báo cáo sản lượng xếp sấy, vào lò, ra lò của các nhà máy chế biến gỗ.",
         priority: true,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
         link: "/reports/wood-drying/drying-queue",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, et.",
+        description: "Báo cáo thông tin xếp chờ sấy.",
         priority: true,
     },
 ];

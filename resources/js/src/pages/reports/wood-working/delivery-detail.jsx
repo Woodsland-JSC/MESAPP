@@ -386,9 +386,9 @@ function DeliveryDetailReport() {
             },
         },
         { headerName: "Người giao", field: "sender", filter: true, minWidth: 240 },
-        { headerName: "Ngày giờ giao", field: "send_date", minWidth: 200, },
-        { headerName: "Người nhận", field: "receiver", minWidth: 240, filter: true,},
-        { headerName: "Ngày giờ nhận", field: "receive_date", minWidth: 200, },
+        { headerName: "Ngày giờ giao", field: "send_date",filter: true, minWidth: 200, },
+        { headerName: "Người nhận", field: "receiver", filter: true, minWidth: 240, filter: true,},
+        { headerName: "Ngày giờ nhận", field: "receive_date", filter: true, minWidth: 200, },
         { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200, filter: true,},
     ]);
 
