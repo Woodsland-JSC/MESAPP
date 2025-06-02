@@ -48,7 +48,7 @@ const SAYReports = [
     //     id: "0002",
     //     name: "Biên bản lịch sử vào lò",
     //     link: "/reports/wood-drying/kiln-loading-history",
-    
+
     // },
     // {
     //     id: "0003",
@@ -74,7 +74,8 @@ const SAYReports = [
         id: "0007",
         name: "Báo cáo xếp sấy khối CBG",
         link: "/reports/wood-drying/wood-drying",
-        description: "Báo cáo sản lượng xếp sấy, vào lò, ra lò của các nhà máy chế biến gỗ.",
+        description:
+            "Báo cáo sản lượng xếp sấy, vào lò, ra lò của các nhà máy chế biến gỗ.",
         priority: true,
     },
     {
@@ -91,7 +92,8 @@ const CBGReports = [
         id: "0001",
         name: "Báo cáo thông tin chi tiết giao nhận (CBG)",
         link: "/reports/wood-working/delivery-detail",
-        description: "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
+        description:
+            "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
         priority: true,
         responsive: true,
     },
@@ -99,32 +101,41 @@ const CBGReports = [
         id: "0002",
         name: "Báo cáo biện pháp xử lý lỗi (CBG)",
         link: "/reports/wood-working/defect-resolution",
-        description: "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
+        description:
+            "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
+        priority: true,
+    },
+    {
+        id: "0003",
+        name: "Báo cáo tồn nguyên vật liệu xử lý lỗi (CBG)",
+        link: "/reports/wood-working/defect-stock-checking",
+        description: "Khuyến nghị số lượng bán thành phẩm cần bổ sung để xử lý lỗi.",
         priority: true,
     },
     // {
-    //     id: "0003",
+    //     id: "0004",
     //     name: "Báo cáo lệnh sản xuất đang thực hiện",
     //     link: "/reports/wood-working/wip-production-order",
     //     description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
     //     priority: true,
     // },
     {
-        id: "0004",
+        id: "0005",
         name: "Báo cáo sản lượng theo ngày/tuần/tháng",
         link: "/reports/wood-working/production-volume-by-time",
-        description: "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
+        description:
+            "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
         priority: true,
     },
     // {
-    //     id: "0005",
+    //     id: "0006",
     //     name: "Báo cáo chi tiết nhập tồn",
     //     link: "/reports/wood-working/details-receipt",
     //     description: "Theo dõi chi tiết nhập tồn đầu kỳ",
     //     priority: true,
     // },
     // {
-    //     id: "0006",
+    //     id: "0007",
     //     name: "Báo cáo sản lượng nhập các nhà máy",
     //     link: "/reports/wood-working/factory-receipt-volume",
     //     description: "",
@@ -153,28 +164,27 @@ const QCReports = [
     },
 ];
 
-
 const VCNReports = [
-        // {
-        //     id: "0001",
-        //     name: "Báo cáo tổng sản lượng ngày - tuần - tháng (VCN)",
-        //     link: "/reports/plywoods/production-volume-by-time",
-        //     priority: false,
-        //     responsive: true,
-        // },
-        // {
-        //     id: "0002",
-        //     name: "Báo cáo chi tiết thông tin giao nhận (VCN)",
-        //     link: "/reports/plywoods/delivered-quantity-details",
-        //     priority: false,
-        //     responsive: false,
-        // },
-        // {
-        //     id: "0003",
-        //     name: "Báo cáo biện pháp xử lý lỗi (VCN)",
-        //     link: "/reports/plywoods/defect-handling",
-        //     priority: false,
-        // },
+    // {
+    //     id: "0001",
+    //     name: "Báo cáo tổng sản lượng ngày - tuần - tháng (VCN)",
+    //     link: "/reports/plywoods/production-volume-by-time",
+    //     priority: false,
+    //     responsive: true,
+    // },
+    // {
+    //     id: "0002",
+    //     name: "Báo cáo chi tiết thông tin giao nhận (VCN)",
+    //     link: "/reports/plywoods/delivered-quantity-details",
+    //     priority: false,
+    //     responsive: false,
+    // },
+    // {
+    //     id: "0003",
+    //     name: "Báo cáo biện pháp xử lý lỗi (VCN)",
+    //     link: "/reports/plywoods/defect-handling",
+    //     priority: false,
+    // },
 ];
 
 const DANDReports = [
@@ -192,7 +202,6 @@ const DANDReports = [
     //     temporaty: true,
     // },
 ];
-
 
 function Report() {
     const { loading, setLoading } = useAppContext();
@@ -482,8 +491,10 @@ function Report() {
                                 >
                                     {/* Report Components */}
                                     {filteredSAYReports.length === 0 ? (
-                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
-                                    ):(
+                                        <div className="py-3 text-gray-500">
+                                            Không có báo cáo được tìm thấy.
+                                        </div>
+                                    ) : (
                                         <div className="flex flex-col gap-y-3">
                                             {filteredSAYReports.map(
                                                 (item, index) => (
@@ -499,18 +510,22 @@ function Report() {
                                                                 </div>
                                                                 <div className="flex flex-col justify-center ">
                                                                     <div className="text-[17px] font-semibold group-hover:text-white">
-                                                                        {item.name}
+                                                                        {
+                                                                            item.name
+                                                                        }
                                                                     </div>
                                                                     <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
-                                                                        {item.description}
+                                                                        {
+                                                                            item.description
+                                                                        }
                                                                     </div>
                                                                 </div>
-                                                                
+
                                                                 {/* {item.priority == true && (
                                                                     <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                 )} */}
                                                             </div>
-                                                            
+
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
                                                     </Link>
@@ -526,8 +541,10 @@ function Report() {
                                     style={gridStyle}
                                 >
                                     {filteredCBGReports.length === 0 ? (
-                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
-                                    ):(
+                                        <div className="py-3 text-gray-500">
+                                            Không có báo cáo được tìm thấy.
+                                        </div>
+                                    ) : (
                                         <div className="flex flex-col gap-y-3">
                                             {filteredCBGReports.map(
                                                 (item, index) => (
@@ -545,23 +562,29 @@ function Report() {
                                                                 <div className="flex w-full justify-between items-center">
                                                                     <div className="flex flex-col justify-center ">
                                                                         <div className="text-[17px] font-semibold group-hover:text-white">
-                                                                            {item.name}
+                                                                            {
+                                                                                item.name
+                                                                            }
                                                                         </div>
                                                                         <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
-                                                                            {item.description}
+                                                                            {
+                                                                                item.description
+                                                                            }
                                                                         </div>
                                                                     </div>
 
                                                                     {item.responsive ==
                                                                         true && (
-                                                                        <Tooltip label='Tương thích trên di động.' fontSize='sm'>
+                                                                        <Tooltip
+                                                                            label="Tương thích trên di động."
+                                                                            fontSize="sm"
+                                                                        >
                                                                             <span>
                                                                                 <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                            </span>           
+                                                                            </span>
                                                                         </Tooltip>
                                                                     )}
                                                                 </div>
-
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -576,12 +599,14 @@ function Report() {
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
-                                >   
+                                >
                                     {filteredVCNReports.length === 0 ? (
-                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
-                                    ):(
+                                        <div className="py-3 text-gray-500">
+                                            Không có báo cáo được tìm thấy.
+                                        </div>
+                                    ) : (
                                         <div className="flex flex-col gap-y-3">
-                                            {filteredVCNReports .map(
+                                            {filteredVCNReports.map(
                                                 (item, index) => (
                                                     <Link
                                                         to={item.link}
@@ -603,7 +628,7 @@ function Report() {
                                                                 {item.responsive ==
                                                                     true && (
                                                                     <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}                                                                
+                                                                )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -618,10 +643,12 @@ function Report() {
                                 <TabPanel
                                     className="space-y-4"
                                     style={gridStyle}
-                                >   
+                                >
                                     {filteredDANDReports.length === 0 ? (
-                                        <div className="py-3 text-gray-500">Không có báo cáo được tìm thấy.</div>
-                                    ):(
+                                        <div className="py-3 text-gray-500">
+                                            Không có báo cáo được tìm thấy.
+                                        </div>
+                                    ) : (
                                         <div className="flex flex-col gap-y-3">
                                             {filteredDANDReports.map(
                                                 (item, index) => (

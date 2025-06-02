@@ -62,7 +62,7 @@ import KilnLoadingHistoryReport from "../pages/reports/wood-drying/kiln-loading-
 import KilnLoadingReport from "../pages/reports/wood-drying/kiln-loading";
 import CBGWoodDryingReport from "../pages/reports/wood-drying/wood-drying";
 import DryingQueueReport from "../pages/reports/wood-drying/drying-queue";
-
+import DefectStockCheckingReport from "../pages/reports/wood-working/defect-stock-checking";
 import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail";
 
 // VCN
@@ -423,6 +423,14 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <DefectResolutionReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/defect-stock-checking"
+                        element={
+                            <ProtectedRoute>
+                                <DefectStockCheckingReport />
                             </ProtectedRoute>
                         }
                     />

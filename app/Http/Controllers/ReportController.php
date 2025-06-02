@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use PhpOffice\PhpWord\TemplateProcessor;
+use App\Models\notireceipt;
 use Carbon\Carbon;
 use Auth;
 use Illuminate\Support\Facades\URL;
@@ -428,7 +429,6 @@ class ReportController extends Controller
         $templateProcessor->saveAs($outputFile);
         return response()->download($outputFile);
     }
-
     public function dryingKilnHistory(Request $request)
     {
         $dataArray = [
@@ -533,4 +533,260 @@ class ReportController extends Controller
         // Download the output PDF file
         return response()->download($outputPdfFile);
     }
+
+    function defectStockChecking(Request $request)
+    {
+        $plantFilter = $request->input('plant');
+
+        $notiData = DB::table('notireceipt as n')
+            ->select(
+                'n.id',
+                'n.Quantity',
+                'n.SPDich',
+                'n.ItemCode',
+                'n.SubItemCode',
+                'n.SubItemName',
+                'n.created_at',
+                'n.type',
+                's.create_by',
+                'u.first_name',
+                'u.last_name',
+                'u.plant',
+                'u.branch'
+            )
+            ->leftJoin('sanluong as s', 'n.baseID', '=', 's.id')
+            ->leftJoin('users as u', 's.create_by', '=', 'u.id')
+            ->where('n.type', 1)
+            ->where('n.confirm', 0)
+            ->when($plantFilter, fn($query) => $query->where('u.plant', $plantFilter))
+            ->get();
+
+        $result = [];
+
+        foreach ($notiData as $noti) {
+            $createByName = trim("{$noti->first_name} {$noti->last_name}");
+
+            try {
+                $sapData = $this->getDefectDataFromSAP($noti->ItemCode, $noti->SubItemCode);
+
+                if ($noti->SubItemCode !== null) {
+                    $requiredQty = ceil((float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity * (float)$sapData['SubItemQty'][0]['BaseQty']));
+
+                    if ($requiredQty < 0) {
+                        $result[] = [
+                            'id' => $noti->id,
+                            'Quantity' => $noti->Quantity,
+                            'SPDich' => $noti->SPDich,
+                            'ItemCode' => $noti->ItemCode,
+                            'SubItemCode' => $noti->SubItemCode,
+                            'SubItemName' => $noti->SubItemName,
+                            'created_at' => $noti->created_at,
+                            'type' => $noti->type,
+                            'wareHouse' => $sapData['SubItemWhs'],
+                            'BaseQty' => $sapData['SubItemQty'][0]['BaseQty'],
+                            'OnHand' => $sapData['SubItemQty'][0]['OnHand'],
+                            'plant' => $noti->plant,
+                            'branch' => $noti->branch,
+                            'create_by' => $createByName,
+                            'requiredQty' => (int)$requiredQty
+                        ];
+                    }
+                } else {
+                    foreach ($sapData['SubItemQty'] as $subItem) {
+                        $requiredQty = ceil((float)$subItem['OnHand'] - ((float)$noti->Quantity * (float)$subItem['BaseQty']));
+
+                        if ($requiredQty < 0) {
+                            $result[] = [
+                                'id' => $noti->id,
+                                'Quantity' => $noti->Quantity,
+                                'SPDich' => $noti->SPDich,
+                                'ItemCode' => $noti->ItemCode,
+                                'SubItemCode' => $subItem['SubItemCode'],
+                                'SubItemName' => $noti->SubItemName,
+                                'created_at' => $noti->created_at,
+                                'type' => $noti->type,
+                                'wareHouse' => $sapData['SubItemWhs'],
+                                'BaseQty' => $subItem['BaseQty'],
+                                'OnHand' => $subItem['OnHand'],
+                                'plant' => $noti->plant,
+                                'branch' => $noti->branch,
+                                'create_by' => $createByName,
+                                'requiredQty' => (int)$requiredQty
+                            ];
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $result[] = [
+                    'id' => $noti->id,
+                    'Quantity' => $noti->Quantity,
+                    'SPDich' => $noti->SPDich,
+                    'ItemCode' => $noti->ItemCode,
+                    'SubItemCode' => $noti->SubItemCode,
+                    'SubItemName' => $noti->SubItemName,
+                    'created_at' => $noti->created_at,
+                    'type' => $noti->type,
+                    'plant' => $noti->plant,
+                    'branch' => $noti->branch,
+                    'create_by' => $createByName,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        return response()->json($result);
+    }
+
+    function getDefectDataFromSAP($ItemCode, $SubItemCode)
+    {
+        $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
+
+        if ($ItemCode && $SubItemCode) {
+            // Trường hợp lỗi bán thành phẩm
+            $sql = <<<SQL
+            SELECT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
+            FROM "UV_SOLUONGTON"
+            WHERE "ItemCode" = ? AND "SubItemCode" = ?
+            LIMIT 1
+        SQL;
+
+            $stmt = odbc_prepare($conDB, $sql);
+            odbc_execute($stmt, [$ItemCode, $SubItemCode]);
+            $row = odbc_fetch_array($stmt);
+
+            if (!$row) {
+                throw new \Exception("Không tìm thấy dữ liệu tồn kho cho bán thành phẩm.");
+            }
+
+            $dataIssues = [
+                'SubItemWhs' => $row['wareHouse'],
+                'SubItemQty' => [
+                    [
+                        'SubItemCode' => $row['SubItemCode'],
+                        'BaseQty' => (float) $row['BaseQty'],
+                        'OnHand' => (float) $row['OnHand']
+                    ]
+                ]
+            ];
+        } elseif ($ItemCode && !$SubItemCode) {
+            // Trường hợp lỗi thành phẩm
+            $sql = <<<SQL
+            SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
+            FROM "UV_SOLUONGTON"
+            WHERE "ItemCode" = ?
+        SQL;
+
+            $stmt = odbc_prepare($conDB, $sql);
+            odbc_execute($stmt, [$ItemCode]);
+
+            $subItems = [];
+            $warehouses = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $subItems[] = [
+                    'SubItemCode' => $row['SubItemCode'],
+                    'BaseQty' => (float) $row['BaseQty'],
+                    'OnHand' => (float) $row['OnHand']
+                ];
+                $warehouses[] = $row['wareHouse'];
+            }
+
+            $uniqueWhs = array_unique($warehouses);
+
+            $dataIssues = [
+                'SubItemWhs' => implode(', ', $uniqueWhs), // có thể nhiều kho
+                'SubItemQty' => $subItems
+            ];
+        } else {
+            throw new \Exception("Không đủ dữ kiện để xác định loại lỗi.");
+        }
+
+        odbc_close($conDB);
+
+        return $dataIssues;
+    }
+
+
+    // function getDefectDataFromSAP($ItemCode, $SubItemCode)
+    // {
+    //     $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
+
+    //     if ($ItemCode && $SubItemCode) {
+    //         // Trường hợp lỗi bán thành phẩm
+    //         $sql = <<<SQL
+    //             SELECT "SubItemCode", "wareHouse", "BaseQty", , "OnHand"
+    //             FROM "UV_SOLUONGTON"
+    //             WHERE "ItemCode" = ? AND "SubItemCode" = ?
+    //             LIMIT 1
+    //         SQL;
+
+    //         $stmt = odbc_prepare($conDB, $sql);
+    //         odbc_execute($stmt, [$ItemCode, $SubItemCode]);
+    //         $row = odbc_fetch_array($stmt);
+
+    //         if (!$row) {
+    //             throw new \Exception("Không tìm thấy dữ liệu tồn kho cho bán thành phẩm.");
+    //         }
+
+    //         $dataIssues = [
+    //             'SubItemWhs' => $row['wareHouse'],
+    //             'SubItemQty' => [
+    //                 [
+    //                     'SubItemCode' => $row['SubItemCode'],
+    //                     'BaseQty' => (float) $row['BaseQty'],
+    //                     'OnHand' => (float) $row['OnHand']
+    //                 ]
+    //             ]
+    //         ];
+    //     } elseif ($ItemCode && !$SubItemCode) {
+    //         // Trường hợp lỗi thành phẩm
+    //         $sql = <<<SQL
+    //             SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
+    //             FROM "UV_SOLUONGTON"
+    //             WHERE "ItemCode" = ?
+    //         SQL;
+
+    //         $stmt = odbc_prepare($conDB, $sql);
+    //         odbc_execute($stmt, [$ItemCode]);
+
+    //         $subItems = [];
+    //         $warehouses = [];
+    //         $subItemCodes = [];
+
+    //         while ($row = odbc_fetch_array($stmt)) {
+    //             $subItems[] = [
+    //                 'SubItemCode' => $row['SubItemCode'],
+    //                 'BaseQty' => (float) $row['BaseQty'],
+    //                 'OnHand' => (float) $row['OnHand']
+    //             ];
+    //             $warehouses[] = $row['wareHouse'];
+    //             $subItemCodes[] = $row['SubItemCode'];
+    //         }
+
+    //         $duplicates = array_filter(array_count_values($subItemCodes), function ($count) {
+    //             return $count > 1;
+    //         });
+
+    //         if (count($duplicates) > 0) {
+    //             throw new \Exception("Định nghĩa BOM của nguyên vật liệu không hợp lệ để xử lý lỗi. Vui lòng kiểm tra lại.");
+    //         }
+
+    //         $uniqueWhs = array_unique($warehouses);
+
+    //         if (count($uniqueWhs) !== 1) {
+    //             throw new \Exception("Nhiều kho khác nhau được tìm thấy. Dữ liệu không đồng nhất.");
+    //         }
+
+    //         $dataIssues = [
+    //             'SubItemWhs' => $uniqueWhs[0],
+    //             'SubItemQty' => $subItems
+    //         ];
+    //     } else {
+    //         throw new \Exception("Không đủ dữ kiện để xác định loại lỗi.");
+    //     }
+
+    //     odbc_close($conDB);
+
+    //     return $dataIssues;
+    // }
 }

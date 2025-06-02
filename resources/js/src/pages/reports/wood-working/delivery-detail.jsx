@@ -28,7 +28,6 @@ import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-enterprise";
-// import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import Select from "react-select";
@@ -38,21 +37,6 @@ import { FaExclamation } from "react-icons/fa";
 import { FaMobileAlt } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
 import "../../../assets/styles/customTable.css"
-
-const ExampleOptions = [
-    {
-        label: "1. Tổ 01",
-        value: "1",
-    },
-    {
-        label: "2. Tổ 2",
-        value: "2",
-    },
-    {
-        label: "2. Tổ 3",
-        value: "3",
-    },
-];
 
 function DeliveryDetailReport() {
     const navigate = useNavigate();
@@ -329,19 +313,22 @@ function DeliveryDetailReport() {
             rowGroup: true,
             hide: true,
             sort: 'asc',
+            pinned: 'left',
             headerComponentParams: { displayName: "Tổ sản xuất" }
         },
         {
             headerName: "Mã chi tiết",
             field: "itemcode",
-            minWidth: 200,
+            width: 120,
             suppressHeaderMenuButton: true,
+            pinned: 'left',
             filter: true,
         },
         {
             headerName: "Tên chi tiết",
+            pinned: 'left',
             field: "itemname",
-            minWidth: 400,
+            minWidth: 360,
             suppressHeaderMenuButton: true,
             filter: true,
         },
@@ -349,18 +336,21 @@ function DeliveryDetailReport() {
             headerName: "Dày",
             field: "thickness",
             maxWidth: 80,
+            pinned: 'left',
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Rộng",
             field: "width",
             maxWidth: 80,
+            pinned: 'left',
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Dài",
             field: "height",
             maxWidth: 80,
+            pinned: 'left',
             suppressHeaderMenuButton: true,
         },
         { headerName: "ĐVT", field: "unit", maxWidth: 90, },
@@ -387,7 +377,7 @@ function DeliveryDetailReport() {
         },
         { headerName: "Người giao", field: "sender", filter: true, minWidth: 240 },
         { headerName: "Ngày giờ giao", field: "send_date",filter: true, minWidth: 200, },
-        { headerName: "Người nhận", field: "receiver", filter: true, minWidth: 240, filter: true,},
+        { headerName: "Người nhận", field: "receiver", filter: true, minWidth: 240},
         { headerName: "Ngày giờ nhận", field: "receive_date", filter: true, minWidth: 200, },
         { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200, filter: true,},
     ]);

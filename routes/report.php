@@ -13,5 +13,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/say-xepchosay', [ReportController::class, 'xepchosay']);
         Route::get('/cbg-sanluongtheothoigian', [ReportController::class, 'sanluongtheothoigian']);
         Route::get('/cbg-sanluongtheongay', [ReportController::class, 'sanluongtheongay']);
+        Route::get('/cbg-tonkhoxulyloi', [ReportController::class, 'defectStockChecking']);
     });
 });

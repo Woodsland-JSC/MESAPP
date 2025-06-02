@@ -54,6 +54,15 @@ const reportApi = {
         });
     },
 
+    getDefectStockCheckingReport: (plant) => {
+        const url = `/report/cbg-tonkhoxulyloi`;
+        return axiosClient().get(url, {
+            params: {
+                plant: plant,
+            }
+        });
+    },
+
     getCBGWoodDryingReport: (fromDate, toDate) => {
         const url = `/report/say-xepsay-cbg`;
         return axiosClient().get(url, {

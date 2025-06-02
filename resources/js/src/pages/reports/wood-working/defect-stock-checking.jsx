@@ -9,8 +9,6 @@ import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
-import { PiFilePdfBold } from "react-icons/pi";
-import { FiCheck } from "react-icons/fi";
 import "../../../assets/styles/index.css";
 import {
     FaArrowRotateLeft,
@@ -22,7 +20,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../../assets/styles/datepicker.css";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
+import {
+    Checkbox,
+    CheckboxGroup,
+    requiredChakraThemeKeys,
+} from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
@@ -34,7 +36,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import useAppContext from "../../../store/AppContext";
 
-function DefectResolution() {
+function DefectStockCheckingReport() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
@@ -68,39 +70,25 @@ function DefectResolution() {
 
     const getReportData = useCallback(async () => {
         let params = {
-            from_date: format(fromDate, "yyyy-MM-dd"),
-            to_date: format(toDate, "yyyy-MM-dd"),
             plant: selectedFactory,
         };
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDefectResolutionReport(
-                params.plant,
-                params.from_date,
-                params.to_date
+            const res = await reportApi.getDefectStockCheckingReport(
+                params.plant
             );
             const formattedData = res.map((item) => ({
-                week: item.week,
-                root_cause: item.NguonLoi,
-                root_place: item.NoiBaoLoi,
-                root_place_name: item.TenToBaoLoi,
-                defect_type: item.LoiLoai,
-                resolution: item.HXL,
-                itemname: item.ItemName,
-                thickness: Number(item.CDay),
-                width: Number(item.CRong),
-                height: Number(item.CDai),
+                id: item.id,
+                item_code: item.ItemCode,
+                sub_itemcode: item.SubItemCode,
                 quantity: parseInt(item.Quantity),
-                m3: item.M3,
-                sender: item.NguoiGiao,
-                send_date: item.created_at,
-                receiver: item.NguoiNhan,
-                defect_causing_team: item.ToGayRaLoi || "Không xác định",
-                receiving_team: item.ToChuyenVe,
-                m3sap: item.M3SAP,
-                handle_date: item.ngaynhan,
-                lsx_from: item.LSX,
+                created_at: item.created_at,
+                created_by: item.create_by,
+                base_qty: item.BaseQty,
+                warehouse: item.wareHouse,
+                on_hand: item.OnHand,
+                required_qty: item.requiredQty,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -110,7 +98,7 @@ function DefectResolution() {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedFactory]);
+    }, [selectedFactory]);
 
     useEffect(() => {
         const allFieldsFilled = selectedFactory && fromDate && toDate;
@@ -136,113 +124,98 @@ function DefectResolution() {
         gridRef.current.api.exportDataAsExcel();
     }, []);
 
-    const handleExportPDF = () => {
-        toast("Chức năng xuất PDF đang được phát triển.");
-    };
-
     // Row Data: The data to be displayed.
     const [rowData, setRowData] = useState([]);
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerName: "Tổ báo lỗi",
-            field: "root_place_name",
-            width: 150,
+            headerName: "Sản phẩm lỗi",
+            field: "item_code",
+            width: 120,
             suppressHeaderMenuButton: true,
             rowGroup: true,
             filter: true,
-            sort: "asc",
-            pinned: 'left',
             hide: true,
-            headerComponentParams: { displayName: "Tổ báo lỗi" },
+            headerComponentParams: { displayName: "Sản phẩm lỗi" },
         },
         {
-            headerName: "Tuần",
-            field: "week",
-            width: 70,
+            headerName: "Bán thành phẩm",
+            rowGroup: true,
+            field: "sub_itemcode",
+            width: 180,
+            hide: true,
             suppressHeaderMenuButton: true,
+            headerComponentParams: { displayName: "Bán thành phẩm" },
         },
         {
-            headerName: "Nơi báo lỗi",
-            field: "root_place",
+            headerName: "NotiID",
+            field: "id",
             width: 150,
             suppressHeaderMenuButton: true,
-            filter: true,
-            hide: true,
         },
         {
-            headerName: "Chi tiết cụm",
-            field: "itemname",
-            width: 350,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Dày",
-            field: "thickness",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Rộng",
-            field: "width",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Dài",
-            field: "height",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Số lượng",
+            headerName: "Số lượng lỗi",
             field: "quantity",
-            width: 100,
+            width: 150,
             suppressHeaderMenuButton: true,
-            valueFormatter: params => {
-                return params.value ? params.value.toLocaleString('en-US') : '';
-            },
-            aggFunc: 'sum',
-            headerComponentParams: { displayName: "Số lượng" }
-        },
-        // { headerName: "M3", field: "m3", width: 120 },
-        { 
-            headerName: "M3", 
-            field: "m3sap", 
-            width: 120, 
-            aggFunc: 'sum', 
-            headerComponentParams: { displayName: "M3" },
-            valueFormatter: params => {
-                return params.value ? params.value.toFixed(6) : '0.000000';
-            }, 
+            filter: true,
+            hide: true,
         },
         {
-            headerName: "Loại lỗi",
-            field: "defect_type",
+            headerName: "Ngày báo lỗi",
+            field: "created_at",
             width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
-            headerName: "Biện pháp xử lý",
-            field: "resolution",
-            width: 370,
+            headerName: "Người báo lỗi",
+            field: "created_by",
+            width: 250,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Số lượng lỗi",
+            field: "quantity",
+            width: 150,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Số lượng tồn",
+            field: "on_hand",
+            width: 150,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Kho",
+            field: "warehouse",
+            width: 150,
+            suppressHeaderMenuButton: true,
+        },
+        {
+            headerName: "Định mức",
+            field: "base_qty",
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
-            headerName: "Tổ gây ra lỗi",
-            field: "defect_causing_team",
-            width: 160,
+            headerName: "Số lượng còn thiếu",
+            field: "required_qty",
+            width: 200,
+            suppressHeaderMenuButton: true,
+            aggFunc: "sum",
+            headerComponentParams: { displayName: "Số lượng còn thiếu" },
+            valueFormatter: (params) => {
+                return new Intl.NumberFormat("en-US", {
+                    style: "decimal",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                    useGrouping: true,
+                }).format(params.value);
+            },
         },
-        { headerName: "Tổ chuyển về", field: "receiving_team", width: 160 },
-        { headerName: "Người tạo", field: "sender" },
-        { headerName: "Ngày tạo", field: "send_date" },
-        { headerName: "Người xử lý", field: "receiver" },
-        { headerName: "Ngày xử lý", field: "handle_date" },
-        { headerName: "LSX ghi nhận lỗi", field: "lsx_from" },
     ]);
 
     const groupDisplayType = "multipleColumns";
@@ -314,7 +287,7 @@ function DefectResolution() {
                                     Báo cáo chế biến gỗ
                                 </div>
                                 <div className="serif font-bold text-3xl">
-                                    Báo cáo biện pháp xử lý lỗi
+                                    Báo cáo tồn nguyên vật liệu xử lý lỗi
                                 </div>
                             </div>
                         </div>
@@ -358,58 +331,6 @@ function DefectResolution() {
                     <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
-                            <div className="flex space-x-3 w-1/4">
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Từ ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={fromDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setFromDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Đến ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={toDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setToDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                            </div>
                             <div className="flex space-x-3 w-3/4 px-3">
                                 <div className="col-span-1 w-full">
                                     <label
@@ -462,7 +383,7 @@ function DefectResolution() {
                                             }
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
-                                            grandTotalRow={"bottom"} 
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>
@@ -480,4 +401,4 @@ function DefectResolution() {
     );
 }
 
-export default DefectResolution;
+export default DefectStockCheckingReport;
