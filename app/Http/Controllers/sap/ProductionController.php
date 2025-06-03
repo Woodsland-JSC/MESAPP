@@ -1383,7 +1383,7 @@ class ProductionController extends Controller
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
-                        "U_UUID" => $request->$request->id,
+                        "U_UUID"=>$request->id,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
