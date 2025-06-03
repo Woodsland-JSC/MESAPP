@@ -1274,7 +1274,7 @@ class QCController extends Controller
 
             $output = '';
 
-            //4. Lấy dữ liệu xử lý lỗi từ request 
+            //4. Lấy dữ liệu xử lý lỗi từ request
             $loailoi = $request->loailoi['label'] ?? '';
             $huongxuly = $request->huongxuly['label'] ?? '';
             $teamBack = $request->teamBack['value'] ?? '';
@@ -1286,6 +1286,7 @@ class QCController extends Controller
             // 5. Tạo payload cho phiếu nhập
             $ReceiptData = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "U_UUID"=>$request->$request->id,
                 "U_LSX" => $data->LSX,
                 "U_TO" => $data->Team,
                 "U_LL" => $loailoi,
@@ -1331,7 +1332,11 @@ class QCController extends Controller
             $totalDocuments = count($dataIssues['SubItemQty']);
             $documentCounter = 0;
             foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'], Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name, Auth::user()->last_name . " " . Auth::user()->first_name, $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT));
+                $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'],
+                    Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    Auth::user()->last_name . " " . Auth::user()->first_name,
+                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT)
+                ,$request->id);
                 $documentCounter++;
                 $IssueData .= "Content-Type: application/http\n";
                 $IssueData .= "Content-Transfer-Encoding: binary\n\n";

@@ -1938,6 +1938,7 @@ class VCNController extends Controller
                     //data cho receipt
                     $dataReceipt[] = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                        "U_UUID"=>$request->id,
                         "U_LSX" => $data->LSX,
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
@@ -1975,7 +1976,7 @@ class VCNController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string);
+                $stockissue = $this->collectStockAllocate($string,$request->id);
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -2196,7 +2197,7 @@ class VCNController extends Controller
         return $requiredItems;
     }
 
-    function collectStockAllocate($stringIssue)
+    function collectStockAllocate($stringIssue,$id)
     {
         $conDB = (new ConnectController)->connect_sap();
         //lấy danh sách sản phẩm cần xuất
@@ -2230,6 +2231,7 @@ class VCNController extends Controller
 
             $data[] = [
                 'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
+                "U_UUID"=>$id,
                 'DocumentLines' => [],
                 'DocEntry' => $docEntry
 
@@ -2355,6 +2357,7 @@ class VCNController extends Controller
 
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "U_UUID"=>$request->id,
                     "U_LSX" => $data->LSX,
                     "U_TO" => $data->Team,
                     "U_LL" => $loailoi,
@@ -2416,7 +2419,7 @@ class VCNController extends Controller
                         $data->FatherCode . " LSX." . $data->LSX
                 ], 500);
             }
-            $stockissue = $this->collectStockAllocate($string);
+            $stockissue = $this->collectStockAllocate($string, $request->id);
             $dataSendPayload = [
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
@@ -2684,7 +2687,7 @@ class VCNController extends Controller
             foreach ($dataAllocateIssue as $allocate) {
                 $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
             }
-            $stockissue = $this->collectStockAllocate($string);
+            $stockissue = $this->collectStockAllocate($string, $request->id);
             //lấy data receipt detail
             $dataReceipt = chiTietRong::where('baseID', $request->id)->where('type', 0)->get();
             $allocates = [];
@@ -2726,6 +2729,7 @@ class VCNController extends Controller
                         // Otherwise, create a new entry for this DocEntry with DocumentLines
                         $allocates[$docEntry] = [
                             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                            "U_UUID"=>$request->id,
                             // "DocEntry" => $docEntry,
                             // "SPDICH" => $allocate['SPDICH'],
                             // "Version" => $allocate['Version'],
@@ -2876,7 +2880,7 @@ class VCNController extends Controller
                     foreach ($dataAllocateIssue as $allocate) {
                         $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
                     }
-                    $stockissue = $this->collectStockAllocate($string);
+                    $stockissue = $this->collectStockAllocate($string, $request->id);
                 };
             }
             // if( )
@@ -2907,6 +2911,7 @@ class VCNController extends Controller
             foreach ($newAllocates as $allocate) {
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                    "U_UUID"=>$request->id,
                     "U_LSX" => $data->LSX,
                     "U_TO" => $data->Team,
                     "U_LL" => $loailoi,
