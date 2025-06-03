@@ -2016,15 +2016,15 @@ class VCNController extends Controller
 
                     // Lặp qua các phần của phản hồi để trích xuất thông tin
                     foreach ($parts as $part) {
-                        if (strpos($part, 'ReceiptFromProduction') !== false) {
-                            // Trích xuất thông tin phiếu ReceiptFromProduction
+                        if (strpos($part, '"DocEntry"') !== false) {
                             preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
                             preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
                             if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
                                 $receiptFromProduction = [
-                                    'DocEntry' => $entryMatches[1],
-                                    'DocNum' => $numMatches[1]
+                                    'DocEntry' => (int)$entryMatches[1],
+                                    'DocNum' => (int)$numMatches[1],
                                 ];
+                                break;
                             }
                         }
                     }

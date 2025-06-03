@@ -1383,7 +1383,7 @@ class ProductionController extends Controller
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
-                        "U_UUID"=>$request->id,
+                        "U_UUID" => $request->id,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
@@ -1476,15 +1476,15 @@ class ProductionController extends Controller
 
                             // Lặp qua các phần của phản hồi để trích xuất thông tin
                             foreach ($parts as $part) {
-                                if (strpos($part, 'ReceiptFromProduction') !== false) {
-                                    // Trích xuất thông tin phiếu ReceiptFromProduction
+                                if (strpos($part, '"DocEntry"') !== false) {
                                     preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
                                     preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
                                     if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
                                         $receiptFromProduction = [
-                                            'DocEntry' => $entryMatches[1],
-                                            'DocNum' => $numMatches[1]
+                                            'DocEntry' => (int)$entryMatches[1],
+                                            'DocNum' => (int)$numMatches[1],
                                         ];
+                                        break;
                                     }
                                 }
                             }
@@ -1513,7 +1513,7 @@ class ProductionController extends Controller
 
                             DB::commit();
                             break;
-                            
+
                         default:
                             // Nếu không khớp status nào cả
                             preg_match('/\{.*\}/s', $resBody, $matches);
