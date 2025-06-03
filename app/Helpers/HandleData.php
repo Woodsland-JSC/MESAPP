@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Auth;
 if (!function_exists('playloadBatch')) {
     function playloadBatch($data)
     {
-
-
         $uid = uniqid();
         $batchBoundary = '--batch_36522ad7-fc75-4b56-8c71-56071383e77c_' . $uid;
         $changeSetBoundary = 'changeset';
@@ -67,10 +65,10 @@ if (!function_exists('playloadIssueCBG')) {
         }
         // Extract the desired values
         $itemType = $row['ItemType'];
-        $stock = $row['Stock'];
-        if ($stock < $Qty) {
-            throw new \App\Exceptions\CustomException('Số lượng tồn ' . $ItemCode . ' tại kho ' . $WarehouseCode . ' không đủ để xuất.');
-        }
+        // $stock = $row['Stock'];
+        // if ($stock < $Qty) {
+        //     throw new \App\Exceptions\CustomException('Số lượng tồn ' . $ItemCode . ' tại kho ' . $WarehouseCode . ' không đủ để xuất.');
+        // }
         //2.allocate data
         $query = 'call "USP_AllocateIssue"(?,?,?,?)';
         $stmt = odbc_prepare($conDB, $query);

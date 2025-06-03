@@ -41,6 +41,8 @@ class notireceiptVCN extends Model
     'isQCConfirmed',
     'CreatedBy',
     'ProdType',
+    'DocEntry',
+    'document_log',
     'version',
     'isPushSAP'  ,
     'loinhamay',

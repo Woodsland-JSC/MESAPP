@@ -1383,7 +1383,7 @@ class ProductionController extends Controller
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
-                        "U_UUID"=>$request->$request->id,
+                        "U_UUID" => $request->$request->id,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
@@ -1431,7 +1431,7 @@ class ProductionController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string,$request->id);
+                $stockissue = $this->collectStockAllocate($string, $request->id);
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -1450,6 +1450,7 @@ class ProductionController extends Controller
                     'body' => $payload['payload'],
                     // Đảm bảo $pl được định dạng đúng cách với boundary
                 ]);
+
                 $statusCode = $response->getStatusCode();
                 $resBody = $response->getBody()->getContents();
                 try {
@@ -1464,43 +1465,74 @@ class ProductionController extends Controller
                             throw new \Exception('SAP authen ' . $resBody);
 
                         case 202:
-                            if (strpos($resBody, 'ETag') !== false) {
-                                // Update thành công
-                                SanLuong::where('id', $data->id)->update(['Status' => 1]);
-                                notireceipt::where('id', $data->notiID)->update([
-                                    'confirm' => 1,
-                                    'ObjType' => 202,
-                                    'confirmBy' => Auth::user()->id,
-                                    'confirm_at' => Carbon::now()->format('YmdHis'),
-                                ]);
-                                awaitingstocks::where('notiId', $data->notiID)->delete();
+                            // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
+                            if (strpos($resBody, 'ETag') === false) {
+                                return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $resBody], 500);
+                            }
 
-                                DB::commit();
-                            } else {
-                                // Lỗi từ SAP nhưng trả JSON string
-                                preg_match('/\{.*\}/s', $resBody, $matches);
-                                if (isset($matches[0])) {
-                                    $errorData = json_decode($matches[0], true);
-                                    if (isset($errorData['error'])) {
-                                        throw new \Exception(
-                                            'SAP code: ' . $errorData['error']['code'] .
-                                            ' chi tiết: ' . $errorData['error']['message']['value']
-                                        );
+                            // Tách các phần của batch response
+                            $parts = preg_split('/--batch.*?\r\n/', $resBody);
+                            $receiptFromProduction = null;
+
+                            // Lặp qua các phần của phản hồi để trích xuất thông tin
+                            foreach ($parts as $part) {
+                                if (strpos($part, 'ReceiptFromProduction') !== false) {
+                                    // Trích xuất thông tin phiếu ReceiptFromProduction
+                                    preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                                    preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                                    if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                                        $receiptFromProduction = [
+                                            'DocEntry' => $entryMatches[1],
+                                            'DocNum' => $numMatches[1]
+                                        ];
                                     }
                                 }
                             }
-                            break;
 
+                            // Kiểm tra xem có thông tin phiếu ReceiptFromProduction không
+                            if (empty($receiptFromProduction)) {
+                                throw new \Exception("Không thể trích xuất thông tin phiếu ReceiptFromProduction từ phản hồi SAP. Response: " . json_encode($resBody));
+                            }
+
+                            // Cấu trúc dữ liệu document_log
+                            $documentLog = [
+                                'ReceiptFromProduction' => $receiptFromProduction,
+                                'timestamp' => now()->toDateTimeString()
+                            ];
+
+                            // Update thành công
+                            SanLuong::where('id', $data->id)->update(['Status' => 1]);
+                            notireceipt::where('id', $data->notiID)->update([
+                                'confirm' => 1,
+                                'ObjType' => 202,
+                                'confirmBy' => Auth::user()->id,
+                                'confirm_at' => Carbon::now()->format('YmdHis'),
+                                'document_log' => json_encode($documentLog)
+                            ]);
+                            awaitingstocks::where('notiId', $data->notiID)->delete();
+
+                            DB::commit();
+                            break;
+                            
                         default:
                             // Nếu không khớp status nào cả
-                            throw new \Exception('Không xác định được trạng thái phản hồi từ SAP.'. $resBody);
-                     }
+                            preg_match('/\{.*\}/s', $resBody, $matches);
+                            if (isset($matches[0])) {
+                                $errorData = json_decode($matches[0], true);
+                                if (isset($errorData['error'])) {
+                                    throw new \Exception(
+                                        'SAP code: ' . $errorData['error']['code'] .
+                                            ' chi tiết: ' . $errorData['error']['message']['value']
+                                    );
+                                }
+                            }
+                    }
 
                     // Nếu là công đoạn TP thì dispatch job
                     if ($request->CongDoan === 'TP' && $U_Qty != 0) {
                         $this->dispatch(new SyncSLDGToSAP($U_Item, $U_Qty, Auth::user()->branch, now()->format('Ymd')));
                     }
-                     return response()->json('Yêu cầu được thực hiện thành công', 200);
+                    return response()->json('Yêu cầu được thực hiện thành công', 200);
                 } finally {
                     // Đảm bảo luôn clear cache, kể cả khi throw exception
                     Cache::forget($lockKey);
@@ -1671,7 +1703,7 @@ class ProductionController extends Controller
         return $requiredItems;
     }
 
-    function collectStockAllocate($stringIssue,$id)
+    function collectStockAllocate($stringIssue, $id)
     {
         $conDB = (new ConnectController)->connect_sap();
         //lấy danh sách sản phẩm cần xuất
@@ -1704,7 +1736,7 @@ class ProductionController extends Controller
         foreach ($uniqueDocEntries as $docEntry) {
             $data[] = [
                 'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
-                "U_UUID"=>$id,
+                "U_UUID" => $id,
                 'DocumentLines' => [],
                 'DocEntry' => $docEntry
             ];

@@ -1938,7 +1938,7 @@ class VCNController extends Controller
                     //data cho receipt
                     $dataReceipt[] = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "U_UUID"=>$request->id,
+                        "U_UUID" => $request->id,
                         "U_LSX" => $data->LSX,
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
@@ -1976,7 +1976,7 @@ class VCNController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string,$request->id);
+                $stockissue = $this->collectStockAllocate($string, $request->id);
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -1993,6 +1993,8 @@ class VCNController extends Controller
                     ],
                     'body' => $payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
                 ]);
+
+                $res = $response->getBody()->getContents();
                 if ($response->getStatusCode() == 400) {
                     throw new \Exception('SAP ERROR Incomplete batch request body.');
                 }
@@ -2003,32 +2005,63 @@ class VCNController extends Controller
                     throw new \Exception('SAP authen ' . $response->getBody()->getContents());
                 }
                 if ($response->getStatusCode() == 202) {
-                    $res = $response->getBody()->getContents();
-                    // kiểm tra sussess hay faild hơi quăng nha
-                    if (strpos($res, 'ETag') !== false) {
 
-                        notireceiptVCN::where('id', $request->id)->update([
-                            'confirm' => 1,
-                            'confirmBy' => Auth::user()->id,
-                            'confirm_at' => Carbon::now()->format('YmdHis')
-                        ]);
-                        awaitingstocksvcn::where('notiId', $request->id)->delete();
-                        DB::commit();
-                    } else {
-                        preg_match('/\{.*\}/s', $res, $matches);
-                        if (isset($matches[0])) {
-                            $jsonString = $matches[0];
-                            $errorData = json_decode($jsonString, true);
+                    // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
+                    if (strpos($res, 'ETag') === false) {
+                        return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
+                    }
+                    // Tách các phần của batch response
+                    $parts = preg_split('/--batch.*?\r\n/', $res);
+                    $receiptFromProduction = null;
 
-                            // Khởi tạo biến $errorMessage với giá trị mặc định
-                            $errorCode = '';
-                            $errorMessage = 'Không có tìm thấy thông tin lỗi từ SAP';
-
-                            if (isset($errorData['error'])) {
-                                $errorCode = $errorData['error']['code'];
-                                $errorMessage = $errorData['error']['message']['value'];
-                                throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
+                    // Lặp qua các phần của phản hồi để trích xuất thông tin
+                    foreach ($parts as $part) {
+                        if (strpos($part, 'ReceiptFromProduction') !== false) {
+                            // Trích xuất thông tin phiếu ReceiptFromProduction
+                            preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                            preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                            if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                                $receiptFromProduction = [
+                                    'DocEntry' => $entryMatches[1],
+                                    'DocNum' => $numMatches[1]
+                                ];
                             }
+                        }
+                    }
+
+                    // Kiểm tra xem có thông tin phiếu ReceiptFromProduction không
+                    if (empty($receiptFromProduction)) {
+                        throw new \Exception("Không thể trích xuất thông tin phiếu ReceiptFromProduction từ phản hồi SAP. Response: " . json_encode($res));
+                    }
+
+                    // Cấu trúc dữ liệu document_log
+                    $documentLog = [
+                        'ReceiptFromProduction' => $receiptFromProduction,
+                        'timestamp' => now()->toDateTimeString()
+                    ];
+
+                    notireceiptVCN::where('id', $request->id)->update([
+                        'confirm' => 1,
+                        'confirmBy' => Auth::user()->id,
+                        'confirm_at' => Carbon::now()->format('YmdHis'),
+                        'document_log' => json_encode($documentLog)
+                    ]);
+                    awaitingstocksvcn::where('notiId', $request->id)->delete();
+                    DB::commit();
+                } else {
+                    preg_match('/\{.*\}/s', $res, $matches);
+                    if (isset($matches[0])) {
+                        $jsonString = $matches[0];
+                        $errorData = json_decode($jsonString, true);
+
+                        // Khởi tạo biến $errorMessage với giá trị mặc định
+                        $errorCode = '';
+                        $errorMessage = 'Không có tìm thấy thông tin lỗi từ SAP';
+
+                        if (isset($errorData['error'])) {
+                            $errorCode = $errorData['error']['code'];
+                            $errorMessage = $errorData['error']['message']['value'];
+                            throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
                         }
                     }
                 }
@@ -2197,7 +2230,7 @@ class VCNController extends Controller
         return $requiredItems;
     }
 
-    function collectStockAllocate($stringIssue,$id)
+    function collectStockAllocate($stringIssue, $id)
     {
         $conDB = (new ConnectController)->connect_sap();
         //lấy danh sách sản phẩm cần xuất
@@ -2231,7 +2264,7 @@ class VCNController extends Controller
 
             $data[] = [
                 'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
-                "U_UUID"=>$id,
+                "U_UUID" => $id,
                 'DocumentLines' => [],
                 'DocEntry' => $docEntry
 
@@ -2357,7 +2390,7 @@ class VCNController extends Controller
 
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "U_UUID"=>$request->id,
+                    "U_UUID" => $request->id,
                     "U_LSX" => $data->LSX,
                     "U_TO" => $data->Team,
                     "U_LL" => $loailoi,
@@ -2436,6 +2469,7 @@ class VCNController extends Controller
                 ],
                 'body' => $payload['payload'], // Đảm bảo $pl được định dạng đúng cách với boundary
             ]);
+            $res = $response->getBody()->getContents();
             if ($response->getStatusCode() == 400) {
                 throw new \Exception('SAP ERROR Incomplete batch request body.');
             }
@@ -2446,44 +2480,89 @@ class VCNController extends Controller
                 throw new \Exception('SAP authen ' . $response->getBody()->getContents());
             }
             if ($response->getStatusCode() == 202) {
-                $res = $response->getBody()->getContents();
-                // kiểm tra sussess hay faild hơi quăng nha
-                if (strpos($res, 'ETag') !== false) {
-                    awaitingstocksvcn::where('notiId', $request->id)->delete();
-                    notireceiptVCN::where('id', $request->id)->update([
-                        'confirm' => 1,
-                        'confirmBy' => Auth::user()->id,
-                        'confirm_at' => Carbon::now()->format('YmdHis'),
-                        'openQty' => $data->openQty - $request->Qty,
-                        'isQCConfirmed' => 1,
-                    ]);
-                    DB::commit();
-                    HistoryQC::dispatch(
-                        $type,
-                        $request->id . "VCN",
-                        $data->ItemCode,
-                        $qtypush,
-                        $whs,
-                        $qtypush - $request->Qty,
-                        'VCN',
-                        $data->Team,
-                        $loailoi,
-                        $huongxuly,
-                        $rootCause,
-                        $subCode,
-                        $request->note,
-                        $teamBack
-                    );
-                } else {
-                    preg_match('/\{.*\}/s', $res, $matches);
-                    if (isset($matches[0])) {
-                        $jsonString = $matches[0];
-                        $errorData = json_decode($jsonString, true);
-                        if (isset($errorData['error'])) {
-                            $errorCode = $errorData['error']['code'];
-                            $errorMessage = $errorData['error']['message']['value'];
-                            throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
+                // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
+                if (strpos($res, 'ETag') === false) {
+                    return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
+                }
+
+                // Tách các phần của batch response
+                $parts = preg_split('/--batch.*?\r\n/', $res);
+
+                $goodsReceipt = null;
+                $goodsIssues = null;
+
+                // Lặp qua các phần của phản hồi để trích xuất thông tin
+                foreach ($parts as $part) {
+                    if (strpos($part, 'InventoryGenEntries') !== false) {
+                        // Trích xuất thông tin phiếu nhập
+                        preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                        preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                        if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                            $goodsReceipt = [
+                                'DocEntry' => $entryMatches[1],
+                                'DocNum' => $numMatches[1]
+                            ];
                         }
+                    } elseif (strpos($part, 'InventoryGenExits') !== false) {
+                        // Trích xuất thông tin phiếu xuất
+                        preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
+                        preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
+                        if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
+                            $goodsIssues[] = [
+                                'DocEntry' => $entryMatches[1],
+                                'DocNum' => $numMatches[1]
+                            ];
+                        }
+                    }
+                }
+
+                // Kiểm tra xem có thông tin phiếu nhập không
+                if (empty($goodsReceipt)) {
+                    throw new \Exception("Không thể trích xuất thông tin phiếu nhập từ phản hồi SAP. Response: " . json_encode($res));
+                }
+
+                // Cấu trúc dữ liệu document_log
+                $documentLog = [
+                    'Goods_Receipt' => $goodsReceipt,
+                    'Goods_Issue' => $goodsIssues,
+                    'timestamp' => now()->toDateTimeString()
+                ];
+
+                awaitingstocksvcn::where('notiId', $request->id)->delete();
+                notireceiptVCN::where('id', $request->id)->update([
+                    'confirm' => 1,
+                    'confirmBy' => Auth::user()->id,
+                    'confirm_at' => Carbon::now()->format('YmdHis'),
+                    'openQty' => $data->openQty - $request->Qty,
+                    'document_log' => json_encode($documentLog),
+                    'isQCConfirmed' => 1,
+                ]);
+                DB::commit();
+                HistoryQC::dispatch(
+                    $type,
+                    $request->id . "VCN",
+                    $data->ItemCode,
+                    $qtypush,
+                    $whs,
+                    $qtypush - $request->Qty,
+                    'VCN',
+                    $data->Team,
+                    $loailoi,
+                    $huongxuly,
+                    $rootCause,
+                    $subCode,
+                    $request->note,
+                    $teamBack
+                );
+            } else {
+                preg_match('/\{.*\}/s', $res, $matches);
+                if (isset($matches[0])) {
+                    $jsonString = $matches[0];
+                    $errorData = json_decode($jsonString, true);
+                    if (isset($errorData['error'])) {
+                        $errorCode = $errorData['error']['code'];
+                        $errorMessage = $errorData['error']['message']['value'];
+                        throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
                     }
                 }
             }
@@ -2729,7 +2808,7 @@ class VCNController extends Controller
                         // Otherwise, create a new entry for this DocEntry with DocumentLines
                         $allocates[$docEntry] = [
                             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                            "U_UUID"=>$request->id,
+                            "U_UUID" => $request->id,
                             // "DocEntry" => $docEntry,
                             // "SPDICH" => $allocate['SPDICH'],
                             // "Version" => $allocate['Version'],
@@ -2911,7 +2990,7 @@ class VCNController extends Controller
             foreach ($newAllocates as $allocate) {
                 $dataReceipt[]  = [
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "U_UUID"=>$request->id,
+                    "U_UUID" => $request->id,
                     "U_LSX" => $data->LSX,
                     "U_TO" => $data->Team,
                     "U_LL" => $loailoi,

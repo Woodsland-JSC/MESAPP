@@ -1216,7 +1216,6 @@ class QCController extends Controller
         issueProduction::dispatch($ItemCode, $Quantity, $WarehouseCode, $branch);
     }
 
-
     function acceptTeamQCCBGV2(Request $request)
     {
         // 1. Check dữ liệu đầu vào
@@ -1390,7 +1389,7 @@ class QCController extends Controller
             if ($response->getStatusCode() == 202) {
                 // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                 if (strpos($res, 'ETag') === false) {
-                    throw new \Exception("SAP không phản hồi thành công.");
+                    return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
                 }
 
                 // Tách các phần của batch response
