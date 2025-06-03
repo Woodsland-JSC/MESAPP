@@ -45,7 +45,7 @@ if (!function_exists('playloadBatch')) {
     }
 }
 if (!function_exists('playloadIssueCBG')) {
-    function playloadIssueCBG($ItemCode, $Qty, $WarehouseCode, $branch, $LSX, $TO, $NGIAO, $NNHAN, $QCNUMBER)
+    function playloadIssueCBG($ItemCode, $Qty, $WarehouseCode, $branch, $LSX, $TO, $NGIAO, $NNHAN, $QCNUMBER,$id)
     {
         $conDB = (new ConnectController)->connect_sap();
 
@@ -107,6 +107,7 @@ if (!function_exists('playloadIssueCBG')) {
         if ($itemType == 0) {
             $body = [
                 "BPL_IDAssignedToInvoice" =>  Auth::user()->branch,
+                "U_UUID"=>$id,
                 "U_LSX" => $LSX,
                 "U_TO" => $TO,
                 "U_NGiao" => $NGIAO,
@@ -125,6 +126,7 @@ if (!function_exists('playloadIssueCBG')) {
         } else if ($itemType == 1) {
             $body = [
                 "BPL_IDAssignedToInvoice" =>  Auth::user()->branch,
+                "U_UUID"=>$id,
                 "U_LSX" => $LSX,
                 "U_TO" => $TO,
                 "U_NGiao" => $NGIAO,
@@ -144,6 +146,7 @@ if (!function_exists('playloadIssueCBG')) {
         } else if ($itemType == 2) {
             $body = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "U_UUID"=>$id,
                 "U_LSX" => $LSX,
                 "U_TO" => $TO,
                 "U_NGiao" => $NGIAO,

@@ -1383,6 +1383,7 @@ class ProductionController extends Controller
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
+                        "U_UUID"=>$request->$request->id,
                         "DocumentLines" => [[
                             "Quantity" => $allocate['Allocate'],
                             "TransactionType" => "C",
@@ -1430,7 +1431,7 @@ class ProductionController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string);
+                $stockissue = $this->collectStockAllocate($string,$request->id);
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -1670,7 +1671,7 @@ class ProductionController extends Controller
         return $requiredItems;
     }
 
-    function collectStockAllocate($stringIssue)
+    function collectStockAllocate($stringIssue,$id)
     {
         $conDB = (new ConnectController)->connect_sap();
         //lấy danh sách sản phẩm cần xuất
@@ -1703,6 +1704,7 @@ class ProductionController extends Controller
         foreach ($uniqueDocEntries as $docEntry) {
             $data[] = [
                 'BPL_IDAssignedToInvoice' =>  Auth::user()->branch,
+                "U_UUID"=>$id,
                 'DocumentLines' => [],
                 'DocEntry' => $docEntry
             ];
