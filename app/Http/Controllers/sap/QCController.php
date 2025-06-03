@@ -1285,7 +1285,7 @@ class QCController extends Controller
             // 5. Tạo payload cho phiếu nhập
             $ReceiptData = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "U_UUID"=>$request->$request->id,
+                "U_UUID"=>$request->id,
                 "U_LSX" => $data->LSX,
                 "U_TO" => $data->Team,
                 "U_LL" => $loailoi,
