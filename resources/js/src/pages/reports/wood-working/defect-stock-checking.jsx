@@ -82,6 +82,8 @@ function DefectStockCheckingReport() {
                 id: item.id,
                 item_code: item.ItemCode,
                 sub_itemcode: item.SubItemCode,
+                team: item.Team,
+                cong_doan: item.CongDoan,
                 quantity: parseInt(item.Quantity),
                 created_at: item.created_at,
                 created_by: item.create_by,
@@ -130,30 +132,46 @@ function DefectStockCheckingReport() {
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerName: "Sản phẩm lỗi",
-            field: "item_code",
-            width: 120,
+            headerName: "Tổ báo lỗi",
+            field: "cong_doan",
+            minWidth: 200,
             suppressHeaderMenuButton: true,
             rowGroup: true,
             filter: true,
             hide: true,
-            headerComponentParams: { displayName: "Sản phẩm lỗi" },
-        },
-        {
-            headerName: "Bán thành phẩm",
-            rowGroup: true,
-            field: "sub_itemcode",
-            width: 180,
-            hide: true,
-            suppressHeaderMenuButton: true,
-            headerComponentParams: { displayName: "Bán thành phẩm" },
+            headerComponentParams: { displayName: "Tổ báo lỗi" },
         },
         {
             headerName: "NotiID",
             field: "id",
             width: 150,
+            rowGroup: true,
+            hide: true,
             suppressHeaderMenuButton: true,
+            headerComponentParams: { displayName: "NotiID" },
         },
+        {
+            headerName: "ItemCode",
+            field: "item_code",
+            width: 120,
+            suppressHeaderMenuButton: true,
+            rowGroup: true,
+            hide: true,
+            filter: true,
+            
+            headerComponentParams: { displayName: "ItemCode" },
+        },
+        {
+            headerName: "SubItemCode",
+            // rowGroup: true,
+            field: "sub_itemcode",
+            width: 180,
+            // hide: true,
+            sort: "asc",
+            suppressHeaderMenuButton: true,
+            // headerComponentParams: { displayName: "Bán thành phẩm" },
+        },
+
         {
             headerName: "Số lượng lỗi",
             field: "quantity",
@@ -165,7 +183,7 @@ function DefectStockCheckingReport() {
         {
             headerName: "Ngày báo lỗi",
             field: "created_at",
-            width: 150,
+            width: 180,
             suppressHeaderMenuButton: true,
             filter: true,
         },
@@ -206,7 +224,7 @@ function DefectStockCheckingReport() {
             width: 200,
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
-            headerComponentParams: { displayName: "Số lượng còn thiếu" },
+            headerComponentParams: { displayName: "Khuyến nghị bổ sung" },
             valueFormatter: (params) => {
                 return new Intl.NumberFormat("en-US", {
                     style: "decimal",
@@ -230,12 +248,6 @@ function DefectStockCheckingReport() {
         return {
             flex: 1,
             minWidth: 150,
-        };
-    }, []);
-
-    const autoGroupColumnDef = useMemo(() => {
-        return {
-            minWidth: 300,
         };
     }, []);
 
@@ -378,9 +390,6 @@ function DefectStockCheckingReport() {
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
-                                            autoGroupColumnDef={
-                                                autoGroupColumnDef
-                                            }
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
                                             grandTotalRow={"bottom"}

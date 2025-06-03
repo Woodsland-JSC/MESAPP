@@ -538,27 +538,40 @@ class ReportController extends Controller
     {
         $plantFilter = $request->input('plant');
 
-        $notiData = DB::table('notireceipt as n')
+        $notiData = DB::table('sanluong as a')
+            ->join('notireceipt as b', function ($join) {
+                $join->on('a.id', '=', 'b.baseID')
+                    ->where('b.deleted', '=', 0);
+            })
+            ->join('users as c', 'a.create_by', '=', 'c.id')
             ->select(
-                'n.id',
-                'n.Quantity',
-                'n.SPDich',
-                'n.ItemCode',
-                'n.SubItemCode',
-                'n.SubItemName',
-                'n.created_at',
-                'n.type',
-                's.create_by',
-                'u.first_name',
-                'u.last_name',
-                'u.plant',
-                'u.branch'
+                'a.ItemCode',
+                'a.ItemName',
+                'b.SubItemName',
+                'b.SubItemCode',
+                'a.Team',
+                'a.CongDoan',
+                DB::raw('(b.openQty - (
+                SELECT COALESCE(SUM(quantity), 0)
+                FROM historySL
+                WHERE itemchild = CASE WHEN b.SubItemCode IS NOT NULL THEN b.SubItemCode ELSE b.ItemCode END
+                AND isQualityCheck = 1
+                AND notiId = b.id
+            )) as Quantity'),
+                'a.created_at',
+                'c.first_name',
+                'c.last_name',
+                'b.text',
+                'b.id',
+                'c.plant',
+                'c.branch',
+                DB::raw('0 as type'),
+                'b.confirm'
             )
-            ->leftJoin('sanluong as s', 'n.baseID', '=', 's.id')
-            ->leftJoin('users as u', 's.create_by', '=', 'u.id')
-            ->where('n.type', 1)
-            ->where('n.confirm', 0)
-            ->when($plantFilter, fn($query) => $query->where('u.plant', $plantFilter))
+            ->where('b.confirm', '=', 0)
+            ->where('b.type', '=', 1)
+            ->havingRaw('Quantity > 0')
+            ->when($plantFilter, fn($query) => $query->where('c.plant', $plantFilter))
             ->get();
 
         $result = [];
@@ -570,60 +583,63 @@ class ReportController extends Controller
                 $sapData = $this->getDefectDataFromSAP($noti->ItemCode, $noti->SubItemCode);
 
                 if ($noti->SubItemCode !== null) {
-                    $requiredQty = ceil((float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity * (float)$sapData['SubItemQty'][0]['BaseQty']));
+                    $rawQty = (float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity * (float)$sapData['SubItemQty'][0]['BaseQty']);
+                    $requiredQty = $rawQty < 0 ? abs(ceil($rawQty)) : 0;
 
-                    if ($requiredQty < 0) {
+                    $result[] = [
+                        'id' => $noti->id,
+                        'Quantity' => $noti->Quantity,
+                        'ItemCode' => $noti->ItemCode,
+                        'ItemName' => $noti->ItemName,
+                        'SubItemCode' => $noti->SubItemCode,
+                        'SubItemName' => $noti->SubItemName,
+                        'Team' => $noti->Team,
+                        'CongDoan' => $noti->CongDoan,
+                        'created_at' => $noti->created_at,
+                        'type' => $noti->type,
+                        'wareHouse' => $sapData['SubItemWhs'],
+                        'BaseQty' => $sapData['SubItemQty'][0]['BaseQty'],
+                        'OnHand' => $sapData['SubItemQty'][0]['OnHand'],
+                        'plant' => $noti->plant,
+                        'branch' => $noti->branch,
+                        'create_by' => $createByName,
+                        'requiredQty' => (int)$requiredQty
+                    ];
+                } else {
+                    foreach ($sapData['SubItemQty'] as $subItem) {
+                        $rawQty = (float)$subItem['OnHand'] - ((float)$noti->Quantity * (float)$subItem['BaseQty']);
+                        $requiredQty = $rawQty < 0 ? abs(ceil($rawQty)) : 0;
                         $result[] = [
                             'id' => $noti->id,
                             'Quantity' => $noti->Quantity,
-                            'SPDich' => $noti->SPDich,
                             'ItemCode' => $noti->ItemCode,
-                            'SubItemCode' => $noti->SubItemCode,
+                            'ItemName' => $noti->ItemName,
+                            'SubItemCode' => $subItem['SubItemCode'],
                             'SubItemName' => $noti->SubItemName,
+                            'Team' => $noti->Team,
+                            'CongDoan' => $noti->CongDoan,
                             'created_at' => $noti->created_at,
                             'type' => $noti->type,
                             'wareHouse' => $sapData['SubItemWhs'],
-                            'BaseQty' => $sapData['SubItemQty'][0]['BaseQty'],
-                            'OnHand' => $sapData['SubItemQty'][0]['OnHand'],
+                            'BaseQty' => $subItem['BaseQty'],
+                            'OnHand' => $subItem['OnHand'],
                             'plant' => $noti->plant,
                             'branch' => $noti->branch,
                             'create_by' => $createByName,
                             'requiredQty' => (int)$requiredQty
                         ];
                     }
-                } else {
-                    foreach ($sapData['SubItemQty'] as $subItem) {
-                        $requiredQty = ceil((float)$subItem['OnHand'] - ((float)$noti->Quantity * (float)$subItem['BaseQty']));
-
-                        if ($requiredQty < 0) {
-                            $result[] = [
-                                'id' => $noti->id,
-                                'Quantity' => $noti->Quantity,
-                                'SPDich' => $noti->SPDich,
-                                'ItemCode' => $noti->ItemCode,
-                                'SubItemCode' => $subItem['SubItemCode'],
-                                'SubItemName' => $noti->SubItemName,
-                                'created_at' => $noti->created_at,
-                                'type' => $noti->type,
-                                'wareHouse' => $sapData['SubItemWhs'],
-                                'BaseQty' => $subItem['BaseQty'],
-                                'OnHand' => $subItem['OnHand'],
-                                'plant' => $noti->plant,
-                                'branch' => $noti->branch,
-                                'create_by' => $createByName,
-                                'requiredQty' => (int)$requiredQty
-                            ];
-                        }
-                    }
                 }
             } catch (\Exception $e) {
                 $result[] = [
                     'id' => $noti->id,
                     'Quantity' => $noti->Quantity,
-                    'SPDich' => $noti->SPDich,
                     'ItemCode' => $noti->ItemCode,
+                    'ItemName' => $noti->ItemName,
                     'SubItemCode' => $noti->SubItemCode,
                     'SubItemName' => $noti->SubItemName,
+                    'Team' => $noti->Team,
+                    'CongDoan' => $noti->CongDoan,
                     'created_at' => $noti->created_at,
                     'type' => $noti->type,
                     'plant' => $noti->plant,
