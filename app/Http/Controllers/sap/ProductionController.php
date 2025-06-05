@@ -1467,7 +1467,24 @@ class ProductionController extends Controller
                         case 202:
                             // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                             if (strpos($resBody, 'ETag') === false) {
-                                return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $resBody], 500);
+                                $errorMessage = 'Không rõ lỗi';
+
+                                // Cố gắng tách nội dung JSON lỗi trong body
+                                preg_match('/\{.*\}/s', $resBody, $matches);
+                                if (isset($matches[0])) {
+                                    $jsonString = $matches[0];
+                                    $errorData = json_decode($jsonString, true);
+
+                                    if (isset($errorData['error']['message']['value'])) {
+                                        $errorMessage = $errorData['error']['message']['value'];
+                                    } elseif (isset($errorData['error']['message'])) {
+                                        $errorMessage = $errorData['error']['message'];
+                                    }
+                                }
+
+                                return response()->json([
+                                    'error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ: ' . $errorMessage
+                                ], 500);
                             }
 
                             // Tách các phần của batch response
@@ -1491,7 +1508,24 @@ class ProductionController extends Controller
 
                             // Kiểm tra xem có thông tin phiếu ReceiptFromProduction không
                             if (empty($receiptFromProduction)) {
-                                throw new \Exception("Không thể trích xuất thông tin phiếu ReceiptFromProduction từ phản hồi SAP. Response: " . json_encode($resBody));
+                                $errorMessage = 'Không tìm thấy thông tin chứng từ ở SAP.';
+
+                                // Cố gắng trích xuất lỗi chi tiết nếu SAP có trả về JSON lỗi
+                                preg_match('/\{.*\}/s', $resBody, $matches);
+                                if (isset($matches[0])) {
+                                    $jsonString = $matches[0];
+                                    $errorData = json_decode($jsonString, true);
+
+                                    if (isset($errorData['error']['message']['value'])) {
+                                        $errorMessage .= ' Chi tiết: ' . $errorData['error']['message']['value'];
+                                    } elseif (isset($errorData['error']['message'])) {
+                                        $errorMessage .= ' Chi tiết: ' . $errorData['error']['message'];
+                                    }
+                                }
+
+                                return response()->json([
+                                    'error' => $errorMessage
+                                ], 500);
                             }
 
                             // Cấu trúc dữ liệu document_log

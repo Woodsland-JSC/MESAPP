@@ -1285,7 +1285,7 @@ class QCController extends Controller
             // 5. Tạo payload cho phiếu nhập
             $ReceiptData = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "U_UUID"=>$request->id,
+                "U_UUID" => $request->id,
                 "U_LSX" => $data->LSX,
                 "U_TO" => $data->Team,
                 "U_LL" => $loailoi,
@@ -1331,11 +1331,18 @@ class QCController extends Controller
             $totalDocuments = count($dataIssues['SubItemQty']);
             $documentCounter = 0;
             foreach ($dataIssues['SubItemQty'] as $dataIssue) {
-                $result = playloadIssueCBG($dataIssue['SubItemCode'], (float)$request->Qty, $dataIssues['SubItemWhs'],
-                    Auth::user()->branch, $data->LSX, $data->Team, $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                $result = playloadIssueCBG(
+                    $dataIssue['SubItemCode'],
+                    (float)$request->Qty * (float)$dataIssue['BaseQty'],
+                    $dataIssues['SubItemWhs'],
+                    Auth::user()->branch,
+                    $data->LSX,
+                    $data->Team,
+                    $U_GIAO->last_name . " " . $U_GIAO->first_name,
                     Auth::user()->last_name . " " . Auth::user()->first_name,
-                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT)
-                ,$request->id);
+                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
+                    $request->id
+                );
                 $documentCounter++;
                 $IssueData .= "Content-Type: application/http\n";
                 $IssueData .= "Content-Transfer-Encoding: binary\n\n";
@@ -1427,11 +1434,6 @@ class QCController extends Controller
                 if (empty($goodsReceipt)) {
                     throw new \Exception("Không thể trích xuất thông tin phiếu nhập từ phản hồi SAP. Response: " . json_encode($res));
                 }
-
-                // // Kiểm tra xem có thông tin phiếu xuất không
-                // if (empty($goodsIssues)) {
-                //     throw new \Exception("Không thể trích xuất thông tin phiếu xuất từ phản hồi SAP. Response: " . json_encode($res));
-                // }
 
                 // Cấu trúc dữ liệu document_log
                 $documentLog = [
