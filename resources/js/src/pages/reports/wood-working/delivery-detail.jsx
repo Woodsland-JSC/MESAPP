@@ -181,6 +181,7 @@ function DeliveryDetailReport() {
                 receiver: item.NguoiNhan,
                 receive_date: item.ngaynhan,
                 production_order: item.LSX,
+                id: item.notiID,
                 m3_sap: item.M3SAP,
             }));
             setIsDataReportLoading(false);
@@ -380,6 +381,7 @@ function DeliveryDetailReport() {
         { headerName: "Người nhận", field: "receiver", filter: true, minWidth: 240},
         { headerName: "Ngày giờ nhận", field: "receive_date", filter: true, minWidth: 200, },
         { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200, filter: true,},
+        { headerName: "NotiID", field: "id", minWidth: 200, filter: true,},
     ]);
 
     const groupDisplayType = 'multipleColumns';
@@ -397,11 +399,17 @@ function DeliveryDetailReport() {
         };
       }, []);
       
-    const autoGroupColumnDef = useMemo(() => {
-        return {
-          minWidth: 300,
-        };
-      }, []);
+const autoGroupColumnDef = useMemo(() => {
+  return {
+    headerName: "Tổ sản xuất",
+    field: "resource",         // Hiển thị giá trị nhóm đúng cột
+    pinned: 'left',            // Pin về bên trái
+    minWidth: 220,
+    cellRendererParams: {
+      suppressCount: false,    // Hiển thị số lượng nhóm (nếu muốn)
+    },
+  };
+}, []);
 
       const statusBar = useMemo(() => { 
         return {
