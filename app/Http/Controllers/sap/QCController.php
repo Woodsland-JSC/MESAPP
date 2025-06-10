@@ -1396,7 +1396,7 @@ class QCController extends Controller
             if ($response->getStatusCode() == 202) {
                 // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                 if (strpos($res, 'ETag') === false) {
-                    return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
+                    $this->throwSAPError($res);
                 }
 
                 // Tách các phần của batch response
@@ -1432,7 +1432,12 @@ class QCController extends Controller
 
                 // Kiểm tra xem có thông tin phiếu nhập không
                 if (empty($goodsReceipt)) {
-                    throw new \Exception("Không thể trích xuất thông tin phiếu nhập từ phản hồi SAP. Response: " . json_encode($res));
+                    $this->throwSAPError($res);
+                }
+
+                // Kiểm tra xem có thông tin phiếu xuất không
+                if (empty($goodsIssues)) {
+                    $this->throwSAPError($res);
                 }
 
                 // Cấu trúc dữ liệu document_log
@@ -1495,18 +1500,7 @@ class QCController extends Controller
 
                 DB::commit();
             } else {
-                // Trích lỗi JSON nếu có trong phản hồi
-                preg_match('/\{.*\}/s', $res, $matches);
-                if (isset($matches[0])) {
-                    $jsonString = $matches[0];
-                    $errorData = json_decode($jsonString, true);
-
-                    if (isset($errorData['error'])) {
-                        $errorCode = $errorData['error']['code'];
-                        $errorMessage = $errorData['error']['message']['value'];
-                        throw new \Exception('SAP code: ' . $errorCode . ' chi tiết: ' . $errorMessage);
-                    }
-                }
+                $this->throwSAPError($res);
             }
 
             return response()->json('Xử lý lỗi thành công.', 200);
@@ -1519,6 +1513,28 @@ class QCController extends Controller
                 'payloadsendSAP' => $output
             ], 500);
         }
+    }
+
+    private function throwSAPError(string $resBody)
+    {
+        preg_match('/\{.*\}/s', $resBody, $matches);
+        if (!isset($matches[0])) {
+            throw new \Exception('SAP code: Unknown chi tiết: Không thể phân tích phản hồi từ SAP');
+        }
+
+        $errorData = json_decode($matches[0], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('SAP code: Unknown chi tiết: Lỗi phân tích JSON từ SAP: ' . json_last_error_msg());
+        }
+
+        if (isset($errorData['error'])) {
+            $code = $errorData['error']['code'] ?? 'Unknown';
+            $message = $errorData['error']['message']['value'] ??
+                (is_array($errorData['error']['message']) ? json_encode($errorData['error']['message']) : ($errorData['error']['message'] ?? 'Không có thông tin chi tiết'));
+            throw new \Exception("SAP code: $code chi tiết: $message");
+        }
+
+        throw new \Exception('SAP code: Unknown chi tiết: Không tìm thấy thông tin lỗi trong phản hồi SAP');
     }
 
     function getDefectDataFromSAP($ItemCode, $SubItemCode)

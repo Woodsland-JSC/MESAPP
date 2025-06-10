@@ -36,7 +36,7 @@ import { FaArrowDown } from "react-icons/fa";
 import { FaExclamation } from "react-icons/fa";
 import { FaMobileAlt } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
-import "../../../assets/styles/customTable.css"
+import "../../../assets/styles/customTable.css";
 
 function DeliveryDetailReport() {
     const navigate = useNavigate();
@@ -76,8 +76,9 @@ function DeliveryDetailReport() {
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredData = useMemo(() => {
-        return reportDataMobile?.filter(item => {
-            const searchValue = `${item.CDay}x${item.CRong}x${item.CDai}`.toLowerCase();
+        return reportDataMobile?.filter((item) => {
+            const searchValue =
+                `${item.CDay}x${item.CRong}x${item.CDai}`.toLowerCase();
             return searchValue.includes(searchTerm.toLowerCase());
         });
     }, [reportDataMobile, searchTerm]);
@@ -192,19 +193,29 @@ function DeliveryDetailReport() {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedTeams, selectedFactory, isReceived, selectAll]);
+    }, [
+        fromDate,
+        toDate,
+        selectedTeams,
+        selectedFactory,
+        isReceived,
+        selectAll,
+    ]);
 
     const getReportDataMobile = useCallback(async () => {
         if (!fromDateMobile || !toDateMobile || !selectedTeamMobile) {
             console.log("Không thể gọi API vì thiếu thông tin. (Mobile)");
             return;
         }
-    
+
         let params = {
             from_date: format(fromDateMobile, "yyyy-MM-dd"),
             to_date: format(toDateMobile, "yyyy-MM-dd"),
             To: selectedTeamMobile.value,
-            plant: user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant,
+            plant:
+                user?.plant === "YS1" || user?.plant === "YS2"
+                    ? "YS"
+                    : user?.plant,
         };
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
@@ -225,7 +236,7 @@ function DeliveryDetailReport() {
             setIsDataReportLoading(false);
         }
     }, [fromDateMobile, toDateMobile, selectedTeamMobile, user.plant]);
-    
+
     useEffect(() => {
         const allFieldsFilled =
             isReceived !== null &&
@@ -239,7 +250,7 @@ function DeliveryDetailReport() {
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    
+
         const allFieldsFilledMobile =
             selectedTeamMobile && fromDateMobile && toDateMobile;
         if (allFieldsFilledMobile) {
@@ -262,8 +273,9 @@ function DeliveryDetailReport() {
 
     // New Get All Group
     useEffect(() => {
-        const userPlant = user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
-    
+        const userPlant =
+            user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
+
         reportApi
             .getTeamByFactory(userPlant)
             .then((response) => {
@@ -301,8 +313,6 @@ function DeliveryDetailReport() {
         toast("Chức năng xuất PDF đang được phát triển.");
     };
 
-
-
     // Row Data: The data to be displayed.
     const [rowData, setRowData] = useState([]);
 
@@ -313,21 +323,21 @@ function DeliveryDetailReport() {
             field: "resource",
             rowGroup: true,
             hide: true,
-            sort: 'asc',
-            pinned: 'left',
-            headerComponentParams: { displayName: "Tổ sản xuất" }
+            sort: "asc",
+            pinned: "left",
+            headerComponentParams: { displayName: "Tổ sản xuất" },
         },
         {
             headerName: "Mã chi tiết",
             field: "itemcode",
             width: 120,
             suppressHeaderMenuButton: true,
-            pinned: 'left',
+            pinned: "left",
             filter: true,
         },
         {
             headerName: "Tên chi tiết",
-            pinned: 'left',
+            pinned: "left",
             field: "itemname",
             minWidth: 360,
             suppressHeaderMenuButton: true,
@@ -337,96 +347,121 @@ function DeliveryDetailReport() {
             headerName: "Dày",
             field: "thickness",
             maxWidth: 80,
-            pinned: 'left',
+            pinned: "left",
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Rộng",
             field: "width",
             maxWidth: 80,
-            pinned: 'left',
+            pinned: "left",
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Dài",
             field: "height",
             maxWidth: 80,
-            pinned: 'left',
+            pinned: "left",
             suppressHeaderMenuButton: true,
         },
-        { headerName: "ĐVT", field: "unit", maxWidth: 90, },
+        { headerName: "ĐVT", field: "unit", maxWidth: 90 },
         {
             headerName: "Số lượng",
             field: "quantity",
             maxWidth: 110,
             suppressHeaderMenuButton: true,
-            valueFormatter: params => {
-                return params.value ? params.value.toLocaleString('en-US') : '';
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString("en-US") : "";
             },
-            aggFunc: 'sum',
-            headerComponentParams: { displayName: "Số lượng" }
+            aggFunc: "sum",
+            headerComponentParams: { displayName: "Số lượng" },
         },
-        { 
-            headerName: "M3", 
-            field: "m3_sap", 
-            width: 120, 
-            aggFunc: 'sum', 
+        {
+            headerName: "M3",
+            field: "m3_sap",
+            width: 120,
+            aggFunc: "sum",
             headerComponentParams: { displayName: "M3" },
-            valueFormatter: params => {
-                return params.value ? params.value.toFixed(6) : '0.000000';
+            valueFormatter: (params) => {
+                return params.value ? params.value.toFixed(6) : "0.000000";
             },
         },
-        { headerName: "Người giao", field: "sender", filter: true, minWidth: 240 },
-        { headerName: "Ngày giờ giao", field: "send_date",filter: true, minWidth: 200, },
-        { headerName: "Người nhận", field: "receiver", filter: true, minWidth: 240},
-        { headerName: "Ngày giờ nhận", field: "receive_date", filter: true, minWidth: 200, },
-        { headerName: "Lệnh sản xuất", field: "production_order", minWidth: 200, filter: true,},
-        { headerName: "NotiID", field: "id", minWidth: 200, filter: true,},
+        {
+            headerName: "Người giao",
+            field: "sender",
+            filter: true,
+            minWidth: 240,
+        },
+        {
+            headerName: "Ngày giờ giao",
+            field: "send_date",
+            filter: true,
+            minWidth: 200,
+        },
+        {
+            headerName: "Người nhận",
+            field: "receiver",
+            filter: true,
+            minWidth: 240,
+        },
+        {
+            headerName: "Ngày giờ nhận",
+            field: "receive_date",
+            filter: true,
+            minWidth: 200,
+        },
+        {
+            headerName: "Lệnh sản xuất",
+            field: "production_order",
+            minWidth: 200,
+            filter: true,
+        },
+        { headerName: "NotiID", field: "id", minWidth: 200, filter: true },
     ]);
 
-    const groupDisplayType = 'multipleColumns';
-    const getRowStyle = params => {
+    const groupDisplayType = "multipleColumns";
+    const getRowStyle = (params) => {
         if (params.node.rowIndex % 2 === 0) {
-            return { background: '#F6F6F6' }; 
+            return { background: "#F6F6F6" };
         }
-        return { background: '#ffffff' };  
+        return { background: "#ffffff" };
     };
-    
+
     const defaultColDef = useMemo(() => {
         return {
-          flex: 1,
-          minWidth: 150,
+            flex: 1,
+            minWidth: 150,
         };
-      }, []);
-      
-const autoGroupColumnDef = useMemo(() => {
-  return {
-    headerName: "Tổ sản xuất",
-    field: "resource",         // Hiển thị giá trị nhóm đúng cột
-    pinned: 'left',            // Pin về bên trái
-    minWidth: 220,
-    cellRendererParams: {
-      suppressCount: false,    // Hiển thị số lượng nhóm (nếu muốn)
-    },
-  };
-}, []);
+    }, []);
 
-      const statusBar = useMemo(() => { 
+    const autoGroupColumnDef = useMemo(() => {
+        return {
+            headerName: "Tổ sản xuất",
+            field: "resource", // Hiển thị giá trị nhóm đúng cột
+            pinned: "left", // Pin về bên trái
+            minWidth: 220,
+            cellRendererParams: {
+                suppressCount: false, // Hiển thị số lượng nhóm (nếu muốn)
+            },
+        };
+    }, []);
+
+    const statusBar = useMemo(() => {
         return {
             statusPanels: [
                 {
-                    key: 'aUniqueString',
-                    statusPanel: 'agTotalRowCountComponent',
-                    align: 'left'
+                    key: "aUniqueString",
+                    statusPanel: "agTotalRowCountComponent",
+                    align: "left",
                 },
                 {
-                    statusPanel: 'agAggregationComponent',
+                    statusPanel: "agAggregationComponent",
                     statusPanelParams: {
                         // possible values are: 'count', 'sum', 'min', 'max', 'avg'
-                        aggFuncs: ['avg', 'sum']
-                    }
-                }
-            ]
+                        aggFuncs: ["avg", "sum"],
+                    },
+                },
+            ],
         };
     }, []);
 
@@ -526,7 +561,9 @@ const autoGroupColumnDef = useMemo(() => {
                                     placeholder="Tìm kiếm theo quy cách..."
                                     className=" w-full focus:ring-transparent !outline-none bg-[#F9FAFB]  border-gray-30 ring-transparent border-transparent focus:border-transparent focus:ring-0"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
                                 />
                             </div>
 
@@ -626,10 +663,7 @@ const autoGroupColumnDef = useMemo(() => {
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="YS"
-                                        label="Yên Sơn"
-                                    />
+                                    <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
@@ -711,11 +745,16 @@ const autoGroupColumnDef = useMemo(() => {
                                             emptyColor="gray.200"
                                             color="#155979"
                                             size="xl"
-                                            
                                         />
                                     </div>
                                 ) : (
-                                    <div className={isDataReportLoading ? "opacity-50 pointer-events-none" : ""}>
+                                    <div
+                                        className={
+                                            isDataReportLoading
+                                                ? "opacity-50 pointer-events-none"
+                                                : ""
+                                        }
+                                    >
                                         <div className="flex items-center justify-between space-x-3">
                                             <div className="font-semibold">
                                                 Chọn các tổ thực hiện:
@@ -733,7 +772,7 @@ const autoGroupColumnDef = useMemo(() => {
                                             </div>
                                         </div>
                                         <div className="w-full grid grid-cols-5">
-                                        <div className="col-span-1 space-y-2">
+                                            <div className="col-span-1 space-y-2">
                                                 <div className="text-[#155979] uppercase font-medium">
                                                     Runnen
                                                 </div>
@@ -742,7 +781,11 @@ const autoGroupColumnDef = useMemo(() => {
                                                         (item) =>
                                                             item.CDOAN === "RN"
                                                     )
-                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
+                                                    .sort((a, b) =>
+                                                        a.Name.localeCompare(
+                                                            b.Name
+                                                        )
+                                                    )
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -770,7 +813,11 @@ const autoGroupColumnDef = useMemo(() => {
                                                         (item) =>
                                                             item.CDOAN === "SC"
                                                     )
-                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
+                                                    .sort((a, b) =>
+                                                        a.Name.localeCompare(
+                                                            b.Name
+                                                        )
+                                                    )
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -798,7 +845,11 @@ const autoGroupColumnDef = useMemo(() => {
                                                         (item) =>
                                                             item.CDOAN === "TC"
                                                     )
-                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
+                                                    .sort((a, b) =>
+                                                        a.Name.localeCompare(
+                                                            b.Name
+                                                        )
+                                                    )
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -826,7 +877,11 @@ const autoGroupColumnDef = useMemo(() => {
                                                         (item) =>
                                                             item.CDOAN === "HT"
                                                     )
-                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
+                                                    .sort((a, b) =>
+                                                        a.Name.localeCompare(
+                                                            b.Name
+                                                        )
+                                                    )
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -854,7 +909,11 @@ const autoGroupColumnDef = useMemo(() => {
                                                         (item) =>
                                                             item.CDOAN === "DG"
                                                     )
-                                                    .sort((a, b) => a.Name.localeCompare(b.Name)) 
+                                                    .sort((a, b) =>
+                                                        a.Name.localeCompare(
+                                                            b.Name
+                                                        )
+                                                    )
                                                     .map((item, index) => (
                                                         <div key={index}>
                                                             <Checkbox
@@ -967,11 +1026,13 @@ const autoGroupColumnDef = useMemo(() => {
                                             rowData={rowData}
                                             columnDefs={colDefs}
                                             defaultColDef={defaultColDef}
-                                            autoGroupColumnDef={autoGroupColumnDef}
+                                            autoGroupColumnDef={
+                                                autoGroupColumnDef
+                                            }
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
                                             // groupTotalRow={"bottom"}
-                                            grandTotalRow={"bottom"} 
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>
@@ -997,105 +1058,99 @@ const autoGroupColumnDef = useMemo(() => {
                             <>
                                 {reportDataMobile?.length > 0 ? (
                                     <>
-                                        {filteredData?.map(
-                                            (item, index) => (
-                                                <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
-                                                    <div className="flex-col w-full">
-                                                        <div className="text-xl font-semibold text-[#17506B] mb-1">
-                                                            {item.ItemName}
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold">
-                                                            <span>
-                                                                Quy cách:{" "}
-                                                            </span>
-                                                            <span className="font-normal">
-                                                                {Number(item.CDay)}*
-                                                                {Number(item.CRong)}*
-                                                                {Number(item.CDai)}
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>
-                                                                Số lượng:{" "}
-                                                            </span>
-                                                            <span className="font-normal">
-                                                                {parseInt(
-                                                                    item.Quantity
-                                                                )}
-                                                            </span>
-                                                        </div>
+                                        {filteredData?.map((item, index) => (
+                                            <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
+                                                <div className="flex-col w-full">
+                                                    <div className="text-xl font-semibold text-[#17506B] mb-1">
+                                                        {item.ItemName}
+                                                    </div>
+                                                    <div className="grid grid-cols-2 font-semibold">
+                                                        <span>Quy cách: </span>
+                                                        <span className="font-normal">
+                                                            {Number(item.CDay)}*
+                                                            {Number(item.CRong)}
+                                                            *{Number(item.CDai)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 font-semibold mb-2">
+                                                        <span>Số lượng: </span>
+                                                        <span className="font-normal">
+                                                            {parseInt(
+                                                                item.Quantity
+                                                            )}
+                                                        </span>
+                                                    </div>
 
-                                                        <div className="mt-3 flex items-center w-full pl-3 ">
-                                                            <div className="space-y-3 border-l-2 border-dashed border-gray-400 w-full">
-                                                                <div className="relative w-full">
-                                                                    <FaArrowDown className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-blue-600 p-1" />
-                                                                    <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
-                                                                        <div className="flex-col  ">
-                                                                            <div className="font-medium text-[15px]">
-                                                                                Người
-                                                                                giao:{" "}
-                                                                            </div>
-                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                {
-                                                                                    item.NguoiGiao
-                                                                                }
-                                                                            </div>
+                                                    <div className="mt-3 flex items-center w-full pl-3 ">
+                                                        <div className="space-y-3 border-l-2 border-dashed border-gray-400 w-full">
+                                                            <div className="relative w-full">
+                                                                <FaArrowDown className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-blue-600 p-1" />
+                                                                <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                    <div className="flex-col  ">
+                                                                        <div className="font-medium text-[15px]">
+                                                                            Người
+                                                                            giao:{" "}
                                                                         </div>
-                                                                        <div className="flex text-gray-500 space-x-2 items-center">
-                                                                            <div>
-                                                                                {
-                                                                                    item.ngaygiao
-                                                                                }
-                                                                            </div>
+                                                                        <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                            {
+                                                                                item.NguoiGiao
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex text-gray-500 space-x-2 items-center">
+                                                                        <div>
+                                                                            {
+                                                                                item.ngaygiao
+                                                                            }
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div className="relative w-full ">
-                                                                    {item.NguoiNhan ? (
-                                                                        <>
-                                                                            <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
-                                                                            <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
-                                                                                <div className="flex-col ">
-                                                                                    <div className="font-medium text-[15px]">
-                                                                                        Người
-                                                                                        nhận:{" "}
-                                                                                    </div>
-                                                                                    <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                        {
-                                                                                            item.NguoiNhan
-                                                                                        }
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div className="flex text-gray-500 space-x-2 items-center">
-                                                                                    <div>
-                                                                                        {
-                                                                                            item.ngaynhan
-                                                                                        }
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <FaExclamation className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-orange-500 p-1" />
-                                                                            <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                            </div>
+                                                            <div className="relative w-full ">
+                                                                {item.NguoiNhan ? (
+                                                                    <>
+                                                                        <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
+                                                                        <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                            <div className="flex-col ">
                                                                                 <div className="font-medium text-[15px]">
-                                                                                    Sản
-                                                                                    phẩm
-                                                                                    đang
-                                                                                    chờ
-                                                                                    nhận.
+                                                                                    Người
+                                                                                    nhận:{" "}
+                                                                                </div>
+                                                                                <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                                    {
+                                                                                        item.NguoiNhan
+                                                                                    }
                                                                                 </div>
                                                                             </div>
-                                                                        </>
-                                                                    )}
-                                                                </div>
+                                                                            <div className="flex text-gray-500 space-x-2 items-center">
+                                                                                <div>
+                                                                                    {
+                                                                                        item.ngaynhan
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <FaExclamation className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-orange-500 p-1" />
+                                                                        <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                            <div className="font-medium text-[15px]">
+                                                                                Sản
+                                                                                phẩm
+                                                                                đang
+                                                                                chờ
+                                                                                nhận.
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            )
-                                        )}
+                                            </div>
+                                        ))}
                                         <div className="pb-3"></div>
                                     </>
                                 ) : (

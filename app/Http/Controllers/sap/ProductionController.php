@@ -1467,24 +1467,7 @@ class ProductionController extends Controller
                         case 202:
                             // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                             if (strpos($resBody, 'ETag') === false) {
-                                $errorMessage = 'Không rõ lỗi';
-
-                                // Cố gắng tách nội dung JSON lỗi trong body
-                                preg_match('/\{.*\}/s', $resBody, $matches);
-                                if (isset($matches[0])) {
-                                    $jsonString = $matches[0];
-                                    $errorData = json_decode($jsonString, true);
-
-                                    if (isset($errorData['error']['message']['value'])) {
-                                        $errorMessage = $errorData['error']['message']['value'];
-                                    } elseif (isset($errorData['error']['message'])) {
-                                        $errorMessage = $errorData['error']['message'];
-                                    }
-                                }
-
-                                return response()->json([
-                                    'error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ: ' . $errorMessage
-                                ], 500);
+                                $this->throwSAPError($resBody);
                             }
 
                             // Tách các phần của batch response
@@ -1508,24 +1491,7 @@ class ProductionController extends Controller
 
                             // Kiểm tra xem có thông tin phiếu ReceiptFromProduction không
                             if (empty($receiptFromProduction)) {
-                                $errorMessage = 'Không tìm thấy thông tin chứng từ ở SAP.';
-
-                                // Cố gắng trích xuất lỗi chi tiết nếu SAP có trả về JSON lỗi
-                                preg_match('/\{.*\}/s', $resBody, $matches);
-                                if (isset($matches[0])) {
-                                    $jsonString = $matches[0];
-                                    $errorData = json_decode($jsonString, true);
-
-                                    if (isset($errorData['error']['message']['value'])) {
-                                        $errorMessage .= ' Chi tiết: ' . $errorData['error']['message']['value'];
-                                    } elseif (isset($errorData['error']['message'])) {
-                                        $errorMessage .= ' Chi tiết: ' . $errorData['error']['message'];
-                                    }
-                                }
-
-                                return response()->json([
-                                    'error' => $errorMessage
-                                ], 500);
+                                $this->throwSAPError($resBody);
                             }
 
                             // Cấu trúc dữ liệu document_log
@@ -1549,17 +1515,17 @@ class ProductionController extends Controller
                             break;
 
                         default:
-                            // Nếu không khớp status nào cả
                             preg_match('/\{.*\}/s', $resBody, $matches);
                             if (isset($matches[0])) {
                                 $errorData = json_decode($matches[0], true);
-                                if (isset($errorData['error'])) {
+                                if (json_last_error() === JSON_ERROR_NONE && isset($errorData['error'])) {
                                     throw new \Exception(
                                         'SAP code: ' . $errorData['error']['code'] .
                                             ' chi tiết: ' . $errorData['error']['message']['value']
                                     );
                                 }
                             }
+                            throw new \Exception('SAP ERROR: Phản hồi không xác định từ server: ' . $resBody);
                     }
 
                     // Nếu là công đoạn TP thì dispatch job
@@ -1598,7 +1564,6 @@ class ProductionController extends Controller
                 strpos($e->getMessage(), 'SAP code:-5002') !== false &&
                 strpos($e->getMessage(), 'Make sure that the consumed quantity') !== false
             ) {
-
                 // Tạo thông báo chi tiết về thiếu hàng
                 $message = "Nguyên vật liệu không đủ để giao nhận!";
                 $itemDetails = [];
@@ -1821,6 +1786,28 @@ class ProductionController extends Controller
         // Output the final data structure
         $output = $data;
         return $output;
+    }
+
+    private function throwSAPError(string $resBody)
+    {
+        preg_match('/\{.*\}/s', $resBody, $matches);
+        if (!isset($matches[0])) {
+            throw new \Exception('SAP code: Unknown chi tiết: Không thể phân tích phản hồi từ SAP');
+        }
+
+        $errorData = json_decode($matches[0], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('SAP code: Unknown chi tiết: Lỗi phân tích JSON từ SAP: ' . json_last_error_msg());
+        }
+
+        if (isset($errorData['error'])) {
+            $code = $errorData['error']['code'] ?? 'Unknown';
+            $message = $errorData['error']['message']['value'] ??
+                (is_array($errorData['error']['message']) ? json_encode($errorData['error']['message']) : ($errorData['error']['message'] ?? 'Không có thông tin chi tiết'));
+            throw new \Exception("SAP code: $code chi tiết: $message");
+        }
+
+        throw new \Exception('SAP code: Unknown chi tiết: Không tìm thấy thông tin lỗi trong phản hồi SAP');
     }
     /*
     **********
