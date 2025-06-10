@@ -1907,7 +1907,7 @@ class VCNController extends Controller
             if (!$data) {
                 throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
             }
-            $U_GIAO = DB::table('users')->where('id', $data->create_by)->first();
+            $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
 
             // Validate phân bổ
             if ($data->NextTeam != "YS-QC"  && $data->NextTeam != "CH-QC"  && $data->NextTeam != "HG-QC") {
@@ -2008,7 +2008,7 @@ class VCNController extends Controller
 
                     // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                     if (strpos($res, 'ETag') === false) {
-                        return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
+                        $this->throwSAPError($res);
                     }
                     // Tách các phần của batch response
                     $parts = preg_split('/--batch.*?\r\n/', $res);
@@ -2031,7 +2031,7 @@ class VCNController extends Controller
 
                     // Kiểm tra xem có thông tin phiếu ReceiptFromProduction không
                     if (empty($receiptFromProduction)) {
-                        throw new \Exception("Không thể trích xuất thông tin phiếu ReceiptFromProduction từ phản hồi SAP. Response: " . json_encode($res));
+                        $this->throwSAPError($res);
                     }
 
                     // Cấu trúc dữ liệu document_log
@@ -2049,21 +2049,7 @@ class VCNController extends Controller
                     awaitingstocksvcn::where('notiId', $request->id)->delete();
                     DB::commit();
                 } else {
-                    preg_match('/\{.*\}/s', $res, $matches);
-                    if (isset($matches[0])) {
-                        $jsonString = $matches[0];
-                        $errorData = json_decode($jsonString, true);
-
-                        // Khởi tạo biến $errorMessage với giá trị mặc định
-                        $errorCode = '';
-                        $errorMessage = 'Không có tìm thấy thông tin lỗi từ SAP';
-
-                        if (isset($errorData['error'])) {
-                            $errorCode = $errorData['error']['code'];
-                            $errorMessage = $errorData['error']['message']['value'];
-                            throw new \Exception('SAP code:' . $errorCode . ' chi tiết' . $errorMessage);
-                        }
-                    }
+                    $this->throwSAPError($res);
                 }
                 return response()->json('success', 200);
             } else {
@@ -2117,6 +2103,28 @@ class VCNController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function throwSAPError(string $resBody)
+    {
+        preg_match('/\{.*\}/s', $resBody, $matches);
+        if (!isset($matches[0])) {
+            throw new \Exception('SAP code: Unknown chi tiết: Không thể phân tích phản hồi từ SAP');
+        }
+
+        $errorData = json_decode($matches[0], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('SAP code: Unknown chi tiết: Lỗi phân tích JSON từ SAP: ' . json_last_error_msg());
+        }
+
+        if (isset($errorData['error'])) {
+            $code = $errorData['error']['code'] ?? 'Unknown';
+            $message = $errorData['error']['message']['value'] ??
+                (is_array($errorData['error']['message']) ? json_encode($errorData['error']['message']) : ($errorData['error']['message'] ?? 'Không có thông tin chi tiết'));
+            throw new \Exception("SAP code: $code chi tiết: $message");
+        }
+
+        throw new \Exception('SAP code: Unknown chi tiết: Không tìm thấy thông tin lỗi trong phản hồi SAP');
     }
 
     function checkInventoryVCN(Request $request)
