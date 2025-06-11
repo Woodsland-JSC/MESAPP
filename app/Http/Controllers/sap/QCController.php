@@ -1444,10 +1444,10 @@ class QCController extends Controller
                     $this->throwSAPError($res);
                 }
 
-                // Kiểm tra xem có thông tin phiếu xuất không
-                if (empty($goodsIssues)) {
-                    $this->throwSAPError($res);
-                }
+                // // Kiểm tra xem có thông tin phiếu xuất không
+                // if (empty($goodsIssues)) {
+                //     $this->throwSAPError($res);
+                // }
 
                 // Cấu trúc dữ liệu document_log
                 $documentLog = [
