@@ -182,8 +182,8 @@ class ReportController extends Controller
 
     function xepsay(Request $request)
     {
-        $fromDate = $request->input('fromDate');
-        $ToDate = $request->input('toDate');
+        $fromDate = $request->input('from_date'); 
+        $ToDate = $request->input('to_date'); 
         // $oven= $request->input('oven');
 
         // Start the query and add conditions based on the request inputs
@@ -583,7 +583,7 @@ class ReportController extends Controller
                 $sapData = $this->getDefectDataFromSAP($noti->ItemCode, $noti->SubItemCode);
 
                 if ($noti->SubItemCode !== null) {
-                    $rawQty = (float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity * (float)$sapData['SubItemQty'][0]['BaseQty']);
+                    $rawQty = (float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity);
                     $requiredQty = $rawQty < 0 ? abs(ceil($rawQty)) : 0;
 
                     $result[] = [

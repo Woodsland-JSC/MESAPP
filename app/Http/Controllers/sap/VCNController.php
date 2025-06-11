@@ -2342,6 +2342,7 @@ class VCNController extends Controller
         $teamBack = $request->teamBack['value'] ?? '';
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
+        
         //check kho QC
         $whs = $this->getQCWarehouseByUser();
         if ($whs == -1) {

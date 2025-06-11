@@ -60,52 +60,56 @@ function CBGWoodDryingReports() {
     const [reportData, setReportData] = useState(null);
 
     const getReportData = useCallback(async () => {
-        let params = {
-            from_date: format(fromDate, "yyyy-MM-dd"),
-            to_date: format(toDate, "yyyy-MM-dd"),
-        };
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDefectResolutionReport(
-                params.from_date,
-                params.to_date
+            // Gọi đúng API getCBGWoodDryingReport thay vì getDefectResolutionReport
+            const res = await reportApi.getCBGWoodDryingReport(
+                format(fromDate, "yyyy-MM-dd"),
+                format(toDate, "yyyy-MM-dd")
             );
-            const formattedData = res.map((item) => ({
-                itemname: item.ItemName,
-                thickness: item.CDay,
-                width: item.CRong,
-                height: item.CDai,
-                th_xepsay: item.sepxay || 0,
-                th_vaolo: item.vaolo || 0,
-                th_daralo: item.ralo || 0,
-                ys_xepsay: 0,
-                ys_vaolo: 0,
-                ys_daralo: 0,
-                tb_xepsay: 0,
-                tb_vaolo: 0,
-                tb_daralo: 0,
-            }));
-            setIsDataReportLoading(false);
+
+            // Logic xử lý dữ liệu từ onGridReady
+            const formattedData = res.map((item) => {
+                const plant = item.plant || ""; // Đảm bảo plant không undefined
+                return {
+                    itemname: item.ItemName,
+                    thickness: item.CDay,
+                    width: item.CRong,
+                    height: item.CDai,
+                    // Thuận Hưng
+                    th_xepsay: plant === "TH" ? Number(item.sepxay) || 0 : 0,
+                    th_vaolo: plant === "TH" ? Number(item.vaolo) || 0 : 0,
+                    th_daralo: plant === "TH" ? Number(item.ralo) || 0 : 0,
+                    // Yên Sơn
+                    ys_xepsay: plant === "YS" ? Number(item.sepxay) || 0 : 0,
+                    ys_vaolo: plant === "YS" ? Number(item.vaolo) || 0 : 0,
+                    ys_daralo: plant === "YS" ? Number(item.ralo) || 0 : 0,
+                    // Thái Bình
+                    tb_xepsay: plant === "TB" ? Number(item.sepxay) || 0 : 0,
+                    tb_vaolo: plant === "TB" ? Number(item.vaolo) || 0 : 0,
+                    tb_daralo: plant === "TB" ? Number(item.ralo) || 0 : 0,
+                };
+            });
+
             setRowData(formattedData);
             setReportData(res);
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching report data:", error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+        } finally {
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedFactory]);
+    }, [fromDate, toDate]);
 
     useEffect(() => {
-        getReportData;
+        getReportData();
     }, [fromDate, toDate, getReportData]);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
-        setSelectAll(false);
         setIsReceived(true);
-        setTeamData([]);
-
         setReportData(null);
+        setRowData([]);
 
         toast.success("Đặt lại bộ lọc thành công.");
     };
@@ -298,50 +302,7 @@ function CBGWoodDryingReports() {
 
     const groupDisplayType = "multipleColumns";
 
-    const onGridReady = useCallback(async () => {
-        showLoading();
-        try {
-            const res = await reportApi.getCBGWoodDryingReport(
-                format(fromDate, "yyyy-MM-dd"),
-                format(toDate, "yyyy-MM-dd")
-            );
-            const formattedData = res.map((item) => {
-                const plant = item.plant || ""; // Đảm bảo plant không undefined
-                return {
-                    itemname: item.ItemName,
-                    thickness: item.CDay,
-                    width: item.CRong,
-                    height: item.CDai,
-                    // Thuận Hưng
-                    th_xepsay: plant === "TH" ? Number(item.sepxay) || 0 : 0,
-                    th_vaolo: plant === "TH" ? Number(item.vaolo) || 0 : 0,
-                    th_daralo: plant === "TH" ? Number(item.ralo) || 0 : 0,
-                    // Yên Sơn
-                    ys_xepsay: plant === "YS" ? Number(item.sepxay) || 0 : 0,
-                    ys_vaolo: plant === "YS" ? Number(item.vaolo) || 0 : 0,
-                    ys_daralo: plant === "YS" ? Number(item.ralo) || 0 : 0,
-                    // Thái Bình
-                    tb_xepsay: plant === "TB" ? Number(item.sepxay) || 0 : 0,
-                    tb_vaolo: plant === "TB" ? Number(item.vaolo) || 0 : 0,
-                    tb_daralo: plant === "TB" ? Number(item.ralo) || 0 : 0,
-                };
-            });
-            setRowData(formattedData);
-        } catch (error) {
-            console.error("Error fetching report data:", error);
-            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-        } finally {
-            hideLoading();
-        }
-    }, []);
-
-    const showLoading = useCallback(() => {
-        gridRef?.current?.api?.showLoadingOverlay();
-    }, []);
-
-    const hideLoading = useCallback(() => {
-        gridRef?.current?.api?.hideOverlay();
-    }, []);
+    const onGridReady = useCallback(() => {}, []);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -416,15 +377,15 @@ function CBGWoodDryingReports() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
+                                            // if (
+                                            //     fromDate &&
+                                            //     toDate &&
+                                            //     selectedFactory &&
+                                            //     isReceived &&
+                                            //     selectedTeams
+                                            // ) {
+                                            //     getReportData();
+                                            // }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -441,15 +402,15 @@ function CBGWoodDryingReports() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
+                                            // if (
+                                            //     fromDate &&
+                                            //     toDate &&
+                                            //     selectedFactory &&
+                                            //     isReceived &&
+                                            //     selectedTeams
+                                            // ) {
+                                            //     getReportData();
+                                            // }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -460,36 +421,44 @@ function CBGWoodDryingReports() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                            <div class="dots"></div>
+                        <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center p-2 px-4 pr-1 rounded-lg">
+                            <div className="dots my-1"></div>
                         </div>
                     ) : (
-                        <div>
-                            <div
-                                className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
-                                style={{
-                                    height: 630,
-                                    fontSize: 16,
-                                }}
-                            >
-                                <AgGridReact
-                                    ref={gridRef}
-                                    rowData={rowData}
-                                    columnDefs={colDefs}
-                                    onGridReady={onGridReady}
-                                    groupDisplayType={groupDisplayType}
-                                    grandTotalRow={"bottom"}
-                                    autoGroupColumnDef={{
-                                        headerName: "Tên nhóm",
-                                        field: "itemname",
-                                        width: 450,
-                                        cellRendererParams: {
-                                            suppressCount: false, // hiển thị số lượng bản ghi trong nhóm
-                                        },
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        <>
+                            {rowData?.length > 0 ? (
+                                <div>
+                                    <div
+                                        className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2"
+                                        style={{
+                                            height: 630,
+                                            fontSize: 16,
+                                        }}
+                                    >
+                                        <AgGridReact
+                                            ref={gridRef}
+                                            rowData={rowData}
+                                            columnDefs={colDefs}
+                                            onGridReady={onGridReady}
+                                            groupDisplayType={groupDisplayType}
+                                            grandTotalRow={"bottom"}
+                                            autoGroupColumnDef={{
+                                                headerName: "Tên nhóm",
+                                                field: "itemname",
+                                                width: 450,
+                                                cellRendererParams: {
+                                                    suppressCount: false, // hiển thị số lượng bản ghi trong nhóm
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center p-2 px-4 pr-1 rounded-lg">
+                                    Không có dữ liệu để hiển thị.
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

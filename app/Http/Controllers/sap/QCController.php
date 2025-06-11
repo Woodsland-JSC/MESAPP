@@ -1331,9 +1331,18 @@ class QCController extends Controller
             $totalDocuments = count($dataIssues['SubItemQty']);
             $documentCounter = 0;
             foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+
+                if (empty($data->SubItemCode)) {
+                    // Lỗi thành phẩm
+                    $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
+                } else {
+                    // Lỗi bán thành phẩm
+                    $quantity = (float)$request->Qty;
+                }
+
                 $result = playloadIssueCBG(
                     $dataIssue['SubItemCode'],
-                    (float)$request->Qty * (float)$dataIssue['BaseQty'],
+                    $quantity,
                     $dataIssues['SubItemWhs'],
                     Auth::user()->branch,
                     $data->LSX,
