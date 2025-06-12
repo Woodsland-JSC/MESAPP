@@ -78,8 +78,12 @@ import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
+import WeeklyDetailProductionVolumeReport from "../pages/reports/wood-working/production-volume-weekly-detail";
 import DetailsReceiptReport from "../pages/reports/wood-working/details-receipt";
 import FactoryReceiptVolumelReport from "../pages/reports/wood-working/factory-receipt-volume";
+import ImportExportInventoryByTime from "../pages/reports/wood-working/import-export-inventory-by-stage";
+import ProductionOutputByProductionOrder from "../pages/reports/wood-working/production-output-by-production-order";
+import FactoryTransfer from "../pages/reports/wood-working/factory-transfer";
 
 // Domestic
 import DomesticFinishedGoodsReceipt from "../pages/workspace/domestic/finished-goods-receipt";
@@ -447,6 +451,38 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <ProductionVolumeByTimeReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/production-volume-weekly-detail"
+                        element={
+                            <ProtectedRoute>
+                                <WeeklyDetailProductionVolumeReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/import-export-inventory-by-stage"
+                        element={
+                            <ProtectedRoute>
+                                <ImportExportInventoryByTime />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/production-output-by-production-order"
+                        element={
+                            <ProtectedRoute>
+                                <ProductionOutputByProductionOrder />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-working/factory-transfer"
+                        element={
+                            <ProtectedRoute>
+                                <FactoryTransfer />
                             </ProtectedRoute>
                         }
                     />

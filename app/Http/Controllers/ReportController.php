@@ -722,6 +722,152 @@ class ReportController extends Controller
         return $dataIssues;
     }
 
+    function importExportInventoryByStage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required',
+            'factory' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_StockBy_SPDICH_CDOAN_MES(?, ?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
+
+    function productionOutputByProductionOrder(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required',
+            'factory' => 'required',
+            'type' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_Production_Output_by_WO_MES(?, ?, ?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
+
+    function weeklyDetailedProductionOutput(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'year' => 'required',
+            'week' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_GT_WEEKLY_DETAILED_PRODUCTION_OUTPUT(?, ?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->year, $request->week, $request->factory, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
+
+    function factoryTransfer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_GT_FACTORY_TRANSFER(?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
 
     // function getDefectDataFromSAP($ItemCode, $SubItemCode)
     // {

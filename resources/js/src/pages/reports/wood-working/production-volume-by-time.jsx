@@ -10,21 +10,17 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
 import { PiFilePdfBold } from "react-icons/pi";
-import { FiCheck } from "react-icons/fi";
-import "../../../assets/styles/index.css";
+import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 import {
     FaArrowRotateLeft,
     FaArrowUpRightFromSquare,
-    FaCheck,
     FaRegImage,
     FaExpand,
-    FaDownLeftAndUpRightToCenter
 } from "react-icons/fa6";
 import { IoMdRadioButtonOff, IoMdRadioButtonOn, IoMdCheckbox, IoMdSquareOutline } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import { formatNumber } from "../../../utils/numberFormat";
-import { format, startOfDay, endOfDay } from "date-fns";
-import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
+import { format } from "date-fns";
 import {
     ModalOverlay,
     Modal,
@@ -32,18 +28,14 @@ import {
     ModalContent,
     ModalCloseButton,
     ModalBody,
-    ModalFooter,
-    Spinner,
     useDisclosure
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-enterprise";
-// import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import Chart from 'chart.js/auto';
 import { Bar } from 'react-chartjs-2';
 import debounce from "../../../utils/debounce";
 import useAppContext from "../../../store/AppContext";
@@ -164,21 +156,36 @@ function ProductionVolumeByTimeReport() {
                         field: "length",
                         width: 100,
                         suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         filter: true,
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Rộng",
                         field: "width",
                         width: 100,
                         suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         filter: true,
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Dày",
                         field: "thickness",
                         width: 100,
                         suppressHeaderMenuButton: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         filter: true,
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Sản lượng",
@@ -256,6 +263,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Rộng",
@@ -263,6 +275,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Dày",
@@ -270,6 +287,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Chủng loại",
@@ -281,7 +303,6 @@ function ProductionVolumeByTimeReport() {
                     {
                         headerName: "Tổng",
                         field: "SLThanhTotal",
-                        // field: "quantity",
                         width: 180,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -295,7 +316,6 @@ function ProductionVolumeByTimeReport() {
                     {
                         headerName: "Tổng khối lượng (M3)",
                         field: "M3Total",
-                        // field: "volume",
                         width: 220,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -358,6 +378,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Rộng",
@@ -365,6 +390,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Dày",
@@ -372,6 +402,11 @@ function ProductionVolumeByTimeReport() {
                         width: 100,
                         suppressHeaderMenuButton: true,
                         filter: true,
+                        valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+                        cellStyle: (params) =>
+                            params.node.rowPinned
+                                ? { fontWeight: "bold", textAlign: "center", backgroundColor: "#B9E0F6" }
+                                : { textAlign: "center" },
                     },
                     {
                         headerName: "Chủng loại",
@@ -383,7 +418,6 @@ function ProductionVolumeByTimeReport() {
                     {
                         headerName: "Tổng",
                         field: "SLThanhTotal",
-                        // field: "quantity",
                         width: 180,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -397,7 +431,6 @@ function ProductionVolumeByTimeReport() {
                     {
                         headerName: "Tổng khối lượng (M3)",
                         field: "M3Total",
-                        // field: "volume",
                         width: 220,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -414,6 +447,10 @@ function ProductionVolumeByTimeReport() {
                 return [];
         }
     }, [selectedTimeRange, selectedUnit]);
+
+    const localeText = useMemo(() => {
+        return AG_GRID_LOCALE_VI;
+    }, []);
 
     const excelStyles = [
         {
@@ -610,7 +647,6 @@ function ProductionVolumeByTimeReport() {
                     quantity: Number(item.SLThanh),
                     volume: Number(item.M3)
                 }));
-                console.log("Daily 1: ", formattedData)
 
                 setDailyData(formattedData);
             } catch (error) {
@@ -987,8 +1023,26 @@ function ProductionVolumeByTimeReport() {
     };
 
     const handleExportExcel = useCallback(() => {
-        gridRef.current.api.exportDataAsExcel();
-    }, []);
+        const formatDate = (date) => {
+            if (!date) return '';
+            try {
+                const parsedDate = typeof date === 'string' ? parseISO(date) : date;
+                return format(parsedDate, 'dd-MM-yyyy'); // Format to DD-MM-YYYY
+            } catch (error) {
+                return '';
+            }
+        };
+
+        const from = formatDate(fromDate);
+        const to = formatDate(toDate);
+        const timeRange = selectedTimeRange == "day" ? from + "_đến_" + to : "năm_" + format(fromYear, 'yyyy');
+        const factory = selectedFactory || 'Tất cả';
+        const fileName = `Báo cáo sản lượng theo ${selectedTimeRange == "day" ? "ngày" : selectedTimeRange == "week" ? "tuần" : "tháng"}_${factory}_${timeRange}_${selectedUnit}.xlsx`;
+
+        gridRef.current.api.exportDataAsExcel({
+            fileName,
+        });
+    }, [fromDate, toDate, fromYear, selectedFactory, selectedUnit]);
 
     const handleExportPDF = () => {
         toast("Chức năng xuất PDF đang được phát triển.");
@@ -1035,6 +1089,10 @@ function ProductionVolumeByTimeReport() {
                 return 'Hoàn thiện';
             case 'DG':
                 return 'Đóng gói';
+            case 'BTP':
+                return 'Bán thành phẩm';
+            case 'TP':
+                return 'Thành phẩm';
             default:
                 return code
         }
@@ -1047,7 +1105,6 @@ function ProductionVolumeByTimeReport() {
 
             if (selectedFactory !== 'All') {
                 res = res.filter(data => data.factory === selectedFactory);
-                console.log("Daily ", res)
                 if (!selectedGroup.some(group => group.value === 'All')) {
                     res = res.filter(data => selectedGroup.some(group => group === data.group_name));
                 }
@@ -1070,7 +1127,6 @@ function ProductionVolumeByTimeReport() {
                 'Hoàn thiện': Array(dates.length).fill(0),
                 'Đóng gói': Array(dates.length).fill(0)
             };
-            // console.log("Daily 2: ", dates)
 
             res.forEach(item => {
                 const itemDate = new Date(item.date);
@@ -1088,8 +1144,6 @@ function ProductionVolumeByTimeReport() {
                     }
                 }
             });
-
-            console.log("Daily 2: ", stageResults)
 
             setDailyChartData(stageResults);
         }
@@ -1301,7 +1355,6 @@ function ProductionVolumeByTimeReport() {
     const getAllFactory = async () => {
         try {
             const response = await reportApi.getCBGFactory();
-            console.log("Nhà máy: ", response)
             response.unshift({
                 U_FAC: 'All',
                 Name: 'Tất cả'
@@ -1382,11 +1435,10 @@ function ProductionVolumeByTimeReport() {
                             </div>
 
                             <div className="flex justify-end items-center divide-x-2 w-1/3">
-                                <div className="mx-2.5"></div>
                                 <div>
                                     <FaArrowRotateLeft
                                         className="mx-2.5 w-[22px] h-[22px] text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
-                                        onClick={handleResetFilter}
+                                        onClick={() => getReportData()}
                                     />
                                 </div>
                                 <div>
@@ -1680,6 +1732,7 @@ function ProductionVolumeByTimeReport() {
                                             rowGroupPanelShow={"always"}
                                             // groupDisplayType="groupRows"
                                             animateRows={true}
+                                            localeText={localeText}
                                             suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
                                         />

@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import { vi } from "date-fns/locale";
+import { setDefaultOptions } from "date-fns";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/lexend";
 import '@fontsource/source-serif-pro/200.css';
@@ -11,6 +13,14 @@ import '@fontsource/source-serif-pro/900.css';
 import AppRoutes from "./routes/index.jsx";
 
 function App() {
+    setDefaultOptions({
+        locale: {
+            ...vi,
+            options: {
+                weekStartsOn: 1,
+            },
+        },
+    });
     return (
         <div id="app">
             <AppRoutes />

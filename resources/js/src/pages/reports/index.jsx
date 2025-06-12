@@ -127,6 +127,34 @@ const CBGReports = [
             "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
         priority: true,
     },
+    {
+        id: "0006",
+        name: "Báo cáo sản lượng chi tiết theo tuần",
+        link: "/reports/wood-working/production-volume-weekly-detail",
+        description: "Xem sản lượng đã được giao nhận chi tiết theo từng tuần",
+        priority: true,
+    },
+    {
+        id: "0007",
+        name: "Báo cáo nhập xuất tồn từng công đoạn",
+        link: "/reports/wood-working/import-export-inventory-by-stage",
+        description: "Kiểm tra số lượng nhập xuất tồn từng công đoạn",
+        priority: true,
+    },
+    {
+        id: "0008",
+        name: "Báo cáo sản lượng theo lệnh sản xuất",
+        link: "/reports/wood-working/production-output-by-production-order",
+        description: "Theo dõi sản lượng và tiến độ hoàn thành theo lệnh sản xuất",
+        priority: true,
+    },
+    {
+        id: "0009",
+        name: "Báo cáo điều chuyển các nhà máy",
+        link: "/reports/wood-working/factory-transfer",
+        description: "Theo dõi số lượng điều chuyển kho giữa các nhà máy",
+        priority: true,
+    },
     // {
     //     id: "0006",
     //     name: "Báo cáo chi tiết nhập tồn",
@@ -203,9 +231,15 @@ const DANDReports = [
     // },
 ];
 
+const tabParamMap = {
+    0: 'wood-drying',
+    1: 'wood-working'
+};
+
 function Report() {
     const { loading, setLoading } = useAppContext();
     const [searchTerm, setSearchTerm] = useState("");
+    const [tabIndex, setTabIndex] = useState(0)
 
     const reportTab = useRef();
     const recordTab = useRef();
@@ -386,10 +420,32 @@ function Report() {
         toast("Chức năng đang được phát triển.");
     };
 
+    // Reverse mapping for looking up index from param value
+    const paramToIndex = Object.fromEntries(
+        Object.entries(tabParamMap).map(([index, param]) => [param, Number(index)])
+    );
+
+    // Handle tab change and update URL query parameter
+    const handleTabsChange = (index) => {
+        setTabIndex(index);
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', tabParamMap[index]); // Set the 'tab' query param to the mapped value
+        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    };
+
     useEffect(() => {
         document.title = "Woodsland - Báo cáo";
         const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab && paramToIndex[tab] !== undefined) {
+            setTabIndex(paramToIndex[tab]);
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tabParamMap[0]);
+            window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+        }
 
+        // Cleanup on unmount
         return () => {
             document.title = "Woodsland";
         };
@@ -447,11 +503,11 @@ function Report() {
                     {/* Main content */}
 
                     <section className="bg-white rounded-xl border-2 mb-2 border-gray-200">
-                        <Tabs size="lg">
+                        <Tabs index={tabIndex} onChange={handleTabsChange} size="lg">
                             <TabList className="">
                                 <Tab
                                     ref={reportTab}
-                                    // onClick={() => handleTabClick(false)}
+                                // onClick={() => handleTabClick(false)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo sấy phôi
@@ -459,7 +515,7 @@ function Report() {
                                 </Tab>
                                 <Tab
                                     ref={recordTab}
-                                    // onClick={() => handleTabClick(true)}
+                                // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo chế biến gỗ
@@ -575,15 +631,15 @@ function Report() {
 
                                                                     {item.responsive ==
                                                                         true && (
-                                                                        <Tooltip
-                                                                            label="Tương thích trên di động."
-                                                                            fontSize="sm"
-                                                                        >
-                                                                            <span>
-                                                                                <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                            </span>
-                                                                        </Tooltip>
-                                                                    )}
+                                                                            <Tooltip
+                                                                                label="Tương thích trên di động."
+                                                                                fontSize="sm"
+                                                                            >
+                                                                                <span>
+                                                                                    <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                </span>
+                                                                            </Tooltip>
+                                                                        )}
                                                                 </div>
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -623,12 +679,12 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+                                                                        <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                    )}
                                                                 {item.responsive ==
                                                                     true && (
-                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+                                                                        <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                    )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -667,8 +723,8 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+                                                                        <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                    )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>

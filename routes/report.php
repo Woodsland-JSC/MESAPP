@@ -14,5 +14,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/cbg-sanluongtheothoigian', [ReportController::class, 'sanluongtheothoigian']);
         Route::get('/cbg-sanluongtheongay', [ReportController::class, 'sanluongtheongay']);
         Route::get('/cbg-tonkhoxulyloi', [ReportController::class, 'defectStockChecking']);
+        Route::get('/cbg-nhapxuattontheocongdoan', [ReportController::class, 'importExportInventoryByStage']);
+        Route::get('/sanluongtheolenhsanxuat', [ReportController::class, 'productionOutputByProductionOrder']);
+        Route::get('/cbg-sanluongtheotuan', [ReportController::class, 'weeklyDetailedProductionOutput']);
+        Route::get('/dieuchuyennhamay', [ReportController::class, 'factoryTransfer']);
     });
 });
