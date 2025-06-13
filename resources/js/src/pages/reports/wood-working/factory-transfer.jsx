@@ -237,6 +237,17 @@ function FactoryTransfer() {
                         ? { fontWeight: "bold", textAlign: "left", backgroundColor: "#B9E0F6" }
                         : { textAlign: "left" },
             },
+            {
+                headerName: "Tổ nhận",
+                field: "To",
+                filter: true,
+                width: 250,
+                suppressHeaderMenuButton: true,
+                cellStyle: (params) =>
+                    params.node.rowPinned
+                        ? { fontWeight: "bold", textAlign: "left", backgroundColor: "#B9E0F6" }
+                        : { textAlign: "left" },
+            },
         ]);
     }, []);
 
@@ -332,6 +343,7 @@ function FactoryTransfer() {
                     ToFacName: item.ToFacName,
                     ToWhsCode: item.ToWhsCode,
                     ToWhsName: item.ToWhsName,
+                    To: item.To,
                 }
             });
 
