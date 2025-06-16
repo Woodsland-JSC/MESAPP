@@ -331,7 +331,7 @@ function CreateRole() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-[#EAEAED] h-full">
+            <div className="flex justify-center h-full">
                 {/* Section */}
                 <div className="w-screen xl:p-12 p-6 px-5 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-52 border-t border-gray-200">
 

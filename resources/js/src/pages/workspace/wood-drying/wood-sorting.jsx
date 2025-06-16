@@ -4,7 +4,7 @@ import Layout from "../../../layouts/layout";
 import { Link } from "react-router-dom";
 import PalletCard from "../../../components/PalletCard";
 import { HiPlus, HiOutlineSearch, HiOutlineClock } from "react-icons/hi";
-import { RiInboxArchiveFill } from "react-icons/ri";
+import { LuRotateCcw } from "react-icons/lu";
 import axios from "axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
@@ -12,6 +12,7 @@ import palletsApi from "../../../api/palletsApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import moment from "moment";
+import { Avatar } from "@chakra-ui/react";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -33,10 +34,13 @@ import {
     ModalCloseButton,
     useDisclosure,
 } from "@chakra-ui/react";
-import { BiSolidFactory } from "react-icons/bi";
+import { BiConfused, BiSolidFactory } from "react-icons/bi";
 import { SiConfluence, SiElasticstack, SiKoyeb } from "react-icons/si";
 import { TbTrash } from "react-icons/tb";
 import LoadedPallet from "../../../components/custom-icon/LoadedPallet";
+import { FaRotateLeft } from "react-icons/fa6";
+import { HiViewColumns } from "react-icons/hi2";
+import { FaCheck, FaCircle } from "react-icons/fa";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -123,6 +127,7 @@ function WoodSorting() {
                         params: {
                             year: selectedYear.value,
                             week: selectedWeek.value,
+                            factory: user.plant,
                         },
                     }
                 );
@@ -500,7 +505,7 @@ function WoodSorting() {
 
     const handleCreatePallet = async () => {
         if (palletCards.length === 0) {
-            toast.error("Danh sách không được để trống.");
+            toast.error("Gỗ chưa được chất lên pallet.");
             onConfirmClose();
             return;
         }
@@ -685,16 +690,18 @@ function WoodSorting() {
                     };
                     const itemInfo = {};
                     response.data.data.forEach((item) => {
-                        updatedResult.totalQty_T += item.Qty_T;
+                        const qty = Number(item.Qty_T) || 0;
+                        updatedResult.totalQty_T += qty;
+
                         const key = `${item.ItemName}_${Math.floor(
                             item.CDay
                         )}x${Math.floor(item.CRong)}x${Math.floor(item.CDai)}`;
                         if (itemInfo[key]) {
-                            itemInfo[key].Qty_T += item.Qty_T;
+                            itemInfo[key].Qty_T += qty;
                         } else {
                             itemInfo[key] = {
                                 ItemName: item.ItemName,
-                                Qty_T: item.Qty_T,
+                                Qty_T: qty,
                                 QuyCach: `${Math.floor(item.CDay)}x${Math.floor(
                                     item.CRong
                                 )}x${Math.floor(item.CDai)}`,
@@ -755,6 +762,10 @@ function WoodSorting() {
         }
     };
 
+    const handleResetPalletHistory = () => {
+        setPalletHistory([]);
+    };
+
     return (
         <Layout>
             {/* Container */}
@@ -782,7 +793,7 @@ function WoodSorting() {
 
                         <div className="flex gap-x-2 ">
                             <button
-                                className="bg-[#10151c] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                className="bg-gradient-to-r from-[#201527] to-[#350750]  font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                 onClick={onOpen}
                                 disabled={createPalletLoading}
                             >
@@ -791,7 +802,7 @@ function WoodSorting() {
                             </button>
 
                             <button
-                                className="bg-[#040507] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                className="bg-gradient-to-r from-[#1e2737] to-[#072450] font-medium rounded-xl p-2.5 px-4 text-white xl:flex items-center md:flex hidden active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                 onClick={onPalletTracingOpen}
                                 disabled={createPalletLoading}
                             >
@@ -804,7 +815,7 @@ function WoodSorting() {
                     {/* History In Mobile View */}
                     <div className="flex space-x-2 xl:hidden lg:hidden md:hidden">
                         <button
-                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                            className="bg-gradient-to-r from-[#201527] to-[#350750] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white  flex w-full justify-center items-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                             onClick={onOpen}
                             disabled={createPalletLoading}
                         >
@@ -812,7 +823,7 @@ function WoodSorting() {
                             Xem lịch sử
                         </button>
                         <button
-                            className="bg-[#1f2937] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                            className="bg-gradient-to-r from-[#1e2737] to-[#072450] font-medium rounded-xl p-2.5 px-4 pr-7 my-4 text-white items-center  flex w-full justify-center active:scale-[.95] active:duration-75 transition-all disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                             onClick={onPalletTracingOpen}
                             disabled={createPalletLoading}
                         >
@@ -831,18 +842,18 @@ function WoodSorting() {
                     >
                         <ModalOverlay />
                         <ModalContent>
-                            <ModalHeader>
-                                <div className="uppercase">
+                            <ModalHeader className="!py-2.5 flex space-x-3 items-center !pl-4">
+                                <HiOutlineClock className="text-3xl text-gray-400 ml-0 pl-0" />
+                                <div className="serif font-bold text-[28px] ">
                                     Lịch sử xếp pallet
                                 </div>
                             </ModalHeader>
-                            <ModalCloseButton />
-                            <ModalBody>
+                            <ModalBody className="!p-3.5 !pt-1">
                                 {/* User Information */}
-                                <div className=" mb-4 xl:w-full">
-                                    <div className="flex items-center gap-x-2">
-                                        <div>Tạo bởi: </div>
-                                        <div className="flex gap-x-3 rounded-full p-2 px-3 pl-2 bg-gray-100">
+                                <div className=" mb-2 xl:w-full flex items-center space-x-2">
+                                    <div className="text-sm ">Tạo bởi: </div>
+                                    <div className="text-[15px] flex items-center gap-x-2">
+                                        <div className="flex gap-x-3 rounded-full p-1.5 px-3 pl-[6px] bg-blue-100 text-[#17506B]">
                                             <img
                                                 src={
                                                     user?.avatar
@@ -850,9 +861,9 @@ function WoodSorting() {
                                                         : defaultUser
                                                 }
                                                 alt="user"
-                                                className="w-6 h-6 rounded-full object-cover"
+                                                className="w-5 h-5 rounded-full object-cover"
                                             ></img>
-                                            <div className="">
+                                            <div className="font-semibold text-sm">
                                                 {(user?.first_name
                                                     ? user?.first_name + " "
                                                     : "") +
@@ -864,52 +875,13 @@ function WoodSorting() {
                                     </div>
                                 </div>
 
-                                {/* Search Bar */}
-                                <div className=" mb-4 xl:w-full">
-                                    <label
-                                        htmlFor="search"
-                                        className="mb-2 text-sm font-medium text-gray-900 sr-only"
-                                    >
-                                        Search
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <svg
-                                                className="w-4 h-4 text-gray-500"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            type="search"
-                                            id="search"
-                                            className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Search"
-                                            onChange={(e) =>
-                                                setSearchTerm(e.target.value)
-                                            }
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
                                 {/* Controller */}
-                                <div className="w-full xl:flex lg:flex md:flex xl:space-x-3 md:space-x-3 lg:space-x-3 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-4 items-end">
-                                    <div className="xl:grid lg:grid md:grid xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-4 grid-cols-2 w-full gap-x-4">
+                                <div className="w-full xl:flex lg:flex md:flex xl:space-x-3 md:space-x-3 lg:space-x-3 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-4 items-end bg-gray-100 border border-gray-300 p-4 rounded-xl">
+                                    <div className="xl:grid lg:grid md:grid xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-3 grid-cols-2 w-full gap-x-4">
                                         <div className="col-span-1">
                                             <label
                                                 htmlFor="indate"
-                                                className="block mb-2 text-md font-medium text-gray-900 "
+                                                className="block mb-1 text-[14px] font-medium text-gray-900 "
                                             >
                                                 Từ ngày
                                             </label>
@@ -925,7 +897,7 @@ function WoodSorting() {
                                         <div className="col-span-1">
                                             <label
                                                 htmlFor="indate"
-                                                className="block mb-2 text-md font-medium text-gray-900 "
+                                                className="block mb-1 text-[14px]  font-medium text-gray-900 "
                                             >
                                                 Đến ngày
                                             </label>
@@ -948,12 +920,70 @@ function WoodSorting() {
                                     </button>
                                 </div>
 
+                                {/* Search Bar */}
+                                {palletHistory.length !== 0 && (
+                                    <div className=" mt-4 xl:w-full flex items-center space-x-2">
+                                        <div className="w-full">
+                                            <label
+                                                htmlFor="search"
+                                                className="mb-2 font-medium text-gray-900 sr-only"
+                                            >
+                                                Search
+                                            </label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <svg
+                                                        className="w-4 h-4 text-gray-500"
+                                                        aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            stroke="currentColor"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <input
+                                                    type="search"
+                                                    id="search"
+                                                    className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="Tìm kiếm mã pallet"
+                                                    onChange={(e) =>
+                                                        setSearchTerm(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="p-3 rounded-lg bg-gray-200 hover:bg-gray-300 active:scale-[.92] h-fit active:duration-75 transition-all"
+                                            onClick={handleResetPalletHistory}
+                                        >
+                                            <FaRotateLeft className=" w-5 h-5" />
+                                        </button>
+                                    </div>
+                                )}
+
                                 {/* Data */}
-                                <div className="w-full mt-8">
+                                <div className="w-full mt-4">
+                                    {palletHistory.length !== 0 && (
+                                        <div className="mb-2 text-gray-600">
+                                            Có tất cả{" "}
+                                            <b>{palletHistory.length}</b> kết
+                                            quả.
+                                        </div>
+                                    )}
                                     {palletHistoryLoading ? (
-                                        <div className="mt-20 text-center">
+                                        <div className="mt-32 text-center">
                                             <Spinner
-                                                thickness="4px"
+                                                thickness="8px"
                                                 speed="0.65s"
                                                 emptyColor="gray.200"
                                                 color="#155979"
@@ -1055,13 +1085,17 @@ function WoodSorting() {
                                                 ))}
                                         </div>
                                     ) : (
-                                        <div className="flex justify-center mt-20 w-full h-full text-gray-400">
-                                            Không tìm thấy dữ liệu.
+                                        <div className="h-full my-32 flex flex-col items-center justify-center text-center">
+                                            <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                            <div className="text-lg text-gray-400">
+                                                Không tìm thấy dữ liệu để hiển
+                                                thị.
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             </ModalBody>
-                            <ModalFooter>
+                            <ModalFooter className="!py-3 border-t shadow-md border-gray-300">
                                 <div className=" flex justify-end gap-x-3  w-full">
                                     <button
                                         onClick={onClose}
@@ -1109,14 +1143,18 @@ function WoodSorting() {
                                         Đóng
                                     </button>
                                     <button
-                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${deletePalletLoading ? "opacity-100 cursor-not-allowed" : ""}`}
+                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${
+                                            deletePalletLoading
+                                                ? "opacity-100 cursor-not-allowed"
+                                                : ""
+                                        }`}
                                         type="button"
                                         onClick={() => {
                                             handleDeletePallet();
                                         }}
                                         disabled={deletePalletLoading}
                                     >
-                                         {deletePalletLoading ? (
+                                        {deletePalletLoading ? (
                                             <div className="flex items-center justify-center w-full space-x-4">
                                                 <Spinner
                                                     size="sm"
@@ -1143,23 +1181,26 @@ function WoodSorting() {
                     >
                         <ModalOverlay />
                         <ModalContent>
-                            <ModalHeader className="border-b border-gray-200 shadow-sm">
-                                <div className="serif text-2xl font-bold">
+                            <ModalHeader className="!py-2 flex space-x-3 items-center !pl-4">
+                                <HiOutlineSearch className="text-3xl text-gray-400 ml-0 pl-0" />
+                                <div className="serif text-[28px] font-bold">
                                     Truy nguyên pallet
                                 </div>
                             </ModalHeader>
-                            <ModalCloseButton />
-                            <ModalBody className="py-6">
+                            <ModalBody className="!p-3.5 !pt-1">
                                 {/* Filter Section */}
-                                <div className=" mt-4  mb-4 xl:w-full">
-                                    <div className="items-center gap-x-2 bg-gray-100 p-3 border border-gray-200 shadow-md rounded-lg">
-                                        <div className="text-lg font-medium mb-4 ">
-                                            Tra cứu pallet{" "}
-                                        </div>
-                                        <div className="xl:flex lg:flex md:flex sm:block w-full gap-x-3 ">
+                                <div className=" mt-1  mb-4 xl:w-full">
+                                    <div className="items-center gap-x-2 bg-gray-100 p-4 border border-gray-300 rounded-xl">
+                                        <div className="xl:flex lg:flex md:flex items-end sm:block w-full gap-x-3 ">
                                             {/* Select Filter */}
-                                            <div className="w-full xl:grid lg:grid md:grid grid-cols-4 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-3 gap-x-3">
+                                            <div className="w-full xl:grid lg:grid md:grid grid-cols-4 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2 gap-x-3">
                                                 <div>
+                                                    <label
+                                                        htmlFor="indate"
+                                                        className="block mb-1 text-[14px]  font-medium text-gray-900 "
+                                                    >
+                                                        Chọn năm
+                                                    </label>
                                                     <Select
                                                         placeholder="Chọn năm"
                                                         options={years}
@@ -1182,6 +1223,12 @@ function WoodSorting() {
                                                     />
                                                 </div>
                                                 <div>
+                                                    <label
+                                                        htmlFor="indate"
+                                                        className="block mb-1 text-[14px]  font-medium text-gray-900 "
+                                                    >
+                                                        Chọn tuần
+                                                    </label>
                                                     <Select
                                                         placeholder="Chọn tuần"
                                                         options={weeks}
@@ -1203,7 +1250,13 @@ function WoodSorting() {
                                                         }
                                                     />
                                                 </div>
-                                                <div className="col-span-2 3">
+                                                <div className="col-span-2">
+                                                    <label
+                                                        htmlFor="indate"
+                                                        className="block mb-1 text-[14px]  font-medium text-gray-900 "
+                                                    >
+                                                        Chọn pallet
+                                                    </label>
                                                     <Select
                                                         placeholder="Chọn pallet"
                                                         // id="pallet"
@@ -1225,7 +1278,7 @@ function WoodSorting() {
                                                 </div>
                                             </div>
                                             <button
-                                                className="xl:mt-0 lg:mt-0 md:mt-0  max-w-md bg-[#155979] p-2 rounded-xl xl:w-[20%] lg:w-[20%] md:w-[20%]  sm:w-[20%] w-full text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all mt-3"
+                                                className="xl:mt-0 lg:mt-0 md:mt-0  max-w-md bg-[#155979] p-2 rounded-xl xl:w-[20%] lg:w-[20%] md:w-[20%] text-[17px] sm:w-[20%] w-full text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all mt-3"
                                                 onClick={handleCheckPallet}
                                             >
                                                 Kiểm tra
@@ -1234,15 +1287,10 @@ function WoodSorting() {
                                     </div>
                                 </div>
 
-                                {/* Result */}
-                                <div className="mb-4 text-lg font-semibold text-[#155979]">
-                                    Kết quả tra cứu:
-                                </div>
-
                                 {palletTracingLoading ? (
-                                    <div className="text-center">
+                                    <div className="text-center mt-32">
                                         <Spinner
-                                            thickness="4px"
+                                            thickness="8px"
                                             speed="0.65s"
                                             emptyColor="gray.200"
                                             color="#155979"
@@ -1250,532 +1298,308 @@ function WoodSorting() {
                                         />
                                     </div>
                                 ) : palletTracingData.Code ? (
-                                    <div className=" shadow-md my-1 p-3 border border-gray-300 rounded-lg">
-                                        <div className="uppercase font-semibold">
-                                            Thông tin pallet{" "}
-                                            <span>
-                                                {palletTracingData.Code}
-                                            </span>
+                                    <>
+                                        {/* Result */}
+                                        <div className="mb-2 text-gray-600">
+                                            Kết quả tra cứu:
                                         </div>
 
-                                        <hr className="mb-3 mt-1 border-2 border-[#237399]"></hr>
-
-                                        {result.data.map((item, index) => (
-                                            <div className="space-y-1 mb-3">
-                                                <div className="w-full xl:flex lg:flex md:flex">
-                                                    <div className="w-1/4 font-semibold xl:block lg:block md:block hidden">
-                                                        Quy cách:
+                                        <div className="border-2 border-gray-200 rounded-xl">
+                                            <div className="  p-4 py-2 pt-3.5">
+                                                <div className="w-full flex items-center justify-between uppercase">
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-gray-500">
+                                                            Mã pallet:{" "}
+                                                        </p>
+                                                        <p className="font-semibold text-[#155979] text-2xl">
+                                                            {
+                                                                palletTracingData.Code
+                                                            }
+                                                        </p>
                                                     </div>
-                                                    <div className="xl:block md:block lg:block xl:w-3/4 lg:w-3/4 md:w-3/4 hidden w-full">
-                                                        {item.ItemName} (
-                                                        {item.QuyCach})
-                                                    </div>
-                                                    <div className="xl:hidden lg:hidden md:hidden  w-full font-semibold text-lg text-[#155979]">
-                                                        {item.ItemName} (
-                                                        {item.QuyCach})
-                                                    </div>
-                                                </div>
-                                                <div className="w-full flex">
-                                                    <div className="w-1/4 font-semibold">
-                                                        Số lượng:
-                                                    </div>
-                                                    <div className="w-3/4">
-                                                        {palletTracingData.LyDo ==
-                                                        "SL" ? (
-                                                            <span>
-                                                                <span>
-                                                                    {
-                                                                        palletTracingData.Qty
-                                                                    }
-                                                                </span>{" "}
-                                                                (m3)
-                                                            </span>
-                                                        ) : (
-                                                            <span>
-                                                                <span>
-                                                                    {
-                                                                        palletTracingData.Qty_T
-                                                                    }
-                                                                </span>{" "}
-                                                                (T)
-                                                            </span>
-                                                        )}
+                                                    <div className="font-semibold p-1 px-3.5 text-blue-600 bg-blue-100 w-fit rounded-full">
+                                                        {palletTracingData.LyDo}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-
-                                        {/* COC Information */}
-                                        <div className="my-1 mt-4 border border-gray-300 shadow-sm rounded-lg">
-                                            <div className="my-2 px-3 font-semibold">
-                                                Thông tin COC
-                                            </div>
-                                            <div className="relative overflow-x-auto sm:rounded-b-md border border-gray-200">
-                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                                                    <thead className="text-xs text-gray-700 uppercase bg-[#E5E7EB] ">
-                                                        <tr>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-2.5"
-                                                            >
-                                                                Loại Gỗ
-                                                            </th>
-                                                            <th
-                                                                scope="col"
-                                                                className="px-6 py-2.5"
-                                                            >
-                                                                Mã lô gỗ
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="text-[15px] text-gray-900 font-medium  ">
-                                                        <tr className="text-md odd:bg-white even:bg-gray-50 border-b ">
-                                                            <td
-                                                                scope="row"
-                                                                className="px-6 py-3 whitespace-nowrap "
-                                                            >
+                                                <div className="mt-2.5 space-y-1 text-gray-600">
+                                                    <div>
+                                                        <p>
+                                                            Loại gỗ:{" "}
+                                                            <span className="font-semibold">
                                                                 {
                                                                     palletTracingData
                                                                         .LoaiGo
                                                                         .Name
                                                                 }
-                                                            </td>
-                                                            <td className="px-6 py-3">
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p>
+                                                            Mã lô:{" "}
+                                                            <span className="font-semibold">
                                                                 {
                                                                     palletTracingData.MaLo
                                                                 }
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* History Tracing */}
-                                        <div className="my-4  mt-4 border border-gray-200 rounded-lg">
-                                            <div className="my-3 mb-4 px-3 font-semibold">
-                                                Lịch sử pallet
-                                            </div>
-                                            <ol className="xl:px-8 lg:px-8 md:px-8 px-4 ">
-                                                <li className="border-l-2 border-blue-600">
-                                                    <div className="md:flex flex-start">
-                                                        <div className="bg-blue-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                            <svg
-                                                                aria-hidden="true"
-                                                                focusable="false"
-                                                                data-prefix="fas"
-                                                                className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                role="img"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="0 0 448 512"
-                                                            >
-                                                                <path
-                                                                    fill="currentColor"
-                                                                    d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                ></path>
-                                                            </svg>
-                                                        </div>
-                                                        <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                            <div className="flex  items-center justify-between mb-2">
-                                                                <a className="font-semibold text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out text-lg">
-                                                                    Chờ sấy
-                                                                </a>
-                                                                {palletTracingData.LyDo ===
-                                                                "SL" ? (
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                    >
-                                                                        Số
-                                                                        lượng:{" "}
+                                            <hr className=" mt-1 border border-gray-200"></hr>
+                                            <div className="bg-gray-50 p-2.5">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="uppercase text-[15px] mb-2 font-semibold text-gray-700">
+                                                        Thành phần{" "}
+                                                        <span className="text-blue-600">
+                                                            (
+                                                            {result.data.length}
+                                                            )
+                                                        </span>
+                                                    </p>
+                                                    <p className="uppercase text-[15px] mb-2 font-semibold text-gray-700">
+                                                        Tổng:{" "}
+                                                        {result.totalQty_T || 0}{" "}
+                                                        (T)
+                                                    </p>
+                                                </div>
+
+                                                {/*  */}
+                                                <div className="p-3 rounded-xl bg-white border-2 space-y-3 border-gray-200">
+                                                    {result.data.map(
+                                                        (item, index) => (
+                                                            <div className="p-3 flex space-x-4 rounded-lg bg-[#edeeff] border">
+                                                                <div className="p-2 bg-[#c3c8fc] rounded-lg w-fit h-fit ">
+                                                                    <HiViewColumns className="w-8 h-8 text-gray-700" />
+                                                                </div>
+                                                                <div className="">
+                                                                    <div className="font-medium xl:mb-0 mb-2">
                                                                         {
-                                                                            palletTracingData.Qty
-                                                                        }{" "}
-                                                                        (m3)
-                                                                    </a>
-                                                                ) : (
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-blue-600 hover:text-blue-700 focus:text-blue-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                    >
-                                                                        Số
-                                                                        lượng:{" "}
-                                                                        {
-                                                                            palletTracingData.Qty_T
-                                                                        }{" "}
-                                                                        (T)
-                                                                    </a>
-                                                                )}
-                                                            </div>
-                                                            <div className="space-y-1 max-w-lg ">
-                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                    <div className="font-semibold">
-                                                                        Ngày làm
-                                                                        việc:
-                                                                    </div>
-                                                                    <div>
-                                                                        {
-                                                                            palletTracingData.ngaytao
+                                                                            item.ItemName
                                                                         }
                                                                     </div>
-                                                                </div>
-                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                    <div className="font-semibold">
-                                                                        Người
-                                                                        thực
-                                                                        hiện:
+                                                                    <div className="text-[15px] xl:flex lg:flex md:flex xl:space-x-8">
+                                                                        <div className="text-gray-600">
+                                                                            Quy
+                                                                            cách:{" "}
+                                                                            <span className="font-medium">
+                                                                                {
+                                                                                    item.QuyCach
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className=" text-gray-600">
+                                                                            <div className=" ">
+                                                                                Số
+                                                                                lượng:{" "}
+                                                                                <span className="font-medium">
+                                                                                    {palletTracingData.LyDo ==
+                                                                                    "SL" ? (
+                                                                                        <span>
+                                                                                            <span>
+                                                                                                {
+                                                                                                    palletTracingData.Qty
+                                                                                                }
+                                                                                            </span>{" "}
+                                                                                            (m3)
+                                                                                        </span>
+                                                                                    ) : (
+                                                                                        <span>
+                                                                                            <span>
+                                                                                                {
+                                                                                                    palletTracingData.Qty_T
+                                                                                                }
+                                                                                            </span>{" "}
+                                                                                            (T)
+                                                                                        </span>
+                                                                                    )}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                    <div>
-                                                                        {
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+
+                                                <p className="uppercase text-[15px] mt-5 mb-2 font-semibold text-gray-700">
+                                                    Nhật ký hoạt động{" "}
+                                                </p>
+                                                {/* History Tracing */}
+                                                <div className="my-4 mb-0 mt-2 p-4 pb-0 bg-white border-2 border-gray-200 rounded-xl">
+                                                    <ol className="space-y-2 divide-y divide-gray-200">
+                                                        <li className="">
+                                                            <div>
+                                                                <div className="p-0.5 px-3 text-sm bg-blue-100 rounded-full  text-blue-600 w-fit">
+                                                                    Tạo pallet
+                                                                    xếp sấy
+                                                                </div>
+                                                                <div className="flex space-x-4 mt-3">
+                                                                    <Avatar
+                                                                        name={
                                                                             palletTracingData.CreateBy
                                                                         }
-                                                                    </div>
-                                                                </div>
-                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                    <div className="font-semibold">
-                                                                        Xuất
-                                                                        đến:
-                                                                    </div>
-                                                                    <div>
-                                                                        Kho sấy
-                                                                    </div>
-                                                                </div>
-                                                                <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                    <div className="font-semibold">
-                                                                        Ngày
-                                                                        nhận:
-                                                                    </div>
-                                                                    <div>
-                                                                        {
-                                                                            palletTracingData.LoadedIntoKilnDate
+                                                                        src="https://bit.ly/tioluwani-kolawole"
+                                                                        size={
+                                                                            "sm"
                                                                         }
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                                {palletTracingData.LoadedIntoKilnDate && (
-                                                    <li className="border-l-2 border-purple-600">
-                                                        <div className="md:flex flex-start">
-                                                            <div className="bg-purple-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    focusable="false"
-                                                                    data-prefix="fas"
-                                                                    className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                    role="img"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 448 512"
-                                                                >
-                                                                    <path
-                                                                        fill="currentColor"
-                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                    ></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out text-lg">
-                                                                        Đã vào
-                                                                        lò
-                                                                    </a>
-                                                                    {palletTracingData.LyDo ===
-                                                                    "SL" ? (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
+                                                                    />
+                                                                    <div>
+                                                                        <p>
+                                                                            <span className="font-medium">
+                                                                                {
+                                                                                    palletTracingData.CreateBy
+                                                                                }
+                                                                            </span>{" "}
+                                                                            đã
+                                                                            tạo
+                                                                            pallet.
+                                                                        </p>
+                                                                        <p className="text-gray-500">
                                                                             {
-                                                                                palletTracingData.Qty
-                                                                            }{" "}
-                                                                            (m3)
-                                                                        </a>
-                                                                    ) : (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-purple-600 hover:text-purple-700 focus:text-purple-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
-                                                                            {
-                                                                                palletTracingData.Qty_T
-                                                                            }{" "}
-                                                                            (T)
-                                                                        </a>
-                                                                    )}
-                                                                </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày
-                                                                            làm
-                                                                            việc:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.LoadedIntoKilnDate
+                                                                                palletTracingData.ngaytao
                                                                             }
-                                                                        </div>
+                                                                        </p>
                                                                     </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Người
-                                                                            thực
-                                                                            hiện:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        {palletTracingData.LoadedIntoKilnDate && (
+                                                            <li className="py-4">
+                                                                <div>
+                                                                    <div className="p-0.5 px-3 text-sm bg-violet-100 rounded-full  text-violet-600 w-fit">
+                                                                        Vào lò
+                                                                    </div>
+                                                                    <div className="flex space-x-4 mt-3">
+                                                                        <Avatar
+                                                                            name={
                                                                                 palletTracingData.LoadedBy
                                                                             }
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                )}
-                                                {palletTracingData.runDate && (
-                                                    <li className="border-l-2 border-red-600">
-                                                        <div className="md:flex flex-start">
-                                                            <div className="bg-red-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    focusable="false"
-                                                                    data-prefix="fas"
-                                                                    className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                    role="img"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 448 512"
-                                                                >
-                                                                    <path
-                                                                        fill="currentColor"
-                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                    ></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-red-600 hover:text-blue-700 focus:text-red-800 duration-300 transition ease-in-out text-lg">
-                                                                        Đang sấy
-                                                                    </a>
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                    >
-                                                                        Số
-                                                                        lượng:{" "}
-                                                                        {
-                                                                            result.totalQty_T
-                                                                        }{" "}
-                                                                        (T)
-                                                                    </a>
-                                                                    {palletTracingData.LyDo ===
-                                                                    "SL" ? (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
-                                                                            {
-                                                                                palletTracingData.Qty
-                                                                            }{" "}
-                                                                            (m3)
-                                                                        </a>
-                                                                    ) : (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-red-600 hover:text-red-700 focus:text-red-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
-                                                                            {
-                                                                                palletTracingData.Qty_T
-                                                                            }{" "}
-                                                                            (T)
-                                                                        </a>
-                                                                    )}
-                                                                </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày
-                                                                            làm
-                                                                            việc:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.runDate
+                                                                            src="https://bit.ly/tioluwani-kolawole"
+                                                                            size={
+                                                                                "sm"
                                                                             }
+                                                                        />
+                                                                        <div>
+                                                                            <p>
+                                                                                <span className="font-medium">
+                                                                                    {
+                                                                                        palletTracingData.LoadedBy
+                                                                                    }
+                                                                                </span>{" "}
+                                                                                đã
+                                                                                cho
+                                                                                pallet
+                                                                                vào
+                                                                                lò.
+                                                                            </p>
+                                                                            <p className="text-gray-500">
+                                                                                {
+                                                                                    palletTracingData.LoadedIntoKilnDate
+                                                                                }
+                                                                            </p>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Người
-                                                                            thực
-                                                                            hiện:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
+                                                                </div>
+                                                            </li>
+                                                        )}
+                                                        {palletTracingData.runDate && (
+                                                            <li className="py-4">
+                                                                <div>
+                                                                    <div className="p-0.5 px-3 text-sm bg-red-100 rounded-full  text-red-600 w-fit">
+                                                                        Chạy lò
+                                                                        sấy
+                                                                    </div>
+                                                                    <div className="flex space-x-4 mt-3">
+                                                                        <Avatar
+                                                                            name={
                                                                                 palletTracingData.RunBy
                                                                             }
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Xuất
-                                                                            đến:
-                                                                        </div>
-                                                                        <div>
-                                                                            Kho
-                                                                            sấy
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày
-                                                                            nhận:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.CompletedDate
+                                                                            src="https://bit.ly/tioluwani-kolawole"
+                                                                            size={
+                                                                                "sm"
                                                                             }
+                                                                        />
+                                                                        <div>
+                                                                            <p>
+                                                                                <span className="font-medium">
+                                                                                    {
+                                                                                        palletTracingData.RunBy
+                                                                                    }
+                                                                                </span>{" "}
+                                                                                đã
+                                                                                bắt
+                                                                                đầu
+                                                                                sấy
+                                                                                pallet.
+                                                                            </p>
+                                                                            <p className="text-gray-500">
+                                                                                {
+                                                                                    palletTracingData.runDate
+                                                                                }
+                                                                            </p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                )}
-                                                {palletTracingData.CompleteDate && (
-                                                    <li className="border-l-2 border-green-600">
-                                                        <div className="md:flex flex-start">
-                                                            <div className="bg-green-600 xl:w-9 md:w-9 lg:w-9 w-6 xl:h-9 md:h-9 lg:h-9 h-6 xl:flex lg:flex md:flex hidden items-center justify-center rounded-full xl:-ml-4 lg:-ml-4 md:-ml-4 ml-0">
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    focusable="false"
-                                                                    data-prefix="fas"
-                                                                    className="text-white w-4 h-4 xl:blocl lg:block md:block hidden"
-                                                                    role="img"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 448 512"
-                                                                >
-                                                                    <path
-                                                                        fill="currentColor"
-                                                                        d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                                                                    ></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div className="block xl:px-6 lg:px-6 md:px-6  px-4 py-4 rounded-lg shadow-lg bg-gray-100 w-full xl:ml-6 lg:ml-6 md:ml-6 ml-0 mb-8">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <a className="font-semibold text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out text-lg">
-                                                                        Đã ra lò
-                                                                    </a>
-                                                                    <a
-                                                                        href="#!"
-                                                                        className="font-medium text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                    >
-                                                                        Số
-                                                                        lượng:{" "}
-                                                                        {
-                                                                            result.totalQty_T
-                                                                        }{" "}
-                                                                        (T)
-                                                                    </a>
-                                                                    {palletTracingData.LyDo ===
-                                                                    "SL" ? (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
-                                                                            {
-                                                                                palletTracingData.Qty
-                                                                            }{" "}
-                                                                            (m3)
-                                                                        </a>
-                                                                    ) : (
-                                                                        <a
-                                                                            href="#!"
-                                                                            className="font-medium text-green-600 hover:text-green-700 focus:text-green-800 duration-300 transition ease-in-out xl:text-lg lg:text-lg md-text-lg text-md"
-                                                                        >
-                                                                            Số
-                                                                            lượng:{" "}
-                                                                            {
-                                                                                palletTracingData.Qty_T
-                                                                            }{" "}
-                                                                            (T)
-                                                                        </a>
-                                                                    )}
+                                                            </li>
+                                                        )}
+                                                        {palletTracingData.CompleteDate && (
+                                                            <li className="pt-4">
+                                                                <div>
+                                                                    <div className="p-0.5 px-3 text-sm bg-green-100 rounded-full  text-green-600 w-fit">
+                                                                        Ra lò
+                                                                    </div>
+                                                                    <div className="flex space-x-4 mt-3">
+                                                                        <Avatar
+                                                                            name={
+                                                                                palletTracingData.CompletedBy
+                                                                            }
+                                                                            src="https://bit.ly/tioluwani-kolawole"
+                                                                            size={
+                                                                                "sm"
+                                                                            }
+                                                                        />
+                                                                        <div>
+                                                                            <p>
+                                                                                <span className="font-medium">
+                                                                                    {
+                                                                                        palletTracingData.CompletedBy
+                                                                                    }
+                                                                                </span>{" "}
+                                                                                đã
+                                                                                cho
+                                                                                pallet
+                                                                                ra
+                                                                                lò.
+                                                                            </p>
+                                                                            <p className="text-gray-500">
+                                                                                {
+                                                                                    palletTracingData.CompletedDate
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="space-y-1 max-w-lg">
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày
-                                                                            làm
-                                                                            việc:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.runDate
-                                                                            }
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Người
-                                                                            thực
-                                                                            hiện:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.CompleteBy
-                                                                            }
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Xuất
-                                                                            đến:
-                                                                        </div>
-                                                                        <div>
-                                                                            Kho
-                                                                            sau
-                                                                            sấy
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* <div className="xl:grid lg:grid md:grid grid-cols-2">
-                                                                        <div className="font-semibold">
-                                                                            Ngày
-                                                                            nhận:
-                                                                        </div>
-                                                                        <div>
-                                                                            {
-                                                                                palletTracingData.CompletedDate
-                                                                            }
-                                                                        </div>
-                                                                    </div> */}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                )}
-                                            </ol>
+                                                            </li>
+                                                        )}
+                                                    </ol>
+                                                    <div></div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
                                 ) : (
-                                    <div className="flex flex-col justify-center text-center text-gray-400">
-                                        <div>
-                                            Không có thông tin để hiển thị.
+                                    <div className="h-full my-32 flex flex-col items-center justify-center text-center">
+                                        <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                        <div className="text-lg text-gray-400">
+                                            Không tìm thấy dữ liệu để hiển thị.
                                         </div>
                                     </div>
                                 )}
                             </ModalBody>
-                            <ModalFooter className="border-t shadow-md border-gray-300">
+                            <ModalFooter className="!py-3 border-t shadow-md border-gray-300">
                                 <div className=" flex justify-end gap-x-3  w-full">
                                     <button
                                         onClick={onPalletTracingClose}
@@ -2012,7 +1836,8 @@ function WoodSorting() {
                                         className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${
                                             createPalletLoading
                                                 ? "cursor-not-allowed opacity-100"
-                                                : ""}`}
+                                                : ""
+                                        }`}
                                         type="button"
                                         onClick={() => {
                                             handleCreatePallet();
@@ -2020,9 +1845,7 @@ function WoodSorting() {
                                         disabled={createPalletLoading}
                                     >
                                         {createPalletLoading ? (
-                                            <div
-                                                className="flex items-center justify-center w-full space-x-4 "
-                                            >
+                                            <div className="flex items-center justify-center w-full space-x-4 ">
                                                 <Spinner
                                                     size="sm"
                                                     color="white"

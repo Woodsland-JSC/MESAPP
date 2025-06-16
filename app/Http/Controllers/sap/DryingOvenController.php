@@ -177,12 +177,13 @@ class DryingOvenController extends Controller
     {
         $year = $request->input('year');
         $week = $request->input('week');
+        $factory = $request->input('factory');
 
         $startDate = Carbon::now()->setISODate($year, $week, 1)->startOfDay();
 
         $endDate = Carbon::now()->setISODate($year, $week, 7)->endOfDay();
 
-        $pallets = Pallet::whereBetween('created_at', [$startDate, $endDate])->get();
+        $pallets = Pallet::whereBetween('created_at', [$startDate, $endDate])->where('factory', $factory)->get();
 
         $palletsData = $pallets->map(function ($pallet) {
             return [

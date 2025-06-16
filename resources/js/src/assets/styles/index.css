@@ -444,3 +444,7 @@ input::-ms-clear {
 input[type="password"]::-webkit-credentials-auto-fill-button {
     display: none !important;
 }
+
+.css-akq0dd {
+    border-top-left-radius: 24px !important;
+}

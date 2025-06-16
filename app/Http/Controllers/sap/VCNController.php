@@ -1067,157 +1067,157 @@ class VCNController extends Controller
 
     function getQCWarehouseByUser()
     {
-        $WHS = GetWhsCode(Auth::user()->plant, 'NG');
+        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
         return $WHS;
     }
 
-    function AcceptQCVCN(Request $request)
-    {
+    // function AcceptQCVCN(Request $request)
+    // {
 
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'Qty' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
-        }
+    //     $validator = Validator::make($request->all(), [
+    //         'id' => 'required',
+    //         'Qty' => 'required'
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
 
-        $loailoi = $request->loailoi['label'] ?? '';
-        $huongxuly = $request->huongxuly['label'] ?? '';
-        $teamBack = $request->teamBack['value'] ?? '';
-        $rootCause = $request->rootCause['value'] ?? '';
-        $subCode = $request->subCode['value'] ?? '';
-        //check kho QC
-        $whs = $this->getQCWarehouseByUser();
-        if ($whs == -1) {
-            return response()->json([
-                'error' => false,
-                'status_code' => 500,
-                'message' => "Không tìm thấy kho QC do user chưa được chỉ định nhà máy hoặc Hệ thống SAP chưa được cấu hình UserId: " . Auth::user()->id
-            ], 500);
-        }
-        try {
-            DB::beginTransaction();
-            // to bình thường
-            $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)
-                ->where('openQty', '>=', $request->Qty)->first();
-            if (!$data) {
-                throw new \Exception('data không hợp lệ.');
-            }
-            $qtypush = 0;
-            // check data history push sap
-            if ($data->IsPushSAP == 0) {
-                $type = 'I';
-                $qtypush = $data->Quantity;
-            } else {
-                $type = 'U';
-                $qtypush = $request->Qty;
-            }
-            //allocate data
-            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
-            $allocates = $this->allocate($dataallocate, $request->Qty);
-            if (count($allocates) == 0) {
-                return response()->json([
-                    'error' => false,
-                    'status_code' => 500,
-                    'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
-                        $data->Team . " sản phẩm: " .
-                        $data->ItemCode . " sản phẩm đích: " .
-                        $data->FatherCode . " LSX." . $data->LSX
-                ], 500);
-            }
-            foreach ($allocates as $allocate) {
+    //     $loailoi = $request->loailoi['label'] ?? '';
+    //     $huongxuly = $request->huongxuly['label'] ?? '';
+    //     $teamBack = $request->teamBack['value'] ?? '';
+    //     $rootCause = $request->rootCause['value'] ?? '';
+    //     $subCode = $request->subCode['value'] ?? '';
+    //     //check kho QC
+    //     $whs = $this->getQCWarehouseByUser();
+    //     if ($whs == -1) {
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => "Không tìm thấy kho QC do user chưa được chỉ định nhà máy hoặc Hệ thống SAP chưa được cấu hình UserId: " . Auth::user()->id
+    //         ], 500);
+    //     }
+    //     try {
+    //         DB::beginTransaction();
+    //         // to bình thường
+    //         $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)
+    //             ->where('openQty', '>=', $request->Qty)->first();
+    //         if (!$data) {
+    //             throw new \Exception('data không hợp lệ.');
+    //         }
+    //         $qtypush = 0;
+    //         // check data history push sap
+    //         if ($data->IsPushSAP == 0) {
+    //             $type = 'I';
+    //             $qtypush = $data->Quantity;
+    //         } else {
+    //             $type = 'U';
+    //             $qtypush = $request->Qty;
+    //         }
+    //         //allocate data
+    //         $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+    //         $allocates = $this->allocate($dataallocate, $request->Qty);
+    //         if (count($allocates) == 0) {
+    //             return response()->json([
+    //                 'error' => false,
+    //                 'status_code' => 500,
+    //                 'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+    //                     $data->Team . " sản phẩm: " .
+    //                     $data->ItemCode . " sản phẩm đích: " .
+    //                     $data->FatherCode . " LSX." . $data->LSX
+    //             ], 500);
+    //         }
+    //         foreach ($allocates as $allocate) {
 
-                $body = [
-                    "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                    "U_LSX" => $data->LSX,
-                    "U_TO" => $data->Team,
-                    "DocumentLines" => [[
-                        "Quantity" => $allocate['Allocate'],
-                        "TransactionType" => "R",
-                        "BaseEntry" => $allocate['DocEntry'],
-                        "BaseType" => 202,
-                        "WarehouseCode" => $whs,
-                        "BatchNumbers" => [
-                            [
-                                "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
-                                "Quantity" => $allocate['Allocate'],
-                                "ItemCode" =>  $allocate['ItemChild'],
-                                "U_CDai" => $allocate['CDai'],
-                                "U_CRong" => $allocate['CRong'],
-                                "U_CDay" => $allocate['CDay'],
-                                "U_Status" => "HL",
-                                "U_Year" => $request->year ?? now()->format('y'),
-                                "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
-                            ]
-                        ]
-                    ]]
-                ];
-                $response = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Basic ' . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
-                $res = $response->json();
-                if ($response->successful()) {
-                    historySLVCN::create(
-                        [
-                            'LSX' => $data->LSX,
-                            'itemchild' => $allocate['ItemChild'],
-                            'SPDich' => $data->FatherCode,
-                            'to' => $data->Team,
-                            "source" => $rootCause,
-                            "TOChuyenVe" => $teamBack,
-                            'quantity' => $allocate['Allocate'],
-                            'ObjType' => 202,
-                            'DocEntry' => $res['DocEntry']
-                        ]
-                    );
-                    DB::commit();
-                } else {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Failed receipt',
-                        'error' => $res['error'],
-                        'body' => $body
-                    ], 500);
-                }
-            }
-            notireceiptVCN::where('id', $request->id)->update([
-                'confirm' => 1,
-                'confirmBy' => Auth::user()->id,
-                'confirm_at' => Carbon::now()->format('YmdHis'),
-                'openQty' => $data->openQty - $request->Qty
-            ]);
-            DB::commit();
-            HistoryQC::dispatch(
-                $type,
-                $request->id . "VCN",
-                $data->ItemCode,
-                $qtypush,
-                $whs,
-                $qtypush - $request->Qty,
-                'VCN',
-                $data->Team,
-                $loailoi,
-                $huongxuly,
-                $rootCause,
-                $subCode,
-                $request->note,
-                $teamBack
-            );
-            return response()->json('success', 200);
-        } catch (\Exception | QueryException $e) {
-            DB::rollBack();
-            return response()->json([
-                'error' => false,
-                'status_code' => 500,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+    //             $body = [
+    //                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+    //                 "U_LSX" => $data->LSX,
+    //                 "U_TO" => $data->Team,
+    //                 "DocumentLines" => [[
+    //                     "Quantity" => $allocate['Allocate'],
+    //                     "TransactionType" => "R",
+    //                     "BaseEntry" => $allocate['DocEntry'],
+    //                     "BaseType" => 202,
+    //                     "WarehouseCode" => $whs,
+    //                     "BatchNumbers" => [
+    //                         [
+    //                             "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
+    //                             "Quantity" => $allocate['Allocate'],
+    //                             "ItemCode" =>  $allocate['ItemChild'],
+    //                             "U_CDai" => $allocate['CDai'],
+    //                             "U_CRong" => $allocate['CRong'],
+    //                             "U_CDay" => $allocate['CDay'],
+    //                             "U_Status" => "HL",
+    //                             "U_Year" => $request->year ?? now()->format('y'),
+    //                             "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+    //                         ]
+    //                     ]
+    //                 ]]
+    //             ];
+    //             $response = Http::withOptions([
+    //                 'verify' => false,
+    //             ])->withHeaders([
+    //                 'Content-Type' => 'application/json',
+    //                 'Accept' => 'application/json',
+    //                 'Authorization' => 'Basic ' . BasicAuthToken(),
+    //             ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
+    //             $res = $response->json();
+    //             if ($response->successful()) {
+    //                 historySLVCN::create(
+    //                     [
+    //                         'LSX' => $data->LSX,
+    //                         'itemchild' => $allocate['ItemChild'],
+    //                         'SPDich' => $data->FatherCode,
+    //                         'to' => $data->Team,
+    //                         "source" => $rootCause,
+    //                         "TOChuyenVe" => $teamBack,
+    //                         'quantity' => $allocate['Allocate'],
+    //                         'ObjType' => 202,
+    //                         'DocEntry' => $res['DocEntry']
+    //                     ]
+    //                 );
+    //                 DB::commit();
+    //             } else {
+    //                 DB::rollBack();
+    //                 return response()->json([
+    //                     'message' => 'Failed receipt',
+    //                     'error' => $res['error'],
+    //                     'body' => $body
+    //                 ], 500);
+    //             }
+    //         }
+    //         notireceiptVCN::where('id', $request->id)->update([
+    //             'confirm' => 1,
+    //             'confirmBy' => Auth::user()->id,
+    //             'confirm_at' => Carbon::now()->format('YmdHis'),
+    //             'openQty' => $data->openQty - $request->Qty
+    //         ]);
+    //         DB::commit();
+    //         HistoryQC::dispatch(
+    //             $type,
+    //             $request->id . "VCN",
+    //             $data->ItemCode,
+    //             $qtypush,
+    //             $whs,
+    //             $qtypush - $request->Qty,
+    //             'VCN',
+    //             $data->Team,
+    //             $loailoi,
+    //             $huongxuly,
+    //             $rootCause,
+    //             $subCode,
+    //             $request->note,
+    //             $teamBack
+    //         );
+    //         return response()->json('success', 200);
+    //     } catch (\Exception | QueryException $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'error' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     //lấy detail data công đoạn rong
     function viewDetailRong(Request $request)
@@ -2342,7 +2342,7 @@ class VCNController extends Controller
         $teamBack = $request->teamBack['value'] ?? '';
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
-        
+
         //check kho QC
         $whs = $this->getQCWarehouseByUser();
         if ($whs == -1) {
