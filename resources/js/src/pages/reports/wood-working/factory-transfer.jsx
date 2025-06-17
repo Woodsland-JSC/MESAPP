@@ -91,20 +91,19 @@ function FactoryTransfer() {
         return updateColumnDefs([
             {
                 field: "ItemCode",
-                // enableRowGroup: true,
                 headerName: "Mã chi tiết/sản phẩm",
                 width: 250,
                 filter: true,
-                // hide: false
+                suppressHeaderMenuButton: true,
+                enableRowGroup: true,
+                hide: false,
             },
             {
                 headerName: "Tên chi tiết/sản phẩm",
                 field: "ItemName",
-                // enableRowGroup: true,
                 width: 350,
                 suppressHeaderMenuButton: true,
                 filter: true,
-                // hide: false
             },
             {
                 headerName: 'Quy cách',
@@ -150,9 +149,11 @@ function FactoryTransfer() {
             {
                 headerName: "Ngày điều chuyển",
                 field: "DocDate",
+                enableRowGroup: true,
                 filter: true,
                 width: 200,
                 suppressHeaderMenuButton: true,
+                hide: false,
                 valueFormatter: (params) => {
                     if (params.value)
                         return format(parseISO(params.value), 'dd/MM/yyyy')
@@ -179,14 +180,17 @@ function FactoryTransfer() {
             },
             {
                 headerName: "Từ kho",
+                field: 'FromWarehouse',
+                enableRowGroup: true,
                 filter: true,
                 width: 250,
                 suppressHeaderMenuButton: true,
-                valueGetter: (params) => {
-                    const code = params.data?.FromWhsCode || '';
-                    const name = params.data?.FromWhsName || '';
-                    return `${code} - ${name}`;
-                },
+                hide: false,
+                // valueGetter: (params) => {
+                //     const code = params.data?.FromWhsCode || '';
+                //     const name = params.data?.FromWhsName || '';
+                //     return `${code} - ${name}`;
+                // },
                 cellStyle: (params) =>
                     params.node.rowPinned
                         ? { fontWeight: "bold", textAlign: "left", backgroundColor: "#B9E0F6" }
@@ -209,14 +213,17 @@ function FactoryTransfer() {
             },
             {
                 headerName: "Đến kho",
+                field: 'ToWarehouse',
+                enableRowGroup: true,
                 filter: true,
                 width: 250,
                 suppressHeaderMenuButton: true,
-                valueGetter: (params) => {
-                    const code = params.data?.ToWhsCode || '';
-                    const name = params.data?.ToWhsName || '';
-                    return `${code} - ${name}`;
-                },
+                hide: false,
+                // valueGetter: (params) => {
+                //     const code = params.data?.ToWhsCode || '';
+                //     const name = params.data?.ToWhsName || '';
+                //     return `${code} - ${name}`;
+                // },
                 cellStyle: (params) =>
                     params.node.rowPinned
                         ? { fontWeight: "bold", textAlign: "left", backgroundColor: "#B9E0F6" }
@@ -291,6 +298,26 @@ function FactoryTransfer() {
         return null;
     };
 
+    function processDataForGrouping(originalData) {
+        const groupedData = [];
+        const groupMap = new Map();
+
+        originalData.forEach(row => {
+            const groupKey = `${row.ItemCode}_${row.DocDate}_${row.FromWhsCode}_${row.ToWhsCode}`;
+
+            if (groupMap.has(groupKey)) {
+                const existingGroup = groupMap.get(groupKey);
+                existingGroup.Quantity += row.Quantity;
+            } else {
+                const newGroup = { ...row };
+                groupMap.set(groupKey, newGroup);
+                groupedData.push(newGroup);
+            }
+        });
+
+        return groupedData;
+    }
+
     const getReportData = async () => {
         if (!fromDate && !toDate) return;
 
@@ -315,8 +342,6 @@ function FactoryTransfer() {
                 { signal }
             );
 
-            console.log("Data: ", res);
-
             setReportData(res);
 
             // if (selectedFactory !== 'All') {
@@ -339,15 +364,17 @@ function FactoryTransfer() {
                     FromFacName: item.FromFacName,
                     FromWhsCode: item.FromWhsCode,
                     FromWhsName: item.FromWhsName,
+                    FromWarehouse: `${item.FromWhsCode || ''} - ${item.FromWhsName || ''}`,
                     ToFacCode: item.ToFacCode,
                     ToFacName: item.ToFacName,
                     ToWhsCode: item.ToWhsCode,
                     ToWhsName: item.ToWhsName,
+                    ToWarehouse: `${item.ToWhsCode || ''} - ${item.ToWhsName || ''}`,
                     To: item.To,
                 }
             });
 
-            setRowData(formattedData);
+            setRowData(processDataForGrouping(formattedData));
         } catch (error) {
             if (error.name === 'AbortError' || signal.aborted) {
                 return;
@@ -779,23 +806,40 @@ function FactoryTransfer() {
                                             fontSize: 16,
                                         }}
                                     >
+
                                         <AgGridReact
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
-                                            autoGroupColumnDef={{
-                                                headerName: 'Nhóm',
-                                                // pinned: "left"
-                                            }}
                                             excelStyles={excelStyles}
-                                            // rowGroupPanelShow={"always"}
-                                            groupDisplayType="groupRows"
+                                            rowGroupPanelShow={"always"}
                                             animateRows={true}
                                             suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
-                                            grandTotalRow={"top"}
                                             localeText={localeText}
-                                            suppressRowGroupHidesColumns={true}
+                                            suppressAutoGroupColumn={false}
+                                            // autoGroupColumnDef={{
+                                            //     headerName: 'Nhóm',
+                                            //     field: 'ag-Grid-AutoColumn',
+                                            //     cellRenderer: 'agGroupCellRenderer',
+                                            //     cellRendererParams: {
+                                            //         suppressCount: true,
+                                            //         checkbox: false
+                                            //     }
+                                            // }}
+                                            groupDefaultExpanded={-1}
+                                            groupDisplayType={'multipleColumns'}
+                                            onGridReady={(params) => {
+                                                const columnsToShow = ['ItemCode', 'DocDate', 'FromWarehouse', 'ToWarehouse'];
+                                                columnsToShow.forEach(colId => {
+                                                    const column = params.api.getColumn(colId);
+                                                    if (column) {
+                                                        params.api.setColumnsVisible([colId], true);
+                                                    }
+                                                });
+
+                                                params.api.refreshCells();
+                                            }}
                                         />
                                     </div>
                                 </div>

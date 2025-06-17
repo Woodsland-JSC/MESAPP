@@ -29,139 +29,6 @@ import debounce from "../../../utils/debounce";
 import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
 
-const exampleData = [
-    {
-        group: 12,
-        targetProduct: "Thứ 2",
-        ItemCode: "SP001",
-        ItemName: "Gỗ sồi đỏ 1m2",
-        length: 100,
-        width: 50,
-        thickness: 10,
-        quantity: 123,
-        qc_type: "SP",
-        workpiece_src: "Thuận Hưng",
-        recipient: "Phạm Thị Thanh"
-    },
-    {
-        group: 12,
-        targetProduct: "Thứ 2",
-        ItemCode: "SP002",
-        ItemName: "Gỗ óc chó 2m4",
-        length: 240,
-        width: 60,
-        thickness: 15,
-        quantity: 85,
-        qc_type: "NK",
-        workpiece_src: "Yên Sơn",
-        recipient: "Nguyễn Văn An"
-    },
-    {
-        group: 12,
-        targetProduct: "Thứ 3",
-        ItemCode: "SP003",
-        ItemName: "Gỗ thông 1m8",
-        length: 180,
-        width: 45,
-        thickness: 12,
-        quantity: 200,
-        qc_type: "SP",
-        workpiece_src: "Thái Bình",
-        recipient: "Trần Minh Tuấn"
-    },
-    {
-        group: 12,
-        targetProduct: "Thứ 4",
-        ItemCode: "SP004",
-        ItemName: "Gỗ xoan 1m5",
-        length: 150,
-        width: 55,
-        thickness: 8,
-        quantity: 167,
-        qc_type: "NK",
-        workpiece_src: "Thuận Hưng",
-        recipient: "Lê Thị Hương"
-    },
-    {
-        group: 13,
-        targetProduct: "Thứ 2",
-        ItemCode: "SP005",
-        ItemName: "Gỗ tràm 2m",
-        length: 200,
-        width: 40,
-        thickness: 20,
-        quantity: 145,
-        qc_type: "SP",
-        workpiece_src: "Yên Sơn",
-        recipient: "Đặng Văn Bình"
-    },
-    {
-        group: 13,
-        targetProduct: "Thứ 3",
-        ItemCode: "SP006",
-        ItemName: "Gỗ cao su 1m2",
-        length: 120,
-        width: 35,
-        thickness: 16,
-        quantity: 178,
-        qc_type: "NK",
-        workpiece_src: "Thái Bình",
-        recipient: "Hoàng Thị Mai"
-    },
-    {
-        group: 13,
-        targetProduct: "Thứ 5",
-        ItemCode: "SP007",
-        ItemName: "Gỗ sồi trắng 2m2",
-        length: 220,
-        width: 65,
-        thickness: 14,
-        quantity: 92,
-        qc_type: "SP",
-        workpiece_src: "Thuận Hưng",
-        recipient: "Vũ Đình Long"
-    },
-    {
-        group: 14,
-        targetProduct: "Thứ 2",
-        ItemCode: "SP008",
-        ItemName: "Gỗ dẻ gai 1m6",
-        length: 160,
-        width: 48,
-        thickness: 18,
-        quantity: 134,
-        qc_type: "NK",
-        workpiece_src: "Yên Sơn",
-        recipient: "Phạm Văn Đức"
-    },
-    {
-        group: 14,
-        targetProduct: "Thứ 4",
-        ItemCode: "SP009",
-        ItemName: "Gỗ lim 1m8",
-        length: 180,
-        width: 70,
-        thickness: 22,
-        quantity: 156,
-        qc_type: "SP",
-        workpiece_src: "Thái Bình",
-        recipient: "Nguyễn Thị Lan"
-    },
-    {
-        group: 14,
-        targetProduct: "Thứ 6",
-        ItemCode: "SP010",
-        ItemName: "Gỗ trắc 1m4",
-        length: 140,
-        width: 42,
-        thickness: 25,
-        quantity: 89,
-        qc_type: "NK",
-        workpiece_src: "Thuận Hưng",
-        recipient: "Trần Văn Hùng"
-    }
-];
-
 function WeeklyDetailProductionVolumeReport() {
     const navigate = useNavigate();
 
@@ -186,12 +53,7 @@ function WeeklyDetailProductionVolumeReport() {
     const [selectedGroup, setSelectedGroup] = useState([]);
 
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
-    const [rowData, setRowData] = useState(Array.from({ length: 10 }, (_, i) =>
-        exampleData.map((item) => ({
-            ...item,
-            id: item.id + i * exampleData.length,
-        }))
-    ).flat() || []);
+    const [rowData, setRowData] = useState([]);
     // const [rowData, setRowData] = useState([]);
     const [dailyChartData, setDailyChartData] = useState([]);
 
@@ -593,7 +455,6 @@ function WeeklyDetailProductionVolumeReport() {
         },
     ];
 
-    // const [reportData, setReportData] = useState(exampleData || []);
     const [reportData, setReportData] = useState([]);
     const [dailyData, setDailyData] = useState([]);
 
@@ -669,7 +530,9 @@ function WeeklyDetailProductionVolumeReport() {
                 acc[key].SLLoi += parseFloat(item.SLLoi) || 0;
                 acc[key].M3Loi += parseFloat(item.M3Loi) || 0;
                 acc[key].SLKeHoach += parseFloat(item.SLKeHoach) || 0;
+                acc[key].SLKeHoach -= parseFloat(item.SLHoanThanh) || 0;
                 acc[key].M3KeHoach += parseFloat(item.M3KeHoach) || 0;
+                acc[key].M3KeHoach -= parseFloat(item.M3HoanThanh) || 0;
                 acc[key].SLKeHoach += parseFloat(item.SLLoi) || 0;
                 acc[key].M3KeHoach += parseFloat(item.M3Loi) || 0;
                 acc[key].processedErrorDocEntries.add(currentDocEntry);
