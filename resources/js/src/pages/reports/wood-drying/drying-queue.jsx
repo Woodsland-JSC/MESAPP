@@ -12,6 +12,7 @@ import { IoSearch, IoClose } from "react-icons/io5";
 import { PiFilePdfBold } from "react-icons/pi";
 import { FiCheck } from "react-icons/fi";
 import "../../../assets/styles/index.css";
+import "../../../assets/styles/customStyle.css";
 import {
     FaArrowRotateLeft,
     FaArrowUpRightFromSquare,
@@ -75,26 +76,24 @@ function DryingQueueReport() {
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDefectResolutionReport(
-                params.plant,
+            const res = await reportApi.getDryingQueue(
                 params.from_date,
-                params.to_date
+                params.to_date,
+                params.plant
             );
             const formattedData = res.map((item) => ({
-                week: item.week,
-                root_cause: item.NguonLoi,
-                root_place: item.NoiBaoLoi,
-                defect_type: item.LoiLoai,
-                resolution: item.HXL,
-                itemname: item.ItemName,
-                thickness: item.CDay,
-                width: item.CRong,
-                height: item.CDai,
-                quantity: parseInt(item.Quantity),
-                m3: item.M3,
-                sender: item.NguoiGiao,
-                send_date: item.created_at,
-                receiver: item.NguoiNhan,
+                created_at: item.created_at,
+                code: item.code,
+                ma_lo: item.ma_lo,
+                item_code: item.item_code,
+                item_name: item.item_name,
+                thickness: parseInt(item.day),
+                width: parseInt(item.rong),
+                height: parseInt(item.dai),
+                qty: parseInt(item.qty),
+                mass: item.mass,
+                reason: item.reason,
+                status: item.status,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -140,42 +139,36 @@ function DryingQueueReport() {
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerName: "Tuần",
-            field: "week",
-            width: 80,
+            headerName: "Ngày xếp",
+            field: "created_at",
+            width: 200,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
-            headerName: "Nguồn lỗi",
-            field: "root_cause",
+            headerName: "Mã pallet",
+            field: "code",
             width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
-            headerName: "Nơi báo lỗi",
-            field: "root_place",
+            headerName: "Mã lô",
+            field: "ma_lo",
             width: 180,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
-            headerName: "Loại lỗi",
-            field: "defect_type",
-            width: 120,
+            headerName: "Mã quy cách",
+            field: "item_code",
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
         },
         {
-            headerName: "Biện pháp xử lý",
-            field: "resolution",
-            width: 180,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Chi tiết cụm",
-            field: "itemname",
+            headerName: "Tên quy cách",
+            field: "item_name",
             width: 350,
             suppressHeaderMenuButton: true,
             filter: true,
@@ -199,16 +192,44 @@ function DryingQueueReport() {
             suppressHeaderMenuButton: true,
         },
         {
-            headerName: "Số lượng",
-            field: "quantity",
-            width: 100,
+            headerName: "Số lượng (T)",
+            field: "qty",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            aggFunc: "sum",
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            },
+            headerComponentParams: { displayName: "Số lượng (T)" },
+        },
+
+        {
+            headerName: "Khối lượng (m3)",
+            field: "mass",
+            width: 170,
+            suppressHeaderMenuButton: true,
+            aggFunc: "sum",
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            },
+            headerComponentParams: { displayName: "Khối lượng (m3)" },
+        },
+        {
+            headerName: "Mục đích sấy",
+            field: "reason",
+            width: 150,
             suppressHeaderMenuButton: true,
         },
-        { headerName: "M3", field: "m3", width: 120 },
-        { headerName: "Người tạo", field: "sender" },
-        { headerName: "Ngày tạo", field: "send_date" },
-        { headerName: "Người nhận", field: "receiver" },
+        {
+            headerName: "Trạng thái",
+            field: "status",
+            width: 150,
+            suppressHeaderMenuButton: true,
+        },
     ]);
+
+    const groupDisplayType = "multipleColumns";
+
 
     const FactoryOption = ({ value, label }) => (
         <div
@@ -257,7 +278,7 @@ function DryingQueueReport() {
                                 <div className="text-sm text-[#17506B]">
                                     Báo cáo sấy phôi
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Báo cáo xếp chờ sấy
                                 </div>
                             </div>
@@ -288,18 +309,12 @@ function DryingQueueReport() {
                                         onClick={handleExportExcel}
                                     />
                                 </div>
-                                <div>
-                                    <PiFilePdfBold
-                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
-                                        onClick={handleExportPDF}
-                                    />
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className=" bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/4">
@@ -368,10 +383,7 @@ function DryingQueueReport() {
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="YS1"
-                                        label="Yên Sơn 1"
-                                    />
+                                    <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
@@ -385,8 +397,7 @@ function DryingQueueReport() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
-                            {/* <div>Đang tải dữ liệu</div> */}
+                        <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center p-3 px-4 pr-1 rounded-lg ">
                             <div class="dots"></div>
                         </div>
                     ) : (
@@ -398,141 +409,25 @@ function DryingQueueReport() {
                                         style={{
                                             height: 630,
                                             fontSize: 16,
+                                            lineHeight: 1.5,
                                         }}
                                     >
                                         <AgGridReact
                                             ref={gridRef}
                                             rowData={rowData}
                                             columnDefs={colDefs}
+                                            groupDisplayType={groupDisplayType}
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}
                         </>
                     )}
-
-                    {/* <div className="flex flex-col">
-                        <div className="overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                <div className="overflow-auto border-2 rounded-xl border-gray-500">
-                                    <table className="min-w-full   text-center font-light text-surface">
-                                        <thead className="rounded-t-xl bg-[#DBDCDD] border-b-2 border-gray-500 font-medium">
-                                            <tr className="rounded-t-xl">
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    #
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    First
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Last
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="font-normal">
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    1
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Mark
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Otto
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @mdo
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    2
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Jacob
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Thornton
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @fat
-                                                </td>
-                                            </tr>
-                                            <tr className="border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    3
-                                                </td>
-                                                <td
-                                                    colSpan="2"
-                                                    className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Larry the Bird
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @twitter
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
                 {/* <div className="py-4"></div> */}
             </div>

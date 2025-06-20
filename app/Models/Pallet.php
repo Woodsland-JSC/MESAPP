@@ -18,6 +18,7 @@ class Pallet extends Model
         'MaLo',
         'LyDo',
         'QuyCach',
+        'factory',
         'PalletType',
         'NgayNhap',
         'status',
@@ -32,28 +33,16 @@ class Pallet extends Model
         'palletSAP',
         'LoadedBy',
         'LoadedIntoKilnDate',
+        'RanBy',
+        'RanDate',
+        'CompletedBy',
+        'CompletedDate',
+        'start_time',
+        'end_time',
+        'employee',
         'activeStatus',
     ];
-    // Sự kiện trước khi tạo mới record
-    // protected static function boot()
-    // {
-    //     parent::boot();
 
-    //     static::creating(function ($model) {
-    //         DB::transaction(function () use ($model) {
-    //             $current_week = now()->format('W');
-    //             $current_year = now()->year;
-
-    //             // Count the number of records for the current year and week
-    //             $recordCount = static::whereYear('created_at', $current_year)
-    //                 ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-    //                 ->count() + 1;
-
-    //             // Set the Code field
-    //             $model->Code = substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
-    //         });
-    //     });
-    // }
     public function details()
     {
         return $this->hasMany(pallet_details::class, 'palletID', 'palletID');

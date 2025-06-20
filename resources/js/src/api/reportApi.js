@@ -21,17 +21,46 @@ const reportApi = {
         );
     },
 
-    // Pedro Version
+    getDryingPlan: (fromDate, toDate, factory) => {
+        const url = `/report/say-kehoachsay`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate,
+                factory: factory,
+            },
+        });
+    },
+
+    
+    getDryingQueue: (fromDate, toDate, factory) => {
+        const url = `/report/say-xepchosay`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate,
+                factory: factory,
+            },
+        });
+    },
+
     getTeamByFactory: (factory) => {
         const url = `/get-team-by-factory`;
         return axiosClient().get(url, {
             params: {
                 FAC: factory,
-            }
+            },
         });
     },
 
-    getDeliveryDetailReport: (statusCode, to, branch, plant, fromDate, toDate) => {
+    getDeliveryDetailReport: (
+        statusCode,
+        to,
+        branch,
+        plant,
+        fromDate,
+        toDate
+    ) => {
         const url = `/report/cbg-chitietgiaonhan`;
         return axiosClient().get(url, {
             params: {
@@ -40,8 +69,8 @@ const reportApi = {
                 branch: branch,
                 plant: plant,
                 from_date: fromDate,
-                to_date: toDate
-            }
+                to_date: toDate,
+            },
         });
     },
 
@@ -51,8 +80,8 @@ const reportApi = {
             params: {
                 plant: plant,
                 from_date: fromDate,
-                to_date: toDate
-            }
+                to_date: toDate,
+            },
         });
     },
 
@@ -61,7 +90,7 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 plant: plant,
-            }
+            },
         });
     },
 
@@ -70,8 +99,8 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 from_date: fromDate,
-                to_date: toDate
-            }
+                to_date: toDate,
+            },
         });
     },
 
@@ -85,8 +114,8 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
-                toDate: toDate
-            }
+                toDate: toDate,
+            },
         });
     },
 
@@ -95,12 +124,17 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
-                toDate: toDate
-            }
+                toDate: toDate,
+            },
         });
     },
 
-    getImportExportInventoryByStage: (fromDate, toDate, factory, { signal } = {}) => {
+    getImportExportInventoryByStage: (
+        fromDate,
+        toDate,
+        factory,
+        { signal } = {}
+    ) => {
         const url = `/report/cbg-nhapxuattontheocongdoan`;
         return axiosClient().get(url, {
             params: {
@@ -112,14 +146,19 @@ const reportApi = {
         });
     },
 
-    getProductionOutputByProductionOrder: (fromDate, toDate, factory, { signal } = {}) => {
+    getProductionOutputByProductionOrder: (
+        fromDate,
+        toDate,
+        factory,
+        { signal } = {}
+    ) => {
         const url = `/report/sanluongtheolenhsanxuat`;
         return axiosClient().get(url, {
             params: {
                 fromDate,
                 toDate,
                 factory,
-                type: 'CBG'
+                type: "CBG",
             },
             signal,
         });
@@ -131,7 +170,7 @@ const reportApi = {
             params: {
                 year,
                 week,
-                factory
+                factory,
             },
             signal,
         });
@@ -147,6 +186,6 @@ const reportApi = {
             signal,
         });
     },
-}
+};
 
 export default reportApi;

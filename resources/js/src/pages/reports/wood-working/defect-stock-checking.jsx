@@ -244,13 +244,6 @@ function DefectStockCheckingReport() {
         return { background: "#ffffff" };
     };
 
-    const defaultColDef = useMemo(() => {
-        return {
-            flex: 1,
-            minWidth: 150,
-        };
-    }, []);
-
     const FactoryOption = ({ value, label }) => (
         <div
             className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
@@ -371,7 +364,7 @@ function DefectStockCheckingReport() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                        <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center  p-3 px-4 pr-1 rounded-lg ">
                             {/* <div>Đang tải dữ liệu</div> */}
                             <div class="dots"></div>
                         </div>

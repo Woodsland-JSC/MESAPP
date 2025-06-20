@@ -624,7 +624,7 @@ function ProductionOutputByProductionOrder() {
                                 <div className="text-sm text-[#17506B]">
                                     Báo cáo chế biến gỗ
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Báo cáo sản lượng theo lệnh sản xuất
                                 </div>
                             </div>

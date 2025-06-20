@@ -898,9 +898,9 @@ function ProductionVolumeByTimeReport() {
               </div>
               <div className="flex flex-col mb-0 pb-0">
                 <div className="text-sm text-[#17506B]">
-                  Báo cáo sản lượng
+                  Báo cáo sản lượng 
                 </div>
-                <div className=" text-2xl font-semibold">
+                <div className="serif text-3xl font-bold">
                   Báo cáo sản lượng theo {selectedTimeRange == "day" ? "ngày" : selectedTimeRange == "week" ? "tuần" : "tháng"} (VCN)
                 </div>
               </div>
@@ -1219,7 +1219,7 @@ function ProductionVolumeByTimeReport() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg flex ">
                   Không có dữ liệu để hiển thị.
                 </div>
               )}

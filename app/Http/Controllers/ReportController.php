@@ -3,10 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Exception;
 use PhpOffice\PhpWord\TemplateProcessor;
 use App\Models\notireceipt;
+use App\Models\planDryings;
+use App\Models\plandetail;
+use App\Models\Pallet;
+use App\Models\FanSpeed;
+use App\Models\ActualThickness;
+use App\Models\User;
 use Carbon\Carbon;
 use Auth;
+use App\Models\notireceiptVCN;
+
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use GuzzleHttp\Client;
@@ -122,68 +131,136 @@ class ReportController extends Controller
     }
 
     //báo cáo xếp chờ xấy
-    function xepchosay(Request $request)
+    // function xepchosay(Request $request)
+    // {
+    //     $validate = Validator::make($request->all(), [
+    //         'fromDate' => 'required|date',
+    //         'toDate' => 'required|date',
+    //         'factory' => 'required',
+    //     ]);
+    //     if ($validate->fails()) {
+    //         return response()->json(['error' => $validate->errors()], 400);
+    //     }
+    //     $branch = $request->input('branch');
+    //     $factory = $request->input('factory');
+    //     $fromDate = $request->FromDate;
+    //     $ToDate = $request->ToDate;
+    //     // Start the query and add conditions based on the request inputs
+    //     $query = DB::table('gt_say_xepchoxay');
+
+    //     if ($branch) {
+    //         $query->where('branch', $branch);
+    //     }
+
+    //     if ($factory) {
+    //         $query->where('plant', $factory);
+    //     }
+
+    //     if ($fromDate != null && $ToDate != null) {
+    //         // where beetwen
+    //         $query->whereRaw('DATE(created_at) BETWEEN ? AND ?', [$fromDate, $ToDate]);
+    //     }
+
+    //     // Get the results
+    //     $data = $query->get();
+    //     $itemdistinct = $query->distinct()->pluck('ItemCode');
+    //     $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
+    //     $dataQuyCach = qtycachIemSAP($itemstring);
+
+    //     $dataQuyCachMap = [];
+    //     foreach ($dataQuyCach as $item) {
+    //         $dataQuyCachMap[$item['ItemCode']] = $item;
+    //     }
+
+    //     // Lặp qua originalData và thay thế các giá trị
+    //     $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+    //         if (isset($dataQuyCachMap[$item->ItemCode])) {
+    //             $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+    //             $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+    //             $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+    //         }
+    //         return $item;
+    //     });
+
+    //     return response()->json($updatedData);
+    // }
+
+    function DryingQueueReport(Request $request)
     {
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $factory = $request->input('factory');
+
         $validate = Validator::make($request->all(), [
-            'FromDate' => 'required|date',
-            'ToDate' => 'required|date',
-        ], [
-            'FromDate.required' => 'The FromDate is required.',
-            'FromDate.date' => 'The FromDate must be a valid date.',
-            'ToDate.required' => 'The ToDate is required.',
-            'ToDate.date' => 'The ToDate must be a valid date.',
+            'fromDate' => 'required|date',
+            'toDate' => 'required|date',
+            'factory' => 'required',
         ]);
+
         if ($validate->fails()) {
             return response()->json(['error' => $validate->errors()], 400);
         }
-        $branch = $request->input('branch');
-        $plant = $request->input('plant');
-        $fromDate = $request->FromDate;
-        $ToDate = $request->ToDate;
-        // Start the query and add conditions based on the request inputs
-        $query = DB::table('gt_say_xepchoxay');
 
-        if ($branch) {
-            $query->where('branch', $branch);
-        }
+        try {
+            // Lấy danh sách ItemName từ SAP
+            $conDB = (new ConnectController)->connect_sap();
+            $query = 'SELECT "ItemCode", "ItemName" FROM OITM';
+            $stmt = odbc_prepare($conDB, $query);
 
-        if ($plant) {
-            $query->where('plant', $plant);
-        }
-
-        if ($fromDate != null && $ToDate != null) {
-            // where beetwen
-            $query->whereRaw('DATE(created_at) BETWEEN ? AND ?', [$fromDate, $ToDate]);
-        }
-
-        // Get the results
-        $data = $query->get();
-        $itemdistinct = $query->distinct()->pluck('ItemCode');
-        $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
-        $dataQuyCach = qtycachIemSAP($itemstring);
-
-        $dataQuyCachMap = [];
-        foreach ($dataQuyCach as $item) {
-            $dataQuyCachMap[$item['ItemCode']] = $item;
-        }
-
-        // Lặp qua originalData và thay thế các giá trị
-        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
-            if (isset($dataQuyCachMap[$item->ItemCode])) {
-                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
-                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
-                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
-            return $item;
-        });
 
-        return response()->json($updatedData);
+            if (!odbc_execute($stmt)) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $sapItems = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $sapItems[$row['ItemCode']] = $row['ItemName'];
+            }
+            odbc_close($conDB);
+
+            // Lấy dữ liệu pallet với điều kiện lọc
+            $pallets = Pallet::with(['details'])
+                ->where('factory', $factory)
+                ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
+                ->get();
+
+            $result = [];
+
+            foreach ($pallets as $pallet) {
+                foreach ($pallet->details as $detail) {
+                    $result[] = [
+                        'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
+                        'code' => $pallet->Code,
+                        'ma_lo' => $pallet->MaLo,
+                        'item_code' => $detail->ItemCode,
+                        'item_name' => $sapItems[$detail->ItemCode] ?? 'Không xác định', 
+                        'dai' => $detail->CDai,
+                        'rong' => $detail->CRong,
+                        'day' => $detail->CDay,
+                        'qty' => $detail->Qty_T,
+                        'mass' => round($detail->Qty, 4), // Làm tròn 4 chữ số thập phân
+                        'reason' => $pallet->LyDo,
+                        'status' => empty($pallet->RanBy) ? 'Chưa sấy' : 'Đang sấy'
+                    ];
+                }
+            }
+
+            return response()->json($result, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi khi lấy dữ liệu: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     function xepsay(Request $request)
     {
-        $fromDate = $request->input('from_date'); 
-        $ToDate = $request->input('to_date'); 
+        $fromDate = $request->input('from_date');
+        $ToDate = $request->input('to_date');
         // $oven= $request->input('oven');
 
         // Start the query and add conditions based on the request inputs
@@ -198,24 +275,343 @@ class ReportController extends Controller
         $data = $query->get();
         $itemdistinct = $query->distinct()->pluck('ItemCode');
         $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
-        $dataQuyCach = qtycachIemSAP($itemstring);
+        // $dataQuyCach = qtycachIemSAP($itemstring);
 
-        $dataQuyCachMap = [];
-        foreach ($dataQuyCach as $item) {
-            $dataQuyCachMap[$item['ItemCode']] = $item;
+        // $dataQuyCachMap = [];
+        // foreach ($dataQuyCach as $item) {
+        //     $dataQuyCachMap[$item['ItemCode']] = $item;
+        // }
+
+        // // Lặp qua originalData và thay thế các giá trị
+        // $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
+        //     if (isset($dataQuyCachMap[$item->ItemCode])) {
+        //         $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+        //         $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+        //         $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+        //     }
+        //     return $item;
+        // });
+
+        return response()->json($data);
+    }
+
+    function KilnLoadingMinutes(Request $request)
+    {
+        $branch = $request->input('branch');
+        $kiln = $request->input('kiln');
+
+        $validate = Validator::make($request->all(), [
+            'branch' => 'required',
+            'kiln' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['error' => $validate->errors()], 400);
         }
 
-        // Lặp qua originalData và thay thế các giá trị
-        $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
-            if (isset($dataQuyCachMap[$item->ItemCode])) {
-                $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
-                $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
-                $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
-            }
-            return $item;
-        });
+        try {
+            // Tìm kế hoạch sấy mới nhất có Oven = $kiln và status = 0 hoặc 1
+            $planDrying = planDryings::where('Oven', $kiln)
+                ->whereIn('Status', [0, 1])
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        return response()->json($updatedData);
+            if (!$planDrying) {
+                return response()->json(['error' => 'Không tìm thấy kế hoạch sấy đang hoạt động cho lò này'], 404);
+            }
+
+            // Lấy thông tin các pallet trong kế hoạch sấy
+            $planDetails = plandetail::where('PlanID', $planDrying->PlanID)->get();
+
+            if ($planDetails->isEmpty()) {
+                return response()->json(['error' => 'Không tìm thấy pallet nào trong kế hoạch sấy'], 404);
+            }
+
+            // Lấy danh sách palletID từ plan_detail.pallet
+            $palletIDs = $planDetails->pluck('pallet')->unique();
+
+            // Lấy thông tin pallet từ bảng Pallet theo palletID
+            $pallets = Pallet::whereIn('palletID', $palletIDs)
+                ->select('palletID', 'Code', 'LoadedIntoKilnDate')
+                ->get()
+                ->keyBy('palletID'); // Key by palletID thay vì Code
+
+            // Lấy danh sách ngày vào lò và tính khoảng thời gian
+            $loadedDates = $planDetails->map(function ($detail) use ($pallets) {
+                $pallet = $pallets->get($detail->pallet); // $detail->pallet chính là palletID
+                if ($pallet && $pallet->LoadedIntoKilnDate) {
+                    return Carbon::parse($pallet->LoadedIntoKilnDate)->format('d/m/Y');
+                }
+                return null;
+            })->filter()->unique()->sort()->values();
+
+            // Tạo chuỗi LoadedIntoKilnDates
+            $loadedIntoKilnDates = '';
+            if ($loadedDates->count() == 1) {
+                $loadedIntoKilnDates = $loadedDates->first();
+            } elseif ($loadedDates->count() > 1) {
+                $loadedIntoKilnDates = $loadedDates->first() . ' - ' . $loadedDates->last();
+            }
+
+            // Tạo mảng Detail với thông tin các pallet
+            $details = $planDetails->map(function ($planDetail) use ($pallets) {
+                $pallet = $pallets->get($planDetail->pallet); // $planDetail->pallet chính là palletID
+
+                if (!$pallet) {
+                    return null;
+                }
+
+                $detail = [
+                    'PalletCode' => $pallet->Code,
+                    'Size' => $planDetail->size,
+                    'Qty' => number_format($planDetail->Qty),
+                    'Mass' => number_format($planDetail->Mass, 4, '.', ''),
+                    'CDay' => null,
+                    'CRong' => null,
+                    'CDai' => null,
+                    'CDay2' => null,
+                    'CRong2' => null,
+                    'CDai2' => null,
+                ];
+
+                // Phân tách kích thước
+                if ($planDetail->size) {
+                    $sizes = explode('_', $planDetail->size);
+
+                    // Kích thước đầu tiên
+                    if (isset($sizes[0]) && !empty(trim($sizes[0]))) {
+                        $dimensions1 = explode('x', trim($sizes[0]));
+                        if (count($dimensions1) == 3) {
+                            $detail['CDay'] = trim($dimensions1[0]);
+                            $detail['CRong'] = trim($dimensions1[1]);
+                            $detail['CDai'] = trim($dimensions1[2]);
+                        }
+                    }
+
+                    // Kích thước thứ hai (nếu có)
+                    if (isset($sizes[1]) && !empty(trim($sizes[1]))) {
+                        $dimensions2 = explode('x', trim($sizes[1]));
+                        if (count($dimensions2) == 3) {
+                            $detail['CDay2'] = trim($dimensions2[0]);
+                            $detail['CRong2'] = trim($dimensions2[1]);
+                            $detail['CDai2'] = trim($dimensions2[2]);
+                        }
+                    }
+                }
+
+                return $detail;
+            })->filter()->values();
+
+            $totalMass = $details->sum('Mass');
+            $totalMassFormatted = number_format($totalMass, 4, '.', '');
+
+            // Tạo kết quả trả về
+            $result = [
+                'PlanID' => $planDrying->PlanID,
+                'Code' => $planDrying->Code,
+                'Oven' => $planDrying->Oven,
+                'Status' => $planDrying->Status,
+                'TotalMass' => $totalMassFormatted,
+                'TotalPallet' => $planDrying->TotalPallet,
+                'Factory' => $planDrying->plant,
+                'LoadedIntoKilnDates' => $loadedIntoKilnDates,
+                'Detail' => $details
+            ];
+
+            return response()->json($result, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+        }
+    }
+
+    function KilnCheckingMinutes(Request $request)
+    {
+        $branch = $request->input('branch');
+        $kiln = $request->input('kiln');
+
+        $validate = Validator::make($request->all(), [
+            'branch' => 'required',
+            'kiln' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['error' => $validate->errors()], 400);
+        }
+
+        try {
+            // Tìm bản ghi kế hoạch sấy mới nhất với Oven = $kiln và status = 0 hoặc 1
+            $planDrying = planDryings::where('Oven', $kiln)
+                ->whereIn('Status', [0, 1])
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$planDrying) {
+                return response()->json([
+                    'error' => 'Không tìm thấy kế hoạch sấy phù hợp cho lò ' . $kiln
+                ], 404);
+            }
+
+            // Lấy thông tin ActualThickness theo PlanID
+            $actualThickness = ActualThickness::where('PlanID', $planDrying->PlanID)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Lấy thông tin FanSpeed theo PlanID
+            $fanSpeed = FanSpeed::where('PlanID', $planDrying->PlanID)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Lấy thông tin user để ghép tên
+            $nguoiTaoPhieu = '';
+            if ($planDrying->CheckedBy) {
+                $user = User::find($planDrying->CheckedBy);
+                if ($user) {
+                    $nguoiTaoPhieu = trim($user->last_name . ' ' . $user->first_name);
+                }
+            }
+
+            // Chuẩn bị dữ liệu trả về
+            $result = [
+                'PlanID' => $planDrying->PlanID,
+                'Oven' => $planDrying->Oven,
+                'CheckedBy' => $planDrying->CheckedBy,
+                'NguoiTaoPhieu' => $nguoiTaoPhieu,
+                'DateChecked' => $planDrying->DateChecked ? \Carbon\Carbon::parse($planDrying->DateChecked)->format('d/m/Y') : null,
+                'CT1' => $planDrying->CT1,
+                'CT2' => $planDrying->CT2,
+                'CT3' => $planDrying->CT3,
+                'CT4' => $planDrying->CT4,
+                'CT5' => $planDrying->CT5,
+                'CT6' => $planDrying->CT6,
+                'CT7' => $planDrying->CT7,
+                'CT8' => $planDrying->CT8,
+                'CT9' => $planDrying->CT9,
+                'CT10' => $planDrying->CT10,
+                'CT11' => $planDrying->CT11,
+                'CT12' => $planDrying->CT12,
+                'SoLan' => $planDrying->SoLan ?? 0,
+                'CBL' => $planDrying->CBL,
+                'DoThucTe' => $planDrying->DoThucTe,
+                'ActualThickness' => $actualThickness->toArray(),
+                'FanSpeed' => $fanSpeed->toArray()
+            ];
+
+            return response()->json($result, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    function DryingPlanReport(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required',
+            'factory' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['error' => $validate->errors()], 400);
+        }
+
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $factory = $request->input('factory');
+
+        try {
+            $planDrying = planDryings::whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
+                ->where('plant', $factory)
+                ->get();
+
+            // Lấy danh sách lò sấy từ SAP một lần duy nhất
+            $conDB = (new ConnectController)->connect_sap();
+            $query = 'select "Code","Name" from "@G_SAY3" where "U_Factory" = ? ORDER BY "Code" ASC';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt, [$factory])) {
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $allKilns = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $allKilns[$row['Code']] = $row['Name']; // Tạo array với key là Code để dễ tra cứu
+            }
+            odbc_close($conDB);
+
+            // Lấy thông tin users một lần để tránh query nhiều lần
+            $userIds = $planDrying->pluck('CreateBy')->unique()->filter();
+            $users = User::whereIn('id', $userIds)->get()->keyBy('id');
+
+            // Xử lý từng bản ghi planDrying
+            $result = $planDrying->map(function ($plan) use ($allKilns, $users) {
+                // 1. Trường NguoiTao
+                $nguoiTao = '';
+                if ($plan->CreateBy && isset($users[$plan->CreateBy])) {
+                    $user = $users[$plan->CreateBy];
+                    $nguoiTao = trim($user->last_name . ' ' . $user->first_name);
+                }
+
+                // 2. Trường LoSay
+                $loSay = $allKilns[$plan->Oven] ?? '';
+
+                // 3. Trường Status
+                $status = '';
+                if ($plan->Status == 0) {
+                    if ($plan->Checked == 1 && $plan->TotalPallet > 0) {
+                        $status = 'Đã vào lò và kiểm tra lò';
+                    } elseif ($plan->Checked == 1) {
+                        $status = 'Đã kiểm tra lò sấy';
+                    } elseif ($plan->TotalPallet > 0) {
+                        $status = 'Đã vào lò';
+                    } else {
+                        $status = 'Tạo mới kế hoạch sấy';
+                    }
+                } elseif ($plan->Status == 1) {
+                    if ($plan->Review == 1) {
+                        $status = 'Đang sấy và đã đánh giá';
+                    } else {
+                        $status = 'Đang sấy chưa đánh giá';
+                    }
+                } elseif ($plan->Status == 2) {
+                    $status = 'Đã hoàn thành sấy';
+                }
+
+                // 4. Trường expected_completion_date
+                $expectedCompletionDate = null;
+                if ($plan->created_at && $plan->Time) {
+                    $expectedCompletionDate = Carbon::parse($plan->created_at)
+                        ->addDays($plan->Time)
+                        ->format('d/m/Y');
+                }
+
+                // Chuyển đổi object plan thành array và thêm các trường mới
+                $planArray = $plan->toArray();
+                $planArray['NguoiTao'] = $nguoiTao;
+                $planArray['LoSay'] = $loSay;
+                $planArray['Status'] = $status;
+                $planArray['expected_completion_date'] = $expectedCompletionDate;
+
+                if ($plan->created_at) {
+                    $planArray['created_at'] = Carbon::parse($plan->created_at)->format('H:i:s d/m/Y');
+                }
+
+                if ($plan->CompletedDate) {
+                    $planArray['CompletedDate'] = Carbon::parse($plan->CompletedDate)->format('H:i:s d/m/Y');
+                }
+
+                return $planArray;
+            });
+
+            return response()->json($result, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     function bienbanvaolo(Request $request)
@@ -868,87 +1264,4 @@ class ReportController extends Controller
 
         return $results;
     }
-
-    // function getDefectDataFromSAP($ItemCode, $SubItemCode)
-    // {
-    //     $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
-
-    //     if ($ItemCode && $SubItemCode) {
-    //         // Trường hợp lỗi bán thành phẩm
-    //         $sql = <<<SQL
-    //             SELECT "SubItemCode", "wareHouse", "BaseQty", , "OnHand"
-    //             FROM "UV_SOLUONGTON"
-    //             WHERE "ItemCode" = ? AND "SubItemCode" = ?
-    //             LIMIT 1
-    //         SQL;
-
-    //         $stmt = odbc_prepare($conDB, $sql);
-    //         odbc_execute($stmt, [$ItemCode, $SubItemCode]);
-    //         $row = odbc_fetch_array($stmt);
-
-    //         if (!$row) {
-    //             throw new \Exception("Không tìm thấy dữ liệu tồn kho cho bán thành phẩm.");
-    //         }
-
-    //         $dataIssues = [
-    //             'SubItemWhs' => $row['wareHouse'],
-    //             'SubItemQty' => [
-    //                 [
-    //                     'SubItemCode' => $row['SubItemCode'],
-    //                     'BaseQty' => (float) $row['BaseQty'],
-    //                     'OnHand' => (float) $row['OnHand']
-    //                 ]
-    //             ]
-    //         ];
-    //     } elseif ($ItemCode && !$SubItemCode) {
-    //         // Trường hợp lỗi thành phẩm
-    //         $sql = <<<SQL
-    //             SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
-    //             FROM "UV_SOLUONGTON"
-    //             WHERE "ItemCode" = ?
-    //         SQL;
-
-    //         $stmt = odbc_prepare($conDB, $sql);
-    //         odbc_execute($stmt, [$ItemCode]);
-
-    //         $subItems = [];
-    //         $warehouses = [];
-    //         $subItemCodes = [];
-
-    //         while ($row = odbc_fetch_array($stmt)) {
-    //             $subItems[] = [
-    //                 'SubItemCode' => $row['SubItemCode'],
-    //                 'BaseQty' => (float) $row['BaseQty'],
-    //                 'OnHand' => (float) $row['OnHand']
-    //             ];
-    //             $warehouses[] = $row['wareHouse'];
-    //             $subItemCodes[] = $row['SubItemCode'];
-    //         }
-
-    //         $duplicates = array_filter(array_count_values($subItemCodes), function ($count) {
-    //             return $count > 1;
-    //         });
-
-    //         if (count($duplicates) > 0) {
-    //             throw new \Exception("Định nghĩa BOM của nguyên vật liệu không hợp lệ để xử lý lỗi. Vui lòng kiểm tra lại.");
-    //         }
-
-    //         $uniqueWhs = array_unique($warehouses);
-
-    //         if (count($uniqueWhs) !== 1) {
-    //             throw new \Exception("Nhiều kho khác nhau được tìm thấy. Dữ liệu không đồng nhất.");
-    //         }
-
-    //         $dataIssues = [
-    //             'SubItemWhs' => $uniqueWhs[0],
-    //             'SubItemQty' => $subItems
-    //         ];
-    //     } else {
-    //         throw new \Exception("Không đủ dữ kiện để xác định loại lỗi.");
-    //     }
-
-    //     odbc_close($conDB);
-
-    //     return $dataIssues;
-    // }
 }

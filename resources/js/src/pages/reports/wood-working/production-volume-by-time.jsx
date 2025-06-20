@@ -1414,7 +1414,7 @@ function ProductionVolumeByTimeReport() {
                                 <div className="text-sm text-[#17506B]">
                                     Báo cáo sản lượng
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Báo cáo sản lượng theo {selectedTimeRange == "day" ? "ngày" : selectedTimeRange == "week" ? "tuần" : "tháng"}
                                 </div>
                             </div>
@@ -1705,7 +1705,7 @@ function ProductionVolumeByTimeReport() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                        <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center  p-3 px-4 pr-1 rounded-lg ">
                             {/* <div>Đang tải dữ liệu</div> */}
                             <div className="dots"></div>
                         </div>
@@ -1739,7 +1739,7 @@ function ProductionVolumeByTimeReport() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg flex">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}

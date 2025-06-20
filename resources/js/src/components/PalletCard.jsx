@@ -45,18 +45,18 @@ function PalletCard(props) {
     }
 
     return (
-        <div className="border-2 border-[#c6d3da] rounded-xl">
-            <div className="flex items-center justify-between  pr-4 bg-[#F6F8F9] rounded-t-xl ">
-                <div className="text-[#17506B] xl:text-xl flex flex-col font-semibold text-lg px-4 py-3 w-[85%]">
+        <div className="relative border-2 border-[#c6d3da] rounded-xl">
+            <div className="flex items-center justify-between    bg-[#F6F8F9] rounded-t-xl ">
+                <div className="text-[#17506B] xl:text-xl flex flex-col font-semibold text-[17px] px-4 py-3">
                     <span className="text-xs font-medium text-gray-500">{itemCode}</span>
                     <span>{itemName}</span>
                 </div>
                 <button
-                    className="flex justify-end text-[#17506B] text-3xl cursor-pointer w-fit disabled:text-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                    className="absolute -top-3 -right-3 text-black text-3xl cursor-pointer w-fit disabled:text-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none active:scale-[.84] active:duration-75 hover:text-red-500"
                     onClick={onDelete}
                     disabled={createPalletLoading}
                 >
-                    <AiFillCloseCircle />
+                    <AiFillCloseCircle className="w-10 h-10"/>
                 </button>
             </div>
             <div className=" pallet-line grid xl:grid-cols-2 md:grid-cols-2 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">

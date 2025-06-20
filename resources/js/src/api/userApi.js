@@ -129,7 +129,12 @@ const usersApi = {
         const url = `/users/delete/${userId}`;
         return axiosClient().delete(url);
 
-    }
+    },
+
+    getUsersByFactory: (factory) => {
+        const url = `/users/get-users-by-factory/${factory}`;
+        return axiosClient().get(url);
+    },
 };
 
 export default usersApi;

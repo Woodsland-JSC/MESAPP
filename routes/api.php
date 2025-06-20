@@ -74,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/upload',[UserController::class, 'importuser']);
         Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
         route::post('/syncfromSAP', [UserController::class, 'syncFromSap']);
+        Route::get('/get-users-by-factory/{factory}', [UserController::class, 'getUserByFactory']);
     });
     /**
      * Pallet Routes
@@ -120,12 +121,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/allteam', [ProductionController::class, 'getAllTeam']);
         Route::get('/rootCause', [ProductionController::class, 'getRootCause']);
     });
-    # route cho master data
+
+    {/*** GET DATA FROM SAP ***/}
+    // Item Master Data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
     Route::get('/items-route', [MasterDataController::class, 'ItemByCD']);
     Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('danh sach kho');
     //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
     Route::get('/branch', [MasterDataController::class, 'branch'])->name('branch');
+
+    // Wood Drying
     Route::get('/stock/{itemid}', [MasterDataController::class, 'getStockByItem'])->name('ton-kho-theo-ma-sp');
     Route::get('/v2/stock/{itemid}', [MasterDataController::class, 'getStockByItemnew'])->name('ton-kho-theo-ma-sp-2');
     Route::get('/typeofwood', [MasterDataController::class, 'getLoaiGo'])->name('loai-go');
@@ -138,7 +143,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');
-
+    Route::get('/get-active-kiln', [DryingOvenController::class, 'getActiveKilnByFactory']);
+    Route::get('/get-loaded-kiln', [DryingOvenController::class, 'getLoadedKilnByFactory']);
+    Route::get('/get-checked-kiln', [DryingOvenController::class, 'getCheckedKilnByFactory']);
     Route::get('/cbg-factory', [MasterDataController::class, 'getCBGFactory'])->name('nha-may-cbg');
 
     Route::get('/danhsachto', [ProductionController::class, 'listo']);

@@ -9,6 +9,7 @@ import axios from "axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import palletsApi from "../../../api/palletsApi";
+import usersApi from "../../../api/userApi";
 import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import moment from "moment";
@@ -82,6 +83,7 @@ function WoodSorting() {
     const [selectedPallet, setSelectedPallet] = useState(null);
     const [selectedDeletePallet, setSelectedDeletePallet] = useState(null);
     const [palletOptions, setPalletOptions] = useState([]);
+    const [employeeOptions, setEmployeeOptions] = useState([]);
     const [reloadAsyncSelectKey, setReloadAsyncSelectKey] = useState(0);
     const [reloadDryingMethodsKey, setReloadDryingMethodsKey] = useState(0);
 
@@ -106,6 +108,8 @@ function WoodSorting() {
 
     const [selectedWeek, setSelectedWeek] = useState(defaultWeek);
     const [selectedYear, setSelectedYear] = useState(defaultYear);
+    const [selectedStartTime, setSelectedStartTime] = useState(new Date());
+    const [selectedEndTime, setSelectedEndTime] = useState(new Date());
 
     const asyncSelectKey = useMemo(
         () => reloadAsyncSelectKey,
@@ -160,6 +164,31 @@ function WoodSorting() {
         loadPalletCallback(inputValue, callback);
     };
 
+    const getUsersByFactory = async () => {
+        try {
+            const response = await axios.get(
+                "/api/users/get-users-by-factory",
+                {
+                    params: {
+                        factory: user.plant,
+                    },
+                }
+            );
+            const data = response.data;
+            if (Array.isArray(data)) {
+                const options = data.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                }));
+                setEmployeeOptions(options);
+            } else {
+                console.error("Error fetching users: Invalid response format");
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
     // Date picker
     const [startDate, setStartDate] = useState(new Date());
     const [fromDate, setFromDate] = useState(new Date());
@@ -178,6 +207,7 @@ function WoodSorting() {
     const [selectedDryingReason, setSelectedDryingReason] = useState(null);
     const [selectedDryingMethod, setSelectedDryingMethod] = useState(null);
     const [selectedBatchInfo, setSelectedBatchInfo] = useState(null);
+    const [selectedEmployee, setSelectedEmployee] = useState(false);
 
     const [palletCards, setPalletCards] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -224,6 +254,24 @@ function WoodSorting() {
                 setDryingReasons(dryingReasonsOptions);
             } catch (error) {
                 console.error("Error fetching drying reasons:", error);
+            }
+
+            try {
+                const employeeData = await usersApi.getUsersByFactory(
+                    user.plant
+                );
+                const employeeOptions = employeeData.map((item) => ({
+                    value: item.id,
+                    label:
+                        item.username +
+                        " - " +
+                        item.last_name +
+                        " " +
+                        item.first_name,
+                }));
+                setEmployeeOptions(employeeOptions);
+            } catch (error) {
+                console.error("Error fetching employees:", error);
             }
             setLoading(false);
         };
@@ -296,6 +344,22 @@ function WoodSorting() {
         }
         if (!startDate) {
             toast.error("Ngày nhập gỗ không được bỏ trống");
+            return false;
+        }
+        if (!selectedStartTime) {
+            toast.error("Thời gian bắt đầu không được bỏ trống");
+            return false;
+        }
+        if (!selectedEndTime) {
+            toast.error("Thời gian kết thúc không được bỏ trống");
+            return false;
+        }
+        if (selectedEndTime < selectedStartTime) {
+            toast.error("Thời gian kết thúc phải lớn hơn thời gian bắt đầu");
+            return false;
+        }
+        if (!selectedEmployee) {
+            toast.error("Nhân viên xếp sấy không được bỏ trống");
             return false;
         }
         return true;
@@ -476,12 +540,20 @@ function WoodSorting() {
 
     // Creating pallets
     const createPalletObject = () => {
+        const formatTime = (date) => {
+            if (!date) return null;
+            return new Date(date).toTimeString().slice(0, 8);
+        };
+
         const palletObject = {
             LoaiGo: selectedWoodType.value,
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
             NgayNhap: formattedStartDate,
             MaNhaMay: user?.plant,
+            startTime: formatTime(selectedStartTime),
+            endTime: formatTime(selectedEndTime),
+            employee: selectedEmployee.value,
             Details: palletCards.map((card) => ({
                 ItemCode: card.props.itemCode,
                 ItemName: card.props.itemName,
@@ -771,11 +843,11 @@ function WoodSorting() {
             {/* Container */}
             <div className="flex mb-4 xl:mb-0 justify-center bg-transparent">
                 {/* Section */}
-                <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-32">
+                <div className="w-screen px-4 xl:p-12 lg:p-12 md:p-12 p-4 xl:pt-4 lg:pt-4 md:pt-4 pt-2 xl:px-32">
                     {/* Go back */}
                     <div className="flex items-top justify-between">
                         <div
-                            className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B]"
+                            className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-1 text-sm font-medium text-[#17506B]"
                             onClick={() => navigate(-1)}
                         >
                             <IoIosArrowBack />
@@ -784,7 +856,7 @@ function WoodSorting() {
                     </div>
 
                     {/* Header */}
-                    <div className="flex justify-between xl:mb-4 lg:mb-4 md:mb-4 mb-0 items-center">
+                    <div className="flex justify-between xl:mb-3 lg:mb-3 md:mb-3 mb-0 items-center">
                         <div className="flex space-x-4">
                             <div className="serif text-4xl font-bold">
                                 Tạo pallet xếp sấy
@@ -1616,13 +1688,16 @@ function WoodSorting() {
                     <div className="xl:p-6 lg:p-6 md:p-6 p-4 bg-white  shadow-sm rounded-xl">
                         <section>
                             <form>
-                                <div className="xl:grid xl:space-y-0 space-y-3 gap-5 mb-6 xl:grid-cols-3">
+                                <div className="xl:grid xl:space-y-0 space-y-4 gap-5 mb-6 xl:grid-cols-3">
                                     <div className="col-span-1">
                                         <label
                                             htmlFor="wood_type"
-                                            className="block mb-2 text-md font-medium text-gray-900"
+                                            className="block mb-1 text-md font-medium text-gray-900"
                                         >
-                                            Loại gỗ
+                                            Loại gỗ{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <Select
                                             placeholder="Chọn loại gỗ"
@@ -1642,9 +1717,12 @@ function WoodSorting() {
                                     <div className="col-span-1">
                                         <label
                                             htmlFor="batch_id"
-                                            className="block mb-2 text-md font-medium text-gray-900"
+                                            className="block mb-1 text-md font-medium text-gray-900"
                                         >
-                                            Mã lô gỗ
+                                            Mã lô gỗ{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <input
                                             type="text"
@@ -1660,9 +1738,12 @@ function WoodSorting() {
                                     <div className="col-span-1">
                                         <label
                                             htmlFor="drying_reason"
-                                            className="block mb-2 text-md font-medium text-gray-900 "
+                                            className="block mb-1 text-md font-medium text-gray-900 "
                                         >
-                                            Mục đích sấy
+                                            Mục đích sấy{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <Select
                                             ref={(ref) => {
@@ -1686,9 +1767,12 @@ function WoodSorting() {
                                     <div className="col-span-2">
                                         <label
                                             htmlFor="drying_method"
-                                            className="block mb-2 text-md font-medium text-gray-900 "
+                                            className="block mb-1 text-md font-medium text-gray-900 "
                                         >
-                                            Quy cách thô
+                                            Quy cách thô{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <AsyncSelect
                                             loadingMessage={() => "Đang tải..."}
@@ -1715,9 +1799,12 @@ function WoodSorting() {
                                     <div className="col-span-1">
                                         <label
                                             htmlFor="indate"
-                                            className="block mb-2 text-md font-medium text-gray-900 "
+                                            className="block mb-1 text-md font-medium text-gray-900 "
                                         >
-                                            Ngày nhập gỗ
+                                            Ngày nhập gỗ{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <DatePicker
                                             selected={startDate}
@@ -1725,6 +1812,73 @@ function WoodSorting() {
                                                 setStartDate(date)
                                             }
                                             className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                        />
+                                    </div>
+
+                                    {/* Update */}
+                                    <div className="col-span-1">
+                                        <label
+                                            htmlFor="drying_reason"
+                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                        >
+                                            Thời gian bắt đầu{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <DatePicker
+                                            selected={selectedStartTime}
+                                            onChange={(date) => {
+                                                setSelectedStartTime(date);
+                                            }}
+                                            disabled={palletCards.length > 0}
+                                            className="pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5 disabled:bg-gray-100 disabled:text-gray-400"
+                                            showTimeSelect
+                                            showTimeSelectOnly
+                                            timeIntervals={30} // phút
+                                            dateFormat="HH:mm"
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label
+                                            htmlFor="drying_reason"
+                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                        >
+                                            Thời gian kết thúc{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <DatePicker
+                                            selected={selectedEndTime}
+                                            onChange={(date) =>
+                                                setSelectedEndTime(date)
+                                            }
+                                            disabled={palletCards.length > 0}
+                                            className="pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5 disabled:bg-gray-100 disabled:text-gray-400"
+                                            showTimeSelect
+                                            showTimeSelectOnly
+                                            timeIntervals={30} // phút
+                                            dateFormat="HH:mm"
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label
+                                            htmlFor="drying_reason"
+                                            className="block mb-1 text-md font-medium text-gray-900 "
+                                        >
+                                            Nhân viên xếp sấy{" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <Select
+                                            placeholder="Chọn nhân viên xếp sấy"
+                                            options={employeeOptions}
+                                            onChange={(value) => {
+                                                setSelectedEmployee(value);
+                                            }}
+                                            isDisabled={palletCards.length > 0}
                                         />
                                     </div>
                                 </div>

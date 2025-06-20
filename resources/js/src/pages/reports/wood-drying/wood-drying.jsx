@@ -311,7 +311,7 @@ function CBGWoodDryingReports() {
     return (
         <Layout>
             <div className="overflow-x-hidden">
-                <div className="w-screen  p-6 px-5 xl:p-5 xl:px-12 ">
+                <div className="w-screen p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
                     <div className="flex items-center justify-between space-x-6 mb-3.5">
                         <div className="flex items-center space-x-4">
@@ -326,7 +326,7 @@ function CBGWoodDryingReports() {
                                     Báo cáo sấy phôi
                                 </div>
                                 <div className="serif text-3xl font-bold">
-                                    Báo cáo xếp sấy khối CBG
+                                    Báo cáo xếp sấy khối chế biến gỗ
                                 </div>
                             </div>
                         </div>
@@ -361,7 +361,7 @@ function CBGWoodDryingReports() {
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className=" bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/2">

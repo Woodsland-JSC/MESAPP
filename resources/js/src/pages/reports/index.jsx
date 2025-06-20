@@ -42,7 +42,7 @@ const SAYReports = [
         name: "Biên bản vào lò",
         link: "/reports/wood-drying/kiln-loading",
         description: "Thông tin biên bản vào lò.",
-        priority: true,
+        updated: true,
     },
     // {
     //     id: "0002",
@@ -50,11 +50,13 @@ const SAYReports = [
     //     link: "/reports/wood-drying/kiln-loading-history",
 
     // },
-    // {
-    //     id: "0003",
-    //     name: "Biên bản kiểm tra lò sấy",
-    //     link: "/reports/wood-drying/kiln-checking",
-    // },
+    {
+        id: "0003",
+        name: "Biên bản kiểm tra lò sấy",
+        link: "/reports/wood-drying/kiln-checking",
+        description: "Thông tin kiểm tra lò sấy của các lò đang hoạt động.",
+        priority: true,
+    },
     // {
     //     id: "0004",
     //     name: "Biên bản kiểm tra độ ẩm",
@@ -65,105 +67,117 @@ const SAYReports = [
     //     name: "Báo cáo lò đang sấy",
     //     link: "/reports/wood-drying/drying-kilns",
     // },
-    // {
-    //     id: "0006",
-    //     name: "Báo cáo kế hoạch sấy",
-    //     link: "/reports/wood-drying/drying-plan",
-    // },
+    {
+        id: "0006",
+        name: "Báo cáo kế hoạch sấy",
+        link: "/reports/wood-drying/drying-plan",
+        description: "Thông tin về các kế hoạch sấy đang thực hiện.",
+        priority: true,
+    },
     {
         id: "0007",
-        name: "Báo cáo xếp sấy khối CBG",
+        name: "Báo cáo xếp sấy khối chế biến gỗ",
         link: "/reports/wood-drying/wood-drying",
         description:
             "Báo cáo sản lượng xếp sấy, vào lò, ra lò của các nhà máy chế biến gỗ.",
-        priority: true,
+        updated: true,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
         link: "/reports/wood-drying/drying-queue",
         description: "Báo cáo thông tin xếp chờ sấy.",
-        priority: true,
+        updated: true,
     },
 ];
 
 const CBGReports = [
     {
         id: "0001",
-        name: "Báo cáo thông tin chi tiết giao nhận (CBG)",
+        name: "Báo cáo thông tin sản lượng nhận (SAP)",
         link: "/reports/wood-working/delivery-detail",
         description:
-            "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
-        priority: true,
-        responsive: true,
+            "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
+        // priority: true,
     },
     {
         id: "0002",
-        name: "Báo cáo biện pháp xử lý lỗi (CBG)",
-        link: "/reports/wood-working/defect-resolution",
+        name: "Báo cáo thông tin chi tiết giao nhận",
+        link: "/reports/wood-working/delivery-detail",
         description:
-            "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
-        priority: true,
+            "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
+        // priority: true,
+        responsive: true,
     },
     {
         id: "0003",
-        name: "Báo cáo tồn nguyên vật liệu xử lý lỗi (CBG)",
+        name: "Báo cáo biện pháp xử lý lỗi",
+        link: "/reports/wood-working/defect-resolution",
+        description:
+            "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
+        // priority: true,
+    },
+    {
+        id: "0004",
+        name: "Báo cáo tồn nguyên vật liệu xử lý lỗi",
         link: "/reports/wood-working/defect-stock-checking",
-        description: "Khuyến nghị số lượng bán thành phẩm cần bổ sung để xử lý lỗi.",
-        priority: true,
+        description:
+            "Khuyến nghị số lượng bán thành phẩm cần bổ sung để xử lý lỗi.",
+        // priority: true,
     },
     // {
-    //     id: "0004",
+    //     id: "0005",
     //     name: "Báo cáo lệnh sản xuất đang thực hiện",
     //     link: "/reports/wood-working/wip-production-order",
     //     description: "Báo các các lệnh sản xuất đang thực hiện bao gồm cả các lệnh đã quá hạn.",
     //     priority: true,
     // },
     {
-        id: "0005",
+        id: "0006",
         name: "Báo cáo sản lượng theo ngày/tuần/tháng",
         link: "/reports/wood-working/production-volume-by-time",
         description:
             "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
-        priority: true,
-    },
-    {
-        id: "0006",
-        name: "Báo cáo sản lượng chi tiết theo tuần",
-        link: "/reports/wood-working/production-volume-weekly-detail",
-        description: "Xem sản lượng đã được giao nhận chi tiết theo từng tuần",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0007",
-        name: "Báo cáo nhập xuất tồn từng công đoạn",
-        link: "/reports/wood-working/import-export-inventory-by-stage",
-        description: "Kiểm tra số lượng nhập xuất tồn từng công đoạn",
-        priority: true,
+        name: "Báo cáo sản lượng chi tiết theo tuần",
+        link: "/reports/wood-working/production-volume-weekly-detail",
+        description: "Xem sản lượng đã được giao nhận chi tiết theo từng tuần",
+        // priority: true,
     },
     {
         id: "0008",
-        name: "Báo cáo sản lượng theo lệnh sản xuất",
-        link: "/reports/wood-working/production-output-by-production-order",
-        description: "Theo dõi sản lượng và tiến độ hoàn thành theo lệnh sản xuất",
-        priority: true,
+        name: "Báo cáo nhập xuất tồn từng công đoạn",
+        link: "/reports/wood-working/import-export-inventory-by-stage",
+        description: "Kiểm tra số lượng nhập xuất tồn từng công đoạn",
+        // priority: true,
     },
     {
         id: "0009",
+        name: "Báo cáo sản lượng theo lệnh sản xuất",
+        link: "/reports/wood-working/production-output-by-production-order",
+        description:
+            "Theo dõi sản lượng và tiến độ hoàn thành theo lệnh sản xuất",
+        // priority: true,
+    },
+    {
+        id: "0010",
         name: "Báo cáo điều chuyển các nhà máy",
         link: "/reports/wood-working/factory-transfer",
         description: "Theo dõi số lượng điều chuyển kho giữa các nhà máy",
-        priority: true,
+        // priority: true,
     },
     // {
-    //     id: "0006",
+    //     id: "0011",
     //     name: "Báo cáo chi tiết nhập tồn",
     //     link: "/reports/wood-working/details-receipt",
     //     description: "Theo dõi chi tiết nhập tồn đầu kỳ",
     //     priority: true,
     // },
     // {
-    //     id: "0007",
+    //     id: "0012",
     //     name: "Báo cáo sản lượng nhập các nhà máy",
     //     link: "/reports/wood-working/factory-receipt-volume",
     //     description: "",
@@ -232,14 +246,14 @@ const DANDReports = [
 ];
 
 const tabParamMap = {
-    0: 'wood-drying',
-    1: 'wood-working'
+    0: "wood-drying",
+    1: "wood-working",
 };
 
 function Report() {
     const { loading, setLoading } = useAppContext();
     const [searchTerm, setSearchTerm] = useState("");
-    const [tabIndex, setTabIndex] = useState(0)
+    const [tabIndex, setTabIndex] = useState(0);
 
     const reportTab = useRef();
     const recordTab = useRef();
@@ -422,27 +436,38 @@ function Report() {
 
     // Reverse mapping for looking up index from param value
     const paramToIndex = Object.fromEntries(
-        Object.entries(tabParamMap).map(([index, param]) => [param, Number(index)])
+        Object.entries(tabParamMap).map(([index, param]) => [
+            param,
+            Number(index),
+        ])
     );
 
     // Handle tab change and update URL query parameter
     const handleTabsChange = (index) => {
         setTabIndex(index);
         const params = new URLSearchParams(window.location.search);
-        params.set('tab', tabParamMap[index]); // Set the 'tab' query param to the mapped value
-        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+        params.set("tab", tabParamMap[index]); // Set the 'tab' query param to the mapped value
+        window.history.replaceState(
+            null,
+            "",
+            `${window.location.pathname}?${params.toString()}`
+        );
     };
 
     useEffect(() => {
         document.title = "Woodsland - Báo cáo";
         const params = new URLSearchParams(window.location.search);
-        const tab = params.get('tab');
+        const tab = params.get("tab");
         if (tab && paramToIndex[tab] !== undefined) {
             setTabIndex(paramToIndex[tab]);
         } else {
             const params = new URLSearchParams(window.location.search);
-            params.set('tab', tabParamMap[0]);
-            window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+            params.set("tab", tabParamMap[0]);
+            window.history.replaceState(
+                null,
+                "",
+                `${window.location.pathname}?${params.toString()}`
+            );
         }
 
         // Cleanup on unmount
@@ -453,7 +478,7 @@ function Report() {
 
     return (
         <Layout>
-            <div className="flex justify-center bg-transparent h-screen ">
+            <div className="flex justify-center bg-transparent min-h-screen ">
                 {/* Section */}
                 <div className="w-screen xl:mb-4 mb-6 p-6 px-5 xl:p-8 xl:px-32 ">
                     {/* Header */}
@@ -467,7 +492,7 @@ function Report() {
                             <div className="flex w-full justify-end space-x-4">
                                 <div className="xl:w-1/2 lg:w-1/2 md:w-1/2 w-full xl:mt-0 lg:mt-0 md:mt-0 mt-3">
                                     <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                                             <svg
                                                 className="w-4 h-4 text-gray-500"
                                                 aria-hidden="true"
@@ -487,7 +512,7 @@ function Report() {
                                         <input
                                             type="text"
                                             id="record-search"
-                                            className="block w-full p-2.5 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                            className="block w-full p-2.5 pl-11 text-gray-900 border border-gray-300 rounded-xl bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Tìm kiếm báo cáo"
                                             value={searchTerm}
                                             onChange={(e) =>
@@ -503,11 +528,15 @@ function Report() {
                     {/* Main content */}
 
                     <section className="bg-white rounded-xl border-2 mb-2 border-gray-200">
-                        <Tabs index={tabIndex} onChange={handleTabsChange} size="lg">
+                        <Tabs
+                            index={tabIndex}
+                            onChange={handleTabsChange}
+                            size="lg"
+                        >
                             <TabList className="">
                                 <Tab
                                     ref={reportTab}
-                                // onClick={() => handleTabClick(false)}
+                                    // onClick={() => handleTabClick(false)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo sấy phôi
@@ -515,7 +544,7 @@ function Report() {
                                 </Tab>
                                 <Tab
                                     ref={recordTab}
-                                // onClick={() => handleTabClick(true)}
+                                    // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo chế biến gỗ
@@ -561,14 +590,28 @@ function Report() {
                                                     >
                                                         <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2.5 px-4 bg-gray-100 rounded-xl w-full ">
                                                             <div className="flex items-center gap-x-6">
-                                                                <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
+                                                                <div className="group-hover:bg-[#5d6170] p-2 rounded-full bg-[#17506B]">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />
                                                                 </div>
                                                                 <div className="flex flex-col justify-center ">
-                                                                    <div className="text-[17px] font-semibold group-hover:text-white">
+                                                                    <div className="flex items-center gap-x-4 text-[17px] font-semibold group-hover:text-white">
                                                                         {
                                                                             item.name
                                                                         }
+                                                                        {item.priority ==
+                                                                            true && (
+                                                                            // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                            <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                NEW
+                                                                            </div>
+                                                                        )}
+                                                                        {item.updated ==
+                                                                            true && (
+                                                                            // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                            <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
+                                                                                UPDATED
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                     <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
                                                                         {
@@ -576,10 +619,6 @@ function Report() {
                                                                         }
                                                                     </div>
                                                                 </div>
-
-                                                                {/* {item.priority == true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )} */}
                                                             </div>
 
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -631,15 +670,15 @@ function Report() {
 
                                                                     {item.responsive ==
                                                                         true && (
-                                                                            <Tooltip
-                                                                                label="Tương thích trên di động."
-                                                                                fontSize="sm"
-                                                                            >
-                                                                                <span>
-                                                                                    <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                </span>
-                                                                            </Tooltip>
-                                                                        )}
+                                                                        <Tooltip
+                                                                            label="Tương thích trên di động."
+                                                                            fontSize="sm"
+                                                                        >
+                                                                            <span>
+                                                                                <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                            </span>
+                                                                        </Tooltip>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -679,12 +718,12 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                        <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                    )}
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}
                                                                 {item.responsive ==
                                                                     true && (
-                                                                        <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                    )}
+                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -723,8 +762,8 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                        <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                    )}
+                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>

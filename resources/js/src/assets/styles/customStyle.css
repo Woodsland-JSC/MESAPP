@@ -1,0 +1,12 @@
+.ag-theme-quartz .ag-body-horizontal-scroll {
+    margin-bottom: 0 !important;
+}
+
+.ag-theme-quartz .ag-floating-bottom {
+    z-index: 10 !important;
+    position: relative !important;
+}
+
+.ag-theme-quartz .ag-body-viewport {
+    padding-bottom: 20px !important;
+}

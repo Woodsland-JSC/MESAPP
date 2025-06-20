@@ -9,7 +9,7 @@ import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
-import { PiFilePdfBold } from "react-icons/pi";
+import { PiFilePdfBold, PiPrinterBold } from "react-icons/pi";
 import { FiCheck } from "react-icons/fi";
 import "../../../assets/styles/index.css";
 import {
@@ -21,99 +21,94 @@ import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../../assets/styles/datepicker.css";
-import { format, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay, set } from "date-fns";
 import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
+import Select from "react-select";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-enterprise";
 // import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import logo from "../../../assets/images/WLorigin.svg";
 
 import useAppContext from "../../../store/AppContext";
+import axios from "axios";
+
+import ExcelJS from "exceljs";
 
 function KilnLoading() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
-    const gridRef = useRef();
-
-    const getFirstDayOfCurrentMonth = () => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    };
-
-    // Date picker
-    const [fromDate, setFromDate] = useState(getFirstDayOfCurrentMonth());
-    const [toDate, setToDate] = useState(new Date());
 
     // Loading States
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
-    const [selectedTeams, setSelectedTeams] = useState([]);
+    const [isKilnLoading, setIsKilnLoading] = useState(false);
+    const [selectedKiln, setSelectedKiln] = useState(null);
 
     const [selectedFactory, setSelectedFactory] = useState(null);
-    const [isReceived, setIsReceived] = useState(true);
+
+    const [kilnOptions, setKilnOptions] = useState([]);
 
     const [reportData, setReportData] = useState(null);
 
     const handleFactorySelect = async (factory) => {
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
-        setReportData(null);
-        setTeamData(null);
-        setSelectedTeams([]);
+        getLoadedKiln(factory);
+    };
+
+    const getLoadedKiln = async (factory) => {
+        setSelectedKiln(null);
+        setKilnOptions([]);
+        setIsKilnLoading(true);
+        try {
+            const res = await axios.get("/api/get-loaded-kiln", {
+                params: {
+                    factory: factory,
+                },
+            });
+
+            const options = res.data.map((item) => ({
+                value: item.Code,
+                label: item.Name,
+            }));
+            setKilnOptions(options);
+            setIsKilnLoading(false);
+        } catch (error) {
+            console.error("Error getting active kiln:", error);
+            toast.error("Không thể lấy dữ liệu, hãy thử lại.");
+        }
     };
 
     const getReportData = useCallback(async () => {
-        let params = {
-            from_date: format(fromDate, "yyyy-MM-dd"),
-            to_date: format(toDate, "yyyy-MM-dd"),
-            plant: selectedFactory,
-        };
-        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDefectResolutionReport(
-                params.plant,
-                params.from_date,
-                params.to_date
-            );
-            const formattedData = res.map((item) => ({
-                week: item.week,
-                root_cause: item.NguonLoi,
-                root_place: item.NoiBaoLoi,
-                defect_type: item.LoiLoai,
-                resolution: item.HXL,
-                itemname: item.ItemName,
-                thickness: item.CDay,
-                width: item.CRong,
-                height: item.CDai,
-                quantity: parseInt(item.Quantity),
-                m3: item.M3,
-                sender: item.NguoiGiao,
-                send_date: item.created_at,
-                receiver: item.NguoiNhan,
-            }));
+            const res = await axios.get("/api/report/say-bienbanvaolo", {
+                params: {
+                    branch: user.branch,
+                    kiln: selectedKiln?.value,
+                },
+            });
+            setReportData(res.data);
             setIsDataReportLoading(false);
-            setRowData(formattedData);
-            setReportData(res);
         } catch (error) {
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedFactory]);
+    }, [selectedKiln]);
 
     useEffect(() => {
-        const allFieldsFilled = selectedFactory && fromDate && toDate;
-        if (allFieldsFilled) {
+        if (selectedKiln) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [selectedFactory, fromDate, toDate, getReportData]);
+    }, [selectedKiln]);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
@@ -126,89 +121,248 @@ function KilnLoading() {
         toast.success("Đặt lại bộ lọc thành công.");
     };
 
-    const handleExportExcel = useCallback(() => {
-        gridRef.current.api.exportDataAsExcel();
-    }, []);
+    const handleExportExcel = useCallback(async () => {
+        if (!reportData) {
+            toast.error("Không có dữ liệu để xuất file Excel.");
+            return;
+        }
 
-    const handleExportPDF = () => {
-        toast("Chức năng xuất PDF đang được phát triển.");
-    };
+        try {
+            // Import ExcelJS dynamically để tránh lỗi bundle
+            const ExcelJS = await import("exceljs");
 
-    // Row Data: The data to be displayed.
-    const [rowData, setRowData] = useState([]);
+            // Tạo workbook và worksheet
+            const workbook = new ExcelJS.default.Workbook();
+            const worksheet = workbook.addWorksheet("Biên bản vào lò");
 
-    // Column Definitions: Defines the columns to be displayed.
-    const [colDefs, setColDefs] = useState([
-        {
-            headerName: "Tuần",
-            field: "week",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Nguồn lỗi",
-            field: "root_cause",
-            width: 150,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Nơi báo lỗi",
-            field: "root_place",
-            width: 180,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Loại lỗi",
-            field: "defect_type",
-            width: 120,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Biện pháp xử lý",
-            field: "resolution",
-            width: 180,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Chi tiết cụm",
-            field: "itemname",
-            width: 350,
-            suppressHeaderMenuButton: true,
-            filter: true,
-        },
-        {
-            headerName: "Dày",
-            field: "thickness",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Rộng",
-            field: "width",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Dài",
-            field: "height",
-            width: 80,
-            suppressHeaderMenuButton: true,
-        },
-        {
-            headerName: "Số lượng",
-            field: "quantity",
-            width: 100,
-            suppressHeaderMenuButton: true,
-        },
-        { headerName: "M3", field: "m3", width: 120 },
-        { headerName: "Người tạo", field: "sender" },
-        { headerName: "Ngày tạo", field: "send_date" },
-        { headerName: "Người nhận", field: "receiver" },
-    ]);
+            // Thiết lập thông tin workbook
+            workbook.creator = "Hệ thống COC";
+            workbook.created = new Date();
+
+            // Header với merge cells và styling
+            worksheet.mergeCells("B1:G1");
+            worksheet.getCell("B1").value = "SỔ TAY COC";
+            worksheet.getCell("B1").font = { bold: true, size: 18 };
+            worksheet.getCell("B1").alignment = {
+                horizontal: "center",
+                vertical: "middle",
+            };
+            worksheet.getCell("B1").fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFD3D3D3" },
+            };
+
+            // Thông tin BM-COC-09
+            worksheet.getCell("H1").value = "BM-COC-09";
+            worksheet.getCell("H1").font = { bold: true, size: 14 };
+            worksheet.getCell("H2").value = "Ngày BH: 05/09/2013";
+            worksheet.getCell("H2").font = { bold: true, size: 12 };
+            worksheet.getCell("H3").value = "Lần BH: 02";
+            worksheet.getCell("H3").font = { bold: true, size: 12 };
+
+            worksheet.mergeCells("B2:G2");
+            worksheet.getCell("B2").value = "DANH MỤC THEO DÕI GỖ SẤY TRONG LÒ";
+            worksheet.getCell("B2").font = { bold: true, size: 16 };
+            worksheet.getCell("B2").alignment = {
+                horizontal: "center",
+                vertical: "middle",
+            };
+            worksheet.getCell("B2").fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFD3D3D3" },
+            };
+
+            // Thông tin chi tiết với error handling
+            const factoryName =
+                reportData?.Factory === "TH"
+                    ? "Thuận Hưng"
+                    : reportData?.Factory === "YS"
+                    ? "Yên Sơn"
+                    : reportData?.Factory === "TB"
+                    ? "Thái Bình"
+                    : "Không xác định";
+
+            const kilnName =
+                kilnOptions && Array.isArray(kilnOptions) && reportData?.Oven
+                    ? kilnOptions.find(
+                          (option) => option?.value === reportData.Oven
+                      )?.label || reportData.Oven
+                    : reportData?.Oven || "";
+
+            // Row 4: Ngày vào lò và Địa điểm sấy gỗ
+            const fillGray = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFD3D3D3" },
+            };
+
+            worksheet.getCell("A4").value = "Ngày vào lò";
+            worksheet.getCell("A4").font = { bold: true };
+            worksheet.getCell("A4").fill = fillGray;
+
+            worksheet.mergeCells("B4:C4");
+            worksheet.getCell("B4").value =
+                reportData?.LoadedIntoKilnDates || "";
+            worksheet.getCell("B4").fill = fillGray;
+
+            worksheet.mergeCells("D4:E4");
+            worksheet.getCell("D4").value = "Địa điểm sấy gỗ";
+            worksheet.getCell("D4").font = { bold: true };
+            worksheet.getCell("D4").fill = fillGray;
+
+            worksheet.mergeCells("F4:G4");
+            worksheet.getCell("F4").value = factoryName;
+            worksheet.getCell("F4").fill = fillGray;
+
+            // Row 5: Lò số và Loại gỗ sấy
+            worksheet.getCell("A5").value = "Lò số";
+            worksheet.getCell("A5").font = { bold: true };
+            worksheet.getCell("A5").fill = fillGray;
+
+            worksheet.mergeCells("B5:C5");
+            worksheet.getCell("B5").value = kilnName;
+            worksheet.getCell("B5").fill = fillGray;
+
+            worksheet.mergeCells("D5:E5");
+            worksheet.getCell("D5").value = "Loại gỗ sấy";
+            worksheet.getCell("D5").font = { bold: true };
+            worksheet.getCell("D5").fill = fillGray;
+
+            worksheet.mergeCells("F5:G5");
+            worksheet.getCell("F5").value = "Acacia";
+            worksheet.getCell("F5").fill = fillGray;
+
+            // Row 6: Tổng số pallet, TTMT và Khối lượng
+            worksheet.getCell("A6").value = "Tổng số pallet:";
+            worksheet.getCell("A6").font = { bold: true };
+            worksheet.getCell("A6").fill = fillGray;
+
+            worksheet.mergeCells("B6:C6");
+            worksheet.getCell("B6").value = reportData?.TotalPallet || "";
+            worksheet.getCell("B6").fill = fillGray;
+
+            worksheet.getCell("D6").value = "TTMT";
+            worksheet.getCell("D6").font = { bold: true };
+            worksheet.getCell("D6").fill = fillGray;
+
+            worksheet.getCell("E6").value = "FSC 100%";
+            worksheet.getCell("E6").fill = fillGray;
+
+            worksheet.getCell("F6").value = "Khối lượng";
+            worksheet.getCell("F6").font = { bold: true };
+            worksheet.getCell("F6").fill = fillGray;
+
+            worksheet.getCell("G6").value = `${
+                reportData?.TotalMass || ""
+            } (m3)`;
+            worksheet.getCell("G6").fill = fillGray;
+
+            // Header của bảng dữ liệu (Row 8)
+            const headerRow = 8;
+            const headers = [
+                "Mã lô gỗ nhập",
+                "Mã Pallet",
+                "Dài",
+                "Rộng",
+                "Dày",
+                "Số Lượng (T)",
+                "Khối Lượng (m3)",
+            ];
+
+            headers.forEach((header, index) => {
+                const cell = worksheet.getCell(headerRow, index + 1);
+                cell.value = header;
+                cell.font = { bold: true };
+                cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFADD8E6" },
+                };
+                cell.border = {
+                    top: { style: "thin" },
+                    left: { style: "thin" },
+                    bottom: { style: "thin" },
+                    right: { style: "thin" },
+                };
+                cell.alignment = { horizontal: "center", vertical: "middle" };
+            });
+
+            // Thêm dữ liệu chi tiết với kiểm tra an toàn
+            if (reportData?.Detail && Array.isArray(reportData.Detail)) {
+                reportData.Detail.forEach((item, index) => {
+                    const row = headerRow + 1 + index;
+                    const rowData = [
+                        item?.Size || "",
+                        item?.PalletCode || "",
+                        item?.CDai || "",
+                        item?.CRong || "",
+                        item?.CDay || "",
+                        item?.Qty || "",
+                        item?.Mass || "",
+                    ];
+
+                    rowData.forEach((data, colIndex) => {
+                        const cell = worksheet.getCell(row, colIndex + 1);
+                        cell.value = data;
+                        cell.border = {
+                            top: { style: "thin" },
+                            left: { style: "thin" },
+                            bottom: { style: "thin" },
+                            right: { style: "thin" },
+                        };
+
+                        // Căn giữa cho các cột số
+                        if (colIndex >= 2 && colIndex <= 6) {
+                            cell.alignment = {
+                                horizontal: "center",
+                                vertical: "middle",
+                            };
+                        }
+                    });
+                });
+            }
+
+            // Thiết lập độ rộng cột
+            worksheet.columns = [
+                { width: 20 },
+                { width: 15 },
+                { width: 10 },
+                { width: 10 },
+                { width: 10 },
+                { width: 15 },
+                { width: 18 },
+            ];
+
+            // Xuất file
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+
+            const safeKilnName = kilnName
+                ? kilnName.replace(/[^a-zA-Z0-9]/g, "_")
+                : "Unknown";
+            a.download = `Bien_ban_vao_lo_${reportData?.Oven}_${
+                new Date().toISOString().split("T")[0]
+            }.xlsx`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            toast.success("Xuất file Excel thành công!");
+        } catch (error) {
+            console.error("Lỗi khi xuất Excel:", error);
+            toast.error("Có lỗi xảy ra khi xuất file Excel.");
+        }
+    }, [reportData, kilnOptions]);
 
     const FactoryOption = ({ value, label }) => (
         <div
@@ -242,8 +396,8 @@ function KilnLoading() {
 
     return (
         <Layout>
-            <div className="overflow-x-hidden">
-                <div className="w-screen  p-6 px-5 xl:p-5 xl:px-12 ">
+            <div className="overflow-x-hidden min-h-[calc(100vh-80px)]">
+                <div className="w-screen p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
                     <div className="flex items-center justify-between space-x-6 mb-3.5">
                         <div className="flex items-center space-x-4">
@@ -257,7 +411,7 @@ function KilnLoading() {
                                 <div className="text-sm text-[#17506B]">
                                     Báo cáo sấy phôi
                                 </div>
-                                <div className=" text-2xl font-semibold">
+                                <div className="serif text-3xl font-bold">
                                     Biên bản vào lò
                                 </div>
                             </div>
@@ -274,7 +428,7 @@ function KilnLoading() {
                                 />
                             </div>
 
-                            <div className="flex justify-end items-center divide-x-2 w-1/3">
+                            <div className="flex justify-end items-center divide-x-2 divide-gray-200 w-1/3">
                                 <div className="mx-2.5"></div>
                                 <div>
                                     <FaArrowRotateLeft
@@ -288,73 +442,15 @@ function KilnLoading() {
                                         onClick={handleExportExcel}
                                     />
                                 </div>
-                                <div>
-                                    <PiFilePdfBold
-                                        className="mx-2.5 w-6 h-6 text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
-                                        onClick={handleExportPDF}
-                                    />
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className=" bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
-                        <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
-                            <div className="flex space-x-3 w-1/4">
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Từ ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={fromDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setFromDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Đến ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={toDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setToDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex space-x-3 w-3/4 px-3">
+                        <div className="flex items-center space-x-3 divide-x-2 divide-gray-150 px-4 mt-1">
+                            <div className="flex space-x-3 w-3/4">
                                 <div className="col-span-1 w-full">
                                     <label
                                         htmlFor="indate"
@@ -368,10 +464,7 @@ function KilnLoading() {
                                     />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="YS1"
-                                        label="Yên Sơn 1"
-                                    />
+                                    <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption
@@ -380,161 +473,285 @@ function KilnLoading() {
                                     />
                                 </div>
                             </div>
+                            <div className="flex space-x-3 w-1/4 pl-4">
+                                <div className="col-span-1 w-full">
+                                    <label
+                                        htmlFor="indate"
+                                        className="block mb-1 text-sm font-medium text-gray-900 "
+                                    >
+                                        Chọn lò đang hoạt động
+                                    </label>
+                                    <Select
+                                        options={kilnOptions}
+                                        isDisabled={isKilnLoading}
+                                        onChange={(value) => {
+                                            setSelectedKiln(value);
+                                        }}
+                                        placeholder="Chọn một lò sấy"
+                                        className="w-full z-20 rounded-[12px]"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                        <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-3 px-4 pr-1 rounded-lg ">
                             {/* <div>Đang tải dữ liệu</div> */}
                             <div class="dots"></div>
                         </div>
                     ) : (
                         <>
-                            {reportData?.length > 0 ? (
+                            {reportData ? (
                                 <div>
-                                    <div
-                                        className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
-                                        style={{
-                                            height: 630,
-                                            fontSize: 16,
-                                        }}
-                                    >
-                                        <AgGridReact
-                                            ref={gridRef}
-                                            rowData={rowData}
-                                            columnDefs={colDefs}
-                                        />
+                                    <div className="serif w-full mt-4 bg-gray-50 p-8 rounded-xl">
+                                        <table className="w-full border-2 border-gray-400">
+                                            <thead className="font-bold">
+                                                {/* Header row 1 - Logo và Sổ tay COC */}
+                                                <tr>
+                                                    <th
+                                                        rowSpan="2"
+                                                        colSpan="1"
+                                                        className="w-48 border-r border-b border-gray-400 p-2 bg-gray-200 mx-auto"
+                                                    >
+                                                        <img
+                                                            src={logo}
+                                                            alt="logo"
+                                                            className="mx-auto flex items-center justify-center w-24 h-24"
+                                                        ></img>
+                                                    </th>
+                                                    <td
+                                                        rowSpan="1"
+                                                        colSpan="6"
+                                                        className="h-[50px] border-b border-gray-400 bg-gray-200 p-2 text-center font-bold text-lg"
+                                                    >
+                                                        SỔ TAY COC
+                                                    </td>
+                                                    <td
+                                                        colSpan="1"
+                                                        rowSpan="5"
+                                                        className="w-[280px] text-lg border-b border-l bg-gray-200 border-gray-400 p-2 px-4 text-right font-bold"
+                                                    >
+                                                        <div className="flex flex-col items-start">
+                                                            <p>BM-COC-09</p>
+                                                            <p>
+                                                                Ngày BH:
+                                                                05/09/2013
+                                                            </p>
+                                                            <p>Lần BH: 02</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                {/* Header row 2 - Danh mục và BM-COC-09 */}
+                                                <tr>
+                                                    <td
+                                                        rowSpan="1"
+                                                        colSpan="6"
+                                                        className="h-[50px] border-b text-xl font-bold bg-gray-200 border-gray-400 p-2  text-center"
+                                                    >
+                                                        DANH MỤC THEO DÕI GỖ SẤY
+                                                        TRONG LÒ
+                                                    </td>
+                                                </tr>
+
+                                                {/* Header row 3 - Thông tin chi tiết */}
+                                                <tr>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b text-lg font-bold border-gray-400 p-2 w-36"
+                                                    >
+                                                        Ngày vào lò
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 text-lg font-bold border-b border-x border-gray-400 p-2 w-32"
+                                                    >
+                                                        {
+                                                            reportData?.LoadedIntoKilnDates
+                                                        }
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b text-lg font-bold border-gray-400 p-2 w-36"
+                                                    >
+                                                        Địa điểm sấy gỗ
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b border-l text-lg font-bold border-gray-400 p-2 w-32"
+                                                    >
+                                                        {reportData.Factory ==
+                                                        "TH"
+                                                            ? "Thuận Hưng"
+                                                            : reportData.Factory ==
+                                                              "YS"
+                                                            ? "Yên Sơn"
+                                                            : reportData.Factory ==
+                                                              "TB"
+                                                            ? "Thái Bình"
+                                                            : "Không xác định"}
+                                                    </td>
+                                                </tr>
+
+                                                {/* Header row 3 - Thông tin chi tiết */}
+                                                <tr>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-gray-400 p-2 text-lg font-bold w-36"
+                                                    >
+                                                        Lò số
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b border-x border-gray-400 p-2 text-lg font-bold w-32"
+                                                    >
+                                                        {
+                                                            kilnOptions.find(
+                                                                (option) =>
+                                                                    option.value ===
+                                                                    reportData.Oven
+                                                            )?.label
+                                                        }
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b border-gray-400 p-2 text-lg font-bold w-36"
+                                                    >
+                                                        Loại gỗ sấy
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b border-l border-gray-400 p-2 text-lg font-bold w-32"
+                                                    >
+                                                        Acacia
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-gray-400 p-2 text-lg font-bold w-36"
+                                                    >
+                                                        Tổng số pallet:
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="bg-gray-200 border-b border-x border-gray-400 p-2 text-lg font-bold w-32"
+                                                    >
+                                                        {reportData.TotalPallet}
+                                                    </td>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-gray-400 p-2 text-lg font-bold w-36"
+                                                    >
+                                                        TTMT
+                                                    </td>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-x border-gray-400 p-2 text-lg font-bold w-32"
+                                                    >
+                                                        FSC 100%
+                                                    </td>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-gray-400 p-2 text-lg font-bold w-36"
+                                                    >
+                                                        Khối lượng
+                                                    </td>
+                                                    <td
+                                                        colSpan="1"
+                                                        className="bg-gray-200 border-b border-l border-gray-400 p-2 text-lg font-bold w-32"
+                                                    >
+                                                        {reportData.TotalMass}{" "}
+                                                        (m3)
+                                                    </td>
+                                                </tr>
+
+                                                {/* Header row 4 - Tiêu đề cột của bảng dữ liệu */}
+                                                <tr className="bg-blue-200">
+                                                    <td className="border-r border-b border-gray-400 p-2 text-lg font-bold">
+                                                        Mã lô gỗ nhập
+                                                    </td>
+                                                    <td className="border-r border-b border-gray-400 p-2 text-lg font-bold">
+                                                        Mã Pallet
+                                                    </td>
+                                                    <td className="w-[150px] border-r border-b border-gray-400 p-2 text-lg text-center font-bold">
+                                                        Dài
+                                                    </td>
+                                                    <td className="border-r border-b border-gray-400 p-2 text-lg text-center font-bold">
+                                                        Rộng
+                                                    </td>
+                                                    <td className="border-r border-b border-gray-400 p-2 text-lg text-center font-bold">
+                                                        Dày
+                                                    </td>
+                                                    <td
+                                                        colSpan="2"
+                                                        className="w-[300px] border-r border-b border-gray-400 p-2 text-lg text-center font-bold"
+                                                    >
+                                                        Số Lượng (T)
+                                                    </td>
+                                                    <td
+                                                        colSpan="3"
+                                                        className="border-b border-gray-400 p-2 text-lg text-center font-bold"
+                                                    >
+                                                        Khối Lượng (m3)
+                                                    </td>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {reportData?.Detail?.map(
+                                                    (item, index) => (
+                                                        <tr
+                                                            key={index}
+                                                            className="bg-white !text-[17px]"
+                                                        >
+                                                            <td className=" border-r border-b border-gray-400 p-2">
+                                                                {item.Size}
+                                                            </td>
+                                                            <td className="border-r border-b border-gray-400 p-2">
+                                                                {
+                                                                    item.PalletCode
+                                                                }
+                                                            </td>
+                                                            <td className="border-r border-b border-gray-400 p-2 text-center">
+                                                                {item.CDai}
+                                                            </td>
+                                                            <td className="border-r border-b border-gray-400 p-2 text-center">
+                                                                {item.CRong}
+                                                            </td>
+                                                            <td className="border-r border-b border-gray-400 p-2 text-center">
+                                                                {item.CDay}
+                                                            </td>
+                                                            <td
+                                                                colSpan="2"
+                                                                className="border-r border-b border-gray-400 p-2 text-right"
+                                                            >
+                                                                {item.Qty}
+                                                            </td>
+                                                            <td
+                                                                colSpan="1"
+                                                                className="border-b border-gray-400 p-2 text-right"
+                                                            >
+                                                                {item.Mass}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg flex">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}
                         </>
                     )}
-
-                    {/* <div className="flex flex-col">
-                        <div className="overflow-x-auto overflow-y-auto sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                                <div className="overflow-auto border-2 rounded-xl border-gray-500">
-                                    <table className="min-w-full   text-center font-light text-surface">
-                                        <thead className="rounded-t-xl bg-[#DBDCDD] border-b-2 border-gray-500 font-medium">
-                                            <tr className="rounded-t-xl">
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    #
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    First
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Last
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-6 py-4"
-                                                >
-                                                    Handle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="font-normal">
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    1
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Mark
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Otto
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @mdo
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    2
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Jacob
-                                                </td>
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4">
-                                                    Thornton
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @fat
-                                                </td>
-                                            </tr>
-                                            <tr className="border-gray-500">
-                                                <td className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4 font-medium">
-                                                    3
-                                                </td>
-                                                <td
-                                                    colSpan="2"
-                                                    className="whitespace-nowrap border-e-2 border-gray-500 px-6 py-4"
-                                                >
-                                                    Larry the Bird
-                                                </td>
-                                                <td className="whitespace-nowrap px-6 py-4">
-                                                    @twitter
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
-                {/* <div className="py-4"></div> */}
             </div>
         </Layout>
     );

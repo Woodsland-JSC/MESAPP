@@ -287,8 +287,8 @@ class UserController extends Controller
 
         // dd($request->input('roles'));
         $userRole = Role::where('id', $request->input('roles'))
-        ->where('guard_name', $user->guard_name ?? 'web') // Đảm bảo khớp guard
-        ->first();
+            ->where('guard_name', $user->guard_name ?? 'web') // Đảm bảo khớp guard
+            ->first();
 
         if (!$userRole) {
             return response()->json(['error' => 'Role not found or guard mismatch'], 422);
@@ -459,6 +459,7 @@ class UserController extends Controller
         dd(Auth::user()->first_name);
         return view('importuser');
     }
+
     function syncFromSap(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -492,5 +493,14 @@ class UserController extends Controller
             db::rollback();
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    function getUserByFactory($factory)
+    {
+        $users = User::where('plant', $factory)
+            ->whereNotIn('role', [1, 2, 3, 4])
+            ->get();
+
+        return response()->json($users, 200);
     }
 }

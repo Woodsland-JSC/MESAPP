@@ -509,7 +509,7 @@ function DeliveryDetailReport() {
                                 <FaArrowLeft className="w-5 h-5 text-gray-600" />
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
-                                <div className="text-sm mb-1 text-[#17506B]">
+                                <div className="text-sm  text-[#17506B]">
                                     Báo cáo chế biến gỗ
                                 </div>
                                 <div className="serif text-3xl font-bold">
@@ -738,9 +738,9 @@ function DeliveryDetailReport() {
                         {selectedFactory && (
                             <div className=" border-2 border-[#C6D2D9] bg-[#f0faff] rounded-lg p-2 py-2 px-4 pb-4  m-2 mt-3 mx-4">
                                 {isTeamLoading ? (
-                                    <div className="text-center my-3 mt-5">
+                                    <div className="text-center my-3 mt-6">
                                         <Spinner
-                                            thickness="4px"
+                                            thickness="7px"
                                             speed="0.65s"
                                             emptyColor="gray.200"
                                             color="#155979"
