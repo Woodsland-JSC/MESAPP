@@ -495,14 +495,12 @@ class UserController extends Controller
         }
     }
 
-    public function getUserByFactory(Request $request)
+    function getUserByFactory($factory)
     {
-        $factory = $request->input('factory');
-
         $users = User::where('plant', $factory)
             ->where('role', 22)
             ->get();
 
-        return response()->json($users);
+        return response()->json($users, 200);
     }
 }
