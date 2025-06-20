@@ -450,11 +450,9 @@ class DryingOvenController extends Controller
             $current_year = now()->year;
 
             // 1. Lấy dữ liệu từ request và thông tin kho
-            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'startTime', 'endTime', 'employee']);
+            $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee']);
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
             $towarehouse = WarehouseCS();
-
-
 
             // 1.1. Tạo pallet mới
             $recordCount = Pallet::whereYear('created_at', $current_year)
@@ -467,8 +465,7 @@ class DryingOvenController extends Controller
                 'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
                 'factory' => $palletData['MaNhaMay'],
                 'QuyCach' => $combinedQuyCach,
-                'start_time' => $palletData['startTime'] ?? null,
-                'end_time' => $palletData['endTime'] ?? null,
+                'stacking_time' => $palletData['stackingTime'] ?? null,
                 'employee' => $palletData['employee'] ?? null,
             ]);
 

@@ -37,8 +37,7 @@ class Pallet extends Model
         'RanDate',
         'CompletedBy',
         'CompletedDate',
-        'start_time',
-        'end_time',
+        'stacking_time',
         'employee',
         'activeStatus',
     ];

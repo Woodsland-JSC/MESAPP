@@ -498,7 +498,7 @@ class UserController extends Controller
     function getUserByFactory($factory)
     {
         $users = User::where('plant', $factory)
-            ->whereNotIn('role', [1, 2, 3, 4])
+            ->whereNotIn('role', [22])
             ->get();
 
         return response()->json($users, 200);
