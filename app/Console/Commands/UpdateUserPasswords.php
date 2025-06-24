@@ -13,14 +13,14 @@ class UpdateUserPasswords extends Command
      *
      * @var string
      */
-    protected $signature = 'user:update-passwords';
+    protected $signature = 'user:update-password {id : ID của user cần cập nhật mật khẩu}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Cập nhật mật khẩu cho các user đã chọn thành 123456 (băm bằng bcrypt)';
+    protected $description = 'Cập nhật mật khẩu thành 123456 (băm bằng bcrypt) cho 1 user dựa trên ID';
 
     /**
      * Execute the console command.
@@ -29,22 +29,17 @@ class UpdateUserPasswords extends Command
      */
     public function handle()
     {
-        // Băm mật khẩu "123456"
+        $userId = $this->argument('id');
         $hashedPassword = Hash::make('123456');
 
-        // Danh sách username cần cập nhật
-        $usernames = ['17Q097', '15Q272', '11T0501', '15Q101', '23Q1820'];
-
-        // Thực hiện cập nhật trong bảng users
         $updated = DB::table('users')
-            ->whereIn('username', $usernames)
+            ->where('id', $userId)
             ->update(['password' => $hashedPassword]);
 
-        // Thông báo kết quả
         if ($updated) {
-            $this->info("Passwords updated successfully for {$updated} users.");
+            $this->info("Cập nhật mật khẩu thành công cho user ID {$userId}.");
         } else {
-            $this->warn("No matching users found.");
+            $this->warn("Không tìm thấy user với ID {$userId}.");
         }
 
         return 0;

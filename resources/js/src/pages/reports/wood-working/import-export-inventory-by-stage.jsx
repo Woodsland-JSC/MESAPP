@@ -966,7 +966,7 @@ function ImportExportInventoryByStage() {
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className=" bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex flex-col lg:flex-row flex-wrap min-[1649px]:flex-nowrap items-center px-4 mt-1 gap-3">
                             <div className="flex gap-3 w-full lg:w-1/4">
@@ -1073,7 +1073,7 @@ function ImportExportInventoryByStage() {
 
                     {/* Content */}
                     {isDataReportLoading ? (
-                        <div className="mt-2 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                        <div className="mt-4 bg-[#C2C2CB]  flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                             <div className="dots"></div>
                         </div>
                     ) : (
@@ -1109,7 +1109,7 @@ function ImportExportInventoryByStage() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="mt-4 bg-[#dbdcdd] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="mt-4 bg-[#C2C2CB]  flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
                                     Không có dữ liệu để hiển thị.
                                 </div>
                             )}

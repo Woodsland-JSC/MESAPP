@@ -355,7 +355,7 @@ function DefectResolution() {
                     </div>
 
                     {/* Header */}
-                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
+                    <div className=" bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
                             <div className="flex space-x-3 w-1/4">

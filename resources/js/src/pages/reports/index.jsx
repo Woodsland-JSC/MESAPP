@@ -94,11 +94,11 @@ const SAYReports = [
 const CBGReports = [
     {
         id: "0001",
-        name: "Báo cáo thông tin sản lượng nhận (SAP)",
-        link: "/reports/wood-working/delivery-detail",
+        name: "Báo cáo thông tin sản lượng nhận tại SAP.",
+        link: "/reports/wood-working/receipt-in-sap",
         description:
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
-        // priority: true,
+        priority: true,
     },
     {
         id: "0002",
@@ -656,10 +656,24 @@ function Report() {
 
                                                                 <div className="flex w-full justify-between items-center">
                                                                     <div className="flex flex-col justify-center ">
-                                                                        <div className="text-[17px] font-semibold group-hover:text-white">
+                                                                        <div className="flex items-center gap-x-4 text-[17px] font-semibold group-hover:text-white">
                                                                             {
                                                                                 item.name
                                                                             }
+                                                                            {item.priority ==
+                                                                                true && (
+                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                <div className="text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                    NEW
+                                                                                </div>
+                                                                            )}
+                                                                            {item.updated ==
+                                                                                true && (
+                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
+                                                                                    UPDATED
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                         <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
                                                                             {

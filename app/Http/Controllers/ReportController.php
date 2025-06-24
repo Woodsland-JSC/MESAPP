@@ -236,7 +236,7 @@ class ReportController extends Controller
                         'code' => $pallet->Code,
                         'ma_lo' => $pallet->MaLo,
                         'item_code' => $detail->ItemCode,
-                        'item_name' => $sapItems[$detail->ItemCode] ?? 'Không xác định', 
+                        'item_name' => $sapItems[$detail->ItemCode] ?? 'Không xác định',
                         'dai' => $detail->CDai,
                         'rong' => $detail->CRong,
                         'day' => $detail->CDay,
@@ -607,6 +607,77 @@ class ReportController extends Controller
             });
 
             return response()->json($result, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    function ReceiptInSAPReport(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'fromDate' => 'required|date',
+            'toDate' => 'required|date',
+            'factory' => 'required',
+            'To' => 'required|array',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['error' => $validate->errors()], 400);
+        }
+
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $factory = $request->input('factory');
+        $to = $request->input('To');
+
+
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_MES(
+            IN_FROM_DATE => '$fromDate',
+            IN_TO_DATE => '$toDate', 
+            IN_FACTORY => '$factory',
+            OUTPUT_RESULT => ?
+        )";
+
+            $result = odbc_exec($conDB, $query);
+
+            if (!$result) {
+                throw new \Exception('Error executing stored procedure: ' . odbc_errormsg($conDB));
+            }
+
+            // Phương pháp đơn giản nhất - chỉ lấy từ result set đầu tiên
+            $allResults = array();
+            while ($row = odbc_fetch_array($result)) {
+                $allResults[] = $row;
+            }
+
+            odbc_close($conDB);
+
+            // Debug: In ra field names để xác định tên field chứa MaTo
+            if (!empty($allResults)) {
+                \Log::info('SAP fields available:', array_keys($allResults[0]));
+            }
+
+            // Lọc dữ liệu
+            $filteredResults = array_filter($allResults, function ($item) use ($to) {
+                $possibleFields = ['MaTo', 'MA_TO', 'ma_to', 'MATO', 'Code', 'CODE', 'ToCode', 'TO_CODE'];
+
+                foreach ($possibleFields as $field) {
+                    if (isset($item[$field]) && in_array($item[$field], $to)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            $filteredResults = array_values($filteredResults);
+
+            return response()->json($filteredResults, 200); // Trả về trực tiếp mảng phẳng
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Có lỗi xảy ra: ' . $e->getMessage()

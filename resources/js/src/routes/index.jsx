@@ -43,13 +43,6 @@ import FinishedGoodsReceipt from "../pages/workspace/wood-working/finished-goods
 import PlywoodFinishedGoodsReceipt from "../pages/workspace/plywoods/finished-goods-receipt";
 
 import Report from "../pages/reports/index";
-import WoodProcessingKilnStackingReport from "../pages/reports/wooddrying/wood-processing-kiln-stacking";
-import WoodAwaitingDryingReport from "../pages/reports/wooddrying/wood-awaiting-drying";
-import KilnInspectionReport from "../pages/reports/wooddrying/kiln-inspection";
-import SelectedDriedInventoryReport from "../pages/reports/wooddrying/selected-dried-inventory";
-import CurrentDryingKilnReport from "../pages/reports/wooddrying/current-drying-kiln";
-import DryingKilnHistoryReport from "../pages/reports/wooddrying/drying-kiln-history";
-import HumidityCheckingReport from "../pages/reports/wooddrying/humidity-checking";
 
 // New
 import DriedWoodInventoryReport from "../pages/reports/wood-drying/dried-wood-inventory";
@@ -76,6 +69,7 @@ import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
+import ReceiptInSapReport from "../pages/reports/wood-working/receipt-in-sap";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 import WeeklyDetailProductionVolumeReport from "../pages/reports/wood-working/production-volume-weekly-detail";
@@ -274,62 +268,6 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
-                    <Route
-                        path="/reports/wood-processing-kiln-stacking"
-                        element={
-                            <ProtectedRoute>
-                                <WoodProcessingKilnStackingReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/wood-awaiting-drying"
-                        element={
-                            <ProtectedRoute>
-                                <WoodAwaitingDryingReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/kiln-inspection"
-                        element={
-                            <ProtectedRoute>
-                                <KilnInspectionReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/selected-dried-inventory"
-                        element={
-                            <ProtectedRoute>
-                                <SelectedDriedInventoryReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/current-drying-kiln"
-                        element={
-                            <ProtectedRoute>
-                                <CurrentDryingKilnReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/drying-kiln-history"
-                        element={
-                            <ProtectedRoute>
-                                <DryingKilnHistoryReport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports/humidity-checking"
-                        element={
-                            <ProtectedRoute>
-                                <HumidityCheckingReport />
-                            </ProtectedRoute>
-                        }
-                    />
 
                     {/* SAY Report */}
                     <Route
@@ -414,6 +352,14 @@ function AppRoutes() {
                     />
 
                     {/* CBG Reports */}
+                    <Route
+                        path="/reports/wood-working/receipt-in-sap"
+                        element={
+                            <ProtectedRoute>
+                                <ReceiptInSapReport />
+                            </ProtectedRoute>
+                        }
+                    />
                     <Route
                         path="/reports/wood-working/delivery-detail"
                         element={

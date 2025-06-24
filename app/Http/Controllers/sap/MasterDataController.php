@@ -382,8 +382,6 @@ class MasterDataController extends Controller
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
             if (!odbc_execute($stmt, [Auth::user()->plant, Auth::user()->branch])) {
-                // Handle execution error
-                // die("Error executing SQL statement: " . odbc_errormsg());
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
@@ -733,7 +731,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
 
             // $query = 'select "WhsCode","WhsName" from OWHS';
-            $query = 'SELECT DISTINCT U_FAC, Fac."Name"  FROM OWOR LEFT JOIN "@G_SAY4" Fac ON Fac."Code" = U_FAC WHERE  "U_LLSX" = \'CBG\' AND "CmpltQty" > 0';
+            $query = 'SELECT DISTINCT "Code","Name"  FROM "@G_SAY4" WHERE  "U_CBG" = \'Y\'';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));

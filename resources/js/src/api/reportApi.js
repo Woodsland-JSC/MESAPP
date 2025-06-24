@@ -32,7 +32,6 @@ const reportApi = {
         });
     },
 
-    
     getDryingQueue: (fromDate, toDate, factory) => {
         const url = `/report/say-xepchosay`;
         return axiosClient().get(url, {
@@ -49,6 +48,23 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 FAC: factory,
+            },
+        });
+    },
+
+    getReceiptInSAPReport: (
+        fromDate,
+        toDate,
+        plant,
+        to,
+    ) => {
+        const url = `/report/cbg-sanluongnhansap`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate,
+                factory: plant,
+                To: to,
             },
         });
     },

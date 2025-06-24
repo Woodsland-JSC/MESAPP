@@ -221,6 +221,24 @@ function WoodSorting() {
         return palletCards.some((card) => card.key === id);
     };
 
+    const getEmployee = async () => {
+        try {
+            const employeeData = await usersApi.getUsersByFactory(user.plant);
+            const employeeOptions = employeeData.map((item) => ({
+                value: item.id,
+                label:
+                    item.username +
+                    " - " +
+                    item.last_name +
+                    " " +
+                    item.first_name,
+            }));
+            setEmployeeOptions(employeeOptions);
+        } catch (error) {
+            console.error("Error fetching employees:", error);
+        }
+    };
+
     useEffect(() => {
         if (selectedYear && selectedWeek) {
             loadPalletCallback();
@@ -257,23 +275,7 @@ function WoodSorting() {
                 console.error("Error fetching drying reasons:", error);
             }
 
-            try {
-                const employeeData = await usersApi.getUsersByFactory(
-                    user.plant
-                );
-                const employeeOptions = employeeData.map((item) => ({
-                    value: item.id,
-                    label:
-                        item.username +
-                        " - " +
-                        item.last_name +
-                        " " +
-                        item.first_name,
-                }));
-                setEmployeeOptions(employeeOptions);
-            } catch (error) {
-                console.error("Error fetching employees:", error);
-            }
+            getEmployee();
             setLoading(false);
         };
 
@@ -656,10 +658,12 @@ function WoodSorting() {
                 setCreatePalletLoading(false);
                 setQuyCachList([]);
                 setBatchId("");
+                setStackingTime(0);
+                setSelectedEmployee(null);
                 setStartDate(new Date());
                 setPalletCards([]);
-
                 setPalletQuantities({});
+                getEmployee();
             }
         } catch (error) {
             console.error("Error creating pallet:", error);
