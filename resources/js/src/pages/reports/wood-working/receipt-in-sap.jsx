@@ -152,11 +152,15 @@ function ReceiptInSapReport() {
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
                 quantity: parseInt(item.Quantity),
-                m3: Number(item.U_M3SP),
+                m3_sp: Number(item.U_M3SP),
+                m3: Number(item.M3),
                 sender: item.DeliveryPerson,
                 receiver: item.Recipient,
                 warehouse: item.WarehouseCode,
-                receive_date: item.CreateTime + " " + moment(item.CreateDate).format('DD/MM/YYYY'),
+                receive_date:
+                    item.CreateTime +
+                    " " +
+                    moment(item.CreateDate).format("DD/MM/YYYY"),
                 production_order_sap: item.ProductionOrderSAP,
                 production_order_mes: item.ProductionOrderMES,
                 mes_noti: item.U_UUID,
@@ -282,6 +286,12 @@ function ReceiptInSapReport() {
         },
         { headerName: "ĐVT", field: "unit", maxWidth: 90 },
         {
+            headerName: "M3 sản phẩm",
+            field: "m3_sp",
+            filter: true,
+            minWidth: 200,
+        },
+        {
             headerName: "Số lượng",
             field: "quantity",
             maxWidth: 110,
@@ -315,7 +325,7 @@ function ReceiptInSapReport() {
             filter: true,
             minWidth: 240,
         },
-                {
+        {
             headerName: "Kho nhận",
             field: "warehouse",
             filter: true,

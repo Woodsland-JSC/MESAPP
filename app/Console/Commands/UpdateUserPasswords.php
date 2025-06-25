@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UpdateUserPasswords extends Command
+class UpdateUserPasswordsư extends Command
 {
     /**
      * The name and signature of the console command.

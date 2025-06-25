@@ -731,7 +731,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
 
             // $query = 'select "WhsCode","WhsName" from OWHS';
-            $query = 'SELECT DISTINCT "Code","Name"  FROM "@G_SAY4" WHERE  "U_CBG" = \'Y\'';
+            $query = 'SELECT DISTINCT "Code" AS U_FAC,"Name"  FROM "@G_SAY4" WHERE  "U_CBG" = \'Y\'';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
