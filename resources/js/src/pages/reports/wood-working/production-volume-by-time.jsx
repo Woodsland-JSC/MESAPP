@@ -1412,7 +1412,7 @@ function ProductionVolumeByTimeReport() {
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
                                 <div className="text-sm text-[#17506B]">
-                                    Báo cáo sản lượng
+                                    Báo cáo chế biến gỗ
                                 </div>
                                 <div className="serif text-3xl font-bold">
                                     Báo cáo sản lượng theo {selectedTimeRange == "day" ? "ngày" : selectedTimeRange == "week" ? "tuần" : "tháng"}
@@ -1735,6 +1735,7 @@ function ProductionVolumeByTimeReport() {
                                             localeText={localeText}
                                             suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
+                                            grandTotalRow="bottom"
                                         />
                                     </div>
                                 </div>
