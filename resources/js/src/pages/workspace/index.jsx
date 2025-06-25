@@ -391,19 +391,19 @@ function Workspace() {
                                                         "Nhập sản lượng lắp đặt khối nội địa",
                                                     type: "ND",
                                                 },
-                                                {
-                                                    permission: [
-                                                        "SLTBND",
-                                                    ],
-                                                    link: "/workspace/kitchen-cabinet/finished-goods-receipt",
-                                                    icon: (
-                                                        <HiMiniWrenchScrewdriver />
-                                                    ),
-                                                    title: "Sản lượng tủ bếp",
-                                                    description:
-                                                        "Nhập sản lượng lắp đặt khối tủ bếp",
-                                                    type: "ND",
-                                                },
+                                                // {
+                                                //     permission: [
+                                                //         "SLTBND",
+                                                //     ],
+                                                //     link: "/workspace/kitchen-cabinet/finished-goods-receipt",
+                                                //     icon: (
+                                                //         <HiMiniWrenchScrewdriver />
+                                                //     ),
+                                                //     title: "Sản lượng tủ bếp",
+                                                //     description:
+                                                //         "Nhập sản lượng lắp đặt khối tủ bếp",
+                                                //     type: "ND",
+                                                // },
                                                 {
                                                     permission: [
                                                         "DAND",

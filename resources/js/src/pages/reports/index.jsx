@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { Link } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
+import useAppContext from "../../store/AppContext";
 import Select from "react-select";
 import { dateToDateTime } from "../../utils/convertDatetime";
 import { MdOutlineRefresh } from "react-icons/md";
@@ -25,7 +26,6 @@ import {
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import Layout from "../../layouts/layout";
-import useAppContext from "../../store/AppContext";
 import Loader from "../../components/Loader";
 import AG_GRID_LOCALE_VI from "../../utils/locale.vi";
 
@@ -43,6 +43,7 @@ const SAYReports = [
         link: "/reports/wood-drying/kiln-loading",
         description: "Thông tin biên bản vào lò.",
         updated: true,
+        // permission: ''
     },
     // {
     //     id: "0002",
@@ -107,6 +108,7 @@ const CBGReports = [
         description:
             "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
         // priority: true,
+        onlyAdmin: true,
         responsive: true,
     },
     {
@@ -251,6 +253,7 @@ const tabParamMap = {
 };
 
 function Report() {
+    const { user } = useAppContext();
     const { loading, setLoading } = useAppContext();
     const [searchTerm, setSearchTerm] = useState("");
     const [tabIndex, setTabIndex] = useState(0);
@@ -387,19 +390,26 @@ function Report() {
         );
     }, []);
 
-    const filterReports = (reports) => {
-        return reports.filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    const filterReports = (reports, userRole) => {
+        return reports.filter((item) => {
+            const isAdminOnly = item.onlyAdmin === true;
+            const isAllowed = !isAdminOnly || userRole == 1;
+
+            const matchesSearch = item.name
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+            return isAllowed && matchesSearch;
+        });
     };
 
-    const filteredSAYReports = useMemo(
-        () => filterReports(SAYReports),
-        [SAYReports, searchTerm]
-    );
     const filteredCBGReports = useMemo(
-        () => filterReports(CBGReports),
-        [CBGReports, searchTerm]
+        () => filterReports(CBGReports, user?.role),
+        [CBGReports, searchTerm, user?.role]
+    );
+
+    const filteredSAYReports = useMemo(
+        () => filterReports(SAYReports, user?.role),
+        [SAYReports, searchTerm, user?.role]
     );
     const filteredVCNReports = useMemo(
         () => filterReports(VCNReports),
@@ -672,6 +682,13 @@ function Report() {
                                                                                 // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                                 <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
                                                                                     UPDATED
+                                                                                </div>
+                                                                            )}
+                                                                            {item.onlyAdmin ==
+                                                                                true && (
+                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
+                                                                                    ADMIN
                                                                                 </div>
                                                                             )}
                                                                         </div>

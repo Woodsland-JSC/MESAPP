@@ -18,10 +18,8 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { Divider } from "@chakra-ui/react";
-
 import useAppContext from "../store/AppContext";
 import usersApi from "../api/userApi";
-
 import logo from "../assets/images/WLorigin.svg";
 import defaultUser from "../assets/images/default-user.png";
 import {
@@ -35,7 +33,6 @@ import {
     Tooltip,
 } from "@chakra-ui/react";
 import { RiExpandUpDownLine } from "react-icons/ri";
-
 import {
     Menu,
     MenuButton,

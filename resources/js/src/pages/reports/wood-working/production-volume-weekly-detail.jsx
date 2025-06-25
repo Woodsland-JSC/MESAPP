@@ -1044,6 +1044,7 @@ function WeeklyDetailProductionVolumeReport() {
                                             suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
                                             localeText={localeText}
+                                            grandTotalRow="bottom"
                                         />
                                     </div>
                                 </div>
