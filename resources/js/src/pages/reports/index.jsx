@@ -673,21 +673,21 @@ function Report() {
                                                                             {item.priority ==
                                                                                 true && (
                                                                                 // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                <div className="xl:block lg:block md:block hidden text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
                                                                                     NEW
                                                                                 </div>
                                                                             )}
                                                                             {item.updated ==
                                                                                 true && (
                                                                                 // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
+                                                                                <div className="xl:block lg:block md:block hidden text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
                                                                                     UPDATED
                                                                                 </div>
                                                                             )}
                                                                             {item.onlyAdmin ==
                                                                                 true && (
                                                                                 // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
+                                                                                <div className="xl:block lg:block md:block hidden  text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
                                                                                     ADMIN
                                                                                 </div>
                                                                             )}

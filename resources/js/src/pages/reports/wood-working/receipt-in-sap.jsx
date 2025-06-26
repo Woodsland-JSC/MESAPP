@@ -61,7 +61,7 @@ function ReceiptInSapReport() {
     const [isTeamLoading, setIsTeamLoading] = useState(false);
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
     const [selectedTeams, setSelectedTeams] = useState([]);
-
+    const [selectedTeamMobile, setSelectedTeamMobile] = useState(null);
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
     const [isReceived, setIsReceived] = useState(true);
@@ -69,8 +69,16 @@ function ReceiptInSapReport() {
     const [teamOptions, setTeamOptions] = useState([]);
 
     const [reportData, setReportData] = useState(null);
-
+    const [reportDataMobile, setReportDataMobile] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredData = useMemo(() => {
+        return reportDataMobile?.filter((item) => {
+            const searchValue =
+                `${item.CDay}x${item.CRong}x${item.CDai}`.toLowerCase();
+            return searchValue.includes(searchTerm.toLowerCase());
+        });
+    }, [reportDataMobile, searchTerm]);
 
     const handleFactorySelect = async (factory) => {
         console.log("Nhà máy đang chọn là:", factory);
@@ -176,6 +184,41 @@ function ReceiptInSapReport() {
         }
     }, [fromDate, toDate, selectedFactory, selectedTeams, selectAll]);
 
+    const getReportDataMobile = useCallback(async () => {
+        if (!fromDateMobile || !toDateMobile || !selectedTeamMobile) {
+            console.log("Không thể gọi API vì thiếu thông tin. (Mobile)");
+            return;
+        }
+
+        let params = {
+            from_date: format(fromDateMobile, "yyyy-MM-dd"),
+            to_date: format(toDateMobile, "yyyy-MM-dd"),
+            To: selectedTeamMobile.value,
+            plant:
+                user?.plant === "YS1" || user?.plant === "YS2"
+                    ? "YS"
+                    : user?.plant,
+        };
+        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
+        setIsDataReportLoading(true);
+        try {
+            const res = await reportApi.getDeliveryDetailReport(
+                params.status_code,
+                params.To,
+                params.branch,
+                params.plant,
+                params.from_date,
+                params.to_date
+            );
+            setIsDataReportLoading(false);
+            setReportDataMobile(res);
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+            setIsDataReportLoading(false);
+        }
+    }, [fromDateMobile, toDateMobile, selectedTeamMobile, user.plant]);
+
     useEffect(() => {
         const allFieldsFilled =
             selectedTeams &&
@@ -188,7 +231,25 @@ function ReceiptInSapReport() {
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [selectedTeams, selectedFactory, fromDate, toDate, getReportData]);
+
+        const allFieldsFilledMobile =
+            selectedTeamMobile && fromDateMobile && toDateMobile;
+        if (allFieldsFilledMobile) {
+            getReportDataMobile();
+        } else {
+            console.log("Không thể gọi API vì không đủ thông tin. (Mobile)");
+        }
+    }, [
+        selectedTeams,
+        selectedFactory,
+        fromDate,
+        toDate,
+        getReportData,
+        fromDateMobile,
+        toDateMobile,
+        selectedTeamMobile,
+        getReportDataMobile,
+    ]);
 
     // New Get All Group
     useEffect(() => {
@@ -445,8 +506,11 @@ function ReceiptInSapReport() {
                                 <div className="text-sm  text-[#17506B]">
                                     Báo cáo chế biến gỗ
                                 </div>
-                                <div className="serif text-3xl font-bold">
+                                <div className="serif text-3xl font-bold xl:block lg:block md:block hidden">
                                     Báo cáo thông tin sản lượng nhận tại SAP
+                                </div>
+                                <div className="serif text-3xl font-bold xl:hidden lg:hidden md:hidden block">
+                                    Báo cáo thông tin sản lượng giao nhận
                                 </div>
                             </div>
                         </div>
@@ -800,6 +864,72 @@ function ReceiptInSapReport() {
                         )}
                     </div>
 
+                    {/* Responsive Header */}
+                    <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 xl:display:hidden lg:hidden md:hidden block">
+                        {/*Filter */}
+                        <div className="flex-col items-center space-y-3 px-4 mt-1 mb-1">
+                            {/* Date Filter */}
+                            <div className="flex space-x-3">
+                                <div className="col-span-1 w-full">
+                                    <label
+                                        htmlFor="indate"
+                                        className="block mb-1 font-medium text-gray-900 "
+                                    >
+                                        Từ ngày
+                                    </label>
+                                    <DatePicker
+                                        selected={fromDateMobile}
+                                        dateFormat="dd/MM/yyyy"
+                                        onChange={(date) => {
+                                            setFromDateMobile(date);
+                                        }}
+                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                    />
+                                </div>
+                                <div className="col-span-1 w-full">
+                                    <label
+                                        htmlFor="indate"
+                                        className="block mb-1 font-medium text-gray-900 "
+                                    >
+                                        Đến ngày
+                                    </label>
+                                    <DatePicker
+                                        selected={toDateMobile}
+                                        dateFormat="dd/MM/yyyy"
+                                        onChange={(date) => {
+                                            setToDateMobile(date);
+                                        }}
+                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Team Filter */}
+                            <div className="flex space-x-3 w-full">
+                                <div className="w-full">
+                                    <label
+                                        htmlFor="first_name"
+                                        className="block mb-1 font-medium text-gray-900"
+                                    >
+                                        Chọn công đoạn
+                                    </label>
+                                    <Select
+                                        placeholder="Chọn công đoạn..."
+                                        options={teamOptions}
+                                        defaultOptions
+                                        onChange={(value) => {
+                                            setSelectedTeamMobile(value);
+                                            console.log(
+                                                "Selected Team:",
+                                                value
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Content */}
                     {isDataReportLoading ? (
                         <div className="mt-4 bg-[#C2C2CB] items-center justify-center  p-2 px-4 pr-1 rounded-lg xl:flex lg:flex md:flex hidden">
@@ -838,6 +968,124 @@ function ReceiptInSapReport() {
                             )}
                         </>
                     )}
+
+                    {/* Responsive Contents */}
+                    <div className="space-y-3 mt-4 xl:display:hidden lg:hidden md:hidden block">
+                        <div className="text-left text-sm text-gray-500 ">
+                            {reportDataMobile?.length || 0} kết quả
+                        </div>
+                        {/* Data */}
+                        {isDataReportLoading ? (
+                            <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                <div className="dots my-1"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {reportDataMobile?.length > 0 ? (
+                                    <>
+                                        {filteredData?.map((item, index) => (
+                                            <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
+                                                <div className="flex-col w-full">
+                                                    <div className="text-xl font-semibold text-[#17506B] mb-1">
+                                                        {item.ItemName}
+                                                    </div>
+                                                    <div className="grid grid-cols-2 font-semibold">
+                                                        <span>Quy cách: </span>
+                                                        <span className="font-normal">
+                                                            {Number(item.CDay)}*
+                                                            {Number(item.CRong)}
+                                                            *{Number(item.CDai)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 font-semibold mb-2">
+                                                        <span>Số lượng: </span>
+                                                        <span className="font-normal">
+                                                            {parseInt(
+                                                                item.Quantity
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="mt-3 flex items-center w-full pl-3 ">
+                                                        <div className="space-y-3 border-l-2 border-dashed border-gray-400 w-full">
+                                                            <div className="relative w-full">
+                                                                <FaArrowDown className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-blue-600 p-1" />
+                                                                <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                    <div className="flex-col  ">
+                                                                        <div className="font-medium text-[15px]">
+                                                                            Người
+                                                                            giao:{" "}
+                                                                        </div>
+                                                                        <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                            {
+                                                                                item.NguoiGiao
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex text-gray-500 space-x-2 items-center">
+                                                                        <div>
+                                                                            {
+                                                                                item.ngaygiao
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="relative w-full ">
+                                                                {item.NguoiNhan ? (
+                                                                    <>
+                                                                        <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
+                                                                        <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                            <div className="flex-col ">
+                                                                                <div className="font-medium text-[15px]">
+                                                                                    Người
+                                                                                    nhận:{" "}
+                                                                                </div>
+                                                                                <div className="font-semibold text-[17px] text-[#1B536E]">
+                                                                                    {
+                                                                                        item.NguoiNhan
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex text-gray-500 space-x-2 items-center">
+                                                                                <div>
+                                                                                    {
+                                                                                        item.ngaynhan
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <FaExclamation className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-orange-500 p-1" />
+                                                                        <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
+                                                                            <div className="font-medium text-[15px]">
+                                                                                Sản
+                                                                                phẩm
+                                                                                đang
+                                                                                chờ
+                                                                                nhận.
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="pb-3"></div>
+                                    </>
+                                ) : (
+                                    <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                                        Không có dữ liệu để hiển thị.
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </Layout>
