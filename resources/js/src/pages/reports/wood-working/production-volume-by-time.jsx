@@ -493,6 +493,8 @@ function ProductionVolumeByTimeReport() {
     const aggregateItemsByDay = (data) => {
         const groupMap = new Map();
 
+        const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
@@ -509,11 +511,16 @@ function ProductionVolumeByTimeReport() {
             }
         });
 
-        return Array.from(groupMap.values());
+        return Array.from(groupMap.values()).sort((a, b) => {
+            const orderA = stageOrder[a.U_CDOAN] || 999;
+            const orderB = stageOrder[b.U_CDOAN] || 999;
+            return orderA - orderB;
+        });
     };
 
     const aggregateItemsByWeek = (data) => {
         const itemMap = new Map();
+        const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
 
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
@@ -556,11 +563,16 @@ function ProductionVolumeByTimeReport() {
             entry[m3WeekKey] += parseFloat(item.M3);
         });
 
-        return Array.from(itemMap.values());
+        return Array.from(itemMap.values()).sort((a, b) => {
+            const orderA = stageOrder[a.stage] || 999;
+            const orderB = stageOrder[b.stage] || 999;
+            return orderA - orderB;
+        });
     }
 
     const aggregateItemsByMonth = (data) => {
         const itemMap = new Map();
+        const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
 
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
@@ -603,7 +615,11 @@ function ProductionVolumeByTimeReport() {
             entry[m3MonthKey] += parseFloat(item.M3);
         });
 
-        return Array.from(itemMap.values());
+        return Array.from(itemMap.values()).sort((a, b) => {
+            const orderA = stageOrder[a.stage] || 999;
+            const orderB = stageOrder[b.stage] || 999;
+            return orderA - orderB;
+        });
     }
 
     const getReportData = async () => {
@@ -713,6 +729,7 @@ function ProductionVolumeByTimeReport() {
                     break;
                 case 'week':
                     formattedData = aggregateItemsByWeek(res);
+                    console.log("Factory 2: ", formattedData)
                     break;
                 case 'month':
                     formattedData = aggregateItemsByMonth(res);
@@ -797,6 +814,8 @@ function ProductionVolumeByTimeReport() {
         }
 
         let formattedData;
+
+        console.log("Factory 1: ", res)
 
         switch (selectedTimeRange) {
             case 'day':
@@ -1101,7 +1120,6 @@ function ProductionVolumeByTimeReport() {
     useEffect(() => {
         if (dailyData && dailyData.length > 0) {
             let res = [...dailyData];
-
 
             if (selectedFactory !== 'All') {
                 res = res.filter(data => data.factory === selectedFactory);
@@ -1726,7 +1744,8 @@ function ProductionVolumeByTimeReport() {
                                             columnDefs={colDefs}
                                             autoGroupColumnDef={{
                                                 headerName: 'Nhóm',
-                                                width: '250px'
+                                                width: '250px',
+                                                pinned: "left"
                                             }}
                                             excelStyles={excelStyles}
                                             rowGroupPanelShow={"always"}
