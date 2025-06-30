@@ -562,7 +562,14 @@ function ImportExportInventoryByStage() {
                 { signal }
             );
 
-            setReportData(res);
+            const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+            const sortedRes = res.sort((a, b) => {
+                const orderA = stageOrder[a.U_CDOAN] || 999;
+                const orderB = stageOrder[b.U_CDOAN] || 999;
+                return orderA - orderB;
+            });
+
+            setReportData(sortedRes);
 
             // if (selectedFactory !== 'All') {
             //     res = res.filter(data => data.U_FAC === selectedFactory);
@@ -571,7 +578,7 @@ function ImportExportInventoryByStage() {
             //     }
             // }
 
-            const formattedData = res.map((item) => {
+            const formattedData = sortedRes.map((item) => {
                 return {
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.BOMName,

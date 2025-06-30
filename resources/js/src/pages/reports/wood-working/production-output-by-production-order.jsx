@@ -304,7 +304,7 @@ function ProductionOutputByProductionOrder() {
     };
 
     const getReportData = async () => {
-        if (!fromDate && !toDate && !selectedFactory) return;
+        if (!selectedFactory) return;
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -314,8 +314,6 @@ function ProductionOutputByProductionOrder() {
         const { signal } = abortControllerRef.current;
 
         let params = {
-            fromDate: format(fromDate, "yyyy-MM-dd"),
-            toDate: format(toDate, "yyyy-MM-dd"),
             factory: selectedFactory || '',
         };
 
@@ -323,8 +321,6 @@ function ProductionOutputByProductionOrder() {
 
         try {
             let res = await reportApi.getProductionOutputByProductionOrder(
-                params.fromDate,
-                params.toDate,
                 params.factory,
                 { signal }
             );
@@ -338,23 +334,32 @@ function ProductionOutputByProductionOrder() {
             //     }
             // }
 
-            const formattedData = res.map((item) => {
-                return {
-                    productionOrder: item.LSX,
-                    stage: convertStageName(item.U_CDOAN),
-                    ItemName: item.ItemName,
-                    length: item.U_CDai,
-                    width: item.U_CRong,
-                    thickness: item.U_CDay,
-                    plannedQty: Number(item.PlannedQty),
-                    errorQty: Number(item.ErrorQty),
-                    completedQty: Number(item.CompletedQty),
-                    completedQtyM3: Number(item.CompletedM3),
-                    remainingQty: Number(item.RemainingQty),
-                    remainingQtyM3: Number(item.RemainingM3),
-                    completion: Number(item.Completion),
-                }
-            });
+            const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+
+            const formattedData = res
+                .slice()
+                .sort((a, b) => (stageOrder[a.U_CDOAN] || 999) - (stageOrder[b.U_CDOAN] || 999))
+                .reduce((acc, item) => {
+                    const completion = Number(item.Completion);
+                    if (completion < 100) {
+                        acc.push({
+                            productionOrder: item.LSX,
+                            stage: convertStageName(item.U_CDOAN),
+                            ItemName: item.ItemName,
+                            length: item.U_CDai,
+                            width: item.U_CRong,
+                            thickness: item.U_CDay,
+                            plannedQty: Number(item.PlannedQty),
+                            errorQty: Number(item.ErrorQty),
+                            completedQty: Number(item.CompletedQty),
+                            completedQtyM3: Number(item.CompletedM3),
+                            remainingQty: Number(item.RemainingQty),
+                            remainingQtyM3: Number(item.RemainingM3),
+                            completion,
+                        });
+                    }
+                    return acc;
+                }, []);
 
             setRowData(formattedData);
         } catch (error) {
@@ -502,25 +507,13 @@ function ProductionOutputByProductionOrder() {
     };
 
     const handleExportExcel = useCallback(() => {
-        const formatDate = (date) => {
-            if (!date) return '';
-            try {
-                const parsedDate = typeof date === 'string' ? parseISO(date) : date;
-                return format(parsedDate, 'dd-MM-yyyy'); // Format to DD-MM-YYYY
-            } catch (error) {
-                return '';
-            }
-        };
-
-        const from = formatDate(fromDate);
-        const to = formatDate(toDate);
         const factory = selectedFactory || 'Tất cả';
-        const fileName = `Báo cáo sản lượng theo lệnh sản xuất_${factory}_${from}_đến_${to}.xlsx`;
+        const fileName = `Báo cáo sản lượng theo lệnh sản xuất_${factory}.xlsx`;
 
         gridRef.current.api.exportDataAsExcel({
             fileName,
         });
-    }, [fromDate, toDate, selectedFactory]);
+    }, [selectedFactory]);
 
     const handleExportPDF = () => {
         toast("Chức năng xuất PDF đang được phát triển.");
@@ -599,13 +592,13 @@ function ProductionOutputByProductionOrder() {
     }, [])
 
     useEffect(() => {
-        const allFieldsFilled = (fromDate && toDate && selectedFactory);
+        const allFieldsFilled = (selectedFactory);
         if (allFieldsFilled) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [fromDate, toDate, selectedFactory]);
+    }, [selectedFactory]);
 
     return (
         <Layout>
@@ -671,7 +664,7 @@ function ProductionOutputByProductionOrder() {
                     <div className="bg-white rounded-xl py-2 pb-3">
                         {/* Filter */}
                         <div className="flex flex-col lg:flex-row flex-wrap min-[1649px]:flex-nowrap items-center px-4 mt-1 gap-3">
-                            <div className="flex gap-3 w-full lg:w-1/4">
+                            {/* <div className="flex gap-3 w-full lg:w-1/4">
                                 <div className="col-span-1 w-full">
                                     <label
                                         htmlFor="indate"
@@ -721,7 +714,7 @@ function ProductionOutputByProductionOrder() {
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="flex flex-col min-[1649px]:pl-3 w-full min-[1649px]:border-l-2 lg:border-gray-100 mb-3">
                                 <label

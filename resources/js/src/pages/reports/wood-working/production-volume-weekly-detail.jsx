@@ -69,19 +69,27 @@ function WeeklyDetailProductionVolumeReport() {
     const colDefs = useMemo(() => {
         return updateColumnDefs([
             {
+                field: "targetProduct",
+                headerName: "Sản phẩm đích",
+                rowGroup: true,
+                enableRowGroup: true,
+                width: 180,
+                filter: true,
+                pinned: "left"
+            },
+            {
                 field: 'group',
                 headerName: 'Tổ',
+                rowGroup: true,
                 enableRowGroup: true,
                 suppressHeaderMenuButton: true,
                 filter: true,
                 pinned: "left"
             },
             {
-                field: "targetProduct",
-                headerName: "Sản phẩm đích",
-                rowGroup: true,
-                enableRowGroup: true,
-                width: 180,
+                field: 'stage',
+                headerName: 'Công đoạn',
+                suppressHeaderMenuButton: true,
                 filter: true,
                 pinned: "left"
             },
@@ -175,6 +183,7 @@ function WeeklyDetailProductionVolumeReport() {
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -191,6 +200,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -202,6 +212,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -213,6 +224,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -224,6 +236,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -235,6 +248,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -246,6 +260,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -257,6 +272,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -312,6 +328,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -323,6 +340,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -334,6 +352,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -345,6 +364,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -356,6 +376,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -367,6 +388,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -378,6 +400,7 @@ function WeeklyDetailProductionVolumeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         width: 120,
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -469,6 +492,16 @@ function WeeklyDetailProductionVolumeReport() {
     };
 
     function transformData(data) {
+        const stageOrder = {
+            'Lựa phôi': 1,
+            'Sơ chế': 2,
+            'Bán thành phẩm': 3,
+            'Tinh chế': 4,
+            'Hoàn thiện': 5,
+            'Đóng gói': 6,
+            'Thành phẩm': 7
+        };
+
         // Nhóm dữ liệu theo ItemCode và U_SPDICH, To
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.ItemCode}_${item.U_SPDICH}_${item.U_To}`;
@@ -481,7 +514,7 @@ function WeeklyDetailProductionVolumeReport() {
                 acc[key] = {
                     docEntry: item.DocEntryPO,
                     group: item.U_To,
-                    stage: item.U_CDOAN,
+                    stage: convertStageName(item.U_CDOAN),
                     ItemCode: item.ItemCode,
                     ItemName: item.ItemName,
                     U_SPDICH: item.U_SPDICH,
@@ -542,7 +575,7 @@ function WeeklyDetailProductionVolumeReport() {
         }, {});
 
         // Tính toán các giá trị cuối cùng và làm sạch dữ liệu
-        return Object.values(groupedData).map(item => {
+        const processedData = Object.values(groupedData).map(item => {
             // Tính SLTong = SLThanh - SLLoi
             item.SLTong = item.SLThanh + item.SLLoi;
 
@@ -557,6 +590,13 @@ function WeeklyDetailProductionVolumeReport() {
             delete item.processedErrorDocEntries;
 
             return item;
+        });
+
+        // Sắp xếp theo thứ tự stage
+        return processedData.sort((a, b) => {
+            const orderA = stageOrder[a.stage] || 999; // Nếu không tìm thấy trong stageOrder, đặt ở cuối
+            const orderB = stageOrder[b.stage] || 999;
+            return orderA - orderB;
         });
     }
 
@@ -575,7 +615,6 @@ function WeeklyDetailProductionVolumeReport() {
             week: getISOWeek(fromWeek),
             factory: selectedFactory || '',
         };
-
 
         setIsDataReportLoading(true);
 
@@ -782,6 +821,10 @@ function WeeklyDetailProductionVolumeReport() {
                 return 'Hoàn thiện';
             case 'DG':
                 return 'Đóng gói';
+            case 'BTP':
+                return 'Bán thành phẩm';
+            case 'TP':
+                return 'Thành phẩm';
             default:
                 return code
         }
