@@ -163,16 +163,12 @@ const reportApi = {
     },
 
     getProductionOutputByProductionOrder: (
-        fromDate,
-        toDate,
         factory,
         { signal } = {}
     ) => {
         const url = `/report/sanluongtheolenhsanxuat`;
         return axiosClient().get(url, {
             params: {
-                fromDate,
-                toDate,
                 factory,
                 type: "CBG",
             },

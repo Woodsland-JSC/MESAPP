@@ -9,9 +9,7 @@ import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
-import { PiFilePdfBold } from "react-icons/pi";
-import { FiCheck } from "react-icons/fi";
-import "../../../assets/styles/index.css";
+import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 import {
     FaArrowRotateLeft,
     FaArrowUpRightFromSquare,
@@ -162,6 +160,7 @@ function DefectResolution() {
             field: "week",
             width: 70,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Nơi báo lỗi",
@@ -183,18 +182,21 @@ function DefectResolution() {
             field: "thickness",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Rộng",
             field: "width",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Dài",
             field: "height",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Số lượng",
@@ -205,18 +207,20 @@ function DefectResolution() {
                 return params.value ? params.value.toLocaleString('en-US') : '';
             },
             aggFunc: 'sum',
+            filter: true,
             headerComponentParams: { displayName: "Số lượng" }
         },
         // { headerName: "M3", field: "m3", width: 120 },
-        { 
-            headerName: "M3", 
-            field: "m3sap", 
-            width: 120, 
-            aggFunc: 'sum', 
+        {
+            headerName: "M3",
+            field: "m3sap",
+            width: 120,
+            aggFunc: 'sum',
             headerComponentParams: { displayName: "M3" },
+            filter: true,
             valueFormatter: params => {
                 return params.value ? params.value.toFixed(6) : '0.000000';
-            }, 
+            },
         },
         {
             headerName: "Loại lỗi",
@@ -236,14 +240,19 @@ function DefectResolution() {
             headerName: "Tổ gây ra lỗi",
             field: "defect_causing_team",
             width: 160,
+            filter: true,
         },
-        { headerName: "Tổ chuyển về", field: "receiving_team", width: 160 },
-        { headerName: "Người tạo", field: "sender" },
-        { headerName: "Ngày tạo", field: "send_date" },
-        { headerName: "Người xử lý", field: "receiver" },
-        { headerName: "Ngày xử lý", field: "handle_date" },
-        { headerName: "LSX ghi nhận lỗi", field: "lsx_from" },
+        { headerName: "Tổ chuyển về", field: "receiving_team", width: 160, filter: true },
+        { headerName: "Người tạo", field: "sender", filter: true },
+        { headerName: "Ngày tạo", field: "send_date", filter: true },
+        { headerName: "Người xử lý", field: "receiver", filter: true },
+        { headerName: "Ngày xử lý", field: "handle_date", filter: true },
+        { headerName: "LSX ghi nhận lỗi", field: "lsx_from", filter: true },
     ]);
+
+    const localeText = useMemo(() => {
+        return AG_GRID_LOCALE_VI;
+    }, []);
 
     const groupDisplayType = "multipleColumns";
     const getRowStyle = (params) => {
@@ -268,11 +277,10 @@ function DefectResolution() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
-                selectedFactory === value
-                    ? "border-[#86ABBE] bg-[#eaf8ff]"
-                    : "border-gray-300"
-            }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
+                ? "border-[#86ABBE] bg-[#eaf8ff]"
+                : "border-gray-300"
+                }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -281,11 +289,10 @@ function DefectResolution() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${
-                    selectedFactory === value
-                        ? "text-[#17506B] font-medium"
-                        : "text-gray-400 group-hover:text-[#17506B]"
-                }`}
+                className={`${selectedFactory === value
+                    ? "text-[#17506B] font-medium"
+                    : "text-gray-400 group-hover:text-[#17506B]"
+                    }`}
             >
                 {label}
             </div>
@@ -462,7 +469,8 @@ function DefectResolution() {
                                             }
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
-                                            grandTotalRow={"bottom"} 
+                                            localeText={localeText}
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>

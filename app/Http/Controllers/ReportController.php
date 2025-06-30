@@ -1229,8 +1229,6 @@ class ReportController extends Controller
     function productionOutputByProductionOrder(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fromDate' => 'required',
-            'toDate' => 'required',
             'factory' => 'required',
             'type' => 'required'
         ]);
@@ -1241,7 +1239,7 @@ class ReportController extends Controller
 
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'CALL USP_Production_Output_by_WO_MES(?, ?, ?, ?, ?)';
+        $query = 'CALL USP_Production_Output_by_WO_MES(?, ?, ?)';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -1250,7 +1248,7 @@ class ReportController extends Controller
 
         $defaultParam = null; // You can change this to your desired default value
 
-        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type, $defaultParam])) {
+        if (!odbc_execute($stmt, [$request->factory, $request->type, $defaultParam])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 

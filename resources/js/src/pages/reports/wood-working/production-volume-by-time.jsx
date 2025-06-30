@@ -17,10 +17,11 @@ import {
     FaRegImage,
     FaExpand,
 } from "react-icons/fa6";
-import { IoMdRadioButtonOff, IoMdRadioButtonOn, IoMdCheckbox, IoMdSquareOutline } from "react-icons/io";
+import { IoMdRadioButtonOff, IoMdRadioButtonOn, IoMdCheckbox, IoMdSquareOutline, IoMdCheckmark } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import { formatNumber } from "../../../utils/numberFormat";
 import { format } from "date-fns";
+import { Switch } from '@chakra-ui/react'
 import {
     ModalOverlay,
     Modal,
@@ -82,6 +83,7 @@ function ProductionVolumeByTimeReport() {
     }]);
     const [selectedTimeRange, setSelectedTimeRange] = useState("day");
     const [selectedUnit, setSelectedUnit] = useState('sl');
+    const [isDisplayBarChart, setIsDisplayBarChart] = useState(false);
     const [keyword, setKeyword] = useState("");
 
     const [fromYear, setFromYear] = useState(new Date());
@@ -138,11 +140,13 @@ function ProductionVolumeByTimeReport() {
                         headerName: 'Sản phẩm đích',
                         rowGroup: true,
                         enableRowGroup: true,
+                        filter: true,
                     },
                     {
                         field: 'productCode',
                         headerName: 'Mã KT',
-                        minWidth: 150
+                        minWidth: 150,
+                        filter: true,
                     },
                     {
                         headerName: "Tên",
@@ -194,6 +198,7 @@ function ProductionVolumeByTimeReport() {
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -207,6 +212,7 @@ function ProductionVolumeByTimeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         hide: selectedUnit === "sl" && selectedTimeRange != 'day',
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -308,6 +314,7 @@ function ProductionVolumeByTimeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         hide: selectedUnit === "m3",
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -321,6 +328,7 @@ function ProductionVolumeByTimeReport() {
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
                         hide: selectedUnit === "sl" && selectedTimeRange != 'day',
                         aggFunc: "sum",
+                        filter: true,
                         cellStyle: (params) =>
                             params.node.rowPinned
                                 ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
@@ -1507,8 +1515,6 @@ function ProductionVolumeByTimeReport() {
                                     </div>
                                 </div>
                             </div>
-                            {/* {
-                                selectedTimeRange != "day" && ( */}
                             <div className="flex flex-col w-full lg:w-[35%] 2xl:w-1/3 lg:pl-3 lg:border-l-2 lg:border-gray-100">
                                 <label
                                     htmlFor="indate"
@@ -1531,8 +1537,17 @@ function ProductionVolumeByTimeReport() {
                                     </div>
                                 </div>
                             </div>
-                            {/* )
-                            } */}
+                            <div className="flex flex-col">
+                                <label
+                                    htmlFor="indate"
+                                    className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
+                                >
+                                    Hiển thị biểu đồ
+                                </label>
+                                <div className="scale-[115%] ml-2">
+                                    <Switch isDisabled={isDataReportLoading} onChange={() => setIsDisplayBarChart(!isDisplayBarChart)} isChecked={isDisplayBarChart} colorScheme='teal' size='lg' />
+                                </div>
+                            </div>
                         </div>
                         <div className="flex flex-col lg:flex-row flex-wrap min-[1649px]:flex-nowrap items-center px-4 mt-1 gap-3">
                             {
@@ -1697,7 +1712,7 @@ function ProductionVolumeByTimeReport() {
 
                     {/* Column chart */}
                     {
-                        !isDataReportLoading &&
+                        !isDataReportLoading && isDisplayBarChart &&
                         <div className="hidden lg:block border-2 border-gray-300 w-full h-auto bg-white rounded-xl p-4 pb-3 mt-3 relative" style={{ aspectRatio: 2 }}>
                             <FaRegImage className="absolute top-3 left-2 mx-2.5 w-[22px] h-[22px] text-gray-300 hover:text-[#2e6782] cursor-pointer active:scale-[.92] active:duration-75 transition-all"
                                 onClick={handleDownloadImage} />

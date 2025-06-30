@@ -9,9 +9,7 @@ import Layout from "../../../layouts/layout";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { IoSearch, IoClose } from "react-icons/io5";
-import { PiFilePdfBold } from "react-icons/pi";
-import { FiCheck } from "react-icons/fi";
-import "../../../assets/styles/index.css";
+import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 import {
     FaArrowRotateLeft,
     FaArrowUpRightFromSquare,
@@ -19,6 +17,7 @@ import {
 } from "react-icons/fa6";
 import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
 import DatePicker from "react-datepicker";
+import { formatNumber } from "../../../utils/numberFormat";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../../assets/styles/datepicker.css";
 import { format, startOfDay, endOfDay } from "date-fns";
@@ -286,8 +285,13 @@ function ReceiptInSapReport() {
     };
 
     const handleExportExcel = useCallback(() => {
-        gridRef.current.api.exportDataAsExcel();
-    }, []);
+        const factory = selectedFactory || 'Tất cả';
+        const fileName = `Báo cáo thông tin sản lượng nhận tại SAP_${factory}.xlsx`;
+
+        gridRef.current.api.exportDataAsExcel({
+            fileName,
+        });
+    }, [selectedFactory]);
 
     const handleExportPDF = () => {
         toast("Chức năng xuất PDF đang được phát triển.");
@@ -302,9 +306,11 @@ function ReceiptInSapReport() {
             headerName: "Tổ sản xuất",
             field: "resource",
             rowGroup: true,
+            enableRowGroup: true,
             hide: true,
             sort: "asc",
             pinned: "left",
+            filter: true,
             headerComponentParams: { displayName: "Tổ sản xuất" },
         },
 
@@ -327,25 +333,36 @@ function ReceiptInSapReport() {
         {
             headerName: "Dày",
             field: "thickness",
-            maxWidth: 80,
+            width: 50,
             pinned: "left",
             suppressHeaderMenuButton: true,
+            filter: true,
+            valueFormatter: (params) => formatNumber(Number(params.value) || 0)
         },
         {
             headerName: "Rộng",
             field: "width",
-            maxWidth: 80,
+            width: 50,
             pinned: "left",
             suppressHeaderMenuButton: true,
+            valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+            filter: true,
         },
         {
             headerName: "Dài",
             field: "height",
-            maxWidth: 80,
+            width: 50,
             pinned: "left",
             suppressHeaderMenuButton: true,
+            valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+            filter: true,
         },
-        { headerName: "ĐVT", field: "unit", maxWidth: 90 },
+        {
+            headerName: "ĐVT",
+            field: "unit",
+            minWidth: 110,
+            filter: true,
+        },
         {
             headerName: "M3 sản phẩm",
             field: "m3_sp",
@@ -355,13 +372,14 @@ function ReceiptInSapReport() {
         {
             headerName: "Số lượng",
             field: "quantity",
-            maxWidth: 110,
+            minWidth: 130,
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
                 return params.value ? params.value.toLocaleString("en-US") : "";
             },
             aggFunc: "sum",
             headerComponentParams: { displayName: "Số lượng" },
+            filter: true,
         },
         {
             headerName: "M3",
@@ -373,6 +391,7 @@ function ReceiptInSapReport() {
                 const value = Number(params?.value); // ép kiểu về number
                 return isNaN(value) ? "0.000000" : value.toFixed(6);
             },
+            filter: true,
         },
         {
             headerName: "Người giao",
@@ -404,7 +423,12 @@ function ReceiptInSapReport() {
             minWidth: 200,
             filter: true,
         },
-        { headerName: "DocNum", field: "doc_num", minWidth: 200, filter: true },
+        {
+            headerName: "DocNum",
+            field: "doc_num",
+            minWidth: 200,
+            filter: true
+        },
         {
             headerName: "MES NotiID",
             field: "mes_noti",
@@ -412,6 +436,10 @@ function ReceiptInSapReport() {
             filter: true,
         },
     ]);
+
+    const localeText = useMemo(() => {
+            return AG_GRID_LOCALE_VI;
+        }, []);
 
     const groupDisplayType = "multipleColumns";
     const getRowStyle = (params) => {
@@ -461,11 +489,10 @@ function ReceiptInSapReport() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
-                selectedFactory === value
-                    ? "border-[#86ABBE] bg-[#eaf8ff]"
-                    : "border-gray-300"
-            }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
+                ? "border-[#86ABBE] bg-[#eaf8ff]"
+                : "border-gray-300"
+                }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -474,11 +501,10 @@ function ReceiptInSapReport() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${
-                    selectedFactory === value
-                        ? "text-[#17506B] font-medium"
-                        : "text-gray-400 group-hover:text-[#17506B]"
-                }`}
+                className={`${selectedFactory === value
+                    ? "text-[#17506B] font-medium"
+                    : "text-gray-400 group-hover:text-[#17506B]"
+                    }`}
             >
                 {label}
             </div>
@@ -954,10 +980,12 @@ function ReceiptInSapReport() {
                                             autoGroupColumnDef={
                                                 autoGroupColumnDef
                                             }
+                                            rowGroupPanelShow={"always"}
                                             groupDisplayType={groupDisplayType}
                                             getRowStyle={getRowStyle}
                                             // groupTotalRow={"bottom"}
                                             grandTotalRow={"bottom"}
+                                            localeText={localeText}
                                         />
                                     </div>
                                 </div>
