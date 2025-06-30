@@ -219,6 +219,67 @@ class ProductionController extends Controller
         $results = [];
 
         // 3.1. Tạo một key có giá trị là 'SPDICH' và lọc qua toàn bộ kết quả tìm được, sau đó gom nhóm các sản phẩm có cùng SPDICH
+        // while ($row = odbc_fetch_array($stmt)) {
+        //     $key = $row['SPDICH'];
+
+        //     //Đối với các kết quả key tìm được, tạo một mảng có các trường sau
+        //     if (!isset($results[$key])) {
+        //         $results[$key] = [
+        //             'SPDICH' => $row['SPDICH'],
+        //             'NameSPDich' => $row['NameSPDich'],
+        //             'MaThiTruong' => $row['MaThiTruong'],
+        //             'Details' => [],
+        //         ];
+        //     }
+        //     // 3.2. Tạo key có giá trị hỗn hợp là ItemChild.TO.TOTT
+        //     $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'];
+
+        //     $details = [
+        //         'ItemChild' => $row['ItemChild'],
+        //         'ChildName' => $row['ChildName'],
+        //         'CDay' => $row['CDay'],
+        //         'CRong' => $row['CRong'],
+        //         'CDai' => $row['CDai'],
+        //         'LSX' => [
+        //             [
+        //                 'LSX' => $row['LSX'],
+        //                 'SanLuong' => $row['SanLuong'],
+        //                 'DaLam' => $row['DaLam'],
+        //                 'Loi' => $row['Loi'],
+        //                 'ConLai' => $row['ConLai'],
+        //             ],
+        //         ],
+        //         'totalsanluong' => $row['SanLuong'],
+        //         'totalDaLam' => $row['DaLam'],
+        //         'totalLoi' => $row['Loi'],
+        //         'totalConLai' => $row['ConLai'],
+        //     ];
+
+        //     // Check if the composite key already exists
+        //     $compositeKeyExists = false;
+        //     foreach ($results[$key]['Details'] as &$existingDetails) {
+        //         $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'];
+        //         if ($existingKey === $detailsKey) {
+        //             $existingDetails['LSX'][] = $details['LSX'][0];
+        //             $existingDetails['totalsanluong'] += $row['SanLuong'];
+        //             $existingDetails['totalDaLam'] += $row['DaLam'];
+        //             $existingDetails['totalLoi'] += $row['Loi'];
+        //             $existingDetails['totalConLai'] += $row['ConLai'];
+        //             $compositeKeyExists = true;
+        //             break;
+        //         }
+        //     }
+
+        //     if (!$compositeKeyExists) {
+        //         $results[$key]['Details'][] = array_merge($details, [
+        //             'TO' => $row['TO'],
+        //             'NameTO' => $row['NameTO'],
+        //             'TOTT' => $row['TOTT'],
+        //             'NameTOTT' => $row['NameTOTT']
+        //         ]);
+        //     }
+        // }
+
         while ($row = odbc_fetch_array($stmt)) {
             $key = $row['SPDICH'];
 
@@ -231,6 +292,7 @@ class ProductionController extends Controller
                     'Details' => [],
                 ];
             }
+
             // 3.2. Tạo key có giá trị hỗn hợp là ItemChild.TO.TOTT
             $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'];
 
@@ -260,11 +322,32 @@ class ProductionController extends Controller
             foreach ($results[$key]['Details'] as &$existingDetails) {
                 $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'];
                 if ($existingKey === $detailsKey) {
-                    $existingDetails['LSX'][] = $details['LSX'][0];
+
+                    // Kiểm tra xem LSX này đã tồn tại trong mảng chưa
+                    $lsxFound = false;
+                    foreach ($existingDetails['LSX'] as &$existingLSX) {
+                        if ($existingLSX['LSX'] === $row['LSX']) {
+                            // LSX đã tồn tại, cộng dồn số liệu vào LSX này
+                            $existingLSX['SanLuong'] += $row['SanLuong'];
+                            $existingLSX['DaLam'] += $row['DaLam'];
+                            $existingLSX['Loi'] += $row['Loi'];
+                            $existingLSX['ConLai'] += $row['ConLai'];
+                            $lsxFound = true;
+                            break;
+                        }
+                    }
+
+                    // Nếu LSX chưa tồn tại và chưa đạt giới hạn 2 LSX, thêm LSX mới
+                    if (!$lsxFound && count($existingDetails['LSX']) < 2) {
+                        $existingDetails['LSX'][] = $details['LSX'][0];
+                    }
+
+                    // Luôn cộng dồn vào total (bất kể có thêm LSX mới hay không)
                     $existingDetails['totalsanluong'] += $row['SanLuong'];
                     $existingDetails['totalDaLam'] += $row['DaLam'];
                     $existingDetails['totalLoi'] += $row['Loi'];
                     $existingDetails['totalConLai'] += $row['ConLai'];
+
                     $compositeKeyExists = true;
                     break;
                 }
