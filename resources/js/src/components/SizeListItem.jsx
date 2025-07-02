@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import { GiPlainCircle } from "react-icons/gi";
 
 function SizeListItem(props) {
-    const { id, size, reason, pallet, Qty, weight, onDelete, planID, onReload, onReloadPalletList } = props;
+    const { id, size, reason, pallet, Qty, weight, onDelete, planID, onReload, onReloadPalletList, code, method } = props;
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -52,7 +52,7 @@ function SizeListItem(props) {
   };
 
     return (
-        <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl h-[9.7rem] w-[13.1rem]">
+        <div className="relative bg-[#F9FAFB] border-2 border-[#76929e] rounded-xl h-[11rem] w-[13.1rem]">
             <div
                 className={`absolute -top-1 -right-2.5 bg-gray-800 text-white w-7 h-7 items-center justify-center rounded-full cursor-pointer active:scale-[.84] active:duration-75 transition-all ${
                     type === "kt" || type === "vl" ? "flex" : "hidden"
@@ -95,15 +95,13 @@ function SizeListItem(props) {
                 </ModalContent>
             </Modal>
             <div className="hidden">{id}</div>
-
-            <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[72px] rounded-t-xl">
-                {/* <div className="font-semibold"><span>{formatSizeQty(size)}</span></div> */}
-                {/* <div className="w-full"><span className="w-1/4">KT: </span> <span className="w-full">{size1}</span></div> */}
+            <div className="flex-col justify-center font-semibold p-4 py-3 border-b border-gray-200 bg-[#d6e4eb] w-full h-[105px] rounded-t-xl">
+                <div className="text-lg text-[] mb-1"><span className="text-gray-500">[{method === 'INDOOR' ? "I" : "O"}]</span>{" "}{code}</div>
                 <div className="w-full flex items-center"><GiPlainCircle className="text-[#17506B] w-2 h-2 mr-2"/><span className="w-full">{size1}</span></div>
                 {size2?<div className="w-full flex items-center "><GiPlainCircle className="text-[#17506B] w-2 h-2 mr-2"/><span className="w-full">{size2}</span></div>:null}
             </div>
 
-            <div className="text-gray-600 space-y-2 py-3 p-4">
+            <div className="text-gray-600 space-y-1 py-3 p-4 text-sm">
                 {/* <div className="">Pallet: {pallet}</div> */}
                 <div className="">SL: {Qty} (T)</div>
                 <div className="">KL: {parseFloat(weight).toFixed(4)} (m³)</div>

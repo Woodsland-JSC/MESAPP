@@ -104,7 +104,7 @@ function SizeCard(props) {
             >
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Tất cả kích thước</ModalHeader>
+                    <ModalHeader>Tất cả kích thước haha</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <TableContainer>
@@ -112,6 +112,7 @@ function SizeCard(props) {
                                 <Thead className="bg-gray-50 top-0 sticky z-40">
                                     <Tr>
                                         <Th>Pallet</Th>
+                                        <Th>Mục đích sấy</Th>
                                         <Th>Kích thước</Th>
                                         <Th isNumeric>Số lượng</Th>
                                         <Th isNumeric>Khối lượng</Th>
@@ -120,10 +121,11 @@ function SizeCard(props) {
                                 <Tbody className="">
                                         {sizeData.map((item) => (
                                             <Tr>
-                                                <Td>{item.pallet}</Td>
+                                                <Td>{item.Code}</Td>
+                                                <Td>{item.LyDo}</Td>
                                                 <Td>{item.size}</Td>
                                                 <Td isNumeric>{item.Qty}</Td>
-                                                <Td isNumeric>{item.Mass}</Td>
+                                                <Td isNumeric>{Number(item.Mass).toFixed(4)}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>
@@ -153,7 +155,7 @@ function SizeCard(props) {
                 {isPalletLoading ? (
                     <div className="h=[10rem]">
                         <Spinner
-                            thickness="4px"
+                            thickness="7px"
                             speed="0.65s"
                             emptyColor="gray.200"
                             color="#155979"
@@ -176,10 +178,12 @@ function SizeCard(props) {
                                         planID={planID}
                                         reason={reason}
                                         id={item.pallet}
+                                        code={item.Code}
                                         size={item.size}
                                         pallet={item.pallet}
                                         Qty={item.Qty}
                                         weight={item.Mass}
+                                        method={item.LyDo}
                                         onDelete={loadSizeData}
                                         onReload={onReload}
                                         onReloadPalletList={onReloadPalletList}

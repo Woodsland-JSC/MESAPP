@@ -83,24 +83,52 @@ class PlanController extends Controller
     }
 
     //danh sách pallet chưa được assign
+    // function listpallet(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'reason' => 'required',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+    //     }
+    //     $pallets = DB::table('pallets as a')
+    //         ->join('users as b', 'a.CreateBy', '=', 'b.id')
+    //         ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
+    //         ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach')
+    //         ->where('b.plant', '=', Auth::user()->plant)
+    //         ->whereNull('c.pallet');
+    //     if ($request->reason == 'INDOOR') {
+    //         $pallets = $pallets->where('LyDo', 'INDOOR')->orwhere('LyDo', 'XINDOOR')->get();
+    //     } else if ($request->reason == 'OUTDOOR') {
+    //         $pallets = $pallets->where('LyDo', 'OUTDOOR')->orwhere('LyDo', 'XOUTDOOR')->get();
+    //     } else if ($request->reason === 'SU') {
+    //         $pallets = $pallets->where('LyDo', 'SU')->get();
+    //     } else {
+    //         $pallets = $pallets->where('LyDo', 'SL')->get();
+    //     }
+
+    //     return response()->json($pallets, 200);
+    // }
+
     function listpallet(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'reason' => 'required',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
             ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach')
             ->where('b.plant', '=', Auth::user()->plant)
-            ->whereNull('c.pallet');
+            ->whereNull('c.pallet')
+            ->where('a.activeStatus', '=', 0);
         if ($request->reason == 'INDOOR') {
-            $pallets = $pallets->where('LyDo', 'INDOOR')->orwhere('LyDo', 'XINDOOR')->get();
+            $pallets = $pallets->whereIn('LyDo', ['INDOOR', 'OUTDOOR'])->get();
         } else if ($request->reason == 'OUTDOOR') {
-            $pallets = $pallets->where('LyDo', 'OUTDOOR')->orwhere('LyDo', 'XOUTDOOR')->get();
+            $pallets = $pallets->whereIn('LyDo', ['INDOOR', 'OUTDOOR'])->get();
         } else if ($request->reason === 'SU') {
             $pallets = $pallets->where('LyDo', 'SU')->get();
         } else {
@@ -134,7 +162,7 @@ class PlanController extends Controller
             ->get();
         return response()->json($pallets, 200);
     }
-    
+
     //danh sách mẻ sấy có thể hoan thanh
     function Listcomplete()
     {
@@ -246,12 +274,18 @@ class PlanController extends Controller
                         // 'Status' => 2,
                         'Checked' => 1,
                         'CheckedBy' => Auth::user()->id,
-                        'CT1' => 1, 'CT2' => 1,
-                        'CT3' => 1, 'CT4' => 1,
-                        'CT5' => 1, 'CT6' => 1,
-                        'CT7' => 1, 'CT8' => 1,
-                        'CT9' => 1, 'CT10' => 1,
-                        'CT11' => 1, 'CT12' => 1,
+                        'CT1' => 1,
+                        'CT2' => 1,
+                        'CT3' => 1,
+                        'CT4' => 1,
+                        'CT5' => 1,
+                        'CT6' => 1,
+                        'CT7' => 1,
+                        'CT8' => 1,
+                        'CT9' => 1,
+                        'CT10' => 1,
+                        'CT11' => 1,
+                        'CT12' => 1,
                         'DateChecked' => now(),
                         'NoCheck' => $id
                     ]
@@ -373,7 +407,7 @@ class PlanController extends Controller
         try {
             DB::beginTransaction();
             $validator = Validator::make($request->all(), [
-                'PlanID' => 'required', 
+                'PlanID' => 'required',
                 'result' => 'required'
             ]);
             if ($validator->fails()) {
@@ -381,7 +415,7 @@ class PlanController extends Controller
             }
             $id = $request->input('PlanID');
             $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 2])->get();
-            $towarehouse =  GetWhsCode(Auth::user()->plant,'SS');
+            $towarehouse =  GetWhsCode(Auth::user()->plant, 'SS');
             if ($record->count() > 0) {
                 planDryings::where('PlanID', $id)->update(
                     [
@@ -474,43 +508,85 @@ class PlanController extends Controller
     }
 
     // chi tiết mẻ
+    // function productionDetail($id)
+    // {
+    //     // Assuming Plandryings is your model for the plandryings table
+    //     $plandrying = planDryings::with('details')
+    //         ->where('PlanID', $id)
+    //         ->first();
+    //     $humiditys = humiditys::where('PlanID', $id)->get();
+    //     $Disability = Disability::where('PlanID', $id)->get();
+    //     $CT11Detail = logchecked::where('PlanID', $id)->select(
+    //         'M1',
+    //         'M2',
+    //         'M3',
+    //         'M4',
+    //         'M5'
+    //     )->get();
+    //     $CT12Detail
+    //         = logchecked::where('PlanID', $id)->select(
+    //             'Q1',
+    //             'Q2',
+    //             'Q3',
+    //             'Q4',
+    //             'Q5',
+    //             'Q6',
+    //             'Q7',
+    //             'Q8',
+    //         )->get();
+    //     if ($plandrying) {
+
+    //         return response()->json(
+    //             [
+    //                 'plandrying' => $plandrying,
+    //                 'Humidity' => $humiditys,
+    //                 'Disability' => $Disability,
+    //                 'CT11Detail' => $CT11Detail,
+    //                 'CT12Detail' => $CT12Detail
+    //             ]
+    //         );
+    //     } else {
+    //         return response()->json(['error' => 'không tìm thấy thông tin'], 404);
+    //     }
+    // }
+
     function productionDetail($id)
     {
-        // Assuming Plandryings is your model for the plandryings table
-        $plandrying = planDryings::with('details')
+        $plandrying = PlanDryings::with(['details' => function ($query) {
+            $query->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                ->select('plan_detail.*', 'pallets.Code', 'pallets.LyDo');
+        }])
             ->where('PlanID', $id)
             ->first();
-        $humiditys = humiditys::where('PlanID', $id)->get();
+
+        $humiditys = Humiditys::where('PlanID', $id)->get();
         $Disability = Disability::where('PlanID', $id)->get();
-        $CT11Detail = logchecked::where('PlanID', $id)->select(
+        $CT11Detail = Logchecked::where('PlanID', $id)->select(
             'M1',
             'M2',
             'M3',
             'M4',
             'M5'
         )->get();
-        $CT12Detail
-            = logchecked::where('PlanID', $id)->select(
-                'Q1',
-                'Q2',
-                'Q3',
-                'Q4',
-                'Q5',
-                'Q6',
-                'Q7',
-                'Q8',
-            )->get();
-        if ($plandrying) {
+        $CT12Detail = Logchecked::where('PlanID', $id)->select(
+            'Q1',
+            'Q2',
+            'Q3',
+            'Q4',
+            'Q5',
+            'Q6',
+            'Q7',
+            'Q8',
+        )->get();
 
-            return response()->json(
-                [
-                    'plandrying' => $plandrying,
-                    'Humidity' => $humiditys,
-                    'Disability' => $Disability,
-                    'CT11Detail' => $CT11Detail,
-                    'CT12Detail' => $CT12Detail
-                ]
-            );
+        if ($plandrying) {
+            return response()->json([
+                'plandrying' => $plandrying,
+                'Humidity' => $humiditys,
+                'Disability' => $Disability,
+                'CT11Detail' => $CT11Detail,
+                'CT12Detail' => $CT12Detail
+            ]);
         } else {
             return response()->json(['error' => 'không tìm thấy thông tin'], 404);
         }

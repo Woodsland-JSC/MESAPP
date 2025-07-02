@@ -1611,7 +1611,7 @@ class QCController extends Controller
             $uniqueWhs = array_unique($warehouses);
 
             if (count($uniqueWhs) == 0) {
-                throw new \Exception("Không còn lệnh sản xuất nào của sản phẩm hiện tại. Vui lòng trả lại giao dịch ghi nhận lỗi.");
+                throw new \Exception("Không còn lệnh sản xuất nào của sản phẩm hiện tại.");
             }
 
             if (count($uniqueWhs) !== 1) {
