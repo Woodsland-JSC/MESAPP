@@ -337,8 +337,7 @@ class ProductionController extends Controller
                         }
                     }
 
-                    // Nếu LSX chưa tồn tại và chưa đạt giới hạn 2 LSX, thêm LSX mới
-                    if (!$lsxFound && count($existingDetails['LSX']) < 2) {
+                    if (!$lsxFound) {
                         $existingDetails['LSX'][] = $details['LSX'][0];
                     }
 
