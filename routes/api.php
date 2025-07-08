@@ -75,6 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
         route::post('/syncfromSAP', [UserController::class, 'syncFromSap']);
         Route::get('/get-users-by-factory/{factory}', [UserController::class, 'getUserByFactory']);
+        Route::post('/change-user-factory', [UserController::class, 'changeUserFactory']);
     });
     /**
      * Pallet Routes
@@ -141,6 +142,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
     Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
+    
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');
     Route::get('/get-active-kiln', [DryingOvenController::class, 'getActiveKilnByFactory']);

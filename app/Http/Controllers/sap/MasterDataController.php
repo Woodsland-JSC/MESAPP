@@ -426,7 +426,7 @@ class MasterDataController extends Controller
 
             $KHOI = $request->input('KHOI');
 
-            $query = 'SELECT "Code", "Name" FROM "@G_SAY4" WHERE "U_BranchID" = ?';
+            $query = 'SELECT "Code", "Name" FROM "@G_SAY4" WHERE "U_BranchID" = ? AND (("U_CBG" IS NOT NULL AND "U_CBG" <> \'N\') OR ("U_VCN" IS NOT NULL AND "U_VCN" <> \'N\') OR ("U_ND" IS NOT NULL AND "U_ND" <> \'N\')) ';
             $params = [$id];
 
             // Kiểm tra giá trị của $KHOI để thêm các điều kiện phù hợp

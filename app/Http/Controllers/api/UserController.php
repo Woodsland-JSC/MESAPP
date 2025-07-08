@@ -503,4 +503,20 @@ class UserController extends Controller
 
         return response()->json($users, 200);
     }
+
+    function changeUserFactory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'factory' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $user = Auth::user();
+        $user->plant = $request->factory;
+        $user->save();
+
+    }
 }

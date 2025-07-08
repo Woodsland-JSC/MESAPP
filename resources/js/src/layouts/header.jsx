@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 import "../assets/styles/index.css";
 import { Button } from "@chakra-ui/react";
@@ -13,6 +14,8 @@ import {
     TbReportAnalytics,
     TbCircleKeyFilled,
 } from "react-icons/tb";
+import { RiArrowLeftRightLine } from "react-icons/ri";
+import { FaCheck } from "react-icons/fa6";
 import { SiSap } from "react-icons/si";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
@@ -31,6 +34,7 @@ import {
     Box,
     IconButton,
     Tooltip,
+    Spinner,
 } from "@chakra-ui/react";
 import { RiExpandUpDownLine } from "react-icons/ri";
 import {
@@ -42,6 +46,13 @@ import {
     MenuGroup,
     MenuOptionGroup,
     MenuDivider,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
 } from "@chakra-ui/react";
 import { IoClose } from "react-icons/io5";
 import { FaCircle, FaKey } from "react-icons/fa";
@@ -50,13 +61,20 @@ import GoodNetwork from "../components/custom-icon/GoodNetwork";
 import MediumNetwork from "../components/custom-icon/MediumNetwork";
 import BadNetwork from "../components/custom-icon/BadNetwork";
 import Offline from "../components/custom-icon/Offline";
+import { set } from "date-fns";
 
 function Header(props) {
     const { isOpen, onToggle } = useDisclosure();
+    const {
+        isOpen: isFactorySwitchOpen,
+        onOpen: onFactorySwitchOpen,
+        onClose: onFactorySwitchClose,
+    } = useDisclosure();
 
     const { user, setUser, isAuthenticated, setIsAuthenticated } =
         useAppContext();
 
+    const navigate = useNavigate();
     const { variant } = props;
 
     // Network Checking
@@ -65,12 +83,17 @@ function Header(props) {
         status: "Đang kiểm tra...",
     });
 
+    const [factoryList, setFactoryList] = useState([]);
+    const [selectedFactory, setSelectedFactory] = useState(null);
+    const [isFactoryLoading, setIsFactoryLoading] = useState(false);
+    const [isFactorySwitchLoading, setIsFactorySwitchLoading] = useState(false);
+
     useEffect(() => {
         const updateNetworkStatus = () => {
             if (navigator.connection) {
                 const { downlink } = navigator.connection;
                 let status = "Tốt";
-    
+
                 if (!navigator.onLine || downlink === 0) {
                     status = "Không có mạng";
                 } else if (downlink < 1.2) {
@@ -80,27 +103,33 @@ function Header(props) {
                 } else {
                     status = "Tốt"; // Fast 4G hoặc No Throttling
                 }
-    
+
                 setNetworkStatus({ speed: downlink, status });
             }
         };
-    
+
         updateNetworkStatus();
         window.addEventListener("online", updateNetworkStatus);
         window.addEventListener("offline", () =>
             setNetworkStatus({ speed: 0, status: "Không có mạng" })
         );
         if (navigator.connection) {
-            navigator.connection.addEventListener("change", updateNetworkStatus);
+            navigator.connection.addEventListener(
+                "change",
+                updateNetworkStatus
+            );
         }
-    
+
         return () => {
             window.removeEventListener("online", updateNetworkStatus);
             window.removeEventListener("offline", () =>
                 setNetworkStatus({ speed: 0, status: "Không có mạng" })
             );
             if (navigator.connection) {
-                navigator.connection.removeEventListener("change", updateNetworkStatus);
+                navigator.connection.removeEventListener(
+                    "change",
+                    updateNetworkStatus
+                );
             }
         };
     }, []);
@@ -123,6 +152,63 @@ function Header(props) {
         }
     };
 
+    const loadFactoryByBranch = async () => {
+        setIsFactoryLoading(true);
+        try {
+            const res = await usersApi.getFactoriesByBranchId(user.branch);
+            setFactoryList(res);
+            setIsFactoryLoading(false);
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể tải danh sách nhà máy. Vui lòng thử lại.");
+            setIsFactoryLoading(false);
+            onFactorySwitchClose();
+        }
+    };
+
+    const handleFactorySwitchOpen = async () => {
+        onFactorySwitchOpen();
+        loadFactoryByBranch();
+    };
+
+    const handleFactorySelectClose = async () => {
+        setSelectedFactory(null);
+        onFactorySwitchClose();
+    };
+
+    const handleFactorySwitch = async () => {
+        if (!selectedFactory) {
+            toast.error("Vui lòng chọn nhà máy cần chuyển");
+            return;
+        }
+        if (selectedFactory === user.plant) {
+            toast.error("Vui lòng chọn nhà máy khác nhà máy hiện tại");
+            return;
+        }
+        setIsFactorySwitchLoading(true);
+        try {
+            const res = await usersApi.changeUserFactory(selectedFactory);
+            setIsFactorySwitchLoading(false);
+            const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+            userInfo.plant = selectedFactory;
+            localStorage.setItem("userInfo", JSON.stringify(userInfo));
+            setUser({
+                ...user,
+                plant: selectedFactory,
+            });
+            navigate(0);
+            toast.success("Chuyển nhà máy thành công");
+            onFactorySwitchClose();
+            setSelectedFactory(null);
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã có lỗi xảy ra, vui lòng thử lại.");
+            setIsFactorySwitchLoading(false);
+            onFactorySwitchClose();
+            setSelectedFactory(null);
+        }
+    };
+
     return (
         <div className="sticky top-0 z-50">
             <div
@@ -130,7 +216,7 @@ function Header(props) {
                     variant == "homepage"
                         ? "border-b-2 border-white"
                         : "border-b-2 border-none"
-                } justify-between px-4 xl:px-32`}
+                } justify-between px-4 xl:px-28`}
             >
                 {/* Logo */}
                 <div className="flex space-x-3 items-center h-full ">
@@ -180,6 +266,107 @@ function Header(props) {
                                 ? "Hà Giang"
                                 : "không xác định"}
                         </div>
+                    </div>
+                    <div>
+                        {(user?.role == 1 || user?.role == 4) && (
+                            <button
+                                className="hidden xl:flex lg:flex bg-[#D9D9DB] rounded-full py-1.5 px-1.5 active:scale-[.92] active:duration-75 transition-all"
+                                onClick={handleFactorySwitchOpen}
+                            >
+                                <RiArrowLeftRightLine />
+                            </button>
+                        )}
+
+                        <Modal
+                            blockScrollOnMount={false}
+                            isOpen={isFactorySwitchOpen}
+                            onClose={handleFactorySelectClose}
+                            isCentered
+                            closeOnOverlayClick={false}
+                        >
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalHeader>Chuyển đổi nhà máy</ModalHeader>
+                                <ModalCloseButton />
+                                <ModalBody>
+                                    <div className="mb-2">
+                                        Chọn nhà máy cần chuyển:
+                                    </div>
+                                    {isFactoryLoading ? (
+                                        <div className="flex items-center justify-center my-8">
+                                            <Spinner
+                                                thickness="7px"
+                                                speed="0.65s"
+                                                emptyColor="gray.200"
+                                                color="blue.600"
+                                                size="xl"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {factoryList.length > 0 ? (
+                                                <div className="space-y-2 mb-4">
+                                                    {factoryList.map(
+                                                        (item, index) => (
+                                                            <div
+                                                                className={`${item.Code == selectedFactory ? "bg-gray-200" : "bg-gray-50"} flex space-x-2 items-center justify-center text-center   rounded-full py-2 px-1.5 border-2 border-gray-200 hover:cursor-pointer hover:bg-black  hover:text-white hover:border-black active:scale-[.92] active:duration-75 transition-all`}
+                                                                onClick={() => {
+                                                                    setSelectedFactory(
+                                                                        item.Code
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <p>
+                                                                    {item.Name}{" "}
+                                                                    {item.Code ===
+                                                                        user?.plant && (
+                                                                        <span>
+                                                                            (hiện
+                                                                            tại)
+                                                                        </span>
+                                                                    )}
+                                                                </p>
+
+                                                                {item.Code ===
+                                                                    selectedFactory && (
+                                                                    <FaCheck className="text-lg text-green-500" />
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    Không tìm thấy danh sách nhà
+                                                    máy
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+
+                                    <div>
+                                        <b>Lưu ý:</b> Sau khi chuyển đổi nhà
+                                        máy, trang sẽ được load lại.
+                                    </div>
+                                </ModalBody>
+
+                                <ModalFooter className="flex justify-between space-x-2">
+                                    <button
+                                        onClick={handleFactorySelectClose}
+                                        className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        onClick={handleFactorySwitch}
+                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all disabled:bg-gray-400"
+                                        disabled={isFactoryLoading}
+                                    >
+                                        {isFactorySwitchLoading ? "Đang tải..." : "Xác nhận"}
+                                    </button>
+                                </ModalFooter>
+                            </ModalContent>
+                        </Modal>
                     </div>
                 </div>
 

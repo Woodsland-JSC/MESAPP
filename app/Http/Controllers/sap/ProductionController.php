@@ -361,7 +361,7 @@ class ProductionController extends Controller
                 ]);
             }
         }
-
+        
         // Sắp xếp kết quả trả về theo thứ tự tăng dần của ItemChild
         foreach ($results as &$result) {
             usort($result['Details'], function ($a, $b) {
@@ -1454,6 +1454,8 @@ class ProductionController extends Controller
                             $data->ItemCode . ", lệnh sản xuất:" . $data->LSX
                     ], 500);
                 }
+
+                // dd($allocates);
                 $string = '';
                 $dataReceipt = [];
                 foreach ($allocates as $allocate) {
@@ -1467,7 +1469,7 @@ class ProductionController extends Controller
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                         "U_UUID" => $request->id,
                         "DocumentLines" => [[
-                            "Quantity" => $allocate['Allocate'],
+                            "Quantity" => (float) $allocate['Allocate'],
                             "TransactionType" => "C",
                             "BaseEntry" => $allocate['DocEntry'],
                             "CostingCode" => "CBG",
@@ -1488,6 +1490,7 @@ class ProductionController extends Controller
                             ]
                         ]]
                     ];
+                    
                     HistorySL::create(
                         [
                             'LSX' => $data->LSX,
@@ -1501,6 +1504,7 @@ class ProductionController extends Controller
                         ]
                     );
                 }
+                // dd($dataReceipt);
                 if ($string == '') {
                     DB::rollBack();
                     Cache::forget($lockKey);

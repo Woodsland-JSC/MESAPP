@@ -135,6 +135,13 @@ const usersApi = {
         const url = `/users/get-users-by-factory/${factory}`;
         return axiosClient().get(url);
     },
+
+    changeUserFactory: (factory) => {
+        const url = `/users/change-user-factory`;
+        return axiosClient().post(url, {
+            factory,
+        });
+    },
 };
 
 export default usersApi;
