@@ -1443,7 +1443,7 @@ class ProductionController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                // if (count($allocates) == 0) {
+
                 if (empty($allocates)) {
                     Cache::forget($lockKey);
                     return response()->json([
@@ -1463,7 +1463,8 @@ class ProductionController extends Controller
                     //data cho receipt
                     $dataReceipt[] = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                        "U_LSX" => $data->LSX,
+                        // "U_LSX" => $data->LSX,
+                        "U_LSX" => $allocate['LSX'],
                         "U_TO" => $data->Team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
