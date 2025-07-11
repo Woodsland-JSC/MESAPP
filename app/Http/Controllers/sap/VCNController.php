@@ -1939,12 +1939,13 @@ class VCNController extends Controller
                     $dataReceipt[] = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "U_UUID" => $request->id,
-                        "U_LSX" => $data->LSX,
-                        "U_TO" => $data->Team,
+                        "U_LSX" => $allocate['LSX'],
+                        // "U_LSX" => $data->LSX,
+                        "U_TO" => $data->team,
                         "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                         "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                         "DocumentLines" => [[
-                            "Quantity" => $allocate['Allocate'],
+                            "Quantity" => (float) $allocate['Allocate'],
                             "TransactionType" => "C",
                             "BaseEntry" => $allocate['DocEntry'],
                             "BaseType" => 202,
@@ -2401,7 +2402,7 @@ class VCNController extends Controller
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_UUID" => $request->id,
                     "U_LSX" => $data->LSX,
-                    "U_TO" => $data->Team,
+                    "U_TO" => $data->team,
                     "U_LL" => $loailoi,
                     "U_HXL" => $huongxuly,
                     "U_QCC" => $huongxuly,
@@ -2821,7 +2822,7 @@ class VCNController extends Controller
                             // "DocEntry" => $docEntry,
                             // "SPDICH" => $allocate['SPDICH'],
                             // "Version" => $allocate['Version'],
-                            // "TO" => $allocate['TO'],
+                            "U_TO" => $data->team,
                             "DocumentLines" => [
 
                                 [
@@ -3001,7 +3002,7 @@ class VCNController extends Controller
                     "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                     "U_UUID" => $request->id,
                     "U_LSX" => $data->LSX,
-                    "U_TO" => $data->Team,
+                    "U_TO" => $data->team,
                     "U_LL" => $loailoi,
                     "U_HXL" => $huongxuly,
                     "U_QCC" => $huongxuly,
