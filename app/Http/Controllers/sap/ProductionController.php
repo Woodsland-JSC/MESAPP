@@ -929,8 +929,6 @@ class ProductionController extends Controller
 
         $groupedResults = array_values($groupedResults);
 
-
-
         // 4. Lấy danh sách sản lượng, lỗi đã ghi nhận và trả lại
         $Datareceipt = DB::table('sanluong as a')
             ->join('notireceipt as b', function ($join) {

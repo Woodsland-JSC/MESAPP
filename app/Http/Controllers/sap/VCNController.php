@@ -1065,9 +1065,9 @@ class VCNController extends Controller
         }
     }
 
-    function getQCWarehouseByUser()
+    function getQCWarehouseByUser($type)
     {
-        $WHS = GetWhsCode(Auth::user()->plant, 'QC');
+        $WHS = GetWhsCode(Auth::user()->plant, $type);
         return $WHS;
     }
 
@@ -2345,7 +2345,7 @@ class VCNController extends Controller
         $subCode = $request->subCode['value'] ?? '';
 
         //check kho QC
-        $whs = $this->getQCWarehouseByUser();
+        $whs = $this->getQCWarehouseByUser('NG');
         if ($whs == -1) {
             return response()->json([
                 'error' => false,
@@ -2926,7 +2926,7 @@ class VCNController extends Controller
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
         //check kho QC
-        $whs = $this->getQCWarehouseByUser();
+        $whs = $this->getQCWarehouseByUser('NG');
         if ($whs == -1) {
             return response()->json([
                 'error' => false,

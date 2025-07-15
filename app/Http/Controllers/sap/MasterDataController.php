@@ -228,6 +228,7 @@ class MasterDataController extends Controller
             if ($validator->fails()) {
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
             }
+            dd($id);
             $conDB = (new ConnectController)->connect_sap();
             if ($request->reason == 'SL') {
                 $filter = 'T3."U_Flag" IN (\'SL\')';
