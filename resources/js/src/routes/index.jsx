@@ -62,6 +62,9 @@ import DeliveryDetailReport from "../pages/reports/wood-working/delivery-detail"
 import DefectHandlingMeasureReport from "../pages/reports/plywoods/defect-handling";
 import DeliveredQuantityDetailReport from "../pages/reports/plywoods/delivered-quantity-detail";
 import ProductionVolumeByTimePlywoodsReport from "../pages/reports/plywoods/production-volume-by-time";
+import ImportExportInventoryByStageReport from "../pages/reports/plywoods/import-export-inventory-by-stage";
+import ReceiptInSapReportVCN from "../pages/reports/plywoods/receipt-in-sap";
+import ProductionOutputByProductionOrderVCN from "../pages/reports/plywoods/production-output-by-production-order";
 
 import DefectQuantityReport from "../pages/reports/wood-working/defect-quantity";
 import DefectResolutionReport from "../pages/reports/wood-working/defect-resolution";
@@ -69,14 +72,14 @@ import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 
 import useAppContext from "../store/AppContext";
 import HumidityCheck from "../components/HumidityCheck";
-import ReceiptInSapReport from "../pages/reports/wood-working/receipt-in-sap";
+import ReceiptInSapReportCBG from "../pages/reports/wood-working/receipt-in-sap";
 import WipProductionOrderReport from "../pages/reports/wood-working/wip-production-order";
 import ProductionVolumeByTimeReport from "../pages/reports/wood-working/production-volume-by-time";
 import WeeklyDetailProductionVolumeReport from "../pages/reports/wood-working/production-volume-weekly-detail";
 import DetailsReceiptReport from "../pages/reports/wood-working/details-receipt";
 import FactoryReceiptVolumelReport from "../pages/reports/wood-working/factory-receipt-volume";
 import ImportExportInventoryByTime from "../pages/reports/wood-working/import-export-inventory-by-stage";
-import ProductionOutputByProductionOrder from "../pages/reports/wood-working/production-output-by-production-order";
+import ProductionOutputByProductionOrderCBG from "../pages/reports/wood-working/production-output-by-production-order";
 import FactoryTransfer from "../pages/reports/wood-working/factory-transfer";
 
 // Domestic
@@ -356,7 +359,7 @@ function AppRoutes() {
                         path="/reports/wood-working/receipt-in-sap"
                         element={
                             <ProtectedRoute>
-                                <ReceiptInSapReport />
+                                <ReceiptInSapReportCBG />
                             </ProtectedRoute>
                         }
                     />
@@ -420,7 +423,7 @@ function AppRoutes() {
                         path="/reports/wood-working/production-output-by-production-order"
                         element={
                             <ProtectedRoute>
-                                <ProductionOutputByProductionOrder />
+                                <ProductionOutputByProductionOrderCBG />
                             </ProtectedRoute>
                         }
                     />
@@ -451,6 +454,14 @@ function AppRoutes() {
 
                     {/* VCN Reports */}
                     <Route
+                        path="/reports/plywoods/receipt-in-sap"
+                        element={
+                            <ProtectedRoute>
+                                <ReceiptInSapReportVCN />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/reports/plywoods/delivered-quantity-details"
                         element={
                             <ProtectedRoute>
@@ -471,6 +482,22 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <ProductionVolumeByTimePlywoodsReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/plywoods/import-export-inventory-by-stage"
+                        element={
+                            <ProtectedRoute>
+                                <ImportExportInventoryByStageReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/plywoods/production-output-by-production-order"
+                        element={
+                            <ProtectedRoute>
+                                <ProductionOutputByProductionOrderVCN />
                             </ProtectedRoute>
                         }
                     />

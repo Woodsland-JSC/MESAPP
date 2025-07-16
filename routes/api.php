@@ -36,7 +36,7 @@ Route::get('/handle-auth', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // Route::post(['auth:sanctum',])->group(function () {
-    
+
 // });
 //'permission'
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -71,8 +71,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/change-password/{UserId}', [UserController::class, 'changePassword'])->name('users.password');
         Route::patch('/disable/{UserId}', [UserController::class, 'blockUser'])->name('users.disable');
         Route::delete('/delete/{UserId}', [UserController::class, 'delete'])->name('users.delete');
-        Route::post('/upload',[UserController::class, 'importuser']);
-        Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
+        Route::post('/upload', [UserController::class, 'importuser']);
+        Route::get('/uploaduser', [UserController::class, 'viewimportuser']);
         route::post('/syncfromSAP', [UserController::class, 'syncFromSap']);
         Route::get('/get-users-by-factory/{factory}', [UserController::class, 'getUserByFactory']);
         Route::post('/change-user-factory', [UserController::class, 'changeUserFactory']);
@@ -121,9 +121,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/danh-sach-phoi-cho-nhan', [ProductionController::class, 'dsphoipending']);
         Route::get('/allteam', [ProductionController::class, 'getAllTeam']);
         Route::get('/rootCause', [ProductionController::class, 'getRootCause']);
-    });
-
-    {/*** GET DATA FROM SAP ***/}
+    }); {
+        /*** GET DATA FROM SAP ***/
+    }
     // Item Master Data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
     Route::get('/items-route', [MasterDataController::class, 'ItemByCD']);
@@ -142,13 +142,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/settings', [MasterDataController::class, 'settings'])->name('admin.settings');
     Route::get('/user-sap', [MasterDataController::class, 'UserSAPAssign'])->name('user-sap');
     Route::get('/factorybybranch/{Id}', [MasterDataController::class, 'listfactory'])->name('danh-sach-nha-may');
-    
+
     Route::get('/updateplant', [MasterDataController::class, 'updatePlant'])->name('cap-nhat-lai-nha-may');
     Route::get('/updatewarehouse', [MasterDataController::class, 'updatewarehouse'])->name('cap-nhat-lai-danh-sach-kho');
     Route::get('/get-active-kiln', [DryingOvenController::class, 'getActiveKilnByFactory']);
     Route::get('/get-loaded-kiln', [DryingOvenController::class, 'getLoadedKilnByFactory']);
     Route::get('/get-checked-kiln', [DryingOvenController::class, 'getCheckedKilnByFactory']);
     Route::get('/cbg-factory', [MasterDataController::class, 'getCBGFactory'])->name('nha-may-cbg');
+    Route::get('/vcn-factory', [MasterDataController::class, 'getVCNFactory'])->name('nha-may-vcn');
 
     Route::get('/danhsachto', [ProductionController::class, 'listo']);
     Route::get('/allocate', [ProductionController::class, 'allocate']);
@@ -165,6 +166,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Others
     Route::get('/get-team-by-factory', [ProductionController::class, 'getTeamByFactory']);
+    Route::get('/get-stage-by-division', [MasterDataController::class, 'getStageNyDivision']);
 
     // Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
     // Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
@@ -180,6 +182,5 @@ include('v2/v2.php');
 include('vcn.php');
 //include route report
 include('report.php');
-include ('noidia.php');
-include ('tubep.php');
-
+include('noidia.php');
+include('tubep.php');

@@ -105,7 +105,7 @@ function DeliveryDetailReport() {
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
         try {
-            const res = await reportApi.getTeamByFactory(param);
+            const res = await reportApi.getTeamByFactory(param, 'CBG');
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -159,7 +159,7 @@ function DeliveryDetailReport() {
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDeliveryDetailReport(
+            const res = await reportApi.getDeliveryDetailReportCBG(
                 params.status_code,
                 params.To,
                 params.branch,
@@ -220,7 +220,7 @@ function DeliveryDetailReport() {
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDeliveryDetailReport(
+            const res = await reportApi.getDeliveryDetailReportCBG(
                 params.status_code,
                 params.To,
                 params.branch,
@@ -277,7 +277,7 @@ function DeliveryDetailReport() {
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
         reportApi
-            .getTeamByFactory(userPlant)
+            .getTeamByFactory(userPlant, 'CBG')
             .then((response) => {
                 const options = response
                     .map((item) => ({

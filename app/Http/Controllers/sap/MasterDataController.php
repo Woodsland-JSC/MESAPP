@@ -731,7 +731,7 @@ class MasterDataController extends Controller
             $conDB = (new ConnectController)->connect_sap();
 
             // $query = 'select "WhsCode","WhsName" from OWHS';
-            $query = 'SELECT DISTINCT "Code" AS U_FAC,"Name"  FROM "@G_SAY4" WHERE  "U_CBG" = \'Y\'';
+            $query = 'SELECT DISTINCT "Code" AS U_FAC,"Name"  FROM "@G_SAY4" WHERE  "U_CBG" = \'Y\' AND "Canceled" = \'N\'';
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
@@ -739,6 +739,80 @@ class MasterDataController extends Controller
             if (!odbc_execute($stmt,)) {
                 // Handle execution error
                 // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Lấy danh sách nhà máy ván công nghiệp
+    function getVCNFactory()
+    {
+        try {
+            $conDB = (new ConnectController)->connect_sap();
+
+            // $query = 'select "WhsCode","WhsName" from OWHS';
+            $query = 'SELECT DISTINCT "Code" AS U_FAC,"Name"  FROM "@G_SAY4" WHERE  "U_VCN" = \'Y\' AND "Canceled" = \'N\'';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+            if (!odbc_execute($stmt,)) {
+                // Handle execution error
+                // die("Error executing SQL statement: " . odbc_errormsg());
+                throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            $results = array();
+            while ($row = odbc_fetch_array($stmt)) {
+                $results[] = $row;
+            }
+            odbc_close($conDB);
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Lấy danh sách công đoạn theo khối
+    function getStageNyDivision(Request $request)
+    {
+        try {
+            // Validate the input parameter
+            $validator = Validator::make($request->all(), [
+                'DIV' => 'required|string|max:254',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+            }
+
+            $conDB = (new ConnectController)->connect_sap();
+
+            // Modified query to use parameter placeholder
+            $query = 'SELECT DISTINCT T0."Code", T0."Name", T0."U_Order" FROM "@V_CDOAN" T0 WHERE T0."U_Brand" = ? AND T0."Canceled" = \'N\' ORDER BY T0."U_Order"';
+            $stmt = odbc_prepare($conDB, $query);
+            if (!$stmt) {
+                throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+            }
+
+            // Execute with the uppercase parameter
+            if (!odbc_execute($stmt, [strtoupper($request->DIV)])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 

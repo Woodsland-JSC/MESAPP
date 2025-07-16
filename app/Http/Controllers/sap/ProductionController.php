@@ -1356,6 +1356,7 @@ class ProductionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'FAC' => 'required|string|max:254',
+            'DIV' => 'required|string|max:254',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
@@ -1369,7 +1370,7 @@ class ProductionController extends Controller
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, ['N', 'Y', $request->FAC, 'CBG'])) {
+        if (!odbc_execute($stmt, ['N', 'Y', $request->FAC, $request->DIV])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $results = array();

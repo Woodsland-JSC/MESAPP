@@ -143,6 +143,27 @@ function ProductionVolumeByTimeReport() {
                         filter: true,
                     },
                     {
+                        headerName: "Mã thị trường",
+                        field: "targetSKU",
+                        width: 200,
+                        suppressHeaderMenuButton: true,
+                        filter: true,
+                        valueGetter: (params) => {
+                            const rowGroupColumns = params.api.getRowGroupColumns();
+                            const isGroupedByTargetCode = rowGroupColumns.some(col => col.getColId() === 'targetProduct');
+
+                            if (isGroupedByTargetCode) {
+                                if (params.node.group && params.node.field === 'targetProduct') {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild ? firstChild.data.targetSKU : '';
+                                }
+                                return null;
+                            }
+
+                            return params.data ? params.data.targetSKU : null;
+                        }
+                    },
+                    {
                         field: 'productCode',
                         headerName: 'Mã KT',
                         minWidth: 150,
@@ -255,6 +276,27 @@ function ProductionVolumeByTimeReport() {
                         headerName: 'Thành phẩm/bán thành phẩm',
                         rowGroup: true,
                         enableRowGroup: true,
+                    },
+                    {
+                        headerName: "Mã thị trường",
+                        field: "targetSKU",
+                        width: 200,
+                        suppressHeaderMenuButton: true,
+                        filter: true,
+                        valueGetter: (params) => {
+                            const rowGroupColumns = params.api.getRowGroupColumns();
+                            const isGroupedByTargetCode = rowGroupColumns.some(col => col.getColId() === 'targetProduct');
+
+                            if (isGroupedByTargetCode) {
+                                if (params.node.group && params.node.field === 'targetProduct') {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild ? firstChild.data.targetSKU : '';
+                                }
+                                return null;
+                            }
+
+                            return params.data ? params.data.targetSKU : null;
+                        }
                     },
                     {
                         headerName: "Tên",
@@ -372,6 +414,27 @@ function ProductionVolumeByTimeReport() {
                         headerName: 'Thành phẩm/bán thành phẩm',
                         rowGroup: true,
                         enableRowGroup: true,
+                    },
+                    {
+                        headerName: "Mã thị trường",
+                        field: "targetSKU",
+                        width: 200,
+                        suppressHeaderMenuButton: true,
+                        filter: true,
+                        valueGetter: (params) => {
+                            const rowGroupColumns = params.api.getRowGroupColumns();
+                            const isGroupedByTargetCode = rowGroupColumns.some(col => col.getColId() === 'targetProduct');
+
+                            if (isGroupedByTargetCode) {
+                                if (params.node.group && params.node.field === 'targetProduct') {
+                                    const firstChild = params.node.allLeafChildren[0];
+                                    return firstChild ? firstChild.data.targetSKU : '';
+                                }
+                                return null;
+                            }
+
+                            return params.data ? params.data.targetSKU : null;
+                        }
                     },
                     {
                         headerName: "Tên",
@@ -537,6 +600,7 @@ function ProductionVolumeByTimeReport() {
                 const newItem = {
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.NameSPdich,
+                    targetSKU: item.SKUSPDich,
                     productCode: item.ItemCode,
                     group_name: item.U_To,
                     year: item.Years,
@@ -589,6 +653,7 @@ function ProductionVolumeByTimeReport() {
                 const newItem = {
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.NameSPdich,
+                    targetSKU: item.SKUSPDich,
                     productCode: item.ItemCode,
                     group_name: item.U_To,
                     year: item.Years,
@@ -657,6 +722,7 @@ function ProductionVolumeByTimeReport() {
                     factory: item.U_FAC,
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.NameSPdich,
+                    targetSKU: item.SKUSPDich,
                     productCode: item.ItemCode,
                     group_name: item.U_To,
                     year: item.Years,
@@ -720,6 +786,7 @@ function ProductionVolumeByTimeReport() {
                         factory: item.U_FAC,
                         stage: convertStageName(item.U_CDOAN),
                         targetProduct: item.NameSPdich,
+                        targetSKU: item.SKUSPDich,
                         productCode: item.ItemCode,
                         group_name: item.U_To,
                         year: item.Years,
@@ -833,6 +900,7 @@ function ProductionVolumeByTimeReport() {
                     factory: item.U_FAC,
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.NameSPdich,
+                    targetSKU: item.SKUSPDich,
                     productCode: item.ItemCode,
                     group_name: item.U_To,
                     year: item.Years,
@@ -909,6 +977,7 @@ function ProductionVolumeByTimeReport() {
                     factory: item.U_FAC,
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.NameSPdich,
+                    targetSKU: item.SKUSPDich,
                     productCode: item.ItemCode,
                     group_name: item.U_To,
                     year: item.Years,

@@ -31,7 +31,7 @@ class ReportController extends Controller
 {
 
     //
-    function chitietgiaonhan(Request $request)
+    function chitietgiaonhanCBG(Request $request)
     {
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
@@ -621,6 +621,7 @@ class ReportController extends Controller
             'toDate' => 'required|date',
             'factory' => 'required',
             'To' => 'required|array',
+            'Khoi' => 'required|string|max:254',
         ]);
 
         if ($validate->fails()) {
@@ -631,17 +632,25 @@ class ReportController extends Controller
         $toDate = $request->input('toDate');
         $factory = $request->input('factory');
         $to = $request->input('To');
-
+        $khoi = $request->input('Khoi');
 
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_MES(
-            IN_FROM_DATE => '$fromDate',
-            IN_TO_DATE => '$toDate', 
-            IN_FACTORY => '$factory',
-            OUTPUT_RESULT => ?
-        )";
+            // $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_MES(
+            //     IN_FROM_DATE => '$fromDate',
+            //     IN_TO_DATE => '$toDate', 
+            //     IN_FACTORY => '$factory',
+            //     IN_DIVISION => '$khoi',
+            //     OUTPUT_RESULT => ?
+            // )";
+            $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_TEST_MES(
+                IN_FROM_DATE => '$fromDate',
+                IN_TO_DATE => '$toDate', 
+                IN_FACTORY => '$factory',
+                IN_DIVISION => '$khoi',
+                OUTPUT_RESULT => ?
+            )";
 
             $result = odbc_exec($conDB, $query);
 
@@ -800,7 +809,7 @@ class ReportController extends Controller
         return response()->json($updatedData);
     }
 
-    function sanluongtheothoigian(Request $request)
+    function sanluongtheothoigianCBG(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fromDate' => 'required',
@@ -836,7 +845,7 @@ class ReportController extends Controller
         return $results;
     }
 
-    function sanluongtheongay(Request $request)
+    function sanluongtheongayCBG(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fromDate' => 'required',
@@ -850,6 +859,78 @@ class ReportController extends Controller
         $conDB = (new ConnectController)->connect_sap();
 
         $query = 'CALL USP_GT_BC_NGAY(?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
+
+    function sanluongtheothoigianVCN(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_GT_BC_NGAYTUANTHANG_VCN(?, ?, ?)';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $defaultParam = null; // You can change this to your desired default value
+
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $defaultParam])) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $results = array();
+        while ($row = odbc_fetch_array($stmt)) {
+            $results[] = $row;
+        }
+
+        odbc_close($conDB);
+
+        return $results;
+    }
+
+    function sanluongtheongayVCN(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fromDate' => 'required',
+            'toDate' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'CALL USP_GT_BC_NGAY_VCN(?, ?, ?)';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -1194,7 +1275,8 @@ class ReportController extends Controller
         $validator = Validator::make($request->all(), [
             'fromDate' => 'required',
             'toDate' => 'required',
-            'factory' => 'required'
+            'factory' => 'required',
+            'type' => 'required|in:CBG,VCN'
         ]);
 
         if ($validator->fails()) {
@@ -1203,7 +1285,8 @@ class ReportController extends Controller
 
         $conDB = (new ConnectController)->connect_sap();
 
-        $query = 'CALL USP_StockBy_SPDICH_CDOAN_MES(?, ?, ?, ?)';
+        // $query = 'CALL USP_StockBy_SPDICH_CDOAN_MES(?, ?, ?, ?, ?)';
+        $query = 'CALL USP_StockBy_SPDICH_CDOAN_TEST_MES(?, ?, ?, ?, ?)';
 
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
@@ -1212,7 +1295,7 @@ class ReportController extends Controller
 
         $defaultParam = null; // You can change this to your desired default value
 
-        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $defaultParam])) {
+        if (!odbc_execute($stmt, [$request->fromDate, $request->toDate, $request->factory, $request->type, $defaultParam])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
@@ -1332,5 +1415,104 @@ class ReportController extends Controller
         odbc_close($conDB);
 
         return $results;
+    }
+
+    function chitietgiaonhanVCN(Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $branch = $request->input('branch');
+        // $plant = $request->input('plant');
+        $to = $request->input('To');
+        $statusCode = $request->input('status_code');
+
+        $query = DB::table('gt_vcn_chitietgiaonhan');
+
+        if ($branch) {
+            $query->where('branch', $branch);
+        }
+
+        if ($to) {
+            $toArray = is_array($to) ? $to : explode(',', trim($to, '[]'));
+            $query->whereIn('ToHT', $toArray);
+        }
+
+        if (isset($statusCode)) {
+            $query->where('statuscode', $statusCode);
+        }
+
+        if ($statusCode == 0) {
+            if ($fromDate && $toDate) {
+                $query->whereBetween('ngaygiao', [
+                    Carbon::parse($fromDate)->startOfDay(),
+                    Carbon::parse($toDate)->endOfDay(),
+                ]);
+            }
+        } else {
+            if ($fromDate && $toDate) {
+                $query->whereBetween('ngaynhan', [
+                    Carbon::parse($fromDate)->startOfDay(),
+                    Carbon::parse($toDate)->endOfDay()
+                ]);
+            }
+        }
+
+        $data = $query->get();
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+
+        // Bổ sung thông tin M3 từ SAP và dd ra kết quả truy vấn
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT "ItemCode", "ItemName", "U_M3SP" FROM OITM';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt)) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $m3sapMap = [];
+        while ($row = odbc_fetch_array($stmt)) {
+            $m3sapMap[$row['ItemCode']] = [
+                'ItemName' => $row['ItemName'],
+                'M3'       => $row['U_M3SP']
+            ];
+        }
+
+        // Lặp qua originalData và thay thế các giá trị
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap, $m3sapMap) {
+            // Copy the item to prevent modifying the original
+            $newItem = clone $item;
+
+            // Add existing dimensions if available
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $newItem->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $newItem->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $newItem->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+
+            // Add M3SAP value if available and multiply it with Quantity
+            if (isset($m3sapMap[$item->ItemCode])) {
+                $newItem->M3SAP = round((float)$m3sapMap[$item->ItemCode]['M3'] * (float)$item->Quantity, 6);
+                $newItem->ItemName = $m3sapMap[$item->ItemCode]['ItemName']; // cập nhật tên
+            } else {
+                $newItem->M3SAP = null;
+            }
+
+            return $newItem;
+        });
+
+        odbc_close($conDB);
+
+        return response()->json($updatedData);
     }
 }

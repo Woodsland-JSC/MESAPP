@@ -29,7 +29,7 @@ import debounce from "../../../utils/debounce";
 import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
 
-function ProductionOutputByProductionOrder() {
+function ProductionOutputByProductionOrderVCN() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
@@ -42,30 +42,8 @@ function ProductionOutputByProductionOrder() {
     };
 
     const [loading, setLoading] = useState(true);
-    const [groupData, setGroupData] = useState([{
-        value: "All",
-        label: "Tất cả"
-    },
-    {
-        value: "LP",
-        label: "Lựa phôi"
-    },
-    {
-        value: "SC",
-        label: "Sơ chế"
-    },
-    {
-        value: "TC",
-        label: "Tinh chế"
-    },
-    {
-        value: "HT",
-        label: "Hoàn thiện"
-    },
-    {
-        value: "DG",
-        label: "Đóng gói"
-    }]);
+    const [stages, setStages] = useState(null);
+    const [groupData, setGroupData] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState('sl');
     const [keyword, setKeyword] = useState("");
 
@@ -322,7 +300,7 @@ function ProductionOutputByProductionOrder() {
         try {
             let res = await reportApi.getProductionOutputByProductionOrder(
                 params.factory,
-                'CBG',
+                'VCN',
                 { signal }
             );
 
@@ -335,7 +313,10 @@ function ProductionOutputByProductionOrder() {
             //     }
             // }
 
-            const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+            const stageOrder = stages.reduce((acc, cur) => {
+                acc[cur.Code] = Number(cur.U_Order);
+                return acc;
+            }, {});
 
             const formattedData = res
                 .slice()
@@ -550,56 +531,72 @@ function ProductionOutputByProductionOrder() {
     };
 
     const convertStageName = (code) => {
-        switch (code) {
-            case 'LP':
-                return 'Lựa phôi';
-            case 'SC':
-                return 'Sơ chế';
-            case 'TC':
-                return 'Tinh chế';
-            case 'HT':
-                return 'Hoàn thiện';
-            case 'DG':
-                return 'Đóng gói';
-            case 'BTP':
-                return 'Bán thành phẩm';
-            case 'TP':
-                return 'Thành phẩm';
-            default:
-                return code
-        }
+        const stage = groupData.find(stage => stage.value === code);
+        if (stage) { return stage.label }
+        else return code
     }
 
     const getAllFactory = async () => {
         try {
-            const response = await reportApi.getCBGFactory();
-            // response.unshift({
-            //     U_FAC: 'All',
-            //     Name: 'Tất cả'
-            // })
-            // const response = await axios.get('/api/factories');
+            const response = await reportApi.getVCNFactory();
             setFactories(response);
             setSelectedFactory(response[0]?.U_FAC || '');
         } catch (error) {
             console.error(error);
-            toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+            // toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getAllStage = async () => {
+        try {
+            const response = await reportApi.getStageByDivision('VCN');
+            const formattedResponse = response.map(stage => ({
+                value: stage.Code,
+                label: stage.Name,
+            }))
+            formattedResponse.unshift({
+                value: 'All',
+                label: 'Tất cả'
+            })
+            setGroupData(formattedResponse);
+            setStages(response);
+        } catch (error) {
+            console.error(error);
+            // toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
         } finally {
             setLoading(false);
         }
     }
 
     useEffect(() => {
-        getAllFactory();
-    }, [])
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([
+                    getAllStage(),
+                    getAllFactory()
+                ]);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                toast.error("Đã xảy ra lỗi khi tải dữ liệu.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     useEffect(() => {
-        const allFieldsFilled = (selectedFactory);
+        const allFieldsFilled = (selectedFactory && groupData.length > 0);
         if (allFieldsFilled) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [selectedFactory]);
+    }, [selectedFactory, groupData]);
 
     return (
         <Layout>
@@ -616,7 +613,7 @@ function ProductionOutputByProductionOrder() {
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
                                 <div className="text-sm text-[#17506B]">
-                                    Báo cáo chế biến gỗ
+                                    Báo cáo ván công nghiệp
                                 </div>
                                 <div className="serif text-3xl font-bold">
                                     Báo cáo sản lượng theo lệnh sản xuất
@@ -816,4 +813,4 @@ function ProductionOutputByProductionOrder() {
     )
 }
 
-export default ProductionOutputByProductionOrder
+export default ProductionOutputByProductionOrderVCN

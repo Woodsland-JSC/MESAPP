@@ -209,6 +209,37 @@ const QCReports = [
 ];
 
 const VCNReports = [
+    {
+        id: "0001",
+        name: "Báo cáo thông tin sản lượng nhận tại SAP.",
+        link: "/reports/plywoods/receipt-in-sap",
+        description:
+            "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
+        priority: true,
+    },
+    {
+        id: "0002",
+        name: "Báo cáo nhập xuất tồn từng công đoạn",
+        link: "/reports/plywoods/import-export-inventory-by-stage",
+        description:
+            "Kiểm tra số lượng nhập xuất tồn từng công đoạn.",
+        priority: true,
+    },
+    {
+        id: "0003",
+        name: "Báo cáo sản lượng theo lệnh sản xuất",
+        link: "/reports/plywoods/production-output-by-production-order",
+        description: "Theo dõi sản lượng và tiến độ hoàn thành theo lệnh sản xuất.",
+        priority: true,
+    },
+    {
+        id: "0004",
+        name: "Báo cáo sản lượng theo ngày/tuần/tháng",
+        link: "/reports/plywoods/production-volume-by-time",
+        description:
+            "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
+        priority: true,
+    },
     // {
     //     id: "0001",
     //     name: "Báo cáo tổng sản lượng ngày - tuần - tháng (VCN)",
@@ -250,6 +281,7 @@ const DANDReports = [
 const tabParamMap = {
     0: "wood-drying",
     1: "wood-working",
+    2: "plywoods",
 };
 
 function Report() {
@@ -546,7 +578,7 @@ function Report() {
                             <TabList className="">
                                 <Tab
                                     ref={reportTab}
-                                    // onClick={() => handleTabClick(false)}
+                                // onClick={() => handleTabClick(false)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo sấy phôi
@@ -554,21 +586,21 @@ function Report() {
                                 </Tab>
                                 <Tab
                                     ref={recordTab}
-                                    // onClick={() => handleTabClick(true)}
+                                // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo chế biến gỗ
                                     </div>
                                 </Tab>
-                                {/* <Tab
+                                <Tab
                                     ref={recordTab}
-                                    // onClick={() => handleTabClick(true)}
+                                // onClick={() => handleTabClick(true)}
                                 >
                                     <div className="text-base font-medium">
                                         Báo cáo ván công nghiệp
                                     </div>
                                 </Tab>
-                                <Tab
+                                {/* <Tab
                                     ref={recordTab}
                                     // onClick={() => handleTabClick(true)}
                                 >
@@ -610,18 +642,18 @@ function Report() {
                                                                         }
                                                                         {item.priority ==
                                                                             true && (
-                                                                            // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                            <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
-                                                                                NEW
-                                                                            </div>
-                                                                        )}
+                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                    NEW
+                                                                                </div>
+                                                                            )}
                                                                         {item.updated ==
                                                                             true && (
-                                                                            // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                            <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
-                                                                                UPDATED
-                                                                            </div>
-                                                                        )}
+                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                <div className="text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
+                                                                                    UPDATED
+                                                                                </div>
+                                                                            )}
                                                                     </div>
                                                                     <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
                                                                         {
@@ -672,25 +704,25 @@ function Report() {
                                                                             }
                                                                             {item.priority ==
                                                                                 true && (
-                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="xl:block lg:block md:block hidden text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
-                                                                                    NEW
-                                                                                </div>
-                                                                            )}
+                                                                                    // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                    <div className="xl:block lg:block md:block hidden text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                        NEW
+                                                                                    </div>
+                                                                                )}
                                                                             {item.updated ==
                                                                                 true && (
-                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="xl:block lg:block md:block hidden text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
-                                                                                    UPDATED
-                                                                                </div>
-                                                                            )}
+                                                                                    // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                    <div className="xl:block lg:block md:block hidden text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
+                                                                                        UPDATED
+                                                                                    </div>
+                                                                                )}
                                                                             {item.onlyAdmin ==
                                                                                 true && (
-                                                                                // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                <div className="xl:block lg:block md:block hidden  text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
-                                                                                    ADMIN
-                                                                                </div>
-                                                                            )}
+                                                                                    // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                    <div className="xl:block lg:block md:block hidden  text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
+                                                                                        ADMIN
+                                                                                    </div>
+                                                                                )}
                                                                         </div>
                                                                         <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
                                                                             {
@@ -701,15 +733,15 @@ function Report() {
 
                                                                     {item.responsive ==
                                                                         true && (
-                                                                        <Tooltip
-                                                                            label="Tương thích trên di động."
-                                                                            fontSize="sm"
-                                                                        >
-                                                                            <span>
-                                                                                <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                            </span>
-                                                                        </Tooltip>
-                                                                    )}
+                                                                            <Tooltip
+                                                                                label="Tương thích trên di động."
+                                                                                fontSize="sm"
+                                                                            >
+                                                                                <span>
+                                                                                    <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                </span>
+                                                                            </Tooltip>
+                                                                        )}
                                                                 </div>
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
@@ -740,21 +772,40 @@ function Report() {
                                                         className=""
                                                     >
                                                         <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
-                                                            <div className="flex items-center gap-x-4">
+                                                            <div className="flex items-center w-[95%] xl:gap-x-6 lg:gap-x-6 md:gap-x-6 gap-x-4">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />
                                                                 </div>
-                                                                <div className="text-[16px] group-hover:text-white">
-                                                                    {item.name}
+
+                                                                <div className="flex w-full justify-between items-center">
+                                                                    <div className="flex flex-col justify-center ">
+                                                                        <div className="flex items-center gap-x-4 text-[17px] font-semibold group-hover:text-white">
+                                                                            {item.name}
+                                                                            {item.priority ==
+                                                                                true && (
+                                                                                    <div className="xl:block lg:block md:block hidden text-xs h-fit w-fit text-white p-0.5 px-2 bg-gradient-to-r from-cyan-700 to-cyan-600 rounded-lg">
+                                                                                        NEW
+                                                                                    </div>
+                                                                                )}
+                                                                        </div>
+                                                                        <div className="text-sm xl:inline-block lg:inline-block md:hidden hidden text-gray-500">
+                                                                            {
+                                                                                item.description
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    {item.responsive ==
+                                                                        true && (
+                                                                            <Tooltip
+                                                                                label="Tương thích trên di động."
+                                                                                fontSize="sm"
+                                                                            >
+                                                                                <span>
+                                                                                    <FaMobileScreenButton className="text-[18px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                                </span>
+                                                                            </Tooltip>
+                                                                        )}
                                                                 </div>
-                                                                {item.priority ==
-                                                                    true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
-                                                                {item.responsive ==
-                                                                    true && (
-                                                                    <FaMobileScreenButton className="text-[16px] text-green-600 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -793,8 +844,8 @@ function Report() {
                                                                 </div>
                                                                 {item.priority ==
                                                                     true && (
-                                                                    <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                )}
+                                                                        <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
+                                                                    )}
                                                             </div>
                                                             <FaArrowRight className="group-hover:text-white w-5 h-5" />
                                                         </div>
@@ -812,7 +863,7 @@ function Report() {
             </div>
 
             {loading && <Loader />}
-        </Layout>
+        </Layout >
     );
 }
 

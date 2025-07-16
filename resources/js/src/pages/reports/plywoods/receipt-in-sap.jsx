@@ -36,8 +36,9 @@ import { FaExclamation } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
 import "../../../assets/styles/customTable.css";
 import moment from "moment";
+import Loader from "../../../components/Loader";
 
-function ReceiptInSapReportCBG() {
+function ReceiptInSapReportVCN() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
@@ -51,12 +52,14 @@ function ReceiptInSapReportCBG() {
     // Date picker
     const [fromDate, setFromDate] = useState(getFirstDayOfCurrentMonth());
     const [toDate, setToDate] = useState(new Date());
+    const [factories, setFactories] = useState([]);
     const [fromDateMobile, setFromDateMobile] = useState(
         getFirstDayOfCurrentMonth()
     );
     const [toDateMobile, setToDateMobile] = useState(new Date());
 
     // Loading States
+    const [loading, setLoading] = useState(true);
     const [isTeamLoading, setIsTeamLoading] = useState(false);
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
     const [selectedTeams, setSelectedTeams] = useState([]);
@@ -64,9 +67,11 @@ function ReceiptInSapReportCBG() {
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
     const [isReceived, setIsReceived] = useState(true);
+
+    // Data
+    const [stages, setStages] = useState([]);
     const [teamData, setTeamData] = useState([]);
     const [teamOptions, setTeamOptions] = useState([]);
-
     const [reportData, setReportData] = useState(null);
     const [reportDataMobile, setReportDataMobile] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -91,7 +96,8 @@ function ReceiptInSapReportCBG() {
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
         try {
-            const res = await reportApi.getTeamByFactory(param, 'CBG');
+            const res = await reportApi.getTeamByFactory(param, 'VCN');
+            console.log("Có ra khum: ", res);
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -147,7 +153,7 @@ function ReceiptInSapReportCBG() {
                 params.to_date,
                 params.plant,
                 params.To,
-                'CBG'
+                'VCN',
             );
             const formattedData = res.map((item) => ({
                 doc_num: item.DocumentNumber,
@@ -198,10 +204,11 @@ function ReceiptInSapReportCBG() {
                     ? "YS"
                     : user?.plant,
         };
-        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
+
         setIsDataReportLoading(true);
+
         try {
-            const res = await reportApi.getDeliveryDetailReportCBG(
+            const res = await reportApi.getDeliveryDetailReportVCN(
                 params.status_code,
                 params.To,
                 params.branch,
@@ -230,7 +237,15 @@ function ReceiptInSapReportCBG() {
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
+    }, [
+        selectedTeams,
+        selectedFactory,
+        fromDate,
+        toDate,
+        getReportData,
+    ]);
 
+    useEffect(() => {
         const allFieldsFilledMobile =
             selectedTeamMobile && fromDateMobile && toDateMobile;
         if (allFieldsFilledMobile) {
@@ -239,16 +254,52 @@ function ReceiptInSapReportCBG() {
             console.log("Không thể gọi API vì không đủ thông tin. (Mobile)");
         }
     }, [
-        selectedTeams,
-        selectedFactory,
-        fromDate,
-        toDate,
-        getReportData,
         fromDateMobile,
         toDateMobile,
         selectedTeamMobile,
         getReportDataMobile,
     ]);
+
+    const getAllFactory = async () => {
+        try {
+            const response = await reportApi.getVCNFactory();
+            setFactories(response);
+        } catch (error) {
+            console.error(error);
+            // toast.error("Đã xảy ra lỗi khi lấy dữ liệu nhà máy.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getAllStage = async () => {
+        try {
+            const response = await reportApi.getStageByDivision('VCN');
+            setStages(response)
+        } catch (error) {
+            console.error(error);
+            // toast.error("Đã xảy ra lỗi khi lấy dữ liệu công đoạn.");
+        }
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([
+                    getAllStage(),
+                    getAllFactory()
+                ]);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                toast.error("Đã xảy ra lỗi khi tải dữ liệu.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // New Get All Group
     useEffect(() => {
@@ -256,7 +307,7 @@ function ReceiptInSapReportCBG() {
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
         reportApi
-            .getTeamByFactory(userPlant, 'CBG')
+            .getTeamByFactory(userPlant, 'VCN')
             .then((response) => {
                 const options = response
                     .map((item) => ({
@@ -438,8 +489,8 @@ function ReceiptInSapReportCBG() {
     ]);
 
     const localeText = useMemo(() => {
-            return AG_GRID_LOCALE_VI;
-        }, []);
+        return AG_GRID_LOCALE_VI;
+    }, []);
 
     const groupDisplayType = "multipleColumns";
     const getRowStyle = (params) => {
@@ -530,7 +581,7 @@ function ReceiptInSapReportCBG() {
                             </div>
                             <div className="flex flex-col mb-0 pb-0">
                                 <div className="text-sm  text-[#17506B]">
-                                    Báo cáo chế biến gỗ
+                                    Báo cáo ván công nghiệp
                                 </div>
                                 <div className="serif text-3xl font-bold xl:block lg:block md:block hidden">
                                     Báo cáo thông tin sản lượng nhận tại SAP
@@ -619,16 +670,16 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
+                                            // if (
+                                            //     isReceived !== null &&
+                                            //     selectedTeams !== null &&
+                                            //     selectedTeams.length > 0 &&
+                                            //     selectedFactory &&
+                                            //     fromDate &&
+                                            //     toDate
+                                            // ) {
+                                            //     getReportData();
+                                            // }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -645,16 +696,16 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
+                                            // if (
+                                            //     isReceived !== null &&
+                                            //     selectedTeams !== null &&
+                                            //     selectedTeams.length > 0 &&
+                                            //     selectedFactory &&
+                                            //     fromDate &&
+                                            //     toDate
+                                            // ) {
+                                            //     getReportData();
+                                            // }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -668,12 +719,20 @@ function ReceiptInSapReportCBG() {
                                     >
                                         Chọn nhà máy
                                     </label>
-                                    <FactoryOption
-                                        value="TH"
-                                        label="Thuận Hưng"
-                                    />
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        {
+                                            factories && factories.length > 0 && factories.map(factory => (
+                                                <div key={factory.U_FAC} className="col-span-1 w-full">
+                                                    <FactoryOption
+                                                        value={factory.U_FAC}
+                                                        label={factory.Name || factory.U_FAC}
+                                                    />
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
-                                <div className="col-span-1 w-full flex items-end">
+                                {/* <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
@@ -681,7 +740,7 @@ function ReceiptInSapReportCBG() {
                                         value="TB"
                                         label="Thái Bình"
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
@@ -722,45 +781,53 @@ function ReceiptInSapReportCBG() {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-full grid grid-cols-5">
-                                            <div className="col-span-1 space-y-2">
-                                                <div className="text-[#155979] uppercase font-medium">
-                                                    Runnen
-                                                </div>
-                                                {teamData
-                                                    .filter(
-                                                        (item) =>
-                                                            item.CDOAN === "RN"
-                                                    )
-                                                    .sort((a, b) =>
-                                                        a.Name.localeCompare(
-                                                            b.Name
-                                                        )
-                                                    )
-                                                    .map((item, index) => (
-                                                        <div key={index}>
-                                                            <Checkbox
-                                                                value={
-                                                                    item.Code
-                                                                }
-                                                                onChange={
-                                                                    handleCheckboxChange
-                                                                }
-                                                                isChecked={selectedTeams.includes(
-                                                                    item.Code
-                                                                )}
-                                                            >
-                                                                {item.Name}
-                                                            </Checkbox>
+                                        <div
+                                            className="w-full grid"
+                                            style={{
+                                                gridTemplateColumns: `repeat(${stages?.length ? stages.length : 5}, minmax(0, 1fr))`
+                                            }}>
+                                            {
+                                                stages && stages.length > 0 && stages.map((stage, index) => (
+                                                    <div key={index} className="col-span-1 space-y-2">
+                                                        <div className="text-[#155979] uppercase font-medium">
+                                                            {stage.Name}
                                                         </div>
-                                                    ))}
-                                            </div>
-                                            <div className="col-span-1 space-y-2 ">
+                                                        {teamData
+                                                            ?.filter(
+                                                                (item) =>
+                                                                    item.CDOAN === stage.Code
+                                                            )
+                                                            .sort((a, b) =>
+                                                                a.Name.localeCompare(
+                                                                    b.Name
+                                                                )
+                                                            )
+                                                            .map((item, index) => (
+                                                                <div key={index}>
+                                                                    <Checkbox
+                                                                        value={
+                                                                            item.Code
+                                                                        }
+                                                                        onChange={
+                                                                            handleCheckboxChange
+                                                                        }
+                                                                        isChecked={selectedTeams.includes(
+                                                                            item.Code
+                                                                        )}
+                                                                    >
+                                                                        {item.Name}
+                                                                    </Checkbox>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                ))
+                                            }
+                                            {/* <div className="col-span-1 space-y-2 ">
                                                 <div className="text-[#155979] uppercase font-medium">
                                                     Sơ chế
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "SC"
                                                     )
@@ -792,7 +859,7 @@ function ReceiptInSapReportCBG() {
                                                     Tinh chế
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "TC"
                                                     )
@@ -824,7 +891,7 @@ function ReceiptInSapReportCBG() {
                                                     Hoàn thiện
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "HT"
                                                     )
@@ -856,7 +923,7 @@ function ReceiptInSapReportCBG() {
                                                     Đóng gói
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "DG"
                                                     )
@@ -882,7 +949,7 @@ function ReceiptInSapReportCBG() {
                                                             </Checkbox>
                                                         </div>
                                                     ))}
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                 )}
@@ -1116,8 +1183,9 @@ function ReceiptInSapReportCBG() {
                     </div>
                 </div>
             </div>
+            {loading && <Loader />}
         </Layout>
     );
 }
 
-export default ReceiptInSapReportCBG;
+export default ReceiptInSapReportVCN;

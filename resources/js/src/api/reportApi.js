@@ -43,11 +43,21 @@ const reportApi = {
         });
     },
 
-    getTeamByFactory: (factory) => {
+    getStageByDivision: (division) => {
+        const url = `/get-stage-by-division`;
+        return axiosClient().get(url, {
+            params: {
+                DIV: division
+            },
+        });
+    },
+
+    getTeamByFactory: (factory, division) => {
         const url = `/get-team-by-factory`;
         return axiosClient().get(url, {
             params: {
                 FAC: factory,
+                DIV: division
             },
         });
     },
@@ -57,19 +67,21 @@ const reportApi = {
         toDate,
         plant,
         to,
+        khoi,
     ) => {
-        const url = `/report/cbg-sanluongnhansap`;
+        const url = `/report/sanluongnhansap`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
                 toDate: toDate,
                 factory: plant,
                 To: to,
+                Khoi: khoi,
             },
         });
     },
 
-    getDeliveryDetailReport: (
+    getDeliveryDetailReportCBG: (
         statusCode,
         to,
         branch,
@@ -78,6 +90,27 @@ const reportApi = {
         toDate
     ) => {
         const url = `/report/cbg-chitietgiaonhan`;
+        return axiosClient().get(url, {
+            params: {
+                status_code: statusCode,
+                To: to,
+                branch: branch,
+                plant: plant,
+                from_date: fromDate,
+                to_date: toDate,
+            },
+        });
+    },
+
+    getDeliveryDetailReportVCN: (
+        statusCode,
+        to,
+        branch,
+        plant,
+        fromDate,
+        toDate
+    ) => {
+        const url = `/report/vcn-chitietgiaonhan`;
         return axiosClient().get(url, {
             params: {
                 status_code: statusCode,
@@ -125,8 +158,23 @@ const reportApi = {
         return axiosClient().get(url);
     },
 
+    getVCNFactory: () => {
+        const url = `/vcn-factory`;
+        return axiosClient().get(url);
+    },
+
     getProductionVolumeByTime: (fromDate, toDate) => {
         const url = `/report/cbg-sanluongtheothoigian`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate,
+            },
+        });
+    },
+
+    getProductionVolumeByTimeVCN: (fromDate, toDate) => {
+        const url = `/report/vcn-sanluongtheothoigian`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
@@ -145,18 +193,30 @@ const reportApi = {
         });
     },
 
+    getProductionVolumeByDayVCN: (fromDate, toDate) => {
+        const url = `/report/vcn-sanluongtheongay`;
+        return axiosClient().get(url, {
+            params: {
+                fromDate: fromDate,
+                toDate: toDate,
+            },
+        });
+    },
+
     getImportExportInventoryByStage: (
         fromDate,
         toDate,
         factory,
+        type,
         { signal } = {}
     ) => {
-        const url = `/report/cbg-nhapxuattontheocongdoan`;
+        const url = `/report/nhapxuattontheocongdoan`;
         return axiosClient().get(url, {
             params: {
                 fromDate,
                 toDate,
                 factory,
+                type
             },
             signal,
         });
@@ -164,13 +224,14 @@ const reportApi = {
 
     getProductionOutputByProductionOrder: (
         factory,
+        type,
         { signal } = {}
     ) => {
         const url = `/report/sanluongtheolenhsanxuat`;
         return axiosClient().get(url, {
             params: {
                 factory,
-                type: "CBG",
+                type
             },
             signal,
         });
