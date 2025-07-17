@@ -43,6 +43,8 @@ function ReceiptInSapReportVCN() {
 
     const { user } = useAppContext();
     const gridRef = useRef();
+    const abortControllerRef = useRef(null);
+    const abortControllerMobileRef = useRef(null);
 
     const getFirstDayOfCurrentMonth = () => {
         const date = new Date();
@@ -85,7 +87,6 @@ function ReceiptInSapReportVCN() {
     }, [reportDataMobile, searchTerm]);
 
     const handleFactorySelect = async (factory) => {
-        console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
         setReportData(null);
         setTeamData(null);
@@ -97,7 +98,6 @@ function ReceiptInSapReportVCN() {
         setIsTeamLoading(true);
         try {
             const res = await reportApi.getTeamByFactory(param, 'VCN');
-            console.log("Có ra khum: ", res);
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -146,7 +146,16 @@ function ReceiptInSapReportVCN() {
             To: selectedTeams,
             plant: selectedFactory,
         };
+
         setIsDataReportLoading(true);
+
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        abortControllerRef.current = new AbortController();
+        const { signal } = abortControllerRef.current;
+
         try {
             const res = await reportApi.getReceiptInSAPReport(
                 params.from_date,
@@ -154,6 +163,7 @@ function ReceiptInSapReportVCN() {
                 params.plant,
                 params.To,
                 'VCN',
+                { signal }
             );
             const formattedData = res.map((item) => ({
                 doc_num: item.DocumentNumber,
@@ -183,9 +193,16 @@ function ReceiptInSapReportVCN() {
             setRowData(formattedData);
             setReportData(res);
         } catch (error) {
+            if (error.name === 'AbortError' || signal.aborted) {
+                return;
+            }
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-            setIsDataReportLoading(false);
+        } finally {
+            if (!signal.aborted) {
+                setIsDataReportLoading(false);
+                abortControllerRef.current = null;
+            }
         }
     }, [fromDate, toDate, selectedFactory, selectedTeams, selectAll]);
 
@@ -207,6 +224,13 @@ function ReceiptInSapReportVCN() {
 
         setIsDataReportLoading(true);
 
+        if (abortControllerMobileRef.current) {
+            abortControllerMobileRef.current.abort();
+        }
+
+        abortControllerMobileRef.current = new AbortController();
+        const { signal } = abortControllerMobileRef.current;
+
         try {
             const res = await reportApi.getDeliveryDetailReportVCN(
                 params.status_code,
@@ -214,14 +238,22 @@ function ReceiptInSapReportVCN() {
                 params.branch,
                 params.plant,
                 params.from_date,
-                params.to_date
+                params.to_date,
+                { signal }
             );
             setIsDataReportLoading(false);
             setReportDataMobile(res);
         } catch (error) {
+            if (error.name === 'AbortError' || signal.aborted) {
+                return;
+            }
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-            setIsDataReportLoading(false);
+        } finally {
+            if (!signal.aborted) {
+                setIsDataReportLoading(false);
+                abortControllerRef.current = null;
+            }
         }
     }, [fromDateMobile, toDateMobile, selectedTeamMobile, user.plant]);
 
@@ -235,6 +267,12 @@ function ReceiptInSapReportVCN() {
         if (allFieldsFilled) {
             getReportData();
         } else {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                setIsDataReportLoading(false);
+            }
+            setRowData([]);
+            setReportData([]);
             console.log("Không thể gọi API vì không đủ thông tin");
         }
     }, [
@@ -251,6 +289,11 @@ function ReceiptInSapReportVCN() {
         if (allFieldsFilledMobile) {
             getReportDataMobile();
         } else {
+            if (abortControllerMobileRef.current) {
+                abortControllerMobileRef.current.abort();
+                setIsDataReportLoading(false);
+            }
+            setReportDataMobile([]);
             console.log("Không thể gọi API vì không đủ thông tin. (Mobile)");
         }
     }, [
@@ -306,16 +349,34 @@ function ReceiptInSapReportVCN() {
         const userPlant =
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
+        let stageOrder = null
+
+        if (stages && stages.length > 0) {
+            stageOrder = stages.reduce((acc, cur) => {
+                acc[cur.Code] = Number(cur.U_Order);
+                return acc;
+            }, {});
+        }
+
         reportApi
             .getTeamByFactory(userPlant, 'VCN')
             .then((response) => {
-                const options = response
+                let res = response;
+                if (stageOrder) {
+                    res = res.sort((a, b) => {
+                        const orderA = stageOrder[a.CDOAN] || 999;
+                        const orderB = stageOrder[b.CDOAN] || 999;
+                        return orderA - orderB;
+                    })
+                } else {
+                    res = res.sort((a, b) => a.Name.localeCompare(b.Name));
+                }
+                const options = res
                     .map((item) => ({
                         value: item.Code || "",
                         label: item.Name || "",
                     }))
                     .filter((option) => option.label)
-                    .sort((a, b) => a.label.localeCompare(b.label));
                 setTeamOptions(options);
             })
             .catch((error) => {
@@ -758,13 +819,7 @@ function ReceiptInSapReportVCN() {
                                         />
                                     </div>
                                 ) : (
-                                    <div
-                                        className={
-                                            isDataReportLoading
-                                                ? "opacity-50 pointer-events-none"
-                                                : ""
-                                        }
-                                    >
+                                    <div>
                                         <div className="flex items-center justify-between space-x-3">
                                             <div className="font-semibold">
                                                 Chọn các tổ thực hiện:
@@ -822,134 +877,6 @@ function ReceiptInSapReportVCN() {
                                                     </div>
                                                 ))
                                             }
-                                            {/* <div className="col-span-1 space-y-2 ">
-                                                <div className="text-[#155979] uppercase font-medium">
-                                                    Sơ chế
-                                                </div>
-                                                {teamData
-                                                    ?.filter(
-                                                        (item) =>
-                                                            item.CDOAN === "SC"
-                                                    )
-                                                    .sort((a, b) =>
-                                                        a.Name.localeCompare(
-                                                            b.Name
-                                                        )
-                                                    )
-                                                    .map((item, index) => (
-                                                        <div key={index}>
-                                                            <Checkbox
-                                                                value={
-                                                                    item.Code
-                                                                }
-                                                                onChange={
-                                                                    handleCheckboxChange
-                                                                }
-                                                                isChecked={selectedTeams.includes(
-                                                                    item.Code
-                                                                )}
-                                                            >
-                                                                {item.Name}
-                                                            </Checkbox>
-                                                        </div>
-                                                    ))}
-                                            </div>
-                                            <div className="col-span-1 space-y-2">
-                                                <div className="text-[#155979] uppercase font-medium">
-                                                    Tinh chế
-                                                </div>
-                                                {teamData
-                                                    ?.filter(
-                                                        (item) =>
-                                                            item.CDOAN === "TC"
-                                                    )
-                                                    .sort((a, b) =>
-                                                        a.Name.localeCompare(
-                                                            b.Name
-                                                        )
-                                                    )
-                                                    .map((item, index) => (
-                                                        <div key={index}>
-                                                            <Checkbox
-                                                                value={
-                                                                    item.Code
-                                                                }
-                                                                onChange={
-                                                                    handleCheckboxChange
-                                                                }
-                                                                isChecked={selectedTeams.includes(
-                                                                    item.Code
-                                                                )}
-                                                            >
-                                                                {item.Name}
-                                                            </Checkbox>
-                                                        </div>
-                                                    ))}
-                                            </div>
-                                            <div className="col-span-1 space-y-2">
-                                                <div className="text-[#155979] uppercase font-medium">
-                                                    Hoàn thiện
-                                                </div>
-                                                {teamData
-                                                    ?.filter(
-                                                        (item) =>
-                                                            item.CDOAN === "HT"
-                                                    )
-                                                    .sort((a, b) =>
-                                                        a.Name.localeCompare(
-                                                            b.Name
-                                                        )
-                                                    )
-                                                    .map((item, index) => (
-                                                        <div key={index}>
-                                                            <Checkbox
-                                                                value={
-                                                                    item.Code
-                                                                }
-                                                                onChange={
-                                                                    handleCheckboxChange
-                                                                }
-                                                                isChecked={selectedTeams.includes(
-                                                                    item.Code
-                                                                )}
-                                                            >
-                                                                {item.Name}
-                                                            </Checkbox>
-                                                        </div>
-                                                    ))}
-                                            </div>
-                                            <div className="col-span-1 space-y-2">
-                                                <div className="text-[#155979] uppercase font-medium">
-                                                    Đóng gói
-                                                </div>
-                                                {teamData
-                                                    ?.filter(
-                                                        (item) =>
-                                                            item.CDOAN === "DG"
-                                                    )
-                                                    .sort((a, b) =>
-                                                        a.Name.localeCompare(
-                                                            b.Name
-                                                        )
-                                                    )
-                                                    .map((item, index) => (
-                                                        <div key={index}>
-                                                            <Checkbox
-                                                                value={
-                                                                    item.Code
-                                                                }
-                                                                onChange={
-                                                                    handleCheckboxChange
-                                                                }
-                                                                isChecked={selectedTeams.includes(
-                                                                    item.Code
-                                                                )}
-                                                            >
-                                                                {item.Name}
-                                                            </Checkbox>
-                                                        </div>
-                                                    ))}
-                                            </div> */}
                                         </div>
                                     </div>
                                 )}
@@ -1012,10 +939,6 @@ function ReceiptInSapReportVCN() {
                                         defaultOptions
                                         onChange={(value) => {
                                             setSelectedTeamMobile(value);
-                                            console.log(
-                                                "Selected Team:",
-                                                value
-                                            );
                                         }}
                                     />
                                 </div>
@@ -1079,7 +1002,7 @@ function ReceiptInSapReportVCN() {
                                 {reportDataMobile?.length > 0 ? (
                                     <>
                                         {filteredData?.map((item, index) => (
-                                            <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
+                                            <div key={index} className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
                                                 <div className="flex-col w-full">
                                                     <div className="text-xl font-semibold text-[#17506B] mb-1">
                                                         {item.ItemName}

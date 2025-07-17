@@ -283,61 +283,6 @@ function ImportExportInventoryByStage() {
                     },
                 ]
             },
-            // {
-            //     headerName: 'Lỗi trong kỳ',
-            //     children: [
-            //         {
-            //             headerName: "Số lượng",
-            //             field: "errorInventory",
-            //             filter: true,
-            //             width: 170,
-            //             suppressHeaderMenuButton: true,
-            //             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
-            //             aggFunc: "sum",
-            //             valueGetter: (params) => {
-            //                 if (params.node.level == -1 && params.node.footer) {
-            //                     if (params.api && params.api.getDisplayedRowAtIndex) {
-            //                         const firstDataRow = params.api.getDisplayedRowAtIndex(0).allLeafChildren[0];
-            //                         if (firstDataRow && firstDataRow.data) {
-            //                             return firstDataRow.data?.errorInventoryTotal ?? 0;
-            //                         }
-            //                     }
-            //                     return 0;
-            //                 }
-            //                 if (isTargetProductGrouped && params.node.group && params.node.field === 'targetProduct') {
-            //                     if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
-            //                         const firstChild = params.node.allLeafChildren[0];
-            //                         return firstChild.data?.errorInventoryBOM ?? 0;
-            //                     }
-            //                 }
-            //                 if (isStageGrouped && params.node.group && params.node.field === 'stage') {
-            //                     if (params.node.allLeafChildren && params.node.allLeafChildren.length > 0) {
-            //                         const firstChild = params.node.allLeafChildren[0];
-            //                         return firstChild.data?.errorInventoryCD ?? 0;
-            //                     }
-            //                 }
-            //                 return params.data?.errorInventory ?? 0;
-            //             },
-            //             cellStyle: (params) =>
-            //                 params.node.rowPinned
-            //                     ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
-            //                     : { textAlign: "right" },
-            //         },
-            //         {
-            //             headerName: "M3",
-            //             field: "errorInventoryM3",
-            //             filter: true,
-            //             width: 170,
-            //             suppressHeaderMenuButton: true,
-            //             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
-            //             aggFunc: "sum",
-            //             cellStyle: (params) =>
-            //                 params.node.rowPinned
-            //                     ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
-            //                     : { textAlign: "right" },
-            //         },
-            //     ]
-            // },
             {
                 headerName: 'Xuất trong kỳ',
                 children: [
@@ -553,13 +498,6 @@ function ImportExportInventoryByStage() {
             });
 
             setReportData(sortedRes);
-
-            // if (selectedFactory !== 'All') {
-            //     res = res.filter(data => data.U_FAC === selectedFactory);
-            //     if (!selectedGroup.some(group => group.value === 'All')) {
-            //         res = res.filter(data => selectedGroup.some(group => group === data.U_To));
-            //     }
-            // }
 
             const formattedData = sortedRes.map((item) => {
                 return {
@@ -1041,34 +979,7 @@ function ImportExportInventoryByStage() {
                                     }
                                 </div>
                             </div>
-
                         </div>
-                        {/* {
-                            selectedFactory && selectedFactory !== 'All' && (
-                                <div className="flex flex-col lg:flex-row flex-wrap 2xl:flex-nowrap items-center px-4 mt-1 gap-3 mb-3">
-                                    <div className="flex flex-col w-full mt-1">
-                                        <label
-                                            htmlFor="indate"
-                                            className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
-                                        >
-                                            Chọn tổ
-                                        </label>
-                                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-                                            {
-                                                groupData && groupData.length > 0 && groupData.map(group => (
-                                                    <div className="col-span-1 w-full sm:w-[200px]">
-                                                        <GroupOption
-                                                            value={group.value}
-                                                            label={group.label}
-                                                        />
-                                                    </div>
-                                                ))
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        } */}
                     </div>
 
                     {/* Content */}

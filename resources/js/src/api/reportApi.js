@@ -68,6 +68,7 @@ const reportApi = {
         plant,
         to,
         khoi,
+        { signal } = {}
     ) => {
         const url = `/report/sanluongnhansap`;
         return axiosClient().get(url, {
@@ -78,6 +79,7 @@ const reportApi = {
                 To: to,
                 Khoi: khoi,
             },
+            signal,
         });
     },
 
@@ -87,7 +89,8 @@ const reportApi = {
         branch,
         plant,
         fromDate,
-        toDate
+        toDate,
+        { signal } = {}
     ) => {
         const url = `/report/cbg-chitietgiaonhan`;
         return axiosClient().get(url, {
@@ -99,6 +102,7 @@ const reportApi = {
                 from_date: fromDate,
                 to_date: toDate,
             },
+            signal,
         });
     },
 
@@ -108,7 +112,8 @@ const reportApi = {
         branch,
         plant,
         fromDate,
-        toDate
+        toDate,
+        { signal } = {}
     ) => {
         const url = `/report/vcn-chitietgiaonhan`;
         return axiosClient().get(url, {
@@ -120,6 +125,7 @@ const reportApi = {
                 from_date: fromDate,
                 to_date: toDate,
             },
+            signal,
         });
     },
 
@@ -163,43 +169,47 @@ const reportApi = {
         return axiosClient().get(url);
     },
 
-    getProductionVolumeByTime: (fromDate, toDate) => {
+    getProductionVolumeByTime: (fromDate, toDate, { signal } = {}) => {
         const url = `/report/cbg-sanluongtheothoigian`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
                 toDate: toDate,
             },
+            signal,
         });
     },
 
-    getProductionVolumeByTimeVCN: (fromDate, toDate) => {
+    getProductionVolumeByTimeVCN: (fromDate, toDate, { signal } = {}) => {
         const url = `/report/vcn-sanluongtheothoigian`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
                 toDate: toDate,
             },
+            signal,
         });
     },
 
-    getProductionVolumeByDay: (fromDate, toDate) => {
+    getProductionVolumeByDay: (fromDate, toDate, { signal } = {}) => {
         const url = `/report/cbg-sanluongtheongay`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
                 toDate: toDate,
             },
+            signal,
         });
     },
 
-    getProductionVolumeByDayVCN: (fromDate, toDate) => {
+    getProductionVolumeByDayVCN: (fromDate, toDate, { signal } = {}) => {
         const url = `/report/vcn-sanluongtheongay`;
         return axiosClient().get(url, {
             params: {
                 fromDate: fromDate,
                 toDate: toDate,
             },
+            signal,
         });
     },
 

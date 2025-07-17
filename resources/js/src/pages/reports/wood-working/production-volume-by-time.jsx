@@ -771,7 +771,7 @@ function ProductionVolumeByTimeReport() {
 
             if (selectedFactory !== 'All') {
                 res = res.filter(data => data.U_FAC === selectedFactory);
-                if (!selectedGroup.some(group => group.value === 'All')) {
+                if (!selectedGroup.some(group => group?.value === 'All')) {
                     res = res.filter(data => selectedGroup.some(group => group === data.U_To));
                 }
             }
@@ -877,7 +877,7 @@ function ProductionVolumeByTimeReport() {
             const uniqueGroups = [...new Set(res.map(item => item.U_To))]
                 .map(group => ({
                     value: group,
-                    label: group
+                    label: group ? group : "Trống"
                 }));
             setGroupData([{
                 value: "All",
@@ -935,7 +935,7 @@ function ProductionVolumeByTimeReport() {
         if (group == "All") {
             if (selectedGroup?.length < groupData?.length) {
                 currentGroups = [
-                    ...groupData.map(group => group.value)
+                    ...groupData.map(group => group?.value)
                 ];
                 setSelectedGroup(currentGroups)
             } else {
@@ -951,7 +951,7 @@ function ProductionVolumeByTimeReport() {
                 const newValue = [...selectedGroup.filter((w) => w !== "All"), group]
                 if (newValue.length == groupData.length - 1) {
                     currentGroups = [
-                        ...groupData.map(group => group.value)
+                        ...groupData.map(group => group?.value)
                     ]
                 } else currentGroups = newValue;
             }
@@ -963,7 +963,7 @@ function ProductionVolumeByTimeReport() {
 
         if (selectedFactory !== 'All') {
             res = reportData.filter(data => data.U_FAC === selectedFactory);
-            if (!currentGroups.some(group => group.value === 'All')) {
+            if (!currentGroups.some(group => group?.value === 'All')) {
                 res = res.filter(data => currentGroups.some(group => group === data.U_To));
             }
         }
@@ -1200,7 +1200,7 @@ function ProductionVolumeByTimeReport() {
 
             if (selectedFactory !== 'All') {
                 res = res.filter(data => data.factory === selectedFactory);
-                if (!selectedGroup.some(group => group.value === 'All')) {
+                if (!selectedGroup.some(group => group?.value === 'All')) {
                     res = res.filter(data => selectedGroup.some(group => group === data.group_name));
                 }
             }
@@ -1634,15 +1634,15 @@ function ProductionVolumeByTimeReport() {
                                                 dateFormat="dd/MM/yyyy"
                                                 onChange={(date) => {
                                                     setFromDate(date);
-                                                    if (
-                                                        fromDate &&
-                                                        toDate &&
-                                                        selectedFactory &&
-                                                        isReceived &&
-                                                        selectedTeams
-                                                    ) {
+                                                    // if (
+                                                    //     fromDate &&
+                                                    //     toDate &&
+                                                    //     selectedFactory &&
+                                                    //     isReceived &&
+                                                    //     selectedTeams
+                                                    // ) {
                                                         // getReportData();
-                                                    }
+                                                    // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                             />
@@ -1659,15 +1659,15 @@ function ProductionVolumeByTimeReport() {
                                                 dateFormat="dd/MM/yyyy"
                                                 onChange={(date) => {
                                                     setToDate(date);
-                                                    if (
-                                                        fromDate &&
-                                                        toDate &&
-                                                        selectedFactory &&
-                                                        isReceived &&
-                                                        selectedTeams
-                                                    ) {
+                                                    // if (
+                                                    //     fromDate &&
+                                                    //     toDate &&
+                                                    //     selectedFactory &&
+                                                    //     isReceived &&
+                                                    //     selectedTeams
+                                                    // ) {
                                                         // getReportData();
-                                                    }
+                                                    // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                             />
@@ -1766,8 +1766,8 @@ function ProductionVolumeByTimeReport() {
                                                 groupData && groupData.length > 0 && groupData.map(group => (
                                                     <div className="col-span-1 w-full sm:w-[200px]">
                                                         <GroupOption
-                                                            value={group.value}
-                                                            label={group.label}
+                                                            value={group?.value}
+                                                            label={group?.label}
                                                         />
                                                     </div>
                                                 ))

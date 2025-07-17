@@ -52,7 +52,6 @@ const STAGE_COLORS = {
     'RO': '#ff5722'     // Rong - Đỏ cam
 };
 
-// Nhóm màu dự phòng cho các công đoạn mới
 const BACKUP_COLORS = [
     '#2196f3', '#9c27b0', '#607d8b', '#795548', '#ff9800', '#e91e63',
     '#3f51b5', '#009688', '#8bc34a', '#ffeb3b', '#ff5722', '#9e9e9e',
@@ -64,6 +63,7 @@ function ProductionVolumeByTimeReport() {
 
     const { user } = useAppContext();
     const gridRef = useRef();
+    const abortControllerRef = useRef(null);
     const chartRef = useRef(null);
     const chartRefMobile = useRef(null);
 
@@ -74,6 +74,7 @@ function ProductionVolumeByTimeReport() {
 
     const [loading, setLoading] = useState(true);
     const [groupData, setGroupData] = useState([]);
+    const [stages, setStages] = useState([]);
     const [selectedTimeRange, setSelectedTimeRange] = useState("day");
     const [selectedUnit, setSelectedUnit] = useState('sl');
     const [isDisplayBarChart, setIsDisplayBarChart] = useState(false);
@@ -87,12 +88,6 @@ function ProductionVolumeByTimeReport() {
     const [selectedGroup, setSelectedGroup] = useState([]);
 
     const [isDataReportLoading, setIsDataReportLoading] = useState(false);
-    // const [rowData, setRowData] = useState(Array.from({ length: 10 }, (_, i) =>
-    //     exampleData.map((item) => ({
-    //         ...item,
-    //         id: item.id + i * exampleData.length,
-    //     }))
-    // ).flat() || []);
     const [rowData, setRowData] = useState([]);
     const [dailyChartData, setDailyChartData] = useState([]);
 
@@ -543,7 +538,6 @@ function ProductionVolumeByTimeReport() {
         },
     ];
 
-    // const [reportData, setReportData] = useState(exampleData || []);
     const [reportData, setReportData] = useState([]);
     const [dailyData, setDailyData] = useState([]);
 
@@ -560,7 +554,10 @@ function ProductionVolumeByTimeReport() {
     const aggregateItemsByDay = (data) => {
         const groupMap = new Map();
 
-        const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+        const stageOrder = stages.reduce((acc, cur) => {
+            acc[cur.value] = Number(cur.order);
+            return acc;
+        }, {});
 
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
@@ -587,8 +584,10 @@ function ProductionVolumeByTimeReport() {
 
     const aggregateItemsByWeek = (data) => {
         const itemMap = new Map();
-        // const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
-        const stageOrder = null;
+        const stageOrder = stages.reduce((acc, cur) => {
+            acc[cur.value] = Number(cur.order);
+            return acc;
+        }, {});
 
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
@@ -641,8 +640,10 @@ function ProductionVolumeByTimeReport() {
 
     const aggregateItemsByMonth = (data) => {
         const itemMap = new Map();
-        // const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
-        const stageOrder = null;
+        const stageOrder = stages.reduce((acc, cur) => {
+            acc[cur.value] = Number(cur.order);
+            return acc;
+        }, {});
 
         data.forEach(item => {
             const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
@@ -699,6 +700,13 @@ function ProductionVolumeByTimeReport() {
 
         setIsDataReportLoading(true);
 
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        abortControllerRef.current = new AbortController();
+        const { signal } = abortControllerRef.current;
+
         if (selectedTimeRange === 'day') {
             params = {
                 fromDate: format(fromDate, "yyyy-MM-dd"),
@@ -708,7 +716,8 @@ function ProductionVolumeByTimeReport() {
             try {
                 let dailyRes = await reportApi.getProductionVolumeByDayVCN(
                     params.fromDate,
-                    params.toDate
+                    params.toDate,
+                    { signal }
                 )
 
                 let formattedData;
@@ -738,6 +747,9 @@ function ProductionVolumeByTimeReport() {
 
                 setDailyData(formattedData);
             } catch (error) {
+                if (error.name === 'AbortError' || signal.aborted) {
+                    return;
+                }
                 console.error(error);
                 toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             }
@@ -762,15 +774,27 @@ function ProductionVolumeByTimeReport() {
         try {
             let res = await reportApi.getProductionVolumeByTimeVCN(
                 params.fromDate,
-                params.toDate
+                params.toDate,
+                { signal }
             );
 
-            setReportData(res);
+            const stageOrder = stages.reduce((acc, cur) => {
+                acc[cur.value] = Number(cur.order);
+                return acc;
+            }, {});
+
+            let sortedRes = res.sort((a, b) => {
+                const orderA = stageOrder[a.U_CDOAN] || 999;
+                const orderB = stageOrder[b.U_CDOAN] || 999;
+                return orderA - orderB;
+            });
+
+            setReportData(sortedRes);
 
             if (selectedFactory !== 'All') {
-                res = res.filter(data => data.U_FAC === selectedFactory);
-                if (!selectedGroup.some(group => group.value === 'All')) {
-                    res = res.filter(data => selectedGroup.some(group => group === data.U_To));
+                sortedRes = sortedRes.filter(data => data.U_FAC === selectedFactory);
+                if (!selectedGroup.some(group => group?.value === 'All')) {
+                    sortedRes = sortedRes.filter(data => selectedGroup.some(group => group === data.U_To));
                 }
             }
 
@@ -778,9 +802,8 @@ function ProductionVolumeByTimeReport() {
 
             switch (selectedTimeRange) {
                 case 'day':
-                    formattedData = aggregateItemsByDay(res);
+                    formattedData = aggregateItemsByDay(sortedRes);
                     formattedData = formattedData?.map((item) => ({
-                        // stage: item.U_CDOAN,
                         factory: item.U_FAC,
                         stage: convertStageName(item.U_CDOAN),
                         targetProduct: item.NameSPdich,
@@ -801,63 +824,33 @@ function ProductionVolumeByTimeReport() {
                     }));
                     break;
                 case 'week':
-                    formattedData = aggregateItemsByWeek(res);
-                    console.log("Factory 2: ", formattedData)
+                    formattedData = aggregateItemsByWeek(sortedRes);
                     break;
                 case 'month':
-                    formattedData = aggregateItemsByMonth(res);
+                    formattedData = aggregateItemsByMonth(sortedRes);
                     break;
                 default:
                     break;
             }
 
             setRowData(formattedData);
-            console.log("Row data: ", formattedData)
         } catch (error) {
+            if (error.name === 'AbortError' || signal.aborted) {
+                return;
+            }
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
         } finally {
-            setIsDataReportLoading(false);
+            if (!signal.aborted) {
+                setIsDataReportLoading(false);
+                abortControllerRef.current = null;
+            }
         }
     }
     // }, [fromDate, toDate, fromYear, selectedTimeRange, selectedGroup, selectedFactory]);
 
     const handleTimeRangeSelect = async (time) => {
         setSelectedTimeRange(time);
-
-        // let formattedData = reportData?.map((item) => ({
-        //     // stage: item.U_CDOAN,
-        //     stage: convertStageName(item.U_CDOAN),
-        //     targetProduct: item.NameSPdich,
-        //     productCode: item.ItemCode,
-        //     group_name: item.U_To,
-        //     year: item.Years,
-        //     week: item.WEEK,
-        //     weekday: "Thứ 6", //
-        //     itemname: item.ItemName,
-        //     category: item.CHUNGLOAI,
-        //     thickness: item.U_CDay,
-        //     width: item.U_CRong,
-        //     length: item.U_CDai,
-        //     unit: "Tấm",
-        //     quantity: Number(item.SLThanh),
-        //     volume: Number(item.M3)
-        // }));;
-
-        // switch (time) {
-        //     case 'week':
-        //         formattedData = aggregateItemsByWeek(reportData);
-        //         break;
-        //     case 'month':
-        //         formattedData = aggregateItemsByMonth(reportData);
-        //         console.log("Month nè: ", formattedData)
-        //         break;
-        //     default:
-        //         break;
-        // }
-
-        // // const randomRows = pickRandomRows(reportData, 3);
-        // setRowData(formattedData);
     };
 
     // DONE
@@ -876,8 +869,9 @@ function ProductionVolumeByTimeReport() {
             const uniqueGroups = [...new Set(res.map(item => item.U_To))]
                 .map(group => ({
                     value: group,
-                    label: group
+                    label: group ? group : "Trống"
                 }));
+
             setGroupData([{
                 value: "All",
                 label: "Tất cả"
@@ -888,8 +882,6 @@ function ProductionVolumeByTimeReport() {
         }
 
         let formattedData;
-
-        console.log("Factory 1: ", res)
 
         switch (selectedTimeRange) {
             case 'day':
@@ -934,7 +926,7 @@ function ProductionVolumeByTimeReport() {
         if (group == "All") {
             if (selectedGroup?.length < groupData?.length) {
                 currentGroups = [
-                    ...groupData.map(group => group.value)
+                    ...groupData.map(group => group?.value)
                 ];
                 setSelectedGroup(currentGroups)
             } else {
@@ -950,7 +942,7 @@ function ProductionVolumeByTimeReport() {
                 const newValue = [...selectedGroup.filter((w) => w !== "All"), group]
                 if (newValue.length == groupData.length - 1) {
                     currentGroups = [
-                        ...groupData.map(group => group.value)
+                        ...groupData.map(group => group?.value)
                     ]
                 } else currentGroups = newValue;
             }
@@ -962,7 +954,7 @@ function ProductionVolumeByTimeReport() {
 
         if (selectedFactory !== 'All') {
             res = reportData.filter(data => data.U_FAC === selectedFactory);
-            if (!currentGroups.some(group => group.value === 'All')) {
+            if (!currentGroups.some(group => group?.value === 'All')) {
                 res = res.filter(data => currentGroups.some(group => group === data.U_To));
             }
         }
@@ -1173,18 +1165,18 @@ function ProductionVolumeByTimeReport() {
     };
 
     const convertStageName = (code) => {
-        const stage = groupData.find(stage => stage.value === code);
+        const stage = stages.find(stage => stage.value === code);
         if (stage) { return stage.label }
         else return code
     }
 
     useEffect(() => {
-        if (dailyData && dailyData.length > 0 && groupData && groupData.length > 0) {
+        if (dailyData && dailyData.length > 0 && stages && stages.length > 0) {
             let res = [...dailyData];
 
             if (selectedFactory !== 'All') {
                 res = res.filter(data => data.factory === selectedFactory);
-                if (!selectedGroup.some(group => group.value === 'All')) {
+                if (!selectedGroup.some(group => group?.value === 'All')) {
                     res = res.filter(data => selectedGroup.some(group => group === data.group_name));
                 }
             }
@@ -1201,7 +1193,7 @@ function ProductionVolumeByTimeReport() {
 
             const stageResults = {};
 
-            groupData
+            stages
                 .filter(item => item.value !== 'All')
                 .forEach(stage => {
                     stageResults[stage.label] = Array(dates.length).fill(0);
@@ -1233,29 +1225,18 @@ function ProductionVolumeByTimeReport() {
 
             setDailyChartData(stageResults);
         }
-    }, [dailyData, selectedUnit, selectedFactory, selectedGroup, groupData]);
+    }, [dailyData, selectedUnit, selectedFactory, selectedGroup, stages]);
 
-    const BACKUP_COLORS = [
-        '#2196f3', '#9c27b0', '#607d8b', '#795548', '#ff9800', '#e91e63',
-        '#3f51b5', '#009688', '#8bc34a', '#ffeb3b', '#ff5722', '#9e9e9e',
-        '#f44336', '#00bcd4', '#4caf50', '#ff9800', '#e91e63', '#673ab7'
-    ];
-
-    // Hàm lấy màu cho stage
     const getStageColor = (stageCode, index) => {
-        // Nếu có màu cố định, sử dụng màu đó
         if (STAGE_COLORS[stageCode]) {
             return STAGE_COLORS[stageCode];
         }
 
-        // Nếu không, chọn màu từ nhóm dự phòng
         return BACKUP_COLORS[index % BACKUP_COLORS.length];
     };
 
-    // Sửa đổi useMemo để chỉ chạy khi có dữ liệu
     const data = useMemo(() => {
-        // Chỉ tạo chart data khi đã có groupData
-        if (!groupData || groupData.length === 0) {
+        if (!stages || stages.length === 0) {
             return {
                 labels: [],
                 datasets: []
@@ -1323,7 +1304,6 @@ function ProductionVolumeByTimeReport() {
 
         const calculateDailyData = (stage, unit) => {
             // Tính toán theo ngày dựa vào labels đã tạo
-            // Implementation sẽ tùy theo cấu trúc dữ liệu daily của bạn
         };
 
         const getDataForStage = (stageName) => {
@@ -1344,7 +1324,7 @@ function ProductionVolumeByTimeReport() {
 
         const hasNoStageData = rowData.some(row => !row.stage || row.stage === '');
 
-        const datasets = groupData
+        const datasets = stages
             .filter(item => item.value !== 'All')
             .map((stage, index) => ({
                 label: stage.label,
@@ -1364,7 +1344,7 @@ function ProductionVolumeByTimeReport() {
             labels,
             datasets,
         };
-    }, [selectedTimeRange, fromDate, toDate, rowData, selectedUnit, dailyChartData, groupData]);
+    }, [selectedTimeRange, fromDate, toDate, rowData, selectedUnit, dailyChartData, stages]);
 
     const options = useMemo(() => {
         const titleText =
@@ -1495,16 +1475,13 @@ function ProductionVolumeByTimeReport() {
         try {
             const response = await reportApi.getStageByDivision('VCN');
             const formattedResponse = [
-                {
-                    value: 'All',
-                    label: 'Tất cả'
-                },
                 ...response.map(stage => ({
                     value: stage.Code,
                     label: stage.Name,
+                    order: stage.U_Order
                 }))
             ];
-            setGroupData(formattedResponse);
+            setStages(formattedResponse);
         } catch (error) {
             console.error('Error fetching stages:', error);
             // toast.error("Đã xảy ra lỗi khi lấy dữ liệu công đoạn.");
@@ -1530,29 +1507,14 @@ function ProductionVolumeByTimeReport() {
         fetchData();
     }, []);
 
-    // useEffect(() => {
-    //     if (selectedTimeRange) {
-    //         switch (selectedTimeRange) {
-    //             case "day":
-    //                 setSelectedUnit("");
-    //                 break;
-
-    //             default:
-    //                 if (!selectedUnit)
-    //                     setSelectedUnit("sl");
-    //                 break;
-    //         }
-    //     }
-    // }, [selectedTimeRange]);
-
     useEffect(() => {
-        const allFieldsFilled = (fromDate && toDate) || fromYear;
-        if (allFieldsFilled && groupData.length > 0) {
+        const allFieldsFilled = ((fromDate && toDate) || fromYear) && stages.length > 0;
+        if (allFieldsFilled) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [fromDate, toDate, fromYear, selectedTimeRange, groupData])
+    }, [fromDate, toDate, fromYear, selectedTimeRange, stages])
 
     return (
         <Layout>
@@ -1696,15 +1658,15 @@ function ProductionVolumeByTimeReport() {
                                                 dateFormat="dd/MM/yyyy"
                                                 onChange={(date) => {
                                                     setFromDate(date);
-                                                    if (
-                                                        fromDate &&
-                                                        toDate &&
-                                                        selectedFactory &&
-                                                        isReceived &&
-                                                        selectedTeams
-                                                    ) {
-                                                        // getReportData();
-                                                    }
+                                                    // if (
+                                                    //     fromDate &&
+                                                    //     toDate &&
+                                                    //     selectedFactory &&
+                                                    //     isReceived &&
+                                                    //     selectedTeams
+                                                    // ) {
+                                                    // getReportData();
+                                                    // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                             />
@@ -1721,15 +1683,6 @@ function ProductionVolumeByTimeReport() {
                                                 dateFormat="dd/MM/yyyy"
                                                 onChange={(date) => {
                                                     setToDate(date);
-                                                    if (
-                                                        fromDate &&
-                                                        toDate &&
-                                                        selectedFactory &&
-                                                        isReceived &&
-                                                        selectedTeams
-                                                    ) {
-                                                        // getReportData();
-                                                    }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                             />
@@ -1750,15 +1703,6 @@ function ProductionVolumeByTimeReport() {
                                                 dateFormat="yyyy"
                                                 onChange={(date) => {
                                                     setFromYear(date);
-                                                    // if (
-                                                    //     fromDate &&
-                                                    //     toDate &&
-                                                    //     selectedFactory &&
-                                                    //     isReceived &&
-                                                    //     selectedTeams
-                                                    // ) {
-                                                    //     // getReportData();
-                                                    // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                             />
@@ -1785,30 +1729,6 @@ function ProductionVolumeByTimeReport() {
                                             </div>
                                         ))
                                     }
-                                    {/* <div className="col-span-1 w-full">
-                                        <FactoryOption
-                                            value="TH"
-                                            label="Thuận Hưng"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="YS"
-                                            label="Yên Sơn"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="TB"
-                                            label="Thái Bình"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="CBG"
-                                            label="Khối chế biến gỗ"
-                                        />
-                                    </div> */}
                                 </div>
                             </div>
 
@@ -1828,8 +1748,8 @@ function ProductionVolumeByTimeReport() {
                                                 groupData && groupData.length > 0 && groupData.map(group => (
                                                     <div className="col-span-1 w-full sm:w-[200px]">
                                                         <GroupOption
-                                                            value={group.value}
-                                                            label={group.label}
+                                                            value={group?.value}
+                                                            label={group?.label}
                                                         />
                                                     </div>
                                                 ))
@@ -1870,7 +1790,6 @@ function ProductionVolumeByTimeReport() {
                     {/* Content */}
                     {isDataReportLoading ? (
                         <div className="mt-2 bg-[#C2C2CB] flex items-center justify-center  p-3 px-4 pr-1 rounded-lg ">
-                            {/* <div>Đang tải dữ liệu</div> */}
                             <div className="dots"></div>
                         </div>
                     ) : (

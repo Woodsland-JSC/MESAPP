@@ -42,7 +42,6 @@ function ProductionOutputByProductionOrderVCN() {
     };
 
     const [loading, setLoading] = useState(true);
-    const [stages, setStages] = useState(null);
     const [groupData, setGroupData] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState('sl');
     const [keyword, setKeyword] = useState("");
@@ -308,12 +307,12 @@ function ProductionOutputByProductionOrderVCN() {
 
             // if (selectedFactory !== 'All') {
             //     res = res.filter(data => data.U_FAC === selectedFactory);
-            //     if (!selectedGroup.some(group => group.value === 'All')) {
+            //     if (!selectedGroup.some(group => group?.value === 'All')) {
             //         res = res.filter(data => selectedGroup.some(group => group === data.U_To));
             //     }
             // }
 
-            const stageOrder = stages.reduce((acc, cur) => {
+            const stageOrder = groupData.reduce((acc, cur) => {
                 acc[cur.Code] = Number(cur.U_Order);
                 return acc;
             }, {});
@@ -363,71 +362,6 @@ function ProductionOutputByProductionOrderVCN() {
         setSelectedFactory(factory);
     };
 
-    // DONE
-    const handleGroupSelect = async (group) => {
-        let currentGroups;
-        if (group == "All") {
-            if (selectedGroup?.length < groupData?.length) {
-                currentGroups = [
-                    ...groupData.map(group => group.value)
-                ];
-                setSelectedGroup(currentGroups)
-            } else {
-                currentGroups = []
-                setSelectedGroup([])
-            }
-        } else {
-            const exists = selectedGroup.includes(group);
-
-            if (exists) {
-                currentGroups = selectedGroup.filter((w) => (w !== group) && (w !== "All"));
-            } else {
-                const newValue = [...selectedGroup.filter((w) => w !== "All"), group]
-                if (newValue.length == groupData.length - 1) {
-                    currentGroups = [
-                        ...groupData.map(group => group.value)
-                    ]
-                } else currentGroups = newValue;
-            }
-
-            setSelectedGroup(currentGroups);
-        }
-
-        let res = [...reportData];
-
-        if (selectedFactory !== 'All') {
-            res = reportData.filter(data => data.U_FAC === selectedFactory);
-            if (!currentGroups.some(group => group.value === 'All')) {
-                res = res.filter(data => currentGroups.some(group => group === data.U_To));
-            }
-        }
-
-        let formattedData;
-
-
-        formattedData = aggregateItemsByDay(res);
-        formattedData = formattedData?.map((item) => ({
-            factory: item.U_FAC,
-            stage: convertStageName(item.U_CDOAN),
-            targetProduct: item.NameSPdich,
-            productCode: item.ItemCode,
-            group_name: item.U_To,
-            year: item.Years,
-            week: item.WEEK,
-            weekday: "Thứ 6",
-            itemname: item.ItemName,
-            category: item.CHUNGLOAI,
-            thickness: item.U_CDay,
-            width: item.U_CRong,
-            length: item.U_CDai,
-            unit: "Tấm",
-            quantity: Number(item.SLThanh),
-            volume: Number(item.M3)
-        }));
-
-        setRowData(formattedData);
-    };
-
     const FactoryOption = ({ value, label }) => (
         <div
             className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
@@ -443,30 +377,6 @@ function ProductionOutputByProductionOrderVCN() {
             )}
             <div
                 className={`${selectedFactory === value
-                    ? "text-[#17506B] font-medium"
-                    : "text-gray-400 group-hover:text-[#17506B]"
-                    }`}
-            >
-                {label}
-            </div>
-        </div>
-    );
-
-    const GroupOption = ({ value, label }) => (
-        <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-md border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedGroup?.includes(value)
-                ? "border-[#86ABBE] bg-[#eaf8ff]"
-                : "border-gray-300"
-                }`}
-            onClick={() => handleGroupSelect(value)}
-        >
-            {selectedGroup?.includes(value) ? (
-                <IoMdCheckbox className="w-5 h-6 text-[#17506B]" />
-            ) : (
-                <IoMdSquareOutline className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
-            )}
-            <div
-                className={`${selectedGroup.includes(value)
                     ? "text-[#17506B] font-medium"
                     : "text-gray-400 group-hover:text-[#17506B]"
                     }`}
@@ -526,10 +436,6 @@ function ProductionOutputByProductionOrderVCN() {
         }
     }
 
-    const generateRandomData = (length, min, max) => {
-        return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min);
-    };
-
     const convertStageName = (code) => {
         const stage = groupData.find(stage => stage.value === code);
         if (stage) { return stage.label }
@@ -544,8 +450,6 @@ function ProductionOutputByProductionOrderVCN() {
         } catch (error) {
             console.error(error);
             // toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -555,18 +459,12 @@ function ProductionOutputByProductionOrderVCN() {
             const formattedResponse = response.map(stage => ({
                 value: stage.Code,
                 label: stage.Name,
+                order: stage.U_Order,
             }))
-            formattedResponse.unshift({
-                value: 'All',
-                label: 'Tất cả'
-            })
             setGroupData(formattedResponse);
-            setStages(response);
         } catch (error) {
             console.error(error);
             // toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -736,32 +634,6 @@ function ProductionOutputByProductionOrderVCN() {
                             </div>
 
                         </div>
-                        {/* {
-                            selectedFactory && selectedFactory !== 'All' && (
-                                <div className="flex flex-col lg:flex-row flex-wrap 2xl:flex-nowrap items-center px-4 mt-1 gap-3 mb-3">
-                                    <div className="flex flex-col w-full mt-1">
-                                        <label
-                                            htmlFor="indate"
-                                            className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
-                                        >
-                                            Chọn tổ
-                                        </label>
-                                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-                                            {
-                                                groupData && groupData.length > 0 && groupData.map(group => (
-                                                    <div className="col-span-1 w-full sm:w-[200px]">
-                                                        <GroupOption
-                                                            value={group.value}
-                                                            label={group.label}
-                                                        />
-                                                    </div>
-                                                ))
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        } */}
                     </div>
 
                     {/* Content */}
