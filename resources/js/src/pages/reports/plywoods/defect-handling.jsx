@@ -220,7 +220,12 @@ function DefectHandlingMeasureReport() {
             filter: true,
         },
         { headerName: "Người tạo", field: "sender", filter: true },
-        { headerName: "Ngày ghi nhận lỗi", field: "send_date", width: 250,filter: true },
+        {
+            headerName: "Ngày ghi nhận lỗi",
+            field: "send_date",
+            width: 250,
+            filter: true,
+        },
         { headerName: "Người xử lý", field: "receiver", filter: true },
         { headerName: "Ngày xử lý", field: "handle_date", filter: true },
         { headerName: "LSX ghi nhận lỗi", field: "lsx_from", filter: true },
@@ -257,7 +262,7 @@ function DefectHandlingMeasureReport() {
                 week: item.week,
                 root_cause: item.NguonLoi || "Không xác định",
                 root_place: item.NoiBaoLoi || "Không xác định",
-                root_place_name: item.TenToBaoLoi  || "Không xác định",
+                root_place_name: item.TenToBaoLoi || "Không xác định",
                 defect_type: item.LoiLoai || "Không xác định",
                 resolution: item.HXL || "Không xác định",
                 itemcode: item.ItemCode,
@@ -336,23 +341,23 @@ function DefectHandlingMeasureReport() {
 
     const WorkshopOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
+            className={`group hover:border-[#a486be] hover:bg-[#fbedff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
                 selectedWorkshop === value
-                    ? "border-[#86ABBE] bg-[#eaf8ff]"
+                    ? "border-[#a486be] bg-[#fae8ff]"
                     : "border-gray-300"
             }`}
             onClick={() => handleWorkshopSelect(value)}
         >
             {selectedWorkshop === value ? (
-                <IoMdRadioButtonOn className="w-5 h-6 text-[#17506B]" />
+                <IoMdRadioButtonOn className="w-5 h-6 text-[#50176b]" />
             ) : (
-                <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
+                <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#50176b]" />
             )}
             <div
                 className={`${
                     selectedWorkshop === value
-                        ? "text-[#17506B] font-medium"
-                        : "text-gray-400 group-hover:text-[#17506B]"
+                        ? "text-[#50176b] font-medium"
+                        : "text-gray-400 group-hover:text-[#50176b]"
                 }`}
             >
                 {label}
@@ -439,7 +444,7 @@ function DefectHandlingMeasureReport() {
                     </div>
 
                     <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3">
-                        <div className="flex flex-col lg:flex-row flex-wrap 2xl:flex-nowrap items-center px-4 mt-1 gap-3">
+                        <div className="flex flex-col xl:flex-row lg:flex-row items-center px-4 mt-1 gap-3">
                             <div className="flex gap-3 w-full lg:w-1/4">
                                 <div className="col-span-1 w-full">
                                     <label
@@ -492,7 +497,7 @@ function DefectHandlingMeasureReport() {
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col lg:pl-3 w-full lg:w-[70%] 2xl:w-1/2 lg:border-l-2 lg:border-gray-100">
+                            <div className="flex flex-col lg:pl-3 w-full xl:w-2/4 lg:border-l-2 lg:border-gray-100">
                                 <label
                                     htmlFor="indate"
                                     className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
@@ -520,24 +525,24 @@ function DefectHandlingMeasureReport() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex flex-col 2xl:pl-3 w-full 2xl:w-1/4 2xl:border-l-2 2xl:border-gray-100">
+                            <div className="flex flex-col lg:pl-3 w-full xl:w-1/4 xl:border-l-2 xl:border-gray-100">
                                 <label
                                     htmlFor="indate"
                                     className="block mb-1 text-sm font-medium whitespace-nowrap text-gray-900"
                                 >
-                                    Chọn xưởng sản xuất
+                                    Chọn loại sản phẩm
                                 </label>
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <div className="col-span-1 w-full">
                                         <WorkshopOption
                                             value="PLY"
-                                            label="Xưởng Plywood"
+                                            label="Plywood"
                                         />
                                     </div>
                                     <div className="col-span-1 w-full flex items-end">
                                         <WorkshopOption
                                             value="LVL"
-                                            label="Xưởng LVL"
+                                            label="LVL"
                                         />
                                     </div>
                                 </div>
