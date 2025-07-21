@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('historyslVCN', function (Blueprint $table) {
+        Schema::table('historySLVCN', function (Blueprint $table) {
             $table->string('subCode', 50)->nullable()->after('HXL');
         });
     }
 
     public function down()
     {
-        Schema::table('historyslVCN', function (Blueprint $table) {
+        Schema::table('historySLVCN', function (Blueprint $table) {
             $table->dropColumn('subCode');
         });
     }
