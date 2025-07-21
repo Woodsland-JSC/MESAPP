@@ -21,5 +21,7 @@ class historySLVCN extends Model
         'SPDich',
         'isQualityCheck',
         'notiId',
+        'subCode',
+        
     ];
 }

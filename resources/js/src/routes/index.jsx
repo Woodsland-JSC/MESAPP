@@ -66,7 +66,6 @@ import ImportExportInventoryByStageReport from "../pages/reports/plywoods/import
 import ReceiptInSapReportVCN from "../pages/reports/plywoods/receipt-in-sap";
 import ProductionOutputByProductionOrderVCN from "../pages/reports/plywoods/production-output-by-production-order";
 
-import DefectQuantityReport from "../pages/reports/wood-working/defect-quantity";
 import DefectResolutionReport from "../pages/reports/wood-working/defect-resolution";
 import QCHandlingReport from "../pages/reports/wood-working/qc-handling";
 

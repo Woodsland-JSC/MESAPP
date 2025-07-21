@@ -774,7 +774,7 @@ function Report() {
                                                         key={index}
                                                         className=""
                                                     >
-                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2.5 px-4 bg-gray-100 rounded-xl ">
                                                             <div className="flex items-center w-[95%] xl:gap-x-6 lg:gap-x-6 md:gap-x-6 gap-x-4">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />

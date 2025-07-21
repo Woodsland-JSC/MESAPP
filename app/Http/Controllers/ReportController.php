@@ -809,6 +809,86 @@ class ReportController extends Controller
         return response()->json($updatedData);
     }
 
+    /** chế biến gỗ */
+    function PlywoodDefectHandling(Request $request)
+    {
+        $branch = $request->input('branch');
+        $plant = $request->input('plant');
+        $prodType = $request->input('prod_type');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Start the query and add conditions based on the request inputs
+        $query = DB::table('gt_vcn_baocaoxulyloi');
+
+        if ($branch) {
+            $query->where('branch', $branch);
+        }
+
+        if ($plant) {
+            $query->where('plant', $plant);
+        }
+
+        if ($prodType) {
+            $query->where('ProdType', $prodType);
+        }
+
+        if ($fromDate != null && $toDate != null) {
+            // where beetwen
+            $query->whereRaw('DATE(ngaynhan) BETWEEN ? AND ?', [$fromDate, $toDate]);
+        }
+
+        // Get the results
+        $data = $query->get();
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+
+        // Bổ sung thông tin M3 từ SAP và dd ra kết quả truy vấn
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT "ItemCode", "U_M3SP" FROM OITM';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt)) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $m3sapMap = [];
+        while ($row = odbc_fetch_array($stmt)) {
+            $m3sapMap[$row['ItemCode']] = $row['U_M3SP'];
+        }
+
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap, $m3sapMap) {
+            // Copy the item to prevent modifying the original
+            $newItem = clone $item;
+
+            // Add existing dimensions if available
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $newItem->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $newItem->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $newItem->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+
+            // Add M3SAP value if available and multiply it with Quantity
+            $newItem->M3SAP = isset($m3sapMap[$item->ItemCode]) ? round((float)$m3sapMap[$item->ItemCode] * (float)$item->Quantity, 6) : null;
+
+            return $newItem;
+        });
+
+        odbc_close($conDB);
+
+        return response()->json($updatedData);
+    }
+
     function sanluongtheothoigianCBG(Request $request)
     {
         $validator = Validator::make($request->all(), [
