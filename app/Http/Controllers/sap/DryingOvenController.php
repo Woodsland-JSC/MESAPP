@@ -454,20 +454,42 @@ class DryingOvenController extends Controller
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
             $towarehouse = WarehouseCS();
 
-            // 1.1. Tạo pallet mới
-            $recordCount = Pallet::whereYear('created_at', $current_year)
-                ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-                ->count() + 1;
-
+            // 1.1. Tạo pallet mới    
             $combinedQuyCach = implode('_', $quyCachList);
 
+            // Bộ đếm mới 
+            $recordCount = Pallet::whereYear('created_at', $current_year)
+                ->whereRaw('WEEK(created_at, 1) = ?', [$current_week])
+                ->where('factory', $palletData['MaNhaMay'])  // Thêm điều kiện lọc theo nhà máy
+                ->count() + 1;
+
+            $generatedCode = $palletData['MaNhaMay']
+                . substr($current_year, -2)
+                . $current_week
+                . '-'
+                . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+
             $pallet = Pallet::create($palletData + [
-                'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
+                'Code' => $generatedCode,
                 'factory' => $palletData['MaNhaMay'],
                 'QuyCach' => $combinedQuyCach,
                 'stacking_time' => $palletData['stackingTime'] ?? null,
                 'employee' => $palletData['employee'] ?? null,
             ]);
+
+
+            // Bộ đếm cũ
+            // $recordCount = Pallet::whereYear('created_at', $current_year)
+            //     ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+            //     ->count() + 1;
+
+            // $pallet = Pallet::create($palletData + [
+            //     'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
+            //     'factory' => $palletData['MaNhaMay'],
+            //     'QuyCach' => $combinedQuyCach,
+            //     'stacking_time' => $palletData['stackingTime'] ?? null,
+            //     'employee' => $palletData['employee'] ?? null,
+            // ]);
 
             // 2. Lấy dữ liệu Details và tạo chi tiết pallet
             $palletDetails = $request->input('Details', []);

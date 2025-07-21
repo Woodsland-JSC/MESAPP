@@ -217,6 +217,14 @@ const VCNReports = [
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
         priority: true,
     },
+        {
+        id: "0003",
+        name: "Báo cáo biện pháp xử lý lỗi (VCN)",
+        link: "/reports/plywoods/defect-handling",
+              description:
+            "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
+        priority: true,
+    },
     {
         id: "0002",
         name: "Báo cáo nhập xuất tồn từng công đoạn",
@@ -254,12 +262,7 @@ const VCNReports = [
     //     priority: false,
     //     responsive: false,
     // },
-    // {
-    //     id: "0003",
-    //     name: "Báo cáo biện pháp xử lý lỗi (VCN)",
-    //     link: "/reports/plywoods/defect-handling",
-    //     priority: false,
-    // },
+
 ];
 
 const DANDReports = [

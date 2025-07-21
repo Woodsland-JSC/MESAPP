@@ -314,10 +314,10 @@ function DefectHandlingMeasureReport() {
               </div>
               <div className="flex flex-col mb-0 pb-0">
                 <div className="text-sm text-[#17506B]">
-                  Báo cáo sản lượng
+                  Báo cáo ván công nghiệp
                 </div>
-                <div className=" text-2xl font-semibold">
-                  Báo cáo biện pháp xử lý lỗi (VCN)
+                <div className=" text-3xl serif font-bold">
+                  Báo cáo biện pháp xử lý lỗi
                 </div>
               </div>
             </div>

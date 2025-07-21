@@ -46,9 +46,16 @@ const palletsApi = {
         const url = `/oven-reasons`;
         return axiosClient().get(url, {});
     },
-    getBOWList: () => {
+    getBOWList: (status, isLoaded, isChecked, isReviewed) => {
         const url = `/ovens/listproduction`;
-        return axiosClient().get(url, {});
+        return axiosClient().get(url, {
+            params: {
+                status: status,
+                isLoaded: isLoaded,
+                isChecked: isChecked,
+                isReviewed: isReviewed,
+            },
+        });
     },
     getBOWById: (id) => {
         const url = `/ovens/production-detail/${id}`;

@@ -75,11 +75,34 @@ class PlanController extends Controller
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->select('a.*')
             ->where('b.branch', '=', Auth::user()->branch)
-            ->where('b.plant', '=', Auth::user()->plant)
-            ->where('a.Status', '<>', '2')
-            ->get();
+            ->where('b.plant', '=', Auth::user()->plant);
 
-        return response()->json($plans, 200);
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            if (is_array($status)) {
+                $plans->whereIn('a.Status', $status);
+            } else {
+                $plans->where('a.Status', '=', $status);
+            }
+        }
+        
+        if ($request->filled('isLoaded')) {
+            if ($request->input('isLoaded') != 0) {
+                $plans->where('a.TotalPallet', '>', 0);
+            } else {
+                $plans->where('a.TotalPallet', '<=', 0);
+            }
+        }
+
+        if ($request->filled('isChecked')) {
+            $plans->where('a.Checked', '=', $request->input('isChecked'));
+        }
+
+        if ($request->filled('isReviewed')) {
+            $plans->where('a.Review', '=', $request->input('isReviewed'));
+        }
+
+        return response()->json($plans->get(), 200);
     }
 
     //danh sách pallet chưa được assign
