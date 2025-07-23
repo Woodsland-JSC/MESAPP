@@ -158,6 +158,7 @@ function ReceiptInSapReportCBG() {
                 width: item.U_CRong,
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
+                market_code: item.MaThiTruong,
                 quantity: parseInt(item.Quantity),
                 m3_sp: Number(item.U_M3SP),
                 m3: Number(item.M3),
@@ -355,6 +356,12 @@ function ReceiptInSapReportCBG() {
             pinned: "left",
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+            filter: true,
+        },
+        {
+            headerName: "Mã thị trường",
+            field: "market_code",
+            minWidth: 200,
             filter: true,
         },
         {
@@ -619,16 +626,6 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -645,16 +642,6 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />

@@ -637,13 +637,6 @@ class ReportController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            // $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_MES(
-            //     IN_FROM_DATE => '$fromDate',
-            //     IN_TO_DATE => '$toDate', 
-            //     IN_FACTORY => '$factory',
-            //     IN_DIVISION => '$khoi',
-            //     OUTPUT_RESULT => ?
-            // )";
             $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_TEST_MES(
                 IN_FROM_DATE => '$fromDate',
                 IN_TO_DATE => '$toDate', 
@@ -658,7 +651,6 @@ class ReportController extends Controller
                 throw new \Exception('Error executing stored procedure: ' . odbc_errormsg($conDB));
             }
 
-            // Phương pháp đơn giản nhất - chỉ lấy từ result set đầu tiên
             $allResults = array();
             while ($row = odbc_fetch_array($result)) {
                 $allResults[] = $row;
@@ -666,7 +658,6 @@ class ReportController extends Controller
 
             odbc_close($conDB);
 
-            // Debug: In ra field names để xác định tên field chứa MaTo
             if (!empty($allResults)) {
                 \Log::info('SAP fields available:', array_keys($allResults[0]));
             }

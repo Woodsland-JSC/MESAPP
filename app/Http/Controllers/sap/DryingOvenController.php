@@ -227,32 +227,48 @@ class DryingOvenController extends Controller
             ], 500);
         }
     }
+
     // Tạo pallet
     // function StorePalletNew(Request $request)
     // {
+    //     // Initialize response variables outside try block to make them accessible in catch
+    //     $stockTransferResponse = null;
+    //     $palletResponse = null;
+    //     $stockTransferResult = null;
+    //     $pallet = null;
+
     //     try {
-    //         // 0. Khởi tạo giao dịch và khởi tạo biến 
+    //         // 0. Khởi tạo giao dịch và khởi tạo biến
     //         DB::beginTransaction();
-    //         $res = null;
-    //         $res2 = null;
     //         $current_week = now()->format('W');
     //         $current_year = now()->year;
 
     //         // 1. Lấy dữ liệu từ request và thông tin kho
-    //         $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay']);
+    //         $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee']);
     //         $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
     //         $towarehouse = WarehouseCS();
 
-    //         // 1.1. Tạo pallet mới
-    //         $recordCount = Pallet::whereYear('created_at', $current_year)
-    //             ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-    //             ->count() + 1;
-
+    //         // 1.1. Tạo pallet mới    
     //         $combinedQuyCach = implode('_', $quyCachList);
 
+    //         // Bộ đếm mới 
+    //         $recordCount = Pallet::whereYear('created_at', $current_year)
+    //             ->whereRaw('WEEK(created_at, 1) = ?', [$current_week])
+    //             ->where('factory', $palletData['MaNhaMay'])  // Thêm điều kiện lọc theo nhà máy
+    //             ->count() + 1;
+
+    //         $generatedCode = $palletData['MaNhaMay']
+    //             . substr($current_year, -2)
+    //             . $current_week
+    //             . '-'
+    //             . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+
     //         $pallet = Pallet::create($palletData + [
-    //             'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
-    //             'QuyCach' => $combinedQuyCach
+    //             'Code' => $generatedCode,
+    //             'factory' => $palletData['MaNhaMay'],
+    //             'QuyCach' => $combinedQuyCach,
+    //             'stacking_time' => $palletData['stackingTime'] ?? null,
+    //             'employee' => $palletData['employee'] ?? null,
     //         ]);
 
     //         // 2. Lấy dữ liệu Details và tạo chi tiết pallet
@@ -301,6 +317,7 @@ class DryingOvenController extends Controller
     //                 "WarehouseCode" =>  $towarehouse,
     //                 "FromWarehouseCode" => $detailData['WhsCode'],
     //                 "Quantity" =>  $datainsert['Qty'],
+
     //                 "BatchNumbers" => [
     //                     [
     //                         "BatchNumber" => $detailData['BatchNum'],
@@ -308,7 +325,7 @@ class DryingOvenController extends Controller
     //                     ]
     //                 ]
     //             ];
-    //             // dd($ldt);
+
     //             $ldt2[] = [
     //                 "U_Item" => $detailData['ItemCode'],
     //                 "U_CRong" => $detailData['CRong'] ? $detailData['CRong'] : 0,
@@ -328,9 +345,10 @@ class DryingOvenController extends Controller
     //             "ToWarehouse" =>  $towarehouse,
     //             "FromWarehouse" => $detailData['WhsCode'],
     //             "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+    //             "U_MoveType" => 'DC_SAY',
     //             "StockTransferLines" => $ldt
     //         ];
-    //         // dd($body);
+
     //         $body2 = [
     //             "U_Code" => $pallet->Code,
     //             "U_Status" => "CS",
@@ -340,7 +358,7 @@ class DryingOvenController extends Controller
     //             "G_PALLETLCollection" => $ldt2
     //         ];
 
-    //         // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về (mới, check kết quả API trước khi thực hiện API kế tiếp)
+    //         // 3. Thực hiện lưu dữ liệu về SAP và nhận kết quả trả về
     //         $stockTransferResponse = Http::withOptions([
     //             'verify' => false,
     //         ])->withHeaders([
@@ -349,16 +367,12 @@ class DryingOvenController extends Controller
     //             "Authorization" => "Basic " . BasicAuthToken(),
     //         ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
 
-    //         $stockTransferResult = $stockTransferResponse->json();
-
-    //         // Kiểm tra lỗi API StockTransfers
-    //         if (!empty($stockTransferResult['error'])) {
-    //             DB::rollBack();
-    //             return response()->json([
-    //                 'message' => 'Failed to create stock transfer in SAP',
-    //                 'error' => $stockTransferResult['error'],
-    //             ], 500);
+    //         if (!$stockTransferResponse->successful()) {
+    //             throw new \Exception('Failed to create stock transfer in SAP: ' .
+    //                 ($stockTransferResponse->json()['error']['message'] ?? $stockTransferResponse->body()));
     //         }
+
+    //         $stockTransferResult = $stockTransferResponse->json();
 
     //         // 3.2 Nếu StockTransfers thành công, tiếp tục gọi API Pallet
     //         $palletResponse = Http::withOptions([
@@ -369,43 +383,30 @@ class DryingOvenController extends Controller
     //             "Authorization" => "Basic " . BasicAuthToken(),
     //         ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
-    //         $palletResult = $palletResponse->json();
+    //         if (!$palletResponse->successful()) {
+    //             // Thực hiện revert StockTransfers
+    //             $revertResponse = Http::withOptions([
+    //                 'verify' => false,
+    //             ])->withHeaders([
+    //                 "Content-Type" => "application/json",
+    //                 "Accept" => "application/json",
+    //                 "Authorization" => "Basic " . BasicAuthToken(),
+    //             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
 
-    //         // Kiểm tra lỗi API Pallet
-    //         if (!empty($palletResult['error'])) {
-    //             // Thực hiện revert StockTransfers nếu có thể
-    //             try {
-    //                 $revertResponse = Http::withOptions([
-    //                     'verify' => false,
-    //                 ])->withHeaders([
-    //                     "Content-Type" => "application/json",
-    //                     "Accept" => "application/json",
-    //                     "Authorization" => "Basic " . BasicAuthToken(),
-    //                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
-
-    //                 if (!$revertResponse->successful()) {
-    //                     // Log thông tin về việc không thể revert
-    //                     \Log::error('Failed to revert StockTransfer', [
-    //                         'docEntry' => $stockTransferResult['DocEntry'],
-    //                         'error' => $revertResponse->json()
-    //                     ]);
-    //                 }
-    //             } catch (\Exception $e) {
-    //                 \Log::error('Exception when reverting StockTransfer', [
+    //             if (!$revertResponse->successful()) {
+    //                 \Log::error('Failed to revert StockTransfer', [
     //                     'docEntry' => $stockTransferResult['DocEntry'],
-    //                     'error' => $e->getMessage()
+    //                     'error' => $revertResponse->json()
     //                 ]);
     //             }
 
-    //             DB::rollBack();
-    //             return response()->json([
-    //                 'message' => 'Failed to create pallet in SAP',
-    //                 'error' => $palletResult['error'],
-    //                 'note' => 'Stock transfer has been attempted to revert'
-    //             ], 500);
+    //             throw new \Exception('Failed to create pallet in SAP: ' .
+    //                 ($palletResponse->json()['error']['message'] ?? $palletResponse->body()));
     //         }
 
-    //         // Trường hợp cả 2 API đều thành công
+    //         $palletResult = $palletResponse->json();
+
+    //         // 4. Trường hợp cả 2 API đều thành công, cập nhật thông tin pallet
     //         Pallet::where('palletID', $pallet->palletID)->update([
     //             'DocNum' => $stockTransferResult['DocNum'],
     //             'DocEntry' => $stockTransferResult['DocEntry'],
@@ -413,25 +414,42 @@ class DryingOvenController extends Controller
     //             'CreateBy' => Auth::user()->id,
     //             'activeStatus' => 0,
     //         ]);
+
     //         DB::commit();
 
     //         return response()->json([
     //             'message' => 'Pallet created successfully',
     //             'data' => [
     //                 'pallet' => $pallet,
-    //                 'stockTransferResult' => $stockTransferResponse->json(),
-    //                 'palletResult' => $palletResponse->json(),
+    //                 'stockTransferResult' => $stockTransferResult,
+    //                 'palletResult' => $palletResult,
     //             ]
     //         ]);
     //     } catch (\Exception | QueryException $e) {
     //         DB::rollBack();
-
-    //         return response()->json([
-    //             'message' => 'Failed to create pallet and details',
+    //         \Log::error('Error creating pallet', [
     //             'error' => $e->getMessage(),
-    //             'stockTransferResult' => $stockTransferResponse->json(),
-    //             'palletResult' => $palletResponse->json(),
-    //         ], 500);
+    //             'trace' => $e->getTraceAsString(),
+    //             'stockTransferResponse' => $stockTransferResponse ? $stockTransferResponse->json() : null,
+    //             'palletResponse' => $palletResponse ? $palletResponse->json() : null,
+    //         ]);
+
+    //         // Prepare error response with details
+    //         $errorResponse = [
+    //             'message' => 'Failed to create pallet and details',
+    //             'error' => $e->getMessage()
+    //         ];
+
+    //         // Include API responses if available
+    //         if ($stockTransferResponse) {
+    //             $errorResponse['stockTransferResult'] = $stockTransferResponse->json();
+    //         }
+
+    //         if ($palletResponse) {
+    //             $errorResponse['palletResult'] = $palletResponse->json();
+    //         }
+
+    //         return response()->json($errorResponse, 500);
     //     }
     // }
 
@@ -454,21 +472,53 @@ class DryingOvenController extends Controller
             $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
             $towarehouse = WarehouseCS();
 
-            // 1.1. Tạo pallet mới    
+            // 1.1. Tạo pallet mới với kiểm tra mã trùng lặp
             $combinedQuyCach = implode('_', $quyCachList);
 
-            // Bộ đếm mới 
-            $recordCount = Pallet::whereYear('created_at', $current_year)
+            // Bộ đếm mới với kiểm tra mã trùng lặp
+            $baseRecordCount = Pallet::whereYear('created_at', $current_year)
                 ->whereRaw('WEEK(created_at, 1) = ?', [$current_week])
                 ->where('factory', $palletData['MaNhaMay'])  // Thêm điều kiện lọc theo nhà máy
                 ->count() + 1;
 
-            $generatedCode = $palletData['MaNhaMay']
-                . substr($current_year, -2)
-                . $current_week
-                . '-'
-                . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+            // Tạo mã pallet với logic kiểm tra trùng lặp
+            $generatedCode = '';
+            $recordCount = $baseRecordCount;
+            $maxAttempts = 1000; // Giới hạn số lần thử để tránh vòng lặp vô hạn
+            $attempt = 0;
 
+            do {
+                $attempt++;
+
+                // Tạo mã pallet
+                $generatedCode = $palletData['MaNhaMay']
+                    . substr($current_year, -2)
+                    . $current_week
+                    . '-'
+                    . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+
+                // Kiểm tra mã đã tồn tại chưa (kiểm tra cả trong DB và trong SAP nếu cần)
+                $existingPallet = Pallet::where('Code', $generatedCode)->first();
+
+                if ($existingPallet) {
+                    // Nếu mã đã tồn tại, tăng số thứ tự lên 1
+                    $recordCount++;
+                    \Log::info("Pallet code exists, incrementing: {$generatedCode} -> attempt {$attempt}");
+                } else {
+                    // Nếu mã chưa tồn tại, có thể sử dụng
+                    break;
+                }
+
+                // Tránh vòng lặp vô hạn
+                if ($attempt >= $maxAttempts) {
+                    throw new \Exception("Unable to generate unique pallet code after {$maxAttempts} attempts");
+                }
+            } while (true);
+
+            // Log thông tin mã được tạo
+            \Log::info("Generated unique pallet code: {$generatedCode} after {$attempt} attempt(s)");
+
+            // Tạo pallet với mã đã được đảm bảo unique
             $pallet = Pallet::create($palletData + [
                 'Code' => $generatedCode,
                 'factory' => $palletData['MaNhaMay'],
@@ -476,20 +526,6 @@ class DryingOvenController extends Controller
                 'stacking_time' => $palletData['stackingTime'] ?? null,
                 'employee' => $palletData['employee'] ?? null,
             ]);
-
-
-            // Bộ đếm cũ
-            // $recordCount = Pallet::whereYear('created_at', $current_year)
-            //     ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-            //     ->count() + 1;
-
-            // $pallet = Pallet::create($palletData + [
-            //     'Code' => $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT),
-            //     'factory' => $palletData['MaNhaMay'],
-            //     'QuyCach' => $combinedQuyCach,
-            //     'stacking_time' => $palletData['stackingTime'] ?? null,
-            //     'employee' => $palletData['employee'] ?? null,
-            // ]);
 
             // 2. Lấy dữ liệu Details và tạo chi tiết pallet
             $palletDetails = $request->input('Details', []);

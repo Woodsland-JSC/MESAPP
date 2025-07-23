@@ -174,6 +174,7 @@ function ReceiptInSapReportVCN() {
                 width: item.U_CRong,
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
+                market_code: item.MaThiTruong,
                 quantity: parseInt(item.Quantity),
                 m3_sp: Number(item.U_M3SP),
                 m3: Number(item.M3),
@@ -467,6 +468,12 @@ function ReceiptInSapReportVCN() {
             pinned: "left",
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
+            filter: true,
+        },
+        {
+            headerName: "Mã thị trường",
+            field: "market_code",
+            width: 200,
             filter: true,
         },
         {

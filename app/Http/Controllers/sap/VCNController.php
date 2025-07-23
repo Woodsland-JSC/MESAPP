@@ -2436,6 +2436,8 @@ class VCNController extends Controller
                     ]]
                 ];
 
+                dd($data->team);
+
                 historySLVCN::create(
                     [   
                         'notiId' => $request->id,
