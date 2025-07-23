@@ -317,6 +317,7 @@ function ReceiptInSapReportCBG() {
         {
             headerName: "Mã thị trường",
             field: "market_code",
+            pinned: "left",
             minWidth: 200,
             filter: true,
         },

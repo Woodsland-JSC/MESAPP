@@ -415,6 +415,7 @@ function ReceiptInSapReportVCN() {
         {
             headerName: "Mã thị trường",
             field: "market_code",
+            pinned: "left",
             width: 200,
             filter: true,
         },
