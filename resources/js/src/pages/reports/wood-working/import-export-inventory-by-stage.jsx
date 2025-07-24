@@ -260,7 +260,6 @@ function ImportExportInventoryByStage() {
                         width: 170,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
-                        aggFunc: "sum",
                         valueGetter: (params) => {
                             if (params.node.level == -1 && params.node.footer) {
                                 if (params.api && params.api.getDisplayedRowAtIndex) {
@@ -370,7 +369,6 @@ function ImportExportInventoryByStage() {
                         width: 170,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
-                        aggFunc: "sum",
                         valueGetter: (params) => {
                             if (params.node.level == -1 && params.node.footer) {
                                 if (params.api && params.api.getDisplayedRowAtIndex) {
@@ -425,7 +423,6 @@ function ImportExportInventoryByStage() {
                         width: 170,
                         suppressHeaderMenuButton: true,
                         valueFormatter: (params) => formatNumber(Number(params.value) || 0),
-                        aggFunc: "sum",
                         valueGetter: (params) => {
                             if (params.node.level == -1 && params.node.footer) {
                                 if (params.api && params.api.getDisplayedRowAtIndex) {
