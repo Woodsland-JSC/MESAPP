@@ -272,7 +272,7 @@ function CheckListItem(props) {
                                     <Popover>
                                         <PopoverTrigger>
                                             <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer mr-3">
-                                                Ghi nhận
+                                                Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
@@ -356,7 +356,7 @@ function CheckListItem(props) {
                                 <Popover>
                                     <PopoverTrigger>
                                         <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0">
-                                            Ghi nhận
+                                            Lịch sử
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
@@ -384,7 +384,7 @@ function CheckListItem(props) {
                                     <Popover>
                                         <PopoverTrigger>
                                             <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
-                                                Ghi nhận
+                                                Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
@@ -498,7 +498,7 @@ function CheckListItem(props) {
                                 <Popover>
                                     <PopoverTrigger>
                                         <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0">
-                                            Ghi nhận
+                                            Lịch sử
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
@@ -526,7 +526,7 @@ function CheckListItem(props) {
                                     <Popover>
                                         <PopoverTrigger>
                                             <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
-                                                Ghi nhận
+                                                Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
@@ -536,23 +536,6 @@ function CheckListItem(props) {
                                                 Ghi nhận tình trạng
                                             </PopoverHeader>
                                             <PopoverBody>
-                                                {/* <div className="space-y-2">
-                                            <div>
-                                                Mẫu 1 : <span>{sample1}</span>
-                                            </div>
-                                            <div>
-                                                Mẫu 2 : <span>{sample2}</span>
-                                            </div>
-                                            <div>
-                                                Mẫu 3 : <span>{sample3}</span>
-                                            </div>
-                                            <div>
-                                                Mẫu 4 : <span>{sample4}</span>
-                                            </div>
-                                            <div>
-                                                Mẫu 5 : <span>{sample5}</span>
-                                            </div>
-                                        </div> */}
                                                 <div className="space-y-2">
                                                     {Object.entries(
                                                         samples

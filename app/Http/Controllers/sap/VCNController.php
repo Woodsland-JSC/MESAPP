@@ -2436,9 +2436,13 @@ class VCNController extends Controller
                     ]]
                 ];
 
+                dd($data->team);
+
                 historySLVCN::create(
-                    [
-                        // 'LSX' => $data->LSX,
+                    [   
+                        'notiId' => $request->id,
+                        'HXL' => $huongxuly,
+                        'LL' => $loailoi,
                         'itemchild' => $allocate['ItemChild'],
                         'SPDich' => $data->FatherCode,
                         'to' => $data->Team,
@@ -2446,7 +2450,8 @@ class VCNController extends Controller
                         "TOChuyenVe" => $teamBack,
                         'quantity' => $allocate['Allocate'],
                         'ObjType' => 202,
-                        'DocEntry' => ""
+                        'DocEntry' => "",
+                        'subCode' => $subCode,
                     ]
                 );
             }

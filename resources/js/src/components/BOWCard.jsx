@@ -79,7 +79,7 @@ function BOWCard(props) {
     };
 
     return (
-        <div className=" rounded-2xl bg-white h-[24rem] shadow-sm">
+        <div className=" rounded-2xl bg-gray-50 h-[24rem] shadow-sm">
             {/* Header */}
             <div className="flex flex-col justify-start rounded-t-xl py-2 pt-0.5 px-4 h-[31%]">
                 <div className="flex space-x-4">
@@ -126,7 +126,7 @@ function BOWCard(props) {
 
             {/* Controller */}
             <Link to={`${detailLink}`} className="">
-                <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#F8FAFC] rounded-b-2xl h-[20%]">
+                <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#f4f7fa] rounded-b-2xl h-[20%]">
                     <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
                         Xem chi tiết
                         <HiArrowRight className="ml-2" />

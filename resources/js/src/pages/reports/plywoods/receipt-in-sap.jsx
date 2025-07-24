@@ -97,7 +97,7 @@ function ReceiptInSapReportVCN() {
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
         try {
-            const res = await reportApi.getTeamByFactory(param, 'VCN');
+            const res = await reportApi.getTeamByFactory(param, "VCN");
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -162,7 +162,7 @@ function ReceiptInSapReportVCN() {
                 params.to_date,
                 params.plant,
                 params.To,
-                'VCN',
+                "VCN",
                 { signal }
             );
             const formattedData = res.map((item) => ({
@@ -174,6 +174,7 @@ function ReceiptInSapReportVCN() {
                 width: item.U_CRong,
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
+                market_code: item.MaThiTruong,
                 quantity: parseInt(item.Quantity),
                 m3_sp: Number(item.U_M3SP),
                 m3: Number(item.M3),
@@ -193,7 +194,7 @@ function ReceiptInSapReportVCN() {
             setRowData(formattedData);
             setReportData(res);
         } catch (error) {
-            if (error.name === 'AbortError' || signal.aborted) {
+            if (error.name === "AbortError" || signal.aborted) {
                 return;
             }
             console.error(error);
@@ -244,7 +245,7 @@ function ReceiptInSapReportVCN() {
             setIsDataReportLoading(false);
             setReportDataMobile(res);
         } catch (error) {
-            if (error.name === 'AbortError' || signal.aborted) {
+            if (error.name === "AbortError" || signal.aborted) {
                 return;
             }
             console.error(error);
@@ -275,13 +276,7 @@ function ReceiptInSapReportVCN() {
             setReportData([]);
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [
-        selectedTeams,
-        selectedFactory,
-        fromDate,
-        toDate,
-        getReportData,
-    ]);
+    }, [selectedTeams, selectedFactory, fromDate, toDate, getReportData]);
 
     useEffect(() => {
         const allFieldsFilledMobile =
@@ -296,12 +291,7 @@ function ReceiptInSapReportVCN() {
             setReportDataMobile([]);
             console.log("Không thể gọi API vì không đủ thông tin. (Mobile)");
         }
-    }, [
-        fromDateMobile,
-        toDateMobile,
-        selectedTeamMobile,
-        getReportDataMobile,
-    ]);
+    }, [fromDateMobile, toDateMobile, selectedTeamMobile, getReportDataMobile]);
 
     const getAllFactory = async () => {
         try {
@@ -313,28 +303,25 @@ function ReceiptInSapReportVCN() {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const getAllStage = async () => {
         try {
-            const response = await reportApi.getStageByDivision('VCN');
-            setStages(response)
+            const response = await reportApi.getStageByDivision("VCN");
+            setStages(response);
         } catch (error) {
             console.error(error);
             // toast.error("Đã xảy ra lỗi khi lấy dữ liệu công đoạn.");
         }
-    }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                await Promise.all([
-                    getAllStage(),
-                    getAllFactory()
-                ]);
+                await Promise.all([getAllStage(), getAllFactory()]);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error("Error fetching data:", error);
                 toast.error("Đã xảy ra lỗi khi tải dữ liệu.");
             } finally {
                 setLoading(false);
@@ -349,7 +336,7 @@ function ReceiptInSapReportVCN() {
         const userPlant =
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
-        let stageOrder = null
+        let stageOrder = null;
 
         if (stages && stages.length > 0) {
             stageOrder = stages.reduce((acc, cur) => {
@@ -359,7 +346,7 @@ function ReceiptInSapReportVCN() {
         }
 
         reportApi
-            .getTeamByFactory(userPlant, 'VCN')
+            .getTeamByFactory(userPlant, "VCN")
             .then((response) => {
                 let res = response;
                 if (stageOrder) {
@@ -367,7 +354,7 @@ function ReceiptInSapReportVCN() {
                         const orderA = stageOrder[a.CDOAN] || 999;
                         const orderB = stageOrder[b.CDOAN] || 999;
                         return orderA - orderB;
-                    })
+                    });
                 } else {
                     res = res.sort((a, b) => a.Name.localeCompare(b.Name));
                 }
@@ -376,7 +363,7 @@ function ReceiptInSapReportVCN() {
                         value: item.Code || "",
                         label: item.Name || "",
                     }))
-                    .filter((option) => option.label)
+                    .filter((option) => option.label);
                 setTeamOptions(options);
             })
             .catch((error) => {
@@ -397,7 +384,7 @@ function ReceiptInSapReportVCN() {
     };
 
     const handleExportExcel = useCallback(() => {
-        const factory = selectedFactory || 'Tất cả';
+        const factory = selectedFactory || "Tất cả";
         const fileName = `Báo cáo thông tin sản lượng nhận tại SAP_${factory}.xlsx`;
 
         gridRef.current.api.exportDataAsExcel({
@@ -425,7 +412,13 @@ function ReceiptInSapReportVCN() {
             filter: true,
             headerComponentParams: { displayName: "Tổ sản xuất" },
         },
-
+        {
+            headerName: "Mã thị trường",
+            field: "market_code",
+            pinned: "left",
+            width: 200,
+            filter: true,
+        },
         {
             headerName: "Mã chi tiết",
             field: "itemcode",
@@ -449,7 +442,7 @@ function ReceiptInSapReportVCN() {
             pinned: "left",
             suppressHeaderMenuButton: true,
             filter: true,
-            valueFormatter: (params) => formatNumber(Number(params.value) || 0)
+            valueFormatter: (params) => formatNumber(Number(params.value) || 0),
         },
         {
             headerName: "Rộng",
@@ -539,7 +532,7 @@ function ReceiptInSapReportVCN() {
             headerName: "DocNum",
             field: "doc_num",
             minWidth: 200,
-            filter: true
+            filter: true,
         },
         {
             headerName: "MES NotiID",
@@ -601,10 +594,11 @@ function ReceiptInSapReportVCN() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
-                ? "border-[#86ABBE] bg-[#eaf8ff]"
-                : "border-gray-300"
-                }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
+                selectedFactory === value
+                    ? "border-[#86ABBE] bg-[#eaf8ff]"
+                    : "border-gray-300"
+            }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -613,10 +607,11 @@ function ReceiptInSapReportVCN() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${selectedFactory === value
-                    ? "text-[#17506B] font-medium"
-                    : "text-gray-400 group-hover:text-[#17506B]"
-                    }`}
+                className={`${
+                    selectedFactory === value
+                        ? "text-[#17506B] font-medium"
+                        : "text-gray-400 group-hover:text-[#17506B]"
+                }`}
             >
                 {label}
             </div>
@@ -781,16 +776,22 @@ function ReceiptInSapReportVCN() {
                                         Chọn nhà máy
                                     </label>
                                     <div className="flex flex-col sm:flex-row gap-3">
-                                        {
-                                            factories && factories.length > 0 && factories.map(factory => (
-                                                <div key={factory.U_FAC} className="col-span-1 w-full">
+                                        {factories &&
+                                            factories.length > 0 &&
+                                            factories.map((factory) => (
+                                                <div
+                                                    key={factory.U_FAC}
+                                                    className="col-span-1 w-full"
+                                                >
                                                     <FactoryOption
                                                         value={factory.U_FAC}
-                                                        label={factory.Name || factory.U_FAC}
+                                                        label={
+                                                            factory.Name ||
+                                                            factory.U_FAC
+                                                        }
                                                     />
                                                 </div>
-                                            ))
-                                        }
+                                            ))}
                                     </div>
                                 </div>
                                 {/* <div className="col-span-1 w-full flex items-end">
@@ -839,44 +840,64 @@ function ReceiptInSapReportVCN() {
                                         <div
                                             className="w-full grid"
                                             style={{
-                                                gridTemplateColumns: `repeat(${stages?.length ? stages.length : 5}, minmax(0, 1fr))`
-                                            }}>
-                                            {
-                                                stages && stages.length > 0 && stages.map((stage, index) => (
-                                                    <div key={index} className="col-span-1 space-y-2">
+                                                gridTemplateColumns: `repeat(${
+                                                    stages?.length
+                                                        ? stages.length
+                                                        : 5
+                                                }, minmax(0, 1fr))`,
+                                            }}
+                                        >
+                                            {stages &&
+                                                stages.length > 0 &&
+                                                stages.map((stage, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="col-span-1 space-y-2"
+                                                    >
                                                         <div className="text-[#155979] uppercase font-medium">
                                                             {stage.Name}
                                                         </div>
                                                         {teamData
                                                             ?.filter(
                                                                 (item) =>
-                                                                    item.CDOAN === stage.Code
+                                                                    item.CDOAN ===
+                                                                    stage.Code
                                                             )
                                                             .sort((a, b) =>
                                                                 a.Name.localeCompare(
                                                                     b.Name
                                                                 )
                                                             )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Checkbox
-                                                                        value={
-                                                                            item.Code
+                                                            .map(
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
                                                                         }
-                                                                        onChange={
-                                                                            handleCheckboxChange
-                                                                        }
-                                                                        isChecked={selectedTeams.includes(
-                                                                            item.Code
-                                                                        )}
                                                                     >
-                                                                        {item.Name}
-                                                                    </Checkbox>
-                                                                </div>
-                                                            ))}
+                                                                        <Checkbox
+                                                                            value={
+                                                                                item.Code
+                                                                            }
+                                                                            onChange={
+                                                                                handleCheckboxChange
+                                                                            }
+                                                                            isChecked={selectedTeams.includes(
+                                                                                item.Code
+                                                                            )}
+                                                                        >
+                                                                            {
+                                                                                item.Name
+                                                                            }
+                                                                        </Checkbox>
+                                                                    </div>
+                                                                )
+                                                            )}
                                                     </div>
-                                                ))
-                                            }
+                                                ))}
                                         </div>
                                     </div>
                                 )}
@@ -1002,7 +1023,10 @@ function ReceiptInSapReportVCN() {
                                 {reportDataMobile?.length > 0 ? (
                                     <>
                                         {filteredData?.map((item, index) => (
-                                            <div key={index} className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4">
+                                            <div
+                                                key={index}
+                                                className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4"
+                                            >
                                                 <div className="flex-col w-full">
                                                     <div className="text-xl font-semibold text-[#17506B] mb-1">
                                                         {item.ItemName}

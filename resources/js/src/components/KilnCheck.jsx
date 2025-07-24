@@ -207,17 +207,17 @@ function KilnCheck(props) {
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        <div className="xl:ml-10 uppercase xl:text-xl ">
+                        <div className="xl:ml-10 uppercase xl:text-2xl serif ">
                             Kiểm tra lò sấy
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <div className="xl:px-10 pb-2 text-[16px] text-gray-500 ">
+                        <div className="xl:px-10 pb-2.5 text-[16px] text-gray-500 ">
                             <strong>Ghi chú: </strong>Lò sấy chỉ đủ tiêu chuẩn
                             hoạt động khi đã đáp ứng tất cả nhu cầu dưới đây
                         </div>
-                        <div className="xl:px-10 grid xl:grid-cols-4 lg:grid-cols-3 gap-6 mb-4">
+                        <div className="xl:px-8 grid xl:grid-cols-2 lg:grid-cols-2 gap-2 mb-4">
                             {/* Hiển thị tất cả giá trị checkItems */}
                             {checkItems.map((item, index) => (
                                 <CheckListItem
@@ -240,29 +240,10 @@ function KilnCheck(props) {
                     </ModalBody>
                     <ModalFooter className="bg-white border-t-2 border-gray-200 w-full sticky bottom-0">
                         <div className=" xl:flex items-center justify-between xl:px-6 md:px-6 w-full">
-                            {/* <div className="flex text-lg ">
-                                <strong className="hidden xl:flex md:flex">
-                                    Kết luận:{" "}
-                                </strong>
-                                <p
-                                    className={`ml-2  ${
-                                        checkedCount === 12
-                                            ? "text-[#0E8E59]"
-                                            : "text-[#961717]"
-                                    }`}
-                                >
-                                    {checkedCount === 12
-                                        ? "Mẻ sấy đã đủ điều kiện hoạt động."
-                                        : "Mẻ sấy chưa đủ điều kiện hoạt động."}
-                                </p>
-                                <p className="ml-2">
-                                    (<span>{checkedCount}</span>/12)
-                                </p>
-                            </div> */}
                             <div className="flex xl:w-fit md:w-fit w-full items-center justify-end py-4 xl:py-0 lg:py-0 md:py-0 gap-x-3 ">
                                 <button
                                     onClick={onClose}
-                                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                    className="bg-gray-800 p-2 rounded-x px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                 >
                                     Đóng
                                 </button>                               

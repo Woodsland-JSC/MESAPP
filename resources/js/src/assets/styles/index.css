@@ -472,3 +472,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .css-13cymwt-control {
     border-radius: 8px !important;
 }
+
+.swal2-confirm .swal2-styled{
+    background-color: #7066e0 !important;
+}

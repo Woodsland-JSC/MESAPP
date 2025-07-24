@@ -763,8 +763,8 @@ function ControllerCard(props) {
             >
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>
-                        <div className="xl:ml-6 uppercase xl:text-xl ">
+                    <ModalHeader className="!pb-0 mb-1">
+                        <div className="xl:ml-6 xl:text-3xl serif font-bold">
                             Kiểm tra lò sấy
                         </div>
                     </ModalHeader>
@@ -787,7 +787,7 @@ function ControllerCard(props) {
                                     />
                                 </div>
                             ) : (
-                                <div className="w-full xl:px-10 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-6">
+                                <div className="w-full xl:px-8 xl:pb-4 grid xl:grid-cols-4 lg:grid-cols-4 mb-4 gap-4">
                                     {/* Hiển thị tất cả giá trị checkItems */}
                                     <>
                                         {checkItems.map((item, index) => (
@@ -869,7 +869,7 @@ function ControllerCard(props) {
                             <div className="flex xl:w-fit md:w-fit w-full items-center justify-end py-4 xl:py-0 lg:py-0 md:py-0 gap-x-3 ">
                                 <button
                                     onClick={onClose}
-                                    className="bg-gray-300  p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                    className="bg-gray-300  p-2 rounded-xl font-medium px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
                                 >
                                     Đóng
                                 </button>

@@ -367,25 +367,27 @@ const AwaitingReception = ({
                     break;
             }
             // console.log("Checking receipt successful", res);
-            if(res?.requiredInventory?.length == 0) {
+            if (res?.requiredInventory?.length == 0) {
                 showstockCheckingInfo();
                 onStockCheckingClose();
             }
             setCheckingLoading(false);
         } catch (error) {
-            const showRequireQuantityAlert = (requiredItems) => { 
-                const tableRows = requiredItems.map((item, index) => 
-                    `<tr style="font-size: 14px; max-height: 280px; overflow-y: auto;">
+            const showRequireQuantityAlert = (requiredItems) => {
+                const tableRows = requiredItems
+                    .map(
+                        (item, index) =>
+                            `<tr style="font-size: 14px; max-height: 280px; overflow-y: auto;">
                         <td style="border: 1px solid #ddd; padding: 6px; user-select: text; text-align: center;">${item.SubItemCode}</td>
                         <td style="border: 1px solid #ddd; padding: 6px; text-align: right; user-select: text;">${item.requiredQuantity}</td>
                         <td style="border: 1px solid #ddd; padding: 6px; user-select: text;">${item.wareHouse}</td>
                     </tr>`
-                ).join('');
-            
+                    )
+                    .join("");
+
                 Swal.fire({
                     title: "Nguyên vật liệu không đủ.",
-                    html: 
-                        `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung nguyên vật liệu:</p>
+                    html: `<p style="font-size: 16px; margin: 6px 0px; user-select: text;">Vui lòng bổ sung nguyên vật liệu:</p>
                         <table style="width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #ddd; user-select: text;">
                             <thead>
                                 <tr style="font-size: 14px;">
@@ -399,20 +401,24 @@ const AwaitingReception = ({
                             </tbody>
                         </table>`,
                     zIndex: 50001,
-                    confirmButtonColor: '#3085d6',
-                    width: '500px',
+                    confirmButtonColor: "#3085d6",
+                    width: "500px",
                     didOpen: () => {
                         window.copyToClipboard = (id, button) => {
                             const text = document.getElementById(id).innerText;
                             navigator.clipboard.writeText(text).then(() => {
-                                button.querySelector('.copy-icon').style.backgroundColor = '#d1e7dd';
+                                button.querySelector(
+                                    ".copy-icon"
+                                ).style.backgroundColor = "#d1e7dd";
                             });
                         };
-                    }
+                    },
                 });
             };
             if (error.response?.data?.status_code === 40001) {
-                showRequireQuantityAlert( error.response?.data?.requiredInventory || []);
+                showRequireQuantityAlert(
+                    error.response?.data?.requiredInventory || []
+                );
             } else {
                 toast.error("Có lỗi xảy ra khi kiểm tra.");
             }
@@ -484,11 +490,17 @@ const AwaitingReception = ({
                 <div className="!px-5 !py-3.5">
                     <Stack mt="1" spacing="4.5px">
                         <div className="flex flex-col">
-                            <span className="uppercase text-xs font-semibold text-gray-500">
-                                {data?.SubItemName
-                                    ? "Bán thành phẩm"
-                                    : "Thành phẩm"}
-                            </span>
+                            <div className="flex items-center   justify-between gap-x-3 mb-1.5">
+                                <span className="uppercase text-xs font-semibold text-gray-500">
+                                    {data?.SubItemName
+                                        ? "Bán thành phẩm"
+                                        : "Thành phẩm"}
+                                </span>
+                                <span className="uppercase text-xs p-1 px-3 bg-gray-100 rounded-2xl font-semibold text-gray-600">
+                                    ID: {data?.id}
+                                </span>
+                            </div>
+
                             <span className="font-bold text-[20px] text-[#155979]">
                                 {variant === "QC"
                                     ? data?.SubItemName ||
@@ -541,7 +553,8 @@ const AwaitingReception = ({
                                         <>
                                             <span>Mã bán thành phẩm: </span>
                                             <span className="font-bold">
-                                                {data?.SubItemCode || "Không xác định"}
+                                                {data?.SubItemCode ||
+                                                    "Không xác định"}
                                             </span>
                                         </>
                                     ) : (
@@ -550,7 +563,8 @@ const AwaitingReception = ({
                                                 Mã thành phẩm:{" "}
                                             </span>
                                             <span className="w-[65%] font-bold">
-                                                {data?.ItemCode || "Không xác định"}
+                                                {data?.ItemCode ||
+                                                    "Không xác định"}
                                             </span>
                                         </>
                                     )}

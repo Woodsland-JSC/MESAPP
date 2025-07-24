@@ -217,6 +217,14 @@ const VCNReports = [
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
         priority: true,
     },
+        {
+        id: "0003",
+        name: "Báo cáo biện pháp xử lý lỗi (VCN)",
+        link: "/reports/plywoods/defect-handling",
+              description:
+            "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
+        priority: true,
+    },
     {
         id: "0002",
         name: "Báo cáo nhập xuất tồn từng công đoạn",
@@ -254,12 +262,7 @@ const VCNReports = [
     //     priority: false,
     //     responsive: false,
     // },
-    // {
-    //     id: "0003",
-    //     name: "Báo cáo biện pháp xử lý lỗi (VCN)",
-    //     link: "/reports/plywoods/defect-handling",
-    //     priority: false,
-    // },
+
 ];
 
 const DANDReports = [
@@ -771,7 +774,7 @@ function Report() {
                                                         key={index}
                                                         className=""
                                                     >
-                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2 px-4 bg-gray-100 rounded-xl ">
+                                                        <div className="group flex justify-between items-center border-2 border-blue-50 hover:bg-gray-900 hover:cursor-pointer p-2.5 px-4 bg-gray-100 rounded-xl ">
                                                             <div className="flex items-center w-[95%] xl:gap-x-6 lg:gap-x-6 md:gap-x-6 gap-x-4">
                                                                 <div className="group-hover:bg-[#30323A] p-2 rounded-full bg-gray-900">
                                                                     <HiClipboard className="  text-white w-5 h-5 " />

@@ -47,7 +47,7 @@ const reportApi = {
         const url = `/get-stage-by-division`;
         return axiosClient().get(url, {
             params: {
-                DIV: division
+                DIV: division,
             },
         });
     },
@@ -57,7 +57,7 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 FAC: factory,
-                DIV: division
+                DIV: division,
             },
         });
     },
@@ -134,6 +134,18 @@ const reportApi = {
         return axiosClient().get(url, {
             params: {
                 plant: plant,
+                from_date: fromDate,
+                to_date: toDate,
+            },
+        });
+    },
+
+    getDefectResolutionReportPlywood: (plant, prodType, fromDate, toDate) => {
+        const url = `/report/vcn-xulyloi`;
+        return axiosClient().get(url, {
+            params: {
+                plant: plant,
+                prod_type: prodType,
                 from_date: fromDate,
                 to_date: toDate,
             },
@@ -226,22 +238,18 @@ const reportApi = {
                 fromDate,
                 toDate,
                 factory,
-                type
+                type,
             },
             signal,
         });
     },
 
-    getProductionOutputByProductionOrder: (
-        factory,
-        type,
-        { signal } = {}
-    ) => {
+    getProductionOutputByProductionOrder: (factory, type, { signal } = {}) => {
         const url = `/report/sanluongtheolenhsanxuat`;
         return axiosClient().get(url, {
             params: {
                 factory,
-                type
+                type,
             },
             signal,
         });

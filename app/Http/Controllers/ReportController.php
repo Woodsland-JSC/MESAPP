@@ -637,13 +637,6 @@ class ReportController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            // $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_MES(
-            //     IN_FROM_DATE => '$fromDate',
-            //     IN_TO_DATE => '$toDate', 
-            //     IN_FACTORY => '$factory',
-            //     IN_DIVISION => '$khoi',
-            //     OUTPUT_RESULT => ?
-            // )";
             $query = "CALL USP_GT_PRODUCTION_OUTPUT_RECORDING_TEST_MES(
                 IN_FROM_DATE => '$fromDate',
                 IN_TO_DATE => '$toDate', 
@@ -658,7 +651,6 @@ class ReportController extends Controller
                 throw new \Exception('Error executing stored procedure: ' . odbc_errormsg($conDB));
             }
 
-            // Phương pháp đơn giản nhất - chỉ lấy từ result set đầu tiên
             $allResults = array();
             while ($row = odbc_fetch_array($result)) {
                 $allResults[] = $row;
@@ -666,7 +658,6 @@ class ReportController extends Controller
 
             odbc_close($conDB);
 
-            // Debug: In ra field names để xác định tên field chứa MaTo
             if (!empty($allResults)) {
                 \Log::info('SAP fields available:', array_keys($allResults[0]));
             }
@@ -751,6 +742,86 @@ class ReportController extends Controller
 
         if ($plant) {
             $query->where('plant', $plant);
+        }
+
+        if ($fromDate != null && $toDate != null) {
+            // where beetwen
+            $query->whereRaw('DATE(ngaynhan) BETWEEN ? AND ?', [$fromDate, $toDate]);
+        }
+
+        // Get the results
+        $data = $query->get();
+        $itemdistinct = $query->distinct()->pluck('ItemCode');
+        $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
+        $dataQuyCach = qtycachIemSAP($itemstring);
+
+        $dataQuyCachMap = [];
+        foreach ($dataQuyCach as $item) {
+            $dataQuyCachMap[$item['ItemCode']] = $item;
+        }
+
+        // Bổ sung thông tin M3 từ SAP và dd ra kết quả truy vấn
+        $conDB = (new ConnectController)->connect_sap();
+
+        $query = 'SELECT "ItemCode", "U_M3SP" FROM OITM';
+
+        $stmt = odbc_prepare($conDB, $query);
+        if (!$stmt) {
+            throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+        }
+        if (!odbc_execute($stmt)) {
+            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+        }
+
+        $m3sapMap = [];
+        while ($row = odbc_fetch_array($stmt)) {
+            $m3sapMap[$row['ItemCode']] = $row['U_M3SP'];
+        }
+
+        $updatedData = $data->map(function ($item) use ($dataQuyCachMap, $m3sapMap) {
+            // Copy the item to prevent modifying the original
+            $newItem = clone $item;
+
+            // Add existing dimensions if available
+            if (isset($dataQuyCachMap[$item->ItemCode])) {
+                $newItem->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
+                $newItem->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
+                $newItem->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
+            }
+
+            // Add M3SAP value if available and multiply it with Quantity
+            $newItem->M3SAP = isset($m3sapMap[$item->ItemCode]) ? round((float)$m3sapMap[$item->ItemCode] * (float)$item->Quantity, 6) : null;
+
+            return $newItem;
+        });
+
+        odbc_close($conDB);
+
+        return response()->json($updatedData);
+    }
+
+    /** chế biến gỗ */
+    function PlywoodDefectHandling(Request $request)
+    {
+        $branch = $request->input('branch');
+        $plant = $request->input('plant');
+        $prodType = $request->input('prod_type');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Start the query and add conditions based on the request inputs
+        $query = DB::table('gt_vcn_baocaoxulyloi');
+
+        if ($branch) {
+            $query->where('branch', $branch);
+        }
+
+        if ($plant) {
+            $query->where('plant', $plant);
+        }
+
+        if ($prodType) {
+            $query->where('ProdType', $prodType);
         }
 
         if ($fromDate != null && $toDate != null) {

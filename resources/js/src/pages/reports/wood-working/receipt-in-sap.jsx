@@ -91,7 +91,7 @@ function ReceiptInSapReportCBG() {
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
         try {
-            const res = await reportApi.getTeamByFactory(param, 'CBG');
+            const res = await reportApi.getTeamByFactory(param, "CBG");
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -147,7 +147,7 @@ function ReceiptInSapReportCBG() {
                 params.to_date,
                 params.plant,
                 params.To,
-                'CBG'
+                "CBG"
             );
             const formattedData = res.map((item) => ({
                 doc_num: item.DocumentNumber,
@@ -158,6 +158,7 @@ function ReceiptInSapReportCBG() {
                 width: item.U_CRong,
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
+                market_code: item.MaThiTruong,
                 quantity: parseInt(item.Quantity),
                 m3_sp: Number(item.U_M3SP),
                 m3: Number(item.M3),
@@ -256,7 +257,7 @@ function ReceiptInSapReportCBG() {
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
         reportApi
-            .getTeamByFactory(userPlant, 'CBG')
+            .getTeamByFactory(userPlant, "CBG")
             .then((response) => {
                 const options = response
                     .map((item) => ({
@@ -285,7 +286,7 @@ function ReceiptInSapReportCBG() {
     };
 
     const handleExportExcel = useCallback(() => {
-        const factory = selectedFactory || 'Tất cả';
+        const factory = selectedFactory || "Tất cả";
         const fileName = `Báo cáo thông tin sản lượng nhận tại SAP_${factory}.xlsx`;
 
         gridRef.current.api.exportDataAsExcel({
@@ -313,7 +314,13 @@ function ReceiptInSapReportCBG() {
             filter: true,
             headerComponentParams: { displayName: "Tổ sản xuất" },
         },
-
+        {
+            headerName: "Mã thị trường",
+            field: "market_code",
+            pinned: "left",
+            minWidth: 200,
+            filter: true,
+        },
         {
             headerName: "Mã chi tiết",
             field: "itemcode",
@@ -337,7 +344,7 @@ function ReceiptInSapReportCBG() {
             pinned: "left",
             suppressHeaderMenuButton: true,
             filter: true,
-            valueFormatter: (params) => formatNumber(Number(params.value) || 0)
+            valueFormatter: (params) => formatNumber(Number(params.value) || 0),
         },
         {
             headerName: "Rộng",
@@ -427,7 +434,7 @@ function ReceiptInSapReportCBG() {
             headerName: "DocNum",
             field: "doc_num",
             minWidth: 200,
-            filter: true
+            filter: true,
         },
         {
             headerName: "MES NotiID",
@@ -438,8 +445,8 @@ function ReceiptInSapReportCBG() {
     ]);
 
     const localeText = useMemo(() => {
-            return AG_GRID_LOCALE_VI;
-        }, []);
+        return AG_GRID_LOCALE_VI;
+    }, []);
 
     const groupDisplayType = "multipleColumns";
     const getRowStyle = (params) => {
@@ -489,10 +496,11 @@ function ReceiptInSapReportCBG() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
-                ? "border-[#86ABBE] bg-[#eaf8ff]"
-                : "border-gray-300"
-                }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
+                selectedFactory === value
+                    ? "border-[#86ABBE] bg-[#eaf8ff]"
+                    : "border-gray-300"
+            }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -501,10 +509,11 @@ function ReceiptInSapReportCBG() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${selectedFactory === value
-                    ? "text-[#17506B] font-medium"
-                    : "text-gray-400 group-hover:text-[#17506B]"
-                    }`}
+                className={`${
+                    selectedFactory === value
+                        ? "text-[#17506B] font-medium"
+                        : "text-gray-400 group-hover:text-[#17506B]"
+                }`}
             >
                 {label}
             </div>
@@ -619,16 +628,6 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -645,16 +644,6 @@ function ReceiptInSapReportCBG() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (
-                                                isReceived !== null &&
-                                                selectedTeams !== null &&
-                                                selectedTeams.length > 0 &&
-                                                selectedFactory &&
-                                                fromDate &&
-                                                toDate
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />

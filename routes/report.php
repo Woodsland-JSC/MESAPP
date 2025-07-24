@@ -26,5 +26,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/vcn-chitietgiaonhan', [ReportController::class, 'chitietgiaonhanVCN']);
         Route::get('/vcn-sanluongtheothoigian', [ReportController::class, 'sanluongtheothoigianVCN']);
         Route::get('/vcn-sanluongtheongay', [ReportController::class, 'sanluongtheongayVCN']);
+        Route::get('/vcn-xulyloi', [ReportController::class, 'PlywoodDefectHandling']);
     });
 });
