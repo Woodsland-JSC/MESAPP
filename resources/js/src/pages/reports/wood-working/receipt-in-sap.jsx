@@ -166,9 +166,9 @@ function ReceiptInSapReportCBG() {
                 receiver: item.Recipient,
                 warehouse: item.WarehouseCode,
                 receive_date:
-                    item.CreateTime +
+                    moment(item.CreateDate).format("DD/MM/YYYY") +
                     " " +
-                    moment(item.CreateDate).format("DD/MM/YYYY"),
+                    item.CreateTime,
                 production_order_sap: item.ProductionOrderSAP,
                 production_order_mes: item.ProductionOrderMES,
                 mes_noti: item.U_UUID,
@@ -340,7 +340,7 @@ function ReceiptInSapReportCBG() {
         {
             headerName: "Dày",
             field: "thickness",
-            width: 50,
+            width: 100,
             pinned: "left",
             suppressHeaderMenuButton: true,
             filter: true,
@@ -349,7 +349,7 @@ function ReceiptInSapReportCBG() {
         {
             headerName: "Rộng",
             field: "width",
-            width: 50,
+            width: 100,
             pinned: "left",
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -358,7 +358,7 @@ function ReceiptInSapReportCBG() {
         {
             headerName: "Dài",
             field: "height",
-            width: 50,
+            width: 100,
             pinned: "left",
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => formatNumber(Number(params.value) || 0),
@@ -391,7 +391,7 @@ function ReceiptInSapReportCBG() {
         {
             headerName: "M3",
             field: "m3",
-            width: 120,
+            minWidth: 150,
             aggFunc: "sum",
             headerComponentParams: { displayName: "M3" },
             valueFormatter: (params) => {
@@ -399,6 +399,12 @@ function ReceiptInSapReportCBG() {
                 return isNaN(value) ? "0.000000" : value.toFixed(6);
             },
             filter: true,
+        },
+        {
+            headerName: "Ngày giờ nhận",
+            field: "receive_date",
+            filter: true,
+            minWidth: 200,
         },
         {
             headerName: "Người giao",
@@ -418,12 +424,7 @@ function ReceiptInSapReportCBG() {
             filter: true,
             minWidth: 150,
         },
-        {
-            headerName: "Ngày giờ nhận",
-            field: "receive_date",
-            filter: true,
-            minWidth: 200,
-        },
+
         {
             headerName: "Lệnh sản xuất",
             field: "production_order_sap",
@@ -459,7 +460,7 @@ function ReceiptInSapReportCBG() {
     const defaultColDef = useMemo(() => {
         return {
             flex: 1,
-            minWidth: 150,
+            minWidth: 100,
         };
     }, []);
 
