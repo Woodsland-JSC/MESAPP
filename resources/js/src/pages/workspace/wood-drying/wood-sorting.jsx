@@ -659,7 +659,6 @@ function WoodSorting() {
                 setQuyCachList([]);
                 setBatchId("");
                 setStackingTime(0);
-                setSelectedEmployee(null);
                 setStartDate(new Date());
                 setPalletCards([]);
                 setPalletQuantities({});

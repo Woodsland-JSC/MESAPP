@@ -469,7 +469,16 @@ class DryingOvenController extends Controller
 
             // 1. Lấy dữ liệu từ request và thông tin kho
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee']);
-            $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
+            foreach ($palletData as $key => $value) {
+                if (is_array($value)) {
+                    $palletData[$key] = is_array($value) ? implode(',', $value) : $value;
+                }
+            }
+            // $quyCachList = collect($request->input('Details'))->pluck('QuyCach')->unique()->toArray();
+            $quyCachList = collect($request->input('Details'))->map(function ($detail) {
+                $quyCach = $detail['QuyCach'] ?? '';
+                return is_array($quyCach) ? implode('-', $quyCach) : $quyCach;
+            })->unique()->toArray();
             $towarehouse = WarehouseCS();
 
             // 1.1. Tạo pallet mới với kiểm tra mã trùng lặp
@@ -537,7 +546,13 @@ class DryingOvenController extends Controller
             $toQty = 0;
 
             // 2.2. Thực hiện lưu dữ liệu về data web
-            foreach ($palletDetails as $detailData) {
+            foreach ($palletDetails as $index => $detailData) {
+                foreach (['ItemCode', 'ItemName', 'WhsCode', 'BatchNum', 'CDai', 'CDay', 'CRong', 'Qty'] as $field) {
+                    if (isset($detailData[$field]) && is_array($detailData[$field])) {
+                        throw new \Exception("Field {$field} at detail index {$index} should not be an array");
+                    }
+                }
+
                 $datainsert = [];
                 $datainsert['palletID'] = $pallet->palletID;
                 $datainsert['WhsCode2'] = $towarehouse;
@@ -594,12 +609,14 @@ class DryingOvenController extends Controller
                 $totalkl += (float)$detailData['CRong'] * (float)$detailData['CDai'] * (float)$detailData['CDay'] * (float)$detailData['Qty'] / 1000000000;
             }
 
+            $fromWarehouse = $palletDetails[0]['WhsCode'] ?? '';
+
             $body = [
                 "U_Pallet" => $pallet->Code,
                 "U_PalletCreatedBy" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
                 "BPLID" => Auth::user()->branch,
                 "ToWarehouse" =>  $towarehouse,
-                "FromWarehouse" => $detailData['WhsCode'],
+                "FromWarehouse" => $fromWarehouse,
                 "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
                 "U_MoveType" => 'DC_SAY',
                 "StockTransferLines" => $ldt
