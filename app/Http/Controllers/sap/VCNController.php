@@ -2436,7 +2436,7 @@ class VCNController extends Controller
                     ]]
                 ];
 
-                dd($data->team);
+                // dd($data->team);
 
                 historySLVCN::create(
                     [   

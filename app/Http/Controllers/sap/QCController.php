@@ -951,7 +951,7 @@ class QCController extends Controller
         $rootCause = $request->rootCause['value'] ?? '';
         $subCode = $request->subCode['value'] ?? '';
         //check kho QC
-        $whs = $this->getQCWarehouseByUserVCN('NG');
+        $whs = $this->getQCWarehouseByUser('NG');
         if ($whs == -1) {
             return response()->json([
                 'error' => false,
