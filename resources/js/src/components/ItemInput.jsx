@@ -1239,6 +1239,7 @@ const ItemInput = ({
                 size="full"
                 onClose={closeInputModal}
                 scrollBehavior="inside"
+                trapFocus={false}
             >
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent className="!px-0">

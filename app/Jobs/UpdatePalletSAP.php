@@ -40,5 +40,8 @@ class UpdatePalletSAP implements ShouldQueue
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->patch(UrlSAPServiceLayer() . '/b1s/v1/Pallet(' . $this->id . ')', $body);
+         if (!$response->successful()) {
+           throw new \Exception('Inventory transfer API failed: ' . $response->status() . ' - ' . $response->body());
+        }
     }
 }

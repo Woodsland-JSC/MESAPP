@@ -35,18 +35,8 @@ class inventorytransfer implements ShouldQueue
             'Accept' => 'application/json',
             'Authorization' => 'Basic ' . BasicAuthToken(),
         ])->post(UrlSAPServiceLayer() . '/b1s/v1/StockTransfers', $this->body);
-        if ($response->successful()) {
-            // $data = [
-            //     "ProductionOrderStatus" => "boposClosed"
-            // ];
-            // // close
-            // Http::withOptions([
-            //     'verify' => false,
-            // ])->withHeaders([
-            //     'Content-Type' => 'application/json',
-            //     'Accept' => 'application/json',
-            //     'Authorization' => 'Basic ' . BasicAuthToken(),
-            // ])->patch(UrlSAPServiceLayer() . '/b1s/v1/ProductionOrders(' . $this->ponum  . ')', $data);
+        if (!$response->successful()) {
+           throw new \Exception('Inventory transfer API failed: ' . $response->status() . ' - ' . $response->body());
         }
     }
 }

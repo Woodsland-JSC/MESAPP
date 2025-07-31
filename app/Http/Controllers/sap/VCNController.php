@@ -86,6 +86,7 @@ class VCNController extends Controller
                         'notiId' => $notifi->id,
                         'SubItemCode' => $subItem['SubItemCode'],
                         'AwaitingQty' => $request->CompleQty * $subItem['BaseQty'],
+                        'team' => $request->Team,
                     ]);
                 }
             }
@@ -117,10 +118,11 @@ class VCNController extends Controller
                 if (empty($request->SubItemCode)) {
                     // Lưu lỗi thành phẩm
                     foreach ($request->ErrorData['SubItemQty'] as $subItem) {
-                        $awaitingStock = awaitingstocksvcn::create([
+                        awaitingstocksvcn::create([
                             'notiId' => $notifi->id,
                             'SubItemCode' => $subItem['SubItemCode'],
                             'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                            'team' => $request->Team,
                         ]);
                     }
                 } else {
@@ -131,6 +133,7 @@ class VCNController extends Controller
                                 'notiId' => $notifi->id,
                                 'SubItemCode' => $subItem['SubItemCode'],
                                 'AwaitingQty' => $request->RejectQty * $subItem['BaseQty'],
+                                'team' => $request->Team,
                             ]);
                             break;
                         }
@@ -433,7 +436,7 @@ class VCNController extends Controller
 
         // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
         foreach ($groupedResults as &$item) {
-            $awaitingQtySum = awaitingstocksvcn::where('SubItemCode', $item['SubItemCode'])->sum('AwaitingQty');
+            $awaitingQtySum = awaitingstocksvcn::where('SubItemCode', $item['SubItemCode'])->where('team', $request->TO)->sum('AwaitingQty');
             $item['OnHand'] -= $awaitingQtySum;
         }
         $groupedResults = array_values($groupedResults);
