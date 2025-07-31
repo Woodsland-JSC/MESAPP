@@ -13,9 +13,9 @@ class UpdateTeamFromNotiReceiptVCN extends Command
     public function handle()
     {
         $updated = DB::table('awaitingstocksvcn')
-            ->join('notireceiptvcn', 'awaitingstocksvcn.notiID', '=', 'notireceiptvcn.id')
+            ->join('notireceiptVCN', 'awaitingstocksvcn.notiID', '=', 'notireceiptVCN.id')
             ->update([
-                'awaitingstocksvcn.team' => DB::raw('notireceiptvcn.team')
+                'awaitingstocksvcn.team' => DB::raw('notireceiptVCN.team')
             ]);
 
         $this->info("Đã cập nhật {$updated} dòng trong bảng awaitingstocksVCN.");
