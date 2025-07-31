@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('awaitingstocksVCN', function (Blueprint $table) {
+        Schema::table('awaitingstocksvcn', function (Blueprint $table) {
             // Thêm cột team_id vào bảng awaitingstocks
             $table->string('wareHouse')->nullable()->after('AwaitingQty');
         });
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('awaitingstocksVCN', function (Blueprint $table) {
+        Schema::table('awaitingstocksvcn', function (Blueprint $table) {
             // Xóa cột team_id nếu cần thiết
             $table->dropColumn('wareHouse');
         });
