@@ -447,7 +447,7 @@ function ControllerCard(props) {
                 setDryingInProgress(true);
             } catch (error) {
                 console.error("Error completing production check:", error);
-
+                onKilnClose();
                 toast.error("Hiện không thể thực hiện hành động này.");
                 setLoadStartDryingLoading(false);
             }
@@ -477,7 +477,7 @@ function ControllerCard(props) {
             }
         } catch (error) {
             console.error("Error completing production check:", error);
-
+            onFinalClose();
             toast.error("Hiện không thể thực hiện hành động này.");
             setLoadFinishDryingLoading(false);
         }
@@ -922,8 +922,9 @@ function ControllerCard(props) {
                     <ModalFooter>
                         <div className="flex w-full xl:justify-end lg:justify-end md:justify-end gap-x-3">
                             <button
+                                disabled={loadStartDryingLoading}
                                 onClick={onKilnClose}
-                                className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Đóng
                             </button>
@@ -963,8 +964,9 @@ function ControllerCard(props) {
                     <ModalFooter>
                         <div className="w-full flex xl:justify-end lg:justify-end md:justify-end gap-x-3">
                             <button
+                                disabled={loadFinishDryingLoading}
                                 onClick={onFinalClose}
-                                className="w-full bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                className="w-full bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Đóng
                             </button>

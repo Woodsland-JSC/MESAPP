@@ -108,7 +108,6 @@ const CBGReports = [
         description:
             "Chi tiết trạng thái và số lượng giao nhận của từng tổ, nhà máy trong một khoảng thời gian.",
         // priority: true,
-        onlyAdmin: true,
         responsive: true,
     },
     {
@@ -717,13 +716,6 @@ function Report() {
                                                                                     // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
                                                                                     <div className="xl:block lg:block md:block hidden text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-purple-800 to-red-800 rounded-lg">
                                                                                         UPDATED
-                                                                                    </div>
-                                                                                )}
-                                                                            {item.onlyAdmin ==
-                                                                                true && (
-                                                                                    // <FaStar className="text-[16px] text-yellow-500 group-hover:text-white xl:block lg:block md:block hidden" />
-                                                                                    <div className="xl:block lg:block md:block hidden  text-xs h-fit text-white p-0.5 px-2 bg-gradient-to-r from-orange-800 to-yellow-700 rounded-lg">
-                                                                                        ADMIN
                                                                                     </div>
                                                                                 )}
                                                                         </div>

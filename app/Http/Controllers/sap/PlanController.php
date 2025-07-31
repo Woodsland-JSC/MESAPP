@@ -439,6 +439,7 @@ class PlanController extends Controller
             $id = $request->input('PlanID');
             $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 2])->get();
             $towarehouse =  GetWhsCode(Auth::user()->plant, 'SS');
+
             if ($record->count() > 0) {
                 planDryings::where('PlanID', $id)->update(
                     [

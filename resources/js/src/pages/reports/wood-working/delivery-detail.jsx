@@ -65,7 +65,7 @@ function DeliveryDetailReport() {
 
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
-    const [isReceived, setIsReceived] = useState(true);
+    const [isReceived, setIsReceived] = useState(false);
     const [teamData, setTeamData] = useState([]);
     const [teamOptions, setTeamOptions] = useState([]);
 
@@ -105,7 +105,7 @@ function DeliveryDetailReport() {
     const getTeamData = async (param) => {
         setIsTeamLoading(true);
         try {
-            const res = await reportApi.getTeamByFactory(param, 'CBG');
+            const res = await reportApi.getTeamByFactory(param, "CBG");
             setIsTeamLoading(false);
             setTeamData(res);
             setSelectAll(false);
@@ -277,7 +277,7 @@ function DeliveryDetailReport() {
             user?.plant === "YS1" || user?.plant === "YS2" ? "YS" : user?.plant;
 
         reportApi
-            .getTeamByFactory(userPlant, 'CBG')
+            .getTeamByFactory(userPlant, "CBG")
             .then((response) => {
                 const options = response
                     .map((item) => ({
@@ -705,30 +705,32 @@ function DeliveryDetailReport() {
                                                 <IoClose className="w-5 h-5" />
                                             ) : null}
                                         </div>
-                                        <div
-                                            className={`flex space-x-1 items-center justify-center p-1.5 px-3 border-2  rounded-r-lg w-full text-center cursor-pointer active:scale-[.96] active:duration-75 transition-all hover:bg-green-50 hover:border-green-200 hover:text-green-500  ${
-                                                isReceived === true
-                                                    ? "border-l-2 font-medium border-green-300 bg-green-100 text-green-600"
-                                                    : "border-gray-200 text-gray-400"
-                                            }`}
-                                            onClick={() => {
-                                                setIsReceived(true);
-                                                // if (
-                                                //     fromDate &&
-                                                //     toDate &&
-                                                //     selectedFactory &&
-                                                //     isReceived &&
-                                                //     selectedTeams
-                                                // ) {
-                                                //     getReportData();
-                                                // }
-                                            }}
-                                        >
-                                            <span>Đã nhận</span>
-                                            {isReceived === true ? (
-                                                <FiCheck className="w-5 h-5" />
-                                            ) : null}
-                                        </div>
+                                        {user.role == 1 && (
+                                            <div
+                                                className={`flex space-x-1 items-center justify-center p-1.5 px-3 border-2  rounded-r-lg w-full text-center cursor-pointer active:scale-[.96] active:duration-75 transition-all hover:bg-green-50 hover:border-green-200 hover:text-green-500  ${
+                                                    isReceived === true
+                                                        ? "border-l-2 font-medium border-green-300 bg-green-100 text-green-600"
+                                                        : "border-gray-200 text-gray-400"
+                                                }`}
+                                                onClick={() => {
+                                                    setIsReceived(true);
+                                                    // if (
+                                                    //     fromDate &&
+                                                    //     toDate &&
+                                                    //     selectedFactory &&
+                                                    //     isReceived &&
+                                                    //     selectedTeams
+                                                    // ) {
+                                                    //     getReportData();
+                                                    // }
+                                                }}
+                                            >
+                                                <span>Đã nhận</span>
+                                                {isReceived === true ? (
+                                                    <FiCheck className="w-5 h-5" />
+                                                ) : null}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

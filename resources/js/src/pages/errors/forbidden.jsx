@@ -7,11 +7,11 @@ const Forbidden = () => {
     return (
         <Layout>
             <div className="max-w-screen-xl flex flex-col-reverse md:flex-row m-auto justify-center items-center md:mt-6 lg:mt-10 p-4 lg:p-6">
-                <div className="w-7/9 mt-6 md:w-1/2 flex flex-col justify-center items-center">
-                    <h1 className="text-[2rem] text-center md:text-left md:text-[3rem] xl:text-[4rem] leading-tight font-semibold mb-[30px]">
+                <div className="w-7/9 mt-6 md:w-1/2 flex flex-col justify-center text-left items-start">
+                    <h1 className="text-[2rem] text-center md:text-left md:text-[2rem] xl:text-[3rem] leading-tight font-bold mb-[16px]">
                         Không thể truy cập
                     </h1>
-                    <div className="mb-[16px] w-full text-[rgba(106,106,107,1)] text-[1.175rem] leading-normal flex flex-col justify-center ">
+                    <div className="mb-[16px] w-full text-[rgba(106,106,107,1)] text-[1rem] leading-normal flex flex-col justify-center ">
                         <p>Rất tiếc, bạn không có quyền truy cập vào trang hiện tại.</p>
                         <p>
                             Vui lòng điều hướng đến trang trước hoặc trang chủ.
