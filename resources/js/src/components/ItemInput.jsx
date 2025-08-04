@@ -664,7 +664,7 @@ const ItemInput = ({
                     RejectQty: 0,
                     PackagedQty: 0,
                     KHOI: variant || "",
-                    Factory: faults.factory.value || user.plant,
+                    Factory: faults?.factory?.value || user.plant || "",
                 };
                 if (amount && amount > 0) {
                     payload.CompleQty = Number(amount);
