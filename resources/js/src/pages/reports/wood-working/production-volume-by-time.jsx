@@ -767,6 +767,8 @@ function ProductionVolumeByTimeReport() {
                 params.toDate
             );
 
+            console.log("Test: ", res)
+
             setReportData(res);
 
             if (selectedFactory !== 'All') {
@@ -869,23 +871,35 @@ function ProductionVolumeByTimeReport() {
     // DONE
     const handleFactorySelect = async (factory) => {
         setSelectedFactory(factory);
+        
+        const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
 
         let res = [...reportData];
 
         if (factory !== 'All') {
-            res = reportData.filter(data => data.U_FAC == factory)
-            const uniqueGroups = [...new Set(res.map(item => item.U_To))]
-                .map(group => ({
-                    value: group,
-                    label: group ? group : "Trống"
-                }));
-            setGroupData([{
-                value: "All",
-                label: "Tất cả"
-            }, ...uniqueGroups]);
-            setSelectedGroup(['All', ...[...new Set(res.map(item => item.U_To))]]);
+            res = reportData.filter(data => data.U_FAC === factory);
+
+            const groupWithStage = [...new Map(
+                res.map(item => [
+                    item.U_To,
+                    {
+                        value: item.U_To,
+                        label: item.U_To || "Trống",
+                        cdoan: item.U_CDOAN
+                    }
+                ])
+            ).values()];
+
+            groupWithStage.sort((a, b) => {
+                const orderA = stageOrder[a.cdoan] || Infinity;
+                const orderB = stageOrder[b.cdoan] || Infinity;
+                return orderA - orderB;
+            });
+
+            setGroupData([{ value: "All", label: "Tất cả" }, ...groupWithStage]);
+            setSelectedGroup(['All', ...groupWithStage.map(g => g.value)]);
         } else {
-            setGroupData([])
+            setGroupData([]);
         }
 
         let formattedData;
@@ -1641,7 +1655,7 @@ function ProductionVolumeByTimeReport() {
                                                     //     isReceived &&
                                                     //     selectedTeams
                                                     // ) {
-                                                        // getReportData();
+                                                    // getReportData();
                                                     // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
@@ -1666,7 +1680,7 @@ function ProductionVolumeByTimeReport() {
                                                     //     isReceived &&
                                                     //     selectedTeams
                                                     // ) {
-                                                        // getReportData();
+                                                    // getReportData();
                                                     // }
                                                 }}
                                                 className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"

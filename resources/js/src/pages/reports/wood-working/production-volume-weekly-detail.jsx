@@ -632,16 +632,27 @@ function WeeklyDetailProductionVolumeReport() {
 
             setRowData(rowData);
 
-            const uniqueGroups = [...new Set(res.map(item => item.U_To))]
-                .map(group => ({
-                    value: group,
-                    label: group
-                }));
-            setGroupData([{
-                value: "All",
-                label: "Tất cả"
-            }, ...uniqueGroups]);
-            setSelectedGroup(['All', ...[...new Set(res.map(item => item.U_To))]]);
+            const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
+
+            const groupWithStage = [...new Map(
+                res.map(item => [
+                    item.U_To,
+                    {
+                        value: item.U_To,
+                        label: item.U_To || "Trống",
+                        cdoan: item.U_CDOAN
+                    }
+                ])
+            ).values()];
+
+            groupWithStage.sort((a, b) => {
+                const orderA = stageOrder[a.cdoan] || Infinity;
+                const orderB = stageOrder[b.cdoan] || Infinity;
+                return orderA - orderB;
+            });
+
+            setGroupData([{ value: "All", label: "Tất cả" }, ...groupWithStage]);
+            setSelectedGroup(['All', ...groupWithStage.map(g => g.value)]);
         } catch (error) {
             if (error.name === 'AbortError' || signal.aborted) {
                 return;
