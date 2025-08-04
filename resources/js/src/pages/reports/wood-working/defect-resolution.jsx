@@ -99,6 +99,7 @@ function DefectResolution() {
                 m3sap: item.M3SAP,
                 handle_date: item.ngaynhan,
                 lsx_from: item.LSX,
+                loinhamay: item.LoiNhaMay,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -151,7 +152,7 @@ function DefectResolution() {
             rowGroup: true,
             filter: true,
             sort: "asc",
-            pinned: 'left',
+            pinned: "left",
             hide: true,
             headerComponentParams: { displayName: "Tổ báo lỗi" },
         },
@@ -159,6 +160,13 @@ function DefectResolution() {
             headerName: "Tuần",
             field: "week",
             width: 70,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Nguồn lỗi",
+            field: "loinhamay",
+            width: 220,
             suppressHeaderMenuButton: true,
             filter: true,
         },
@@ -203,23 +211,23 @@ function DefectResolution() {
             field: "quantity",
             width: 100,
             suppressHeaderMenuButton: true,
-            valueFormatter: params => {
-                return params.value ? params.value.toLocaleString('en-US') : '';
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString("en-US") : "";
             },
-            aggFunc: 'sum',
+            aggFunc: "sum",
             filter: true,
-            headerComponentParams: { displayName: "Số lượng" }
+            headerComponentParams: { displayName: "Số lượng" },
         },
         // { headerName: "M3", field: "m3", width: 120 },
         {
             headerName: "M3",
             field: "m3sap",
             width: 120,
-            aggFunc: 'sum',
+            aggFunc: "sum",
             headerComponentParams: { displayName: "M3" },
             filter: true,
-            valueFormatter: params => {
-                return params.value ? params.value.toFixed(6) : '0.000000';
+            valueFormatter: (params) => {
+                return params.value ? params.value.toFixed(6) : "0.000000";
             },
         },
         {
@@ -242,7 +250,12 @@ function DefectResolution() {
             width: 160,
             filter: true,
         },
-        { headerName: "Tổ chuyển về", field: "receiving_team", width: 160, filter: true },
+        {
+            headerName: "Tổ chuyển về",
+            field: "receiving_team",
+            width: 160,
+            filter: true,
+        },
         { headerName: "Người tạo", field: "sender", filter: true },
         { headerName: "Ngày tạo", field: "send_date", filter: true },
         { headerName: "Người xử lý", field: "receiver", filter: true },
@@ -277,10 +290,11 @@ function DefectResolution() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
-                ? "border-[#86ABBE] bg-[#eaf8ff]"
-                : "border-gray-300"
-                }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
+                selectedFactory === value
+                    ? "border-[#86ABBE] bg-[#eaf8ff]"
+                    : "border-gray-300"
+            }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -289,10 +303,11 @@ function DefectResolution() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${selectedFactory === value
-                    ? "text-[#17506B] font-medium"
-                    : "text-gray-400 group-hover:text-[#17506B]"
-                    }`}
+                className={`${
+                    selectedFactory === value
+                        ? "text-[#17506B] font-medium"
+                        : "text-gray-400 group-hover:text-[#17506B]"
+                }`}
             >
                 {label}
             </div>

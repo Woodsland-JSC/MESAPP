@@ -105,7 +105,7 @@ class ProductionController extends Controller
                 'Type' => $request->Type,
                 'LSX' => $request->LSX,
                 'create_by' => Auth::user()->id,
-                'loinhamay' => $request->factories['value'] ?? null,
+                'loinhamay' => $request->Factory,
                 'openQty' => 0,
             ]);
 
@@ -640,16 +640,16 @@ class ProductionController extends Controller
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
         $factory = [
             [
-                'Factory' => '01',
-                'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+                'Factory' => 'TH',
+                'FactoryName' => 'Nhà Máy Thuận Hưng'
             ],
             [
-                'Factory' => '02',
-                'FactoryName' => 'Nhà Máy CBG Yên sơn'
+                'Factory' => 'YS',
+                'FactoryName' => 'Nhà Máy Yên Sơn'
             ],
             [
-                'Factory' => '03',
-                'FactoryName' => 'Nhà Máy CBG Thái Bình'
+                'Factory' => 'TB',
+                'FactoryName' => 'Nhà Máy Thái Bình'
             ],
         ];
 

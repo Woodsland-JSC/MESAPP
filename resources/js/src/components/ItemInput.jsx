@@ -580,6 +580,16 @@ const ItemInput = ({
         } else if (
             selectedItemDetails.CongDoan !== "SC" &&
             selectedItemDetails.CongDoan !== "XV" &&
+            (selectedFaultItem.ItemCode !== "" || selectedFaultItem.SubItemCode !== "") &&
+            faultyAmount > 0 &&
+            (selectedFactory === "" || selectedFactory === null)
+        ) {
+            toast.error("Nhà máy nguồn lỗi không được để trống");
+            onAlertDialogClose();
+            return;
+        } else if (
+            selectedItemDetails.CongDoan !== "SC" &&
+            selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
             selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") &&
             selectedFaultItem.SubItemCode === "" &&
@@ -654,7 +664,7 @@ const ItemInput = ({
                     RejectQty: 0,
                     PackagedQty: 0,
                     KHOI: variant || "",
-                    Factory: selectedFactory || "",
+                    Factory: faults.factory.value || user.plant,
                 };
                 if (amount && amount > 0) {
                     payload.CompleQty = Number(amount);
@@ -1680,21 +1690,10 @@ const ItemInput = ({
                                                                                     }
                                                                                 );
                                                                             } else {
-                                                                                setRongData(
-                                                                                    (
-                                                                                        prevData
-                                                                                    ) => {
-                                                                                        const newData =
-                                                                                            [
-                                                                                                ...prevData,
-                                                                                            ];
-                                                                                        newData[
-                                                                                            stockIndex
-                                                                                        ].factories =
-                                                                                            value;
-                                                                                        return newData;
-                                                                                    }
-                                                                                );
+                                                                                console.log(value);
+                                                                                setSelectedFactory(
+                                                                                    value.value
+                                                                                )
                                                                             }
                                                                         }}
                                                                     />
@@ -2714,7 +2713,7 @@ const ItemInput = ({
                                                                     factory:
                                                                         null,
                                                                 })
-                                                            );
+                                                            ); 
                                                         } else {
                                                             setFaults(
                                                                 (prev) => ({
@@ -2723,6 +2722,7 @@ const ItemInput = ({
                                                                         value,
                                                                 })
                                                             );
+                                                            
                                                         }
                                                     }}
                                                 />
