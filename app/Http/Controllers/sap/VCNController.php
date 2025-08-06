@@ -1980,7 +1980,8 @@ class VCNController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string, $request->id);
+               // $stockissue = $this->collectStockAllocate($string, $request->id);
+                $stockissue=null; // yêu cầu không cần gửi stock issue item manual nữa
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -2442,7 +2443,7 @@ class VCNController extends Controller
                 // dd($data->team);
 
                 historySLVCN::create(
-                    [   
+                    [
                         'notiId' => $request->id,
                         'HXL' => $huongxuly,
                         'LL' => $loailoi,
@@ -2470,7 +2471,8 @@ class VCNController extends Controller
                         $data->FatherCode . " LSX." . $data->LSX
                 ], 500);
             }
-            $stockissue = $this->collectStockAllocate($string, $request->id);
+            //$stockissue = $this->collectStockAllocate($string, $request->id);
+            $stockissue=null; // yêu cầu không cần gửi stock issue item manual nữa
             $dataSendPayload = [
                 'InventoryGenEntries' => $dataReceipt,
                 'InventoryGenExits' => $stockissue
@@ -2768,23 +2770,24 @@ class VCNController extends Controller
             }
             //Item father issue
 
-            $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version);
-            $dataAllocateIssue = $this->allocatedIssueRong($dataissueRong, $data->QtyIssueRong);
-            if (count($dataAllocateIssue) == 0) {
-                return response()->json([
-                    'error' => false,
-                    'status_code' => 500,
-                    'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
-                        $data->team . " sản phẩm: " .
-                        $data->ItemCode . " sản phẩm đích: " .
-                        $data->FatherCode . " LSX." . $data->LSX
-                ], 500);
-            }
-            $string = '';
-            foreach ($dataAllocateIssue as $allocate) {
-                $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
-            }
-            $stockissue = $this->collectStockAllocate($string, $request->id);
+//            $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version);
+//            $dataAllocateIssue = $this->allocatedIssueRong($dataissueRong, $data->QtyIssueRong);
+//            if (count($dataAllocateIssue) == 0) {
+//                return response()->json([
+//                    'error' => false,
+//                    'status_code' => 500,
+//                    'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
+//                        $data->team . " sản phẩm: " .
+//                        $data->ItemCode . " sản phẩm đích: " .
+//                        $data->FatherCode . " LSX." . $data->LSX
+//                ], 500);
+//            }
+//            $string = '';
+//            foreach ($dataAllocateIssue as $allocate) {
+//                $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
+//            }
+           // $stockissue = $this->collectStockAllocate($string, $request->id);
+            $stockissue=null; // yêu cầu không cần gửi stock issue item manual nữa
             //lấy data receipt detail
             $dataReceipt = chiTietRong::where('baseID', $request->id)->where('type', 0)->get();
             $allocates = [];
@@ -2977,7 +2980,8 @@ class VCNController extends Controller
                     foreach ($dataAllocateIssue as $allocate) {
                         $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
                     }
-                    $stockissue = $this->collectStockAllocate($string, $request->id);
+//                    $stockissue = $this->collectStockAllocate($string, $request->id);
+                    $stockissue=null; // yêu cầu không cần gửi stock issue item manual nữa
                 };
             }
             // if( )

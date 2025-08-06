@@ -364,7 +364,7 @@ class ProductionController extends Controller
                 ]);
             }
         }
-        
+
         // Sắp xếp kết quả trả về theo thứ tự tăng dần của ItemChild
         foreach ($results as &$result) {
             usort($result['Details'], function ($a, $b) {
@@ -1497,7 +1497,7 @@ class ProductionController extends Controller
                             ]
                         ]]
                     ];
-                    
+
                     HistorySL::create(
                         [
                             'LSX' => $data->LSX,
@@ -1524,7 +1524,8 @@ class ProductionController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                $stockissue = $this->collectStockAllocate($string, $request->id);
+                //$stockissue = $this->collectStockAllocate($string, $request->id);
+                $stockissue=null; // yêu cầu không cần gửi stock issue item manual nữa
                 $dataSendPayload = [
                     'InventoryGenEntries' => $dataReceipt,
                     'InventoryGenExits' => $stockissue
@@ -1592,7 +1593,7 @@ class ProductionController extends Controller
                                 'ReceiptFromProduction' => $receiptFromProduction,
                                 'timestamp' => now()->toDateTimeString()
                             ];
-                            
+
                             // Update thành công
                             SanLuong::where('id', $data->id)->update(['Status' => 1]);
                             notireceipt::where('id', $data->notiID)->update([
