@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
+import { MdOutlineSubdirectoryArrowRight } from "react-icons/md";
 import {
     AlertDialog,
     AlertDialogBody,
@@ -490,12 +491,38 @@ const AwaitingReception = ({
                 <div className="!px-5 !py-3.5">
                     <Stack mt="1" spacing="4.5px">
                         <div className="flex flex-col">
-                            <div className="flex items-center   justify-between gap-x-3 mb-1.5">
-                                <span className="uppercase text-xs font-semibold text-gray-500">
-                                    {data?.SubItemName
-                                        ? "Bán thành phẩm"
-                                        : "Thành phẩm"}
-                                </span>
+                            <div className="flex items-center justify-between gap-x-3 mb-1.5">
+                                <div className="">
+                                    {data?.loinhamay != null &&
+                                    data?.loinhamay != user.plant &&
+                                    data?.type == "0" ? (
+                                        <div className="flex grid-cols-1 items-center space-x-1">
+                                            <MdOutlineSubdirectoryArrowRight className="w-5 h-5 text-red-700" />
+                                            <Text
+                                                color="red.900"
+                                                fontWeight="500"
+                                                fontSize="sm"
+                                                className=""
+                                            >
+                                                Lỗi từ{" "}
+                                                {data?.loinhamay == "YS"
+                                                    ? "Yên Sơn"
+                                                    : data?.loinhamay == "TH"
+                                                    ? "Thuận Hưng"
+                                                    : data?.loinhamay == "TB"
+                                                    ? "Thái Bình"
+                                                    : "không xác định"}
+                                            </Text>
+                                        </div>
+                                    ) : (
+                                        <span className="uppercase text-xs font-semibold text-gray-500">
+                                            {data?.SubItemName
+                                                ? "Bán thành phẩm"
+                                                : "Thành phẩm"}
+                                        </span>
+                                    )}
+                                </div>
+
                                 <span className="uppercase text-xs p-1 px-3 bg-gray-100 rounded-2xl font-semibold text-gray-600">
                                     ID: {data?.id}
                                 </span>
@@ -514,12 +541,12 @@ const AwaitingReception = ({
                                           data?.CDai ||
                                       "Sản phẩm không xác định"}
                             </span>
-                            <div className="flex gap-4">
+                            <div className="flex justify-between">
                                 <div className="flex grid-cols-1 items-center space-x-1">
                                     <TbClock className="w-5 h-5 text-gray-500" />
                                     <Text
                                         color="gray.500"
-                                        fontWeight="600"
+                                        fontWeight="500"
                                         fontSize="sm"
                                         className=""
                                     >
@@ -551,7 +578,9 @@ const AwaitingReception = ({
                                 <div className="flex">
                                     {data?.SubItemName ? (
                                         <>
-                                            <span>Mã bán thành phẩm: </span>
+                                            <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
+                                                ItemCode:{" "}
+                                            </span>
                                             <span className="font-bold">
                                                 {data?.SubItemCode ||
                                                     "Không xác định"}
@@ -560,7 +589,7 @@ const AwaitingReception = ({
                                     ) : (
                                         <>
                                             <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
-                                                Mã thành phẩm:{" "}
+                                                ItemCode:{" "}
                                             </span>
                                             <span className="w-[65%] font-bold">
                                                 {data?.ItemCode ||
@@ -577,7 +606,7 @@ const AwaitingReception = ({
                                 Quy cách:{" "}
                             </span>
                             <span className="w-[65%] font-bold">
-                                {data?.QuyCach || "0*0*0"}
+                                {data?.CDay + "*" + data?.CRong + "*" + data?.CDai || "0*0*0"}
                             </span>
                         </div>
 

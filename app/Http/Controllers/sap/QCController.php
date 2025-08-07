@@ -361,6 +361,7 @@ class QCController extends Controller
                 'b.SubItemCode',
                 'b.ErrorData',
                 'b.QuyCach',
+                'a.loinhamay',
                 'a.Team',
                 'a.CongDoan',
                 'a.CDay',

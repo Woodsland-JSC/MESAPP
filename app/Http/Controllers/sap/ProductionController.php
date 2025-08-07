@@ -46,6 +46,7 @@ class ProductionController extends Controller
             'NexTeam' => 'required|string|max:254',
             'Type' => 'required|string|max:254',
             'KHOI' => 'required',
+            'loinhamay' => 'required',
             'Factory' => 'required',
         ]);
         // dd($request->all());
@@ -105,7 +106,7 @@ class ProductionController extends Controller
                 'Type' => $request->Type,
                 'LSX' => $request->LSX,
                 'create_by' => Auth::user()->id,
-                'loinhamay' => $request->Factory,
+                'loinhamay' => $request->loinhamay,
                 'openQty' => 0,
             ]);
 
@@ -455,7 +456,7 @@ class ProductionController extends Controller
 
             foreach ($rawData as $item) {
                 // Truy vấn đến bảng OITM trong SAP để lấy U_SKU
-                $query = 'SELECT "U_SKU" FROM OITM WHERE "ItemCode" = ?';
+                $query = 'SELECT "U_SKU", "U_CDay", "U_CRong", "U_CDai" FROM OITM WHERE "ItemCode" = ?';
                 $stmt = odbc_prepare($conDB, $query);
 
                 if (!$stmt) {
@@ -467,12 +468,36 @@ class ProductionController extends Controller
                 }
 
                 $maThiTruong = null;
+                $CDay = null;
+                $CRong = null;
+                $CDai = null;
                 if ($row = odbc_fetch_array($stmt)) {
                     $maThiTruong = $row['U_SKU'];
+                    $CDay = (float) $row['U_CDay'];
+                    $CRong = (float) $row['U_CRong'];
+                    $CDai = (float) $row['U_CDai'];
+
+                    if (strpos((string) $CDay, '.') !== false && (int) substr((string) $CDay, strpos((string) $CDay, '.') + 1) > 0) {
+                        $CDay = number_format((float) $CDay, 1);
+                    } else {
+                        $CDay = (int) $CDay;
+                    }
+
+                    if (strpos((string) $CRong, '.') !== false && (int) substr((string) $CRong, strpos((string) $CRong, '.') + 1) > 0) {
+                        $CRong = number_format((float) $CRong, 1);
+                    } else {
+                        $CRong = (int) $CRong;
+                    }
+
+                    if (strpos((string) $CDai, '.') !== false && (int) substr((string) $CDai, strpos((string) $CDai, '.') + 1) > 0) {
+                        $CDai = number_format((float) $CDai, 1);
+                    } else {
+                        $CDai = (int) $CDai;
+                    }
                 }
 
                 // Thêm thuộc tính MaThiTruong vào item
-                $itemWithMarket = (object) array_merge((array) $item, ['MaThiTruong' => $maThiTruong]);
+                $itemWithMarket = (object) array_merge((array) $item, ['MaThiTruong' => $maThiTruong], ['CDay' => $CDay], ['CRong' => $CRong], ['CDai' => $CDai]);
                 $data->push($itemWithMarket);
             }
 
@@ -676,6 +701,7 @@ class ProductionController extends Controller
                 'b.SubItemName',
                 'b.SubItemCode',
                 'a.team',
+                'a.loinhamay',
                 'CDay',
                 'CRong',
                 'CDai',
@@ -710,6 +736,7 @@ class ProductionController extends Controller
                 'b.SubItemName',
                 'b.SubItemCode',
                 'a.team',
+                'a.loinhamay',
                 'CDay',
                 'CRong',
                 'CDai',
