@@ -38,12 +38,16 @@ import FinishedGoodsIllustration from "../assets/images/wood-receipt-illustratio
 import Loader from "./Loader";
 import moment from "moment";
 import { formatNumber } from "../utils/numberFormat";
-import { FaCircleRight } from "react-icons/fa6";
+import { FaCircleRight, FaDiceD6 } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
-import { FaCheckCircle, FaInstalod } from "react-icons/fa";
+import { FaCheckCircle, FaDollyFlatbed, FaInstalod } from "react-icons/fa";
 import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
-import { MdAssignmentReturn, MdDangerous, MdOutlineSubdirectoryArrowRight } from "react-icons/md";
+import {
+    MdAssignmentReturn,
+    MdDangerous,
+    MdOutlineSubdirectoryArrowRight,
+} from "react-icons/md";
 import { TbTrash } from "react-icons/tb";
 import { FaBox } from "react-icons/fa";
 import { FaClock } from "react-icons/fa";
@@ -252,7 +256,9 @@ const ItemInput = ({
                         CongDoan: res.CongDoan,
                         ProdType: res.ProdType,
                         SubItemWhs: res.SubItemWhs,
-                        factories: res.Factorys?.map((item) => ({
+                        factories: res.Factorys?.filter(
+                            (item) => item.Factory !== user.plant
+                        ).map((item) => ({
                             value: item.Factory,
                             label: item.FactoryName,
                         })),
@@ -528,17 +534,6 @@ const ItemInput = ({
             amount < 0
         ) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
-            onAlertDialogClose();
-            return;
-        } else if (
-            selectedItemDetails.CongDoan !== "SC" &&
-            selectedItemDetails.CongDoan !== "XV" &&
-            (selectedItemDetails?.stocks?.length !== 1 ||
-                selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
-            amount > selectedItemDetails.maxQty
-        ) {
-            toast.error("Đã vượt quá số lượng có thể ghi nhận");
             onAlertDialogClose();
             return;
         } else if (
@@ -1980,12 +1975,13 @@ const ItemInput = ({
                                             </div>
                                         </div>
 
+                                        {/* Nguyên vật liệu */}
                                         <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
-                                            <div className="flex justify-between pb-3 ">
+                                            <div className="flex justify-between pb-1 ">
                                                 <div className="flex items-center space-x-2">
-                                                    <FaCircleRight className="w-7 h-7 text-blue-700" />
+                                                    <FaDiceD6 className="w-7 h-7 text-amber-700" />
                                                     <div className="font-semibold text-lg ">
-                                                        Ghi nhận sản lượng
+                                                        Nguyên vật liệu
                                                     </div>
                                                 </div>
                                                 <div className="text-blue-600 p-1.5 px-4 bg-blue-50 rounded-full border-2 border-blue-200">
@@ -2002,8 +1998,8 @@ const ItemInput = ({
                                             </div>
                                             <div className="space-y-2 pb-3">
                                                 <Text className="font-semibold px-2">
-                                                    Số phôi đã nhận và phôi tồn
-                                                    tại tổ:
+                                                    Số lượng tồn nguyên vật
+                                                    liệu:
                                                 </Text>
                                                 {/* BOM Item Group */}
                                                 {selectedItemDetails?.stocks
@@ -2109,6 +2105,18 @@ const ItemInput = ({
                                                         )
                                                     ) || 0}
                                                 </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Ghi nhận sản lượng */}
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                            <div className="flex justify-between pb-1 ">
+                                                <div className="flex items-center space-x-2">
+                                                    <FaCircleRight className="w-7 h-7 text-blue-700" />
+                                                    <div className="font-semibold text-lg ">
+                                                        Ghi nhận sản lượng
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Số lượng giao chờ xác nhận */}
@@ -2289,26 +2297,7 @@ const ItemInput = ({
                                                     {" "}
                                                     *
                                                 </span>
-                                                {selectedItemDetails?.CongDoan !==
-                                                    "SC" &&
-                                                selectedItemDetails?.CongDoan !==
-                                                    "XV" &&
-                                                selectedItemDetails?.maxQty <=
-                                                    0 &&
-                                                (selectedItemDetails?.stocks
-                                                    ?.length !== 1 ||
-                                                    selectedItemDetails
-                                                        ?.stocks[0]
-                                                        ?.SubItemCode !==
-                                                        "MM010000178") ? (
-                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
-                                                        <MdDangerous className="w-6 h-6" />
-                                                        <div>
-                                                            Không đủ số lượng để
-                                                            ghi nhận
-                                                        </div>
-                                                    </div>
-                                                ) : selectedItemDetails?.remainQty -
+                                                {selectedItemDetails?.remainQty -
                                                       selectedItemDetails?.WaitingConfirmQty <=
                                                   0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
@@ -2352,7 +2341,7 @@ const ItemInput = ({
 
                                         {/* Ghi nhận lỗi */}
                                         <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
-                                            <div className="flex space-x-2 pb-3 items-center">
+                                            <div className="flex space-x-2 pb-1 items-center">
                                                 <FaExclamationCircle className="w-7 h-7 text-red-700" />
                                                 <div className="font-semibold text-lg ">
                                                     Ghi nhận lỗi
@@ -2433,16 +2422,36 @@ const ItemInput = ({
                                                                             item?.Quantity
                                                                         )}
                                                                     </div>
-                                                                    {(item?.loinhamay !== null && item?.loinhamay !== user.plant) && (
-                                                                        <Text className="flex space-x-1 font-medium text-xs text-red-500 mb-1">
-                                                                            <MdOutlineSubdirectoryArrowRight /> 
-                                                                            <span className=" ">
-                                                                                Lỗi nhận từ nhà máy{" "}
-                                                                                {item?.loinhamay == "YS" ? "Yên Sơn" : item?.loinhamay == "TH" ? "Thuận Hưng" : item?.loinhamay == "TB" ? "Thái Bình" : "không xác định" }
-                                                                            </span>
-                                                                        </Text>
-                                                                    )}
-                                                                    
+                                                                    {item?.loinhamay !==
+                                                                        null &&
+                                                                        item?.loinhamay !==
+                                                                            user.plant && (
+                                                                            <Text className="flex space-x-1 font-medium text-xs text-red-500 mb-1">
+                                                                                <MdOutlineSubdirectoryArrowRight />
+                                                                                <span className=" ">
+                                                                                    Lỗi
+                                                                                    nhận
+                                                                                    từ
+                                                                                    nhà
+                                                                                    máy{" "}
+                                                                                    {item?.loinhamay ==
+                                                                                    "YS"
+                                                                                        ? "Yên Sơn"
+                                                                                        : item?.loinhamay ==
+                                                                                          "TH"
+                                                                                        ? "Thuận Hưng"
+                                                                                        : item?.loinhamay ==
+                                                                                          "TB"
+                                                                                        ? "Thái Bình"
+                                                                                        : item?.loinhamay == "CH"
+                                                                                        ? "Chiêm Hóa"
+                                                                                        : item?.loinhamay == "VF"
+                                                                                        ? "Viforex"
+                                                                                        : "không xác định"}
+                                                                                </span>
+                                                                            </Text>
+                                                                        )}
+
                                                                     <div className="text-[15px] font-semibold ">
                                                                         {item.SubItemName ||
                                                                             item.ItemName}
@@ -2506,7 +2515,10 @@ const ItemInput = ({
                                             </div>
                                             <Box className="px-0 pt-2">
                                                 <label className="font-semibold ">
-                                                    Số lượng ghi nhận lỗi: <span className="text-red-600">*</span>
+                                                    Số lượng ghi nhận lỗi:{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
                                                 </label>
                                                 {/*  */}
                                                 <NumberInput

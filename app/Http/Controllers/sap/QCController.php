@@ -379,7 +379,7 @@ class QCController extends Controller
                 'c.last_name',
                 'b.text',
                 'b.id',
-                DB::raw('0 as type'),
+                DB::raw('1 as type'),
                 'b.confirm'
             )
             ->where('b.confirm', '=', 0)
@@ -548,7 +548,9 @@ class QCController extends Controller
                 'a.SubItemCode',
                 'a.ErrorData',
                 'a.QuyCach',
+                'a.loinhamay',
                 'a.team',
+                'a.type',
                 'a.CongDoan',
                 'a.CDay',
                 'a.CRong',

@@ -39,6 +39,7 @@ class VCNController extends Controller
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
             'ProdType' => 'required|string|max:254',
+            'loinhamay' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -77,6 +78,7 @@ class VCNController extends Controller
                     'ProdType' => $request->ProdType,
                     'version' => $request->version,
                     'CreatedBy' => Auth::user()->id,
+                    'loinhamay' => null,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
 
@@ -110,7 +112,7 @@ class VCNController extends Controller
                     'ErrorData' => $errorData,
                     'MaThiTruong' => $request->MaThiTruong,
                     'CreatedBy' => Auth::user()->id,
-                    'loinhamay' => $request->factories['value'] ?? null
+                    'loinhamay' => $request->loinhamay,
                 ]);
                 $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
 
@@ -444,16 +446,16 @@ class VCNController extends Controller
         // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
         $factory = [
             [
-                'Factory' => '01',
-                'FactoryName' => 'Nhà Máy CBG Thuận hưng'
+                'Factory' => 'YS',
+                'FactoryName' => 'Nhà Máy Yên Sơn'
             ],
             [
-                'Factory' => '02',
-                'FactoryName' => 'Nhà Máy CBG Yên sơn'
+                'Factory' => 'CH',
+                'FactoryName' => 'Nhà Máy Chiêm Hóa'
             ],
             [
-                'Factory' => '03',
-                'FactoryName' => 'Nhà Máy CBG Thái Bình'
+                'Factory' => 'VF',
+                'FactoryName' => 'Nhà Máy Viforex'
             ],
         ];
 
@@ -473,6 +475,7 @@ class VCNController extends Controller
                 'a.ItemName',
                 'a.SubItemName',
                 'a.SubItemCode',
+                'a.loinhamay',
                 'a.team',
                 'CDay',
                 'CRong',

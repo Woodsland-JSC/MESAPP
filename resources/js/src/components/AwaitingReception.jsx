@@ -495,7 +495,7 @@ const AwaitingReception = ({
                                 <div className="">
                                     {data?.loinhamay != null &&
                                     data?.loinhamay != user.plant &&
-                                    data?.type == "0" ? (
+                                    data?.type == "1" ? (
                                         <div className="flex grid-cols-1 items-center space-x-1">
                                             <MdOutlineSubdirectoryArrowRight className="w-5 h-5 text-red-700" />
                                             <Text
@@ -511,6 +511,10 @@ const AwaitingReception = ({
                                                     ? "Thuận Hưng"
                                                     : data?.loinhamay == "TB"
                                                     ? "Thái Bình"
+                                                    : data?.loinhamay == "CH"
+                                                    ? "Chiêm Hóa"
+                                                    : data?.loinhamay == "VF"
+                                                    ? "Viforex"
                                                     : "không xác định"}
                                             </Text>
                                         </div>
@@ -567,7 +571,7 @@ const AwaitingReception = ({
                         {type == "plywood" ? (
                             <div className="flex w-full gap-2">
                                 <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-500">
-                                    Mã thành phẩm:{" "}
+                                    ItemCode:{" "}
                                 </span>
                                 <span className="w-[65%] font-bold">
                                     {data?.ItemCode || "????"}
