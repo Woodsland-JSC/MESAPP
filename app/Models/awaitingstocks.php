@@ -15,6 +15,7 @@ class awaitingstocks extends Model
         'SubItemCode',
         'AwaitingQty',
         'wareHouse',
+        'team',
     ];
     public $timestamps = false;
 }

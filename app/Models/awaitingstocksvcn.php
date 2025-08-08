@@ -14,7 +14,7 @@ class awaitingstocksvcn extends Model
         'SubItemCode',
         'AwaitingQty',
         'wareHouse',
-        'team'
+        'team',
     ];
     public $timestamps = false;
 }
