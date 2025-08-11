@@ -2507,17 +2507,34 @@ class VCNController extends Controller
             if ($response->getStatusCode() == 202) {
                 // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                 if (strpos($res, 'ETag') === false) {
-                    $responseData = json_decode($res, true);
+                    $detail = null;
 
-                    $errorDetail = isset($responseData['error']['message']['value'])
-                        ? $responseData['error']['message']['value']
-                        : 'Vui lòng kiểm tra thông tin phản hồi.';
+                    // 1) Tìm và parse phần JSON trong batchresponse
+                    if (preg_match_all('/\{(?:[^{}]|(?R))*\}/s', $res, $matches) && !empty($matches[0])) {
+                        // Lấy JSON cuối cùng (thường là body lỗi)
+                        $json = json_decode(end($matches[0]), true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $detail = $json['error']['message']['value']
+                                ?? ($json['error']['message'] ?? null);
+                        }
+                    }
 
-                    $errorMessage = 'Đã xảy ra lỗi trong quá trình tạo chứng từ. Chi tiết: ' . $errorDetail;
+                    // 2) Fallback: nếu chưa bắt được JSON, trích trực tiếp trường "value"
+                    if (!$detail && preg_match('/"value"\s*:\s*"([^"]+)"/s', $res, $m)) {
+                        // Dùng json_decode để giải mã \uXXXX thành UTF-8
+                        $detail = json_decode('"' . $m[1] . '"');
+                    }
 
-                    return response()->json(['error' => $errorMessage, 'response' => $res], 500);
+                    $msg = 'Đã xảy ra lỗi trong quá trình tạo chứng từ.';
+                    if (!empty($detail)) {
+                        $msg .= ' Chi tiết: ' . $detail;
+                    }
+
+                    return response()->json([
+                        'error'    => $msg,
+                        'response' => $res, // giữ raw để tiện debug nếu cần
+                    ], 500);
                 }
-
                 // Tách các phần của batch response
                 $parts = preg_split('/--batch.*?\r\n/', $res);
 
