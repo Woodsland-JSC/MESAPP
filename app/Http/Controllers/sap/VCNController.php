@@ -2507,7 +2507,15 @@ class VCNController extends Controller
             if ($response->getStatusCode() == 202) {
                 // Bước 1: kiểm tra phản hồi có chứa phần tử thành công không
                 if (strpos($res, 'ETag') === false) {
-                    return response()->json(['error' => 'Đã xảy ra lỗi trong quá trình tạo chứng từ.', 'response' => $res], 500);
+                    $responseData = json_decode($res, true);
+
+                    $errorDetail = isset($responseData['error']['message']['value'])
+                        ? $responseData['error']['message']['value']
+                        : 'Vui lòng kiểm tra thông tin phản hồi.';
+
+                    $errorMessage = 'Đã xảy ra lỗi trong quá trình tạo chứng từ. Chi tiết: ' . $errorDetail;
+
+                    return response()->json(['error' => $errorMessage, 'response' => $res], 500);
                 }
 
                 // Tách các phần của batch response
