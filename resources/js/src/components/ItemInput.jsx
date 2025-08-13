@@ -1069,27 +1069,29 @@ const ItemInput = ({
                                           </span>
                                       </div>
                                   </div>
-                                  <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-2.5">
+                                  <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
                                       <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
                                           <thead className="bg-[#dae0ec] ">
                                               <tr>
                                                   <th
                                                       scope="col"
-                                                      className="px-3 py-2 text-xs font-medium uppercase text-gray-500 "
+                                                      className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
                                                   >
-                                                      Lệnh sản xuất
+                                                      LSX
                                                   </th>
                                                   <th
                                                       scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
+                                                      className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
                                                   >
-                                                      Sản lượng
+                                                      <span className="xl:block lg:block md:block hidden">Sản lượng</span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">SL</span>
                                                   </th>
                                                   <th
                                                       scope="col"
                                                       className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
                                                   >
-                                                      Đã làm
+                                                      <span className="xl:block lg:block md:block hidden">Đã làm</span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">ĐL</span>
                                                   </th>
                                                   <th
                                                       scope="col"
@@ -1101,7 +1103,8 @@ const ItemInput = ({
                                                       scope="col"
                                                       className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
                                                   >
-                                                      Còn lại
+                                                      <span className="xl:block lg:block md:block hidden">Còn lại</span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">CL</span>
                                                   </th>
                                               </tr>
                                           </thead>
@@ -1122,7 +1125,7 @@ const ItemInput = ({
                                                               index
                                                           ) => (
                                                               <tr
-                                                                  className="bg-[#ECEFF5] border-[#c4cfe7] border-b"
+                                                                  className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
                                                                   key={index}
                                                               >
                                                                   <th
@@ -1168,9 +1171,9 @@ const ItemInput = ({
                                                   <span>Không có dữ liệu</span>
                                               )}
                                           </tbody>
-                                          <tfoot>
+                                          <tfoot className="!text-[12px]">
                                               <tr>
-                                                  <td className="font-bold text-gray-700 px-2 py-2">
+                                                  <td className="font-bold  text-gray-700 px-2 py-2">
                                                       Tổng
                                                   </td>
                                                   <td className="px-2 py-2 text-right font-bold text-gray-700">
