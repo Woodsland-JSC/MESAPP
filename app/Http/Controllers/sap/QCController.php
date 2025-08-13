@@ -564,7 +564,7 @@ class QCController extends Controller
             )
             ->where('a.deleted', '=', 0)
             ->where('a.type', 1)
-            ->where('confirm', 0)
+            ->whereIn('confirm', [0, 1])
             ->where('a.openQty', '>', 0)
             ->where('a.team', '=',  $request->TO)
             ->get();
