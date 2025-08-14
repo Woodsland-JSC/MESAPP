@@ -560,7 +560,7 @@ function ProductionVolumeByTimeReport() {
         }, {});
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!groupMap.has(key)) {
                 groupMap.set(key, {
@@ -590,7 +590,7 @@ function ProductionVolumeByTimeReport() {
         }, {});
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!itemMap.has(key)) {
                 const newItem = {
@@ -646,7 +646,7 @@ function ProductionVolumeByTimeReport() {
         }, {});
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!itemMap.has(key)) {
                 const newItem = {
