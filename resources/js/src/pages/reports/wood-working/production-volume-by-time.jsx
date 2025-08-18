@@ -567,7 +567,7 @@ function ProductionVolumeByTimeReport() {
         const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!groupMap.has(key)) {
                 groupMap.set(key, {
@@ -594,7 +594,7 @@ function ProductionVolumeByTimeReport() {
         const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!itemMap.has(key)) {
                 const newItem = {
@@ -647,7 +647,7 @@ function ProductionVolumeByTimeReport() {
         const stageOrder = { 'Lựa phôi': 1, 'Sơ chế': 2, 'Bán thành phẩm': 3, 'Tinh chế': 4, 'Hoàn thiện': 5, 'Đóng gói': 6, 'Thành phẩm': 7 };
 
         data.forEach(item => {
-            const key = `${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
+            const key = `${item.U_SPDICH}_${item.ItemCode}_${item.U_To}_${item.U_CDOAN}`;
 
             if (!itemMap.has(key)) {
                 const newItem = {
