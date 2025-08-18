@@ -331,9 +331,13 @@ class VCNController extends Controller
             'SPDICH' => 'required|string|max:254',
             'ItemCode' => 'required|string|max:254',
             'TO' => 'required|string|max:254',
+            'ProdType' => '',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+        if ($request->ProdType == null) {
+            return response()->json(['error' => 'Giá trị "ProdType" trong lệnh hoặc trong sản phẩm không được bỏ trống. Vui lòng kiểm tra lại.'], 422);
         }
 
         // 2. Truy vấn cơ sở dữ liệu SAP
@@ -1583,7 +1587,7 @@ class VCNController extends Controller
         if ($request->TO == "QC_YS(VCN)" || $request->TO == "QC_CH" || $request->TO == "QC_HG") {
             $data = null;
         } else {
-            $data = DB::table('notireceiptVCN as a')
+            $rawData = DB::table('notireceiptVCN as a')
                 ->join('users as b', 'a.CreatedBy', '=', 'b.id')
                 ->select(
                     'a.FatherCode',
@@ -1591,9 +1595,9 @@ class VCNController extends Controller
                     'a.ItemName',
                     'a.team',
                     'a.CongDoan',
-                    'a.CDay',
-                    'a.CRong',
-                    'a.CDai',
+                    // 'a.CDay',
+                    // 'a.CRong',
+                    // 'a.CDai',
                     'a.Quantity',
                     'a.MaThiTruong',
                     'a.ProdType',
@@ -1625,6 +1629,62 @@ class VCNController extends Controller
 
                     return $item;
                 });
+
+                            // Kết nối đến SAP
+            $conDB = (new ConnectController)->connect_sap();
+
+            // Tạo mảng kết quả mới có thêm trường MaThiTruong
+            $data = collect();
+
+            foreach ($rawData as $item) {
+                // Truy vấn đến bảng OITM trong SAP để lấy U_SKU
+                $query = 'SELECT "U_SKU", "U_CDay", "U_CRong", "U_CDai" FROM OITM WHERE "ItemCode" = ?';
+                $stmt = odbc_prepare($conDB, $query);
+
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                if (!odbc_execute($stmt, [$item->ItemCode])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+
+                $maThiTruong = null;
+                $CDay = null;
+                $CRong = null;
+                $CDai = null;
+                if ($row = odbc_fetch_array($stmt)) {
+                    $maThiTruong = $row['U_SKU'];
+                    $CDay = (float) $row['U_CDay'];
+                    $CRong = (float) $row['U_CRong'];
+                    $CDai = (float) $row['U_CDai'];
+
+                    if (strpos((string) $CDay, '.') !== false && (int) substr((string) $CDay, strpos((string) $CDay, '.') + 1) > 0) {
+                        $CDay = number_format((float) $CDay, 1);
+                    } else {
+                        $CDay = (int) $CDay;
+                    }
+
+                    if (strpos((string) $CRong, '.') !== false && (int) substr((string) $CRong, strpos((string) $CRong, '.') + 1) > 0) {
+                        $CRong = number_format((float) $CRong, 1);
+                    } else {
+                        $CRong = (int) $CRong;
+                    }
+
+                    if (strpos((string) $CDai, '.') !== false && (int) substr((string) $CDai, strpos((string) $CDai, '.') + 1) > 0) {
+                        $CDai = number_format((float) $CDai, 1);
+                    } else {
+                        $CDai = (int) $CDai;
+                    }
+                }
+
+                // Thêm thuộc tính MaThiTruong vào item
+                $itemWithMarket = (object) array_merge((array) $item, ['MaThiTruong' => $maThiTruong], ['CDay' => $CDay], ['CRong' => $CRong], ['CDai' => $CDai]);
+                $data->push($itemWithMarket);
+            }
+
+            // Đóng kết nối SAP sau khi hoàn thành
+            odbc_close($conDB);
         }
 
         return response()->json([
