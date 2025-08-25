@@ -569,12 +569,12 @@ const AwaitingReception = ({
                         </div>
                         <div className=""></div>
                         {type == "plywood" ? (
-                            <div className="flex w-full gap-2">
+                            <div className="flex w-full ">
                                 <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-500">
-                                    ItemCode:{" "}
+                                    ItemCode:
                                 </span>
                                 <span className="w-[65%] font-bold">
-                                    {data?.ItemCode || "????"}
+                                    {data?.ItemCode || "Không xác định"}
                                 </span>
                             </div>
                         ) : (
@@ -583,7 +583,7 @@ const AwaitingReception = ({
                                     {data?.SubItemName ? (
                                         <>
                                             <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
-                                                ItemCode:{" "}
+                                                ItemCode:
                                             </span>
                                             <span className="font-bold">
                                                 {data?.SubItemCode ||
@@ -593,7 +593,7 @@ const AwaitingReception = ({
                                     ) : (
                                         <>
                                             <span className="xl:w-[35%] lg:w-[35%] md:w-[35%] w-[40%] text-gray-600">
-                                                ItemCode:{" "}
+                                                ItemCode:
                                             </span>
                                             <span className="w-[65%] font-bold">
                                                 {data?.ItemCode ||

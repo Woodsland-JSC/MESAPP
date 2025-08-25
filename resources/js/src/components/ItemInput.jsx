@@ -190,6 +190,7 @@ const ItemInput = ({
                         FatherCode: item.ItemChild,
                         TO: item.TO,
                         version: item.Version,
+                        ProdType: item.ProdType,
                     };
                     const res =
                         await productionApi.getFinishedRongPlywoodGoodsDetail(
@@ -242,6 +243,7 @@ const ItemInput = ({
                         ItemCode: item.ItemChild,
                         TO: item.TO,
                         Version: item.Version,
+                        ProdType: item.ProdType,
                     };
                     const res =
                         await productionApi.getFinishedPlywoodGoodsDetail(
