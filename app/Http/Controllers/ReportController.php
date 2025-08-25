@@ -1449,7 +1449,7 @@ class ReportController extends Controller
 
         odbc_close($conDB);
 
-        return $results;
+        return mb_convert_encoding($results, 'UTF-8', 'UTF-8');
     }
 
     function factoryTransfer(Request $request)
