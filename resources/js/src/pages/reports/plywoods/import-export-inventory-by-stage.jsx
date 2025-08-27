@@ -98,6 +98,14 @@ function ImportExportInventoryByStage() {
                 pinned: "left"
             },
             {
+                headerName: "Mã chi tiết",
+                field: "ItemName",
+                width: 180,
+                suppressHeaderMenuButton: true,
+                filter: true,
+                pinned: "left"
+            },
+            {
                 headerName: "Chi tiết",
                 field: "ItemName",
                 width: 350,
@@ -500,6 +508,7 @@ function ImportExportInventoryByStage() {
                 return {
                     stage: convertStageName(item.U_CDOAN),
                     targetProduct: item.BOMName,
+                    ItemCode: item.ItemCode,
                     ItemName: item.ItemName,
                     length: item.U_CDai,
                     width: item.U_CRong,
