@@ -136,6 +136,13 @@ function DefectHandlingMeasureReport() {
                     : null,
         },
         {
+            headerName: "Tên sản phẩm đích",
+            field: "tenspd",
+            width: 370,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
             headerName: "Mã chi tiết",
             field: "itemcode",
             width: 150,
@@ -265,6 +272,7 @@ function DefectHandlingMeasureReport() {
                 root_place_name: item.TenToBaoLoi || "Không xác định",
                 defect_type: item.LoiLoai || "Không xác định",
                 resolution: item.HXL || "Không xác định",
+                tenspd: item.TenSPD || "Không xác định",
                 itemcode: item.ItemCode,
                 itemname: item.ItemName,
                 thickness: Number(item.CDay),
