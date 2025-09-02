@@ -32,7 +32,10 @@ class ResetDryingHistoryByUserFactory extends Command
         $plant = $this->argument('plant'); // Get the plant argument from the command
 
         // Get all planDryings records with the specified plant and status = 0
-        $planDryingsToDelete = planDryings::where('plant', $plant)->where('status', 0)->get();
+        $planDryingsToDelete = planDryings::where('plant', $plant)
+            ->where('status', 0)
+            ->whereDoesntHave('planDetails') // chỉ lấy planDryings không có plan_detail
+            ->get();
 
         if ($planDryingsToDelete->isEmpty()) {
             $this->info("No records found for plant: $plant with status = 0.");

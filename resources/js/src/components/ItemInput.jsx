@@ -539,6 +539,17 @@ const ItemInput = ({
             onAlertDialogClose();
             return;
         } else if (
+            selectedItemDetails.CongDoan !== "SC" &&
+            selectedItemDetails.CongDoan !== "XV" &&
+            (selectedItemDetails?.stocks?.length !== 1 ||
+                selectedItemDetails?.stocks[0]?.SubItemCode !==
+                    "MM010000178") &&
+            amount > selectedItemDetails.maxQty
+        ) {
+            toast.error("Đã vượt quá số lượng tối đa có thể xuất");
+            onAlertDialogClose();
+            return;
+        } else if (
             amount >
             selectedItemDetails.remainQty -
                 selectedItemDetails.WaitingConfirmQty
@@ -1085,15 +1096,23 @@ const ItemInput = ({
                                                       scope="col"
                                                       className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
                                                   >
-                                                      <span className="xl:block lg:block md:block hidden">Sản lượng</span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">SL</span>
+                                                      <span className="xl:block lg:block md:block hidden">
+                                                          Sản lượng
+                                                      </span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">
+                                                          SL
+                                                      </span>
                                                   </th>
                                                   <th
                                                       scope="col"
                                                       className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
                                                   >
-                                                      <span className="xl:block lg:block md:block hidden">Đã làm</span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">ĐL</span>
+                                                      <span className="xl:block lg:block md:block hidden">
+                                                          Đã làm
+                                                      </span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">
+                                                          ĐL
+                                                      </span>
                                                   </th>
                                                   <th
                                                       scope="col"
@@ -1105,8 +1124,12 @@ const ItemInput = ({
                                                       scope="col"
                                                       className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
                                                   >
-                                                      <span className="xl:block lg:block md:block hidden">Còn lại</span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">CL</span>
+                                                      <span className="xl:block lg:block md:block hidden">
+                                                          Còn lại
+                                                      </span>
+                                                      <span className="xl:hidden lg:hidden md:hidden block">
+                                                          CL
+                                                      </span>
                                                   </th>
                                               </tr>
                                           </thead>
@@ -2302,7 +2325,26 @@ const ItemInput = ({
                                                     {" "}
                                                     *
                                                 </span>
-                                                {selectedItemDetails?.remainQty -
+                                                {selectedItemDetails?.CongDoan !==
+                                                    "SC" &&
+                                                selectedItemDetails?.CongDoan !==
+                                                    "XV" &&
+                                                selectedItemDetails?.maxQty <=
+                                                    0 &&
+                                                (selectedItemDetails?.stocks
+                                                    ?.length !== 1 ||
+                                                    selectedItemDetails
+                                                        ?.stocks[0]
+                                                        ?.SubItemCode !==
+                                                        "MM010000178") ? (
+                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
+                                                        <MdDangerous className="w-6 h-6" />
+                                                        <div>
+                                                            Không đủ số lượng để
+                                                            ghi nhận
+                                                        </div>
+                                                    </div>
+                                                ) : selectedItemDetails?.remainQty -
                                                       selectedItemDetails?.WaitingConfirmQty <=
                                                   0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
@@ -2448,9 +2490,11 @@ const ItemInput = ({
                                                                                         : item?.loinhamay ==
                                                                                           "TB"
                                                                                         ? "Thái Bình"
-                                                                                        : item?.loinhamay == "CH"
+                                                                                        : item?.loinhamay ==
+                                                                                          "CH"
                                                                                         ? "Chiêm Hóa"
-                                                                                        : item?.loinhamay == "VF"
+                                                                                        : item?.loinhamay ==
+                                                                                          "VF"
                                                                                         ? "Viforex"
                                                                                         : "không xác định"}
                                                                                 </span>

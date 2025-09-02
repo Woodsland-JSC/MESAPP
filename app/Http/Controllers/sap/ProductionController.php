@@ -631,6 +631,8 @@ class ProductionController extends Controller
 
         $stock = [];
 
+        // dd($results);
+
         // Lấy danh sách số lượng tồn
         $groupedResults = [];
 
@@ -645,12 +647,12 @@ class ProductionController extends Controller
                 $groupedResults[$subItemCode] = [
                     'SubItemCode' => $subItemCode,
                     'SubItemName' => $subItemName,
-                    'OnHand' => 0,
+                    'OnHand' => $onHand,
                     'BaseQty' => $baseQty,
                 ];
             }
 
-            $groupedResults[$subItemCode]['OnHand'] = $onHand;
+            // $groupedResults[$subItemCode]['OnHand'] = $onHand;
         }
 
         // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
