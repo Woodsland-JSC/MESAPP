@@ -92,6 +92,13 @@ function ProductionOutputByProductionOrderVCN() {
                 filter: true,
                 pinned: "left"
             },
+            // {
+            //     headerName: "Mã thị trường",
+            //     field: "SPD_MTT",
+            //     width: 170,
+            //     suppressHeaderMenuButton: true,
+            //     filter: true,
+            // },
             {
                 headerName: 'Quy cách',
                 children: [
@@ -327,6 +334,7 @@ function ProductionOutputByProductionOrderVCN() {
                             productionOrder: item.LSX,
                             stage: convertStageName(item.U_CDOAN),
                             ItemName: item.ItemName,
+                            SPD_MTT: item.SPD_MTT,
                             length: item.U_CDai,
                             width: item.U_CRong,
                             thickness: item.U_CDay,
