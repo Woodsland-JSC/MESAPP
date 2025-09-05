@@ -1332,40 +1332,44 @@ class QCController extends Controller
 
             $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-            $totalDocuments = count($dataIssues['SubItemQty']);
-            $documentCounter = 0;
-            foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+            if ($dataIssues) {
+                $totalDocuments = count($dataIssues['SubItemQty']);
+                $documentCounter = 0;
+                foreach ($dataIssues['SubItemQty'] as $dataIssue) {
 
-                if (empty($data->SubItemCode)) {
-                    // Lỗi thành phẩm
-                    $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
-                } else {
-                    // Lỗi bán thành phẩm
-                    $quantity = (float)$request->Qty;
-                }
+                    if (empty($data->SubItemCode)) {
+                        // Lỗi thành phẩm
+                        $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
+                    } else {
+                        // Lỗi bán thành phẩm
+                        $quantity = (float)$request->Qty;
+                    }
 
-                $result = playloadIssueCBG(
-                    $dataIssue['SubItemCode'],
-                    $quantity,
-                    $dataIssues['SubItemWhs'],
-                    Auth::user()->branch,
-                    $data->LSX,
-                    $data->Team,
-                    $U_GIAO->last_name . " " . $U_GIAO->first_name,
-                    Auth::user()->last_name . " " . Auth::user()->first_name,
-                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
-                    $request->id
-                );
-                $documentCounter++;
-                $IssueData .= "Content-Type: application/http\n";
-                $IssueData .= "Content-Transfer-Encoding: binary\n\n";
-                $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
-                $IssueData .= "Content-Type: application/json\n\n";
-                $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
-                if (!($documentCounter === $totalDocuments)) {
-                    $IssueData .= "{$batchBoundary}\n";
+                    $result = playloadIssueCBG(
+                        $dataIssue['SubItemCode'],
+                        $quantity,
+                        $dataIssues['SubItemWhs'],
+                        Auth::user()->branch,
+                        $data->LSX,
+                        $data->Team,
+                        $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                        Auth::user()->last_name . " " . Auth::user()->first_name,
+                        $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
+                        $request->id
+                    );
+                    $documentCounter++;
+                    $IssueData .= "Content-Type: application/http\n";
+                    $IssueData .= "Content-Transfer-Encoding: binary\n\n";
+                    $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
+                    $IssueData .= "Content-Type: application/json\n\n";
+                    $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
+                    if (!($documentCounter === $totalDocuments)) {
+                        $IssueData .= "{$batchBoundary}\n";
+                    }
                 }
             }
+
+
             if ($data->IsPushSAP == 0) {
                 $type = 'I';
                 $qtypush = $data->RejectQty;
@@ -1373,8 +1377,8 @@ class QCController extends Controller
                 $type = 'U';
                 $qtypush = $request->Qty;
             }
-            // tạo một payload batch
 
+            // tạo một payload batch
             $changeSetBoundary = 'changeset';
             $output = "{$batchBoundary}\n";
             $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
@@ -1416,7 +1420,6 @@ class QCController extends Controller
                 $parts = preg_split('/--batch.*?\r\n/', $res);
 
                 $goodsReceipt = null;
-                $goodsIssues = null;
 
                 // Lặp qua các phần của phản hồi để trích xuất thông tin
                 foreach ($parts as $part) {
@@ -1447,11 +1450,6 @@ class QCController extends Controller
                 if (empty($goodsReceipt)) {
                     $this->throwSAPError($res);
                 }
-
-                // // Kiểm tra xem có thông tin phiếu xuất không
-                // if (empty($goodsIssues)) {
-                //     $this->throwSAPError($res);
-                // }
 
                 // Cấu trúc dữ liệu document_log
                 $documentLog = [
@@ -1619,7 +1617,7 @@ class QCController extends Controller
             //     throw new \Exception("Không còn lệnh sản xuất nào của sản phẩm hiện tại.");
             // }
 
-            if (count($uniqueWhs) !== 1) {
+            if (count($uniqueWhs) > 1) {
                 throw new \Exception("Nhiều kho khác nhau được tìm thấy. Dữ liệu không đồng nhất.");
             }
 
