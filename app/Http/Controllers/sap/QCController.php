@@ -1449,16 +1449,6 @@ class QCController extends Controller
                                 'DocNum' => $numMatches[1]
                             ];
                         }
-                    } elseif (strpos($part, 'InventoryGenExits') !== false) {
-                        // Trích xuất thông tin phiếu xuất
-                        preg_match('/"DocEntry"\s*:\s*(\d+)/', $part, $entryMatches);
-                        preg_match('/"DocNum"\s*:\s*(\d+)/', $part, $numMatches);
-                        if (!empty($entryMatches[1]) && !empty($numMatches[1])) {
-                            $goodsIssues[] = [
-                                'DocEntry' => $entryMatches[1],
-                                'DocNum' => $numMatches[1]
-                            ];
-                        }
                     }
                 }
 
@@ -1470,7 +1460,6 @@ class QCController extends Controller
                 // Cấu trúc dữ liệu document_log
                 $documentLog = [
                     'Goods_Receipt' => $goodsReceipt,
-                    'Goods_Issue' => $goodsIssues,
                     'timestamp' => now()->toDateTimeString()
                 ];
 
