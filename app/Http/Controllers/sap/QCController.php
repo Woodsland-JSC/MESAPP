@@ -1382,16 +1382,34 @@ class QCController extends Controller
             }
 
             // tạo một payload batch
-            $changeSetBoundary = 'changeset';
-            $output = "{$batchBoundary}\n";
+            // $changeSetBoundary = 'changeset';
+            // $output = "{$batchBoundary}\n";
+            // $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
+            // $output .= "Content-Type: application/http\n";
+            // $output .= "Content-Transfer-Encoding: binary\n";
+            // $output .= "POST /b1s/v1/InventoryGenEntries\n";
+            // $output .= "Content-Type: application/json\n\n";
+            // $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
+            // $output .= "{$batchBoundary}\n";
+            // $output .= "{$batchBoundary}--";
+
+            $changeSetBoundary = 'changeset_' . uniqid();
+            $output  = "--{$batchBoundary}\n";
             $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
+            $output .= "--{$changeSetBoundary}\n";
             $output .= "Content-Type: application/http\n";
-            $output .= "Content-Transfer-Encoding: binary\n";
+            $output .= "Content-Transfer-Encoding: binary\n\n";
             $output .= "POST /b1s/v1/InventoryGenEntries\n";
             $output .= "Content-Type: application/json\n\n";
             $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
-            $output .= "{$batchBoundary}\n";
-            $output .= "{$batchBoundary}--";
+            $output .= "--{$changeSetBoundary}--\n";
+            if (!empty($IssueData)) {
+                $output .= "--{$batchBoundary}\n";
+                $output .= $IssueData;
+            }
+            $output .= "--{$batchBoundary}--";
+
+
             $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
                 'verify' => false,
