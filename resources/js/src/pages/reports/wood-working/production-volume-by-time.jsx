@@ -48,6 +48,7 @@ function ProductionVolumeByTimeReport() {
 
     const { user } = useAppContext();
     const gridRef = useRef();
+    const abortControllerRef = useRef(null);
     const chartRef = useRef(null);
     const chartRefMobile = useRef(null);
 
@@ -701,6 +702,13 @@ function ProductionVolumeByTimeReport() {
 
         setIsDataReportLoading(true);
 
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        abortControllerRef.current = new AbortController();
+        const { signal } = abortControllerRef.current;
+
         if (selectedTimeRange === 'day') {
             params = {
                 fromDate: format(fromDate, "yyyy-MM-dd"),
@@ -710,7 +718,8 @@ function ProductionVolumeByTimeReport() {
             try {
                 let dailyRes = await reportApi.getProductionVolumeByDay(
                     params.fromDate,
-                    params.toDate
+                    params.toDate,
+                    { signal }
                 )
 
                 let formattedData;
@@ -740,6 +749,9 @@ function ProductionVolumeByTimeReport() {
 
                 setDailyData(formattedData);
             } catch (error) {
+                if (error.name === 'AbortError' || signal.aborted) {
+                    return;
+                }
                 console.error(error);
                 toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             }
@@ -764,10 +776,9 @@ function ProductionVolumeByTimeReport() {
         try {
             let res = await reportApi.getProductionVolumeByTime(
                 params.fromDate,
-                params.toDate
+                params.toDate,
+                { signal }
             );
-
-            console.log("Test: ", res)
 
             setReportData(res);
 
@@ -806,7 +817,6 @@ function ProductionVolumeByTimeReport() {
                     break;
                 case 'week':
                     formattedData = aggregateItemsByWeek(res);
-                    console.log("Factory 2: ", formattedData)
                     break;
                 case 'month':
                     formattedData = aggregateItemsByMonth(res);
@@ -817,10 +827,16 @@ function ProductionVolumeByTimeReport() {
 
             setRowData(formattedData);
         } catch (error) {
+            if (error.name === 'AbortError' || signal.aborted) {
+                return;
+            }
             console.error(error);
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
         } finally {
-            setIsDataReportLoading(false);
+            if (!signal.aborted) {
+                setIsDataReportLoading(false);
+                abortControllerRef.current = null;
+            }
         }
     }
     // }, [fromDate, toDate, fromYear, selectedTimeRange, selectedGroup, selectedFactory]);
@@ -865,13 +881,16 @@ function ProductionVolumeByTimeReport() {
 
     // DONE
     const handleUnitSelect = async (unit) => {
-        setSelectedUnit(unit);
+        if (!isDataReportLoading)
+            setSelectedUnit(unit);
     };
 
     // DONE
     const handleFactorySelect = async (factory) => {
+        if (isDataReportLoading) return
+
         setSelectedFactory(factory);
-        
+
         const stageOrder = { LP: 1, SC: 2, BTP: 3, TC: 4, HT: 5, DG: 6, TP: 7 };
 
         let res = [...reportData];
@@ -945,6 +964,8 @@ function ProductionVolumeByTimeReport() {
 
     // DONE
     const handleGroupSelect = async (group) => {
+        if (isDataReportLoading) return
+
         let currentGroups;
         if (group == "All") {
             if (selectedGroup?.length < groupData?.length) {
@@ -1049,7 +1070,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedUnit === value
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleUnitSelect(value)}
         >
             {selectedUnit === value ? (
@@ -1073,7 +1094,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -1097,7 +1118,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-md border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedGroup?.includes(value)
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleGroupSelect(value)}
         >
             {selectedGroup?.includes(value) ? (

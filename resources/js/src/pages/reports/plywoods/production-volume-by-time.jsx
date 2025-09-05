@@ -855,11 +855,14 @@ function ProductionVolumeByTimeReport() {
 
     // DONE
     const handleUnitSelect = async (unit) => {
-        setSelectedUnit(unit);
+        if (!isDataReportLoading)
+            setSelectedUnit(unit);
     };
 
     // DONE
     const handleFactorySelect = async (factory) => {
+        if (isDataReportLoading) return
+
         setSelectedFactory(factory);
 
         let res = [...reportData];
@@ -922,6 +925,8 @@ function ProductionVolumeByTimeReport() {
 
     // DONE
     const handleGroupSelect = async (group) => {
+        if (isDataReportLoading) return
+
         let currentGroups;
         if (group == "All") {
             if (selectedGroup?.length < groupData?.length) {
@@ -1026,7 +1031,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedUnit === value
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleUnitSelect(value)}
         >
             {selectedUnit === value ? (
@@ -1050,7 +1055,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#1d2326] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -1074,7 +1079,7 @@ function ProductionVolumeByTimeReport() {
             className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-md border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedGroup?.includes(value)
                 ? "border-[#86ABBE] bg-[#eaf8ff]"
                 : "border-gray-300"
-                }`}
+                } ${isDataReportLoading && "hover:cursor-not-allowed"}`}
             onClick={() => handleGroupSelect(value)}
         >
             {selectedGroup?.includes(value) ? (
