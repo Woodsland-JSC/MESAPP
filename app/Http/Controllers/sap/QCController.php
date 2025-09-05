@@ -1332,7 +1332,7 @@ class QCController extends Controller
 
             $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-            if (!empty($dataIssues) && !empty($dataIssues['SubItemQty'])) {
+            if (!empty($dataIssues) && !empty($dataIssues['SubItemQty']) && is_array($dataIssues['SubItemQty'])) {
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
