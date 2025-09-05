@@ -1332,7 +1332,7 @@ class QCController extends Controller
 
             $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-            if ($dataIssues) {
+            if (!empty($dataIssues) && !empty($dataIssues['SubItemQty'])) {
                 $totalDocuments = count($dataIssues['SubItemQty']);
                 $documentCounter = 0;
                 foreach ($dataIssues['SubItemQty'] as $dataIssue) {
@@ -1368,7 +1368,6 @@ class QCController extends Controller
                     }
                 }
             }
-
 
             if ($data->IsPushSAP == 0) {
                 $type = 'I';
