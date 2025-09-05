@@ -1560,6 +1560,7 @@ class QCController extends Controller
                 SELECT "SubItemCode", "wareHouse", "BaseQty"
                 FROM "UV_SOLUONGTON"
                 WHERE "ItemCode" = ? AND "SubItemCode" = ?
+                AND "IssueType" = 'B'
                 LIMIT 1
             SQL;
 
@@ -1585,7 +1586,7 @@ class QCController extends Controller
             $sql = <<<SQL
                 SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty"
                 FROM "UV_SOLUONGTON"
-                WHERE "ItemCode" = ?
+                WHERE "ItemCode" = ? AND "IssueType" = 'B'
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
