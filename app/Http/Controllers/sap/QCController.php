@@ -1397,13 +1397,13 @@ class QCController extends Controller
                 $output .= "{$batchBoundary}--";
             } else {
                 // Trường hợp chỉ có phiếu nhập
-                $output  = "--{$batchBoundary}\n";
+                $output  = "{$batchBoundary}\n";
                 $output .= "Content-Type: application/http\n";
                 $output .= "Content-Transfer-Encoding: binary\n\n";
                 $output .= "POST /b1s/v1/InventoryGenEntries\n";
                 $output .= "Content-Type: application/json\n\n";
                 $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
-                $output .= "--{$batchBoundary}--";
+                $output .= "{$batchBoundary}--";
             }
 
             $client = new Client();
