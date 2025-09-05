@@ -1332,42 +1332,43 @@ class QCController extends Controller
 
             $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-            if (!empty($dataIssues) && !empty($dataIssues['SubItemQty']) && is_array($dataIssues['SubItemQty'])) {
-                $totalDocuments = count($dataIssues['SubItemQty']);
-                $documentCounter = 0;
-                foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+            dd($dataIssues);
 
-                    if (empty($data->SubItemCode)) {
-                        // Lỗi thành phẩm
-                        $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
-                    } else {
-                        // Lỗi bán thành phẩm
-                        $quantity = (float)$request->Qty;
-                    }
+            $totalDocuments = count($dataIssues['SubItemQty']);
+            $documentCounter = 0;
+            foreach ($dataIssues['SubItemQty'] as $dataIssue) {
 
-                    $result = playloadIssueCBG(
-                        $dataIssue['SubItemCode'],
-                        $quantity,
-                        $dataIssues['SubItemWhs'],
-                        Auth::user()->branch,
-                        $data->LSX,
-                        $data->Team,
-                        $U_GIAO->last_name . " " . $U_GIAO->first_name,
-                        Auth::user()->last_name . " " . Auth::user()->first_name,
-                        $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
-                        $request->id
-                    );
-                    $documentCounter++;
-                    $IssueData .= "Content-Type: application/http\n";
-                    $IssueData .= "Content-Transfer-Encoding: binary\n\n";
-                    $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
-                    $IssueData .= "Content-Type: application/json\n\n";
-                    $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
-                    if (!($documentCounter === $totalDocuments)) {
-                        $IssueData .= "{$batchBoundary}\n";
-                    }
+                if (empty($data->SubItemCode)) {
+                    // Lỗi thành phẩm
+                    $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
+                } else {
+                    // Lỗi bán thành phẩm
+                    $quantity = (float)$request->Qty;
+                }
+
+                $result = playloadIssueCBG(
+                    $dataIssue['SubItemCode'],
+                    $quantity,
+                    $dataIssues['SubItemWhs'],
+                    Auth::user()->branch,
+                    $data->LSX,
+                    $data->Team,
+                    $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                    Auth::user()->last_name . " " . Auth::user()->first_name,
+                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
+                    $request->id
+                );
+                $documentCounter++;
+                $IssueData .= "Content-Type: application/http\n";
+                $IssueData .= "Content-Transfer-Encoding: binary\n\n";
+                $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
+                $IssueData .= "Content-Type: application/json\n\n";
+                $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
+                if (!($documentCounter === $totalDocuments)) {
+                    $IssueData .= "{$batchBoundary}\n";
                 }
             }
+
 
             if ($data->IsPushSAP == 0) {
                 $type = 'I';
@@ -1554,10 +1555,9 @@ class QCController extends Controller
         if ($ItemCode && $SubItemCode) {
             // Trường hợp lỗi bán thành phẩm
             $sql = <<<SQL
-                SELECT "SubItemCode", "wareHouse", "BaseQty"
+                SELECT "SubItemCode", "wareHouse", "BaseQty", "IssueType"
                 FROM "UV_SOLUONGTON"
                 WHERE "ItemCode" = ? AND "SubItemCode" = ?
-                AND "IssueType" = 'B'
                 LIMIT 1
             SQL;
 
@@ -1570,20 +1570,21 @@ class QCController extends Controller
             }
 
             $dataIssues = [
-                'SubItemWhs' => $row['wareHouse'],
                 'SubItemQty' => [
                     [
                         'SubItemCode' => $row['SubItemCode'],
-                        'BaseQty' => (float) $row['BaseQty']
+                        'BaseQty' => (float) $row['BaseQty'],
+                        'IssueType' => $row['IssueType']
                     ]
-                ]
+                ],
+                'SubItemWhs' => $row['wareHouse'],
             ];
         } elseif ($ItemCode && !$SubItemCode) {
             // Trường hợp lỗi thành phẩm
             $sql = <<<SQL
-                SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty"
+                SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "IssueType"
                 FROM "UV_SOLUONGTON"
-                WHERE "ItemCode" = ? AND "IssueType" = 'B'
+                WHERE "ItemCode" = ? 
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
@@ -1596,7 +1597,8 @@ class QCController extends Controller
             while ($row = odbc_fetch_array($stmt)) {
                 $subItems[] = [
                     'SubItemCode' => $row['SubItemCode'],
-                    'BaseQty' => (float) $row['BaseQty']
+                    'BaseQty' => (float) $row['BaseQty'],
+                    'IssueType' => $row['IssueType']
                 ];
                 $warehouses[] = $row['wareHouse'];
                 $subItemCodes[] = $row['SubItemCode'];
@@ -1621,8 +1623,8 @@ class QCController extends Controller
             }
 
             $dataIssues = [
+                'SubItemQty' => $subItems,
                 'SubItemWhs' => $uniqueWhs[0],
-                'SubItemQty' => $subItems
             ];
         } else {
             throw new \Exception("Không đủ dữ kiện để xác định loại lỗi.");
