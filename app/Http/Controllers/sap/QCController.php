@@ -1382,6 +1382,18 @@ class QCController extends Controller
             }
 
             // tạo một payload batch
+            // $changeSetBoundary = 'changeset';
+            // $output = "{$batchBoundary}\n";
+            // $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
+            // $output .= "Content-Type: application/http\n";
+            // $output .= "Content-Transfer-Encoding: binary\n";
+            // $output .= "POST /b1s/v1/InventoryGenEntries\n";
+            // $output .= "Content-Type: application/json\n\n";
+            // $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
+            // $output .= "{$batchBoundary}\n";
+            // $output .= $IssueData ? $IssueData . "\n" : '';
+            // $output .= "{$batchBoundary}--";
+
             $changeSetBoundary = 'changeset';
             $output = "{$batchBoundary}\n";
             $output .= "Content-Type: multipart/mixed; boundary={$changeSetBoundary}\n\n";
@@ -1391,8 +1403,13 @@ class QCController extends Controller
             $output .= "Content-Type: application/json\n\n";
             $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
             $output .= "{$batchBoundary}\n";
-            $output .= $IssueData ? $IssueData . "\n" : '';
-            $output .= "{$batchBoundary}--";
+
+            // Chỉ thêm IssueData vào batch nếu có dữ liệu phiếu xuất
+            if (!empty($IssueData)) {
+                $output .= $IssueData;
+            }
+
+            // 
             $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
                 'verify' => false,
