@@ -1332,43 +1332,46 @@ class QCController extends Controller
 
             $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
 
-            dd($dataIssues);
+            $filteredSubItemQty = array_filter($dataIssues['SubItemQty'], function ($item) {
+                return isset($item['IssueType']) && $item['IssueType'] == 'B';
+            });
 
-            $totalDocuments = count($dataIssues['SubItemQty']);
-            $documentCounter = 0;
-            foreach ($dataIssues['SubItemQty'] as $dataIssue) {
+            if (!empty($filteredSubItemQty)) {
+                $totalDocuments = count($dataIssues['SubItemQty']);
+                $documentCounter = 0;
+                foreach ($dataIssues['SubItemQty'] as $dataIssue) {
 
-                if (empty($data->SubItemCode)) {
-                    // Lỗi thành phẩm
-                    $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
-                } else {
-                    // Lỗi bán thành phẩm
-                    $quantity = (float)$request->Qty;
-                }
+                    if (empty($data->SubItemCode)) {
+                        // Lỗi thành phẩm
+                        $quantity = (float)$request->Qty * (float)$dataIssue['BaseQty'];
+                    } else {
+                        // Lỗi bán thành phẩm
+                        $quantity = (float)$request->Qty;
+                    }
 
-                $result = playloadIssueCBG(
-                    $dataIssue['SubItemCode'],
-                    $quantity,
-                    $dataIssues['SubItemWhs'],
-                    Auth::user()->branch,
-                    $data->LSX,
-                    $data->Team,
-                    $U_GIAO->last_name . " " . $U_GIAO->first_name,
-                    Auth::user()->last_name . " " . Auth::user()->first_name,
-                    $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
-                    $request->id
-                );
-                $documentCounter++;
-                $IssueData .= "Content-Type: application/http\n";
-                $IssueData .= "Content-Transfer-Encoding: binary\n\n";
-                $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
-                $IssueData .= "Content-Type: application/json\n\n";
-                $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
-                if (!($documentCounter === $totalDocuments)) {
-                    $IssueData .= "{$batchBoundary}\n";
+                    $result = playloadIssueCBG(
+                        $dataIssue['SubItemCode'],
+                        $quantity,
+                        $dataIssues['SubItemWhs'],
+                        Auth::user()->branch,
+                        $data->LSX,
+                        $data->Team,
+                        $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                        Auth::user()->last_name . " " . Auth::user()->first_name,
+                        $data->ItemCode . "-" . $data->Team . "-" . str_pad($HistorySL + 1, 4, '0', STR_PAD_LEFT),
+                        $request->id
+                    );
+                    $documentCounter++;
+                    $IssueData .= "Content-Type: application/http\n";
+                    $IssueData .= "Content-Transfer-Encoding: binary\n\n";
+                    $IssueData .= "POST /b1s/v1/InventoryGenExits\n";
+                    $IssueData .= "Content-Type: application/json\n\n";
+                    $IssueData .= json_encode($result, JSON_PRETTY_PRINT) . "\n\n";
+                    if (!($documentCounter === $totalDocuments)) {
+                        $IssueData .= "{$batchBoundary}\n";
+                    }
                 }
             }
-
 
             if ($data->IsPushSAP == 0) {
                 $type = 'I';
