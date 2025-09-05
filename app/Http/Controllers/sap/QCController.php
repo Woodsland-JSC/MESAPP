@@ -1403,11 +1403,12 @@ class QCController extends Controller
             $output .= "Content-Type: application/json\n\n";
             $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
             $output .= "{$batchBoundary}\n";
-
-            // Chỉ thêm IssueData vào batch nếu có dữ liệu phiếu xuất
+            
             if (!empty($IssueData)) {
                 $output .= $IssueData;
             }
+
+            $output .= "{$batchBoundary}--";
 
             // 
             $client = new Client();
