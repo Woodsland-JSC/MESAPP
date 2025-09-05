@@ -1391,7 +1391,6 @@ class QCController extends Controller
             $output .= "Content-Type: application/json\n\n";
             $output .= json_encode($ReceiptData, JSON_PRETTY_PRINT) . "\n";
             $output .= "{$batchBoundary}\n";
-            $output .= $IssueData;
             $output .= "{$batchBoundary}--";
             $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
