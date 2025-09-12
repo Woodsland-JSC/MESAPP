@@ -1285,7 +1285,7 @@ class ReportController extends Controller
             $createByName = trim("{$noti->first_name} {$noti->last_name}");
 
             try {
-                $sapData = $this->getDefectDataFromSAP($noti->ItemCode, $noti->SubItemCode);
+                $sapData = $this->getDefectDataFromSAP($noti->ItemCode, $noti->SubItemCode, $noti->plant);
 
                 if ($noti->SubItemCode !== null) {
                     $rawQty = (float)$sapData['SubItemQty'][0]['OnHand'] - ((float)$noti->Quantity);
@@ -1358,7 +1358,7 @@ class ReportController extends Controller
         return response()->json($result);
     }
 
-    function getDefectDataFromSAP($ItemCode, $SubItemCode)
+    function getDefectDataFromSAP($ItemCode, $SubItemCode, $Factory)
     {
         $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
 
@@ -1367,12 +1367,12 @@ class ReportController extends Controller
             $sql = <<<SQL
             SELECT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
             FROM "UV_SOLUONGTON"
-            WHERE "ItemCode" = ? AND "SubItemCode" = ?
+            WHERE "ItemCode" = ? AND "SubItemCode" = ? AND "Factory" = ?
             LIMIT 1
         SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
-            odbc_execute($stmt, [$ItemCode, $SubItemCode]);
+            odbc_execute($stmt, [$ItemCode, $SubItemCode, $Factory]);
             $row = odbc_fetch_array($stmt);
 
             if (!$row) {
@@ -1394,11 +1394,11 @@ class ReportController extends Controller
             $sql = <<<SQL
             SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "OnHand"
             FROM "UV_SOLUONGTON"
-            WHERE "ItemCode" = ?
+            WHERE "ItemCode" = ? AND "Factory" = ?
         SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
-            odbc_execute($stmt, [$ItemCode]);
+            odbc_execute($stmt, [$ItemCode, $Factory]);
 
             $subItems = [];
             $warehouses = [];
