@@ -637,7 +637,6 @@ class ProductionController extends Controller
         $groupedResults = [];
 
         foreach ($results as $result) {
-            $itemCode = $result['ItemCode'];
             $subItemCode = $result['SubItemCode'];
             $subItemName = $result['SubItemName'];
             $onHand = (float) $result['OnHand'];

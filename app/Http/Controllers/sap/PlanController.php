@@ -488,7 +488,6 @@ class PlanController extends Controller
                                     "Quantity" => $batchData->Qty,
                                     "U_Status" => $request->result
                                 ]
-
                             ]
                         ];
                     };
@@ -499,7 +498,7 @@ class PlanController extends Controller
                         "U_Pallet" => $header->Code,
                         "U_CreateBy" => Auth::user()->sap_id,
                         "BPLID" => Auth::user()->branch,
-                        "Comments" => "WLAPP PORTAL tạo pallet xếp xấy",
+                        "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò",
                         "StockTransferLines" => $data
                     ];
                     inventorytransfer::dispatch($body);
