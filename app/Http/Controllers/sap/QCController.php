@@ -1330,7 +1330,7 @@ class QCController extends Controller
             // 5.Tạo payload cho phiếu xuất
             $IssueData = '';
 
-            $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode);
+            $dataIssues = $this->getDefectDataFromSAP($data->ItemCode, $data->SubItemCode, $request->Factory);
 
             $filteredSubItemQty = array_filter($dataIssues['SubItemQty'], function ($item) {
                 return isset($item['IssueType']) && $item['IssueType'] == 'B';
@@ -1553,7 +1553,7 @@ class QCController extends Controller
         throw new \Exception('SAP code: Unknown chi tiết: Không tìm thấy thông tin lỗi trong phản hồi SAP');
     }
 
-    function getDefectDataFromSAP($ItemCode, $SubItemCode)
+    function getDefectDataFromSAP($ItemCode, $SubItemCode, $Factory)
     {
         $conDB = (new ConnectController)->connect_sap(); // Kết nối SAP HANA
 
@@ -1562,12 +1562,12 @@ class QCController extends Controller
             $sql = <<<SQL
                 SELECT "SubItemCode", "wareHouse", "BaseQty", "IssueType"
                 FROM "UV_SOLUONGTON"
-                WHERE "ItemCode" = ? AND "SubItemCode" = ?
+                WHERE "ItemCode" = ? AND "SubItemCode" = ? AND 'Factory' = ?
                 LIMIT 1
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
-            odbc_execute($stmt, [$ItemCode, $SubItemCode]);
+            odbc_execute($stmt, [$ItemCode, $SubItemCode, $Factory]);
             $row = odbc_fetch_array($stmt);
 
             if (!$row) {
@@ -1589,11 +1589,11 @@ class QCController extends Controller
             $sql = <<<SQL
                 SELECT DISTINCT "SubItemCode", "wareHouse", "BaseQty", "IssueType"
                 FROM "UV_SOLUONGTON"
-                WHERE "ItemCode" = ? 
+                WHERE "ItemCode" = ? AND 'Factory' = ?
             SQL;
 
             $stmt = odbc_prepare($conDB, $sql);
-            odbc_execute($stmt, [$ItemCode]);
+            odbc_execute($stmt, [$ItemCode, $Factory]);
 
             $subItems = [];
             $warehouses = [];
