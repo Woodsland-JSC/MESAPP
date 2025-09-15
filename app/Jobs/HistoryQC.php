@@ -76,7 +76,7 @@ class HistoryQC implements ShouldQueue
                                     $this->TCV ])
             ) {
             $this->fail('Error executing SQL statement: ' . odbc_errormsg($conDB));
-            throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+          //  throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         odbc_close($conDB);
     }
