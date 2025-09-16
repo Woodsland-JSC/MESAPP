@@ -29,6 +29,11 @@
                             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         🔄 Retry Selected
                     </button>
+                     <button formaction="{{ route('jobs.retryAll') }}"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                            onclick="return confirm('Bạn có chắc chắn muốn retry toàn bộ job thất bại không?')">
+                        🔁 Retry All
+                    </button>
                     <button formaction="{{ route('jobs.delete') }}"
                             class="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
                             onclick="return confirm('Bạn có chắc chắn muốn xóa các job đã chọn không?')">

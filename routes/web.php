@@ -19,6 +19,7 @@ Route::prefix('jobs_wl')->group(function () {
     Route::get('/', [JobController::class, 'index'])->name('jobs.index');
     Route::post('/retry', [JobController::class, 'retry'])->name('jobs.retry');
     Route::post('/delete', [\App\Http\Controllers\JobController::class, 'delete'])->name('jobs.delete');
+    Route::post('/retry-all', [\App\Http\Controllers\JobController::class, 'retryAll'])->name('jobs.retryAll');
 
 });
 
