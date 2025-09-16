@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
+use App\Http\Controllers\JobController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,6 +15,12 @@ use App\Http\Controllers\api\UserController;
 */
 
 Route::get('/uploaduser',[UserController::class, 'viewimportuser']);
+Route::prefix('jobs_wl')->group(function () {
+    Route::get('/', [JobController::class, 'index'])->name('jobs.index');
+    Route::post('/retry', [JobController::class, 'retry'])->name('jobs.retry');
+    Route::post('/delete', [\App\Http\Controllers\JobController::class, 'delete'])->name('jobs.delete');
+
+});
 
 Route::get('/{any}', function () {
     return view('index');
