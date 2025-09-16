@@ -63,6 +63,8 @@ function Details() {
 
     const [loadedPalletList, setLoadedPalletList] = useState([]);;
     const [palletData, setPalletData] = useState([]);
+    const [minThickness, setMinThickness]=useState("");
+    const [maxThickness, setMaxThickness]=useState("");
     
     const [reload, setReload] = useState(false);
 
@@ -104,6 +106,8 @@ function Details() {
                 setCT11Data(response.CT11Detail[0]);
                 setCT12Data(response.CT12Detail[0]);
                 setHumidData(response.Humidity);
+                setMaxThickness(response.plandrying?.Method?.substring(1).split("_")[1] || "");
+                setMinThickness(response.plandrying?.Method?.substring(1).split("_")[0] || "");
             })
             .catch((error) => {
                 console.error("Lỗi khi gọi API:", error);
@@ -125,6 +129,7 @@ function Details() {
         const options = data.map((item) => ({
             value: item.palletID,
             label: `${item.Code} (${item.QuyCach}) - ${item.MaLo}`,
+            thickness: item.QuyCach.split("x")[0]
         }));
         setPalletOptions(options);
         setPalletListLoading(false);
@@ -268,6 +273,8 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
                                                     status={BOWData.Status}
+                                                    minThickness={minThickness}
+                                                    maxThickness={maxThickness}
                                                     isChecked={BOWData.Checked}
                                                     onReload={setReload}
                                                     onCallback={updateData}
@@ -310,6 +317,8 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     isChecked={BOWData.Checked}
                                                     status={BOWData.Status}
+                                                    minThickness={minThickness}
+                                                    maxThickness={maxThickness}
                                                     onReload={setReload}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}

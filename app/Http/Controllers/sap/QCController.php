@@ -1606,7 +1606,10 @@ class QCController extends Controller
                     'IssueType' => $row['IssueType']
                 ];
                 $warehouses[] = $row['wareHouse'];
-                $subItemCodes[] = $row['SubItemCode'];
+                
+                if ($row['IssueType'] !== 'M') {
+                    $subItemCodes[] = $row['SubItemCode'];
+                }
             }
 
             $duplicates = array_filter(array_count_values($subItemCodes), function ($count) {

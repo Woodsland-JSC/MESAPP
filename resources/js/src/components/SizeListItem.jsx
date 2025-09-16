@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import {
     Modal,
@@ -22,6 +22,7 @@ function SizeListItem(props) {
 
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
+    const [isDeletePallet, setIsDeletePallet] = useState(false);
 
     const type = searchParams.get("type");
 
@@ -32,6 +33,7 @@ function SizeListItem(props) {
           PlanID: planID,
           PalletID: id
       };
+      setIsDeletePallet(true);
 
       try{
         palletsApi
@@ -42,10 +44,12 @@ function SizeListItem(props) {
               onReloadPalletList(reason);
               onClose();
               onDelete();
+              setIsDeletePallet(false);
           })
       }catch(error){
         console.error("Lỗi khi gọi API:", error);
         toast.error("Hiện không thể xóa pallet, hãy thử lại sau.");
+        setIsDeletePallet(false);
         onClose();
       }
           
@@ -81,15 +85,17 @@ function SizeListItem(props) {
                     <ModalFooter className="flex gap-x-3">
                         <button
                             onClick={onClose}
-                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                            className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                            disabled={isDeletePallet}
                         >
                             Đóng
                         </button>
                         <button
-                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full"
+                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit lg:w-fit w-full disabled:opacity-60 disabled:cursor-default"
+                            disabled={isDeletePallet}
                             onClick={handleDelete}
                         >
-                            Xác nhận
+                            {isDeletePallet ? "Đang xóa..." : "Xác nhận"}
                         </button>
                     </ModalFooter>
                 </ModalContent>

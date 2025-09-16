@@ -110,6 +110,8 @@ function ControllerCard(props) {
     const {
         progress,
         status,
+        minThickness,
+        maxThickness,
         isChecked,
         isReviewed,
         reason,
@@ -162,45 +164,6 @@ function ControllerCard(props) {
 
     const [BOWData, setBOWData] = useState([]);
 
-    // System Data
-    // const [fixedStates, setFixedStates] = useState({
-    //     CT1: 0,
-    //     CT2: 0,
-    //     CT3: 0,
-    //     CT4: 0,
-    //     CT5: 0,
-    //     CT6: 0,
-    //     CT7: 0,
-    //     CT8: 0,
-    //     CT9: 0,
-    //     CT10: 0,
-    //     CT11: 0,
-    //     CT12: 0,
-    // });
-
-    // const [fixedSoLan, setFixedSoLan] = useState("");
-    // const [fixedCBL, setFixedCBL] = useState("");
-    // const [fixedDoThucTe, setFixedDoThucTe] = useState("");
-
-    // const [fixedSamples, setFixedSamples] = useState({
-    //     M1: "",
-    //     M2: "",
-    //     M3: "",
-    //     M4: "",
-    //     M5: "",
-    // });
-
-    // const [fixedFanValues, setFixedFanValues] = useState({
-    //     Q1: "",
-    //     Q2: "",
-    //     Q3: "",
-    //     Q4: "",
-    //     Q5: "",
-    //     Q6: "",
-    //     Q7: "",
-    //     Q8: "",
-    // });
-
     //User Data
     const [checkboxStates, setCheckboxStates] = useState({
         CT1: 0,
@@ -239,9 +202,6 @@ function ControllerCard(props) {
         Q7: "",
         Q8: "",
     });
-
-    console.log("01. Dữ liệu checkbox nhận được từ detail là:", checkboxData);
-    console.log("01. Dữ liệu pallet nhận được từ detail là:", palletData);
 
     const handleSoLanChange = (newSoLan) => {
         setSoLan(newSoLan);
@@ -287,10 +247,6 @@ function ControllerCard(props) {
 
     // Get data Select
     useEffect(() => {
-        // if(reason){
-        //     loadPallets();
-        // }
-
         setCheckboxStates({
             CT1: checkboxData.CT1 || 0,
             CT2: checkboxData.CT2 || 0,
@@ -367,14 +323,22 @@ function ControllerCard(props) {
         const checkedCount = Object.values(checkboxStates).filter(
             (value) => value === 1
         ).length;
-
-        console.log(checkedCount === 12 ? "Đạt" : "Không đạt");
     }, [checkboxStates]);
 
     const handleLoadIntoKiln = async (reason, callback) => {
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
+                return;
+            }
+            if (selectedPallet.thickness > maxThickness) {
+                toast.error(
+                    `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
+                );
+                return;
+            }
+            if (selectedPallet.thickness < minThickness) {
+                toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
                 return;
             }
             setLoadIntoKilnLoading(true);
@@ -518,31 +482,25 @@ function ControllerCard(props) {
                         >
                             Chọn pallet
                         </label>
-                        {/* <Select
-                            placeholder="Chọn pallet"
-                            // value={selectedPallet}
-                            loadOptions={onReloadPalletList}
-                            options={palletOptions}
-                            onChange={(value) => {
-                                console.log("Selected Pallet:", value);
-                                setSelectedPallet(value);
-                            }}
-                            isLoading={palletListLoading}
-                        /> */}
                         <Select
                             placeholder="Chọn pallet"
-                            // value={selectedPallet}
+                            value={selectedPallet}
                             loadOptions={onReloadPalletList}
                             options={palletOptions}
                             onChange={(value) => {
                                 console.log("Selected Pallet:", value);
+                                console.log(
+                                    "Selected Pallet Thickness:",
+                                    value.thickness
+                                );
                                 setSelectedPallet(value);
                             }}
                             isLoading={palletListLoading}
                         />
                     </div>
                     <button
-                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%]"
+                        className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end justify-end w-full xl:max-w-[25%] disabled:opacity-60 disabled:cursor-not-allowed"
+                        disabled={loadIntoKilnLoading}
                         onClick={handleLoadIntoKiln}
                     >
                         {loadIntoKilnLoading ? (
@@ -666,36 +624,36 @@ function ControllerCard(props) {
                         </div>
                     )
                 ) : status === 1 && isReviewed === 0 ? (
-                        <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
-                            <div className="space-y-1 xl:w-[75%]">
-                                <div className="font-semibold">Chú ý:</div>
-                                <div>
-                                    Thời gian sẽ bắt đầu được tính khi bấm bắt
-                                    đầu sấy.
-                                </div>
-                            </div>
-                            <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
-                                <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
-                                <div className="font-medium">Đang sấy...</div>
+                    <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
+                        <div className="space-y-1 xl:w-[75%]">
+                            <div className="font-semibold">Chú ý:</div>
+                            <div>
+                                Thời gian sẽ bắt đầu được tính khi bấm bắt đầu
+                                sấy.
                             </div>
                         </div>
+                        <div className="flex bg-gray-200 text-gray-600 justify-center p-2 rounded-xl  px-4 text-center h-fit items-center xl:w-[25%] w-full">
+                            <CgSpinnerTwo className="animate-spin mr-2 text-xl" />
+                            <div className="font-medium">Đang sấy...</div>
+                        </div>
+                    </div>
                 ) : status === 1 && isReviewed === 1 ? (
                     <div className="flex xl:flex-row flex-col items-end gap-x-4 p-4 xl:space-y-0 space-y-3">
-                            <div className=" space-y-1 w-full xl:w-[75%]">
-                                <div className="font-semibold">
-                                    Tình trạng mẻ sấy:
-                                </div>
-                                <div className="text-green-500">
-                                    Mẻ sấy đã đủ điều kiện ra lò.
-                                </div>
+                        <div className=" space-y-1 w-full xl:w-[75%]">
+                            <div className="font-semibold">
+                                Tình trạng mẻ sấy:
                             </div>
-                            <button
-                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                onClick={onFinalOpen}
-                            >
-                                Xác nhận ra lò
-                            </button>
+                            <div className="text-green-500">
+                                Mẻ sấy đã đủ điều kiện ra lò.
+                            </div>
                         </div>
+                        <button
+                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                            onClick={onFinalOpen}
+                        >
+                            Xác nhận ra lò
+                        </button>
+                    </div>
                 ) : null}
             </div>
         ) : progress === "dg" ? (
