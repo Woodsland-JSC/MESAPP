@@ -64,9 +64,15 @@
                                 <td class="px-3 py-2">
                                     <pre class="whitespace-pre-wrap text-xs bg-gray-50 p-2 rounded">{{ Str::limit($job->payload, 200) }}</pre>
                                 </td>
-                                <td class="px-3 py-2">
-                                    <pre class="whitespace-pre-wrap text-xs text-red-600 bg-gray-50 p-2 rounded">{{ Str::limit($job->exception, 200) }}</pre>
+                                <td class="px-3 py-2 relative group">
+                                    <pre class="whitespace-pre-wrap text-xs text-red-600 bg-gray-50 p-2 rounded cursor-help">
+                                        {{ Str::limit($job->exception, 200) }}
+                                    </pre>
+                                    <div class="absolute z-10 hidden group-hover:block bg-black text-white text-xs p-2 rounded max-w-md">
+                                        {{ $job->exception }}
+                                    </div>
                                 </td>
+
                                 <td class="px-3 py-2">{{ $job->failed_at }}</td>
                             </tr>
                         @empty
