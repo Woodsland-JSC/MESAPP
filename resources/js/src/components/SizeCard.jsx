@@ -119,7 +119,7 @@ function SizeCard(props) {
                                     </Tr>
                                 </Thead>
                                 <Tbody className="">
-                                        {sizeData.map((item) => (
+                                        {sizeData.map((item, index) => (
                                             <Tr>
                                                 <Td>{item.Code}</Td>
                                                 <Td>{item.LyDo}</Td>
@@ -173,7 +173,7 @@ function SizeCard(props) {
                             </div>
                         ) : (
                             <>
-                                {sizeData.map((item) => (
+                                {sizeData.map((item, index) => (
                                     <SizeListItem
                                         planID={planID}
                                         reason={reason}

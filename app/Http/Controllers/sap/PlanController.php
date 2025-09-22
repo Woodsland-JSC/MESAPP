@@ -85,7 +85,7 @@ class PlanController extends Controller
                 $plans->where('a.Status', '=', $status);
             }
         }
-        
+
         if ($request->filled('isLoaded')) {
             if ($request->input('isLoaded') != 0) {
                 $plans->where('a.TotalPallet', '>', 0);
@@ -602,6 +602,8 @@ class PlanController extends Controller
             'Q8',
         )->get();
 
+        // dd(array_keys($plandrying->getAttributes()));
+
         if ($plandrying) {
             return response()->json([
                 'plandrying' => $plandrying,
@@ -615,73 +617,158 @@ class PlanController extends Controller
         }
     }
 
+    // function singlecheckOven(Request $request)
+    // {
+    //     $data = $request->only(
+    //         'CT1',
+    //         'CT2',
+    //         'CT3',
+    //         'CT4',
+    //         'CT5',
+    //         'CT6',
+    //         'CT7',
+    //         'CT8',
+    //         'CT9',
+    //         'CT10',
+    //         'CT11',
+    //         'CT12',
+    //         'SoLan',
+    //         'CBL',
+    //         'DoThucTe'
+    //     );
+    //     $CT11Detail = $request->only('CT11Detail');
+    //     $CT12Detail = $request->only('CT12Detail');
+
+    //     $id = $request->PlanID;
+
+    //     if ($CT11Detail) {
+    //         logchecked::UpdateOrCreate(
+    //             ['PlanID' => $id],
+    //             array_merge($CT11Detail['CT11Detail'], ['PlanID' => $id])
+    //         );
+    //     };
+    //     if ($CT12Detail) {
+    //         logchecked::UpdateOrCreate(
+    //             ['PlanID' => $id],
+    //             array_merge($CT12Detail['CT12Detail'], ['PlanID' => $id])
+    //         );
+    //     }
+
+    //     planDryings::where('PlanID', $id)->update(
+    //         array_merge($data, ['CheckedBy' => Auth::user()->id])
+    //     );
+    //     $plandrying = planDryings::where('PlanID', $id)
+    //         ->first();
+    //     $CT11Detail = logchecked::where('PlanID', $id)->select(
+    //         'M1',
+    //         'M2',
+    //         'M3',
+    //         'M4',
+    //         'M5'
+    //     )->get();
+    //     $CT12Detail
+    //         = logchecked::where('PlanID', $id)->select(
+    //             'Q1',
+    //             'Q2',
+    //             'Q3',
+    //             'Q4',
+    //             'Q5',
+    //             'Q6',
+    //             'Q7',
+    //             'Q8',
+    //         )->get();
+    //     return response()->json([
+    //         'message' => 'success',
+    //         'plandrying' => $plandrying,
+    //         'CT11Detail' => $CT11Detail,
+    //         'CT12Detail' => $CT12Detail
+    //     ], 200);
+    // }
+
     function singlecheckOven(Request $request)
     {
-        $data = $request->only(
-            'CT1',
-            'CT2',
-            'CT3',
-            'CT4',
-            'CT5',
-            'CT6',
-            'CT7',
-            'CT8',
-            'CT9',
-            'CT10',
-            'CT11',
-            'CT12',
-            'SoLan',
-            'CBL',
-            'DoThucTe'
-        );
-        $CT11Detail = $request->only('CT11Detail');
-        $CT12Detail = $request->only('CT12Detail');
+        return DB::transaction(function () use ($request) {
+            $id = $request->input('PlanID');
 
-        $id = $request->PlanID;
-
-        if ($CT11Detail) {
-            logchecked::UpdateOrCreate(
-                ['PlanID' => $id],
-                array_merge($CT11Detail['CT11Detail'], ['PlanID' => $id])
+            // Chỉ lấy các field liên quan planDryings
+            $data = $request->only(
+                'CT1',
+                'CT2',
+                'CT3',
+                'CT4',
+                'CT5',
+                'CT6',
+                'CT7',
+                'CT8',
+                'CT9',
+                'CT10',
+                'CT11',
+                'CT12',
+                'SoLan',
+                'CBL',
+                'DoThucTe'
             );
-        };
-        if ($CT12Detail) {
-            logchecked::UpdateOrCreate(
-                ['PlanID' => $id],
-                array_merge($CT12Detail['CT12Detail'], ['PlanID' => $id])
-            );
-        }
 
-        planDryings::where('PlanID', $id)->update(
-            array_merge($data, ['CheckedBy' => Auth::user()->id])
-        );
-        $plandrying = planDryings::where('PlanID', $id)
-            ->first();
-        $CT11Detail = logchecked::where('PlanID', $id)->select(
-            'M1',
-            'M2',
-            'M3',
-            'M4',
-            'M5'
-        )->get();
-        $CT12Detail
-            = logchecked::where('PlanID', $id)->select(
-                'Q1',
-                'Q2',
-                'Q3',
-                'Q4',
-                'Q5',
-                'Q6',
-                'Q7',
-                'Q8',
-            )->get();
-        return response()->json([
-            'message' => 'success',
-            'plandrying' => $plandrying,
-            'CT11Detail' => $CT11Detail,
-            'CT12Detail' => $CT12Detail
-        ], 200);
+            // LỌC: Loại bỏ các giá trị null để tránh overwrite bằng null
+            $planUpdate = collect($data)
+                ->filter(fn($v) => !is_null($v))   // giữ lại 0, "", false… chỉ bỏ null
+                ->toArray();
+
+            // Luôn set người kiểm tra
+            $planUpdate['CheckedBy'] = Auth::id();
+
+            // Chỉ update nếu còn gì để update
+            if (count($planUpdate) > 0) {
+                planDryings::where('PlanID', $id)->update($planUpdate);
+            }
+
+            // CT11Detail
+            if ($request->filled('CT11Detail')) {
+                $ct11 = collect($request->input('CT11Detail', []))
+                    ->filter(fn($v) => !is_null($v))
+                    ->toArray();
+
+                if (!empty($ct11)) {
+                    logchecked::updateOrCreate(
+                        ['PlanID' => $id],
+                        array_merge($ct11, ['PlanID' => $id])
+                    );
+                }
+            }
+
+            // CT12Detail
+            if ($request->filled('CT12Detail')) {
+                $ct12 = collect($request->input('CT12Detail', []))
+                    ->filter(fn($v) => !is_null($v))
+                    ->toArray();
+
+                if (!empty($ct12)) {
+                    logchecked::updateOrCreate(
+                        ['PlanID' => $id],
+                        array_merge($ct12, ['PlanID' => $id])
+                    );
+                }
+            }
+
+            $plandrying = planDryings::where('PlanID', $id)->first();
+
+            $CT11Detail = logchecked::where('PlanID', $id)
+                ->select('M1', 'M2', 'M3', 'M4', 'M5')
+                ->get();
+
+            $CT12Detail = logchecked::where('PlanID', $id)
+                ->select('Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8')
+                ->get();
+
+            return response()->json([
+                'message'    => 'success',
+                'plandrying' => $plandrying,
+                'CT11Detail' => $CT11Detail,
+                'CT12Detail' => $CT12Detail,
+            ], 200);
+        });
     }
+
 
     function removePallet(Request $request)
     {

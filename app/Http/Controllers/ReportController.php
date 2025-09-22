@@ -11,6 +11,7 @@ use App\Models\plandetail;
 use App\Models\Pallet;
 use App\Models\FanSpeed;
 use App\Models\ActualThickness;
+use App\Models\logchecked;
 use App\Models\User;
 use Carbon\Carbon;
 use Auth;
@@ -424,6 +425,86 @@ class ReportController extends Controller
         }
     }
 
+    // function KilnCheckingMinutes(Request $request)
+    // {
+    //     $branch = $request->input('branch');
+    //     $kiln = $request->input('kiln');
+
+    //     $validate = Validator::make($request->all(), [
+    //         'branch' => 'required',
+    //         'kiln' => 'required',
+    //     ]);
+
+    //     if ($validate->fails()) {
+    //         return response()->json(['error' => $validate->errors()], 400);
+    //     }
+
+    //     try {
+    //         // Tìm bản ghi kế hoạch sấy mới nhất với Oven = $kiln và status = 0 hoặc 1
+    //         $planDrying = planDryings::where('Oven', $kiln)
+    //             ->whereIn('Status', [0, 1])
+    //             ->orderBy('created_at', 'desc')
+    //             ->first();
+
+    //         if (!$planDrying) {
+    //             return response()->json([
+    //                 'error' => 'Không tìm thấy kế hoạch sấy phù hợp cho lò ' . $kiln
+    //             ], 404);
+    //         }
+
+    //         // Lấy thông tin ActualThickness theo PlanID
+    //         $actualThickness = ActualThickness::where('PlanID', $planDrying->PlanID)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         // Lấy thông tin FanSpeed theo PlanID
+    //         $fanSpeed = FanSpeed::where('PlanID', $planDrying->PlanID)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         // Lấy thông tin user để ghép tên
+    //         $nguoiTaoPhieu = '';
+    //         if ($planDrying->CheckedBy) {
+    //             $user = User::find($planDrying->CheckedBy);
+    //             if ($user) {
+    //                 $nguoiTaoPhieu = trim($user->last_name . ' ' . $user->first_name);
+    //             }
+    //         }
+
+    //         // Chuẩn bị dữ liệu trả về
+    //         $result = [
+    //             'PlanID' => $planDrying->PlanID,
+    //             'Oven' => $planDrying->Oven,
+    //             'CheckedBy' => $planDrying->CheckedBy,
+    //             'NguoiTaoPhieu' => $nguoiTaoPhieu,
+    //             'DateChecked' => $planDrying->DateChecked ? \Carbon\Carbon::parse($planDrying->DateChecked)->format('d/m/Y') : null,
+    //             'CT1' => $planDrying->CT1,
+    //             'CT2' => $planDrying->CT2,
+    //             'CT3' => $planDrying->CT3,
+    //             'CT4' => $planDrying->CT4,
+    //             'CT5' => $planDrying->CT5,
+    //             'CT6' => $planDrying->CT6,
+    //             'CT7' => $planDrying->CT7,
+    //             'CT8' => $planDrying->CT8,
+    //             'CT9' => $planDrying->CT9,
+    //             'CT10' => $planDrying->CT10,
+    //             'CT11' => $planDrying->CT11,
+    //             'CT12' => $planDrying->CT12,
+    //             'SoLan' => $planDrying->SoLan ?? 0,
+    //             'CBL' => $planDrying->CBL,
+    //             'DoThucTe' => $planDrying->DoThucTe,
+    //             'ActualThickness' => $actualThickness->toArray(),
+    //             'FanSpeed' => $fanSpeed->toArray()
+    //         ];
+
+    //         return response()->json($result, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     function KilnCheckingMinutes(Request $request)
     {
         $branch = $request->input('branch');
@@ -451,15 +532,15 @@ class ReportController extends Controller
                 ], 404);
             }
 
-            // Lấy thông tin ActualThickness theo PlanID
-            $actualThickness = ActualThickness::where('PlanID', $planDrying->PlanID)
+            // Lấy thông tin ActualThickness (M1-M5) từ bảng logchecked theo PlanID
+            $actualThickness = logchecked::where('PlanID', $planDrying->PlanID)
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->get(['M1', 'M2', 'M3', 'M4', 'M5']);
 
-            // Lấy thông tin FanSpeed theo PlanID
-            $fanSpeed = FanSpeed::where('PlanID', $planDrying->PlanID)
+            // Lấy thông tin FanSpeed (Q1-Q8) từ bảng logchecked theo PlanID
+            $fanSpeed = logchecked::where('PlanID', $planDrying->PlanID)
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->get(['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8']);
 
             // Lấy thông tin user để ghép tên
             $nguoiTaoPhieu = '';
@@ -503,6 +584,7 @@ class ReportController extends Controller
             ], 500);
         }
     }
+
 
     function DryingPlanReport(Request $request)
     {

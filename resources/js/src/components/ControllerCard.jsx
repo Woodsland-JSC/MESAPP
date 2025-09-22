@@ -36,6 +36,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdFormatColorReset } from "react-icons/md";
 import KilnCheck from "./KilnCheck";
+import { set } from "date-fns";
 
 const checkItems = [
     {
@@ -149,6 +150,7 @@ function ControllerCard(props) {
     const [selectedPallet, setSelectedPallet] = useState(null);
     const [dryingInProgress, setDryingInProgress] = useState(false);
     const [isCompleteChecking, setIsCompleteChecking] = useState(false);
+    const [isSavingUpdate, setIsSavingUpdate] = useState(false);
     const [isCompleteReviewing, setIsCompleteReviewing] = useState(false);
     const [disabledCheckbox, setDisabledCheckbox] = useState(false);
 
@@ -205,27 +207,22 @@ function ControllerCard(props) {
 
     const handleSoLanChange = (newSoLan) => {
         setSoLan(newSoLan);
-        console.log("Giá trị số lần nhận được là:", newSoLan);
     };
 
     const handleCBLChange = (newCBL) => {
         setCBL(newCBL);
-        console.log("Giá trị cảm biến lò nhận được là:", newCBL);
     };
 
     const handleDoThucTeChange = (newDoThucTe) => {
         setDoThucTe(newDoThucTe);
-        console.log("Giá trị đo thực tế nhận được là:", newDoThucTe);
     };
 
     const handleSampleChange = (newSamples) => {
         setSamples(newSamples);
-        console.log("Giá trị sample nhận được là:", newSamples);
     };
 
     const handleFanValuesChange = (newFanValues) => {
         setFanValues(newFanValues);
-        console.log("Giá trị tốc độ quạt nhận được là:", newFanValues);
     };
 
     const [checkedCount, setCheckedCount] = useState(0);
@@ -265,7 +262,6 @@ function ControllerCard(props) {
     }, [reason]);
 
     const handleSave = async () => {
-        console.log("02. Dữ liệu checkbox: ", checkboxStates);
         const kilnCheckData = {
             PlanID: planID,
             CT1: checkboxStates.CT1,
@@ -304,6 +300,8 @@ function ControllerCard(props) {
 
         console.log("02. Dữ liệu sẽ được đưa lên database: ", kilnCheckData);
 
+        setIsSavingUpdate(true);
+
         try {
             const response = await palletsApi.saveCheckingKiln(kilnCheckData);
             console.log("03. Kết quả trả về từ database: ", response);
@@ -311,11 +309,13 @@ function ControllerCard(props) {
             if (typeof onCallback === "function") {
                 onCallback();
             }
-            // loadBOWData();
+            setIsSavingUpdate(false);
             console.log("04.Dữ liệu checkbox sau khi cập nhật:", checkboxData);
             onClose();
         } catch (error) {
             console.error("Error:", error);
+            toast.error("Hiện không thể lưu thông tin. Hãy thử lại sau.");
+            setIsSavingUpdate(false);
         }
     };
 
@@ -529,7 +529,7 @@ function ControllerCard(props) {
                             </label>
                             <Select
                                 placeholder="Chọn pallet"
-                                // value={selectedPallet}
+                                value={selectedPallet}
                                 loadOptions={onReloadPalletList}
                                 options={palletOptions}
                                 onChange={(value) => {
@@ -727,7 +727,7 @@ function ControllerCard(props) {
                         </div>
                     </ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody>
+                    <ModalBody className="!px-4">
                         <div className="h-full">
                             <div className="xl:px-6 pb-2 text-[16px] text-gray-500 ">
                                 <strong>Ghi chú: </strong>Lò sấy chỉ đủ tiêu
@@ -833,7 +833,8 @@ function ControllerCard(props) {
                                 </button>
                                 {checkedCount === 12 ? (
                                     <button
-                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full"
+                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={isSavingUpdate}
                                         onClick={handleCompleteCheckingKiln}
                                     >
                                         {loadKilnCheckingLoading ? (
@@ -851,9 +852,10 @@ function ControllerCard(props) {
                                 ) : (
                                     <button
                                         onClick={handleSave}
-                                        className="bg-gray-800 text-white p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                        disabled={isSavingUpdate}
+                                        className="bg-gray-800 text-white p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Lưu lại
+                                        {isSavingUpdate ? "Đang cập nhật..." : "Lưu lại"}
                                     </button>
                                 )}
                             </div>

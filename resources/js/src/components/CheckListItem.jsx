@@ -30,7 +30,8 @@ import {
     PopoverAnchor,
 } from "@chakra-ui/react";
 import toast from "react-hot-toast";
-import "../assets/styles/index.css";   
+import "../assets/styles/index.css";
+import { set } from "date-fns";
 
 function CheckListItem(props) {
     const {
@@ -99,85 +100,154 @@ function CheckListItem(props) {
         Q8: "",
     });
 
+    useEffect(() => {}, [fixedSamples]);
+
     useEffect(() => {
+        if (fixedSoLan) {
+            setSoLan(fixedSoLan);
+        }
+        if (fixedCBL) {
+            setCBL(fixedCBL);
+        }
+        if (fixedDoThucTe) {
+            setDoThucTe(fixedDoThucTe);
+        }
+
         if (fixedSamples) {
             setSamples((prevSamples) => ({
                 ...prevSamples,
                 ...fixedSamples,
             }));
         }
-    }, [fixedSamples]);
 
-    useEffect(() => {
         if (fixedFanValues) {
             setFanValues(fixedFanValues);
         }
-    }, [fixedFanValues]);
+    }, [fixedSoLan, fixedCBL, fixedDoThucTe, fixedSamples, fixedFanValues]);
 
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0 || soLan === "") {
             toast.error("Giá trị không được bỏ trống.");
+        } else if (soLan <= 1) {
+            toast.error("Số lần phải lớn hơn 1.");
         } else if (soLan > 3) {
             onSoLanChange(soLan);
-            toast("Dữ liệu đã được lưu.");
+            toast.success("Dữ liệu đã được cập nhật.");
             onNo7Close();
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
-            onCheckboxChange(value ? 1 : 0);
+            onCheckboxChange(1);
             onSoLanChange(soLan);
-            toast("Dữ liệu đã được lưu.");
+            toast.success("Dữ liệu đã được cập nhật.");
             onNo7Close();
         }
     };
+
 
     const handleCheckboxNo8Change = (value) => {
         if (CBL === 0) {
             toast.error("Số cảm biến lò không được bỏ trống.");
         } else if (doThucTe === 0) {
             toast.error("Số đo thực tế không được bỏ trống.");
-        } else if (Math.abs(CBL - doThucTe) > 3) {
-            onCBLChange(CBL);
-            onDoThucTeChange(doThucTe);
-            toast("Dữ liệu đã được lưu.");
-            onNo8Close();
+        } else if (CBL <= 1 || doThucTe <= 1) {
+            toast.error("Giá trị cảm biến lò và số đo thực tế phải lớn hơn 1.");
+        } else if (Math.abs(CBL - doThucTe) > 2) {
+            toast.error(
+                "Cảm biến lò không được sai khác quá 2 độ so với số đo thực tế."
+            );
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
-            onCheckboxChange(value ? 1 : 0);
+            onCheckboxChange(1);
             onCBLChange(CBL);
             onDoThucTeChange(doThucTe);
-            toast("Dữ liệu đã được lưu.");
+            toast.success("Dữ liệu đã được lưu.");
             onNo8Close();
         }
-
     };
 
     const handleCheckboxNo11Change = () => {
+        console.log("Dữ liệu đã ghi nhận", samples);
         if (Object.values(samples).some((sample) => !sample)) {
             toast.error("Vui lòng nhập đầy đủ thông tin mẫu.");
-        } else {
-            onCheckboxChange(!localIsChecked);
-            setLocalIsChecked(!localIsChecked);
-            onCheckboxChange(1);
-
-            onSampleChange(samples);
-            toast("Dữ liệu đã được lưu.");
-            onNo11Close();
+            return;
         }
+
+        const invalidSample = Object.values(samples).some((sample) =>
+            sample.includes(" ")
+        );
+
+        if (invalidSample) {
+            toast.error(
+                'Các kích thước phải được cách nhau bằng dấu "/". (Ví dụ: 21/21/22/21/22)'
+            );
+            return;
+        }
+
+        const wrongCount = Object.values(samples).some((sample) => {
+            const parts = sample.split("/");
+            return parts.length !== 5;
+        });
+
+        if (wrongCount) {
+            toast.error(
+                "Bạn phải nhập đúng 5 kích thước, ví dụ: 21/21/22/21/22"
+            );
+            return;
+        }
+
+        onCheckboxChange(!localIsChecked);
+        setLocalIsChecked(!localIsChecked);
+        onCheckboxChange(1);
+
+        onSampleChange(samples);
+        toast.success("Dữ liệu đã được lưu.");
+        onNo11Close();
     };
 
     const handleCheckboxNo12Change = () => {
-        if (Object.values(fanValues).some((value) => !value)) {
-            toast.error("Vui lòng nhập đầy đủ thông tin cho tất cả các quạt");
-        } else {
-            onCheckboxChange(!localIsChecked);
-            setLocalIsChecked(!localIsChecked);
-            onCheckboxChange(1);
-            onFanValuesChange(fanValues);
-            toast("Dữ liệu đã được lưu.");
-            onNo12Close();
+        const entries = Object.entries(fanValues || {});
+
+        // Chỉ lấy NHỮNG MẪU ĐÃ NHẬP
+        const isFilled = (v) =>
+            v !== null && v !== undefined && String(v).trim() !== "";
+        const filled = entries.filter(([_, v]) => isFilled(v));
+
+        // 1) Kiểm tra đủ số lượng tối thiểu (>= 4 mẫu đã nhập)
+        if (filled.length < 4) {
+            // (tuỳ chọn) gợi ý một vài key đang trống để người dùng biết nên nhập thêm
+            const emptyKeys = entries
+                .filter(([_, v]) => !isFilled(v))
+                .map(([k]) => k);
+
+            toast.error(
+                `Vui lòng nhập tối thiểu 4 mẫu thử. (hiện có ${filled.length} mẫu)`
+            );
+            return;
         }
+
+        // 2) Kiểm tra giá trị (chỉ kiểm tra TRÊN NHỮNG MẪU ĐÃ NHẬP)
+        const firstInvalid = filled.find(([key, v]) => {
+            const num = Number(v);
+            return !(Number.isInteger(num) && num >= 1);
+        });
+
+        if (firstInvalid) {
+            const [key, v] = firstInvalid;
+            toast.error(
+                `Mẫu "${key}" có giá trị "${v}" không hợp lệ (phải là số nguyên > 1).`
+            );
+            return;
+        }
+
+        // 3) Hợp lệ -> lưu
+        onCheckboxChange(!localIsChecked);
+        setLocalIsChecked(!localIsChecked);
+        onCheckboxChange(1);
+        onFanValuesChange(fanValues);
+        toast.success("Dữ liệu đã được lưu.");
+        onNo12Close();
     };
 
     const handleSoLanOnChange = (value) => {
@@ -205,15 +275,15 @@ function CheckListItem(props) {
 
     return (
         <div
-            className={` flex relative flex-col rounded-xl w-full h-fit xl:h-[13.5rem] lg:h-[13.5rem] md:h-[13.5rem] border-2  ${
+            className={` flex relative flex-col rounded-2xl w-full h-fit xl:h-[14rem] lg:h-[14rem] md:h-[14rem] border-2  ${
                 isDisabled
                     ? "border-gray-200 bg-gray-50"
-                    : "border-[#99b4c1] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#96d1ed] bg-[#f6feff] "
+                    : "border-[#99b4c1] hover:shadow-[rgba(7,_65,_210,_0.1)_0px_9px_30px] hover:border-[#96d1ed] bg-[#f9feff] "
             }`}
         >
             {/* <div className="absolute -top-1 -right-0.5 bg-green-500 shadow-sm shadow-black text-white w-4 h-4 flex items-center justify-center rounded-full" /> */}
             <div
-                className={`px-4 py-3  h-[30%] rounded-t-xl w-full flex items-center border-b border-gray-200 ${
+                className={`px-4 py-3  h-[30%] rounded-t-2xl w-full flex items-center border-b border-gray-200 ${
                     isDisabled ? "bg-gray-100" : " bg-[#eef9fe] "
                 }`}
             >
@@ -240,63 +310,72 @@ function CheckListItem(props) {
 
             <div className="px-4 xl:h-[70%] lg:h-[70%] text-base py-3">
                 <div
-                    className={`xl:h-[70%] lg:h-[70%] ${
+                    className={`xl:h-[65%] lg:h-[65%] ${
                         isDisabled ? "text-gray-500" : null
                     }`}
                 >
                     {description}
                 </div>
-                <div className="xl:h-[30%] lg:h-[30%]  flex justify-end ">
+                <div className="xl:h-[35%] lg:h-[35%]  flex w-full ">
                     {value === 7 ? (
                         <>
                             {isDisabled ? (
-                                <Popover>
+                                <Popover placement="auto-start">
                                     <PopoverTrigger>
-                                        <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer">
-                                            Ghi nhận
+                                        <button className="bg-[#DBDFE1] w-full h-fit px-4 py-2 rounded-2xl mt-2 xl:my-0 lg:my-0 cursor-pointer ">
+                                            Lịch sử ghi nhận
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
                                         <PopoverArrow />
                                         <PopoverCloseButton />
-                                        <PopoverHeader>
-                                            Ghi nhận tình trạng
+                                        <PopoverHeader className="font-semibold !py-3">
+                                            Lịch sử ghi nhận
                                         </PopoverHeader>
                                         <PopoverBody>
-                                            Số lần : <span>{fixedSoLan}</span>
+                                            Số lần :{" "}
+                                            <span>
+                                                {fixedSoLan || "Chưa kiểm tra"}
+                                            </span>
                                         </PopoverBody>
                                     </PopoverContent>
                                 </Popover>
                             ) : (
-                                <>
-                                    <Popover>
+                                <div className="flex w-full">
+                                    <Popover placement="auto-start">
                                         <PopoverTrigger>
-                                            <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer mr-3">
+                                            <button className="bg-[#DBDFE1] h-fit px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0 cursor-pointer mr-3 w-full">
                                                 Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <PopoverArrow />
                                             <PopoverCloseButton />
-                                            <PopoverHeader>
-                                                Ghi nhận tình trạng
+                                            <PopoverHeader className="font-semibold !py-3">
+                                                Lịch sử ghi nhận
                                             </PopoverHeader>
                                             <PopoverBody>
-                                                Số lần : <span>{soLan}</span>
+                                                <span className="font-medium text-gray-700">
+                                                    Số lần :{" "}
+                                                </span>
+                                                <span>
+                                                    {soLan || "Chưa ghi nhận"}
+                                                </span>
                                             </PopoverBody>
                                         </PopoverContent>
                                     </Popover>
-                                    <div
-                                        className="h-fit bg-gray-700 text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 md:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                    <button
+                                        className="h-fit bg-gray-700 text-white px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0 md:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all w-full text-center"
                                         onClick={onNo7Open}
                                     >
                                         Kiểm tra
-                                    </div>
+                                    </button>
                                     <Modal
                                         isOpen={isNo7Open}
                                         isCentered
                                         onClick={onNo7Close}
                                         size="xs"
+                                        className="rounded-xl"
                                     >
                                         <ModalOverlay />
                                         <ModalContent>
@@ -314,10 +393,11 @@ function CheckListItem(props) {
                                                         Số lần
                                                     </label>
                                                     <input
-                                                        type="text"
+                                                        type="number"
                                                         id="soLan"
                                                         className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
-                                                        value={fixedSoLan}
+                                                        value={soLan}
+                                                        placeholder="Nhập số lần"
                                                         onChange={(e) =>
                                                             handleSoLanOnChange(
                                                                 e.target.value
@@ -327,17 +407,17 @@ function CheckListItem(props) {
                                                 </div>
                                             </ModalBody>
 
-                                            <ModalFooter className="flex gap-x-4 ">
+                                            <ModalFooter className="flex gap-x-4 w-full ">
                                                 <button
                                                     type="button"
                                                     onClick={onNo7Close}
-                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-gray-800 bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl w-full px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                 >
                                                     Hủy
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="text-white bg-[#3182CE] focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                     onClick={
                                                         handleCheckboxNo7Change
                                                     }
@@ -347,23 +427,23 @@ function CheckListItem(props) {
                                             </ModalFooter>
                                         </ModalContent>
                                     </Modal>
-                                </>
+                                </div>
                             )}
                         </>
                     ) : value === 8 ? (
                         <>
                             {isDisabled ? (
-                                <Popover>
+                                <Popover placement="auto-start">
                                     <PopoverTrigger>
-                                        <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0">
+                                        <button className="w-full bg-[#DBDFE1] px-4 h-fit py-2 rounded-xl mt-4 xl:my-0 lg:my-0">
                                             Lịch sử
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
                                         <PopoverArrow />
                                         <PopoverCloseButton />
-                                        <PopoverHeader>
-                                            Ghi nhận tình trạng
+                                        <PopoverHeader className="font-semibold !py-3">
+                                            Lịch sử ghi nhận
                                         </PopoverHeader>
                                         <PopoverBody>
                                             <div className="space-y-2">
@@ -381,38 +461,48 @@ function CheckListItem(props) {
                                 </Popover>
                             ) : (
                                 <>
-                                    <Popover>
+                                    <Popover placement="auto-start">
                                         <PopoverTrigger>
-                                            <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
+                                            <button className="w-full text-center bg-[#DBDFE1] px-4 h-full py-2 rounded-xl mt-4 xl:my-0 lg:my-0 mr-3">
                                                 Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <PopoverArrow />
                                             <PopoverCloseButton />
-                                            <PopoverHeader>
-                                                Ghi nhận tình trạng
+                                            <PopoverHeader className="font-semibold !py-3">
+                                                Lịch sử ghi nhận
                                             </PopoverHeader>
                                             <PopoverBody>
                                                 <div className="space-y-2">
                                                     <div>
-                                                        Cảm biến lò :{" "}
-                                                        <span>{CBL}</span>
+                                                        <span className="font-semibold text-gray-700">
+                                                            Cảm biến lò :{" "}
+                                                        </span>
+                                                        <span>
+                                                            {CBL ||
+                                                                "Chưa kiểm tra"}
+                                                        </span>
                                                     </div>
                                                     <div>
-                                                        Đo thực tế :{" "}
-                                                        <span>{doThucTe}</span>
+                                                        <span className="font-semibold text-gray-700">
+                                                            Đo thực tế :{" "}
+                                                        </span>
+                                                        <span>
+                                                            {doThucTe ||
+                                                                "Chưa kiểm tra"}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </PopoverBody>
                                         </PopoverContent>
                                     </Popover>
-                                    <div
-                                        className="h-fit bg-gray-700 text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                    <button
+                                        className="h-fit w-full bg-gray-700 text-white px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                         onClick={onNo8Open}
                                     >
                                         Kiểm tra
-                                    </div>
+                                    </button>
                                     <Modal
                                         isOpen={isNo8Open}
                                         isCentered
@@ -433,13 +523,17 @@ function CheckListItem(props) {
                                                         htmlFor="CBL"
                                                         className="block mb-2 text-md font-medium text-gray-900 "
                                                     >
-                                                        Cảm biến lò
+                                                        Cảm biến lò{" "}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
                                                     </label>
                                                     <input
                                                         type="text"
                                                         id="CBL"
                                                         className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                                         value={fixedCBL}
+                                                        placeholder="Nhập số cảm biến lò"
                                                         onChange={(e) =>
                                                             handleCBLOnChange(
                                                                 e.target.value
@@ -453,13 +547,17 @@ function CheckListItem(props) {
                                                         htmlFor="quantity"
                                                         className="block mb-2 text-md font-medium text-gray-900 "
                                                     >
-                                                        Đo thực tế
+                                                        Đo thực tế{" "}
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
                                                     </label>
                                                     <input
                                                         type="text"
                                                         id="doThucTe"
                                                         className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                                         value={fixedDoThucTe}
+                                                        placeholder="Nhập số đo thực tế"
                                                         onChange={(e) =>
                                                             handleDoThucTeOnChange(
                                                                 e.target.value
@@ -473,13 +571,13 @@ function CheckListItem(props) {
                                                 <button
                                                     type="button"
                                                     onClick={onNo8Close}
-                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-gray-800 bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                 >
                                                     Hủy
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="text-white bg-[#3182CE] focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                     onClick={
                                                         handleCheckboxNo8Change
                                                     }
@@ -495,17 +593,17 @@ function CheckListItem(props) {
                     ) : value === 11 ? (
                         <>
                             {isDisabled ? (
-                                <Popover>
+                                <Popover placement="auto-start">
                                     <PopoverTrigger>
-                                        <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0">
+                                        <button className="w-full bg-[#DBDFE1] px-4 h-fit py-2 rounded-xl mt-4 xl:my-0 lg:my-0">
                                             Lịch sử
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
                                         <PopoverArrow />
                                         <PopoverCloseButton />
-                                        <PopoverHeader>
-                                            Ghi nhận tình trạng
+                                        <PopoverHeader className="font-semibold !py-3">
+                                            Lịch sử ghi nhận
                                         </PopoverHeader>
                                         <PopoverBody>
                                             <div className="space-y-2">
@@ -523,17 +621,17 @@ function CheckListItem(props) {
                                 </Popover>
                             ) : (
                                 <>
-                                    <Popover>
+                                    <Popover placement="auto-start">
                                         <PopoverTrigger>
-                                            <button className="bg-[#DBDFE1] px-4 h-fit py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
+                                            <button className="w-full bg-[#DBDFE1] px-4 h-fit py-2 rounded-xl mt-4 xl:my-0 lg:my-0 mr-3">
                                                 Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <PopoverArrow />
                                             <PopoverCloseButton />
-                                            <PopoverHeader>
-                                                Ghi nhận tình trạng
+                                            <PopoverHeader className="font-semibold !py-3">
+                                                Lịch sử ghi nhận
                                             </PopoverHeader>
                                             <PopoverBody>
                                                 <div className="space-y-2">
@@ -545,10 +643,14 @@ function CheckListItem(props) {
                                                             index
                                                         ) => (
                                                             <div key={key}>
-                                                                Mẫu {index + 1}{" "}
-                                                                :{" "}
+                                                                <span className="text-gray-700 font-semibold">
+                                                                    Mẫu{" "}
+                                                                    {index + 1}{" "}
+                                                                    :{" "}
+                                                                </span>
                                                                 <span>
-                                                                    {value}
+                                                                    {value ||
+                                                                        "Chưa kiểm tra"}
                                                                 </span>
                                                             </div>
                                                         )
@@ -557,12 +659,12 @@ function CheckListItem(props) {
                                             </PopoverBody>
                                         </PopoverContent>
                                     </Popover>
-                                    <div
-                                        className="h-fit bg-gray-700 text-white px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                    <button
+                                        className="w-full h-fit bg-gray-700 text-white px-4  py-2 rounded-xl mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                         onClick={onNo11Open}
                                     >
                                         Kiểm tra
-                                    </div>
+                                    </button>
                                     <Modal
                                         isOpen={isNo11Open}
                                         isCentered
@@ -573,8 +675,10 @@ function CheckListItem(props) {
                                         <ModalOverlay />
                                         <ModalContent>
                                             <ModalHeader>
-                                                <div className="text-lg">
-                                                    Chiều dày thực tế
+                                                <div className="">
+                                                    <p className="text-lg">
+                                                        Chiều dày thực tế
+                                                    </p>
                                                 </div>
                                             </ModalHeader>
                                             <ModalBody className="space-y-4">
@@ -585,13 +689,17 @@ function CheckListItem(props) {
                                                                 htmlFor={`batch_id_${key}`}
                                                                 className="block mb-2 text-md font-medium text-gray-900"
                                                             >
-                                                                Mẫu {index + 1}
+                                                                Mẫu {index + 1}{" "}
+                                                                <span className="text-red-500">
+                                                                    *
+                                                                </span>
                                                             </label>
                                                             <input
                                                                 type="text"
                                                                 id={`batch_id_${key}`}
                                                                 className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                                                 value={value}
+                                                                placeholder="xx/xx/xx/xx/xx"
                                                                 onChange={(e) =>
                                                                     handleSampleInputChange(
                                                                         key,
@@ -609,13 +717,13 @@ function CheckListItem(props) {
                                                 <button
                                                     type="button"
                                                     onClick={onNo11Close}
-                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-gray-800 bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                 >
                                                     Hủy
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="text-white bg-[#3182CE] focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                     onClick={
                                                         handleCheckboxNo11Change
                                                     }
@@ -631,70 +739,75 @@ function CheckListItem(props) {
                     ) : value === 12 ? (
                         <>
                             {isDisabled ? (
-                                <Popover placement="top">
+                                <Popover placement="auto-start">
                                     <PopoverTrigger>
-                                        <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0">
+                                        <button className="w-full bg-[#DBDFE1] h-fit px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0">
                                             Ghi nhận
                                         </button>
                                     </PopoverTrigger>
                                     <PopoverContent>
                                         <PopoverArrow />
                                         <PopoverCloseButton />
-                                        <PopoverHeader>
-                                            Ghi nhận tình trạng
+                                        <PopoverHeader className="font-semibold !py-3">
+                                            Lịch sử ghi nhận
                                         </PopoverHeader>
                                         <PopoverBody>
                                             <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 gap-2 space-y-2">
-                                                {Object.entries(fixedFanValues || {}).map(
-                                                    ([key, value]) => (
-                                                        <div
-                                                            key={key}
-                                                            className="gap-2"
-                                                        >
-                                                            <div>
+                                                {Object.entries(
+                                                    fixedFanValues || {}
+                                                ).map(([key, value]) => (
+                                                    <div
+                                                        key={key}
+                                                        className="gap-2 col-span-2"
+                                                    >
+                                                        <div>
+                                                            <span className="text-gray-700 font-semibold">
                                                                 {`Quạt ${key.substring(
                                                                     1
                                                                 )} : `}
-                                                                <span>
-                                                                    {value}
-                                                                </span>
-                                                            </div>
+                                                            </span>
+                                                            <span>{value ? value + " " + "m/s" : "Chưa ghi nhận"}</span>
                                                         </div>
-                                                    )
-                                                )}
+                                                    </div>
+                                                ))}
                                             </div>
                                         </PopoverBody>
                                     </PopoverContent>
                                 </Popover>
                             ) : (
                                 <>
-                                    <Popover placement="top">
+                                    <Popover placement="auto-start">
                                         <PopoverTrigger>
-                                            <button className="bg-[#DBDFE1] h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 mr-3">
-                                                Ghi nhận
+                                            <button className="w-full bg-[#DBDFE1] h-fit px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0 mr-3">
+                                                Lịch sử
                                             </button>
                                         </PopoverTrigger>
                                         <PopoverContent>
                                             <PopoverArrow />
                                             <PopoverCloseButton />
-                                            <PopoverHeader>
-                                                Ghi nhận tình trạng
+                                            <PopoverHeader className="font-semibold !py-3">
+                                                Lịch sử ghi nhận
                                             </PopoverHeader>
-                                            <PopoverBody>
-                                                <div className="xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
+                                            <PopoverBody className="!shadown-xl">
+                                                <div className=" xl:grid grid-cols-2 xl:space-y-0 lg:space-y-0 md:space-y-0 gap-y-2">
                                                     {Object.entries(
                                                         fanValues
                                                     ).map(([key, value]) => (
                                                         <div
                                                             key={key}
-                                                            className="space-y-3 gap-y-3"
+                                                            className="space-y-3 gap-y-3 col-span-2"
                                                         >
                                                             <div>
-                                                                {`Quạt ${key.substring(
-                                                                    1
-                                                                )} : `}
+                                                                <span className="font-medium text-gray-700">
+                                                                    {`Quạt ${key.substring(
+                                                                        1
+                                                                    )} : `}
+                                                                </span>
                                                                 <span>
-                                                                    {value}
+                                                                    {value
+                                                                        ? value +
+                                                                          "m/s"
+                                                                        : "Chưa kiểm tra"}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -703,12 +816,12 @@ function CheckListItem(props) {
                                             </PopoverBody>
                                         </PopoverContent>
                                     </Popover>
-                                    <div
-                                        className="bg-gray-700 text-white h-fit px-4 py-1 rounded-lg mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
+                                    <button
+                                        className="w-full bg-gray-700 text-white h-fit px-4 py-2 rounded-xl mt-4 xl:my-0 lg:my-0 cursor-pointer active:scale-[.95] active:duration-75 transition-all"
                                         onClick={onNo12Open}
                                     >
                                         Kiểm tra
-                                    </div>
+                                    </button>
                                     <Modal
                                         isOpen={isNo12Open}
                                         isCentered
@@ -722,11 +835,18 @@ function CheckListItem(props) {
                                                 <div className="text-lg">
                                                     Động cơ quạt, tốc độ gió
                                                     quạt
+                                                    <p className="!font-normal text-[16px] text-red-500">
+                                                        Nhập tối thiểu 4 mẫu
+                                                        thử.
+                                                    </p>
                                                 </div>
                                             </ModalHeader>
-                                            <ModalBody className="">
+                                            <ModalBody
+                                                className="!rounded-xl"
+                                                borderRadius={"xl"}
+                                            >
                                                 <div className="max-h-[420px] w-full overflow-y-scroll pr-5 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2">
-                                                    <div className="space-y-2 my-4">
+                                                    <div className="space-y-2">
                                                         {Object.entries(
                                                             fanValues
                                                         ).map(
@@ -743,9 +863,10 @@ function CheckListItem(props) {
                                                                         )}`}
                                                                     </label>
                                                                     <input
-                                                                        type="text"
+                                                                        type="number"
                                                                         id={key}
                                                                         className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                                        placeholder="Nhập tốc độ gió (m/s)"
                                                                         value={
                                                                             value
                                                                         }
@@ -771,13 +892,13 @@ function CheckListItem(props) {
                                                 <button
                                                     type="button"
                                                     onClick={onNo12Close}
-                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-gray-800 bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                 >
                                                     Hủy
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="text-white bg-[#3182CE] focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
+                                                    className="text-white bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-xl  w-full sm:w-auto px-5 py-2.5 text-center active:scale-[.95] active:duration-75 transition-all cursor-pointer disabled:bg-gray-400 disabled:cursor-auto disabled:transform-none disabled:transition-none"
                                                     onClick={
                                                         handleCheckboxNo12Change
                                                     }

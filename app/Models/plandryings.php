@@ -46,6 +46,9 @@ class planDryings extends Model
         'DateChecked',
         'NoCheck',
         'result',
+        'SoLan',
+        'CBL',
+        'DoThucTe',
         'runDate',
         'reviewDate',
         'CompletedDate',
@@ -88,6 +91,11 @@ class planDryings extends Model
     public function details()
     {
         return $this->hasMany(plandetail::class, 'PlanID', 'PlanID');
+    }
+
+    public function logchecked()
+    {
+        return $this->hasMany(logchecked::class, 'PlanID', 'PlanID');
     }
 
     public function fanSpeed()
