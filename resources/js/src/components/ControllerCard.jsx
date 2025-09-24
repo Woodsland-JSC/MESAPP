@@ -36,7 +36,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { MdFormatColorReset } from "react-icons/md";
 import KilnCheck from "./KilnCheck";
-import { set } from "date-fns";
+import { max, min, set } from "date-fns";
 
 const checkItems = [
     {
@@ -326,6 +326,7 @@ function ControllerCard(props) {
     }, [checkboxStates]);
 
     const handleLoadIntoKiln = async (reason, callback) => {
+        console.log("Khoảng kích thước hợp lệ:", minThickness, maxThickness, );
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");

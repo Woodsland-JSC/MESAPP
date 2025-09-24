@@ -39,7 +39,7 @@ function Details() {
         DateChecked: "",
         NoCheck: "",
     });
-    
+
     const [checkboxData, setCheckboxData] = useState({
         CT1: 0,
         CT2: 0,
@@ -61,11 +61,11 @@ function Details() {
     const [palletOptions, setPalletOptions] = useState([]);
     const [palletListLoading, setPalletListLoading] = useState(true);
 
-    const [loadedPalletList, setLoadedPalletList] = useState([]);;
+    const [loadedPalletList, setLoadedPalletList] = useState([]);
     const [palletData, setPalletData] = useState([]);
-    const [minThickness, setMinThickness]=useState("");
-    const [maxThickness, setMaxThickness]=useState("");
-    
+    const [minThickness, setMinThickness] = useState("");
+    const [maxThickness, setMaxThickness] = useState("");
+
     const [reload, setReload] = useState(false);
 
     const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ function Details() {
                     CT10: response.plandrying.CT10 || 0,
                     CT11: response.plandrying.CT11 || 0,
                     CT12: response.plandrying.CT12 || 0,
-                })
+                });
                 setCheckData({
                     SoLan: response.plandrying.SoLan,
                     CBL: response.plandrying.CBL,
@@ -106,8 +106,16 @@ function Details() {
                 setCT11Data(response.CT11Detail[0]);
                 setCT12Data(response.CT12Detail[0]);
                 setHumidData(response.Humidity);
-                setMaxThickness(response.plandrying?.Method?.substring(1).split("_")[1] || "");
-                setMinThickness(response.plandrying?.Method?.substring(1).split("_")[0] || "");
+                setMaxThickness(
+                    response.plandrying?.Method?.substring(1).split(
+                        /[-_]/
+                    )[1] || ""
+                );
+                setMinThickness(
+                    response.plandrying?.Method?.substring(1).split(
+                        /[-_]/
+                    )[0] || ""
+                );
             })
             .catch((error) => {
                 console.error("Lỗi khi gọi API:", error);
@@ -118,7 +126,7 @@ function Details() {
     }, []);
 
     useEffect(() => {
-        if(BOWData.Reason){
+        if (BOWData.Reason) {
             loadPallets(BOWData.Reason);
         }
     }, [BOWData.Reason]);
@@ -129,7 +137,7 @@ function Details() {
         const options = data.map((item) => ({
             value: item.palletID,
             label: `${item.Code} (${item.QuyCach}) - ${item.MaLo}`,
-            thickness: item.QuyCach.split("x")[0]
+            thickness: item.QuyCach.split("x")[0],
         }));
         setPalletOptions(options);
         setPalletListLoading(false);
@@ -137,40 +145,40 @@ function Details() {
 
     const updateData = async () => {
         palletsApi
-        .getBOWById(id)
-        .then((response) => {
-            console.log("Dữ liệu từ API:", response);
+            .getBOWById(id)
+            .then((response) => {
+                console.log("Dữ liệu từ API:", response);
 
-            setBOWData(response.plandrying);
-            setCheckboxData({
-                CT1: response.plandrying.CT1 || 0,
-                CT2: response.plandrying.CT2 || 0,
-                CT3: response.plandrying.CT3 || 0,
-                CT4: response.plandrying.CT4 || 0,
-                CT5: response.plandrying.CT5 || 0,
-                CT6: response.plandrying.CT6 || 0,
-                CT7: response.plandrying.CT7 || 0,
-                CT8: response.plandrying.CT8 || 0,
-                CT9: response.plandrying.CT9 || 0,
-                CT10: response.plandrying.CT10 || 0,
-                CT11: response.plandrying.CT11 || 0,
-                CT12: response.plandrying.CT12 || 0,
+                setBOWData(response.plandrying);
+                setCheckboxData({
+                    CT1: response.plandrying.CT1 || 0,
+                    CT2: response.plandrying.CT2 || 0,
+                    CT3: response.plandrying.CT3 || 0,
+                    CT4: response.plandrying.CT4 || 0,
+                    CT5: response.plandrying.CT5 || 0,
+                    CT6: response.plandrying.CT6 || 0,
+                    CT7: response.plandrying.CT7 || 0,
+                    CT8: response.plandrying.CT8 || 0,
+                    CT9: response.plandrying.CT9 || 0,
+                    CT10: response.plandrying.CT10 || 0,
+                    CT11: response.plandrying.CT11 || 0,
+                    CT12: response.plandrying.CT12 || 0,
+                });
+                setCheckData({
+                    SoLan: response.plandrying.SoLan,
+                    CBL: response.plandrying.CBL,
+                    DoThucTe: response.plandrying.DoThucTe,
+                    DateChecked: response.plandrying.DateChecked,
+                    NoCheck: response.plandrying.NoCheck,
+                });
+                setPalletData(response.plandrying.details);
+                setCT11Data(response.CT11Detail[0]);
+                setCT12Data(response.CT12Detail[0]);
+                setHumidData(response.Humidity);
             })
-            setCheckData({
-                SoLan: response.plandrying.SoLan,
-                CBL: response.plandrying.CBL,
-                DoThucTe: response.plandrying.DoThucTe,
-                DateChecked: response.plandrying.DateChecked,
-                NoCheck: response.plandrying.NoCheck,
+            .catch((error) => {
+                console.error("Lỗi khi recall API:", error);
             });
-            setPalletData(response.plandrying.details);
-            setCT11Data(response.CT11Detail[0]);
-            setCT12Data(response.CT12Detail[0]);
-            setHumidData(response.Humidity);
-        })
-        .catch((error) => {
-            console.error("Lỗi khi recall API:", error);
-        })
     };
 
     // const totalMass = BOWData.details.reduce((acc, detail) => acc + parseFloat(detail.Mass), 0);
@@ -201,8 +209,12 @@ function Details() {
                             >
                                 <div className="flex flex-col justify-center">
                                     <div className="serif xl:text-3xl text-[27px] font-bold text-[#17506B] ">
-                                        <div className="text-gray-800 xl:inline-block lg:inline-block md:inline-block hidden">Chi tiết mẻ sấy:</div>
-                                        <div className="xl:hidden lg:hidden md:hidden inline-block">Mẻ sấy:</div>{" "}
+                                        <div className="text-gray-800 xl:inline-block lg:inline-block md:inline-block hidden">
+                                            Chi tiết mẻ sấy:
+                                        </div>
+                                        <div className="xl:hidden lg:hidden md:hidden inline-block">
+                                            Mẻ sấy:
+                                        </div>{" "}
                                         <span>{BOWData.Code}</span>{" "}
                                     </div>
 
@@ -233,7 +245,7 @@ function Details() {
                                                 : "Invalid Date"
                                         }
                                         palletQty={BOWData.details?.length}
-                                        weight={BOWData.Mass} 
+                                        weight={BOWData.Mass}
                                     />
                                 </Skeleton>
                                 <div className="col-span-2">
@@ -251,13 +263,21 @@ function Details() {
                                                     Checked={BOWData.Checked}
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
-                                                    loadedPalletList={loadedPalletList}
+                                                    loadedPalletList={
+                                                        loadedPalletList
+                                                    }
                                                     reload={reload}
                                                     CT11Data={CT11Data}
                                                     CT12Data={CT12Data}
-                                                    onReloadPalletList={loadPallets}
-                                                    palletOptions={palletOptions}
-                                                    palletListLoading={palletListLoading} 
+                                                    onReloadPalletList={
+                                                        loadPallets
+                                                    }
+                                                    palletOptions={
+                                                        palletOptions
+                                                    }
+                                                    palletListLoading={
+                                                        palletListLoading
+                                                    }
                                                 />
                                             </Skeleton>
                                         </div>
@@ -279,15 +299,23 @@ function Details() {
                                                     onReload={setReload}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}
-                                                    loadedPalletList={loadedPalletList}
+                                                    loadedPalletList={
+                                                        loadedPalletList
+                                                    }
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
                                                     CT12Data={CT12Data}
                                                     reload={reload}
-                                                    onReloadPalletList={loadPallets}
-                                                    palletOptions={palletOptions}
-                                                    palletListLoading={palletListLoading}  
+                                                    onReloadPalletList={
+                                                        loadPallets
+                                                    }
+                                                    palletOptions={
+                                                        palletOptions
+                                                    }
+                                                    palletListLoading={
+                                                        palletListLoading
+                                                    }
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -298,7 +326,9 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     reason={BOWData.Reason}
                                                     reload={reload}
-                                                    onReloadPalletList={loadPallets}
+                                                    onReloadPalletList={
+                                                        loadPallets
+                                                    }
                                                     onReload={updateData}
                                                     palletData={palletData}
                                                 />
@@ -322,28 +352,36 @@ function Details() {
                                                     onReload={setReload}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}
-                                                    loadedPalletList={loadedPalletList}
+                                                    loadedPalletList={
+                                                        loadedPalletList
+                                                    }
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
                                                     CT12Data={CT12Data}
-                                                    onReloadPalletList={loadPallets}
-                                                    palletOptions={palletOptions}
-                                                    palletListLoading={palletListLoading}  
+                                                    onReloadPalletList={
+                                                        loadPallets
+                                                    }
+                                                    palletOptions={
+                                                        palletOptions
+                                                    }
+                                                    palletListLoading={
+                                                        palletListLoading
+                                                    }
                                                 />
                                             </Skeleton>
-                                                <Skeleton
-                                                    isLoaded={!loading}
-                                                    borderRadius="2xl"
-                                                >
-                                                    <KilnCheck 
-                                                        Checked={BOWData.Checked}
-                                                        checkData={checkData}
-                                                        checkboxData={checkboxData}
-                                                        CT11Data={CT11Data}
-                                                        CT12Data={CT12Data}                                              
-                                                    />
-                                                </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck
+                                                    Checked={BOWData.Checked}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data}
+                                                />
+                                            </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
@@ -353,7 +391,9 @@ function Details() {
                                                     reason={BOWData.Reason}
                                                     reload={reload}
                                                     onReload={updateData}
-                                                    onReloadPalletList={loadPallets}
+                                                    onReloadPalletList={
+                                                        loadPallets
+                                                    }
                                                     palletData={palletData}
                                                 />
                                             </Skeleton>
@@ -373,25 +413,27 @@ function Details() {
                                                     isReviewed={BOWData.Review}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}
-                                                    loadedPalletList={loadedPalletList}
+                                                    loadedPalletList={
+                                                        loadedPalletList
+                                                    }
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
-                                                    CT12Data={CT12Data} 
+                                                    CT12Data={CT12Data}
                                                 />
                                             </Skeleton>
-                                                <Skeleton
-                                                    isLoaded={!loading}
-                                                    borderRadius="2xl"
-                                                >
-                                                    <KilnCheck 
-                                                        Checked={BOWData.Checked}
-                                                        checkData={checkData}
-                                                        checkboxData={checkboxData}
-                                                        CT11Data={CT11Data}
-                                                        CT12Data={CT12Data}
-                                                    />
-                                                </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck
+                                                    Checked={BOWData.Checked}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data}
+                                                />
+                                            </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
@@ -417,25 +459,27 @@ function Details() {
                                                     isReviewed={BOWData.Review}
                                                     onCallback={updateData}
                                                     Checked={BOWData.Checked}
-                                                    loadedPalletList={loadedPalletList}
+                                                    loadedPalletList={
+                                                        loadedPalletList
+                                                    }
                                                     checkData={checkData}
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
-                                                    CT12Data={CT12Data} 
+                                                    CT12Data={CT12Data}
                                                 />
                                             </Skeleton>
-                                                <Skeleton
-                                                    isLoaded={!loading}
-                                                    borderRadius="2xl"
-                                                >
-                                                    <KilnCheck 
-                                                        Checked={BOWData.Checked}
-                                                        checkData={checkData}
-                                                        checkboxData={checkboxData}
-                                                        CT11Data={CT11Data}
-                                                        CT12Data={CT12Data}
-                                                    />
-                                                </Skeleton>
+                                            <Skeleton
+                                                isLoaded={!loading}
+                                                borderRadius="2xl"
+                                            >
+                                                <KilnCheck
+                                                    Checked={BOWData.Checked}
+                                                    checkData={checkData}
+                                                    checkboxData={checkboxData}
+                                                    CT11Data={CT11Data}
+                                                    CT12Data={CT12Data}
+                                                />
+                                            </Skeleton>
                                             <Skeleton
                                                 isLoaded={!loading}
                                                 borderRadius="2xl"
