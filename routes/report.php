@@ -27,5 +27,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/vcn-sanluongtheothoigian', [ReportController::class, 'sanluongtheothoigianVCN']);
         Route::get('/vcn-sanluongtheongay', [ReportController::class, 'sanluongtheongayVCN']);
         Route::get('/vcn-xulyloi', [ReportController::class, 'PlywoodDefectHandling']);
+
+        //Tạo biên bản xử lý sản phẩm không phù hợp
+        Route::post('/tao-bien-ban-xu-ly', [ReportController::class, 'create_report_solution']);
+        Route::get('/lay-danh-sach-bien-ban', [ReportController::class, 'get_report_solution_by_factory']);
+        Route::get('/lay-danh-sach-bien-ban-theo-id', [ReportController::class, 'get_list_report_by_report_resolution_id']);
     });
 });

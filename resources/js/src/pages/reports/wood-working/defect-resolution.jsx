@@ -31,6 +31,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import useAppContext from "../../../store/AppContext";
+import { FACTORIES } from "../../../shared/data";
 
 function DefectResolution() {
     const navigate = useNavigate();
@@ -56,6 +57,58 @@ function DefectResolution() {
 
     const [reportData, setReportData] = useState(null);
 
+    //state for create report solution
+    const [rowSelected, setRowSelected] = useState([]);
+    const [isSubmitCreate, setIsSubmitCreate] = useState(false);
+
+    const createReportResolution = async () => {
+        if (rowSelected.length == 0) return;
+
+        if (isSubmitCreate) return;
+
+        let listIdSelected = [];
+
+        rowSelected.forEach(item => {
+            listIdSelected.push(item.slId);
+        });
+
+        console.log("rowSelected", rowSelected);
+        
+
+        let idGD = "";
+        let idQC = "";
+
+        if (selectedFactory == FACTORIES.TH.value) {
+            idGD = 342;
+            idQC = 829;
+        } else if (selectedFactory == FACTORIES.YS.value) {
+            idGD = 438;
+            idQC = 828;
+        } else {
+            idGD = 393;
+            idQC = 610;
+        }
+
+        let data = {
+            listIdSelected,
+            factory: selectedFactory,
+            idGD,
+            idQC
+        };
+
+        try {
+            setIsSubmitCreate(true)
+            await reportApi.createReportReSolution(data);
+            toast.success("Tạo biên bản thành công.");
+            getReportData();
+            setIsSubmitCreate(false)
+            setRowSelected([])
+        } catch {
+            toast.error("Đã xảy ra lỗi khi tạo biên bản.");
+            setIsSubmitCreate(false)
+        }
+    }
+
     const handleFactorySelect = async (factory) => {
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
@@ -63,6 +116,11 @@ function DefectResolution() {
         setTeamData(null);
         setSelectedTeams([]);
     };
+
+    const onSelectionChanged = useCallback((event) => {
+        const selected = event.api.getSelectedRows();
+        setRowSelected(selected);
+    }, []);
 
     const getReportData = useCallback(async () => {
         let params = {
@@ -79,6 +137,7 @@ function DefectResolution() {
                 params.to_date
             );
             const formattedData = res.map((item) => ({
+                slId: item.slId,
                 week: item.week,
                 root_cause: item.NguonLoi,
                 root_place: item.NoiBaoLoi,
@@ -144,6 +203,13 @@ function DefectResolution() {
 
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
+        {
+            headerCheckboxSelection: true,
+            width: 50,
+            pinned: 'left',
+            checkboxSelection: (params) => !params.node.footer,
+            resizable: false
+        },
         {
             headerName: "Tổ báo lỗi",
             field: "root_place_name",
@@ -290,11 +356,10 @@ function DefectResolution() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
-                selectedFactory === value
-                    ? "border-[#86ABBE] bg-[#eaf8ff]"
-                    : "border-gray-300"
-            }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
+                ? "border-[#86ABBE] bg-[#eaf8ff]"
+                : "border-gray-300"
+                }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -303,11 +368,10 @@ function DefectResolution() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${
-                    selectedFactory === value
-                        ? "text-[#17506B] font-medium"
-                        : "text-gray-400 group-hover:text-[#17506B]"
-                }`}
+                className={`${selectedFactory === value
+                    ? "text-[#17506B] font-medium"
+                    : "text-gray-400 group-hover:text-[#17506B]"
+                    }`}
             >
                 {label}
             </div>
@@ -324,7 +388,7 @@ function DefectResolution() {
                 <div className="w-screen  p-6 px-5 xl:p-5 xl:px-12 ">
                     {/* Title */}
                     <div className="flex items-center justify-between space-x-6 mb-3.5">
-                        <div className="flex items-center space-x-4">
+                        <div className="w-1/2 flex items-center space-x-4">
                             <div
                                 className="p-2 hover:bg-gray-200 rounded-full cursor-pointer active:scale-[.87] active:duration-75 transition-all"
                                 onClick={handleGoBack}
@@ -339,6 +403,29 @@ function DefectResolution() {
                                     Báo cáo biện pháp xử lý lỗi
                                 </div>
                             </div>
+                            {
+                                rowSelected.length > 0 &&
+                                <div className="flex" style={{ marginLeft: 'auto' }}>
+                                    <button
+                                        type="button"
+                                        disabled={isSubmitCreate}
+                                        className={`mt-0 self-end flex cursor-pointer items-center justify-center text-white bg-[#155979] hover:bg-[#1A6D94] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center gap-x-2`}
+                                        onClick={() => createReportResolution()}
+                                    >
+                                        {isSubmitCreate ? (
+                                            <div className="flex items-center space-x-4">
+                                                <Spinner
+                                                    size="sm"
+                                                    color="white"
+                                                />
+                                                <div>Đang lưu...</div>
+                                            </div>
+                                        ) : (
+                                            "Tạo biên bản"
+                                        )}
+                                    </button>
+                                </div>
+                            }
                         </div>
 
                         {/* Search & Export */}
@@ -486,6 +573,10 @@ function DefectResolution() {
                                             getRowStyle={getRowStyle}
                                             localeText={localeText}
                                             grandTotalRow={"bottom"}
+                                            rowSelection="multiple"
+                                            onSelectionChanged={onSelectionChanged}
+                                            suppressRowClickSelection={true}
+                                            groupSelectsChildren={true}
                                         />
                                     </div>
                                 </div>

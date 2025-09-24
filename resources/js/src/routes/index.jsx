@@ -90,6 +90,7 @@ import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-wareho
 
 // Kichen cabinet
 import KitchenCabinetFinishedGoodsReceipt from "../pages/workspace/kitchen-cabinet/finished-goods-receipt";
+import ReportResolution from "../pages/reports/wood-working/report-resolution";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -447,6 +448,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <FactoryReceiptVolumelReport />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/reports/wood-working/report-resolution"
+                        element={
+                            <ProtectedRoute>
+                                <ReportResolution />
                             </ProtectedRoute>
                         }
                     />

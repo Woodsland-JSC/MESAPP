@@ -184,6 +184,12 @@ const CBGReports = [
     //     description: "",
     //     priority: true,
     // },
+    {
+        id: "0013",
+        name: "Biên bản xử lý sản phẩm không phù hợp",
+        link: "/reports/wood-working/report-resolution",
+        description: "Biên bản xử ly sản phẩm không phù hợp"
+    },
 ];
 
 const QCReports = [

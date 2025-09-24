@@ -277,6 +277,29 @@ const reportApi = {
             signal,
         });
     },
+
+    createReportReSolution: (data) => {
+        const url = `/report/tao-bien-ban-xu-ly`;
+        return axiosClient().post(url, data);
+    },
+
+    getReportSolution: (factory) => {
+        const url = `/report/lay-danh-sach-bien-ban`;
+        return axiosClient().get(url, {
+            params: {
+                factory
+            }
+        });
+    },
+
+    getReportSolutionById: (report_resolution_id) => {
+        const url = `/report/lay-danh-sach-bien-ban-theo-id`;
+        return axiosClient().get(url, {
+            params: {
+                report_resolution_id
+            }
+        });
+    }
 };
 
 export default reportApi;
