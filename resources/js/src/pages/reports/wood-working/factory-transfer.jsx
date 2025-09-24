@@ -179,6 +179,21 @@ function FactoryTransfer() {
                         : { textAlign: "right" },
             },
             {
+                headerName: "M3 sản phẩm",
+                field: "M3SP",
+                filter: true,
+                width: 150,
+                suppressHeaderMenuButton: true,
+                valueFormatter: (params) => {
+                    return formatNumber(Number(params.value) || 0)
+                },
+                aggFunc: "sum",
+                cellStyle: (params) =>
+                    params.node.rowPinned
+                        ? { fontWeight: "bold", textAlign: "right", backgroundColor: "#B9E0F6" }
+                        : { textAlign: "right" },
+            },
+            {
                 headerName: "Từ kho",
                 field: 'FromWarehouse',
                 enableRowGroup: true,
@@ -360,6 +375,7 @@ function FactoryTransfer() {
                     thickness: item.U_CDay,
                     DocDate: item.DocDate,
                     Quantity: Number(item.Quantity),
+                    M3SP: Number(item.M3SP),
                     FromFacCode: item.FromFacCode,
                     FromFacName: item.FromFacName,
                     FromWhsCode: item.FromWhsCode,
