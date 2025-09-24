@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Database\QueryException;
 use App\Http\Controllers\sap\ConnectController;
+use App\Models\BienBanXuLyLoiCBG;
+use App\Models\HistorySL;
+use Exception as GlobalException;
 
 class ReportController extends Controller
 {
@@ -817,6 +820,8 @@ class ReportController extends Controller
 
         // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_cbg_baocaoxulyloi');
+
+        $query->whereNull('reportResolutionId');
 
         if ($branch) {
             $query->where('branch', $branch);
@@ -1753,5 +1758,94 @@ class ReportController extends Controller
         odbc_close($conDB);
 
         return response()->json($updatedData);
+    }
+
+    
+    public function create_report_solution(Request $request) {
+        $data = $request->all();
+
+        if(!isset($data['listIdSelected']) && !isset($data['factory'])) {
+            return response()->json(['error' => 'Thiếu thông tin tạo biên bản'], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+            $listIdSelected = $data['listIdSelected'];
+            $factory = $data['factory'];
+
+            $bienbanCBG = BienBanXuLyLoiCBG::create([
+                'report_resolution_factory' => $factory,
+                'created_by' => $request->user()->id,
+                'id_GD' => $request->idGD,
+                'id_QC' => $request->idQC
+            ]);
+
+            if(!$bienbanCBG){
+                return response()->json(['error' => 'Chưa tạo được biên bản'], 500);
+            }
+
+            $historySLs_updated = HistorySL::whereIn('id', $listIdSelected)->update([
+                'report_resolution_id' => $bienbanCBG->id
+            ]);
+
+            DB::commit();
+
+            return response()->json($historySLs_updated);
+        }catch (GlobalException $e ) {
+            DB::rollBack();
+            return response()->json(['error'=> 'Lỗi khi tạo biên bản' ],500);
+        }
+    }
+
+    public function get_report_solution_by_factory(Request $request){
+        $factory = $request->factory;
+
+        if(!isset($factory)) {
+            return response()->json(['error' => 'Thiếu thông tin nhà máy'],  500);
+        }
+
+        $results = DB::table('bien_ban_xu_ly_loi_cbg as B')
+        ->where('B.report_resolution_factory', '=', $factory)
+        ->leftjoin('users as U', 'B.created_by', '=', 'U.id')
+        ->leftjoin('users as U1', 'B.id_GD', '=', 'U1.id')
+        ->leftjoin('users as U2', 'B.id_QC', '=', 'U2.id')
+        ->select(
+            'B.id', 
+            'B.report_resolution_factory',
+            'B.created_by',
+            'B.created_at',
+            'U.first_name',
+            'U.last_name',
+            'U1.id as idGD',
+            'U2.id as idQC',
+            'U1.first_name as firstNameGD',
+            'U1.last_name as lastNameGD',
+            'U2.first_name as firstNameQC',
+            'U2.last_name as lastNameQC'
+        )
+        ->orderByDesc('B.id')
+        ->get();
+
+        // ::select('category')->distinct()->get();
+        return response()->json($results);
+    }
+
+    public function get_list_report_by_report_resolution_id(Request $request){
+        $report_resolution_id = $request->report_resolution_id;
+
+        if(!isset($report_resolution_id)) {
+            return response()->json(['error' => 'Thiếu thông tin '], 500);
+        }
+
+        // $data = DB::table('gt_report_resolutions_view');
+
+        // Start the query and add conditions based on the request inputs
+        $query = DB::table('gt_cbg_baocaoxulyloi');
+
+        $data = $query->where('reportResolutionId', '=' , $report_resolution_id)
+        ->orderByDesc('reportResolutionId')
+        ->get();
+
+        return response()->json($data);
     }
 }

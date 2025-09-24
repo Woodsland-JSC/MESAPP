@@ -476,3 +476,30 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .swal2-confirm .swal2-styled{
     background-color: #7066e0 !important;
 }
+
+/* #pdf-content */
+/* Khi in, chỉ hiện content */
+@media print {
+  body * {
+    visibility: hidden;   /* Ẩn toàn bộ */
+  }
+  #pdf-content, #pdf-content * {
+    visibility: visible;  /* Chỉ hiện phần content */
+  }
+  #pdf-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  @page {
+    size: A4 landscape !important;
+    /* margin: 20mm; */
+  }
+
+  #signature-qc {
+    page-break-inside: avoid; /* cho Chrome/Edge */
+    break-inside: avoid;      /* chuẩn mới */
+  }
+}
