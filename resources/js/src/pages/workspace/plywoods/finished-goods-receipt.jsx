@@ -51,6 +51,7 @@ import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 import { BiConfused } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowUp } from "react-icons/fa";
+import { layKetCauVCNTheoLSX } from "../../../api/vcn.api";
 
 function PlywoodFinishedGoodsReceipt() {
     const { user } = useAppContext();
@@ -93,7 +94,11 @@ function PlywoodFinishedGoodsReceipt() {
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
-    const [viewedStructureLSX, setViewedStructureLSX] = useState(null);
+    const [viewedStructureLSX, setViewedStructureLSX] = useState({
+        lsx: null,
+        data: null,
+        detail: []
+    });
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -326,12 +331,26 @@ function PlywoodFinishedGoodsReceipt() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const viewStructure = (e, lsx) => {
-        e.stopPropagation();
+    const viewStructure = async (e, lsx) => {
+        try {
+            e.stopPropagation();
 
-        console.log("viewStructure", lsx);
-        setViewedStructureLSX(lsx);
-        onModalStructureOpen();
+            let res = await layKetCauVCNTheoLSX(lsx);
+
+            setViewedStructureLSX({
+                lsx,
+                data: res.data,
+                detail: res.detail
+            });
+            onModalStructureOpen();
+        } catch (error) {
+            toast.error("Lỗi khi lấy kết cấu.")
+            setViewedStructureLSX({
+                lsx: null,
+                data: null,
+                detail: null
+            });
+        }
     }
 
     return (
@@ -603,7 +622,7 @@ function PlywoodFinishedGoodsReceipt() {
 
             {/* Popup xem kết cấu ván công nghiệp theo lệnh sản xuất */}
             {
-                viewedStructureLSX &&
+                viewedStructureLSX.lsx &&
                 <Modal
                     isCentered
                     isOpen={isModalStructureOpen}
@@ -617,22 +636,142 @@ function PlywoodFinishedGoodsReceipt() {
                     <ModalContent>
                         <ModalHeader className="!p-2.5 ">
                             <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
-                                Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline">{viewedStructureLSX}</span>
+                                Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline">{viewedStructureLSX.lsx}</span>
                             </h1>
                         </ModalHeader>
                         <ModalCloseButton />
                         <div className="border-b-2 border-gray-200"></div>
-                        <ModalBody className="bg-gray-100 !p-4">
-                            <div className="flex gap-4 justify-center h-full">
+                        <ModalBody className="bg-gray-100 !p-4 flex flex-col gap-y-3">
+                            {
+                                viewedStructureLSX.data ? (
+                                    <>
+                                        <div className="flex flex-col gap-4 justify-center h-full w-full px-10">
+                                            <div>
+                                                <span className="font-bold text-[#17506B] text-[20px]">THÔNG TIN</span>
+                                            </div>
+                                            <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] xl:mx-0 md:mx-0 lg:mx-0 mx-3 bg-white w-full">
+                                                <div className="flex flex-col justify-start px-3">
+                                                    <label className="font-medium uppercase text-sm text-gray-400">
+                                                        Nhóm LSX
+                                                    </label>
+                                                    <span className="text-[13px] font-bold">
+                                                        {viewedStructureLSX.lsx}
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-col justify-start px-3">
+                                                    <label className="font-medium uppercase text-sm text-gray-400">
+                                                        Khối
+                                                    </label>
+                                                    <span className="text-[13px] font-bold">
+                                                        {viewedStructureLSX?.data?.U_LLSX ?? ""}
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-col justify-start px-3">
+                                                    <label className="font-medium uppercase text-sm text-gray-400">
+                                                        Tên SP
+                                                    </label>
+                                                    <span className="text-[13px] font-bold">
+                                                        {viewedStructureLSX?.data?.Name ?? ""}
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-col justify-start px-3">
+                                                    <label className="font-medium uppercase text-sm text-gray-400">
+                                                        Nhà máy
+                                                    </label>
+                                                    <span className="text-[13px] font-bold">
+                                                        {viewedStructureLSX?.data?.U_FAC ?? ""}
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-col justify-start px-3">
+                                                    <label className="font-medium uppercase text-sm text-gray-400">
+                                                        Mã Sản phẩm
+                                                    </label>
+                                                    <span className="text-[13px] font-bold">
+                                                        {viewedStructureLSX?.data?.U_ItemCode ?? "-"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            </div>
+                                        {
+                                            viewedStructureLSX.detail.length > 0 ? (
+                                                <div className="flex flex-col gap-4 justify-center h-full w-full px-10">
+                                                    <div>
+                                                        <span className="font-bold text-[#17506B] text-[20px]">CHI TIẾT KẾT CẤU</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-2 divide-x-2 border-[#DADADA] xl:mx-0 md:mx-0 lg:mx-0 mx-3  w-full">
+                                                        <table className="w-full border-collapse table-fixed">
+                                                            <thead class="font-bold">
+                                                                <tr className="bg-white">
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r border-[#DADADA] border-b">
+                                                                        Tên sản phẩm
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Mã sản phẩm
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Kết cấu
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Số lớp
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Cách xếp
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Độ dày
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
+                                                                        Loại gỗ
+                                                                    </td>
+                                                                    <td className="p-2 h-[48px] text-center font-bold border-[#DADADA] border-b">
+                                                                        Quy cách
+                                                                    </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {
+                                                                    viewedStructureLSX.detail.map((item, index) => (
+                                                                        <tr key={index} className="bg-white">
+                                                                            <td className="break-words border p-1 text-center">{item?.U_ItemName ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_ItemCode ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_KetCau ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_SoLop ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_CachX ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_DoDay ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{item?.U_LoaiG ?? '-'}</td>
+                                                                            <td className="break-words border p-1 text-center">{`${Number(item.U_TIDay)}x${Number(item.U_TIRong)}x${Number(item.U_TIDai)}`}</td>
+                                                                        </tr>
+                                                                    ))
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex w-full h-full justify-center items-center text-[20px]">
+                                                    Không có dữ liệu kết cấu
+                                                </div>
+                                            )
+                                        }
+                                    </>
+                                ) : (
+                                    <div className="flex w-full h-full justify-center items-center text-[20px]">
+                                        Không có dữ liệu
+                                    </div>
+                                )
+                            }
                         </ModalBody>
                         <ModalFooter className="flex flex-col !p-0 ">
                             <div className="border-b-2 border-gray-100"></div>
                             <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
                                 <button
                                     onClick={() => {
-                                        setViewedStructureLSX(null);
+                                        setViewedStructureLSX({
+                                            data: null,
+                                            detail: [],
+                                            lsx: null
+                                        });
                                         onModalStructureClose();
                                     }}
                                     className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
