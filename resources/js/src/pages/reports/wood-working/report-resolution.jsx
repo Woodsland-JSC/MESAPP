@@ -385,7 +385,7 @@ const ReportResolution = () => {
                                             <thead class="font-bold">
                                                 {/* INFO report */}
                                                 <tr className="">
-                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[110px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         CĐ báo lỗi
                                                     </td>
                                                     <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
@@ -409,7 +409,7 @@ const ReportResolution = () => {
                                                     <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Cách xử lý
                                                     </td>
-                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold" >
+                                                    <td className="w-[110px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold" >
                                                         CĐ xử lý
                                                     </td>
                                                 </tr>

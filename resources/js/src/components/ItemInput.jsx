@@ -56,6 +56,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
 import { BiSolidBadgeCheck } from "react-icons/bi";
+import { VAN_CONG_NGHIEP } from "../shared/data";
 
 const ItemInput = ({
     data,
@@ -66,6 +67,9 @@ const ItemInput = ({
     variant,
     selectedFactory,
     nextGroup,
+
+    // Hàm xem kết cấu ván công nghiệp
+    viewStructure
 }) => {
     const checkRef = useRef(null);
     const itemCheckRef = useRef(null);
@@ -74,10 +78,10 @@ const ItemInput = ({
 
     const filteredData = Array.isArray(data)
         ? data.filter((item) =>
-              `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
-          )
+            `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        )
         : [];
 
     const { user } = useAppContext();
@@ -230,7 +234,7 @@ const ItemInput = ({
                 } catch (error) {
                     toast.error(
                         error.response.data.error ||
-                            "Có lỗi khi lấy dữ liệu item."
+                        "Có lỗi khi lấy dữ liệu item."
                     );
                     console.error(error);
                 }
@@ -274,7 +278,7 @@ const ItemInput = ({
                 } catch (error) {
                     toast.error(
                         error.response.data.error ||
-                            "Có lỗi khi lấy dữ liệu item."
+                        "Có lỗi khi lấy dữ liệu item."
                     );
                     console.error(error);
                 }
@@ -532,7 +536,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             amount < 0
         ) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
@@ -543,7 +547,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             amount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng tối đa có thể xuất");
@@ -552,7 +556,7 @@ const ItemInput = ({
         } else if (
             amount >
             selectedItemDetails.remainQty -
-                selectedItemDetails.WaitingConfirmQty
+            selectedItemDetails.WaitingConfirmQty
         ) {
             toast.error(
                 <span>
@@ -573,7 +577,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             faultyAmount < 0
         ) {
             toast.error("Số lượng lỗi phải lớn hơn 0");
@@ -585,7 +589,7 @@ const ItemInput = ({
             selectedFaultItem.ItemCode !== "" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             faultyAmount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
@@ -596,7 +600,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             selectedFaultItem.SubItemCode === "" &&
             selectedFaultItem.ItemCode === "" &&
             faultyAmount
@@ -609,10 +613,10 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             selectedFaultItem.ItemCode !== "" &&
             parseInt(faultyAmount) + parseInt(amount) >
-                parseInt(selectedItemDetails.maxQty)
+            parseInt(selectedItemDetails.maxQty)
         ) {
             toast.error(
                 <span>
@@ -633,19 +637,19 @@ const ItemInput = ({
             // Object chứa dữ liệu lỗi
             const ErrorData = isItemCodeDetech
                 ? {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  }
+                    SubItemWhs: selectedItemDetails.SubItemWhs,
+                    SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                        SubItemCode: item.SubItemCode,
+                        BaseQty: item.BaseQty,
+                    })),
+                }
                 : {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  };
+                    SubItemWhs: selectedItemDetails.SubItemWhs,
+                    SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                        SubItemCode: item.SubItemCode,
+                        BaseQty: item.BaseQty,
+                    })),
+                };
 
             try {
                 const payload = {
@@ -1048,221 +1052,241 @@ const ItemInput = ({
                 <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
-                              <section
-                                  onClick={() => {
-                                      openInputModal(item);
-                                      setChoosenItem(item);
-                                  }}
-                                  className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
-                                  key={index}
-                              >
-                                  <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
-                                      <div className="flex items-center">
-                                          <span>
-                                              <IoIosArrowDown className="inline-block text-gray-500" />{" "}
-                                              {item.ChildName}{" "}
-                                              {variant === "VCN" ? (
-                                                  <span className="text-[#1979A6]">
-                                                      {data.QuyCach2}
-                                                  </span>
-                                              ) : (
-                                                  <span className="">
-                                                      ({item.CDay}*{item.CRong}*
-                                                      {item.CDai})
-                                                  </span>
-                                              )}
-                                              {item.Version && (
-                                                  <span className="pl-2 font-medium text-[#17506b]">
-                                                      V.
-                                                      <span>
-                                                          {item.Version}
-                                                      </span>
-                                                  </span>
-                                              )}
-                                          </span>
-                                      </div>
-                                  </div>
-                                  <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
-                                      <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
-                                          <thead className="bg-[#dae0ec] ">
-                                              <tr>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
-                                                  >
-                                                      LSX
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Sản lượng
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          SL
-                                                      </span>
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Đã làm
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          ĐL
-                                                      </span>
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
-                                                  >
-                                                      Lỗi
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Còn lại
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          CL
-                                                      </span>
-                                                  </th>
-                                              </tr>
-                                          </thead>
-                                          <tbody className=" border-t border-[#c4cfe7]  ">
-                                              {item.LSX?.length > 0 ? (
-                                                  item.LSX.filter(
-                                                      (production) =>
-                                                          production.ConLai > 0
-                                                  )
-                                                      .sort((a, b) => {
-                                                          return a.LSX.localeCompare(
-                                                              b.LSX
-                                                          );
-                                                      })
-                                                      .map(
-                                                          (
-                                                              production,
-                                                              index
-                                                          ) => (
-                                                              <tr
-                                                                  className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
-                                                                  key={index}
-                                                              >
-                                                                  <th
-                                                                      scope="row"
-                                                                      className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
-                                                                  >
-                                                                      {
-                                                                          production.LSX
-                                                                      }
-                                                                  </th>
-                                                                  <td className="px-2 py-2 text-right text-gray-800">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.SanLuong
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right text-gray-900">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.DaLam
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right text-gray-900">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.Loi
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2  py-2 text-right text-gray-800">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.ConLai
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                              </tr>
-                                                          )
-                                                      )
-                                              ) : (
-                                                  <span>Không có dữ liệu</span>
-                                              )}
-                                          </tbody>
-                                          <tfoot className="!text-[12px]">
-                                              <tr>
-                                                  <td className="font-bold  text-gray-700 px-2 py-2">
-                                                      Tổng
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.SanLuong
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.DaLam
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.Loi
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.ConLai
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                              </tr>
-                                          </tfoot>
-                                      </table>
-                                  </div>
-                              </section>
-                          ))
+                            <section
+                                onClick={() => {
+                                    openInputModal(item);
+                                    setChoosenItem(item);
+                                }}
+                                className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                key={index}
+                            >
+                                <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
+                                    <div className="flex items-center">
+                                        <span>
+                                            <IoIosArrowDown className="inline-block text-gray-500" />{" "}
+                                            {item.ChildName}{" "}
+                                            {variant === "VCN" ? (
+                                                <span className="text-[#1979A6]">
+                                                    {data.QuyCach2}
+                                                </span>
+                                            ) : (
+                                                <span className="">
+                                                    ({item.CDay}*{item.CRong}*
+                                                    {item.CDai})
+                                                </span>
+                                            )}
+                                            {item.Version && (
+                                                <span className="pl-2 font-medium text-[#17506b]">
+                                                    V.
+                                                    <span>
+                                                        {item.Version}
+                                                    </span>
+                                                </span>
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
+                                    <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
+                                        <thead className="bg-[#dae0ec] ">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
+                                                >
+                                                    LSX
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Sản lượng
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        SL
+                                                    </span>
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Đã làm
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        ĐL
+                                                    </span>
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
+                                                >
+                                                    Lỗi
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Còn lại
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        CL
+                                                    </span>
+                                                </th>
+                                                {
+                                                    variant == VAN_CONG_NGHIEP &&
+                                                    <th
+                                                        scope="col"
+                                                        className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
+                                                    >
+                                                        <span className="xl:block lg:block md:block hidden">
+                                                            
+                                                        </span>
+                                                        <span className="xl:hidden lg:hidden md:hidden block">
+                                                            
+                                                        </span>
+                                                    </th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody className=" border-t border-[#c4cfe7]  ">
+                                            {item.LSX?.length > 0 ? (
+                                                item.LSX.filter(
+                                                    (production) =>
+                                                        production.ConLai > 0
+                                                )
+                                                    .sort((a, b) => {
+                                                        return a.LSX.localeCompare(
+                                                            b.LSX
+                                                        );
+                                                    })
+                                                    .map(
+                                                        (
+                                                            production,
+                                                            index
+                                                        ) => (
+                                                            <tr
+                                                                className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
+                                                                key={index}
+                                                            >
+                                                                <th
+                                                                    scope="row"
+                                                                    className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
+                                                                >
+                                                                    {
+                                                                        production.LSX
+                                                                    }
+                                                                </th>
+                                                                <td className="px-2 py-2 text-right text-gray-800">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.SanLuong
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right text-gray-900">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.DaLam
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right text-gray-900">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.Loi
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2  py-2 text-right text-gray-800">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.ConLai
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                {
+                                                                    variant == VAN_CONG_NGHIEP &&
+                                                                    <td className="px-2 py-2 text-right text-[#17506B] underline" onClick={(e) => viewStructure(e, production.LSX)}>
+                                                                        Xem kết cấu
+                                                                    </td>
+                                                                }
+                                                            </tr>
+                                                        )
+                                                    )
+                                            ) : (
+                                                <span>Không có dữ liệu</span>
+                                            )}
+                                        </tbody>
+                                        <tfoot className="!text-[12px]">
+                                            <tr>
+                                                <td className="font-bold  text-gray-700 px-2 py-2">
+                                                    Tổng
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.SanLuong
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.DaLam
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.Loi
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.ConLai
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </section>
+                        ))
                         : null}
                 </div>
             </div>
@@ -1301,12 +1325,11 @@ const ItemInput = ({
                                         <div className="p-3 border-2 border-[#DADADA] bg-white rounded-xl shadow-sm">
                                             <div className="">
                                                 <div
-                                                    className={`w-full flex items-center justify-between rounded-xl p-3 ${
-                                                        selectedItemDetails?.FatherStock <=
+                                                    className={`w-full flex items-center justify-between rounded-xl p-3 ${selectedItemDetails?.FatherStock <=
                                                         0
-                                                            ? "bg-gray-200"
-                                                            : "bg-blue-100"
-                                                    }`}
+                                                        ? "bg-gray-200"
+                                                        : "bg-blue-100"
+                                                        }`}
                                                 >
                                                     <div className="w-[90%]">
                                                         <div className="text-xs m-0 text-[#647C9C]">
@@ -1323,12 +1346,11 @@ const ItemInput = ({
                                                         </div>
                                                     </div>
                                                     <div
-                                                        className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${
-                                                            selectedItemDetails?.FatherStock <=
+                                                        className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${selectedItemDetails?.FatherStock <=
                                                             0
-                                                                ? "bg-gray-500"
-                                                                : "bg-[#155979]"
-                                                        } `}
+                                                            ? "bg-gray-500"
+                                                            : "bg-[#155979]"
+                                                            } `}
                                                     >
                                                         {selectedItemDetails?.FatherStock ||
                                                             0}
@@ -1341,7 +1363,7 @@ const ItemInput = ({
                                                     phẩm:
                                                 </label>
                                                 {selectedItemDetails?.FatherStock <=
-                                                0 ? (
+                                                    0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
                                                         <div>
@@ -1411,7 +1433,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.SanLuong ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1423,7 +1445,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.DaLam ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1434,7 +1456,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.Loi ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1482,7 +1504,7 @@ const ItemInput = ({
                                                                         phẩm:
                                                                     </label>
                                                                     {selectedItemDetails?.FatherStock <=
-                                                                    0 ? (
+                                                                        0 ? (
                                                                         <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                                             <MdDangerous className="w-6 h-6" />
                                                                             <div>
@@ -1515,7 +1537,7 @@ const ItemInput = ({
                                                                             ) => {
                                                                                 if (
                                                                                     value ===
-                                                                                        0 ||
+                                                                                    0 ||
                                                                                     !value ||
                                                                                     isNaN(
                                                                                         value
@@ -1599,7 +1621,7 @@ const ItemInput = ({
                                                                         ) => {
                                                                             if (
                                                                                 value ===
-                                                                                    0 ||
+                                                                                0 ||
                                                                                 !value ||
                                                                                 isNaN(
                                                                                     value
@@ -1692,7 +1714,7 @@ const ItemInput = ({
                                                                                     stockIndex
                                                                                 ]
                                                                                     .RejectQty <
-                                                                                    1
+                                                                                1
                                                                             ) {
                                                                                 toast.error(
                                                                                     "Vui lòng khai báo số lượng lỗi."
@@ -1731,233 +1753,233 @@ const ItemInput = ({
                                         )}
                                         {selectedItemDetails?.notifications
                                             ?.length > 0 && (
-                                            <>
-                                                {/* <div className="border-t-2 border-dashed border-gray-300 mt-3"></div> */}
-                                                <div>
-                                                    <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
-                                                        <div className="flex items-center space-x-1">
-                                                            <div className="px-1 rounded-xl">
-                                                                <FaClock className="text-[#5777ae] w-5 h-5" />
+                                                <>
+                                                    {/* <div className="border-t-2 border-dashed border-gray-300 mt-3"></div> */}
+                                                    <div>
+                                                        <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
+                                                            <div className="flex items-center space-x-1">
+                                                                <div className="px-1 rounded-xl">
+                                                                    <FaClock className="text-[#5777ae] w-5 h-5" />
+                                                                </div>
+                                                                <div className="uppercase">
+                                                                    Lịch sử ghi nhận{" "}
+                                                                </div>
                                                             </div>
-                                                            <div className="uppercase">
-                                                                Lịch sử ghi nhận{" "}
+
+                                                            <div className="pr-2 text-[17px] font-semibold">
+                                                                (
+                                                                {
+                                                                    selectedItemDetails
+                                                                        ?.notifications
+                                                                        .length
+                                                                }
+                                                                )
                                                             </div>
                                                         </div>
-
-                                                        <div className="pr-2 text-[17px] font-semibold">
-                                                            (
-                                                            {
-                                                                selectedItemDetails
-                                                                    ?.notifications
-                                                                    .length
-                                                            }
-                                                            )
-                                                        </div>
-                                                    </div>
-                                                    <div className="space-y-4">
-                                                        {selectedItemDetails?.notifications?.map(
-                                                            (item, index) => (
-                                                                <>
-                                                                    {item?.Type ===
-                                                                    0 ? (
-                                                                        <div className="p-2 px-4 rounded-lg bg-[#f8fffb] border-2 border-[#81ca9c]">
-                                                                            {/* Bán thành phẩm */}
-                                                                            <div className="flex justify-between w-full">
-                                                                                <div className="flex flex-col w-full">
-                                                                                    <div className="flex items-center justify-between w-full py-1">
-                                                                                        <div className="">
-                                                                                            <div className="text-[#8D9194] font-medium text-xs uppercase">
-                                                                                                Bán
-                                                                                                thành
-                                                                                                phẩm
-                                                                                                rong
-                                                                                            </div>
-                                                                                            <div className="text-[17px] font-semibold uppercase">
-                                                                                                {
-                                                                                                    item.SubItemName
-                                                                                                }
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="text-[#15803D] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
-                                                                                            {item.QtyIssueRong ||
-                                                                                                0}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div className="my-2 mt-1 border-b-2 border border-green-500"></div>
-
-                                                                            {/* Thành phẩm */}
-                                                                            <div className=" ">
-                                                                                <div className="text-[#898c90] mb-0 font-medium text-xs uppercase">
-                                                                                    Thành
-                                                                                    phẩm
-                                                                                    rong
-                                                                                </div>
-
-                                                                                {transformDetail(
-                                                                                    item?.detail
-                                                                                ).map(
-                                                                                    (
-                                                                                        detailItem,
-                                                                                        detailIndex
-                                                                                    ) => (
-                                                                                        <div className=" flex items-center justify-between">
-                                                                                            <div className="flex items-center space-x-2">
-                                                                                                {/* <FaArrowRightLong /> */}
-                                                                                                <FaDotCircle className="text-green-600 w-3 h-3" />
-                                                                                                <div className="font-medium">
+                                                        <div className="space-y-4">
+                                                            {selectedItemDetails?.notifications?.map(
+                                                                (item, index) => (
+                                                                    <>
+                                                                        {item?.Type ===
+                                                                            0 ? (
+                                                                            <div className="p-2 px-4 rounded-lg bg-[#f8fffb] border-2 border-[#81ca9c]">
+                                                                                {/* Bán thành phẩm */}
+                                                                                <div className="flex justify-between w-full">
+                                                                                    <div className="flex flex-col w-full">
+                                                                                        <div className="flex items-center justify-between w-full py-1">
+                                                                                            <div className="">
+                                                                                                <div className="text-[#8D9194] font-medium text-xs uppercase">
+                                                                                                    Bán
+                                                                                                    thành
+                                                                                                    phẩm
+                                                                                                    rong
+                                                                                                </div>
+                                                                                                <div className="text-[17px] font-semibold uppercase">
                                                                                                     {
-                                                                                                        detailItem.ItemName
+                                                                                                        item.SubItemName
                                                                                                     }
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <div className="font-semibold px-2">
-                                                                                                {parseInt(
-                                                                                                    detailItem.Qty_Type0
-                                                                                                )}
+                                                                                            <div className="text-[#15803D] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
+                                                                                                {item.QtyIssueRong ||
+                                                                                                    0}
                                                                                             </div>
                                                                                         </div>
-                                                                                    )
-                                                                                )}
-                                                                            </div>
-
-                                                                            <div className="my-2 mb-1 border-b border border-gray-200"></div>
-
-                                                                            <div className="py-1 flex justify-between space-x-5">
-                                                                                <div className="">
-                                                                                    <div className="text-sm">
-                                                                                        Người
-                                                                                        giao:{" "}
-                                                                                        <span className="font-medium text-[#15803D]">
-                                                                                            {
-                                                                                                item.fullname
-                                                                                            }
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div className="text-sm ">
-                                                                                        <span className="">
-                                                                                            Thời
-                                                                                            gian
-                                                                                            giao:{" "}
-                                                                                        </span>
-                                                                                        <span className="font-medium text-gray-600">
-                                                                                            {
-                                                                                                item.CreatedAt
-                                                                                            }
-                                                                                        </span>
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div className="flex items-center gap-x-6">
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            onDeleteProcessingDialogOpen();
-                                                                                            console.log(
-                                                                                                "Id Noti bị xóa:",
-                                                                                                item?.notiID
-                                                                                            );
-                                                                                            setSelectedDelete(
-                                                                                                item?.notiID
-                                                                                            );
-                                                                                            setDialogType(
-                                                                                                "product"
-                                                                                            );
-                                                                                        }}
-                                                                                        className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
-                                                                                    >
-                                                                                        <TbTrash className="text-red-700 text-2xl h-fit" />
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    ) : item?.Type ===
-                                                                      1 ? (
-                                                                        <div className="p-2 px-4 rounded-lg bg-[#fff3f3] border-2 border-[#db8c8c]">
-                                                                            {/* Bán thành phẩm */}
-                                                                            <div className="flex justify-between w-full">
-                                                                                <div className="flex flex-col w-full">
-                                                                                    <div className="flex items-center justify-between w-full py-1">
-                                                                                        <div className="">
-                                                                                            <div className="text-[#8D9194] font-medium text-xs uppercase">
-                                                                                                Thành
-                                                                                                phẩm
-                                                                                                rong
+                                                                                <div className="my-2 mt-1 border-b-2 border border-green-500"></div>
+
+                                                                                {/* Thành phẩm */}
+                                                                                <div className=" ">
+                                                                                    <div className="text-[#898c90] mb-0 font-medium text-xs uppercase">
+                                                                                        Thành
+                                                                                        phẩm
+                                                                                        rong
+                                                                                    </div>
+
+                                                                                    {transformDetail(
+                                                                                        item?.detail
+                                                                                    ).map(
+                                                                                        (
+                                                                                            detailItem,
+                                                                                            detailIndex
+                                                                                        ) => (
+                                                                                            <div className=" flex items-center justify-between">
+                                                                                                <div className="flex items-center space-x-2">
+                                                                                                    {/* <FaArrowRightLong /> */}
+                                                                                                    <FaDotCircle className="text-green-600 w-3 h-3" />
+                                                                                                    <div className="font-medium">
+                                                                                                        {
+                                                                                                            detailItem.ItemName
+                                                                                                        }
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div className="font-semibold px-2">
+                                                                                                    {parseInt(
+                                                                                                        detailItem.Qty_Type0
+                                                                                                    )}
+                                                                                                </div>
                                                                                             </div>
-                                                                                            <div className="text-[17px] font-semibold uppercase">
+                                                                                        )
+                                                                                    )}
+                                                                                </div>
+
+                                                                                <div className="my-2 mb-1 border-b border border-gray-200"></div>
+
+                                                                                <div className="py-1 flex justify-between space-x-5">
+                                                                                    <div className="">
+                                                                                        <div className="text-sm">
+                                                                                            Người
+                                                                                            giao:{" "}
+                                                                                            <span className="font-medium text-[#15803D]">
                                                                                                 {
-                                                                                                    item.ItemName
+                                                                                                    item.fullname
                                                                                                 }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div className="text-sm ">
+                                                                                            <span className="">
+                                                                                                Thời
+                                                                                                gian
+                                                                                                giao:{" "}
+                                                                                            </span>
+                                                                                            <span className="font-medium text-gray-600">
+                                                                                                {
+                                                                                                    item.CreatedAt
+                                                                                                }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div className="flex items-center gap-x-6">
+                                                                                        <button
+                                                                                            onClick={() => {
+                                                                                                onDeleteProcessingDialogOpen();
+                                                                                                console.log(
+                                                                                                    "Id Noti bị xóa:",
+                                                                                                    item?.notiID
+                                                                                                );
+                                                                                                setSelectedDelete(
+                                                                                                    item?.notiID
+                                                                                                );
+                                                                                                setDialogType(
+                                                                                                    "product"
+                                                                                                );
+                                                                                            }}
+                                                                                            className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
+                                                                                        >
+                                                                                            <TbTrash className="text-red-700 text-2xl h-fit" />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : item?.Type ===
+                                                                            1 ? (
+                                                                            <div className="p-2 px-4 rounded-lg bg-[#fff3f3] border-2 border-[#db8c8c]">
+                                                                                {/* Bán thành phẩm */}
+                                                                                <div className="flex justify-between w-full">
+                                                                                    <div className="flex flex-col w-full">
+                                                                                        <div className="flex items-center justify-between w-full py-1">
+                                                                                            <div className="">
+                                                                                                <div className="text-[#8D9194] font-medium text-xs uppercase">
+                                                                                                    Thành
+                                                                                                    phẩm
+                                                                                                    rong
+                                                                                                </div>
+                                                                                                <div className="text-[17px] font-semibold uppercase">
+                                                                                                    {
+                                                                                                        item.ItemName
+                                                                                                    }
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="text-[#801515] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
+                                                                                                {parseInt(
+                                                                                                    item.Quantity
+                                                                                                ) ||
+                                                                                                    0}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="text-[#801515] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
-                                                                                            {parseInt(
-                                                                                                item.Quantity
-                                                                                            ) ||
-                                                                                                0}
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div className="my-2 mb-1 border-b border border-gray-200"></div>
+
+                                                                                <div className="py-1 flex justify-between space-x-5">
+                                                                                    <div className="">
+                                                                                        <div className="text-sm">
+                                                                                            Người
+                                                                                            giao:{" "}
+                                                                                            <span className="font-medium text-[#801515]">
+                                                                                                {
+                                                                                                    item.fullname
+                                                                                                }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div className="text-sm ">
+                                                                                            <span className="">
+                                                                                                Thời
+                                                                                                gian
+                                                                                                giao:{" "}
+                                                                                            </span>
+                                                                                            <span className="font-medium text-gray-600">
+                                                                                                {
+                                                                                                    item.CreatedAt
+                                                                                                }
+                                                                                            </span>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
-                                                                            </div>
 
-                                                                            <div className="my-2 mb-1 border-b border border-gray-200"></div>
-
-                                                                            <div className="py-1 flex justify-between space-x-5">
-                                                                                <div className="">
-                                                                                    <div className="text-sm">
-                                                                                        Người
-                                                                                        giao:{" "}
-                                                                                        <span className="font-medium text-[#801515]">
-                                                                                            {
-                                                                                                item.fullname
-                                                                                            }
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div className="text-sm ">
-                                                                                        <span className="">
-                                                                                            Thời
-                                                                                            gian
-                                                                                            giao:{" "}
-                                                                                        </span>
-                                                                                        <span className="font-medium text-gray-600">
-                                                                                            {
-                                                                                                item.CreatedAt
-                                                                                            }
-                                                                                        </span>
+                                                                                    <div className="flex items-center gap-x-6">
+                                                                                        <button
+                                                                                            onClick={() => {
+                                                                                                onDeleteProcessingDialogOpen();
+                                                                                                console.log(
+                                                                                                    "Id Noti bị xóa:",
+                                                                                                    item?.notiID
+                                                                                                );
+                                                                                                setSelectedDelete(
+                                                                                                    item?.notiID
+                                                                                                );
+                                                                                                setDialogType(
+                                                                                                    "product"
+                                                                                                );
+                                                                                            }}
+                                                                                            className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
+                                                                                        >
+                                                                                            <TbTrash className="text-red-700 text-2xl h-fit" />
+                                                                                        </button>
                                                                                     </div>
                                                                                 </div>
-
-                                                                                <div className="flex items-center gap-x-6">
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            onDeleteProcessingDialogOpen();
-                                                                                            console.log(
-                                                                                                "Id Noti bị xóa:",
-                                                                                                item?.notiID
-                                                                                            );
-                                                                                            setSelectedDelete(
-                                                                                                item?.notiID
-                                                                                            );
-                                                                                            setDialogType(
-                                                                                                "product"
-                                                                                            );
-                                                                                        }}
-                                                                                        className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
-                                                                                    >
-                                                                                        <TbTrash className="text-red-700 text-2xl h-fit" />
-                                                                                    </button>
-                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    ) : null}
-                                                                </>
-                                                            )
-                                                        )}
+                                                                        ) : null}
+                                                                    </>
+                                                                )
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </>
-                                        )}
+                                                </>
+                                            )}
                                     </div>
                                 ) : (
                                     <>
@@ -2039,14 +2061,13 @@ const ItemInput = ({
                                                     .map((item, index) => (
                                                         <div
                                                             key={index}
-                                                            className={`${
-                                                                parseInt(
-                                                                    item.OnHand ||
-                                                                        0
-                                                                ) <= 0
-                                                                    ? "bg-gray-200"
-                                                                    : "bg-blue-100"
-                                                            } flex flex-col py-2  mb-6 rounded-xl`}
+                                                            className={`${parseInt(
+                                                                item.OnHand ||
+                                                                0
+                                                            ) <= 0
+                                                                ? "bg-gray-200"
+                                                                : "bg-blue-100"
+                                                                } flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
                                                                 <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
@@ -2059,15 +2080,15 @@ const ItemInput = ({
                                                                             {item.BaseQty.toString().includes(
                                                                                 "."
                                                                             ) && (
-                                                                                <span>
-                                                                                    {
-                                                                                        "-"
-                                                                                    }
-                                                                                    {Math.ceil(
-                                                                                        item.BaseQty
-                                                                                    )}
-                                                                                </span>
-                                                                            )}
+                                                                                    <span>
+                                                                                        {
+                                                                                            "-"
+                                                                                        }
+                                                                                        {Math.ceil(
+                                                                                            item.BaseQty
+                                                                                        )}
+                                                                                    </span>
+                                                                                )}
                                                                             ]
                                                                         </span>
                                                                         {
@@ -2076,29 +2097,28 @@ const ItemInput = ({
                                                                     </div>
                                                                     <div className="font-medium text-[15px]">
                                                                         {item.SubItemName ===
-                                                                        "Gỗ"
+                                                                            "Gỗ"
                                                                             ? "Nguyên liệu gỗ"
                                                                             : item.SubItemName ===
-                                                                                  null ||
-                                                                              item.SubItemName ===
-                                                                                  ""
-                                                                            ? "Nguyên vật liệu chưa xác định"
-                                                                            : item.SubItemName}
+                                                                                null ||
+                                                                                item.SubItemName ===
+                                                                                ""
+                                                                                ? "Nguyên vật liệu chưa xác định"
+                                                                                : item.SubItemName}
                                                                     </div>
                                                                 </div>
                                                                 <span
-                                                                    className={`${
-                                                                        parseInt(
-                                                                            item.OnHand ||
-                                                                                0
-                                                                        ) <= 0
-                                                                            ? "bg-gray-500"
-                                                                            : "bg-[#155979]"
-                                                                    } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
+                                                                    className={`${parseInt(
+                                                                        item.OnHand ||
+                                                                        0
+                                                                    ) <= 0
+                                                                        ? "bg-gray-500"
+                                                                        : "bg-[#155979]"
+                                                                        } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {parseInt(
                                                                         item.OnHand ||
-                                                                            0
+                                                                        0
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>
@@ -2112,11 +2132,11 @@ const ItemInput = ({
                                                 </Text>
                                                 <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                                     {selectedItemDetails?.maxQty >
-                                                    0
+                                                        0
                                                         ? parseInt(
-                                                              selectedItemDetails?.maxQty ||
-                                                                  0
-                                                          ).toLocaleString()
+                                                            selectedItemDetails?.maxQty ||
+                                                            0
+                                                        ).toLocaleString()
                                                         : 0}
                                                 </span>
                                             </div>
@@ -2129,7 +2149,7 @@ const ItemInput = ({
                                                     {formatNumber(
                                                         Number(
                                                             selectedItemDetails?.remainQty -
-                                                                selectedItemDetails?.WaitingConfirmQty
+                                                            selectedItemDetails?.WaitingConfirmQty
                                                         )
                                                     ) || 0}
                                                 </span>
@@ -2171,7 +2191,7 @@ const ItemInput = ({
                                                     .filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 0
                                                     )
                                                     ?.map((item, index) => (
@@ -2201,31 +2221,31 @@ const ItemInput = ({
                                                                         </Text>
                                                                         {selectedItemDetails?.CongDoan ==
                                                                             "DG" && (
-                                                                            <div className="flex text-sm">
-                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
-                                                                                    Số
-                                                                                    lượng
-                                                                                    đã
-                                                                                    đóng
-                                                                                    gói
-                                                                                    chờ
-                                                                                    giao:{" "}
-                                                                                </Text>
-                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
-                                                                                    Đã
-                                                                                    đóng
-                                                                                    gói
-                                                                                    chờ
-                                                                                    giao:{" "}
-                                                                                </Text>
-                                                                                <span className="ml-1 text-gray-600">
-                                                                                    {Number(
-                                                                                        item?.SLDG ||
+                                                                                <div className="flex text-sm">
+                                                                                    <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                        Số
+                                                                                        lượng
+                                                                                        đã
+                                                                                        đóng
+                                                                                        gói
+                                                                                        chờ
+                                                                                        giao:{" "}
+                                                                                    </Text>
+                                                                                    <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                        Đã
+                                                                                        đóng
+                                                                                        gói
+                                                                                        chờ
+                                                                                        giao:{" "}
+                                                                                    </Text>
+                                                                                    <span className="ml-1 text-gray-600">
+                                                                                        {Number(
+                                                                                            item?.SLDG ||
                                                                                             0
-                                                                                    )}
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
+                                                                                        )}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
                                                                         <div className="flex text-sm">
                                                                             <Text className=" font-medium text-gray-600">
                                                                                 Thời
@@ -2280,7 +2300,7 @@ const ItemInput = ({
                                             {selectedItemDetails?.CongDoan ===
                                                 "DG" &&
                                                 selectedItemDetails?.maxQty >
-                                                    0 && (
+                                                0 && (
                                                     <div className="">
                                                         <Box className="px-0">
                                                             <label className="mt-6 font-semibold">
@@ -2327,15 +2347,15 @@ const ItemInput = ({
                                                 </span>
                                                 {selectedItemDetails?.CongDoan !==
                                                     "SC" &&
-                                                selectedItemDetails?.CongDoan !==
+                                                    selectedItemDetails?.CongDoan !==
                                                     "XV" &&
-                                                selectedItemDetails?.maxQty <=
+                                                    selectedItemDetails?.maxQty <=
                                                     0 &&
-                                                (selectedItemDetails?.stocks
-                                                    ?.length !== 1 ||
-                                                    selectedItemDetails
-                                                        ?.stocks[0]
-                                                        ?.SubItemCode !==
+                                                    (selectedItemDetails?.stocks
+                                                        ?.length !== 1 ||
+                                                        selectedItemDetails
+                                                            ?.stocks[0]
+                                                            ?.SubItemCode !==
                                                         "MM010000178") ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
@@ -2345,8 +2365,8 @@ const ItemInput = ({
                                                         </div>
                                                     </div>
                                                 ) : selectedItemDetails?.remainQty -
-                                                      selectedItemDetails?.WaitingConfirmQty <=
-                                                  0 ? (
+                                                    selectedItemDetails?.WaitingConfirmQty <=
+                                                    0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
                                                         <BiSolidBadgeCheck className="w-6 h-6" />
                                                         <div className="text-white">
@@ -2409,9 +2429,9 @@ const ItemInput = ({
                                                                 selectedItemDetails?.notifications.filter(
                                                                     (notif) =>
                                                                         notif.confirm ===
-                                                                            0 &&
+                                                                        0 &&
                                                                         notif.type ===
-                                                                            1
+                                                                        1
                                                                 ).length || 0 // Đóng đúng cặp ở đây
                                                             )
                                                         )}
@@ -2424,13 +2444,13 @@ const ItemInput = ({
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     ) && (
                                                         <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
@@ -2444,14 +2464,14 @@ const ItemInput = ({
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
                                                     selectedItemDetails?.notifications
                                                         .filter(
                                                             (notif) =>
                                                                 notif.confirm ==
-                                                                    0 &&
+                                                                0 &&
                                                                 notif.type == 1
                                                         )
                                                         .map((item, index) => (
@@ -2472,7 +2492,7 @@ const ItemInput = ({
                                                                     {item?.loinhamay !==
                                                                         null &&
                                                                         item?.loinhamay !==
-                                                                            user.plant && (
+                                                                        user.plant && (
                                                                             <Text className="flex space-x-1 font-medium text-xs text-red-500 mb-1">
                                                                                 <MdOutlineSubdirectoryArrowRight />
                                                                                 <span className=" ">
@@ -2482,21 +2502,21 @@ const ItemInput = ({
                                                                                     nhà
                                                                                     máy{" "}
                                                                                     {item?.loinhamay ==
-                                                                                    "YS"
+                                                                                        "YS"
                                                                                         ? "Yên Sơn"
                                                                                         : item?.loinhamay ==
-                                                                                          "TH"
-                                                                                        ? "Thuận Hưng"
-                                                                                        : item?.loinhamay ==
-                                                                                          "TB"
-                                                                                        ? "Thái Bình"
-                                                                                        : item?.loinhamay ==
-                                                                                          "CH"
-                                                                                        ? "Chiêm Hóa"
-                                                                                        : item?.loinhamay ==
-                                                                                          "VF"
-                                                                                        ? "Viforex"
-                                                                                        : "không xác định"}
+                                                                                            "TH"
+                                                                                            ? "Thuận Hưng"
+                                                                                            : item?.loinhamay ==
+                                                                                                "TB"
+                                                                                                ? "Thái Bình"
+                                                                                                : item?.loinhamay ==
+                                                                                                    "CH"
+                                                                                                    ? "Chiêm Hóa"
+                                                                                                    : item?.loinhamay ==
+                                                                                                        "VF"
+                                                                                                        ? "Viforex"
+                                                                                                        : "không xác định"}
                                                                                 </span>
                                                                             </Text>
                                                                         )}
@@ -2644,12 +2664,11 @@ const ItemInput = ({
                                                             </div>
                                                             <div
                                                                 className={`mb-4 ml-3 text-gray-600 
-                                                                ${
-                                                                    selectedFaultItem.ItemCode ===
-                                                                    choosenItem.ItemChild
+                                                                ${selectedFaultItem.ItemCode ===
+                                                                        choosenItem.ItemChild
                                                                         ? "font-semibold text-gray-800 "
                                                                         : "text-gray-600"
-                                                                }`}
+                                                                    }`}
                                                                 key={index}
                                                             >
                                                                 <Radio
@@ -2696,7 +2715,7 @@ const ItemInput = ({
                                                             {selectedItemDetails?.CongDoan !==
                                                                 "SC" &&
                                                                 selectedItemDetails?.CongDoan !==
-                                                                    "XV" && (
+                                                                "XV" && (
                                                                     <>
                                                                         {" "}
                                                                         <div className="my-3 font-medium text-[15px] text-red-700">
@@ -2714,12 +2733,11 @@ const ItemInput = ({
                                                                                 index
                                                                             ) => (
                                                                                 <div
-                                                                                    className={`mb-4 ml-3  ${
-                                                                                        selectedFaultItem.SubItemCode ===
+                                                                                    className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode ===
                                                                                         item.SubItemCode
-                                                                                            ? "font-semibold text-gray-800 "
-                                                                                            : "text-gray-600"
-                                                                                    }`}
+                                                                                        ? "font-semibold text-gray-800 "
+                                                                                        : "text-gray-600"
+                                                                                        }`}
                                                                                     key={
                                                                                         index
                                                                                     }
@@ -2891,7 +2909,7 @@ const ItemInput = ({
                                             ) : (
                                                 <>
                                                     {filteredReturnedData.length >
-                                                    0 ? (
+                                                        0 ? (
                                                         <div>
                                                             <div className="text-orange-600 text-sm pb-2">
                                                                 Có{" "}
@@ -3039,14 +3057,14 @@ const ItemInput = ({
                             {["CBG", "VCN", "DAND"].some((permission) =>
                                 user.permissions.includes(permission)
                             ) && (
-                                <button
-                                    className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
-                                    type="button"
-                                    onClick={onAlertDialogOpen}
-                                >
-                                    Xác nhận
-                                </button>
-                            )}
+                                    <button
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        type="button"
+                                        onClick={onAlertDialogOpen}
+                                    >
+                                        Xác nhận
+                                    </button>
+                                )}
                         </div>
                     </ModalFooter>
                 </ModalContent>
@@ -3089,9 +3107,9 @@ const ItemInput = ({
                                                     .filter(
                                                         (data) =>
                                                             data.CompleQty !==
-                                                                "" ||
+                                                            "" ||
                                                             data.RejectQty !==
-                                                                ""
+                                                            ""
                                                     )
                                                     .map((data, index) => (
                                                         <div className="">
@@ -3144,7 +3162,7 @@ const ItemInput = ({
                             ) : (
                                 <>
                                     {(amount && amount !== "") ||
-                                    (faultyAmount && faultyAmount !== "") ? (
+                                        (faultyAmount && faultyAmount !== "") ? (
                                         <div className="space-y-1">
                                             {packagedAmount && (
                                                 <div className="text-yellow-700">
@@ -3236,8 +3254,8 @@ const ItemInput = ({
                                 {dialogType === "product"
                                     ? "Bạn chắc chắn muốn xoá số lượng đã giao chờ xác nhận?"
                                     : dialogType === "qc"
-                                    ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
-                                    : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
+                                        ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
+                                        : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">

@@ -71,6 +71,12 @@ function PlywoodFinishedGoodsReceipt() {
         onClose: onModalClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isModalStructureOpen,
+        onOpen: onModalStructureOpen,
+        onClose: onModalStructureClose,
+    } = useDisclosure();
+
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
@@ -87,6 +93,7 @@ function PlywoodFinishedGoodsReceipt() {
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedFactory, setSelectedFactory] = useState(null);
     const [isQualityCheck, setIsQualityCheck] = useState(false);
+    const [viewedStructureLSX, setViewedStructureLSX] = useState(null);
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -319,6 +326,14 @@ function PlywoodFinishedGoodsReceipt() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    const viewStructure = (e, lsx) => {
+        e.stopPropagation();
+
+        console.log("viewStructure", lsx);
+        setViewedStructureLSX(lsx);
+        onModalStructureOpen();
+    }
+
     return (
         <Layout>
             {/* Container */}
@@ -469,6 +484,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     isQualityCheck={isQualityCheck}
                                     onReceiptFromChild={handleReceiptFromChild}
                                     onRejectFromChild={handleRejectFromChild}
+                                    viewStructure={viewStructure}
                                 />
                             ))
                         ) : (
@@ -564,11 +580,10 @@ function PlywoodFinishedGoodsReceipt() {
                 </AlertDialogOverlay>
             </AlertDialog>
             <div
-                className={`progress-wrap fixed xl:right-12 lg:right-12 md:right-12 right-8 xl:bottom-12 lg:bottom-12 md:bottom-12 bottom-8 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${
-                    isActive
-                        ? "opacity-100 visible translate-y-0"
-                        : "opacity-0 invisible translate-y-4"
-                }`}
+                className={`progress-wrap fixed xl:right-12 lg:right-12 md:right-12 right-8 xl:bottom-12 lg:bottom-12 md:bottom-12 bottom-8 h-14 w-14 cursor-pointer rounded-full shadow-inner transition-all duration-200 z-50 bg-[#17506B] ${isActive
+                    ? "opacity-100 visible translate-y-0"
+                    : "opacity-0 invisible translate-y-4"
+                    }`}
                 onClick={scrollToTop}
             >
                 <svg
@@ -585,6 +600,50 @@ function PlywoodFinishedGoodsReceipt() {
                 </span>
             </div>
             {loading && <Loader />}
+
+            {/* Popup xem kết cấu ván công nghiệp theo lệnh sản xuất */}
+            {
+                viewedStructureLSX &&
+                <Modal
+                    isCentered
+                    isOpen={isModalStructureOpen}
+                    size="full"
+                    onClose={() => {
+                        onModalStructureClose();
+                    }}
+                    scrollBehavior="inside"
+                >
+                    <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                    <ModalContent>
+                        <ModalHeader className="!p-2.5 ">
+                            <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
+                                Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline">{viewedStructureLSX}</span>
+                            </h1>
+                        </ModalHeader>
+                        <ModalCloseButton />
+                        <div className="border-b-2 border-gray-200"></div>
+                        <ModalBody className="bg-gray-100 !p-4">
+                            <div className="flex gap-4 justify-center h-full">
+
+                            </div>
+                        </ModalBody>
+                        <ModalFooter className="flex flex-col !p-0 ">
+                            <div className="border-b-2 border-gray-100"></div>
+                            <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                                <button
+                                    onClick={() => {
+                                        setViewedStructureLSX(null);
+                                        onModalStructureClose();
+                                    }}
+                                    className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            }
         </Layout>
     );
 }
