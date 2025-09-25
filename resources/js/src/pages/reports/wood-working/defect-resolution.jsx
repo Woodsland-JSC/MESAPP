@@ -73,9 +73,6 @@ function DefectResolution() {
             listIdSelected.push(item.slId);
         });
 
-        console.log("rowSelected", rowSelected);
-
-
         let idGD = "";
         let idQC = "";
 

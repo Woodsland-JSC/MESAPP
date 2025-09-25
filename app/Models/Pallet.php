@@ -46,4 +46,9 @@ class Pallet extends Model
     {
         return $this->hasMany(pallet_details::class, 'palletID', 'palletID');
     }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'CreateBy', 'id');
+    }
 }
