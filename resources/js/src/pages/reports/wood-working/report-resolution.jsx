@@ -346,13 +346,13 @@ const ReportResolution = () => {
                                     <table className="w-full border-2 border-gray-400">
                                         <thead class="font-bold">
                                             <tr>
-                                                <th rowspan="3" colspan="1" class="w-48 border-r border-b border-gray-400 p-2 bg-gray-200 mx-auto">
+                                                <th rowspan="3" colspan="1" class="w-48 border-r border-b border-gray-400 bg-gray-200 mx-auto">
                                                     <img src={logo} alt="logo" class="mx-auto flex items-center justify-center w-24 h-24" />
                                                 </th>
-                                                <td rowspan="1" colspan="7" class="h-[20px] border-b border-gray-400 bg-gray-200 p-2 text-center font-bold text-base">
+                                                <td rowspan="1" colspan="7" class="border-b border-gray-400 bg-gray-200 text-center font-bold">
                                                     QUY TRÌNH KIỂM SOÁT SẢN PHẨM KHÔNG PHÙ HỢP
                                                 </td>
-                                                <td colspan="1" rowspan="6" class="w-[280px] text-lg border-b border-l bg-gray-200 border-gray-400 p-2 px-4 text-right font-bold">
+                                                <td colspan="1" rowspan="6" class="w-[280px] text-lg border-b border-l bg-gray-200 border-gray-400 px-4 text-right font-bold">
                                                     <div class="flex flex-col items-start">
                                                         <p>QT-05/BM-02</p>
                                                         <p>Ngày ban hành: 10/09/2018</p>
@@ -362,7 +362,7 @@ const ReportResolution = () => {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td rowspan="1" colspan="7" class="h-[20px] border-b text-base font-bold bg-gray-200 border-gray-400 p-2  text-center">
+                                                <td rowspan="1" colspan="7" class="border-b font-bold bg-gray-200 border-gray-400  text-center">
                                                     BIÊN BẢN XỬ LÝ SẢN PHẨM KHÔNG PHÙ HỢP
                                                 </td>
                                             </tr>
@@ -381,35 +381,35 @@ const ReportResolution = () => {
                                         }
                                     </div>
                                     <div>
-                                        <table className="w-full border-2 border-gray-400">
+                                        <table className="w-full border-2 border-gray-400 border-collapse table-fixed">
                                             <thead class="font-bold">
                                                 {/* INFO report */}
-                                                <tr className="bg-blue-200">
-                                                    <td className="w-[120px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                <tr className="">
+                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         CĐ báo lỗi
                                                     </td>
-                                                    <td className="w-[150px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Tên sản phẩm
                                                     </td>
-                                                    <td className="w-[150px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Loại lỗi
                                                     </td>
-                                                    <td className="w-[120px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Lệnh SX
                                                     </td>
-                                                    <td className="w-[50px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[50px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         ĐVT
                                                     </td>
-                                                    <td className="w-[120px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Số Lượng (T)
                                                     </td>
-                                                    <td className="w-[150px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Diễn giải
                                                     </td>
-                                                    <td className="w-[150px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Cách xử lý
                                                     </td>
-                                                    <td className="w-[120px] border-r border-b border-gray-400 p-2 text-center font-bold" >
+                                                    <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold" >
                                                         CĐ xử lý
                                                     </td>
                                                 </tr>
@@ -417,16 +417,16 @@ const ReportResolution = () => {
                                             <tbody>
                                                 {
                                                     reports.map((item, index) => (
-                                                        <tr key={index} className="bg-white !text-[12px]">
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.NoiBaoLoi}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.ItemName}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.LoiLoai}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.LSX}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1 text-center">{item.DVT}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1 text-center">{item.Quantity}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.LoiLoai}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.HXL}</td>
-                                                            <td className=" border-r border-b border-gray-400 p-1">{item.ToTT}</td>
+                                                        <tr key={index} className="bg-white !text-[13px]">
+                                                            <td className="border border-gray-400 break-words p-1">{item.NoiBaoLoi}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.ItemName}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.LoiLoai}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.LSX}</td>
+                                                            <td className="border border-gray-400 break-words p-1 text-center">{item.DVT}</td>
+                                                            <td className="border border-gray-400 break-words p-1 text-center">{item.Quantity}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.LoiLoai}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.HXL}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.ToTT}</td>
                                                         </tr>
                                                     ))
                                                 }
