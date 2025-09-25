@@ -70,3 +70,5 @@ export const FACTORIES = {
         label: "Thái Bình"
     }
 }
+
+export const VAN_CONG_NGHIEP = "VCN";

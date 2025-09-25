@@ -113,6 +113,8 @@ function DefectResolution() {
 
     const onSelectionChanged = useCallback((event) => {
         const selected = event.api.getSelectedRows();
+        console.log("selected", selected);
+
         setRowSelected(selected);
     }, []);
 
@@ -140,6 +142,7 @@ function DefectResolution() {
             );
             const formattedData = res.map((item) => ({
                 slId: item.slId,
+                reportResolutionId: item.reportResolutionId,
                 week: item.week,
                 root_cause: item.NguonLoi,
                 root_place: item.NoiBaoLoi,
@@ -206,10 +209,24 @@ function DefectResolution() {
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            headerCheckboxSelection: true,
             width: 50,
             pinned: 'left',
-            checkboxSelection: (params) => !params.node.footer,
+            checkboxSelection: (params) => {
+                if (params.node.group && !params.node.footer) {
+                    let show = false;
+
+                    let children = params.node.allLeafChildren;
+                    children.forEach(item => {
+                        if(item.data && item.data.reportResolutionId == null){
+                            show = true;
+                        }
+                    })
+
+                    return show;
+                } else {
+                    return !params.node.footer && !params?.data?.reportResolutionId;
+                }
+            },
             resizable: false
         },
         {
@@ -337,10 +354,28 @@ function DefectResolution() {
 
     const groupDisplayType = "multipleColumns";
     const getRowStyle = (params) => {
-        if (params.node.rowIndex % 2 === 0) {
-            return { background: "#F6F6F6" };
+        
+        if(!params.node.group) {
+            if(params.node.data && params.node.data.reportResolutionId && params.node.rowIndex % 2 === 0){
+                return { background: "#fdf2f8" };
+            }
+            if(params.node.data && params.node.data.reportResolutionId && params.node.rowIndex % 2 != 0) {
+                return { background: "#fce7f3" };
+            }
+
+            if(params.node.data && !params.node.data.reportResolutionId && params.node.rowIndex % 2 === 0){
+                return { background: "#F6F6F6" };
+            }
+
+            if(params.node.data && !params.node.data.reportResolutionId && params.node.rowIndex % 2 != 0){
+                return { background: "#ffffff" };
+            }
         }
-        return { background: "#ffffff" };
+        
+        // if (params.node.rowIndex % 2 === 0) {
+        //     return { background: "#F6F6F6" };
+        // }
+        // return { background: "#ffffff" };
     };
 
     const defaultColDef = useMemo(() => {

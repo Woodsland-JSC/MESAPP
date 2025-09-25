@@ -823,7 +823,7 @@ class ReportController extends Controller
         // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_cbg_baocaoxulyloi');
 
-        $query->whereNull('reportResolutionId');
+        // $query->whereNull('reportResolutionId');
 
         if ($branch) {
             $query->where('branch', $branch);
