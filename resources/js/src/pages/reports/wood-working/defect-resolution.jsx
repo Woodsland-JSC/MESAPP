@@ -32,6 +32,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import useAppContext from "../../../store/AppContext";
 import { FACTORIES } from "../../../shared/data";
+import Swal from "sweetalert2";
 
 function DefectResolution() {
     const navigate = useNavigate();
@@ -73,7 +74,7 @@ function DefectResolution() {
         });
 
         console.log("rowSelected", rowSelected);
-        
+
 
         let idGD = "";
         let idQC = "";
@@ -98,16 +99,25 @@ function DefectResolution() {
 
         try {
             setIsSubmitCreate(true)
-            await reportApi.createReportReSolution(data);
+            let res = await reportApi.createReportReSolution(data);
             toast.success("Tạo biên bản thành công.");
+
+            let id = `${res.bienbanCBG.report_resolution_factory}-QC-${Number(res.bienbanCBG.id).toString().padStart(6, '0')}`
+
+            Swal.fire(`Biên bản ${id} được tạo thành công.`);
             getReportData();
             setIsSubmitCreate(false)
-            setRowSelected([])
+            setRowSelected([]);
         } catch {
             toast.error("Đã xảy ra lỗi khi tạo biên bản.");
             setIsSubmitCreate(false)
         }
     }
+
+    const onSelectionChanged = useCallback((event) => {
+        const selected = event.api.getSelectedRows();
+        setRowSelected(selected);
+    }, []);
 
     const handleFactorySelect = async (factory) => {
         console.log("Nhà máy đang chọn là:", factory);
@@ -116,11 +126,6 @@ function DefectResolution() {
         setTeamData(null);
         setSelectedTeams([]);
     };
-
-    const onSelectionChanged = useCallback((event) => {
-        const selected = event.api.getSelectedRows();
-        setRowSelected(selected);
-    }, []);
 
     const getReportData = useCallback(async () => {
         let params = {

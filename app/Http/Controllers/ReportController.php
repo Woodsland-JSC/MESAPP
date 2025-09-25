@@ -1790,7 +1790,9 @@ class ReportController extends Controller
 
             DB::commit();
 
-            return response()->json($historySLs_updated);
+            return response()->json([
+                'bienbanCBG' => $bienbanCBG
+            ]);
         }catch (GlobalException $e ) {
             DB::rollBack();
             return response()->json(['error'=> 'Lỗi khi tạo biên bản' ],500);
