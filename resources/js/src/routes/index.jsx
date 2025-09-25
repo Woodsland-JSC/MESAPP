@@ -91,6 +91,7 @@ import BinWarehouseTransfer from "../pages/workspace/goods-management/bin-wareho
 // Kichen cabinet
 import KitchenCabinetFinishedGoodsReceipt from "../pages/workspace/kitchen-cabinet/finished-goods-receipt";
 import ReportResolution from "../pages/reports/wood-working/report-resolution";
+import ProductionOrder from "../pages/reports/plywoods/production-order";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -510,6 +511,14 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
+                     {/* <Route
+                        path="/reports/plywoods/production-order"
+                        element={
+                            <ProtectedRoute>
+                                <ProductionOrder />
+                            </ProtectedRoute>
+                        }
+                    /> */}
 
                     {/* <Route
                         path="/reports/defect-quantity"

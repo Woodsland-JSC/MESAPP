@@ -226,7 +226,7 @@ class ReportController extends Controller
             odbc_close($conDB);
 
             // Lấy dữ liệu pallet với điều kiện lọc
-            $pallets = Pallet::with(['details'])
+            $pallets = Pallet::with(['details', 'createdBy'])
                 ->where('factory', $factory)
                 ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
@@ -247,7 +247,9 @@ class ReportController extends Controller
                         'qty' => $detail->Qty_T,
                         'mass' => round($detail->Qty, 4), // Làm tròn 4 chữ số thập phân
                         'reason' => $pallet->LyDo,
-                        'status' => empty($pallet->RanBy) ? 'Chưa sấy' : 'Đang sấy'
+                        'status' => empty($pallet->RanBy) ? 'Chưa sấy' : 'Đang sấy',
+                        'created_username' => $pallet->createdBy->username,
+                        'stacking_time' => $pallet->stacking_time
                     ];
                 }
             }
@@ -1760,11 +1762,12 @@ class ReportController extends Controller
         return response()->json($updatedData);
     }
 
-    
-    public function create_report_solution(Request $request) {
+
+    public function create_report_solution(Request $request)
+    {
         $data = $request->all();
 
-        if(!isset($data['listIdSelected']) && !isset($data['factory'])) {
+        if (!isset($data['listIdSelected']) && !isset($data['factory'])) {
             return response()->json(['error' => 'Thiếu thông tin tạo biên bản'], 422);
         }
 
@@ -1780,7 +1783,7 @@ class ReportController extends Controller
                 'id_QC' => $request->idQC
             ]);
 
-            if(!$bienbanCBG){
+            if (!$bienbanCBG) {
                 return response()->json(['error' => 'Chưa tạo được biên bản'], 500);
             }
 
@@ -1793,49 +1796,51 @@ class ReportController extends Controller
             return response()->json([
                 'bienbanCBG' => $bienbanCBG
             ]);
-        }catch (GlobalException $e ) {
+        } catch (GlobalException $e) {
             DB::rollBack();
-            return response()->json(['error'=> 'Lỗi khi tạo biên bản' ],500);
+            return response()->json(['error' => 'Lỗi khi tạo biên bản'], 500);
         }
     }
 
-    public function get_report_solution_by_factory(Request $request){
+    public function get_report_solution_by_factory(Request $request)
+    {
         $factory = $request->factory;
 
-        if(!isset($factory)) {
+        if (!isset($factory)) {
             return response()->json(['error' => 'Thiếu thông tin nhà máy'],  500);
         }
 
         $results = DB::table('bien_ban_xu_ly_loi_cbg as B')
-        ->where('B.report_resolution_factory', '=', $factory)
-        ->leftjoin('users as U', 'B.created_by', '=', 'U.id')
-        ->leftjoin('users as U1', 'B.id_GD', '=', 'U1.id')
-        ->leftjoin('users as U2', 'B.id_QC', '=', 'U2.id')
-        ->select(
-            'B.id', 
-            'B.report_resolution_factory',
-            'B.created_by',
-            'B.created_at',
-            'U.first_name',
-            'U.last_name',
-            'U1.id as idGD',
-            'U2.id as idQC',
-            'U1.first_name as firstNameGD',
-            'U1.last_name as lastNameGD',
-            'U2.first_name as firstNameQC',
-            'U2.last_name as lastNameQC'
-        )
-        ->orderByDesc('B.id')
-        ->get();
+            ->where('B.report_resolution_factory', '=', $factory)
+            ->leftjoin('users as U', 'B.created_by', '=', 'U.id')
+            ->leftjoin('users as U1', 'B.id_GD', '=', 'U1.id')
+            ->leftjoin('users as U2', 'B.id_QC', '=', 'U2.id')
+            ->select(
+                'B.id',
+                'B.report_resolution_factory',
+                'B.created_by',
+                'B.created_at',
+                'U.first_name',
+                'U.last_name',
+                'U1.id as idGD',
+                'U2.id as idQC',
+                'U1.first_name as firstNameGD',
+                'U1.last_name as lastNameGD',
+                'U2.first_name as firstNameQC',
+                'U2.last_name as lastNameQC'
+            )
+            ->orderByDesc('B.id')
+            ->get();
 
         // ::select('category')->distinct()->get();
         return response()->json($results);
     }
 
-    public function get_list_report_by_report_resolution_id(Request $request){
+    public function get_list_report_by_report_resolution_id(Request $request)
+    {
         $report_resolution_id = $request->report_resolution_id;
 
-        if(!isset($report_resolution_id)) {
+        if (!isset($report_resolution_id)) {
             return response()->json(['error' => 'Thiếu thông tin '], 500);
         }
 
@@ -1844,9 +1849,9 @@ class ReportController extends Controller
         // Start the query and add conditions based on the request inputs
         $query = DB::table('gt_cbg_baocaoxulyloi');
 
-        $data = $query->where('reportResolutionId', '=' , $report_resolution_id)
-        ->orderByDesc('reportResolutionId')
-        ->get();
+        $data = $query->where('reportResolutionId', '=', $report_resolution_id)
+            ->orderByDesc('reportResolutionId')
+            ->get();
 
         return response()->json($data);
     }

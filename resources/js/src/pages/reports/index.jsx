@@ -267,6 +267,13 @@ const VCNReports = [
     //     priority: false,
     //     responsive: false,
     // },
+    // {
+    //     id: "0005",
+    //     name: "Báo cáo Lệnh sản xuất",
+    //     link: "/reports/plywoods/production-order",
+    //     description:
+    //         "Xem chi tiết lệnh sản xuất VCN",
+    // },
 
 ];
 

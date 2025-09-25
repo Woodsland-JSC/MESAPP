@@ -81,20 +81,65 @@ function DryingQueueReport() {
                 params.to_date,
                 params.plant
             );
-            const formattedData = res.map((item) => ({
-                created_at: item.created_at,
-                code: item.code,
-                ma_lo: item.ma_lo,
-                item_code: item.item_code,
-                item_name: item.item_name,
-                thickness: parseInt(item.day),
-                width: parseInt(item.rong),
-                height: parseInt(item.dai),
-                qty: parseInt(item.qty),
-                mass: item.mass,
-                reason: item.reason,
-                status: item.status,
-            }));
+            const formattedData = res.map((item) => {
+                let khoiLuongTinhThuong = 0;
+                let dgnc = 99500;
+                let heSoQuyDoi = 1.35;
+                let quyLuong = 0;
+
+                if (item.day <= 16) {
+
+                }
+
+                if (item.day <= 21 && item.dai < 800) {
+                    heSoQuyDoi = 1.2
+                    dgnc = 88400;
+                }
+
+                if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
+                    heSoQuyDoi = 1;
+                    dgnc = 73700;
+                }
+
+                if (item.day <= 21 && item.dai >= 800) {
+                    heSoQuyDoi = 1;
+                    dgnc = 73700;
+                }
+
+                if (item.day > 25) {
+                    heSoQuyDoi = 0.85;
+                    dgnc = 62600;
+                }
+
+                if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
+                    heSoQuyDoi = 0.85;
+                    dgnc = 62600;
+                }
+
+                // Tính toán
+                khoiLuongTinhThuong = item.mass * heSoQuyDoi;
+                quyLuong = item.mass * dgnc;
+
+                return {
+                    created_at: item.created_at,
+                    code: item.code,
+                    ma_lo: item.ma_lo,
+                    item_code: item.item_code,
+                    item_name: item.item_name,
+                    thickness: parseInt(item.day),
+                    width: parseInt(item.rong),
+                    height: parseInt(item.dai),
+                    qty: parseInt(item.qty),
+                    mass: item.mass,
+                    reason: item.reason,
+                    status: item.status,
+                    mnv: item.created_username,
+                    khoiLuongTinhThuong,
+                    dgnc,
+                    quyLuong,
+                    stacking_time: item.stacking_time ?? ""
+                }
+            });
             setIsDataReportLoading(false);
             setRowData(formattedData);
             setReportData(res);
@@ -142,6 +187,13 @@ function DryingQueueReport() {
             headerName: "Ngày xếp",
             field: "created_at",
             width: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "MNV",
+            field: "mnv",
+            width: 100,
             suppressHeaderMenuButton: true,
             filter: true,
         },
@@ -215,6 +267,42 @@ function DryingQueueReport() {
             headerComponentParams: { displayName: "Khối lượng (m3)" },
         },
         {
+            headerName: "Khối lượng tính thưởng",
+            field: "khoiLuongTinhThuong",
+            width: 250,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            }
+        },
+        {
+            headerName: "Đơn giá",
+            field: "dgnc",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            },
+            filter: true,
+        },
+        {
+            headerName: "Quỹ lương",
+            field: "quyLuong",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? Math.round(params.value).toLocaleString() : "0";
+            }
+        },
+        {
+            headerName: "Thời gian xếp(phút)",
+            field: "stacking_time",
+            width: 150,
+            valueFormatter: (params) => {
+                return params.value ? Math.round(params.value).toLocaleString() : "0";
+            }
+        },
+        {
             headerName: "Mục đích sấy",
             field: "reason",
             width: 150,
@@ -233,11 +321,10 @@ function DryingQueueReport() {
 
     const FactoryOption = ({ value, label }) => (
         <div
-            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${
-                selectedFactory === value
-                    ? "border-[#86ABBE] bg-[#eaf8ff]"
-                    : "border-gray-300"
-            }`}
+            className={`group hover:border-[#86ABBE] hover:bg-[#eaf8ff] flex items-center justify-center space-x-2 text-base text-center rounded-3xl border-2 p-1.5 px-3 pl-0 w-full cursor-pointer active:scale-[.92] active:duration-75 transition-all ${selectedFactory === value
+                ? "border-[#86ABBE] bg-[#eaf8ff]"
+                : "border-gray-300"
+                }`}
             onClick={() => handleFactorySelect(value)}
         >
             {selectedFactory === value ? (
@@ -246,11 +333,10 @@ function DryingQueueReport() {
                 <IoMdRadioButtonOff className="w-5 h-6 text-gray-400 group-hover:text-[#17506B]" />
             )}
             <div
-                className={`${
-                    selectedFactory === value
-                        ? "text-[#17506B] font-medium"
-                        : "text-gray-400 group-hover:text-[#17506B]"
-                }`}
+                className={`${selectedFactory === value
+                    ? "text-[#17506B] font-medium"
+                    : "text-gray-400 group-hover:text-[#17506B]"
+                    }`}
             >
                 {label}
             </div>
