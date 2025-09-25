@@ -113,9 +113,9 @@ function DefectResolution() {
 
     const onSelectionChanged = useCallback((event) => {
         const selected = event.api.getSelectedRows();
-        console.log("selected", selected);
+        let _selected = selected.filter(item => item.reportResolutionId == null);
 
-        setRowSelected(selected);
+        setRowSelected(_selected);
     }, []);
 
     const handleFactorySelect = async (factory) => {
