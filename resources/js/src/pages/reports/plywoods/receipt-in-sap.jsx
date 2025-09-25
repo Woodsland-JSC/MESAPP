@@ -89,7 +89,7 @@ function ReceiptInSapReportVCN() {
     const handleFactorySelect = async (factory) => {
         setSelectedFactory(factory);
         setReportData(null);
-        setTeamData(null);
+        setTeamData([]);
         setSelectedTeams([]);
         await getTeamData(factory);
     };
@@ -130,7 +130,7 @@ function ReceiptInSapReportVCN() {
         setSelectAll((prevSelectAll) => {
             const newSelectAll = !prevSelectAll;
             if (newSelectAll) {
-                const allTeamCodes = teamData.map((item) => item.Code);
+                const allTeamCodes = teamData?.map((item) => item.Code);
                 setSelectedTeams([...new Set(allTeamCodes)]);
             } else {
                 setSelectedTeams([]);
@@ -794,15 +794,6 @@ function ReceiptInSapReportVCN() {
                                             ))}
                                     </div>
                                 </div>
-                                {/* <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption value="YS" label="Yên Sơn" />
-                                </div>
-                                <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="TB"
-                                        label="Thái Bình"
-                                    />
-                                </div> */}
                             </div>
                         </div>
 
@@ -857,8 +848,7 @@ function ReceiptInSapReportVCN() {
                                                         <div className="text-[#155979] uppercase font-medium">
                                                             {stage.Name}
                                                         </div>
-                                                        {teamData
-                                                            ?.filter(
+                                                        {teamData?.filter(
                                                                 (item) =>
                                                                     item.CDOAN ===
                                                                     stage.Code

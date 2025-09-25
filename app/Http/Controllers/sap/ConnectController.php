@@ -11,9 +11,8 @@ class ConnectController extends Controller
     // function connect to SAP HANA DATABASE
     function connect_sap()
     {
-
         try {
-            $host = '192.168.1.205:30015';
+            $host = 'sap.woodsland.com.vn:30015';
             $driver = '';
             if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
                 $driver = 'HDBODBC';

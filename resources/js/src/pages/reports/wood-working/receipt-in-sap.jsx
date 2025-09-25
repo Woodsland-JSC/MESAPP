@@ -83,7 +83,7 @@ function ReceiptInSapReportCBG() {
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
         setReportData(null);
-        setTeamData(null);
+        setTeamData([]);
         setSelectedTeams([]);
         await getTeamData(factory);
     };
@@ -93,7 +93,7 @@ function ReceiptInSapReportCBG() {
         try {
             const res = await reportApi.getTeamByFactory(param, "CBG");
             setIsTeamLoading(false);
-            setTeamData(res);
+            setTeamData(res || []);
             setSelectAll(false);
         } catch (error) {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
@@ -718,7 +718,7 @@ function ReceiptInSapReportCBG() {
                                                     Runnen
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "RN"
                                                     )
@@ -750,7 +750,7 @@ function ReceiptInSapReportCBG() {
                                                     Sơ chế
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "SC"
                                                     )
@@ -782,7 +782,7 @@ function ReceiptInSapReportCBG() {
                                                     Tinh chế
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "TC"
                                                     )
@@ -814,7 +814,7 @@ function ReceiptInSapReportCBG() {
                                                     Hoàn thiện
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "HT"
                                                     )
@@ -846,7 +846,7 @@ function ReceiptInSapReportCBG() {
                                                     Đóng gói
                                                 </div>
                                                 {teamData
-                                                    .filter(
+                                                    ?.filter(
                                                         (item) =>
                                                             item.CDOAN === "DG"
                                                     )
