@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "../../../layouts/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { HiPlus, HiArrowLeft } from "react-icons/hi";
@@ -52,6 +52,12 @@ import { BiConfused } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowUp } from "react-icons/fa";
 import { layKetCauVCNTheoLSX } from "../../../api/vcn.api";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-enterprise";
+// import "ag-grid-charts-enterprise";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 
 function PlywoodFinishedGoodsReceipt() {
     const { user } = useAppContext();
@@ -96,7 +102,6 @@ function PlywoodFinishedGoodsReceipt() {
     const [isQualityCheck, setIsQualityCheck] = useState(false);
     const [viewedStructureLSX, setViewedStructureLSX] = useState({
         lsx: null,
-        data: null,
         detail: []
     });
 
@@ -337,21 +342,148 @@ function PlywoodFinishedGoodsReceipt() {
 
             let res = await layKetCauVCNTheoLSX(lsx);
 
+            let formatData = [];
+            res.data_ket_cau.forEach((item, index) => {
+                const obj = {
+                    code: item.Code,
+                    name: item.Name,
+                    uGridH: item.U_GRID_H,
+                    uFac: item.U_FAC,
+                    uLlsx: item.U_LLSX,
+                    itemCodeH: item.ItemCodeH,
+                    itemNameH: item.ItemNameH,
+                    date: item.U_Date,
+                    itemCodeL: item.ItemCodeL,
+                    itemNameL: item.ItemNameL,
+                    uKetCau: item.U_KetCau,
+                    uSoLop: item.U_SoLop,
+                    uCachX: item.U_CachX,
+                    uDoDay: item.U_DoDay,
+                    uLoaiG: item.U_LoaiG,
+                    uTiDay: item.U_TIDay,
+                    uTiRong: item.U_TIRong,
+                    uTiDai: item.U_TIDai
+                };
+                formatData.push(obj);
+            })
+
             setViewedStructureLSX({
                 lsx,
-                data: res.data,
-                detail: res.detail
+                detail: formatData
             });
             onModalStructureOpen();
         } catch (error) {
             toast.error("Lỗi khi lấy kết cấu.")
             setViewedStructureLSX({
                 lsx: null,
-                data: null,
                 detail: null
             });
         }
     }
+
+    const [agGridState] = useState({
+        columns: [
+            {
+                headerName: "Mã kết cấu",
+                field: "code",
+                width: 150,
+                suppressHeaderMenuButton: true,
+                rowGroup: true,
+                filter: true,
+                sort: "asc",
+                pinned: "left",
+                hide: true,
+            },
+            {
+                headerName: "Ngày áp dụng",
+                field: "date",
+                width: 150,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.date : "";
+                    }
+                    return ""
+                },
+                valueFormatter: (params) => {
+                    if (!params.value) return "";
+                    const d = new Date(params.value);
+                    return d.toLocaleDateString("vi-VN");
+                },
+                suppressHeaderMenuButton: true,
+            },
+            {
+                headerName: "Nhà máy",
+                width: 150,
+                field: "uFac",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Mã SP",
+                width: 150,
+                field: "itemCodeL",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Tên SP",
+                width: 150,
+                field: "itemNameL",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Kết cấu",
+                width: 150,
+                field: "uKetCau",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Số lớp",
+                width: 150,
+                field: "uSoLop",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Cách xếp",
+                width: 150,
+                field: "uCachX",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Độ dày",
+                width: 150,
+                field: "uDoDay",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            },
+            {
+                headerName: "Loại gỗ",
+                width: 150,
+                field: "uLoaiG",
+                suppressHeaderMenuButton: true,
+                filter: true,
+            }
+
+        ],
+        groupDisplayType: "multipleColumns",
+        getRowStyle: (params) => {
+            if (params.node.group) {
+                return { backgroundColor: "#ffffff" }; // màu group row
+            }
+            if (params.node.rowIndex % 2 === 0) {
+                return { backgroundColor: "#ffffff" }; // zebra stripe
+            }
+            return { backgroundColor: "#ffffff" };
+        },
+        autoGroupColumnDef: {
+            minWidth: 300,
+        }
+    });
 
     return (
         <Layout>
@@ -628,6 +760,10 @@ function PlywoodFinishedGoodsReceipt() {
                     isOpen={isModalStructureOpen}
                     size="full"
                     onClose={() => {
+                        setViewedStructureLSX({
+                            detail: [],
+                            lsx: null
+                        });
                         onModalStructureClose();
                     }}
                     scrollBehavior="inside"
@@ -641,119 +777,26 @@ function PlywoodFinishedGoodsReceipt() {
                         </ModalHeader>
                         <ModalCloseButton />
                         <div className="border-b-2 border-gray-200"></div>
-                        <ModalBody className="bg-gray-100 !p-4 flex flex-col gap-y-3">
+                        <ModalBody className="bg-gray-100 !p-10 flex flex-col">
                             {
-                                viewedStructureLSX.data ? (
+                                viewedStructureLSX.detail ? (
                                     <>
-                                        <div className="flex flex-col gap-4 justify-center h-full w-full px-10">
-                                            <div>
-                                                <span className="font-bold text-[#17506B] text-[20px]">THÔNG TIN</span>
-                                            </div>
-                                            <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] xl:mx-0 md:mx-0 lg:mx-0 mx-3 bg-white w-full">
-                                                <div className="flex flex-col justify-start px-3">
-                                                    <label className="font-medium uppercase text-sm text-gray-400">
-                                                        Nhóm LSX
-                                                    </label>
-                                                    <span className="text-[13px] font-bold">
-                                                        {viewedStructureLSX.lsx}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col justify-start px-3">
-                                                    <label className="font-medium uppercase text-sm text-gray-400">
-                                                        Khối
-                                                    </label>
-                                                    <span className="text-[13px] font-bold">
-                                                        {viewedStructureLSX?.data?.U_LLSX ?? ""}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col justify-start px-3">
-                                                    <label className="font-medium uppercase text-sm text-gray-400">
-                                                        Tên SP
-                                                    </label>
-                                                    <span className="text-[13px] font-bold">
-                                                        {viewedStructureLSX?.data?.Name ?? ""}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col justify-start px-3">
-                                                    <label className="font-medium uppercase text-sm text-gray-400">
-                                                        Nhà máy
-                                                    </label>
-                                                    <span className="text-[13px] font-bold">
-                                                        {viewedStructureLSX?.data?.U_FAC ?? ""}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col justify-start px-3">
-                                                    <label className="font-medium uppercase text-sm text-gray-400">
-                                                        Mã Sản phẩm
-                                                    </label>
-                                                    <span className="text-[13px] font-bold">
-                                                        {viewedStructureLSX?.data?.U_ItemCode ?? "-"}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                        <div
+                                            id="grid-ket-cau-vcn"
+                                            style={{
+                                                height: 630,
+                                                fontSize: 16,
+                                                width: "100%",
+                                            }}
+                                            className="ag-theme-quartz">
+                                            <AgGridReact
+                                                rowData={viewedStructureLSX.detail}
+                                                columnDefs={agGridState.columns}
+                                                autoGroupColumnDef={agGridState.autoGroupColumnDef}
+                                                groupDisplayType={agGridState.groupDisplayType}
+                                                getRowStyle={agGridState.getRowStyle}
+                                            />
                                         </div>
-
-                                        {
-                                            viewedStructureLSX.detail.length > 0 ? (
-                                                <div className="flex flex-col gap-4 justify-center h-full w-full px-10">
-                                                    <div>
-                                                        <span className="font-bold text-[#17506B] text-[20px]">CHI TIẾT KẾT CẤU</span>
-                                                    </div>
-                                                    <div className="flex justify-between border-2 divide-x-2 border-[#DADADA] xl:mx-0 md:mx-0 lg:mx-0 mx-3  w-full">
-                                                        <table className="w-full border-collapse table-fixed">
-                                                            <thead class="font-bold">
-                                                                <tr className="bg-white">
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r border-[#DADADA] border-b">
-                                                                        Tên sản phẩm
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Mã sản phẩm
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Kết cấu
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Số lớp
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Cách xếp
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Độ dày
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-r  border-[#DADADA] border-b">
-                                                                        Loại gỗ
-                                                                    </td>
-                                                                    <td className="p-2 h-[48px] text-center font-bold border-[#DADADA] border-b">
-                                                                        Quy cách
-                                                                    </td>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {
-                                                                    viewedStructureLSX.detail.map((item, index) => (
-                                                                        <tr key={index} className="bg-white">
-                                                                            <td className="break-words border p-1 text-center">{item?.U_ItemName ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_ItemCode ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_KetCau ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_SoLop ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_CachX ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_DoDay ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{item?.U_LoaiG ?? '-'}</td>
-                                                                            <td className="break-words border p-1 text-center">{`${Number(item.U_TIDay)}x${Number(item.U_TIRong)}x${Number(item.U_TIDai)}`}</td>
-                                                                        </tr>
-                                                                    ))
-                                                                }
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex w-full h-full justify-center items-center text-[20px]">
-                                                    Không có dữ liệu kết cấu
-                                                </div>
-                                            )
-                                        }
                                     </>
                                 ) : (
                                     <div className="flex w-full h-full justify-center items-center text-[20px]">
@@ -768,7 +811,6 @@ function PlywoodFinishedGoodsReceipt() {
                                 <button
                                     onClick={() => {
                                         setViewedStructureLSX({
-                                            data: null,
                                             detail: [],
                                             lsx: null
                                         });
