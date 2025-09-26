@@ -215,7 +215,7 @@ const ReportResolution = () => {
                         <div>Giám đốc sản xuất</div>
                     </div>
                     <div className="mt-3 mb-3">
-                        <img className="mx-auto" src={new URL(`../../../assets/signature/${currentReportSelected.idGD}.png`, import.meta.url).href} alt="giam-doc-sx-chu-ky" crossOrigin="anonymous" />
+                        <img className="mx-auto" width="80" src={new URL(`../../../assets/signature/${currentReportSelected.idGD}.png`, import.meta.url).href} alt="giam-doc-sx-chu-ky" crossOrigin="anonymous" />
                     </div>
                     <div>
                         <div>{currentReportSelected?.firstNameGD + " " + currentReportSelected?.lastNameGD}</div>
@@ -229,7 +229,7 @@ const ReportResolution = () => {
                         <div>Trưởng bộ phận QC</div>
                     </div>
                     <div className="mt-3 mb-3">
-                        <img className="mx-auto" src={new URL(`../../../assets/signature/${currentReportSelected.idQC}.png`, import.meta.url).href} alt="truong-qc-chu-ky" crossOrigin="anonymous" />
+                        <img className="mx-auto" width="80" src={new URL(`../../../assets/signature/${currentReportSelected.idQC}.png`, import.meta.url).href} alt="truong-qc-chu-ky" crossOrigin="anonymous" />
                     </div>
                     <div>
                         <div>{currentReportSelected.firstNameQC + " " + currentReportSelected.lastNameQC }</div>
@@ -426,7 +426,7 @@ const ReportResolution = () => {
                                                             <td className="border border-gray-400 break-words p-1 text-center">{item.Quantity}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.LoiLoai}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.HXL}</td>
-                                                            <td className="border border-gray-400 break-words p-1">{item.ToTT}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.ToChuyenVe}</td>
                                                         </tr>
                                                     ))
                                                 }
