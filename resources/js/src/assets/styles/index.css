@@ -503,3 +503,32 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     break-inside: avoid;      /* chuẩn mới */
   }
 }
+
+#grid-ket-cau-vcn .ag-row.ag-row-last:not(.ag-row-group) {
+    background-color: #FFFFFF !important;
+}
+
+#grid-ket-cau-vcn .ag-header-cell{
+    background-color: #17506B;
+    color: #FFFFFF;
+}
+
+#grid-ket-cau-vcn .ag-icon-menu-alt{
+    color: #FFFFFF;
+}
+
+#grid-ket-cau-vcn .ag-icon-asc{
+    color: #FFFFFF;
+}
+
+#grid-ket-cau-vcn .ag-icon-desc{
+    color: #FFFFFF;
+}
+
+#grid-ket-cau-vcn .ag-icon-filter{
+    color: #FFFFFF;
+}
+
+#grid-ket-cau-vcn .ag-header-cell-resize::after{
+    color: #FFFFFF !important;
+}

@@ -3304,16 +3304,15 @@ class VCNController extends Controller
             ], 500);
         }
 
-        $result = $ketCauVcnService->lay_ket_cau_h_theo_lsx($lsx);
-        $detail = [];
+        $result = $ketCauVcnService->getStructureByLSX($lsx);
+        // $detail = [];
 
-        if ($result != null) {
-            $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result['Code']);
-        }
+        // if ($result != null) {
+        //     $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result['Code']);
+        // }
 
         return response()->json([
-            'data' => $result ?  $result : null,
-            'detail' => $detail
+            'data_ket_cau' => $result,
         ], 200);
     }
 }
