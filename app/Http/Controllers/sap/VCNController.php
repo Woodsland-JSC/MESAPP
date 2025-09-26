@@ -3307,12 +3307,12 @@ class VCNController extends Controller
         $result = $ketCauVcnService->lay_ket_cau_h_theo_lsx($lsx);
         $detail = [];
 
-        if (count($result) > 0) {
-            $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result[0]['Code']);
+        if ($result != null) {
+            $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result['Code']);
         }
 
         return response()->json([
-            'data' => count($result) > 0 ?  $result[0] : null,
+            'data' => $result ?  $result : null,
             'detail' => $detail
         ], 200);
     }

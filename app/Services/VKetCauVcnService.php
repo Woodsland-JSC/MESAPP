@@ -25,7 +25,7 @@ class VKetCauVcnService
     public function lay_ket_cau_h_theo_lsx(String $lsx)
     {
         try {
-            $result = $this->hanaService->select($this->SQL_KET_CAU_H_THEO_LSX, [$lsx]);
+            $result = $this->hanaService->selectOne($this->SQL_KET_CAU_H_THEO_LSX, [$lsx]);
             return $result;
         } catch (Exception $th) {
             return response()->json([

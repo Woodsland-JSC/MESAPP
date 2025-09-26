@@ -40,6 +40,26 @@ class HanaConnection extends Connection
         }
     }
 
+    public function selectOne($query, $bindings = [], $useReadPdo = true){
+        try {
+            $stmt = odbc_prepare($this->odbc, $query);
+
+            if (! $stmt) {
+                $this->throwException(odbc_errormsg($this->odbc));
+            }
+
+            if (! odbc_execute($stmt, $bindings)) {
+                $this->throwException(odbc_errormsg($this->odbc));
+            }
+
+            $row = odbc_fetch_array($stmt);
+
+            return $row ?: null;
+        } catch (Exception $e) {
+            $this->throwException($e->getMessage());
+        }
+    }
+
     public function statement($query, $bindings = [])
     {
         try {

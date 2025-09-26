@@ -28,4 +28,8 @@ class HanaService
     {
         return $this->connection->statement($query, $bindings);
     }
+
+    public function selectOne(string $query, array $bindings = []){
+        return $this->connection->selectOne($query, $bindings);
+    }
 }
