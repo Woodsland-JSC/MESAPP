@@ -83,7 +83,7 @@ FROM (
     JOIN `pallet_details` `b` ON `b`.`palletID` = `a`.`palletID`
     LEFT JOIN `users` `u` ON `a`.`CreateBy` = `u`.`id`
     JOIN `plan_detail` `c` ON `c`.`pallet` = `a`.`palletID`
-    JOIN `plandryings` `d` ON `c`.`PlanID` = `d`.`PlanID`
+    JOIN `planDryings` `d` ON `c`.`PlanID` = `d`.`PlanID`
     WHERE `a`.`LoadedBy` IS NOT NULL
       AND `d`.`Status` <> 2
 
@@ -106,7 +106,7 @@ FROM (
     JOIN `pallet_details` `b` ON `b`.`palletID` = `a`.`palletID`
     LEFT JOIN `users` `u` ON `a`.`CreateBy` = `u`.`id`
     JOIN `plan_detail` `c` ON `c`.`pallet` = `a`.`palletID`
-    JOIN `plandryings` `d` ON `c`.`PlanID` = `d`.`PlanID`
+    JOIN `planDryings` `d` ON `c`.`PlanID` = `d`.`PlanID`
     WHERE `d`.`Status` = 2
 ) `x`
 GROUP BY
