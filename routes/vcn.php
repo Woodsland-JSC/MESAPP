@@ -17,5 +17,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/reject-receipts', [VCNController::class, 'reject']);
         Route::post('/accept-qc', [VCNController::class, 'AcceptQCVCN']);
         Route::get('/danh-sach-phoi-cho-nhan', [VCNController::class, 'dsphoipending']);
+
+        // Kết cấu ván công nghiệp
+        Route::get('/ket-cau/{lsx}', [VCNController::class, 'xem_ket_cau'])->name('xem_ket_cau');
     });
 });

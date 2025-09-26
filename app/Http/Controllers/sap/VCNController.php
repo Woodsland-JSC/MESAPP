@@ -16,7 +16,10 @@ use App\Rules\AtLeastOneQty;
 use App\Jobs\HistoryQC;
 use Carbon\Carbon;
 use App\Models\ChiTietRong;
+use Exception;
 use GuzzleHttp\Client;
+use App\Services\VKetCauVcnService;
+use Log;
 
 class VCNController extends Controller
 {
@@ -1630,7 +1633,7 @@ class VCNController extends Controller
                     return $item;
                 });
 
-                            // Kết nối đến SAP
+            // Kết nối đến SAP
             $conDB = (new ConnectController)->connect_sap();
 
             // Tạo mảng kết quả mới có thêm trường MaThiTruong
@@ -3292,4 +3295,25 @@ class VCNController extends Controller
      END Version 2 VCN
     *********
     */
+
+    public function xem_ket_cau(Request $request, $lsx, VKetCauVcnService $ketCauVcnService)
+    {
+        if (!$lsx) {
+            return response()->json([
+                'message' => "Không có lệnh sản xuất"
+            ], 500);
+        }
+
+        $result = $ketCauVcnService->lay_ket_cau_h_theo_lsx($lsx);
+        $detail = [];
+
+        if ($result != null) {
+            $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result['Code']);
+        }
+
+        return response()->json([
+            'data' => $result ?  $result : null,
+            'detail' => $detail
+        ], 200);
+    }
 }
