@@ -231,10 +231,16 @@ class ReportController extends Controller
                 ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
 
+
             $result = [];
 
             foreach ($pallets as $pallet) {
                 foreach ($pallet->details as $detail) {
+                    $status = 'Chưa sấy';
+                    if (!empty($pallet->RanBy)) {
+                        $status = !empty($pallet->CompletedBy) ? 'Đã sấy' : 'Đang sấy';
+                    }
+
                     $result[] = [
                         'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
                         'code' => $pallet->Code,
@@ -247,7 +253,7 @@ class ReportController extends Controller
                         'qty' => $detail->Qty_T,
                         'mass' => round($detail->Qty, 4), // Làm tròn 4 chữ số thập phân
                         'reason' => $pallet->LyDo,
-                        'status' => empty($pallet->RanBy) ? 'Chưa sấy' : 'Đang sấy',
+                        'status' => $status,
                         'created_username' => $pallet->createdBy->username,
                         'stacking_time' => $pallet->stacking_time
                     ];

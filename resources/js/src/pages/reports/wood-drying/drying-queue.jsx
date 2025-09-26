@@ -295,9 +295,9 @@ function DryingQueueReport() {
             }
         },
         {
-            headerName: "Thời gian xếp(phút)",
+            headerName: "Thời gian xếp (phút)",
             field: "stacking_time",
-            width: 150,
+            width: 230,
             valueFormatter: (params) => {
                 return params.value ? Math.round(params.value).toLocaleString() : "0";
             }
@@ -305,12 +305,14 @@ function DryingQueueReport() {
         {
             headerName: "Mục đích sấy",
             field: "reason",
-            width: 150,
+            filter: true,
+            width: 180,
             suppressHeaderMenuButton: true,
         },
         {
             headerName: "Trạng thái",
             field: "status",
+            filter: true,
             width: 150,
             suppressHeaderMenuButton: true,
         },

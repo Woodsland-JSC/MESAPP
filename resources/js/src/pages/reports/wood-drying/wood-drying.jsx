@@ -73,9 +73,9 @@ function CBGWoodDryingReports() {
                 const plant = item.plant || ""; // Đảm bảo plant không undefined
                 return {
                     itemname: item.ItemName,
-                    thickness: item.CDay,
-                    width: item.CRong,
-                    height: item.CDai,
+                    thickness: parseInt(item.CDay),
+                    width: parseInt(item.CRong),
+                    height: parseInt(item.CDai),
                     // Thuận Hưng
                     th_xepsay: plant === "TH" ? Number(item.sepxay) || 0 : 0,
                     th_vaolo: plant === "TH" ? Number(item.vaolo) || 0 : 0,
@@ -142,19 +142,19 @@ function CBGWoodDryingReports() {
                 {
                     headerName: "Dày",
                     field: "thickness",
-                    width: 150,
+                    width: 120,
                     filter: true,
                 },
                 {
                     headerName: "Rộng",
                     field: "width",
-                    width: 150,
+                    width: 120,
                     filter: true,
                 },
                 {
                     headerName: "Dài",
                     field: "height",
-                    width: 150,
+                    width: 120,
                     filter: true,
                 },
             ],

@@ -361,7 +361,6 @@ class PlanController extends Controller
             }
             if ($record->count() > 0) {
                 //chắc chắn lò có pallet
-
                 planDryings::where('PlanID', $id)->update(
                     [
                         'Status' => 1,
@@ -405,7 +404,9 @@ class PlanController extends Controller
 
                     $header = $group->first();
                     Pallet::where('palletID', $header->palletID)->update([
-                        'IssueNumber' => -1
+                        'IssueNumber' => -1,
+                        'RanBy' => Auth::user()->id,
+                        'RanDate' => now(),
                     ]);
                 }
 
@@ -493,6 +494,12 @@ class PlanController extends Controller
                     };
 
                     $header = $group->first();
+
+                    Pallet::where('palletID', $header->palletID)->update([
+                        'IssueNumber' => -1,
+                        'CompletedBy' => Auth::user()->id,
+                        'CompletedDate' => now(),
+                    ]);
 
                     $body = [
                         "U_Pallet" => $header->Code,

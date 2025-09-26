@@ -42,7 +42,7 @@ const SAYReports = [
         name: "Biên bản vào lò",
         link: "/reports/wood-drying/kiln-loading",
         description: "Thông tin biên bản vào lò.",
-        updated: true,
+        // updated: true,
         // permission: ''
     },
     // {
@@ -56,7 +56,7 @@ const SAYReports = [
         name: "Biên bản kiểm tra lò sấy",
         link: "/reports/wood-drying/kiln-checking",
         description: "Thông tin kiểm tra lò sấy của các lò đang hoạt động.",
-        priority: true,
+        // priority: true,
     },
     // {
     //     id: "0004",
@@ -73,7 +73,7 @@ const SAYReports = [
         name: "Báo cáo kế hoạch sấy",
         link: "/reports/wood-drying/drying-plan",
         description: "Thông tin về các kế hoạch sấy đang thực hiện.",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0007",
@@ -81,14 +81,14 @@ const SAYReports = [
         link: "/reports/wood-drying/wood-drying",
         description:
             "Báo cáo sản lượng xếp sấy, vào lò, ra lò của các nhà máy chế biến gỗ.",
-        updated: true,
+        // updated: true,
     },
     {
         id: "0010",
         name: "Báo cáo xếp chờ sấy",
         link: "/reports/wood-drying/drying-queue",
         description: "Báo cáo thông tin xếp chờ sấy.",
-        updated: true,
+        // updated: true,
     },
 ];
 
@@ -99,7 +99,7 @@ const CBGReports = [
         link: "/reports/wood-working/receipt-in-sap",
         description:
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0002",
@@ -203,7 +203,7 @@ const QCReports = [
         id: "0002",
         name: "Báo cáo biện pháp xử lý lỗi",
         link: "/reports/plywoods/defect-resolution",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0003",
@@ -220,7 +220,7 @@ const VCNReports = [
         link: "/reports/plywoods/receipt-in-sap",
         description:
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
-        priority: true,
+        // priority: true,
     },
         {
         id: "0003",
@@ -228,7 +228,7 @@ const VCNReports = [
         link: "/reports/plywoods/defect-handling",
               description:
             "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0002",
@@ -236,14 +236,14 @@ const VCNReports = [
         link: "/reports/plywoods/import-export-inventory-by-stage",
         description:
             "Kiểm tra số lượng nhập xuất tồn từng công đoạn.",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0003",
         name: "Báo cáo sản lượng theo lệnh sản xuất",
         link: "/reports/plywoods/production-output-by-production-order",
         description: "Theo dõi sản lượng và tiến độ hoàn thành theo lệnh sản xuất.",
-        priority: true,
+        // priority: true,
     },
     {
         id: "0004",
@@ -251,7 +251,7 @@ const VCNReports = [
         link: "/reports/plywoods/production-volume-by-time",
         description:
             "Xem sản lượng đã được giao nhận trong giai đoạn (ngày, tuần, tháng) theo từng tổ (công đoạn tiếp theo xác nhận)",
-        priority: true,
+        // priority: true,
     },
     // {
     //     id: "0001",

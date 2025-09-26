@@ -22,7 +22,7 @@ class plandetail extends Model
         return Carbon::parse($value)->format('Y-m-d H:i:s');
     }
 
-    public function pallet()
+    public function palletRel()
     {
         return $this->belongsTo(Pallet::class, 'pallet', 'palletID');
     }
