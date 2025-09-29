@@ -57,7 +57,7 @@ class Handler extends ExceptionHandler
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Invalid session',
+                    'message' => 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.',
                 ], Response::HTTP_METHOD_NOT_ALLOWED); // 405
             }
         });

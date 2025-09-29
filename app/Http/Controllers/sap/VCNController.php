@@ -1383,8 +1383,8 @@ class VCNController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
         $toqc = "";
-        if (Auth::user()->plant == 'YS2') {
-            $toqc = 'YS2-QC';
+        if (Auth::user()->plant == 'YS') {
+            $toqc = 'YS-QC';
         } else if (Auth::user()->plant == 'CH') {
             $toqc = 'CH-QC';
         } else {

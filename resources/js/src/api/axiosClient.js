@@ -30,7 +30,7 @@ const axiosClient = (authToken) => {
             return response;
         },
         (error) => {
-            if (error.response && error.response.status === 401) {
+            if (error.response && (error.response.status === 401 || error.response.status === 405)) {
                 localStorage.removeItem("userInfo");
     
                 if (window.location.pathname !== "/login") {
