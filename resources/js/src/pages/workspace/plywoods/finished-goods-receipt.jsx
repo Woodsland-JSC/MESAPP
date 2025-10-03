@@ -455,15 +455,43 @@ function PlywoodFinishedGoodsReceipt() {
             {
                 headerName: "Mã SP",
                 width: 150,
-                field: "itemCodeL",
+                field: "itemCodeH",
                 suppressHeaderMenuButton: true,
                 filter: true,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.itemCodeH : "";
+                    }
+                    return ""
+                },
             },
             {
                 headerName: "Tên SP",
                 width: 150,
-                field: "itemNameL",
+                field: "itemNameH",
                 suppressHeaderMenuButton: true,
+                filter: true,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.itemNameH : "";
+                    }
+                    return ""
+                },
+            },
+            {
+                headerName: "Dung sai",
+                width: 150,
+                field: "dungSai",
+                suppressHeaderMenuButton: true,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.dungSai : "";
+                    }
+                    return ""
+                },
                 filter: true,
             },
             {
@@ -499,20 +527,6 @@ function PlywoodFinishedGoodsReceipt() {
                 width: 150,
                 field: "uLoaiG",
                 suppressHeaderMenuButton: true,
-                filter: true,
-            },
-            {
-                headerName: "Dung sai",
-                width: 150,
-                field: "dungSai",
-                suppressHeaderMenuButton: true,
-                valueGetter: (params) => {
-                    if (params.node.group) {
-                        const firstLeaf = params.node.allLeafChildren?.[0];
-                        return firstLeaf ? firstLeaf?.data?.dungSai : "";
-                    }
-                    return ""
-                },
                 filter: true,
             }
         ],
