@@ -109,7 +109,8 @@ function PlywoodFinishedGoodsReceipt() {
         itemName: "",
         itemCode: "",
         detail: [],
-        mobileViewData: []
+        mobileViewData: [],
+        sanLuong: 0
     });
 
     const handleReceiptFromChild = (data, receipts) => {
@@ -349,9 +350,10 @@ function PlywoodFinishedGoodsReceipt() {
             let res = await layKetCauVCNTheoLSX(lsx);
 
             let dataKetCau = res?.data_ket_cau ?? [];
-
             let details = [];
             let formatData = [];
+
+            let sanLuong = data?.Details[0]?.LSX.find(_lsx => _lsx.LSX == lsx);
 
             dataKetCau.forEach((item) => {
                 let obj = {
@@ -385,6 +387,7 @@ function PlywoodFinishedGoodsReceipt() {
                     uLlsx: item.U_LLSX,
                     itemCodeH: item.ItemCodeH,
                     itemNameH: item.ItemNameH,
+                    note: item.U_Notes,
                     date: item.U_Date,
                     itemCodeL: item.ItemCodeL,
                     itemNameL: item.ItemNameL,
@@ -406,7 +409,8 @@ function PlywoodFinishedGoodsReceipt() {
                 detail: formatData,
                 mobileViewData: details,
                 itemName: data.NameSPDich,
-                itemCode: data.SPDICH
+                itemCode: data.SPDICH,
+                sanLuong: sanLuong ? sanLuong.SanLuong : 0
             });
             onModalStructureOpen();
         } catch (error) {
@@ -416,7 +420,8 @@ function PlywoodFinishedGoodsReceipt() {
                 detail: [],
                 itemName: "",
                 itemCode: "",
-                mobileViewData: []
+                mobileViewData: [],
+                sanLuong: 0
             });
         }
     }
@@ -495,6 +500,20 @@ function PlywoodFinishedGoodsReceipt() {
                 filter: true,
             },
             {
+                headerName: "Ghi chú",
+                width: 150,
+                field: "note",
+                suppressHeaderMenuButton: true,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.note : "";
+                    }
+                    return ""
+                },
+                filter: true,
+            },
+            {
                 headerName: "Kết cấu",
                 width: 150,
                 field: "uKetCau",
@@ -520,6 +539,8 @@ function PlywoodFinishedGoodsReceipt() {
                 width: 150,
                 field: "uDoDay",
                 suppressHeaderMenuButton: true,
+                headerComponentParams: { displayName: "Độ dày" },
+                aggFunc: "sum",
                 filter: true,
             },
             {
@@ -834,15 +855,17 @@ function PlywoodFinishedGoodsReceipt() {
                             <div className="hidden md:block">
                                 <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
                                     Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline mb-1 text-[#17506B]">{viewedStructureLSX.lsx}</span> <br />
-                                    <span className="mb-1">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                    <span className="mb-1">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                    <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                    <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                    <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br />
                                 </h1>
                             </div>
                             <div className="block sm:block md:hidden">
-                                <h1 className="pl-4 serif font-bold ">
+                                <h1 className="pl-4 serif font-bold">
                                     <span className="underline mb-1 text-[#17506B]">LSX: {viewedStructureLSX.lsx}</span> <br />
-                                    <span className="mb-1">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                    <span className="mb-1">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                    <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                    <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                    <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br />
                                 </h1>
                             </div>
                         </ModalHeader>
