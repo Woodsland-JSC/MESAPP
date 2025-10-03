@@ -537,3 +537,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     padding-left: 0px !important;
     padding-right: 0px !important;
 }
+
+#ag-grid-baocao-dieuchuyen .ag-row.ag-row-last:not(.ag-row-group) {
+    background-color: #FFFFFF !important;
+}
