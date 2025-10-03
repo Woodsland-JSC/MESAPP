@@ -859,7 +859,7 @@ function PlywoodFinishedGoodsReceipt() {
                                                 viewedStructureLSX.mobileViewData.map((item, i) => (
                                                     <AccordionItem borderColor={"bg-gray-100"} key={i}>
                                                         <h2>
-                                                            <AccordionButton background={"#17506B"} color={"#FFFFFF"} className="hover:!bg-[#17506B] hover:!text-[#FFFFFF]">
+                                                            <AccordionButton className="hover:!bg-[#17506B] hover:!text-[#FFFFFF] bg-[#17506B] text-[#FFFFFF]">
                                                                 <Box as='span' flex='1' textAlign='left' fontSize={"small"}>
                                                                     {item.code} | {item.date}
                                                                 </Box>
