@@ -3305,11 +3305,6 @@ class VCNController extends Controller
         }
 
         $result = $ketCauVcnService->getStructureByLSX($lsx);
-        // $detail = [];
-
-        // if ($result != null) {
-        //     $detail = $ketCauVcnService->lay_ket_cau_l_theo_code($result['Code']);
-        // }
 
         return response()->json([
             'data_ket_cau' => $result,

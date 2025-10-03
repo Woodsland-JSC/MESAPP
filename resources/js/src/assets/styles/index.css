@@ -532,3 +532,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 #grid-ket-cau-vcn .ag-header-cell-resize::after{
     color: #FFFFFF !important;
 }
+
+#accordion-ket-cau-vcn .chakra-accordion__panel{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
