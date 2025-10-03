@@ -27,6 +27,7 @@ class VKetCauVcnService
                                         h."U_ItemName" as "ItemNameH",
                                         h."U_Date",
                                         h."U_DungS",
+                                        h."U_Notes",
                                         l."U_ItemCode" as "ItemCodeL",
                                         l."U_ItemName" as "ItemNameL",
                                         l."U_KetCau",
