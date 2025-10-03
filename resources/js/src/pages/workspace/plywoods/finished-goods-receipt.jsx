@@ -34,6 +34,11 @@ import {
     Skeleton,
     Stack,
     useDisclosure,
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon
 } from "@chakra-ui/react";
 import { HiMiniBellAlert } from "react-icons/hi2";
 import Select, { components } from "react-select";
@@ -57,7 +62,6 @@ import "ag-grid-enterprise";
 // import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 
 function PlywoodFinishedGoodsReceipt() {
     const { user } = useAppContext();
@@ -102,7 +106,10 @@ function PlywoodFinishedGoodsReceipt() {
     const [isQualityCheck, setIsQualityCheck] = useState(false);
     const [viewedStructureLSX, setViewedStructureLSX] = useState({
         lsx: null,
-        detail: []
+        itemName: "",
+        itemCode: "",
+        detail: [],
+        mobileViewData: []
     });
 
     const handleReceiptFromChild = (data, receipts) => {
@@ -336,14 +343,40 @@ function PlywoodFinishedGoodsReceipt() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const viewStructure = async (e, lsx) => {
+    const viewStructure = async (e, lsx, data) => {
         try {
             e.stopPropagation();
-
             let res = await layKetCauVCNTheoLSX(lsx);
 
+            let dataKetCau = res?.data_ket_cau ?? [];
+
+            let details = [];
             let formatData = [];
-            res.data_ket_cau.forEach((item, index) => {
+
+            dataKetCau.forEach((item) => {
+                let obj = {
+                    code: item.Code,
+                    date: item.U_Date.split(" ")[0],
+                    name: item.Name,
+                    itemCodeH: item.ItemCodeH,
+                    itemNameH: item.ItemNameH,
+                    dungSai: item.U_DungS,
+                    details: []
+                };
+
+                if (!details.some(detail => detail.code == obj.code)) {
+                    details.push(obj);
+                }
+            })
+
+            details.forEach(detail => {
+                let childItems = dataKetCau.filter(item => item.Code == detail.code);
+
+                detail.details = childItems.sort((item1, item2) => item1.U_SoLop - item2.U_SoLop);
+            })
+
+
+            dataKetCau.forEach((item, index) => {
                 const obj = {
                     code: item.Code,
                     name: item.Name,
@@ -362,21 +395,28 @@ function PlywoodFinishedGoodsReceipt() {
                     uLoaiG: item.U_LoaiG,
                     uTiDay: item.U_TIDay,
                     uTiRong: item.U_TIRong,
-                    uTiDai: item.U_TIDai
+                    uTiDai: item.U_TIDai,
+                    dungSai: item.U_DungS
                 };
                 formatData.push(obj);
             })
 
             setViewedStructureLSX({
                 lsx,
-                detail: formatData
+                detail: formatData,
+                mobileViewData: details,
+                itemName: data.NameSPDich,
+                itemCode: data.SPDICH
             });
             onModalStructureOpen();
         } catch (error) {
             toast.error("Lỗi khi lấy kết cấu.")
             setViewedStructureLSX({
                 lsx: null,
-                detail: null
+                detail: [],
+                itemName: "",
+                itemCode: "",
+                mobileViewData: []
             });
         }
     }
@@ -411,13 +451,6 @@ function PlywoodFinishedGoodsReceipt() {
                     return d.toLocaleDateString("vi-VN");
                 },
                 suppressHeaderMenuButton: true,
-            },
-            {
-                headerName: "Nhà máy",
-                width: 150,
-                field: "uFac",
-                suppressHeaderMenuButton: true,
-                filter: true,
             },
             {
                 headerName: "Mã SP",
@@ -467,8 +500,21 @@ function PlywoodFinishedGoodsReceipt() {
                 field: "uLoaiG",
                 suppressHeaderMenuButton: true,
                 filter: true,
+            },
+            {
+                headerName: "Dung sai",
+                width: 150,
+                field: "dungSai",
+                suppressHeaderMenuButton: true,
+                valueGetter: (params) => {
+                    if (params.node.group) {
+                        const firstLeaf = params.node.allLeafChildren?.[0];
+                        return firstLeaf ? firstLeaf?.data?.dungSai : "";
+                    }
+                    return ""
+                },
+                filter: true,
             }
-
         ],
         groupDisplayType: "multipleColumns",
         getRowStyle: (params) => {
@@ -771,15 +817,26 @@ function PlywoodFinishedGoodsReceipt() {
                     <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                     <ModalContent>
                         <ModalHeader className="!p-2.5 ">
-                            <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
-                                Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline">{viewedStructureLSX.lsx}</span>
-                            </h1>
+                            <div className="hidden md:block">
+                                <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
+                                    Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline mb-1 text-[#17506B]">{viewedStructureLSX.lsx}</span> <br />
+                                    <span className="mb-1">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                    <span className="mb-1">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                </h1>
+                            </div>
+                            <div className="block sm:block md:hidden">
+                                <h1 className="pl-4 serif font-bold ">
+                                    <span className="underline mb-1 text-[#17506B]">LSX: {viewedStructureLSX.lsx}</span> <br />
+                                    <span className="mb-1">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                    <span className="mb-1">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                </h1>
+                            </div>
                         </ModalHeader>
                         <ModalCloseButton />
                         <div className="border-b-2 border-gray-200"></div>
-                        <ModalBody className="bg-gray-100 !p-10 flex flex-col">
+                        <ModalBody className="bg-gray-100 flex flex-col">
                             {
-                                viewedStructureLSX.detail ? (
+                                viewedStructureLSX.detail.length > 0 ? (
                                     <>
                                         <div
                                             id="grid-ket-cau-vcn"
@@ -788,7 +845,7 @@ function PlywoodFinishedGoodsReceipt() {
                                                 fontSize: 16,
                                                 width: "100%",
                                             }}
-                                            className="ag-theme-quartz">
+                                            className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
                                             <AgGridReact
                                                 rowData={viewedStructureLSX.detail}
                                                 columnDefs={agGridState.columns}
@@ -797,6 +854,69 @@ function PlywoodFinishedGoodsReceipt() {
                                                 getRowStyle={agGridState.getRowStyle}
                                             />
                                         </div>
+                                        <Accordion background={"#FFFFFF"} allowToggle className="gap-y-3 block md:block lg:hidden xl:hidden 2xl:hidden" defaultIndex={0} id="accordion-ket-cau-vcn">
+                                            {
+                                                viewedStructureLSX.mobileViewData.map((item, i) => (
+                                                    <AccordionItem borderColor={"bg-gray-100"} key={i}>
+                                                        <h2>
+                                                            <AccordionButton background={"#17506B"} color={"#FFFFFF"} className="hover:!bg-[#17506B] hover:!text-[#FFFFFF]">
+                                                                <Box as='span' flex='1' textAlign='left' fontSize={"small"}>
+                                                                    {item.code} | {item.date}
+                                                                </Box>
+                                                                <AccordionIcon />
+                                                            </AccordionButton>
+                                                        </h2>
+                                                        <AccordionPanel pb={4}>
+                                                            <div className="bg-white border-2 border-gray-300 h-fit">
+                                                                <div className="border-b bg-[#d6e4eb]">
+                                                                    <div className="flex items-center gap-x-2 text-[14px] p-3 px-2 border-gray-200">
+                                                                        <div className="w-8 h-8"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-[85%] h-full" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                                                                        </svg>
+                                                                        </div>
+                                                                        <div className="serif text-[16px] font-bold">Thông tin kết cấu</div>
+                                                                    </div>
+                                                                    <div className="space-y-1 px-2 pb-2">
+                                                                        <div className="grid grid-cols-3 gap-2">
+                                                                            <div className="text-[13px] col-span-1">Tên KC:</div>
+                                                                            <span className="text-[13px] col-span-2">{item.name}</span>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-3 gap-2">
+                                                                            <div className="text-[13px] col-span-1">Dung sai:</div>
+                                                                            <span className="text-[13px] col-span-2">{item.dungSai}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="w-full">
+                                                                    <table className="w-full">
+                                                                        <tr className="text-[11px]">
+                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>KC</th>
+                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[55px]'>Số lớp</th>
+                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[50px]'>Cách<br />xếp</th>
+                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>Độ dày<br />(mm)</th>
+                                                                            <th className='border-b text-center py-2 '>Loại gỗ</th>
+                                                                        </tr>
+                                                                        {
+                                                                            item?.details.map((detail, index) => (
+                                                                                <>
+                                                                                    <tr className="text-[11px]" key={index}>
+                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_KetCau ?? ""}</td>
+                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_SoLop ?? ""}</td>
+                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_CachX ?? ""}</td>
+                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_DoDay ?? ""}</td>
+                                                                                        <td className='text-center py-2 '>{detail.U_LoaiG ?? ""}</td>
+                                                                                    </tr>
+                                                                                </>
+                                                                            ))
+                                                                        }
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </AccordionPanel>
+                                                    </AccordionItem>
+                                                ))
+                                            }
+                                        </Accordion>
                                     </>
                                 ) : (
                                     <div className="flex w-full h-full justify-center items-center text-[20px]">
@@ -812,7 +932,10 @@ function PlywoodFinishedGoodsReceipt() {
                                     onClick={() => {
                                         setViewedStructureLSX({
                                             detail: [],
-                                            lsx: null
+                                            lsx: null,
+                                            itemCode: "",
+                                            itemName: "",
+                                            mobileViewData: []
                                         });
                                         onModalStructureClose();
                                     }}
