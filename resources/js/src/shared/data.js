@@ -72,3 +72,9 @@ export const FACTORIES = {
 }
 
 export const VAN_CONG_NGHIEP = "VCN";
+
+export const COMPLETE_PALLET_STATUS = {
+    ALL: 0,
+    COMPLETE: 1,
+    UN_COMPLETE: 2
+}

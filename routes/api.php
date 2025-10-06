@@ -109,6 +109,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/production-run', [PlanController::class, 'runOven'])->name('chay-lo');
         Route::get('/production-completed', [PlanController::class, 'Listcomplete'])->name('danh-sach-me-ra-lo');
         Route::patch('/production-completed', [PlanController::class, 'completed'])->name('ra-lo');
+        Route::post('/production-complete-by-pallets', [PlanController::class, 'completeByPallets'])->name('ra-lo-theo-pallets');
     });
     Route::group(['prefix' => 'production'], function () {
         Route::get('/receipts-productions', [ProductionController::class, 'index'])->name('danh-sach-thanh-pham');

@@ -369,17 +369,8 @@ function PlywoodFinishedGoodsReceipt() {
                 if (!details.some(detail => detail.code == obj.code)) {
                     details.push(obj);
                 }
-            })
 
-            details.forEach(detail => {
-                let childItems = dataKetCau.filter(item => item.Code == detail.code);
-
-                detail.details = childItems.sort((item1, item2) => item1.U_SoLop - item2.U_SoLop);
-            })
-
-
-            dataKetCau.forEach((item, index) => {
-                const obj = {
+                let aggridData = {
                     code: item.Code,
                     name: item.Name,
                     uGridH: item.U_GRID_H,
@@ -401,7 +392,13 @@ function PlywoodFinishedGoodsReceipt() {
                     uTiDai: item.U_TIDai,
                     dungSai: item.U_DungS
                 };
-                formatData.push(obj);
+                formatData.push(aggridData);
+            })
+
+            details.forEach(detail => {
+                let childItems = dataKetCau.filter(item => item.Code == detail.code);
+
+                detail.details = childItems.sort((item1, item2) => item1.U_SoLop - item2.U_SoLop);
             })
 
             setViewedStructureLSX({

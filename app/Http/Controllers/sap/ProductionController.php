@@ -1398,10 +1398,10 @@ class ProductionController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            if (!is_resource($conDB)) {
-                $type = is_object($conDB) ? get_class($conDB) : gettype($conDB);
-                throw new \RuntimeException("Expected ODBC resource, got {$type}");
-            }
+            // if (!is_resource($conDB)) {
+            //     $type = is_object($conDB) ? get_class($conDB) : gettype($conDB);
+            //     throw new \RuntimeException("Expected ODBC resource, got {$type}");
+            // }
 
             $query = 'select "VisResCode" "Code","ResName" "Name","U_CDOAN" "CDOAN"
                   from "ORSC" where "U_QC"=? AND "validFor"=? AND "U_FAC"=? AND "U_KHOI"=?';

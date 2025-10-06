@@ -238,10 +238,10 @@ function Details() {
                                         finishedDate={
                                             BOWData?.Time && BOWData?.created_at
                                                 ? moment(BOWData.created_at)
-                                                      .add(BOWData.Time, "days")
-                                                      .format(
-                                                          "YYYY-MM-DD HH:mm:ss"
-                                                      )
+                                                    .add(BOWData.Time, "days")
+                                                    .format(
+                                                        "YYYY-MM-DD HH:mm:ss"
+                                                    )
                                                 : "Invalid Date"
                                         }
                                         palletQty={BOWData.details?.length}
@@ -441,6 +441,7 @@ function Details() {
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
                                                     palletData={palletData}
+                                                    type={"ls"}
                                                 />
                                             </Skeleton>
                                         </div>
