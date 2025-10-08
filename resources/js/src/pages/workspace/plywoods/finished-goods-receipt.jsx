@@ -431,7 +431,6 @@ function PlywoodFinishedGoodsReceipt() {
             {
                 headerName: "Mã kết cấu",
                 field: "code",
-                width: 150,
                 suppressHeaderMenuButton: true,
                 rowGroup: true,
                 filter: true,
@@ -441,8 +440,8 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Ngày áp dụng",
+                width: 140,
                 field: "date",
-                width: 150,
                 valueGetter: (params) => {
                     if (params.node.group) {
                         const firstLeaf = params.node.allLeafChildren?.[0];
@@ -459,7 +458,6 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Mã SP",
-                width: 150,
                 field: "itemCodeH",
                 suppressHeaderMenuButton: true,
                 filter: true,
@@ -473,7 +471,6 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Tên SP",
-                width: 150,
                 field: "itemNameH",
                 suppressHeaderMenuButton: true,
                 filter: true,
@@ -487,8 +484,8 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Dung sai",
-                width: 150,
                 field: "dungSai",
+                width: 120,
                 suppressHeaderMenuButton: true,
                 valueGetter: (params) => {
                     if (params.node.group) {
@@ -501,7 +498,6 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Ghi chú",
-                width: 150,
                 field: "note",
                 suppressHeaderMenuButton: true,
                 valueGetter: (params) => {
@@ -515,40 +511,40 @@ function PlywoodFinishedGoodsReceipt() {
             },
             {
                 headerName: "Kết cấu",
-                width: 150,
                 field: "uKetCau",
                 suppressHeaderMenuButton: true,
                 filter: true,
+                width: 120
             },
             {
                 headerName: "Số lớp",
-                width: 150,
                 field: "uSoLop",
                 suppressHeaderMenuButton: true,
                 filter: true,
+                width: 120
             },
             {
                 headerName: "Cách xếp",
-                width: 150,
                 field: "uCachX",
                 suppressHeaderMenuButton: true,
                 filter: true,
+                width: 120
             },
             {
                 headerName: "Độ dày",
-                width: 150,
                 field: "uDoDay",
                 suppressHeaderMenuButton: true,
                 headerComponentParams: { displayName: "Độ dày" },
                 aggFunc: "sum",
                 filter: true,
+                width: 120
             },
             {
                 headerName: "Loại gỗ",
-                width: 150,
                 field: "uLoaiG",
                 suppressHeaderMenuButton: true,
                 filter: true,
+                flex: 1
             }
         ],
         groupDisplayType: "multipleColumns",
