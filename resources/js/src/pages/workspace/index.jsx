@@ -416,6 +416,15 @@ function Workspace() {
                                                         "Báo cáo tiến độ lắp đặt đồ nội thất.",
                                                     type: "ND",
                                                 },
+                                                {
+                                                    permission: ["QCCBG",],
+                                                    link: "/workspace/qc-che-bien-go",
+                                                    icon: <HiViewColumns />,
+                                                    title: "QC Chế biến gỗ",
+                                                    description:
+                                                        "QC Chế biến gỗ",
+                                                    type: "CBG",
+                                                },
                                             ].map(
                                                 ({
                                                     permission,
