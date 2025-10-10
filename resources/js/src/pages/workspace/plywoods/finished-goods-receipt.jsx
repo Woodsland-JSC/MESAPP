@@ -373,10 +373,8 @@ function PlywoodFinishedGoodsReceipt() {
 
             details.forEach(detail => {
                 let childItems = dataKetCau.filter(item => item.Code == detail.code);
-
-                detail.details = childItems.sort((item1, item2) => item1.U_SoLop - item2.U_SoLop);
-            })
-
+                detail.details = childItems.sort((item1, item2) => item1.LineId - item2.LineId);
+            });
 
             dataKetCau.forEach((item, index) => {
                 const obj = {

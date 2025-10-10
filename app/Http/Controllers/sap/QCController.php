@@ -21,10 +21,14 @@ use App\Models\HistorySL;
 use App\Models\historySLVCN;
 use App\Jobs\issueProduction;
 use App\Jobs\HistoryQC;
+use App\Services\HanaService;
+use App\Services\IncomingQCCBGService;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Database\QueryException;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
+use Log;
 
 class QCController extends Controller
 {
@@ -1606,7 +1610,7 @@ class QCController extends Controller
                     'IssueType' => $row['IssueType']
                 ];
                 $warehouses[] = $row['wareHouse'];
-                
+
                 if ($row['IssueType'] !== 'M') {
                     $subItemCodes[] = $row['SubItemCode'];
                 }
@@ -1641,5 +1645,525 @@ class QCController extends Controller
         odbc_close($conDB);
 
         return $dataIssues;
+    }
+
+    public function getQcCBG(Request $request, ConnectController $conController)
+    {
+        $filter = $request->all();
+
+        try {
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetNLGBQC(?,?,?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$filter['fromDate'], $filter['toDate'], $filter['factory']])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $rowData = array_values($row);
+                $item = [
+                    'sapId' => $rowData[2],
+                    'qcNote' => $rowData[3],
+                    'dateEntry' => $rowData[4],
+                    'lotEntryId' => $rowData[5],
+                    'deliveryName' => $rowData[6],
+                    'deliveryAddress' => $rowData[7],
+                    'statusMT'  => $rowData[8],
+                    'woodType' => $rowData[9],
+                    'certNumber' => $rowData[10],
+                    'plateNumber' => $rowData[11],
+                    'suplierId' => $rowData[12],
+                    'ticketNumber' => $rowData[13],
+                    'wareHouseId' => $rowData[14],
+                    'wareHouseName' => $rowData[15]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getQcCBGDetail(Request $request, $sapId, ConnectController $conController)
+    {
+        try {
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetNLGBQCDetail(?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$sapId])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $rowData = array_values($row);
+
+                $item = [
+                    'quyCach' => $rowData[0],
+                    'soBo' => $rowData[1],
+                    'soThanh' => $rowData[2],
+                    'tongThanh' => $rowData[3],
+                    'khoiLuong' => $rowData[4],
+                    'traLaiNCC' => $rowData[5],
+                    'tongThanhConLai' => $rowData[6],
+                    'day' => $rowData[7],
+                    'rong' => $rowData[8],
+                    'dai' => $rowData[9],
+                    'sapId' => $rowData[10],
+                    'lineId' => $rowData[11],
+                    'visOrder' => $rowData[12]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getQcDetail(Request $request, $sapId, $lineId, ConnectController $conController)
+    {
+        try {
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetQCDetail(?,?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$sapId, $lineId])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+
+                $rowData = array_values($row);
+                $item = [
+                    'lineId' => $rowData[0],
+                    'quyCach' => $rowData[1],
+                    'phanLoai' => $rowData[2],
+                    'soBo' => $rowData[3],
+                    'soThanh' => $rowData[4],
+                    'soThanhKLGiao' => $rowData[5],
+                    'soThanhKLMau' => $rowData[6],
+                    'datYeuCauHaCapLoai' => $rowData[7],
+                    'tiLe' => $rowData[8],
+                    'theTichTheoQC' => $rowData[9],
+                    'theTichTheoKho' => $rowData[10],
+                    'gapDoi' => $rowData[11],
+                    'ghiChu' => $rowData[12],
+                    'day' => $rowData[13],
+                    'rong' => $rowData[14],
+                    'dai' => $rowData[15],
+                    'dayCP' => $rowData[16],
+                    'rongCP' => $rowData[17],
+                    'daiCP' => $rowData[18],
+                    'id' => $rowData[19]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getQcType(Request $request, ConnectController $conController)
+    {
+        try {
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetQCType()}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $data[] = $row;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getGQC(Request $request, ConnectController $conController)
+    {
+        try {
+            $currentPage = $request->get('currentPage');
+
+            $skip = $currentPage * 20;
+
+            $search = $request->get('search');
+
+            $url = '';
+
+            if ($search != '' || !empty($string) || strlen($search) > 0) {
+                $url = '/b1s/v1/GQC?' . '$count=true&$skip=' . $skip . '&$filter=contains(Code,' . "' $search '" . ')';
+            } else {
+                $url = '/b1s/v1/GQC?' . '$count=true&$skip=' . $skip;
+            }
+
+            // get list GQC
+            $gqcResponse = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+                "Authorization" => "Basic " . BasicAuthToken(),
+            ])->get(UrlSAPServiceLayer() . $url);
+
+            $data = $gqcResponse->json();
+            $data['currentPage'] = $currentPage;
+            $data['skip'] = $skip;
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function insertQc(Request $request,  ConnectController $conController)
+    {
+        try {
+            $sapConnect = $conController->connect_sap();
+            $sql = "{CALL usp_VN_PU_InsertQC (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) }";
+
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            $usernameSapDB = env("user_db");
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [
+                $request->get('oDocEntry'),
+                $request->get('oLineId'),
+                $request->get('oU_QCK'),
+                $request->get('oU_QCType'),
+                $request->get('oU_TTHANH'),
+                $request->get('oU_MTHANH'),
+                $request->get('oU_QTHANH'),
+                $request->get('oU_Rate'),
+                $request->get('oU_GDOI'),
+                $request->get('oU_LineMemo'),
+                $request->get('oU_ERR'),
+                $request->get('oU_DayQC'),
+                $request->get('oU_RongQC'),
+                $request->get('oU_DaiQC'),
+                $request->get('oU_DayCP'),
+                $request->get('oU_RongCP'),
+                $request->get('oU_DaiCP'),
+                $usernameSapDB
+            ])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json([
+                'success' => true
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteQc(Request $request,  ConnectController $conController)
+    {
+        try {
+            //code...
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_DeleteQC(?,?,?)}";
+
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$request->get('id'), $request->get('sapId'), $request->get('lineId')])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json([
+                'success' => true
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getChungTuQc(Request $request, ConnectController $conController)
+    {
+        $filter = $request->all();
+
+        try {
+            //code...
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetNLGAQC(?,?,?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$filter['fromDate'], $filter['toDate'], $filter['factory']])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $rowData = array_values($row);
+
+                $item = [
+                    'sapId' => $rowData[1],
+                    'qcNote' => $rowData[2],
+                    'dateEntry' => $rowData[3],
+                    'lotEntryId' => $rowData[4],
+                    'deliveryName' => $rowData[5],
+                    'deliveryAddress' => $rowData[6],
+                    'statusMT'  => $rowData[7],
+                    'woodType' => $rowData[8],
+                    'certNumber' => $rowData[9],
+                    'plateNumber' => $rowData[10],
+                    'suplierId' => $rowData[11],
+                    'ticketNumber' => $rowData[12],
+                    'wareHouseId' => $rowData[13],
+                    'wareHouseName' => $rowData[14]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getChungTuTraLaiNCC(Request $request, ConnectController $conController)
+    {
+        $filter = $request->all();
+
+        try {
+            //code...
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetNLGRQC(?,?,?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$filter['fromDate'], $filter['toDate'], $filter['factory']])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $rowData = array_values($row);
+
+                $item = [
+                    'sapId' => $rowData[0],
+                    'suplierId' => $rowData[1],
+                    'suplierName' => $rowData[2],
+                    'totalQuantity' => $rowData[3],
+                    'returnSuplier' => $rowData[4],
+                    'remainQuantity' => $rowData[5],
+                    'dateEntry' => $rowData[6],
+                    'lotEntryId' => $rowData[7],
+                    'deliveryName' => $rowData[8],
+                    'deliveryAddress' => $rowData[9],
+                    'statusMT' => $rowData[10],
+                    'woodType' => $rowData[11],
+                    'certNumber' => $rowData[12],
+                    'plateNumber' => $rowData[13],
+                    'ticketNumber' => $rowData[14],
+                    'wareHouseId' => $rowData[15],
+                    'wareHouseName' => $rowData[16]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getNLGTraLaiNCC(Request $request, $sapid, ConnectController $conController)
+    {
+        try {
+            $sapConnect = $conController->connect_sap();
+
+            $sql = "{CALL usp_VN_PU_GetNLGQCR(?)}";
+            $stmt = odbc_prepare($sapConnect, $sql);
+
+            if (!$stmt) {
+                throw new Exception('Error preparing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+            if (!odbc_execute($stmt, [$sapid])) {
+                throw new Exception('Error executing SQL statement: ' . odbc_errormsg($sapConnect));
+            }
+
+            $data = [];
+
+            while ($row = odbc_fetch_array($stmt)) {
+                $rowData = array_values($row);
+
+                $item = [
+                    'quyCach' => $rowData[1],
+                    'day' => $rowData[2],
+                    'rong' => $rowData[3],
+                    'dai' => $rowData[4],
+                    'soBo' => $rowData[5],
+                    'soThanh' => $rowData[6],
+                    'tongThanh' => $rowData[7],
+                    'khoiLuong' => $rowData[8],
+                    'slDaTraNCC' => $rowData[9],
+                    'slConLai'  => $rowData[10],
+                    'traLaiNCC' => $rowData[11],
+                    'qcGhiChu' => $rowData[12],
+                    'sapId' => $rowData[13],
+                    'lineId' => $rowData[14]
+                ];
+
+                $data[] = $item;
+            }
+
+            odbc_close($sapConnect);
+
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function qcQuantityReturn(Request $request, IncomingQCCBGService $incomingQCCBGService)
+    {
+        $data = $request->listChecked;
+
+        if (!$data || count($data) == 0) {
+            return response()->json(['status' => false, 'message' => 'Thiếu thông tin QC.'], 500);
+        }
+
+        $qcData = [];
+
+        foreach ($data as $key => $item) {
+            $qcData[] = [
+                'docEntry' => sprintf("'%s'", $item['sapId']),
+                'lineId' => sprintf("'%s'", $item['lineId']),
+                'quantity' => sprintf("'%s'", $item['tongThanh']),
+                'userId' => sprintf("'%s'", Auth::user()->username),
+                'remark' => sprintf("'%s'", $item['qcGhiChu']),
+                'flag' => 'N',
+                'docType' => 'CBG'
+            ];
+        }
+
+        $incomingQCCBGService->qcQuantityReturn($data);
+        return response()->json(['status' => true]);
+    }
+
+    public function qcQuantityReturnAll(Request $request, IncomingQCCBGService $incomingQCCBGService)
+    {
+        $data = $request->qcData;
+
+        if (!$data || count($data) == 0) {
+            return response()->json(['status' => false, 'message' => 'Thiếu thông tin QC.'], 500);
+        }
+
+        $incomingQCCBGService->qcQuantityReturnAll($data);
+        return response()->json(['status' => true]);
     }
 }

@@ -93,6 +93,9 @@ import KitchenCabinetFinishedGoodsReceipt from "../pages/workspace/kitchen-cabin
 import ReportResolution from "../pages/reports/wood-working/report-resolution";
 import ProductionOrder from "../pages/reports/plywoods/production-order";
 
+import QCCBG from '../pages/workspace/wood-working/qc-cbg/index';
+import ChungTuNhapKhoChiTiet from "../pages/workspace/wood-working/qc-cbg/chung_tu_nhap_kho/detail";
+
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
     const Wrapper = ({ children }) => {
@@ -202,6 +205,24 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute permissionsRequired={['QCVCN']}>
                                 <PlywoodQC />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/qc-che-bien-go/:sapId"
+                        element={
+                            <ProtectedRoute>
+                                <ChungTuNhapKhoChiTiet />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/qc-che-bien-go"
+                        element={
+                            <ProtectedRoute permissionsRequired={['QCCBG']}>
+                                <QCCBG />
                             </ProtectedRoute>
                         }
                     />
