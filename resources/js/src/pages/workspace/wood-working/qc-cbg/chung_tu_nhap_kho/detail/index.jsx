@@ -109,10 +109,6 @@ const ChungTuNhapKhoChiTiet = () => {
                 oU_DaiCP: selectedNLGBQCD.dai
             }
 
-            console.log("postData", postData);
-            console.log("gqcSelected", gqcSelected);
-
-
             try {
                 let res = await QCApi.insertQC(dataQC);
 
@@ -124,8 +120,6 @@ const ChungTuNhapKhoChiTiet = () => {
                 clearModifyData();
 
                 getInfoGetQCDetail(selectedNLGBQCD);
-
-                console.log("res", res);
             } catch (error) {
                 toast.error("Lỗi tạo QC", {
                     duration: 3000
@@ -158,8 +152,6 @@ const ChungTuNhapKhoChiTiet = () => {
 
             setSelectedNLGBQCD(lineData);
 
-            console.log("getInfoGetQCDetail", res);
-
             let existingQcTypes = []
 
             res.forEach(item => {
@@ -167,9 +159,6 @@ const ChungTuNhapKhoChiTiet = () => {
                     existingQcTypes.push(item.phanLoai);
                 }
             })
-
-            console.log("existingQcTypes", existingQcTypes);
-
 
             setExistingQcType(existingQcTypes);
             setInfoGetQCDetail(res);
@@ -306,12 +295,7 @@ const ChungTuNhapKhoChiTiet = () => {
         formik.setFieldValue('rong', gqcSelected?.U_Rong ?? 0);
         formik.setFieldValue('dai', gqcSelected?.U_Dai ?? 0);
 
-        console.log("gqcSelected", gqcSelected);
-        console.log("selecged", selectedNLGBQCD);
-
         if (gqcSelected.Code != selectedNLGBQCD.quyCach) {
-            console.log("if");
-
             Swal.fire({
                 icon: 'warning',
                 text: 'Sai quy cách.'

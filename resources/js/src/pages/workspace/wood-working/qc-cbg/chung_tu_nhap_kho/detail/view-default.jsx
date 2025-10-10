@@ -4,7 +4,7 @@ const ViewDefault = ({ dataNLGBQCDetail, getInfoGetQCDetail }) => {
             <table className="w-full border-2 border-gray-400">
                 <thead class="font-bold">
                     {/* INFO report */}
-                    <tr className="bg-blue-200">
+                    <tr className="bg-[#17506B] text-[#FFFFFF]">
                         <td className="border-r border-b border-gray-400 p-2 text-lg font-bold text-center">
                             Quy cách
                         </td>
