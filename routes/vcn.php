@@ -20,5 +20,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Kết cấu ván công nghiệp
         Route::get('/ket-cau/{lsx}', [VCNController::class, 'xem_ket_cau'])->name('xem_ket_cau');
+        Route::get('/vat-tu/{lsx}', [VCNController::class, 'xem_vat_tu'])->name('xem_vat_tu');
     });
 });

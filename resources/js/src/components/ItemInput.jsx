@@ -28,6 +28,14 @@ import {
     RadioGroup,
     Spinner,
     useDisclosure,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuItemOption,
+    MenuGroup,
+    MenuOptionGroup,
+    MenuDivider,
 } from "@chakra-ui/react";
 import Select from "react-select";
 import toast from "react-hot-toast";
@@ -70,6 +78,8 @@ const ItemInput = ({
 
     // Hàm xem kết cấu ván công nghiệp
     viewStructure,
+    // Xem vật tư
+    viewMaterial
 }) => {
     const checkRef = useRef(null);
     const itemCheckRef = useRef(null);
@@ -1041,9 +1051,25 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
+    const MenuView = ({actionKetCau, actionVatTu}) => {
+        return (
+            <Menu>
+                <MenuButton as={Button} background={"unset"} backgroundColor={"unset"} className="!text-[#17506B] !font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+                    </svg>
+                </MenuButton>
+                <MenuList className="z-50">
+                    <MenuItem onClick={() => viewStructure(actionKetCau.LSX, actionKetCau.data)}>Xem kết cấu</MenuItem>
+                    <MenuItem onClick={() => viewMaterial(actionKetCau.LSX, actionKetCau.data)}>Xem vật tư</MenuItem>
+                </MenuList>
+            </Menu>
+        )
+    }
+
     return (
         <>
-            <div className="shadow-md relative  rounded-lg bg-white/30 backdrop-blur-xs z-1">
+            <div className="shadow-md relative  rounded-lg bg-white/30 z-1">
                 <div
                     className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5
                  xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
@@ -1058,7 +1084,7 @@ const ItemInput = ({
                                     openInputModal(item);
                                     setChoosenItem(item);
                                 }}
-                                className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                className="rounded-b-xl cursor-pointer duration-200 ease-linear"
                                 key={index}
                             >
                                 <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
@@ -1087,7 +1113,7 @@ const ItemInput = ({
                                         </span>
                                     </div>
                                 </div>
-                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
+                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
                                     <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
                                         <thead className="bg-[#dae0ec] ">
                                             <tr>
@@ -1210,16 +1236,12 @@ const ItemInput = ({
                                                                             className="px-2 py-2 text-right text-[#17506B] underline truncate"
                                                                             onClick={(
                                                                                 e
-                                                                            ) =>
-                                                                                viewStructure(
-                                                                                    e,
-                                                                                    production.LSX,
-                                                                                    data
-                                                                                )
-                                                                            }
+                                                                            ) =>{
+                                                                                e.stopPropagation();
+                                                                            }}
                                                                         >
-                                                                            <span className="xl:block lg:block md:block hidden">Xem kết cấu</span>
-                                                                            <span className="xl:hidden lg:hidden md:hidden block">Xem KC</span>
+                                                                            <MenuView actionKetCau={{LSX: production.LSX, data: data}} actionVatTu={{LSX: production.LSX}}/>
+                                                    
                                                                         </td>
                                                                     )}
                                                             </tr>
@@ -1335,9 +1357,9 @@ const ItemInput = ({
                                             <div className="">
                                                 <div
                                                     className={`w-full flex items-center justify-between rounded-xl p-3 ${selectedItemDetails?.FatherStock <=
-                                                            0
-                                                            ? "bg-gray-200"
-                                                            : "bg-blue-100"
+                                                        0
+                                                        ? "bg-gray-200"
+                                                        : "bg-blue-100"
                                                         }`}
                                                 >
                                                     <div className="w-[90%]">
@@ -1356,9 +1378,9 @@ const ItemInput = ({
                                                     </div>
                                                     <div
                                                         className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${selectedItemDetails?.FatherStock <=
-                                                                0
-                                                                ? "bg-gray-500"
-                                                                : "bg-[#155979]"
+                                                            0
+                                                            ? "bg-gray-500"
+                                                            : "bg-[#155979]"
                                                             } `}
                                                     >
                                                         {selectedItemDetails?.FatherStock ||
@@ -1995,8 +2017,8 @@ const ItemInput = ({
                                                                 item.OnHand ||
                                                                 0
                                                             ) <= 0
-                                                                    ? "bg-gray-200"
-                                                                    : "bg-blue-100"
+                                                                ? "bg-gray-200"
+                                                                : "bg-blue-100"
                                                                 } flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
@@ -2042,8 +2064,8 @@ const ItemInput = ({
                                                                         item.OnHand ||
                                                                         0
                                                                     ) <= 0
-                                                                            ? "bg-gray-500"
-                                                                            : "bg-[#155979]"
+                                                                        ? "bg-gray-500"
+                                                                        : "bg-[#155979]"
                                                                         } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {parseInt(
@@ -2664,9 +2686,9 @@ const ItemInput = ({
                                                                             ) => (
                                                                                 <div
                                                                                     className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode ===
-                                                                                            item.SubItemCode
-                                                                                            ? "font-semibold text-gray-800 "
-                                                                                            : "text-gray-600"
+                                                                                        item.SubItemCode
+                                                                                        ? "font-semibold text-gray-800 "
+                                                                                        : "text-gray-600"
                                                                                         }`}
                                                                                     key={
                                                                                         index

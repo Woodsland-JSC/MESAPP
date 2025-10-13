@@ -56,7 +56,7 @@ import AwaitingErrorReception from "../../../components/AwaitingErrorReception";
 import { BiConfused } from "react-icons/bi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowUp } from "react-icons/fa";
-import { layKetCauVCNTheoLSX } from "../../../api/vcn.api";
+import { layKetCauVCNTheoLSX, layVatTuVCNTheoLSX } from "../../../api/vcn.api";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-enterprise";
 // import "ag-grid-charts-enterprise";
@@ -88,6 +88,12 @@ function PlywoodFinishedGoodsReceipt() {
         onClose: onModalStructureClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isModalMaterialOpen,
+        onOpen: onModalMaterialOpen,
+        onClose: onModalMaterialClose,
+    } = useDisclosure();
+
     const [awaitingReception, setAwaitingReception] = useState([]);
 
     const [data, setData] = useState([]);
@@ -112,6 +118,13 @@ function PlywoodFinishedGoodsReceipt() {
         mobileViewData: [],
         sanLuong: 0
     });
+
+    const [materialData, setMaterialData] = useState({
+        loading: false,
+        lsx: null,
+        data: [],
+        dataMobile: []
+    })
 
     const handleReceiptFromChild = (data, receipts) => {
         const params = {
@@ -344,9 +357,8 @@ function PlywoodFinishedGoodsReceipt() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const viewStructure = async (e, lsx, data) => {
+    const viewStructure = async (lsx, data) => {
         try {
-            e.stopPropagation();
             let res = await layKetCauVCNTheoLSX(lsx);
 
             let dataKetCau = res?.data_ket_cau ?? [];
@@ -560,6 +572,210 @@ function PlywoodFinishedGoodsReceipt() {
         }
     });
 
+    const viewMaterial = async (lsx, data) => {
+        try {
+            onModalMaterialOpen();
+            setMaterialData(prev => ({ ...prev, loading: true, lsx: lsx }))
+            let res = await layVatTuVCNTheoLSX(lsx);
+            let dataVatTu = res.data_vat_tu ?? [];
+
+            dataVatTu = [
+                {
+                    "DocEntry": "4,439",
+                    "DocNum": "250,001,148",
+                    "DocDate": "Feb 19, 2025, 12:00:00.0 AM",
+                    "LineNum": "0",
+                    "ItemCode": "SU300001048",
+                    "CodeBars": "43.02.0095",
+                    "ItemName": "BC Dầu màu WB 2K Stackholmen (805-9006-200W)",
+                    "soLuongYC": "303.600006",
+                    "soLuongDC": "303.600006",
+                    "soLuongDaDC": "0",
+                    "OnHand": "0",
+                    "FromWhsCod": "WY2.VT01",
+                    "WhsCode": "WY1.HT01",
+                    "U_CDay": "0",
+                    "U_CRong": "0",
+                    "U_CDai": "0",
+                    "U_FAC": "YS",
+                    "U_GRID": "YS-2025-10-005",
+                    "Comments": "Phiếu chỉ định được tạo bởi : huyenntt",
+                    "U_SPDICH": "FG010000044",
+                    "U_SPDICHName": "STACKHOLMEN stool, out 48x35x43 lbrwn stnd",
+                    "U_LSX": "YS-2025-10-005",
+                    "U_LLSX": "CBG",
+                    "U_BaseEntry": "33,540",
+                    "U_BaseType": "202",
+                    "U_BaseLine": "1",
+                    "U_MoveType": "DC_SANXUAT",
+                    "BPLid": "3",
+                    "Status": "L"
+                }
+            ]
+
+            // prepare data for mobile view
+            let dataMobile = [];
+
+            dataVatTu.forEach(item => {
+                let FromWhsCod = item.FromWhsCod;
+                let obj = {
+                    FromWhsCod,
+                    detail: [],
+                    U_SPDICH: item.U_SPDICH,
+                    U_SPDICHName: item.U_SPDICHName
+                };
+
+                if (!dataMobile.some(item => item.FromWhsCod == obj.FromWhsCod)) {
+                    dataMobile.push(obj);
+                }
+            });
+
+            dataMobile.forEach(_item => {
+                let detail = dataVatTu.filter(item => item.FromWhsCod == _item.FromWhsCod);
+                _item.detail = detail;
+            });
+
+            setMaterialData({
+                loading: false,
+                lsx: lsx,
+                data: dataVatTu,
+                dataMobile: dataMobile
+            });
+        } catch (error) {
+            toast.error("Lỗi khi lấy thông tin vật tư.");
+            clearMaterialData();
+        }
+    }
+
+    const clearMaterialData = () => {
+        setMaterialData({
+            loading: false,
+            lsx: null,
+            data: [],
+            dataMobile: []
+        })
+    }
+
+    const [agGridMaterialState] = useState({
+        columns: [
+            {
+                headerName: "Kho điều chuyển",
+                field: "FromWhsCod",
+                rowGroup: true,
+                filter: true,
+                sort: "asc",
+                pinned: "left",
+                hide: true,
+            },
+            {
+                headerName: "Kho nhận",
+                field: "WhsCode",
+                filter: true,
+                width: 140,
+            },
+            {
+                headerName: "Mã SP",
+                field: "ItemCode",
+                filter: true,
+                width: 160,
+            },
+            {
+                headerName: "Tên SP",
+                field: "ItemName",
+                filter: true,
+                width: 400,
+            },
+            {
+                headerName: "Số lượng YC",
+                field: "soLuongYC",
+                filter: true,
+                width: 120,
+            },
+            {
+                headerName: "Số lượng ĐC",
+                field: "soLuongDC",
+                filter: true,
+                width: 120,
+            },
+            {
+                headerName: "Số lượng đã ĐC",
+                field: "soLuongDaDC",
+                filter: true,
+                width: 120,
+            },
+            {
+                headerName: "Tồn kho",
+                field: "OnHand",
+                filter: true,
+                width: 120,
+            },
+            {
+                headerName: "Mã SP đích",
+                field: "U_SPDICH",
+                filter: true,
+                width: 160,
+            },
+            {
+                headerName: "Tên SP đích",
+                field: "U_SPDICHName",
+                filter: true,
+                flex: 1
+            }
+            // {
+            //     headerName: "Mã SP",
+            //     field: "itemCodeH",
+            //     suppressHeaderMenuButton: true,
+            //     filter: true,
+            //     valueGetter: (params) => {
+            //         if (params.node.group) {
+            //             const firstLeaf = params.node.allLeafChildren?.[0];
+            //             return firstLeaf ? firstLeaf?.data?.itemCodeH : "";
+            //         }
+            //         return ""
+            //     },
+            // },
+            // {
+            //     headerName: "Tên SP",
+            //     field: "itemNameH",
+            //     suppressHeaderMenuButton: true,
+            //     filter: true,
+            //     valueGetter: (params) => {
+            //         if (params.node.group) {
+            //             const firstLeaf = params.node.allLeafChildren?.[0];
+            //             return firstLeaf ? firstLeaf?.data?.itemNameH : "";
+            //         }
+            //         return ""
+            //     },
+            // },
+            // {
+            //     headerName: "Ghi chú",
+            //     field: "note",
+            //     suppressHeaderMenuButton: true,
+            //     valueGetter: (params) => {
+            //         if (params.node.group) {
+            //             const firstLeaf = params.node.allLeafChildren?.[0];
+            //             return firstLeaf ? firstLeaf?.data?.note : "";
+            //         }
+            //         return ""
+            //     },
+            //     filter: true,
+            // },
+        ],
+        groupDisplayType: "multipleColumns",
+        getRowStyle: (params) => {
+            if (params.node.group) {
+                return { backgroundColor: "#ffffff" }; // màu group row
+            }
+            if (params.node.rowIndex % 2 === 0) {
+                return { backgroundColor: "#ffffff" }; // zebra stripe
+            }
+            return { backgroundColor: "#ffffff" };
+        },
+        autoGroupColumnDef: {
+            minWidth: 300,
+        }
+    });
+
     return (
         <Layout>
             {/* Container */}
@@ -711,6 +927,7 @@ function PlywoodFinishedGoodsReceipt() {
                                     onReceiptFromChild={handleReceiptFromChild}
                                     onRejectFromChild={handleRejectFromChild}
                                     viewStructure={viewStructure}
+                                    viewMaterial={viewMaterial}
                                 />
                             ))
                         ) : (
@@ -978,6 +1195,198 @@ function PlywoodFinishedGoodsReceipt() {
                         </ModalFooter>
                     </ModalContent>
                 </Modal>
+            }
+
+            {
+                materialData.lsx && (
+                    <Modal
+                        isCentered
+                        isOpen={isModalMaterialOpen}
+                        size="full"
+                        onClose={() => {
+                            setMaterialData({
+                                detail: [],
+                                lsx: null,
+                                loading: false
+                            });
+                            onModalMaterialClose();
+                        }}
+                        scrollBehavior="inside"
+                    >
+                        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                        <ModalContent>
+                            <ModalHeader className="!p-2.5 ">
+                                <div className="hidden md:block">
+                                    <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
+                                        Vật liệu ván công nghiệp theo lệnh sản xuất <span className="underline mb-1 text-[#17506B]">{materialData.lsx}</span> <br />
+                                        {/* <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                        <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                        <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br /> */}
+                                    </h1>
+                                </div>
+                                <div className="block sm:block md:hidden">
+                                    <h1 className="pl-4 serif font-bold">
+                                        <span className="underline mb-1 text-[#17506B]">LSX: {materialData.lsx}</span> <br />
+                                        {/* <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
+                                        <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
+                                        <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br /> */}
+                                    </h1>
+                                </div>
+                            </ModalHeader>
+                            <ModalCloseButton />
+                            <div className="border-b-2 border-gray-200"></div>
+                            <ModalBody className="bg-gray-100 flex flex-col">
+                                {
+                                    materialData.loading ?
+                                        <div className="flex justify-center mt-10">
+                                            <div className="special-spinner"></div>
+                                        </div> :
+                                        materialData.data.length > 0 ? (
+                                            <>
+                                                <div
+                                                    id="grid-ket-cau-vcn"
+                                                    style={{
+                                                        height: 630,
+                                                        fontSize: 14,
+                                                        width: "100%",
+                                                    }}
+                                                    className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
+                                                    <AgGridReact
+                                                        rowData={materialData.data}
+                                                        columnDefs={agGridMaterialState.columns}
+                                                        autoGroupColumnDef={agGridMaterialState.autoGroupColumnDef}
+                                                        groupDisplayType={agGridMaterialState.groupDisplayType}
+                                                        getRowStyle={agGridMaterialState.getRowStyle}
+                                                    />
+                                                </div>
+                                                <Accordion background={"#FFFFFF"} allowToggle className="gap-y-3 block md:block lg:hidden xl:hidden 2xl:hidden" defaultIndex={0} id="accordion-ket-cau-vcn">
+                                                    {
+                                                        materialData.dataMobile.map((item, i) => (
+                                                            <AccordionItem borderColor={"bg-gray-100"} key={i}>
+                                                                <h2>
+                                                                    <AccordionButton className="hover:!bg-[#17506B] hover:!text-[#FFFFFF] bg-[#17506B] text-[#FFFFFF]">
+                                                                        <Box as='span' flex='1' textAlign='left' fontSize={"small"}>
+                                                                            Kho ĐC - {item.FromWhsCod ?? ''}
+                                                                        </Box>
+                                                                        <AccordionIcon />
+                                                                    </AccordionButton>
+                                                                </h2>
+                                                                <AccordionPanel pb={4}>
+                                                                    <div className="bg-white border-2 border-gray-300 h-fit">
+                                                                        <div className="border-b bg-[#d6e4eb]">
+                                                                            <div className="flex items-center gap-x-2 text-[14px] p-3 px-2 border-gray-200">
+                                                                                <div className="w-8 h-8"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-[85%] h-full" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                                                                                </svg>
+                                                                                </div>
+                                                                                <div className="serif text-[16px] font-bold">Thông tin vật liệu</div>
+                                                                            </div>
+                                                                            <div className="space-y-1 px-2 pb-2">
+                                                                                <div className="grid grid-cols-3 gap-2">
+                                                                                    <div className="text-[13px] col-span-1">Mã SP đích:</div>
+                                                                                    <span className="text-[12px] col-span-2">{item.U_SPDICH}</span>
+                                                                                </div>
+                                                                                <div className="grid grid-cols-3 gap-2">
+                                                                                    <span className="text-[12px] col-span-3">{item.U_SPDICHName}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {/* <div className="w-full">
+                                                                            <table className="w-full">
+                                                                                <tr className="text-[11px]">
+                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>KC</th>
+                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[55px]'>Số lớp</th>
+                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[50px]'>Cách<br />xếp</th>
+                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>Độ dày<br />(mm)</th>
+                                                                                    <th className='border-b text-center py-2 '>Loại gỗ</th>
+                                                                                </tr>
+                                                                                {
+                                                                                    item?.details.map((detail, index) => (
+                                                                                        <>
+                                                                                            <tr className="text-[11px]" key={index}>
+                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_KetCau ?? ""}</td>
+                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_SoLop ?? ""}</td>
+                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_CachX ?? ""}</td>
+                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_DoDay ?? ""}</td>
+                                                                                                <td className='text-center py-2 '>{detail.U_LoaiG ?? ""}</td>
+                                                                                            </tr>
+                                                                                        </>
+                                                                                    ))
+                                                                                }
+                                                                            </table>
+                                                                        </div> */}
+                                                                        {
+                                                                            item.detail.map((detail, index) => {
+                                                                                return (
+                                                                                    <div className="bg-gray-50" key={index}>
+                                                                                        {/* Header */}
+                                                                                        <div className="flex flex-col justify-start rounded-t-xl py-2 pt-2 px-4">
+                                                                                            <div className="text-[14px] font-bold px-1 text-[#17506B] ">
+                                                                                                Kho nhận:
+                                                                                                <span className="ml-2">{detail.WhsCode}</span>
+                                                                                            </div>
+                                                                                            <div className="text-[12px] font-semibold px-1 text-gray-700 ">
+                                                                                                Mã SP:
+                                                                                                <span className="ml-2">{detail.ItemCode}</span>
+                                                                                            </div>
+                                                                                            <div className="text-[12px] font-semibold px-1 text-gray-700 ">
+                                                                                                Tên SP:<span className="ml-2">{detail.ItemName}</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[2%]"></div>
+                                                                                        <div className="space-y-2 py-2 px-6 pt-4 text-[12px]">
+                                                                                            <div className="grid grid-cols-2">
+                                                                                                <div className="font-semibold">Số lượng YC:</div>
+                                                                                                <div className="font-medium ">{detail.soLuongYC}</div>
+                                                                                            </div>
+                                                                                            <div className="grid grid-cols-2">
+                                                                                                <div className="font-semibold">Số lượng ĐC:</div>
+                                                                                                <div className="font-medium ">{detail.soLuongDC}</div>
+                                                                                            </div>
+                                                                                            <div className="grid grid-cols-2">
+                                                                                                <div className="font-semibold">Số lượng đã ĐC:</div>
+                                                                                                <div className="font-medium truncate">{detail.soLuongDaDC}</div>
+                                                                                            </div>
+                                                                                            <div className="grid grid-cols-2">
+                                                                                                <div className="font-semibold">Tồn kho:</div>
+                                                                                                <div className="font-medium ">{detail.OnHand}</div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </div>
+                                                                </AccordionPanel>
+                                                            </AccordionItem>
+                                                        ))
+                                                    }
+                                                </Accordion>
+                                            </>
+                                        ) : (
+                                            <div className="flex w-full h-full justify-center items-center text-[20px]">
+                                                Không có dữ liệu
+                                            </div>
+                                        )
+                                }
+                            </ModalBody>
+                            <ModalFooter className="flex flex-col !p-0 ">
+                                <div className="border-b-2 border-gray-100"></div>
+                                <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                                    <button
+                                        onClick={() => {
+                                            clearMaterialData();
+                                            onModalStructureClose();
+                                        }}
+                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                    >
+                                        Đóng
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
+                )
             }
         </Layout>
     );
