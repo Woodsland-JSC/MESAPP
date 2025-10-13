@@ -579,40 +579,6 @@ function PlywoodFinishedGoodsReceipt() {
             let res = await layVatTuVCNTheoLSX(lsx);
             let dataVatTu = res.data_vat_tu ?? [];
 
-            dataVatTu = [
-                {
-                    "DocEntry": "4,439",
-                    "DocNum": "250,001,148",
-                    "DocDate": "Feb 19, 2025, 12:00:00.0 AM",
-                    "LineNum": "0",
-                    "ItemCode": "SU300001048",
-                    "CodeBars": "43.02.0095",
-                    "ItemName": "BC Dầu màu WB 2K Stackholmen (805-9006-200W)",
-                    "soLuongYC": "303.600006",
-                    "soLuongDC": "303.600006",
-                    "soLuongDaDC": "0",
-                    "OnHand": "0",
-                    "FromWhsCod": "WY2.VT01",
-                    "WhsCode": "WY1.HT01",
-                    "U_CDay": "0",
-                    "U_CRong": "0",
-                    "U_CDai": "0",
-                    "U_FAC": "YS",
-                    "U_GRID": "YS-2025-10-005",
-                    "Comments": "Phiếu chỉ định được tạo bởi : huyenntt",
-                    "U_SPDICH": "FG010000044",
-                    "U_SPDICHName": "STACKHOLMEN stool, out 48x35x43 lbrwn stnd",
-                    "U_LSX": "YS-2025-10-005",
-                    "U_LLSX": "CBG",
-                    "U_BaseEntry": "33,540",
-                    "U_BaseType": "202",
-                    "U_BaseLine": "1",
-                    "U_MoveType": "DC_SANXUAT",
-                    "BPLid": "3",
-                    "Status": "L"
-                }
-            ]
-
             // prepare data for mobile view
             let dataMobile = [];
 
