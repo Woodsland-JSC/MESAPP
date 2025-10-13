@@ -16,6 +16,7 @@ use App\Rules\AtLeastOneQty;
 use App\Jobs\HistoryQC;
 use Carbon\Carbon;
 use App\Models\ChiTietRong;
+use App\Services\VatTuVCNService;
 use Exception;
 use GuzzleHttp\Client;
 use App\Services\VKetCauVcnService;
@@ -3296,7 +3297,7 @@ class VCNController extends Controller
     *********
     */
 
-    public function xem_ket_cau(Request $request, $lsx, VKetCauVcnService $ketCauVcnService)
+    public function xem_ket_cau($lsx, VKetCauVcnService $ketCauVcnService)
     {
         if (!$lsx) {
             return response()->json([
@@ -3308,6 +3309,20 @@ class VCNController extends Controller
 
         return response()->json([
             'data_ket_cau' => $result,
+        ], 200);
+    }
+
+    public function xem_vat_tu(string $lsx, VatTuVCNService $vatTuVCNService){
+        if (!$lsx) {
+            return response()->json([
+                'message' => "Không có lệnh sản xuất"
+            ], 500);
+        }
+
+        $result = $vatTuVCNService->getMaterialByLSX($lsx);
+
+        return response()->json([
+            'data_vat_tu' => $result,
         ], 200);
     }
 }
