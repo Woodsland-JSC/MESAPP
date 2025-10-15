@@ -230,7 +230,7 @@ function CheckListItem(props) {
         // 2) Kiểm tra giá trị (chỉ kiểm tra TRÊN NHỮNG MẪU ĐÃ NHẬP)
         const firstInvalid = filled.find(([key, v]) => {
             const num = Number(v);
-            return !(Number.isInteger(num) && num >= 1);
+            return !(num && num >= 1);
         });
 
         if (firstInvalid) {
@@ -393,7 +393,7 @@ function CheckListItem(props) {
                                                         Số lần
                                                     </label>
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         id="soLan"
                                                         className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
                                                         value={soLan}

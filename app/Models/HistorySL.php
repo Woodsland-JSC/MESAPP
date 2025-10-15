@@ -23,6 +23,7 @@ class HistorySL extends Model
         'SPDich',
         'isQualityCheck',
         'notiId',
+        'note'
     ];
 
 }
