@@ -1499,6 +1499,7 @@ class QCController extends Controller
                     'TOChuyenVe' => $teamBack,
                     'isQualityCheck' => 1,
                     'notiId' => $request->id,
+                    'note' => $request->Note
                 ]);
 
                 HistoryQC::dispatch(
