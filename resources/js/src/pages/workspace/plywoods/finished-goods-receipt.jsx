@@ -62,6 +62,7 @@ import "ag-grid-enterprise";
 // import "ag-grid-charts-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import { FaDiceD6 } from "react-icons/fa6";
 
 function PlywoodFinishedGoodsReceipt() {
     const { user } = useAppContext();
@@ -122,6 +123,10 @@ function PlywoodFinishedGoodsReceipt() {
     const [materialData, setMaterialData] = useState({
         loading: false,
         lsx: null,
+        itemName: "",
+        itemCode: "",
+        itemSPDich: "",
+        itemSPDichName: "",
         data: [],
         dataMobile: []
     })
@@ -574,7 +579,7 @@ function PlywoodFinishedGoodsReceipt() {
 
     const viewMaterial = async (lsx, data) => {
         try {
-            onModalMaterialOpen();
+            
             setMaterialData(prev => ({ ...prev, loading: true, lsx: lsx }))
             let res = await layVatTuVCNTheoLSX(lsx);
             let dataVatTu = res.data_vat_tu ?? [];
@@ -605,8 +610,13 @@ function PlywoodFinishedGoodsReceipt() {
                 loading: false,
                 lsx: lsx,
                 data: dataVatTu,
-                dataMobile: dataMobile
+                dataMobile: dataMobile,
+                itemName: data.NameSPDich,
+                itemCode: data.SPDICH,
+                itemSPDich: dataVatTu[0]?.U_SPDICH,
+                itemSPDichName: dataVatTu[0]?.U_SPDICHName
             });
+            onModalMaterialOpen();
         } catch (error) {
             toast.error("Lỗi khi lấy thông tin vật tư.");
             clearMaterialData();
@@ -617,6 +627,10 @@ function PlywoodFinishedGoodsReceipt() {
         setMaterialData({
             loading: false,
             lsx: null,
+            itemName: "",
+            itemCode: "",
+            itemSPDich: "",
+            itemSPDichName: "",
             data: [],
             dataMobile: []
         })
@@ -1017,129 +1031,160 @@ function PlywoodFinishedGoodsReceipt() {
                     isCentered
                     isOpen={isModalStructureOpen}
                     size="full"
-                    onClose={() => {
-                        setViewedStructureLSX({
-                            detail: [],
-                            lsx: null
-                        });
-                        onModalStructureClose();
-                    }}
                     scrollBehavior="inside"
                 >
-                    <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-                    <ModalContent>
-                        <ModalHeader className="!p-2.5 ">
-                            <div className="hidden md:block">
-                                <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
-                                    Kết cấu ván công nghiệp theo lệnh sản xuất <span className="underline mb-1 text-[#17506B]">{viewedStructureLSX.lsx}</span> <br />
-                                    <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                    <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
-                                    <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br />
-                                </h1>
-                            </div>
-                            <div className="block sm:block md:hidden">
-                                <h1 className="pl-4 serif font-bold">
-                                    <span className="underline mb-1 text-[#17506B]">LSX: {viewedStructureLSX.lsx}</span> <br />
-                                    <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                    <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
-                                    <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br />
-                                </h1>
+                    <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" overflow="hidden" />
+                    <ModalContent px={0} display="flex" flexDirection="column" height="100vh">
+                        <ModalHeader px={0} py={3} className="flex items-center justify-center">
+                            <div class="serif font-bold text-2xl">
+                                Chi tiết kết cấu
                             </div>
                         </ModalHeader>
-                        <ModalCloseButton />
                         <div className="border-b-2 border-gray-200"></div>
-                        <ModalBody className="bg-gray-100 flex flex-col">
-                            {
-                                viewedStructureLSX.detail.length > 0 ? (
-                                    <>
-                                        <div
-                                            id="grid-ket-cau-vcn"
-                                            style={{
-                                                height: 630,
-                                                fontSize: 16,
-                                                width: "100%",
-                                            }}
-                                            className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
-                                            <AgGridReact
-                                                rowData={viewedStructureLSX.detail}
-                                                columnDefs={agGridState.columns}
-                                                autoGroupColumnDef={agGridState.autoGroupColumnDef}
-                                                groupDisplayType={agGridState.groupDisplayType}
-                                                getRowStyle={agGridState.getRowStyle}
-                                            />
+                        <ModalBody px={0} py={0} flex="1" overflowY="auto">
+                            <div className="flex flex-col pb-4 bg-[#FAFAFA] lg:px-[20px] lg:py-[20px] h-full">
+                                <div className="xl:mx-auto xl:px-8 text-base w-full space-y-3">
+                                    <div className="flex flex-col md:flex-row justify-between pt-2 items-center xl:px-0 md:px-0 lg:px-0 px-3">
+                                        <div className="flex flex-col  w-full">
+                                            <label className="font-medium">
+                                                Sản phẩm
+                                            </label>
+                                            <span className="text-[#17506B] text-xl font-bold">
+                                                {viewedStructureLSX?.itemName}
+                                            </span>
                                         </div>
-                                        <Accordion background={"#FFFFFF"} allowToggle className="gap-y-3 block md:block lg:hidden xl:hidden 2xl:hidden" defaultIndex={0} id="accordion-ket-cau-vcn">
-                                            {
-                                                viewedStructureLSX.mobileViewData.map((item, i) => (
-                                                    <AccordionItem borderColor={"bg-gray-100"} key={i}>
-                                                        <h2>
-                                                            <AccordionButton className="hover:!bg-[#17506B] hover:!text-[#FFFFFF] bg-[#17506B] text-[#FFFFFF]">
-                                                                <Box as='span' flex='1' textAlign='left' fontSize={"small"}>
-                                                                    {item.code} | {item.date}
-                                                                </Box>
-                                                                <AccordionIcon />
-                                                            </AccordionButton>
-                                                        </h2>
-                                                        <AccordionPanel pb={4}>
-                                                            <div className="bg-white border-2 border-gray-300 h-fit">
-                                                                <div className="border-b bg-[#d6e4eb]">
-                                                                    <div className="flex items-center gap-x-2 text-[14px] p-3 px-2 border-gray-200">
-                                                                        <div className="w-8 h-8"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-[85%] h-full" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
-                                                                        </svg>
-                                                                        </div>
-                                                                        <div className="serif text-[16px] font-bold">Thông tin kết cấu</div>
-                                                                    </div>
-                                                                    <div className="space-y-1 px-2 pb-2">
-                                                                        <div className="grid grid-cols-3 gap-2">
-                                                                            <div className="text-[13px] col-span-1">Tên KC:</div>
-                                                                            <span className="text-[13px] col-span-2">{item.name}</span>
-                                                                        </div>
-                                                                        <div className="grid grid-cols-3 gap-2">
-                                                                            <div className="text-[13px] col-span-1">Dung sai:</div>
-                                                                            <span className="text-[13px] col-span-2">{item.dungSai}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="w-full">
-                                                                    <table className="w-full">
-                                                                        <tr className="text-[11px]">
-                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>KC</th>
-                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[55px]'>Số lớp</th>
-                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[50px]'>Cách<br />xếp</th>
-                                                                            <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>Độ dày<br />(mm)</th>
-                                                                            <th className='border-b text-center py-2 '>Loại gỗ</th>
-                                                                        </tr>
-                                                                        {
-                                                                            item?.details.map((detail, index) => (
-                                                                                <>
-                                                                                    <tr className="text-[11px]" key={index}>
-                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_KetCau ?? ""}</td>
-                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_SoLop ?? ""}</td>
-                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_CachX ?? ""}</td>
-                                                                                        <td className='border-r border-gray-200 text-center py-2 '>{detail.U_DoDay ?? ""}</td>
-                                                                                        <td className='text-center py-2 '>{detail.U_LoaiG ?? ""}</td>
-                                                                                    </tr>
-                                                                                </>
-                                                                            ))
-                                                                        }
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                        </AccordionPanel>
-                                                    </AccordionItem>
-                                                ))
-                                            }
-                                        </Accordion>
-                                    </>
-                                ) : (
-                                    <div className="flex w-full h-full justify-center items-center text-[20px]">
-                                        Không có dữ liệu
                                     </div>
-                                )
-                            }
+
+                                    <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#f0faff]">
+                                        <div className="flex justify-between pb-1 ">
+                                            <div className="flex items-center space-x-2">
+                                                <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                                <div className="font-semibold text-md">
+                                                    Thông tin sản phẩm
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2 items-center justify-between py-3 border-t ">
+                                            <Text className="font-semibold">
+                                                Lệnh sản xuất
+                                            </Text>
+                                            <span className="">
+                                                {viewedStructureLSX?.lsx}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex gap-2 items-center justify-between py-3 border-t ">
+                                            <Text className="font-semibold">
+                                                Mã sản phẩm
+                                            </Text>
+                                            <span className="">
+                                                {viewedStructureLSX?.itemCode}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex gap-2 items-center py-3 border-t !mt-0 justify-between">
+                                            <Text className="font-semibold">
+                                                Sản lượng
+                                            </Text>
+                                            <span className="">
+                                                {Number(viewedStructureLSX?.sanLuong)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* View Table */}
+                                    <div
+                                        id="grid-ket-cau-vcn"
+                                        style={{
+                                            height: 630,
+                                            fontSize: 14,
+                                            width: "100%",
+                                        }}
+                                        className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
+                                        <AgGridReact
+                                            rowData={viewedStructureLSX.detail}
+                                            columnDefs={agGridState.columns}
+                                            autoGroupColumnDef={agGridState.autoGroupColumnDef}
+                                            groupDisplayType={agGridState.groupDisplayType}
+                                            getRowStyle={agGridState.getRowStyle}
+                                        />
+                                    </div>
+
+                                    {/* View MObile */}
+                                    <div className="block md:block lg:hidden xl:hidden 2xl:hidden xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#f0faff]">
+                                        <div className="flex justify-between pb-1 ">
+                                            <div className="flex items-center space-x-2">
+                                                <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                                <div className="font-semibold text-md">
+                                                    Thông tin kết cấu
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-full">
+                                            {
+                                                viewedStructureLSX.detail.length > 0 ? (
+                                                    <Accordion allowToggle className="mx-auto" defaultIndex={0}>
+                                                        {
+                                                            viewedStructureLSX.mobileViewData.map((item, i) => (
+                                                                <AccordionItem borderColor={"#DADADA"} className="border rounded-md overflow-hidden mb-1" key={i}>
+                                                                    <h2>
+                                                                        <AccordionButton className="bg-[#17506B] hover:!bg-[#17506B] flex justify-between items-center text-[#FFFFFF]" px={2}>
+                                                                            <Box as="span" flex="1" textAlign="left" className="font-medium text-[#FFFFFF]" py={1}>
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <div className="font-semibold text-sm">
+                                                                                        {item.code} | {item.date}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </Box>
+                                                                            <AccordionIcon className="text-[#FFFFFF]" />
+                                                                        </AccordionButton>
+                                                                    </h2>
+                                                                    <AccordionPanel py={0} px={0} className="text-black text-sm px-4 py-3">
+                                                                        <div className="h-fit">
+                                                                            <div className="w-full">
+                                                                                <table className="w-full bg-[#fffefe]">
+                                                                                    <tr className="text-[11px]">
+                                                                                        <th className='border-r border-b border-t border-[#C6D2D9] text-center py-2 w-[60px]'>KC</th>
+                                                                                        <th className='border-r border-b border-t border-[#C6D2D9] text-center py-2 w-[55px]'>Số lớp</th>
+                                                                                        <th className='border-r border-b border-t border-[#C6D2D9] text-center py-2 w-[50px]'>Cách<br />xếp</th>
+                                                                                        <th className='border-r border-b border-t border-[#C6D2D9] text-center py-2 w-[60px]'>Độ dày<br />(mm)</th>
+                                                                                        <th className='border-b border-t text-center py-2 border-[#C6D2D9]'>Loại gỗ</th>
+                                                                                    </tr>
+                                                                                    {
+                                                                                        item?.details.map((detail, index) => (
+                                                                                            <>
+                                                                                                <tr className="text-[11px]" key={index}>
+                                                                                                    <td className='border-r border-[#C6D2D9] text-center py-2 '>{detail.U_KetCau ?? ""}</td>
+                                                                                                    <td className='border-r border-[#C6D2D9] text-center py-2 '>{detail.U_SoLop ?? ""}</td>
+                                                                                                    <td className='border-r border-[#C6D2D9] text-center py-2 '>{detail.U_CachX ?? ""}</td>
+                                                                                                    <td className='border-r border-[#C6D2D9] text-center py-2 '>{detail.U_DoDay ?? ""}</td>
+                                                                                                    <td className='text-center py-2 border-[#C6D2D9]'>{detail.U_LoaiG ?? ""}</td>
+                                                                                                </tr>
+                                                                                            </>
+                                                                                        ))
+                                                                                    }
+                                                                                </table>
+                                                                            </div>
+                                                                        </div>
+                                                                    </AccordionPanel>
+                                                                </AccordionItem>
+                                                            ))
+                                                        }
+                                                    </Accordion>
+                                                ) : (
+                                                    <div className="flex items-center text-center justify-center">
+                                                        Không có dữ liệu
+                                                    </div>
+                                                )
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </ModalBody>
-                        <ModalFooter className="flex flex-col !p-0 ">
+                        <ModalFooter className="flex flex-col !p-0">
                             <div className="border-b-2 border-gray-100"></div>
                             <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
                                 <button
@@ -1169,39 +1214,17 @@ function PlywoodFinishedGoodsReceipt() {
                         isCentered
                         isOpen={isModalMaterialOpen}
                         size="full"
-                        onClose={() => {
-                            setMaterialData({
-                                detail: [],
-                                lsx: null,
-                                loading: false
-                            });
-                            onModalMaterialClose();
-                        }}
                         scrollBehavior="inside"
                     >
                         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-                        <ModalContent>
-                            <ModalHeader className="!p-2.5 ">
-                                <div className="hidden md:block">
-                                    <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
-                                        Vật liệu ván công nghiệp theo lệnh sản xuất <span className="underline mb-1 text-[#17506B]">{materialData.lsx}</span> <br />
-                                        {/* <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                        <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
-                                        <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br /> */}
-                                    </h1>
-                                </div>
-                                <div className="block sm:block md:hidden">
-                                    <h1 className="pl-4 serif font-bold">
-                                        <span className="underline mb-1 text-[#17506B]">LSX: {materialData.lsx}</span> <br />
-                                        {/* <span className="mb-1 text-[19px]">MÃ SP: {viewedStructureLSX?.itemCode}</span> <br />
-                                        <span className="mb-1 text-[19px]">TÊN SP: {viewedStructureLSX?.itemName}</span> <br />
-                                        <span className="mb-1 text-[19px]">SẢN LƯỢNG: {Number(viewedStructureLSX?.sanLuong)}</span> <br /> */}
-                                    </h1>
+                        <ModalContent px={0} display="flex" flexDirection="column" height="100vh">
+                            <ModalHeader px={0} py={3} className="flex items-center justify-center">
+                                <div class="serif font-bold text-2xl">
+                                    Chi tiết vật tư
                                 </div>
                             </ModalHeader>
-                            <ModalCloseButton />
                             <div className="border-b-2 border-gray-200"></div>
-                            <ModalBody className="bg-gray-100 flex flex-col">
+                            <ModalBody px={0} py={0}  flex="1" overflowY="auto">
                                 {
                                     materialData.loading ?
                                         <div className="flex justify-center mt-10">
@@ -1209,125 +1232,167 @@ function PlywoodFinishedGoodsReceipt() {
                                         </div> :
                                         materialData.data.length > 0 ? (
                                             <>
-                                                <div
-                                                    id="grid-ket-cau-vcn"
-                                                    style={{
-                                                        height: 630,
-                                                        fontSize: 14,
-                                                        width: "100%",
-                                                    }}
-                                                    className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
-                                                    <AgGridReact
-                                                        rowData={materialData.data}
-                                                        columnDefs={agGridMaterialState.columns}
-                                                        autoGroupColumnDef={agGridMaterialState.autoGroupColumnDef}
-                                                        groupDisplayType={agGridMaterialState.groupDisplayType}
-                                                        getRowStyle={agGridMaterialState.getRowStyle}
-                                                    />
-                                                </div>
-                                                <Accordion background={"#FFFFFF"} allowToggle className="gap-y-3 block md:block lg:hidden xl:hidden 2xl:hidden" defaultIndex={0} id="accordion-ket-cau-vcn">
-                                                    {
-                                                        materialData.dataMobile.map((item, i) => (
-                                                            <AccordionItem borderColor={"bg-gray-100"} key={i}>
-                                                                <h2>
-                                                                    <AccordionButton className="hover:!bg-[#17506B] hover:!text-[#FFFFFF] bg-[#17506B] text-[#FFFFFF]">
-                                                                        <Box as='span' flex='1' textAlign='left' fontSize={"small"}>
-                                                                            Kho ĐC - {item.FromWhsCod ?? ''}
-                                                                        </Box>
-                                                                        <AccordionIcon />
-                                                                    </AccordionButton>
-                                                                </h2>
-                                                                <AccordionPanel pb={4}>
-                                                                    <div className="bg-white border-2 border-gray-300 h-fit">
-                                                                        <div className="border-b bg-[#d6e4eb]">
-                                                                            <div className="flex items-center gap-x-2 text-[14px] p-3 px-2 border-gray-200">
-                                                                                <div className="w-8 h-8"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" className="text-[#17506B] w-[85%] h-full" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
-                                                                                </svg>
-                                                                                </div>
-                                                                                <div className="serif text-[16px] font-bold">Thông tin vật liệu</div>
-                                                                            </div>
-                                                                            <div className="space-y-1 px-2 pb-2">
-                                                                                <div className="grid grid-cols-3 gap-2">
-                                                                                    <div className="text-[13px] col-span-1">Mã SP đích:</div>
-                                                                                    <span className="text-[12px] col-span-2">{item.U_SPDICH}</span>
-                                                                                </div>
-                                                                                <div className="grid grid-cols-3 gap-2">
-                                                                                    <span className="text-[12px] col-span-3">{item.U_SPDICHName}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        {/* <div className="w-full">
-                                                                            <table className="w-full">
-                                                                                <tr className="text-[11px]">
-                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>KC</th>
-                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[55px]'>Số lớp</th>
-                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[50px]'>Cách<br />xếp</th>
-                                                                                    <th className='border-r border-b border-gray-200 text-center py-2 w-[60px]'>Độ dày<br />(mm)</th>
-                                                                                    <th className='border-b text-center py-2 '>Loại gỗ</th>
-                                                                                </tr>
-                                                                                {
-                                                                                    item?.details.map((detail, index) => (
-                                                                                        <>
-                                                                                            <tr className="text-[11px]" key={index}>
-                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_KetCau ?? ""}</td>
-                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_SoLop ?? ""}</td>
-                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_CachX ?? ""}</td>
-                                                                                                <td className='border-r border-gray-200 text-center py-2 '>{detail.U_DoDay ?? ""}</td>
-                                                                                                <td className='text-center py-2 '>{detail.U_LoaiG ?? ""}</td>
-                                                                                            </tr>
-                                                                                        </>
-                                                                                    ))
-                                                                                }
-                                                                            </table>
-                                                                        </div> */}
-                                                                        {
-                                                                            item.detail.map((detail, index) => {
-                                                                                return (
-                                                                                    <div className="bg-gray-50" key={index}>
-                                                                                        {/* Header */}
-                                                                                        <div className="flex flex-col justify-start rounded-t-xl py-2 pt-2 px-4">
-                                                                                            <div className="text-[14px] font-bold px-1 text-[#17506B] ">
-                                                                                                Kho nhận:
-                                                                                                <span className="ml-2">{detail.WhsCode}</span>
-                                                                                            </div>
-                                                                                            <div className="text-[12px] font-semibold px-1 text-gray-700 ">
-                                                                                                Mã SP:
-                                                                                                <span className="ml-2">{detail.ItemCode}</span>
-                                                                                            </div>
-                                                                                            <div className="text-[12px] font-semibold px-1 text-gray-700 ">
-                                                                                                Tên SP:<span className="ml-2">{detail.ItemName}</span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="border-b-2 border-gray-200 ml-6 w-[5rem] h-[2%]"></div>
-                                                                                        <div className="space-y-2 py-2 px-6 pt-4 text-[12px]">
-                                                                                            <div className="grid grid-cols-2">
-                                                                                                <div className="font-semibold">Số lượng YC:</div>
-                                                                                                <div className="font-medium ">{detail.soLuongYC}</div>
-                                                                                            </div>
-                                                                                            <div className="grid grid-cols-2">
-                                                                                                <div className="font-semibold">Số lượng ĐC:</div>
-                                                                                                <div className="font-medium ">{detail.soLuongDC}</div>
-                                                                                            </div>
-                                                                                            <div className="grid grid-cols-2">
-                                                                                                <div className="font-semibold">Số lượng đã ĐC:</div>
-                                                                                                <div className="font-medium truncate">{detail.soLuongDaDC}</div>
-                                                                                            </div>
-                                                                                            <div className="grid grid-cols-2">
-                                                                                                <div className="font-semibold">Tồn kho:</div>
-                                                                                                <div className="font-medium ">{detail.OnHand}</div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                )
-                                                                            })
-                                                                        }
+                                                <div className="flex flex-col pb-4 bg-[#FAFAFA] lg:px-[20px] lg:py-[20px] h-full">
+                                                    <div className="xl:mx-auto xl:px-8 text-base w-full space-y-3">
+                                                        <div className="flex flex-col md:flex-row justify-between pt-2 items-center xl:px-0 md:px-0 lg:px-0 px-3">
+                                                            <div className="flex flex-col  w-full">
+                                                                <label className="font-medium">
+                                                                    Sản phẩm
+                                                                </label>
+                                                                <span className="text-[#17506B] text-xl font-bold">
+                                                                    {materialData?.itemName}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#f0faff]">
+                                                            <div className="flex justify-between pb-1 ">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                                                    <div className="font-semibold text-md">
+                                                                        Thông tin sản phẩm
                                                                     </div>
-                                                                </AccordionPanel>
-                                                            </AccordionItem>
-                                                        ))
-                                                    }
-                                                </Accordion>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex gap-2 items-center justify-between py-3 border-t text-[14px]">
+                                                                <Text className="font-semibold">
+                                                                    Lệnh sản xuất
+                                                                </Text>
+                                                                <span className="">
+                                                                    {materialData?.lsx}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex gap-2 items-center justify-between py-3 border-t text-[14px]">
+                                                                <Text className="font-semibold">
+                                                                    Mã SP
+                                                                </Text>
+                                                                <span className="">
+                                                                    {materialData?.itemCode}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex gap-2 items-center justify-between py-3 border-t text-[14px]">
+                                                                <Text className="font-semibold">
+                                                                    Mã SP đích
+                                                                </Text>
+                                                                <span className="">
+                                                                    {materialData?.itemSPDich}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex gap-2 items-center justify-between py-3 border-t text-[14px]">
+                                                                <Text className="font-semibold">
+                                                                    Tên SP đích
+                                                                </Text>
+                                                                <span className="text-right text-wrap w-[250px] sm:w-full">
+                                                                    {materialData?.itemSPDichName}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div
+                                                            id="grid-ket-cau-vcn"
+                                                            style={{
+                                                                height: 630,
+                                                                fontSize: 14,
+                                                                width: "100%",
+                                                            }}
+                                                            className="ag-theme-quartz hidden md:hidden lg:block xl:block 2xl:block">
+                                                            <AgGridReact
+                                                                rowData={materialData.data}
+                                                                columnDefs={agGridMaterialState.columns}
+                                                                autoGroupColumnDef={agGridMaterialState.autoGroupColumnDef}
+                                                                groupDisplayType={agGridMaterialState.groupDisplayType}
+                                                                getRowStyle={agGridMaterialState.getRowStyle}
+                                                            />
+                                                        </div>
+
+                                                        <div className="block md:block lg:hidden xl:hidden 2xl:hidden xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#f0faff]">
+                                                            <div className="flex justify-between pb-1 ">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                                                    <div className="font-semibold text-md">
+                                                                        Thông tin vật tư
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="w-full bg-[#f0faff]">
+                                                                <Accordion allowToggle className="mx-auto " defaultIndex={0}>
+                                                                    {
+                                                                        materialData.dataMobile.map((item, i) => (
+                                                                            <AccordionItem borderColor={"#DADADA"} className="rounded-md overflow-hidden mb-1" key={i}>
+                                                                                <h2>
+                                                                                    <AccordionButton className="bg-[#17506B] hover:!bg-[#17506B] flex justify-between items-center text-[#FFFFFF]" px={2}>
+                                                                                        <Box as="span" flex="1" textAlign="left" className="font-medium text-[#FFFFFF]" py={1}>
+                                                                                            <div className="flex items-center space-x-2">
+                                                                                                <div className="font-semibold text-sm">
+                                                                                                    Kho ĐC - {item.FromWhsCod ?? ''}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </Box>
+                                                                                        <AccordionIcon className="text-gray-500" />
+                                                                                    </AccordionButton>
+                                                                                </h2>
+                                                                                <AccordionPanel py={0} px={0} className="text-black text-sm bg-[#fffefe] py-3">
+                                                                                    <div className="h-fit flex flex-col gap-y-1 bg-[#f0faff]">
+                                                                                        {
+                                                                                            item.detail.map((detail, index) => {
+                                                                                                return (
+                                                                                                    <div className="border border-[#C6D2D9] bg-[#fffefe]" key={index}>
+                                                                                                        <div className="flex flex-col justify-start rounded-t-xl py-2 pt-2 px-1">
+                                                                                                            <div className="text-[14px] font-bold px-1 text-[#17506B] ">
+                                                                                                                <div className="flex gap-2 items-center justify-between">
+                                                                                                                    <div className="font-semibold">Kho nhận</div>
+                                                                                                                    <div className="font-medium text-right">{detail.WhsCode}</div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            <div className="text-[12px] font-bold px-1 ">
+                                                                                                                <div className="flex gap-2 items-center justify-between">
+                                                                                                                    <div className="font-semibold">Mã SP</div>
+                                                                                                                    <div className="font-medium text-right">{detail.ItemCode}</div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            <div className="text-[12px] font-bold px-1 ">
+                                                                                                                <div className="flex gap-2 items-center justify-between">
+                                                                                                                    <div className="font-semibold">Tên SP</div>
+                                                                                                                    <div className="font-medium text-right w-[200px] sm:w-full">{detail.ItemName}</div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div className="border-b-2 border-[#C6D2D9] ml-4 w-[50px] h-[2%]"></div>
+                                                                                                        <div className="space-y-2 py-2 px-2 pt-4 text-[12px]">
+                                                                                                            <div className="grid grid-cols-2">
+                                                                                                                <div className="font-semibold">Số lượng YC</div>
+                                                                                                                <div className="font-medium text-right">{detail.soLuongYC}</div>
+                                                                                                            </div>
+                                                                                                            <div className="grid grid-cols-2">
+                                                                                                                <div className="font-semibold">Số lượng ĐC</div>
+                                                                                                                <div className="font-medium text-right">{detail.soLuongDC}</div>
+                                                                                                            </div>
+                                                                                                            <div className="grid grid-cols-2">
+                                                                                                                <div className="font-semibold">Số lượng đã ĐC</div>
+                                                                                                                <div className="font-medium text-right">{detail.soLuongDaDC}</div>
+                                                                                                            </div>
+                                                                                                            <div className="grid grid-cols-2">
+                                                                                                                <div className="font-semibold">Tồn kho</div>
+                                                                                                                <div className="font-medium text-right">{detail.OnHand}</div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                )
+                                                                                            })
+                                                                                        }
+                                                                                    </div>
+                                                                                </AccordionPanel>
+                                                                            </AccordionItem>
+                                                                        ))
+                                                                    }
+                                                                </Accordion>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
                                             </>
                                         ) : (
                                             <div className="flex w-full h-full justify-center items-center text-[20px]">
@@ -1344,7 +1409,7 @@ function PlywoodFinishedGoodsReceipt() {
                                             clearMaterialData();
                                             onModalStructureClose();
                                         }}
-                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                        className="bg-gray-300 p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Đóng
                                     </button>
