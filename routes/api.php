@@ -11,7 +11,10 @@ use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
 use App\Http\Controllers\api\ReportController;
+use App\Http\Controllers\sap_controller\ORSCController;
 use App\Http\Controllers\sap\GoodsManagementController;
+use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
+use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -171,6 +174,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Route::get('/report/download/drying-process', [ReportController::class, 'dryingProcess'])->name('create.dryingprocess');
     // Route::get('/report/download/drying-kiln-history', [ReportController::class, 'dryingKilnHistory'])->name('create.kilnhistory');
     Route::get('/nguyentest', [ProductionController::class, 'getQCWarehouseByUser'])->name('create.kilnhistorydetail');
+
+
+    /**
+     * NEW
+     * 17-10-2025
+     * 
+     * */ 
+
+    Route::get('/ORSC/layDanhSachToTheoNhaMayCBG', [ORSCController::class, 'layDanhSachToTheoNhaMayCBG'])->name('layDanhSachToTheoNhaMayCBG');
+
+    Route::group(['prefix' => 'sap/masterdata'], function () {
+        Route::get('danhSachNhaMayCBG', [SapMasterDataController::class, 'danhSachNhaMayCBG'])->name('danhSachNhaMayCBG');
+    });
+
+    Route::group(['prefix' => 'sap/report'], function(){
+        Route::get('baoCaoSanLuongQuyDoiCBG', [Sap_controllerReportController::class, 'baoCaoSanLuongQuyDoiCBG'])->name('baoCaoSanLuongQuyDoiCBG');
+    });
 });
 
 
