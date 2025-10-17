@@ -35,10 +35,10 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                 <div className="font-bold text-[15px] ">
                                                     Đơn vị giao hàng
                                                 </div>
-                                                <div className="font-semibold text-[13px] text-[#1B536E] truncate" title={item.deliveryName}>
+                                                <div className="font-semibold text-[13px] text-[#1B536E]" title={item.deliveryName}>
                                                     {item.deliveryName}
                                                 </div>
-                                                <div className="text-[13px] mt-2 truncate" title={item.deliveryAddress}>
+                                                <div className="text-[13px] mt-2" title={item.deliveryAddress}>
                                                     {item.deliveryAddress ?? '-'}
                                                 </div>
                                                 <div className="text-[13px]">

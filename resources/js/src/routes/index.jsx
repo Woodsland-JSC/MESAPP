@@ -95,6 +95,7 @@ import ProductionOrder from "../pages/reports/plywoods/production-order";
 
 import QCCBG from '../pages/workspace/wood-working/qc-cbg/index';
 import ChungTuNhapKhoChiTiet from "../pages/workspace/wood-working/qc-cbg/chung_tu_nhap_kho/detail";
+import SanLuongQuyDoi from "../pages/reports/wood-working/san-luong-quy-doi";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -483,6 +484,16 @@ function AppRoutes() {
                         }
                     />
 
+                    <Route
+                        path="/reports/wood-working/san-luong-quy-doi"
+                        element={
+                            <ProtectedRoute>
+                                <SanLuongQuyDoi />
+                            </ProtectedRoute>
+                        }
+                        
+                    />
+
                     {/* VCN Reports */}
                     <Route
                         path="/reports/plywoods/receipt-in-sap"
@@ -532,7 +543,7 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
-                     {/* <Route
+                    {/* <Route
                         path="/reports/plywoods/production-order"
                         element={
                             <ProtectedRoute>
@@ -549,7 +560,7 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     /> */}
-                    
+
                     {/* <Route
                         path="/reports/qc-handling"
                         element={

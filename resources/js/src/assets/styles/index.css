@@ -546,3 +546,36 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     background-color: #17506B !important;
     color: #FFFFFF !important;
 } */
+
+/* #app-ag-grid .ag-row.ag-row-last:not(.ag-row-group) {
+    background-color: #e4f2fd !important;
+} */
+
+#app-ag-grid .ag-header-cell{
+    background-color: #17506B;
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-menu-alt{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-asc{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-desc{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-filter{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-header-cell-resize::after{
+    color: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+#app-ag-grid .ag-header-viewport {
+    background-color: #17506B;
+}
