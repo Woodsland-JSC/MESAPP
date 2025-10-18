@@ -364,11 +364,7 @@ function ControllerCard(props) {
                 });
 
                 let min = Math.min(...thinkness);
-                let max = Math.max(...thinkness);
-
-                console.log("min", min);
-                console.log("max", max);
-                
+                let max = Math.max(...thinkness);                
 
                 if (selectedPallet.thickness < min - 3) {
                     toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);

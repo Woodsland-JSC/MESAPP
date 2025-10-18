@@ -196,6 +196,12 @@ const CBGReports = [
         link: "/reports/wood-working/san-luong-quy-doi",
         description: "Báo cáo sản lượng quy đổi"
     },
+    {
+        id: "0015",
+        name: "Báo cáo quỹ lương",
+        link: "/reports/wood-working/quy-luong",
+        description: "Báo cáo quỹ lương"
+    },
 ];
 
 const QCReports = [
