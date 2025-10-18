@@ -1,16 +1,16 @@
 import { FaArrowDown, FaArrowLeft, FaArrowRotateLeft, FaArrowUpRightFromSquare, FaCheck } from "react-icons/fa6";
 import Layout from "../../../layouts/layout";
 import { useNavigate } from "react-router-dom";
-import { IoClose, IoSearch } from "react-icons/io5";
+import { IoSearch } from "react-icons/io5";
 import DatePicker from "react-datepicker";
 import { useEffect, useRef, useState } from "react";
-import { getFirstDayOfCurrentMonth } from '../../../utils/date.utils';
+import { getCurrentYear, getFirstDayOfCurrentMonth } from '../../../utils/date.utils';
 import { danhSachNhaMayCBG } from "../../../api/MasterDataApi";
 import toast from "react-hot-toast";
 import { IoMdRadioButtonOff, IoMdRadioButtonOn } from "react-icons/io";
 import { layDanhSachToTheoNhaMayCBG } from "../../../api/ORSCApi";
-import { Checkbox, Radio, RadioGroup, Spinner } from "@chakra-ui/react";
-import { baoCaoSanLuongQuyDoiCBG } from "../../../api/ReportSAPApi";
+import { Radio, RadioGroup, Spinner } from "@chakra-ui/react";
+import { baoCaoQuyLuongCBG, baoCaoSanLuongQuyDoiCBG } from "../../../api/ReportSAPApi";
 import { AgGridReact } from "ag-grid-react";
 import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 import moment from "moment";
@@ -19,26 +19,19 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import Select from "react-select";
 
-const SanLuongQuyDoi = () => {
+const BaoCaoQuyLuong = () => {
     const navigate = useNavigate();
-
     const gridRef = useRef();
-
     const [filter, setFilter] = useState({
-        fromDate: getFirstDayOfCurrentMonth(),
-        toDate: new Date(),
+        year: new Date(),
         factory: ''
     });
-
     const [factories, setFactories] = useState([]);
     const [selectedFactory, setSelectedFactory] = useState(null);
-    const [teams, setTeams] = useState([]);
-    const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingReport, setLoadingReport] = useState(false);
     const [reports, setReports] = useState([]);
     const [factoryOptions, setFactoryOptions] = useState([]);
-    const [teamOptions, setTeamOptions] = useState([]);
 
     const getFactories = async () => {
         try {
@@ -51,60 +44,40 @@ const SanLuongQuyDoi = () => {
                     value: item.U_FAC
                 })
             })
-            console.log("options", options);
-
             setFactoryOptions(options);
-
         } catch (error) {
             toast.error('Lấy danh sách nhà máy có lỗi.');
         }
     }
 
     const handleSelectFactory = async (value) => {
-        setTeam(null);
-        setTeams([]);
         setSelectedFactory(value);
-        await getTeams(value);
-    }
-
-    const getTeams = async (factory) => {
-        try {
-            setLoading(true);
-            let res = await layDanhSachToTheoNhaMayCBG(factory);
-            setTeams(res);
-            setLoading(false);
-
-            let options = [];
-
-            res.forEach(item => {
-                options.push({
-                    label: item.Name,
-                    value: item.Code
-                })
-            })
-            options = options.sort((a, b) => a.label.localeCompare(b.label, 'vi', { numeric: true }));
-
-            setTeamOptions(options)
-        } catch (error) {
-            toast.error('Lấy danh sách tổ có lỗi.');
-            setLoading(false);
-        }
     }
 
     const getReports = async () => {
         try {
             setLoadingReport(true);
-            let _t = teams.find(item => item.Code == team);
-            let res = await baoCaoSanLuongQuyDoiCBG({
-                fromDate: filter.fromDate,
-                toDate: filter.toDate,
-                team: team,
-                CD: _t.CDOAN
-
+            let res = await baoCaoQuyLuongCBG({
+                year: new Date(filter.year).getFullYear(),
+                factory: selectedFactory
             });
-            res = res.sort((item1, item2) => new Date(item1.DocDate) - new Date(item2.DocDate))
+            console.log("res", res);
+
+            // res = res.sort((item1, item2) => new Date(item1.DocDate) - new Date(item2.DocDate))
             res.forEach(item => {
-                item.QUANTITY = Number(item.QUANTITY);
+                item.M3SP = Number(item.M3SP);
+                item.Month1 = Number(item.Month1);
+                item.Month2 = Number(item.Month2);
+                item.Month3 = Number(item.Month3);
+                item.Month4 = Number(item.Month4);
+                item.Month5 = Number(item.Month5);
+                item.Month6 = Number(item.Month6);
+                item.Month7 = Number(item.Month7);
+                item.Month8 = Number(item.Month8);
+                item.Month9 = Number(item.Month9);
+                item.Month10 = Number(item.Month10);
+                item.Month11 = Number(item.Month11);
+                item.Month12 = Number(item.Month12);
             });
             setReports(res);
             setLoadingReport(false);
@@ -123,24 +96,24 @@ const SanLuongQuyDoi = () => {
 
     const [colDefs] = useState([
         {
-            headerName: "LSX",
-            field: "U_GRID",
+            headerName: "Mã Tổ",
+            field: "To",
             filter: true,
-            width: 150,
+            width: 250,
             rowGroup: true,
             enableRowGroup: true,
             hide: true,
-            sort: "asc",
-            pinned: "left",
         },
         {
-            headerName: "Ngày",
-            field: "DocDate",
+            headerName: "Tên tổ",
+            field: "ToName",
             filter: true,
-            valueFormatter: param => {
-                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY')
-            },
+            width: 150
+        },
+        {
+            headerName: "Công đoạn",
+            field: "CDOANName",
+            filter: true,
             width: 150
         },
         {
@@ -157,77 +130,166 @@ const SanLuongQuyDoi = () => {
             flex: 1
         },
         {
-            headerName: "CĐ",
-            field: "U_CDOAN",
+            headerName: "M3 SP",
+            field: "M3SP",
             filter: true,
-            width: 100
-        },
-        {
-            headerName: "Số lượng",
-            field: "QUANTITY",
-            filter: true,
-            width: 170,
+            width: 150,
             aggFunc: "sum",
-            headerComponentParams: { displayName: "Số lượng" }
-        },
-        {
-            headerName: "Tổ giao",
-            field: "U_To",
-            filter: true,
-            width: 170
-        },
-        {
-            headerName: "Ngày giao",
-            field: "CreateDate",
-            filter: true,
-            valueFormatter: param => {
-                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY')
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
             },
-            width: 170
+            headerComponentParams: { displayName: "M3 SP" }
         },
         {
-            headerName: "Tổ nhận",
-            field: "U_Next",
+            headerName: "Tháng 1",
+            field: "Month1",
             filter: true,
-            width: 170
-        },
-        {
-            headerName: "Ngày nhận",
-            field: "CreateDate",
-            filter: true,
-            valueFormatter: param => {
-                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY')
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
             },
-            width: 170
+            headerComponentParams: { displayName: "Tháng 1" }
         },
         {
-            headerName: "Dày",
-            field: "U_CDay",
+            headerName: "Tháng 2",
+            field: "Month2",
             filter: true,
-            width: 150
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 2" }
         },
         {
-            headerName: "Rộng",
-            field: "U_CRong",
+            headerName: "Tháng 3",
+            field: "Month3",
             filter: true,
-            width: 150
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 3" }
         },
         {
-            headerName: "Dài",
-            field: "U_CDai",
+            headerName: "Tháng 4",
+            field: "Month4",
             filter: true,
-            width: 150
-        }
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 4" }
+        },
+        {
+            headerName: "Tháng 5",
+            field: "Month5",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 5" }
+        },
+        {
+            headerName: "Tháng 6",
+            field: "Month6",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 6" }
+        },
+        {
+            headerName: "Tháng 7",
+            field: "Month7",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 7" }
+        },
+        {
+            headerName: "Tháng 8",
+            field: "Month8",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 8" }
+        },
+        {
+            headerName: "Tháng 9",
+            field: "Month9",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 9" }
+        },
+        {
+            headerName: "Tháng 10",
+            field: "Month10",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 10" }
+        },
+        {
+            headerName: "Tháng 11",
+            field: "Month11",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 11" }
+        },
+        {
+            headerName: "Tháng 12",
+            field: "Month12",
+            filter: true,
+            width: 150,
+            aggFunc: "sum",
+            valueFormatter: params => {
+                if (params.value == null) return '';
+                return Number(params.value).toFixed(6);
+            },
+            headerComponentParams: { displayName: "Tháng 12" }
+        },
     ]);
 
     const handleExportExcel = () => {
-        const fileName = `Báo cáo sản lượng quy đổi.xlsx`;
-
-        gridRef.current.api.exportDataAsExcel({
-            fileName,
-        });
+        const fileName = `Báo cáo quỹ lương ${selectedFactory} - ${getCurrentYear()}.xlsx`;
+        gridRef.current.api.exportDataAsExcel({ fileName });
     }
 
     useEffect(() => {
@@ -235,10 +297,10 @@ const SanLuongQuyDoi = () => {
     }, []);
 
     useEffect(() => {
-        if (!team && !selectedFactory) return;
+        if (!selectedFactory) return;
         getReports();
 
-    }, [filter.fromDate, filter.toDate, team]);
+    }, [filter.year, selectedFactory]);
 
     return (
         <Layout>
@@ -257,10 +319,10 @@ const SanLuongQuyDoi = () => {
                                     Báo cáo chế biến gỗ
                                 </div>
                                 <div className="serif text-3xl font-bold xl:block lg:block md:block hidden">
-                                    Báo cáo sản lượng quy đổi
+                                    Báo cáo quỹ lương
                                 </div>
                                 <div className="serif text-3xl font-bold xl:hidden lg:hidden md:hidden block">
-                                    Báo cáo sản lượng quy đổi
+                                    Báo cáo quỹ lương
                                 </div>
                             </div>
                         </div>
@@ -312,37 +374,22 @@ const SanLuongQuyDoi = () => {
                     <div className=" bg-white rounded-xl py-2 pb-3 xl:display:block lg:block md:block hidden">
                         {/* Filter */}
                         <div className="flex items-center space-x-3 divide-x-2 divide-gray-100 px-4 mt-1">
-                            <div className="flex space-x-3 w-1/4">
+                            <div className="flex space-x-3 w-1/4 date-picker-custom">
                                 <div className="col-span-1 w-full">
                                     <label
                                         htmlFor="indate"
                                         className="block mb-1 text-sm font-medium text-gray-900 "
                                     >
-                                        Từ ngày
+                                        Chọn năm
                                     </label>
                                     <DatePicker
-                                        selected={filter.fromDate}
-                                        dateFormat="dd/MM/yyyy"
+                                        showYearPicker
+                                        selected={filter.year}
+                                        dateFormat="yyyy"
                                         onChange={(date) => {
-                                            setFilter(pre => ({ ...pre, fromDate: date }));
+                                            setFilter(pre => ({ ...pre, year: date }));
                                         }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 text-sm font-medium text-gray-900 "
-                                    >
-                                        Đến ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={filter.toDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setFilter(pre => ({ ...pre, toDate: date }));
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                        className="border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
                                 </div>
                             </div>
@@ -383,177 +430,6 @@ const SanLuongQuyDoi = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Team Select */}
-                        {selectedFactory && (
-                            <div className=" border-2 border-[#C6D2D9] bg-[#f0faff] rounded-lg p-2 py-2 px-4 pb-4  m-2 mt-3 mx-4">
-                                {
-                                    loading ? (
-                                        <div className="text-center my-3 mt-6">
-                                            <Spinner
-                                                thickness="7px"
-                                                speed="0.65s"
-                                                emptyColor="gray.200"
-                                                color="#155979"
-                                                size="xl"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <div className="flex items-center justify-between space-x-3">
-                                                <div className="font-semibold">
-                                                    Chọn các tổ thực hiện:
-                                                </div>
-                                            </div>
-                                            <div className="w-full grid grid-cols-5">
-                                                <div className="col-span-1 space-y-2">
-                                                    <div className="text-[#155979] uppercase font-medium">
-                                                        Runnen
-                                                    </div>
-                                                    <RadioGroup onChange={setTeam} value={team}>
-                                                        {teams
-                                                            ?.filter(
-                                                                (item) =>
-                                                                    item.CDOAN === "RN"
-                                                            )
-                                                            .sort((a, b) =>
-                                                                a.Name.localeCompare(
-                                                                    b.Name
-                                                                )
-                                                            )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Radio
-                                                                        value={
-                                                                            item.Code
-                                                                        }
-                                                                    >
-                                                                        {item.Name}
-                                                                    </Radio>
-                                                                </div>
-                                                            ))}
-                                                    </RadioGroup>
-                                                </div>
-                                                <div className="col-span-1 space-y-2 ">
-                                                    <div className="text-[#155979] uppercase font-medium">
-                                                        Sơ chế
-                                                    </div>
-                                                    <RadioGroup onChange={setTeam} value={team}>
-                                                        {teams
-                                                            ?.filter(
-                                                                (item) =>
-                                                                    item.CDOAN === "SC"
-                                                            )
-                                                            .sort((a, b) =>
-                                                                a.Name.localeCompare(
-                                                                    b.Name
-                                                                )
-                                                            )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Radio
-                                                                        value={
-                                                                            item.Code
-                                                                        }
-                                                                    >
-                                                                        {item.Name}
-                                                                    </Radio>
-                                                                </div>
-                                                            ))}
-                                                    </RadioGroup>
-
-                                                </div>
-                                                <div className="col-span-1 space-y-2">
-                                                    <div className="text-[#155979] uppercase font-medium">
-                                                        Tinh chế
-                                                    </div>
-                                                    <RadioGroup onChange={setTeam} value={team}>
-                                                        {teams
-                                                            ?.filter(
-                                                                (item) =>
-                                                                    item.CDOAN === "TC"
-                                                            )
-                                                            .sort((a, b) =>
-                                                                a.Name.localeCompare(
-                                                                    b.Name
-                                                                )
-                                                            )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Radio
-                                                                        value={
-                                                                            item.Code
-                                                                        }
-                                                                    >
-                                                                        {item.Name}
-                                                                    </Radio>
-                                                                </div>
-                                                            ))}
-                                                    </RadioGroup>
-
-                                                </div>
-                                                <div className="col-span-1 space-y-2">
-                                                    <div className="text-[#155979] uppercase font-medium">
-                                                        Hoàn thiện
-                                                    </div>
-                                                    <RadioGroup onChange={setTeam} value={team}>
-                                                        {teams
-                                                            ?.filter(
-                                                                (item) =>
-                                                                    item.CDOAN === "HT"
-                                                            )
-                                                            .sort((a, b) =>
-                                                                a.Name.localeCompare(
-                                                                    b.Name
-                                                                )
-                                                            )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Radio
-                                                                        value={
-                                                                            item.Code
-                                                                        }
-                                                                    >
-                                                                        {item.Name}
-                                                                    </Radio>
-                                                                </div>
-                                                            ))}
-                                                    </RadioGroup>
-
-                                                </div>
-                                                <div className="col-span-1 space-y-2">
-                                                    <div className="text-[#155979] uppercase font-medium">
-                                                        Đóng gói
-                                                    </div>
-                                                    <RadioGroup onChange={setTeam} value={team}>
-                                                        {teams
-                                                            ?.filter(
-                                                                (item) =>
-                                                                    item.CDOAN === "DG"
-                                                            )
-                                                            .sort((a, b) =>
-                                                                a.Name.localeCompare(
-                                                                    b.Name
-                                                                )
-                                                            )
-                                                            .map((item, index) => (
-                                                                <div key={index}>
-                                                                    <Radio
-                                                                        value={
-                                                                            item.Code
-                                                                        }
-                                                                    >
-                                                                        {item.Name}
-                                                                    </Radio>
-                                                                </div>
-                                                            ))}
-                                                    </RadioGroup>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                            </div>
-                        )}
                     </div>
 
                     <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 xl:display:hidden lg:hidden md:hidden block">
@@ -566,29 +442,14 @@ const SanLuongQuyDoi = () => {
                                         htmlFor="indate"
                                         className="block mb-1 font-medium text-gray-900 "
                                     >
-                                        Từ ngày
+                                        Chọn năm
                                     </label>
                                     <DatePicker
-                                        selected={filter.fromDate}
-                                        dateFormat="dd/MM/yyyy"
+                                        showYearPicker
+                                        selected={filter.year}
+                                        dateFormat="yyyy"
                                         onChange={(date) => {
-                                            setFilter(pre => ({ ...pre, fromDate: date }));
-                                        }}
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                                    />
-                                </div>
-                                <div className="col-span-1 w-full">
-                                    <label
-                                        htmlFor="indate"
-                                        className="block mb-1 font-medium text-gray-900 "
-                                    >
-                                        Đến ngày
-                                    </label>
-                                    <DatePicker
-                                        selected={filter.toDate}
-                                        dateFormat="dd/MM/yyyy"
-                                        onChange={(date) => {
-                                            setFilter(pre => ({ ...pre, toDate: date }));
+                                            setFilter(pre => ({ ...pre, year: date }));
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -608,32 +469,8 @@ const SanLuongQuyDoi = () => {
                                         options={factoryOptions}
                                         defaultOptions
                                         onChange={(option) => {
-                                            // setTeam(value);
-                                            console.log("value", option);
                                             setFilter(prev => ({ ...prev, factory: option.value }));
                                             handleSelectFactory(option.value);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Team Filter */}
-                            <div className="flex space-x-3 w-full">
-                                <div className="w-full">
-                                    <label
-                                        htmlFor="first_name"
-                                        className="block mb-1 font-medium text-gray-900"
-                                    >
-                                        Chọn công đoạn
-                                    </label>
-                                    <Select
-                                        placeholder="Chọn công đoạn..."
-                                        options={teamOptions}
-                                        defaultOptions
-                                        onChange={(option) => {
-                                            setTeam(option.value);
-                                            console.log("option", option);
-
                                         }}
                                     />
                                 </div>
@@ -647,7 +484,7 @@ const SanLuongQuyDoi = () => {
                                 <div className="dots my-1"></div>
                             </div>
                         ) : (
-                            reports.length > 0 ? (
+                            (selectedFactory && reports.length) > 0 ? (
                                 <>
                                     <div className="xl:display:block lg:block md:block hidden">
                                         <div
@@ -670,7 +507,7 @@ const SanLuongQuyDoi = () => {
                                         </div>
                                     </div>
 
-                                    <div className="xl:display:hidden lg:hidden md:hidden sm:block block mt-3 ">
+                                    {/* <div className="xl:display:hidden lg:hidden md:hidden sm:block block mt-3 ">
                                         {
                                             reports.map((report, i) => (
                                                 <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4 mt-4" key={i}>
@@ -748,12 +585,14 @@ const SanLuongQuyDoi = () => {
                                                 </div>
                                             ))
                                         }
-                                    </div>
+                                    </div> */}
                                 </>
                             ) : (
-                                <div className="mt-4 bg-[#C2C2CB] items-center justify-center text-center p-2 px-4 pr-1 rounded-lg w-full">
-                                    Không có dữ liệu để hiển thị.
-                                </div>
+                                selectedFactory && (
+                                    <div className="mt-4 bg-[#C2C2CB] items-center justify-center text-center p-2 px-4 pr-1 rounded-lg w-full">
+                                        Không có dữ liệu để hiển thị.
+                                    </div>
+                                )
                             )
                         )}
                 </div>
@@ -762,4 +601,4 @@ const SanLuongQuyDoi = () => {
     )
 }
 
-export default SanLuongQuyDoi;
+export default BaoCaoQuyLuong;

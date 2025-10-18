@@ -42,6 +42,8 @@ class ReportController extends Controller
         T3."U_CDay" , T3."U_CRong" , T3."U_CDai",T1."U_GRID",T2."CreateDate",T1."U_Next";
     SQL;
 
+    private $SQL_BAO_CAO_QUY_LUONG = '{call USP_REPORT_CONVERTQTY(?, ?)}';
+
     public function __construct(HanaService $hanaService)
     {
         $this->hanaService = $hanaService;
@@ -56,6 +58,18 @@ class ReportController extends Controller
             return response()->json([
                 'message' => $e->getMessage()
             ], 500);
-        }
+        } 
+    }
+
+    public function baoCaoQuyLuongCBG(Request $request){
+        try {
+            $params = [$request->year, $request->factory];
+            $results = $this->hanaService->select($this->SQL_BAO_CAO_QUY_LUONG, $params);
+            return response()->json($results);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        } 
     }
 }

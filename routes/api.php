@@ -190,6 +190,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'sap/report'], function(){
         Route::get('baoCaoSanLuongQuyDoiCBG', [Sap_controllerReportController::class, 'baoCaoSanLuongQuyDoiCBG'])->name('baoCaoSanLuongQuyDoiCBG');
+        Route::get('bao-cao-quy-luong-cbg', [Sap_controllerReportController::class, 'baoCaoQuyLuongCBG'])->name('baoCaoQuyLuongCBG');
+        
     });
 });
 

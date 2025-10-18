@@ -8,3 +8,10 @@ export const baoCaoSanLuongQuyDoiCBG = (params) => {
         params: params
     });
 }
+
+export const baoCaoQuyLuongCBG = (params) => {
+    const url = `${BASEURL}/bao-cao-quy-luong-cbg`;
+    return axiosClient().get(url, {
+        params: params
+    });
+}

@@ -96,6 +96,7 @@ import ProductionOrder from "../pages/reports/plywoods/production-order";
 import QCCBG from '../pages/workspace/wood-working/qc-cbg/index';
 import ChungTuNhapKhoChiTiet from "../pages/workspace/wood-working/qc-cbg/chung_tu_nhap_kho/detail";
 import SanLuongQuyDoi from "../pages/reports/wood-working/san-luong-quy-doi";
+import BaoCaoQuyLuong from "../pages/reports/wood-working/quy-luong";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -489,6 +490,16 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <SanLuongQuyDoi />
+                            </ProtectedRoute>
+                        }
+                        
+                    />
+
+                    <Route
+                        path="/reports/wood-working/quy-luong"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoQuyLuong />
                             </ProtectedRoute>
                         }
                         
