@@ -141,7 +141,7 @@ const productionApi = {
         // const url = `/confirm-qc-vcn`;
         return axiosClient().post(url, data);
     },
-    checkReceiptsCBG: ({id, ItemCode, Quantity, CongDoan, Factory}) => {
+    checkReceiptsCBG: ({ id, ItemCode, Quantity, CongDoan, Factory }) => {
         const url = `/production/check-receipts`;
         // const url = `/production/accept-receipts`;
         return axiosClient().get(url, {
@@ -187,6 +187,20 @@ const productionApi = {
     getReturnCode: () => {
         const url = `/items-route`;
         return axiosClient().get(url);
+    },
+
+    //Update RONG
+    cancelDisassemblyOrder: (data) => {
+        const url = `/vcn/cancel-disassembly-order`;
+        return axiosClient().post(url, data);
+    },
+    closeDisassemblyOrder: (data) => {
+        const url = `/vcn/close-disassembly-order`;
+        return axiosClient().post(url, data);
+    },
+    adjustRongQuantity: (data) => { 
+        const url = `/vcn/adjust-rong-quantity`;
+        return axiosClient().post(url, data);
     },
 };
 

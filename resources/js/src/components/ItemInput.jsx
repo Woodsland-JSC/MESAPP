@@ -42,7 +42,7 @@ import { FaCircleRight, FaDiceD6 } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaCheckCircle, FaDollyFlatbed, FaInstalod } from "react-icons/fa";
 import { FaExclamationCircle, FaCaretRight } from "react-icons/fa";
-import { TbPlayerTrackNextFilled } from "react-icons/tb";
+import { TbDotsVertical, TbMenu, TbMenu2, TbPencil, TbPlayerTrackNextFilled } from "react-icons/tb";
 import {
     MdAssignmentReturn,
     MdDangerous,
@@ -57,6 +57,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
 import { BiSolidBadgeCheck } from "react-icons/bi";
 import { VAN_CONG_NGHIEP } from "../shared/data";
+import { set } from "date-fns";
 
 const ItemInput = ({
     data,
@@ -109,11 +110,34 @@ const ItemInput = ({
         onClose: onModalClose,
     } = useDisclosure();
 
+    // New disclosure hooks for confirmation modals
+    const {
+        isOpen: isCancelOrderModalOpen,
+        onOpen: onCancelOrderModalOpen,
+        onClose: onCancelOrderModalClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isCloseOrderModalOpen,
+        onOpen: onCloseOrderModalOpen,
+        onClose: onCloseOrderModalClose,
+    } = useDisclosure();
+
+    // New disclosure hook for adjust rong quantity modal
+    const {
+        isOpen: isAdjustRongQuantityModalOpen,
+        onOpen: onAdjustRongQuantityModalOpen,
+        onClose: onAdjustRongQuantityModalClose,
+    } = useDisclosure();
+
     const [loading, setLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [deleteProcessingLoading, setDeleteProcessingLoading] =
         useState(false);
     const [deleteErrorLoading, setDeleteErrorLoading] = useState(false);
+    const [cancelDisassemblyOrderLoading, setCancelDisassemblyOrderLoading] = useState(false);
+    const [closeDisassemblyOrderLoading, setCloseDisassemblyOrderLoading] = useState(false);
+    const [adjustRongQuantityLoading, setAdjustRongQuantityLoading] = useState(false);
 
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
     const [selectedFaultItem, setSelectedFaultItem] = useState({
@@ -138,151 +162,230 @@ const ItemInput = ({
     const [selectedError, setSelectedError] = useState(null);
     const [dialogType, setDialogType] = useState(null);
     const [selectedQCLogging, setSelectedQCLogging] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null); 
+    const [selectedNotification, setSelectedNotification] = useState({
+        ItemCode: "",
+        ItemName: "",
+        Quantity: "",
+    }); 
+    const [adjustQuantity, setAdjustQuantity] = useState(""); 
 
     const [fromDate, setFromDate] = useState(new Date().setHours(0, 0, 0, 0));
     const [toDate, setToDate] = useState(new Date().setHours(23, 59, 59, 999));
+
+    const loadCBGItemDetails = async (item) => {
+        setLoading(true);
+        const params = {
+            SPDICH: data.SPDICH,
+            ItemCode: item.ItemChild,
+            TO: item.TO,
+        };
+        try {
+            const res = await productionApi.getFinishedGoodsDetail(params);
+            console.log("Chi tiết thành phẩm: ", res);
+            setSelectedItemDetails({
+                ...item,
+                CDay: item.CDay,
+                CRong: item.CRong,
+                CDai: item.CDai,
+                ItemInfo: res.ItemInfo,
+                stockQuantity: res.maxQuantity,
+                CongDoan: res.CongDoan,
+                SubItemWhs: res.SubItemWhs,
+                factories: res.Factorys?.filter(
+                    (item) => item.Factory !== user.plant
+                ).map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+                stocks: res.stocks,
+                maxQty: res.maxQty,
+                remainQty: res.remainQty,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
+                returnedData: res.returnedHistory,
+            });
+            onModalOpen();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error || "Có lỗi khi lấy dữ liệu item."
+            );
+            console.error(error);
+        }
+        setLoading(false);
+    };
+
+    const loadRongItemDetails = async (item) => {
+        setLoading(true);
+        try {
+            const params = {
+                FatherCode: item.ItemChild,
+                TO: item.TO,
+                version: item.Version,
+                ProdType: item.ProdType,
+            };
+            const res =
+                await productionApi.getFinishedRongPlywoodGoodsDetail(
+                    params
+                );
+            console.log(
+                "Thông tin lệnh phân rã rong: ",
+                res.disassemblyOrders
+            );
+            setSelectedItemDetails({
+                ...item,
+                CongDoan: res.CongDoan,
+                FatherStock: res.FatherStock,
+                factories: res.Factorys?.map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                disassemblyOrders: res.disassemblyOrders,
+                stocks: res.stocks,
+                SubItemCode: item.ChildName,
+                SubItemName: item.ItemChild,
+            });
+
+            // Tạo mảng lưu dữ liệu rong
+            const RONGReceiptData = res.stocks.map((stock, key) => ({
+                ItemCode: stock.ItemCode,
+                ItemName: stock.ItemName,
+                CompleQty: "",
+                RejectQty: "",
+                ConLai: parseInt(stock.ConLai),
+                CDay: stock.CDay,
+                CRong: stock.CRong,
+                CDai: stock.CDai,
+                factories: "",
+            }));
+            setRongData(RONGReceiptData);
+            onModalOpen();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error ||
+                    "Có lỗi khi lấy dữ liệu item."
+            );
+            console.error(error);
+        }
+        setLoading(false);
+    };
+
+    const loadPlywoodItemDetails = async (item) => {
+        setLoading(true);
+        try {
+            const params = {
+                SPDICH: data.SPDICH,
+                ItemCode: item.ItemChild,
+                TO: item.TO,
+                Version: item.Version,
+                ProdType: item.ProdType,
+            };
+            const res =
+                await productionApi.getFinishedPlywoodGoodsDetail(
+                    params
+                );
+            console.log("Chi tiết thành phẩm: ", res);
+            setSelectedItemDetails({
+                ...item,
+                ItemInfo: res.ItemInfo,
+                stockQuantity: res.maxQuantity,
+                remainQty: res.remainQty,
+                CongDoan: res.CongDoan,
+                ProdType: res.ProdType,
+                SubItemWhs: res.SubItemWhs,
+                factories: res.Factorys?.filter(
+                    (item) => item.Factory !== user.plant
+                ).map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+                stocks: res.stocks,
+                maxQty: res.maxQty,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
+            });
+            onModalOpen();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error ||
+                    "Có lỗi khi lấy dữ liệu item."
+            );
+            console.error(error);
+        }
+        setLoading(false);
+    };
+
+    const cancelOrder = async (order) => {
+        try {
+            const payload = {
+                id: order.id,
+            };
+            setCancelDisassemblyOrderLoading(true);
+            
+            const res = await productionApi.cancelDisassemblyOrder(payload);
+            toast.success("Hủy lệnh thành công!");
+            
+            if (choosenItem) {
+                if (choosenItem.CDOAN === "RO") {
+                    await loadRongItemDetails(choosenItem);
+                }
+            }
+
+            setCancelDisassemblyOrderLoading(false);
+            
+            onCancelOrderModalClose();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error ||
+                    "Đã xảy ra lỗi khi hủy lệnh. Vui lòng thử lại sau."
+            );
+            setCancelDisassemblyOrderLoading(false);
+            console.error(error);
+        }
+    };
+
+    const closeOrder = async (order) => {
+        try {
+            const payload = {
+                id: order.id,
+            };
+
+            setCloseDisassemblyOrderLoading(true);
+            
+            const res = await productionApi.closeDisassemblyOrder(payload);
+            toast.success("Đóng lệnh thành công!");
+            
+            if (choosenItem) {
+                if (choosenItem.CDOAN === "RO") {
+                    await loadRongItemDetails(choosenItem);
+                }
+            }
+
+            setCloseDisassemblyOrderLoading(false);
+            
+            onCloseOrderModalClose();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error ||
+                    "Đã xảy ra lỗi khi đóng lệnh. Vui lòng thử lại sau."
+            );
+            setCloseDisassemblyOrderLoading(false);
+            console.error(error);
+        }
+    };
 
     const openInputModal = async (item) => {
         console.log("Item đã chọn: ", item);
         console.log("Nhà máy hiện tại: ", selectedFactory);
         if (variant === "CBG") {
-            setLoading(true);
-            const params = {
-                SPDICH: data.SPDICH,
-                ItemCode: item.ItemChild,
-                TO: item.TO,
-            };
-            try {
-                const res = await productionApi.getFinishedGoodsDetail(params);
-                console.log("Chi tiết thành phẩm: ", res);
-                setSelectedItemDetails({
-                    ...item,
-                    CDay: item.CDay,
-                    CRong: item.CRong,
-                    CDai: item.CDai,
-                    ItemInfo: res.ItemInfo,
-                    stockQuantity: res.maxQuantity,
-                    CongDoan: res.CongDoan,
-                    SubItemWhs: res.SubItemWhs,
-                    factories: res.Factorys?.filter(
-                        (item) => item.Factory !== user.plant
-                    ).map((item) => ({
-                        value: item.Factory,
-                        label: item.FactoryName,
-                    })),
-                    notifications: res.notifications,
-                    stocks: res.stocks,
-                    maxQty: res.maxQty,
-                    remainQty: res.remainQty,
-                    WaitingConfirmQty: res.WaitingConfirmQty,
-                    WaitingQCItemQty: res.WaitingQCItemQty,
-                    returnedData: res.returnedHistory,
-                });
-                onModalOpen();
-            } catch (error) {
-                toast.error(
-                    error.response.data.error || "Có lỗi khi lấy dữ liệu item."
-                );
-                console.error(error);
-            }
-            setLoading(false);
+            await loadCBGItemDetails(item);
         } else {
             if (item.CDOAN === "RO") {
-                setLoading(true);
-                try {
-                    const params = {
-                        FatherCode: item.ItemChild,
-                        TO: item.TO,
-                        version: item.Version,
-                        ProdType: item.ProdType,
-                    };
-                    const res =
-                        await productionApi.getFinishedRongPlywoodGoodsDetail(
-                            params
-                        );
-                    // console.log("Chi tiết thành phẩm: ", res);
-                    console.log("Thông tin thành phẩm: ", res.stocks);
-                    setSelectedItemDetails({
-                        ...item,
-                        CongDoan: res.CongDoan,
-                        FatherStock: res.FatherStock,
-                        factories: res.Factorys?.map((item) => ({
-                            value: item.Factory,
-                            label: item.FactoryName,
-                        })),
-                        notifications: res.notifications,
-                        stocks: res.stocks,
-                        SubItemCode: item.ChildName,
-                        SubItemName: item.ItemChild,
-                    });
-
-                    // Tạo mảng lưu dữ liệu rong
-                    const RONGReceiptData = res.stocks.map((stock, key) => ({
-                        ItemCode: stock.ItemCode,
-                        ItemName: stock.ItemName,
-                        CompleQty: "",
-                        RejectQty: "",
-                        ConLai: parseInt(stock.ConLai),
-                        CDay: stock.CDay,
-                        CRong: stock.CRong,
-                        CDai: stock.CDai,
-                        factories: "",
-                    }));
-                    console.log("Kết quả tạo mảng rong: ", RONGReceiptData);
-                    setRongData(RONGReceiptData);
-                    onModalOpen();
-                } catch (error) {
-                    toast.error(
-                        error.response.data.error ||
-                            "Có lỗi khi lấy dữ liệu item."
-                    );
-                    console.error(error);
-                }
-                setLoading(false);
+                await loadRongItemDetails(item);
             } else {
-                setLoading(true);
-                try {
-                    const params = {
-                        SPDICH: data.SPDICH,
-                        ItemCode: item.ItemChild,
-                        TO: item.TO,
-                        Version: item.Version,
-                        ProdType: item.ProdType,
-                    };
-                    const res =
-                        await productionApi.getFinishedPlywoodGoodsDetail(
-                            params
-                        );
-                    console.log("Chi tiết thành phẩm: ", res);
-                    setSelectedItemDetails({
-                        ...item,
-                        ItemInfo: res.ItemInfo,
-                        stockQuantity: res.maxQuantity,
-                        remainQty: res.remainQty,
-                        CongDoan: res.CongDoan,
-                        ProdType: res.ProdType,
-                        SubItemWhs: res.SubItemWhs,
-                        factories: res.Factorys?.filter(
-                            (item) => item.Factory !== user.plant
-                        ).map((item) => ({
-                            value: item.Factory,
-                            label: item.FactoryName,
-                        })),
-                        notifications: res.notifications,
-                        stocks: res.stocks,
-                        maxQty: res.maxQty,
-                        WaitingConfirmQty: res.WaitingConfirmQty,
-                        WaitingQCItemQty: res.WaitingQCItemQty,
-                    });
-                    onModalOpen();
-                } catch (error) {
-                    toast.error(
-                        error.response.data.error ||
-                            "Có lỗi khi lấy dữ liệu item."
-                    );
-                    console.error(error);
-                }
-                setLoading(false);
+                await loadPlywoodItemDetails(item);
             }
         }
     };
@@ -298,236 +401,203 @@ const ItemInput = ({
         setFilteredReturnedData([]);
     };
 
+    // Function to handle adjust rong quantity
+    const handleAdjustRongQuantity = async () => {
+        if (!adjustQuantity || adjustQuantity === "" || isNaN(adjustQuantity)) {
+            toast.error("Vui lòng nhập số lượng hợp lệ");
+            return;
+        }
+
+        if (adjustQuantity <= 0) {
+            toast.error("Số lượng phải lớn hơn 0");
+            return;
+        }
+
+        // Check if adjustQuantity exceeds ConLai value
+        if (selectedItemDetails && rongData) {
+            const selectedItem = rongData.find(item => item.ItemCode === selectedNotification.ItemCode);
+            if (selectedItem && Number(adjustQuantity) > selectedItem.ConLai) {
+                toast.error(`Số lượng điều chỉnh không được vượt quá số lượng còn lại (${selectedItem.ConLai})`);
+                return;
+            }
+        }
+
+        try {
+            const data = {
+                id: selectedNotification?.id,
+                Qty: adjustQuantity
+            };
+
+            setAdjustRongQuantityLoading(true);
+
+            const res = await productionApi.adjustRongQuantity(data);
+            toast.success("Cập nhật số lượng thành công!");
+            
+            // Close modal and reset state
+            setAdjustRongQuantityLoading(false);
+            onAdjustRongQuantityModalClose();
+            setAdjustQuantity("");
+            setSelectedNotification({
+                ItemCode: "",
+                ItemName: "",
+                Quantity: "",
+            });
+            
+            // Refresh the data
+            if (selectedItemDetails) {
+                openInputModal(selectedItemDetails);
+            }
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error || "Có lỗi xảy ra khi cập nhật số lượng."
+            );
+            setAdjustRongQuantityLoading(false);
+            console.error(error);
+        }
+    };
+
     const handleSubmitQuantityRong = async () => {
-        let isValid = true;
-        console.log("Rong data: ", rongData);
+        console.log("Dữ liệu: ", rongData, RONGInputQty);
+
+        // Validate RONGInputQty
+        if (!RONGInputQty || RONGInputQty === "" || RONGInputQty === null) {
+            toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (Number(RONGInputQty) <= 0) {
+            toast.error("Số lượng ghi nhận bán thành phẩm phải lớn hơn 0.");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (Number(RONGInputQty) > selectedItemDetails.FatherStock) {
+            toast.error(
+                <span>
+                    Số lượng ghi nhận bán thành phẩm{" "}
+                    <span style={{ fontWeight: "bold" }}>
+                        {selectedItemDetails.ChildName}
+                    </span>{" "}
+                    không được vượt quá {selectedItemDetails.FatherStock}.
+                </span>
+            );
+            onAlertDialogClose();
+            return;
+        }
+
         for (let i = 0; i < rongData.length; i++) {
             const item = rongData[i];
-            const allEmpty = rongData.every(
-                (item) => item.CompleQty === "" && item.RejectQty === ""
-            );
-            const isAllCompleteEmpty = rongData.every(
-                (item) => item.CompleQty === ""
-            );
-            if (item.RejectQty) {
-                if (item.RejectQty < 0) {
-                    toast.error(
-                        <span>
-                            Số lượng lỗi{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            phải lớn hơn 0
+
+            // CompleQty là bắt buộc
+            if (
+                item.CompleQty === undefined ||
+                item.CompleQty === null ||
+                item.CompleQty === "" ||
+                isNaN(Number(item.CompleQty))
+            ) {
+                toast.error(
+                    <span>
+                        Vui lòng nhập số lượng ghi nhận cho{" "}
+                        <span style={{ fontWeight: "bold" }}>
+                            {item.ItemName}
                         </span>
-                    );
-                    onAlertDialogClose();
-                }
-                if (item.RejectQty > parseInt(item.ConLai)) {
-                    toast.error(
-                        <span>
-                            Số lượng lỗi{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            không được vượt quá {item.ConLai}.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                }
-                if (
-                    (RONGInputQty !== "" || RONGInputQty !== null) &&
-                    item.CompleQty
-                ) {
-                    toast.error(
-                        "Vui lòng nhập số lượng ghi nhận bán thành phẩm."
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (
-                    ((RONGInputQty !== "" || RONGInputQty !== null) &&
-                        RONGInputQty === "0") ||
-                    RONGInputQty < 0
-                ) {
-                    toast.error(
-                        "Số lượng ghi nhận bán thành phẩm phải lớn hơn 0."
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty > selectedItemDetails.FatherStock) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận bán thành phẩm{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {selectedItemDetails.ChildName}
-                            </span>{" "}
-                            không được vượt quá{" "}
-                            {selectedItemDetails.FatherStock}.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (
-                    RONGInputQty &&
-                    (item.CompleQty === "" || item.CompleQty === null)
-                ) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            không được bỏ trống.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty && item.CompleQty <= 0) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            phải lớn hơn 0
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty && item.CompleQty > parseInt(item.ConLai)) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            không được vượt quá {item.ConLai}.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-            } else if (item.RejectQty === null && item.RejectQty === "") {
-                if (RONGInputQty === "" && isAllCompleteEmpty) {
-                    toast.error("Vui lòng ghi nhận trước khi xác nhận!");
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty === "" && allEmpty) {
-                    toast.error("Vui lòng ghi nhận trước khi xác nhận!");
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty === "" || RONGInputQty === null) {
-                    toast.error(
-                        "Vui lòng nhập số lượng ghi nhận bán thành phẩm."
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (
-                    ((RONGInputQty !== "" || RONGInputQty !== null) &&
-                        RONGInputQty === "0") ||
-                    RONGInputQty < 0
-                ) {
-                    toast.error(
-                        "Số lượng ghi nhận bán thành phẩm phải lớn hơn 0."
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (RONGInputQty > selectedItemDetails.FatherStock) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận bán thành phẩm{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {selectedItemDetails.ChildName}
-                            </span>{" "}
-                            không được vượt quá{" "}
-                            {selectedItemDetails.FatherStock}.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (item.CompleQty === "" || item.CompleQty === null) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            không được bỏ trống.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (item.CompleQty <= 0) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            phải lớn hơn 0
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-                if (item.CompleQty > parseInt(item.ConLai)) {
-                    toast.error(
-                        <span>
-                            Số lượng ghi nhận{" "}
-                            <span style={{ fontWeight: "bold" }}>
-                                {item.ItemName}
-                            </span>{" "}
-                            không được vượt quá {item.ConLai}.
-                        </span>
-                    );
-                    onAlertDialogClose();
-                    return;
-                }
-            }
-        }
-        if ((isValid = false)) {
-            onAlertDialogClose();
-        } else {
-            setConfirmLoading(true);
-            try {
-                const Data = {
-                    LSX: choosenItem.LSX[0].LSX,
-                    QtyIssue: RONGInputQty,
-                    CongDoan: choosenItem.CDOAN,
-                    version: choosenItem.Version,
-                    ProdType: "LVL",
-                    SubItemCode: choosenItem.ItemChild,
-                    SubItemName: choosenItem.ChildName,
-                    team: choosenItem.TO,
-                    NextTeam: choosenItem.TOTT,
-                    Data: rongData,
-                    KHOI: "VCN",
-                };
-                console.log("Dữ liệu sẽ được gửi đi: ", Data);
-                const res = await productionApi.enterFinishedRongAmountVCN(
-                    Data
+                        .
+                    </span>
                 );
-                toast.success("Ghi nhận & chuyển tiếp thành công!");
-            } catch (error) {
-                // Xử lý lỗi (nếu có)
-                console.error("Đã xảy ra lỗi:", error);
-                toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+                onAlertDialogClose();
+                return;
             }
-            setConfirmLoading(false);
-            setRongData(null);
-            onAlertDialogClose();
-            closeInputModal();
+
+            const comple = Number(item.CompleQty);
+            const conLai = Number(item.ConLai);
+
+            if (comple <= 0) {
+                toast.error(
+                    <span>
+                        Số lượng ghi nhận{" "}
+                        <span style={{ fontWeight: "bold" }}>
+                            {item.ItemName}
+                        </span>{" "}
+                        phải lớn hơn 0.
+                    </span>
+                );
+                onAlertDialogClose();
+                return;
+            }
+
+            if (comple > conLai) {
+                toast.error(
+                    <span>
+                        Số lượng ghi nhận{" "}
+                        <span style={{ fontWeight: "bold" }}>
+                            {item.ItemName}
+                        </span>{" "}
+                        không được vượt quá {item.ConLai}.
+                    </span>
+                );
+                onAlertDialogClose();
+                return;
+            }
+
+            if (item.RejectQty !== undefined && item.RejectQty !== "") {
+                const reject = Number(item.RejectQty);
+                if (isNaN(reject) || reject <= 0) {
+                    toast.error(
+                        <span>
+                            Số lượng lỗi{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            phải lớn hơn 0.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+                if (reject > conLai) {
+                    toast.error(
+                        <span>
+                            Số lượng lỗi{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                                {item.ItemName}
+                            </span>{" "}
+                            không được vượt quá {item.ConLai}.
+                        </span>
+                    );
+                    onAlertDialogClose();
+                    return;
+                }
+            }
         }
+
+        setConfirmLoading(true);
+        try {
+            const Data = {
+                LSX: choosenItem.LSX[0].LSX,
+                QtyIssue: RONGInputQty,
+                CongDoan: choosenItem.CDOAN,
+                version: choosenItem.Version,
+                ProdType: "LVL",
+                SubItemCode: choosenItem.ItemChild,
+                SubItemName: choosenItem.ChildName,
+                team: choosenItem.TO,
+                NextTeam: choosenItem.TOTT,
+                Data: rongData,
+                KHOI: "VCN",
+            };
+            console.log("Dữ liệu sẽ được gửi đi: ", Data);
+            const res = await productionApi.enterFinishedRongAmountVCN(Data);
+            toast.success("Ghi nhận & chuyển tiếp thành công!");
+        } catch (error) {
+            console.error("Đã xảy ra lỗi:", error);
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+        }
+        setConfirmLoading(false);
+        setRONGInputQty("");
+        setRongData(null);
+        onAlertDialogClose();
+        closeInputModal();
     };
 
     const handleSubmitQuantity = async () => {
@@ -744,7 +814,7 @@ const ItemInput = ({
     function transformDetail(details, type) {
         const result = [];
 
-        details.forEach((item) => {
+        details?.forEach((item) => {
             let existingItem = result.find(
                 (detail) =>
                     detail.ItemCode === item.ItemCode &&
@@ -1066,9 +1136,9 @@ const ItemInput = ({
                                           <span>
                                               <IoIosArrowDown className="inline-block text-gray-500" />{" "}
                                               {item.ChildName}{" "}
-                                              {variant === "VCN" ? (
-                                                  <span className="text-[#1979A6]">
-                                                      {data.QuyCach2}
+                                              {item.CDOAN === "RO" ? (
+                                                  <span className="text-[#0da0ea]">
+                                                      {item.QuyCach2 || ""}
                                                   </span>
                                               ) : (
                                                   <span className="">
@@ -1204,7 +1274,7 @@ const ItemInput = ({
                                                                           )
                                                                       )}
                                                                   </td>
-                                                                  {variant ==
+                                                                  {/* {variant ==
                                                                       VAN_CONG_NGHIEP && (
                                                                       <td
                                                                           className="px-2 py-2 text-right text-[#17506B] underline"
@@ -1221,7 +1291,7 @@ const ItemInput = ({
                                                                           kết
                                                                           cấu
                                                                       </td>
-                                                                  )}
+                                                                  )} */}
                                                               </tr>
                                                           )
                                                       )
@@ -1394,10 +1464,6 @@ const ItemInput = ({
                                                             setRONGInputQty(
                                                                 newValue
                                                             );
-                                                            console.log(
-                                                                "Số lượng BTP đem đi RONG",
-                                                                newValue
-                                                            );
                                                         }}
                                                     >
                                                         <NumberInputField />
@@ -1431,9 +1497,21 @@ const ItemInput = ({
                                                     key={stockIndex}
                                                 >
                                                     <div className="flex items-center bg-gray-900 border-[#DADADA]  rounded-t-xl p-3 py-2.5 border-b-0 ">
-                                                        <div className="pl-2 text-white font-semibold text-lg">
-                                                            {stockItem?.ItemName ||
-                                                                "Thành phẩm không xác định"}
+                                                        <div className="pl-2 text-white text-lg">
+                                                            <div className="text-xs font-medium text-gray-400">
+                                                                [
+                                                                {Math.abs(
+                                                                    stockItem?.BaseQty ||
+                                                                        0
+                                                                )}
+                                                                ]{" "}
+                                                                {stockItem?.ItemCode ||
+                                                                    ""}
+                                                            </div>
+                                                            <p className="font-semibold">
+                                                                {stockItem?.ItemName ||
+                                                                    "Thành phẩm không xác định"}
+                                                            </p>
                                                         </div>
                                                     </div>
 
@@ -1762,10 +1840,9 @@ const ItemInput = ({
                                                 </div>
                                             )
                                         )}
-                                        {selectedItemDetails?.notifications
+                                        {selectedItemDetails?.disassemblyOrders
                                             ?.length > 0 && (
                                             <>
-                                                {/* <div className="border-t-2 border-dashed border-gray-300 mt-3"></div> */}
                                                 <div>
                                                     <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
                                                         <div className="flex items-center space-x-1">
@@ -1776,139 +1853,219 @@ const ItemInput = ({
                                                                 Lịch sử ghi nhận{" "}
                                                             </div>
                                                         </div>
-
-                                                        <div className="pr-2 text-[17px] font-semibold">
-                                                            (
-                                                            {
-                                                                selectedItemDetails
-                                                                    ?.notifications
-                                                                    .length
-                                                            }
-                                                            )
-                                                        </div>
                                                     </div>
                                                     <div className="space-y-4">
-                                                        {selectedItemDetails?.notifications?.map(
-                                                            (item, index) => (
-                                                                <>
-                                                                    <div className="p-2 px-4 rounded-xl bg-[#f8fffb] border-2 border-[#81ca9c]">
-                                                                        {/* Bán thành phẩm */}
-                                                                        <div className="flex justify-between w-full">
-                                                                            <div className="flex flex-col w-full">
-                                                                                <div className="flex items-center justify-between w-full py-1">
-                                                                                    <div className="">
-                                                                                        <div className="text-[#8D9194] font-medium text-xs uppercase">
-                                                                                            Bán
-                                                                                            thành
-                                                                                            phẩm
-                                                                                            rong
-                                                                                        </div>
-                                                                                        <div className="text-[17px] font-semibold uppercase">
-                                                                                            {
-                                                                                                item.SubItemName
-                                                                                            }
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div className="text-[#15803D] xl:text-xl lg:text-lg md:text-lg text-2xl font-semibold px-2">
-                                                                                        {item.QtyIssueRong ||
-                                                                                            0}
-                                                                                    </div>
+                                                        {selectedItemDetails?.disassemblyOrders?.map(
+                                                            (order, index) => (
+                                                                <div className="bg-gray-100 border border-gray-300 py-4 pb-2 rounded-xl ">
+                                                                    <div className="px-3">
+                                                                        <div className=" flex items-center justify-between">
+                                                                            <div className="w-[85%]">
+                                                                                <div className="text-[#898c90] font-medium text-xs uppercase">
+                                                                                    Bán
+                                                                                    thành
+                                                                                    phẩm
+                                                                                    rong
                                                                                 </div>
+                                                                                <p className="text-[#185B7B] font-semibold text-[17px] truncate">
+                                                                                    {
+                                                                                        selectedItemDetails?.SubItemCode
+                                                                                    }
+                                                                                </p>
                                                                             </div>
+                                                                            <p className="text-2xl mr-1 text-[#185B7B] font-medium">
+                                                                                {
+                                                                                    order.quantity
+                                                                                }
+                                                                            </p>
                                                                         </div>
-
-                                                                        <div className="my-2 mt-1 border-b-2 border border-green-500"></div>
-
-                                                                        {/* Thành phẩm */}
-                                                                        <div className=" ">
-                                                                            <div className="text-[#898c90] mb-0 font-medium text-xs uppercase">
-                                                                                Thành
-                                                                                phẩm
-                                                                                rong
-                                                                            </div>
-
-                                                                            {transformDetail(
-                                                                                item?.detail,
-                                                                                item?.Type
-                                                                            ).map(
-                                                                                (
-                                                                                    detailItem,
-                                                                                    detailIndex
-                                                                                ) => (
-                                                                                    <div className=" flex items-center justify-between">
-                                                                                        <div className="flex items-center space-x-2">
-                                                                                            {/* <FaArrowRightLong /> */}
-                                                                                            <FaDotCircle className="text-green-600 w-3 h-3" />
-                                                                                            <div className="font-medium">
-                                                                                                {
-                                                                                                    detailItem.ItemName
-                                                                                                }
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="font-semibold px-2">
-                                                                                            {Number(
-                                                                                                detailItem.Qty_Type0 ||
-                                                                                                    detailItem.Qty_Type1
-                                                                                            )}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                )
-                                                                            )}
-                                                                        </div>
-
-                                                                        <div className="my-2 mb-1 border-b border border-gray-200"></div>
-
-                                                                        <div className="py-1 flex justify-between space-x-5">
-                                                                            <div className="">
-                                                                                <div className="text-sm">
-                                                                                    Người
-                                                                                    giao:{" "}
-                                                                                    <span className="font-medium text-[#15803D]">
-                                                                                        {
-                                                                                            item.fullname
-                                                                                        }
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="text-sm ">
-                                                                                    <span className="">
-                                                                                        Thời
-                                                                                        gian
-                                                                                        giao:{" "}
-                                                                                    </span>
-                                                                                    <span className="font-medium text-gray-600">
-                                                                                        {
-                                                                                            item.CreatedAt
-                                                                                        }
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div className="flex items-center gap-x-6">
-                                                                                <button
-                                                                                    onClick={() => {
-                                                                                        onDeleteProcessingDialogOpen();
-                                                                                        console.log(
-                                                                                            "Id Noti bị xóa:",
-                                                                                            item?.notiID
-                                                                                        );
-                                                                                        setSelectedDelete(
-                                                                                            item?.notiID
-                                                                                        );
-                                                                                        setDialogType(
-                                                                                            "product"
-                                                                                        );
-                                                                                    }}
-                                                                                    className="rounded-lg duration-200 ease hover:bg-red-100 px-2 py-1.5"
-                                                                                >
-                                                                                    <TbTrash className="text-red-700 text-2xl h-fit" />
-                                                                                </button>
-                                                                            </div>
+                                                                        <div className="flex flex-col  mt-3 text-sm text-gray-600">
+                                                                            <p className="w-full xl: flex justify-between">
+                                                                                Thời
+                                                                                gian:{" "}
+                                                                                <span className="font-semibold">
+                                                                                    {
+                                                                                        order.created_at
+                                                                                    }
+                                                                                </span>
+                                                                            </p>
+                                                                            <p className="w-full flex justify-between">
+                                                                                Người
+                                                                                thực
+                                                                                hiện:{" "}
+                                                                                <span className="font-semibold">
+                                                                                    {
+                                                                                        order.created_by
+                                                                                    }
+                                                                                </span>
+                                                                            </p>
                                                                         </div>
                                                                     </div>
-                                                                </>
+
+                                                                    <div className="my-2 mb-1 border-b-2 border-dashed border-gray-300"></div>
+
+                                                                    <div className="px-3 text-[#898c90] my-3 mb-2 font-medium text-xs uppercase">
+                                                                        Thành
+                                                                        phẩm
+                                                                        rong
+                                                                    </div>
+                                                                    <div className="px-1 space-y-1.5 bg-gray-100 ">
+                                                                        {order.notifications?.map(
+                                                                            (
+                                                                                item,
+                                                                                index
+                                                                            ) => (
+                                                                                <div>
+                                                                                    {item?.Type ===
+                                                                                    0 ? (
+                                                                                        <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
+                                                                                            {/* Sản lượng */}
+                                                                                            <div className="">
+                                                                                                {transformDetail(
+                                                                                                    item?.detail,
+                                                                                                    item?.Type
+                                                                                                ).map(
+                                                                                                    (
+                                                                                                        detailItem,
+                                                                                                        detailIndex
+                                                                                                    ) => (
+                                                                                                        <div className=" flex items-center justify-between">
+                                                                                                            <div className="w-[85%]">
+                                                                                                                <p className="text-xs text-gray-500">
+                                                                                                                    Sản
+                                                                                                                    lượng <span>({item?.confirm == 0 ? 'đã giao' :item?.confirm == 1 ?  'đã nhận' : 'đã bị trả lại'})</span>
+                                                                                                                </p>
+                                                                                                                <div className="font-medium truncate ">
+                                                                                                                    {
+                                                                                                                        detailItem.ItemName
+                                                                                                                    }
+                                                                                                                </div>
+                                                                                                                <div className="font-semibold text-lg text-green-600">
+                                                                                                                +{parseInt(
+                                                                                                                    detailItem.Qty_Type0
+                                                                                                                ) ||
+                                                                                                                    0}
+                                                                                                            </div>
+                                                                                                            </div>
+                                                                                                            
+                                                                                                            <div className="flex items-center ">
+                                                                                                                {item.confirm == "2" ? (
+                                                                                                                // Adjust Rong Quantity
+                                                                                                                <button
+                                                                                                                    onClick={() => {
+                                                                                                                        // Set the selected notification and open the adjust modal
+                                                                                                                        setSelectedNotification({
+                                                                                                                            ItemCode: detailItem.ItemCode || "",
+                                                                                                                            ItemName: detailItem.ItemName || "",
+                                                                                                                            Quantity: detailItem.Qty_Type0 || detailItem.Qty_Type1 || 0,
+                                                                                                                            id: item.id || item.notiID || ""
+                                                                                                                        });
+                                                                                                                        setAdjustQuantity(item.Quantity || "");
+                                                                                                                        onAdjustRongQuantityModalOpen();
+                                                                                                                    }}
+                                                                                                                    className="flex text-white text-sm rounded-full duration-200 ease bg-black hover:bg-orange-700 p-1.5"
+                                                                                                                >
+                                                                                                                    <TbPencil className="text-white text-2xl h-fit" />
+                                                                                                                </button>) :
+                                                                                                                (<button className="flex text-black text-sm rounded-full duration-200 ease bg-gray-100 hover:bg-gray-200 p-1.5">
+                                                                                                                    <TbDotsVertical className=" text-xl h-fit"/>
+                                                                                                                </button>)}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    )
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ) : item?.Type ===
+                                                                                      1 ? (
+                                                                                        <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
+                                                                                            {/* Lỗi */}
+                                                                                            <div className="">
+                                                                                                {transformDetail(
+                                                                                                    item?.detail,
+                                                                                                    item?.Type
+                                                                                                ).map(
+                                                                                                    (
+                                                                                                        detailItem,
+                                                                                                        detailIndex
+                                                                                                    ) => (
+                                                                                                        <div className=" flex items-center justify-between">
+                                                                                                            <div className="w-[85%]">
+                                                                                                                <p className="text-xs text-gray-500">
+                                                                                                                    Lỗi thành phẩm
+                                                                                                                </p>
+                                                                                                                <div className="font-medium truncate ">
+                                                                                                                    {
+                                                                                                                        detailItem.ItemName
+                                                                                                                    }
+                                                                                                                </div>
+                                                                                                                <div className="font-semibold text-lg text-red-600">
+                                                                                                                +{parseInt(
+                                                                                                                    detailItem.Qty_Type1
+                                                                                                                ) ||
+                                                                                                                    0}
+                                                                                                            </div>
+                                                                                                            </div>
+                                                                                                            
+                                                                                                            <div className="flex items-center gap-x-6">
+                                                                                                                {/* <button
+                                                                                                                    onClick={() => {
+                                                                                                                        onDeleteProcessingDialogOpen();
+                                                                                                                        console.log(
+                                                                                                                            "Id Noti bị xóa:",
+                                                                                                                            item?.notiID
+                                                                                                                        );
+                                                                                                                        setSelectedDelete(
+                                                                                                                            item?.notiID
+                                                                                                                        );
+                                                                                                                        setDialogType(
+                                                                                                                            "product"
+                                                                                                                        );
+                                                                                                                    }}
+                                                                                                                    className="flex text-white text-sm rounded-full duration-200 ease bg-black hover:bg-red-700 p-1.5"
+                                                                                                                >
+                                                                                                                    <TbPencil className="text-white text-2xl h-fit" />
+                                                                                                                </button> */}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    )
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="w-full px-3 space-x-3 flex items-center justify-end mt-3">
+                                                                        {order.status == "new" && (
+                                                                            <button
+                                                                                className="p-2 px-4 hover:bg-red-200 bg-red-100 rounded-full font-medium text-red-600"
+                                                                                onClick={() => {
+                                                                                    setSelectedOrder(order);
+                                                                                    onCancelOrderModalOpen();
+                                                                                }}
+                                                                            >
+                                                                                Hủy lệnh
+                                                                            </button>
+                                                                        )}
+                                                                        {order.status == "complete" && (
+                                                                            <button
+                                                                                className="p-2 px-4 bg-blue-900 hover:bg-blue-800 rounded-full font-medium text-blue-100"
+                                                                                onClick={() => {
+                                                                                    setSelectedOrder(order);
+                                                                                    onCloseOrderModalOpen();
+                                                                                }}
+                                                                            >
+                                                                                Đóng lệnh
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
                                                             )
                                                         )}
                                                     </div>
+                                                    
                                                 </div>
                                             </>
                                         )}
@@ -3266,6 +3423,153 @@ const ItemInput = ({
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+
+            {/* Confirmation Modal for Cancel Order */}
+            <AlertDialog
+                isOpen={isCancelOrderModalOpen}
+                onClose={onCancelOrderModalClose}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>Xác nhận hủy lệnh</AlertDialogHeader>
+                        <AlertDialogBody>
+                            Bạn có chắc chắn muốn hủy lệnh này không?
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button onClick={onCancelOrderModalClose} isDisabled={cancelDisassemblyOrderLoading}>Hủy bỏ</Button>
+                            <Button
+                                colorScheme="red"
+                                isLoading={cancelDisassemblyOrderLoading}
+                                onClick={() => {
+                                    if (selectedOrder) {
+                                        cancelOrder(selectedOrder);
+                                    }
+                                }}
+                            >
+                                {cancelDisassemblyOrderLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            {/* Confirmation Modal for Close Order */}
+            <AlertDialog
+                isOpen={isCloseOrderModalOpen}
+                onClose={onCloseOrderModalClose}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>Xác nhận đóng lệnh</AlertDialogHeader>
+                        <AlertDialogBody>
+                            Bạn có chắc chắn muốn đóng lệnh này không?
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button onClick={onCloseOrderModalClose} isDisabled={closeDisassemblyOrderLoading}>Hủy bỏ</Button>
+                            <Button
+                                colorScheme="blue"
+                                isDisabled={closeDisassemblyOrderLoading}
+                                onClick={() => {
+                                    if (selectedOrder) {
+                                        closeOrder(selectedOrder);
+                                    }
+                                }}
+                            >
+                                {closeDisassemblyOrderLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            {/* Adjust Rong Quantity Modal */}
+            <Modal
+                isCentered
+                isOpen={isAdjustRongQuantityModalOpen}
+                onClose={onAdjustRongQuantityModalClose}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Điều chỉnh số lượng rong</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        {selectedNotification && (
+                            <div className="space-y-4">
+                                <div className=" rounded-lg">
+                                    <div className="font-medium">Thông tin sản phẩm:</div>
+                                    <div className="text-lg font-semibold text-blue-600">
+                                        {selectedNotification.ItemName}
+                                    </div>
+                                </div>
+                                
+                                <div className=" rounded-lg">
+                                    <div className="font-medium">Số lượng hiện tại:</div>
+                                    <div className="text-lg font-semibold">
+                                        {Number(selectedNotification.Quantity)}
+                                    </div>
+                                </div>
+                                
+                                <Box>
+                                    <label className="font-semibold">
+                                        Số lượng điều chỉnh: <span className="text-red-500">*</span>
+                                    </label>
+                                    <NumberInput
+                                        value={adjustQuantity}
+                                        onChange={(value) => setAdjustQuantity(value)}
+                                        min={0}
+                                        className="mt-2"
+                                    >
+                                        <NumberInputField />
+                                        <NumberInputStepper>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
+                                        </NumberInputStepper>
+                                    </NumberInput>
+                                </Box>
+                            </div>
+                        )}
+                    </ModalBody>
+                    <ModalFooter className="gap-3">
+                        <Button 
+                            onClick={onAdjustRongQuantityModalClose}
+                            isDisabled={adjustRongQuantityLoading}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            colorScheme="blue"
+                            onClick={handleAdjustRongQuantity}
+                            isDisabled={!adjustQuantity || adjustQuantity === "" || isNaN(adjustQuantity)}
+                        >
+                            {adjustRongQuantityLoading ? (
+                                <div className="flex items-center space-x-4">
+                                    <Spinner size="sm" color="white" />
+                                    <div>Đang tải</div>
+                                </div>
+                            ) : (
+                                "Xác nhận"
+                            )}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
             {loading && <Loader />}
         </>
     );

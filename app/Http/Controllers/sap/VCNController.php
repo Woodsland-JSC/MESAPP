@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\notireceiptVCN;
+use App\Models\DisassemblyOrder;
 use App\Models\historySLVCN;
 use App\Models\awaitingstocksvcn;
 use Illuminate\Database\QueryException;
@@ -811,9 +812,9 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
-        $data = notireceiptVCN::where('id', $request->id)->where('deleted', 0)->first();
+        $data = notireceiptVCN::where('id', $request->id)->where('deleted', 0)->where('confirm', 0)->first();
         if (!$data) {
-            throw new \Exception('Giao dịch hiện tại có thể đã bị xóa. Hãy load lại tổ để kiểm tra.');
+            throw new \Exception('Thông báo đã được nhận hoặc trả lại. Vui lòng load lại trang');
         }
 
         //Truy vấn cơ sở dữ liệu SAP
@@ -1084,154 +1085,6 @@ class VCNController extends Controller
         return $WHS;
     }
 
-    // function AcceptQCVCN(Request $request)
-    // {
-
-    //     $validator = Validator::make($request->all(), [
-    //         'id' => 'required',
-    //         'Qty' => 'required'
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
-    //     }
-
-    //     $loailoi = $request->loailoi['label'] ?? '';
-    //     $huongxuly = $request->huongxuly['label'] ?? '';
-    //     $teamBack = $request->teamBack['value'] ?? '';
-    //     $rootCause = $request->rootCause['value'] ?? '';
-    //     $subCode = $request->subCode['value'] ?? '';
-    //     //check kho QC
-    //     $whs = $this->getQCWarehouseByUser();
-    //     if ($whs == -1) {
-    //         return response()->json([
-    //             'error' => false,
-    //             'status_code' => 500,
-    //             'message' => "Không tìm thấy kho QC do user chưa được chỉ định nhà máy hoặc Hệ thống SAP chưa được cấu hình UserId: " . Auth::user()->id
-    //         ], 500);
-    //     }
-    //     try {
-    //         DB::beginTransaction();
-    //         // to bình thường
-    //         $data = notireceiptVCN::where('id', $request->id)->where('deleted', '=', 0)->where('type', '=', 1)
-    //             ->where('openQty', '>=', $request->Qty)->first();
-    //         if (!$data) {
-    //             throw new \Exception('data không hợp lệ.');
-    //         }
-    //         $qtypush = 0;
-    //         // check data history push sap
-    //         if ($data->IsPushSAP == 0) {
-    //             $type = 'I';
-    //             $qtypush = $data->Quantity;
-    //         } else {
-    //             $type = 'U';
-    //             $qtypush = $request->Qty;
-    //         }
-    //         //allocate data
-    //         $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
-    //         $allocates = $this->allocate($dataallocate, $request->Qty);
-    //         if (count($allocates) == 0) {
-    //             return response()->json([
-    //                 'error' => false,
-    //                 'status_code' => 500,
-    //                 'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
-    //                     $data->Team . " sản phẩm: " .
-    //                     $data->ItemCode . " sản phẩm đích: " .
-    //                     $data->FatherCode . " LSX." . $data->LSX
-    //             ], 500);
-    //         }
-    //         foreach ($allocates as $allocate) {
-
-    //             $body = [
-    //                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-    //                 "U_LSX" => $data->LSX,
-    //                 "U_TO" => $data->Team,
-    //                 "DocumentLines" => [[
-    //                     "Quantity" => $allocate['Allocate'],
-    //                     "TransactionType" => "R",
-    //                     "BaseEntry" => $allocate['DocEntry'],
-    //                     "BaseType" => 202,
-    //                     "WarehouseCode" => $whs,
-    //                     "BatchNumbers" => [
-    //                         [
-    //                             "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
-    //                             "Quantity" => $allocate['Allocate'],
-    //                             "ItemCode" =>  $allocate['ItemChild'],
-    //                             "U_CDai" => $allocate['CDai'],
-    //                             "U_CRong" => $allocate['CRong'],
-    //                             "U_CDay" => $allocate['CDay'],
-    //                             "U_Status" => "HL",
-    //                             "U_Year" => $request->year ?? now()->format('y'),
-    //                             "U_Week" => $request->week ? str_pad($request->week, 2, '0', STR_PAD_LEFT) : str_pad(now()->weekOfYear, 2, '0', STR_PAD_LEFT)
-    //                         ]
-    //                     ]
-    //                 ]]
-    //             ];
-    //             $response = Http::withOptions([
-    //                 'verify' => false,
-    //             ])->withHeaders([
-    //                 'Content-Type' => 'application/json',
-    //                 'Accept' => 'application/json',
-    //                 'Authorization' => 'Basic ' . BasicAuthToken(),
-    //             ])->post(UrlSAPServiceLayer() . '/b1s/v1/InventoryGenEntries', $body);
-    //             $res = $response->json();
-    //             if ($response->successful()) {
-    //                 historySLVCN::create(
-    //                     [
-    //                         'LSX' => $data->LSX,
-    //                         'itemchild' => $allocate['ItemChild'],
-    //                         'SPDich' => $data->FatherCode,
-    //                         'to' => $data->Team,
-    //                         "source" => $rootCause,
-    //                         "TOChuyenVe" => $teamBack,
-    //                         'quantity' => $allocate['Allocate'],
-    //                         'ObjType' => 202,
-    //                         'DocEntry' => $res['DocEntry']
-    //                     ]
-    //                 );
-    //                 DB::commit();
-    //             } else {
-    //                 DB::rollBack();
-    //                 return response()->json([
-    //                     'message' => 'Failed receipt',
-    //                     'error' => $res['error'],
-    //                     'body' => $body
-    //                 ], 500);
-    //             }
-    //         }
-    //         notireceiptVCN::where('id', $request->id)->update([
-    //             'confirm' => 1,
-    //             'confirmBy' => Auth::user()->id,
-    //             'confirm_at' => Carbon::now()->format('YmdHis'),
-    //             'openQty' => $data->openQty - $request->Qty
-    //         ]);
-    //         DB::commit();
-    //         HistoryQC::dispatch(
-    //             $type,
-    //             $request->id . "VCN",
-    //             $data->ItemCode,
-    //             $qtypush,
-    //             $whs,
-    //             $qtypush - $request->Qty,
-    //             'VCN',
-    //             $data->Team,
-    //             $loailoi,
-    //             $huongxuly,
-    //             $rootCause,
-    //             $subCode,
-    //             $request->note,
-    //             $teamBack
-    //         );
-    //         return response()->json('success', 200);
-    //     } catch (\Exception | QueryException $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'error' => false,
-    //             'status_code' => 500,
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     //lấy detail data công đoạn rong
     function viewDetailRong(Request $request)
     {
@@ -1394,7 +1247,6 @@ class VCNController extends Controller
             DB::beginTransaction();
             $changedData = []; // Mảng chứa dữ liệu đã thay đổi trong bảng notirecept
             foreach ($request->Data as $dt) {
-
                 if ($dt['CompleQty'] > 0) {
                     $notifi = notireceiptVCN::create([
                         'text' => 'Production information waiting for confirmation',
@@ -1493,7 +1345,6 @@ class VCNController extends Controller
                     'SPDICH' => $row['SPDICH'],
                     'NameSPDich' => $row['NameSPDich'],
                     'MaThiTruong' => $row['MaThiTruong'],
-                    'QuyCach2' => $row['QuyCach2'],
                     'Details' => [],
                 ];
             }
@@ -1505,6 +1356,7 @@ class VCNController extends Controller
                 'ChildName' => $row['ChildName'],
                 'Version' => $row['Version'],
                 'ProdType' => $row['ProdType'],
+                'QuyCach2' => $row['QuyCach2'],
                 'CDay' => $row['CDay'],
                 'CRong' => $row['CRong'],
                 'CDai' => $row['CDai'],
@@ -1729,22 +1581,22 @@ class VCNController extends Controller
             //3. Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
-                    'Factory' => '04',
+                    'Factory' => 'YS',
                     'FactoryName' => 'Nhà Máy VCN Yên Sơn'
                 ],
                 [
-                    'Factory' => '05',
+                    'Factory' => 'CH',
                     'FactoryName' => 'Nhà Máy VCN Chiêm Hóa'
                 ],
                 [
-                    'Factory' => '06',
+                    'Factory' => 'VF',
                     'FactoryName' => 'Nhà Máy VCN Hà Giang'
                 ],
             ];
 
             // Lấy công đoạn hiện tại
             $CongDoan = null;
-            foreach ($results as $result) {
+            foreach ($results as $key => $result) {
 
                 $U_CDOAN = $result['U_CDOAN'];
 
@@ -1755,6 +1607,21 @@ class VCNController extends Controller
                         return response()->json(['error' => 'Các giá trị của U_CDOAN trong LSX không giống nhau!'], 422);
                     }
                 }
+
+                // Chỉnh sửa giá trị ConLai của mỗi bản ghi trong $results bằng cách lấy tổng số lượng của trường
+                // Quantity của bảng chitietrong có baseID = $notification->id. Nhóm theo ItemCode.
+                // Sau đó cập nhật giá trị ConLai mới trong $results = ConLai - Qty theo ItemCode của $results.
+                $itemCode = $result['ItemCode'];
+                $chitietrongQty = DB::table('chitietrong')
+                    ->join('notireceiptVCN', 'chitietrong.baseID', '=', 'notireceiptVCN.id')
+                    ->where('notireceiptVCN.FatherCode', $request->FatherCode)
+                    ->where('notireceiptVCN.team', $request->TO)
+                    ->where('notireceiptVCN.version', $request->version)
+                    ->where('chitietrong.ItemCode', $itemCode)
+                    ->sum('chitietrong.Quantity');
+                
+                $result['ConLai'] = (float) $result['ConLai'] - (float) $chitietrongQty;
+                $results[$key] = $result;
             }
 
             //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
@@ -1778,62 +1645,70 @@ class VCNController extends Controller
             } else {
                 $TotalFather = $stockFather[0]['Qty'];
             }
+            
+            // Lệnh phân rã
+            $disassemblyOrder = DisassemblyOrder::where('SubItemCode', $request->FatherCode)
+                ->where('team', $request->TO)
+                ->where('isClosed', '0')
+                ->leftJoin('users as u', 'disassembly_order.CreatedBy', '=', 'u.id')
+                ->select(
+                    'disassembly_order.id',
+                    'disassembly_order.SubItemCode',
+                    'disassembly_order.Qty',
+                    'disassembly_order.isClosed',
+                    'disassembly_order.created_at',
+                    DB::raw("CONCAT(u.first_name, ' ', u.last_name) as created_by")
+                )
+                ->get();
 
-            // Lấy dữ liệu đã ghi nhận trên web
-            $databtp = notireceiptVCN::where('FatherCode', $request->FatherCode)
-                ->where('deleted', 0)
-                ->where('confirm', 0)
-                ->where('type', -1)
-                ->sum('QtyIssueRong');
+            $totalDisassemblyQty = $disassemblyOrder->sum('Qty');
+            $TotalFather = $TotalFather - $totalDisassemblyQty;
 
-            // Trả về tồn thực tế
-            $TotalFather = $TotalFather - $databtp;
+            // Lấy thông tin notireceiptVCN để xác định trạng thái lệnh phân rã
+            $notificationsForOrders = notireceiptVCN::whereIn('disassembly_order_id', $disassemblyOrder->pluck('id'))
+                ->select('disassembly_order_id', 'confirm')
+                ->get()
+                ->groupBy('disassembly_order_id');
+
+            // Cập nhật trạng thái lệnh phân rã dựa trên các notireceiptvcn con
+            $disassemblyOrder = $disassemblyOrder->map(function ($order) use ($notificationsForOrders) {
+                if ($order->isClosed == 1) {
+                    return $order;
+                }
+
+                $orderNotifications = $notificationsForOrders->get($order->id, collect());
+
+                if ($orderNotifications->isEmpty()) {
+                    return $order;
+                }
 
 
-            // =============
-            // 1. Lấy data dở dang??
-            // $data = $data = NotiReceiptVCN::query()
-            // ->join('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
-            // ->select(
-            //     'version',
-            //     'LSX',
-            //     'ProdType',
-            //     'FatherCode',
-            //     'b.ItemCode',
-            //     DB::raw('SUM(CASE WHEN b.type = 1 THEN b.openQty ELSE b.Quantity END) AS TotalQuantity')
-            // )
-            // ->where('deleted', 0)
-            // ->where('version', $request->version)
-            // ->where('FatherCode', $request->FatherCode)
-            // ->where('notireceiptVCN.team', $request->TO)
-            // ->where(function($query) {
-            //     $query->where(function($query) {
-            //         $query->where('b.type', 0)
-            //               ->where('confirm', 0);
-            //     })
-            //     ->orWhere(function($query) {
-            //         $query->where('b.type', 1)
-            //               ->where('deleted', 0)
-            //               ->where('b.openQty','>', 0);
-            //     });
-            // })
-            // ->groupBy(
-            //     'version',
-            //     'LSX',
-            //     'ProdType',
-            //     'FatherCode',
-            //     'b.ItemCode'
-            // )
-            // ->get();
+                $allConfirmed = $orderNotifications->every(function ($noti) {
+                    return $noti->confirm == 1;
+                });
 
-            // dd($data);
+                $hasConfirmed = $orderNotifications->some(function ($noti) {
+                    return $noti->confirm != 0;
+                });
 
-            //data noti
+                if ($allConfirmed) {
+                    $order->status = 'completed';
+                } elseif ($hasConfirmed) {
+                    $order->status = 'inprogress';
+                } else {
+                    $order->status = 'new';
+                }
+
+                return $order;
+            });
+
+            // Data noti (giữ nguyên query như ban đầu)
             $notification = NotiReceiptVCN::query()
                 ->leftJoin('chitietrong as b', 'notireceiptVCN.id', '=', 'b.baseID')
                 ->join('users as c', 'notireceiptVCN.CreatedBy', '=', 'c.id')
                 ->select(
                     'notireceiptVCN.id',
+                    'notireceiptVCN.disassembly_order_id', 
                     'version',
                     'LSX',
                     'ProdType',
@@ -1842,21 +1717,23 @@ class VCNController extends Controller
                     'notireceiptVCN.Quantity as DetectQuantity',
                     'SubItemCode',
                     'SubItemName',
+                    'notireceiptVCN.confirm',
                     'notireceiptVCN.created_at as CreatedAt',
                     'b.ItemCode',
                     'b.ItemName',
                     'notireceiptVCN.type as Type',
                     'QtyIssueRong',
                     DB::raw("CONCAT(c.first_name, ' ', c.last_name) as fullname"),
-                    DB::raw('SUM(b.Quantity) as Quantity') // Sử dụng SUM để tính tổng số lượng
+                    DB::raw('SUM(b.Quantity) as Quantity')
                 )
                 ->where('deleted', 0)
-                ->where('confirm', 0)
+                // ->where('confirm', 0)
                 ->where('version', $request->version)
                 ->where('FatherCode', $request->FatherCode)
                 ->where('notireceiptVCN.team', $request->TO)
                 ->groupBy(
                     'notireceiptVCN.id',
+                    'notireceiptVCN.disassembly_order_id',
                     'version',
                     'LSX',
                     'ProdType',
@@ -1865,6 +1742,7 @@ class VCNController extends Controller
                     'FatherCode',
                     'SubItemCode',
                     'SubItemName',
+                    'confirm',
                     'CreatedAt',
                     'b.ItemCode',
                     'b.ItemName',
@@ -1872,83 +1750,60 @@ class VCNController extends Controller
                     'fullname',
                 )
                 ->get()
-                ->groupBy('id')  // Nhóm theo id
+                ->groupBy('id')
                 ->map(function ($items, $id) {
-                    if ($items[0]->Type == 1) {
+                    $firstItem = $items[0];
+                    if ($firstItem->Type == 1) {
                         return [
                             'notiID' => $id,
-                            'Quantity' => $items[0]['DetectQuantity'],
-                            'ItemName' => $items[0]['DetectItemName'],
-                            'fullname' => $items[0]['fullname'],
-                            'CreatedAt' => $items[0]['CreatedAt'],
-                            'Type' => $items[0]->Type,
+                            'disassembly_order_id' => $firstItem->disassembly_order_id,
+                            'Quantity' => $firstItem->DetectQuantity,
+                            'ItemName' => $firstItem->DetectItemName,
+                            'confirm' => $firstItem->confirm,
+                            'Type' => $firstItem->Type,
                         ];
                     } else { // Type = 0
                         return [
                             'notiID' => $id,
-                            'QtyIssueRong' => $items[0]['QtyIssueRong'],
-                            'SubItemName' => $items[0]['SubItemName'],
-                            'fullname' => $items[0]['fullname'],
-                            'CreatedAt' => $items[0]['CreatedAt'],
-                            'Type' => $items[0]->Type,
+                            'disassembly_order_id' => $firstItem->disassembly_order_id,
+                            'QtyIssueRong' => $firstItem->QtyIssueRong,
+                            'SubItemName' => $firstItem->SubItemName,
+                            'confirm' => $firstItem->confirm,
+                            'Type' => $firstItem->Type,
                             'detail' => $items->map(function ($item) {
                                 return [
                                     'ItemCode' => $item->ItemCode,
                                     'ItemName' => $item->ItemName,
-                                    'Qty' => $item->Quantity,  // Sử dụng trường đã được tính tổng
+                                    'Qty' => $item->Quantity,
                                 ];
                             })->toArray(),
                         ];
                     }
                 })
-                ->values()
-                ->toArray();
+                ->values();
 
-            // dd($notification);
+            // Cấu trúc lại dữ liệu theo yêu cầu
+            $notiWithDisassemblyOrder = $disassemblyOrder->map(function ($order) use ($notification) {
+                return [
+                    'id' => $order->id,
+                    'quantity' => $order->Qty, 
+                    'status' => $order->status,
+                    'created_at' => $order->created_at->format('H:i:s d/m/Y'),
+                    'created_by' => $order->created_by, 
+                    'notifications' => $notification->filter(function ($noti) use ($order) {
+                        return $noti['disassembly_order_id'] == $order->id;
+                    })->values()->toArray()
+                ];
+            })->toArray();
 
             return response()->json([
                 'CongDoan' => $CongDoan,
                 'FatherStock' => $TotalFather,
                 'stocks' => $results,
                 'Factorys' => $factory,
-                'notifications' => $notification
+                // 'notifications' => $notification,
+                'disassemblyOrders' => $notiWithDisassemblyOrder
             ], 200);
-
-            // if ($data->count() > 0) {
-            //     // Map mảng 2 theo ItemCode và version
-            //     $map = [];
-            //     foreach ($data as $item) {
-            //         $itemCode = $item['ItemCode'];
-            //         $map[$itemCode][$item['version']] = $item['TotalQuantity'];
-            //     }
-
-            //     // Cập nhật lại giá trị ConLai của mảng 1 và lấy ra notiID
-            //     foreach ($results as &$item1) {
-            //         $itemCode = $item1['ItemCode'];
-            //         if (isset($map[$itemCode])) {
-            //             foreach ($map[$itemCode] as $version => $totalQuantity) {
-            //                 $item1['ConLai'] -= $totalQuantity;
-            //             }
-            //         }
-            //         $item1['ConLai'] = (float) $item1['ConLai'];
-
-            //     }
-            //     return response()->json([
-            //         'CongDoan' => $CongDoan,
-            //         'FatherStock'=>$TotalFather,
-            //         'stocks' => $results,
-            //         'Factorys' => $factory,
-            //         'notifications' => $notification
-            //     ], 200);
-            // } else {
-            //     return response()->json([
-            //         'CongDoan' => $CongDoan,
-            //         'notifications'=> null,
-            //         'FatherStock'=>$TotalFather,
-            //         'stocks' => $results,
-            //         'Factorys' => $factory
-            //     ], 200);
-            // }
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -2171,6 +2026,161 @@ class VCNController extends Controller
             return response()->json([
                 'error' => true,
                 'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    function cancelDisassemblyOrder(Request $request)
+    { 
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            // Find the disassembly order by ID
+            $disassemblyOrder = DisassemblyOrder::find($request->id);
+            
+            // Check if the disassembly order exists
+            if (!$disassemblyOrder) {
+                throw new \Exception('Lệnh phân rã không tồn tại.');
+            }
+            
+            // Check if the disassembly order status is 'new' (assuming 'new' means it has no confirmed notifications)
+            $hasConfirmedNotifications = notireceiptVCN::where('disassembly_order_id', $request->id)
+                ->where('confirm', '!=', 0) // 0 = pending, 1 = confirmed, 2 = rejected
+                ->exists();
+                
+            if ($hasConfirmedNotifications) {
+                throw new \Exception('Không thể hủy lệnh đã có giao dịch được xác nhận.');
+            }
+            
+            // Get all notireceiptVCN records associated with this disassembly order
+            $notiReceipts = notireceiptVCN::where('disassembly_order_id', $request->id)->get();
+            
+            // Delete all chitietrong records associated with these notireceiptVCN records
+            $notiReceiptIds = $notiReceipts->pluck('id')->toArray();
+            if (!empty($notiReceiptIds)) {
+                ChiTietRong::whereIn('baseID', $notiReceiptIds)->delete();
+            }
+            
+            // Delete all notireceiptVCN records with this disassembly_order_id
+            notireceiptVCN::where('disassembly_order_id', $request->id)->delete();
+            
+            // Delete the disassembly order
+            $disassemblyOrder->delete();
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Hủy lệnh phân rã thành công.'
+            ], 200);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    function closeDisassemblyOrder(Request $request)
+    { 
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            // Find the disassembly order by ID
+            $disassemblyOrder = DisassemblyOrder::find($request->id);
+            
+            // Check if the disassembly order exists
+            if (!$disassemblyOrder) {
+                throw new \Exception('Lệnh phân rã không tồn tại.');
+            }
+            
+            // Check if all notireceiptvcn have been confirmed (confirm = 1)
+            $hasUnconfirmedNotifications = notireceiptVCN::where('disassembly_order_id', $request->id)
+                ->where('confirm', '!=', 1) // 1 = confirmed
+                ->exists();
+                
+            if ($hasUnconfirmedNotifications) {
+                throw new \Exception('Không thể đóng lệnh khi còn giao dịch chưa được xác nhận.');
+            }
+            
+            // Update the status of the disassembly order to 'closed'
+            $disassemblyOrder->status = 'closed';
+            $disassemblyOrder->save();
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Đóng lệnh phân rã thành công.'
+            ], 200);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    function adjustRongQuantity (Request $request)
+    { 
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+            'Qty' => 'required|numeric|min:0'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        try {
+            $notiReceipt = notireceiptVCN::find($request->id);
+            
+            if (!$notiReceipt) {
+                return response()->json(['error' => 'Không tìm thấy bản ghi notireceiptVCN với id đã cho'], 404);
+            }
+            
+            if ($notiReceipt->confirm == 3) {
+   
+                $notiReceipt->confirm = 0;
+                $notiReceipt->save();
+            }
+            
+            ChiTietRong::where('baseID', $request->id)->update(['Quantity' => $request->Qty]);
+            notireceiptVCN::where('id', $request->id)->update(['confirm' => '0']);
+            
+            return response()->json([
+                'message' => 'Cập nhật số lượng thành công',
+                'data' => [
+                    'notireceipt_id' => $notiReceipt->id,
+                    'updated_quantity' => $request->Qty
+                ]
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -2743,15 +2753,23 @@ class VCNController extends Controller
         $toqc = "";
         if (Auth::user()->plant == 'TH') {
             $toqc = 'TH-QC';
-        } else if (Auth::user()->plant == 'YS1') {
+        } else if (Auth::user()->plant == 'YS') {
             $toqc = 'YS1-QC';
-        } else if (Auth::user()->plant == 'YS2') {
-            $toqc = 'YS2-QC';
         } else {
             $toqc = 'HG-QC';
         }
         try {
             DB::beginTransaction();
+
+            $newOrder = DisassemblyOrder::create([
+                'SubItemCode' => $request->SubItemCode,
+                'team' => $request->team,
+                'Qty' => $request->QtyIssue,
+                'status' => "new",
+                'CreatedBy' => Auth::user()->id,
+                'created_at' => Carbon::now(),
+            ]);
+
             // data header
             foreach ($request->Data as $dt) {
                 if ($dt['CompleQty'] > 0) {
@@ -2772,6 +2790,7 @@ class VCNController extends Controller
                         'isRONG' => true,
                         'QtyIssueRong' => $request->QtyIssue,
                         'CreatedBy' => Auth::user()->id,
+                        'disassembly_order_id' => $newOrder->id,
                     ]);
                     ChiTietRong::create([
                         'baseID' => $notidata->id,
@@ -2808,23 +2827,8 @@ class VCNController extends Controller
                         'QtyIssueRong' => $request->QtyIssue,
                         'CreatedBy' => Auth::user()->id,
                         'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'disassembly_order_id' => $newOrder->id,
                     ]);
-                    // ChiTietRong::create([
-                    //     'baseID'=>$noti->id,
-                    //     'ItemCode' => $dt['ItemCode'],
-                    //     'ItemName' => $dt['ItemName'],
-                    //     'type' => 1,
-                    //     'Quantity' => $dt['RejectQty'],
-                    //     'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
-                    //     'LYDO' => $request->LYDO ?? null,
-                    //     'Team' => $request->Team,
-                    //     'NextTeam' => $toqc,
-                    //     'CDay'=>$dt['CDay'],
-                    //     'CRong'=>$dt['CRong'],
-                    //     'CDai'=>$dt['CDai'],
-                    //     'openQty' => $dt['RejectQty'],
-                    //     'loinhamay' => $dt['factories']['value'] ?? null,
-                    // ]);
                 }
             }
 

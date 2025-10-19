@@ -524,7 +524,7 @@ function ReceiptInSapReportVCN() {
         },
         {
             headerName: "Lệnh sản xuất",
-            field: "production_order_sap",
+            field: "production_order_mes",
             minWidth: 200,
             filter: true,
         },

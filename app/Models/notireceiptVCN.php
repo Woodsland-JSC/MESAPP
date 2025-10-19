@@ -46,6 +46,7 @@ class notireceiptVCN extends Model
     'version',
     'isPushSAP'  ,
     'loinhamay',
+    'disassembly_order_id',
     'isRONG',
     'QtyIssueRong'
     ];
