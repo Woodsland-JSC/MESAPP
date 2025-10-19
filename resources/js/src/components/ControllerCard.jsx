@@ -326,22 +326,59 @@ function ControllerCard(props) {
     }, [checkboxStates]);
 
     const handleLoadIntoKiln = async (reason, callback) => {
-        console.log("Khoảng kích thước hợp lệ:", minThickness, maxThickness, );
+        console.log("Khoảng kích thước hợp lệ:", minThickness, maxThickness,);
+        console.log("loadedPalletList", loadedPalletList);
+
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
                 return;
             }
-            if (selectedPallet.thickness > maxThickness) {
-                toast.error(
-                    `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
-                );
-                return;
+
+            // nếu lò trống, so với chiều dày cơ sở.
+            if (loadedPalletList.length == 0) {
+                if (selectedPallet.thickness < minThickness - 3) {
+                    toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
+                    return;
+                }
+
+                if (selectedPallet.thickness > maxThickness + 3) {
+                    toast.error(
+                        `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
+                    );
+                    return;
+                }
             }
-            if (selectedPallet.thickness < minThickness) {
-                toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
-                return;
+
+            // nếu lò có pallet, so với min max của toàn bộ pallet.
+            if (loadedPalletList.length != 0) {
+                let thinkness = [];
+
+                loadedPalletList.forEach(item => {
+                    let quyCach = item.size;
+
+                    if(quyCach){
+                        let CDay = quyCach.split('x')[0];
+                        thinkness.push(CDay);
+                    }
+                });
+
+                let min = Math.min(...thinkness);
+                let max = Math.max(...thinkness);                
+
+                if (selectedPallet.thickness < min - 3) {
+                    toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
+                    return;
+                }
+
+                if (selectedPallet.thickness > max + 3) {
+                    toast.error(
+                        `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
+                    );
+                    return;
+                }
             }
+
             setLoadIntoKilnLoading(true);
 
             const requestData = {
@@ -452,14 +489,14 @@ function ControllerCard(props) {
         progress === "kh"
             ? "Tạo kế hoạch sấy"
             : progress === "vl"
-            ? "Vào lò"
-            : progress === "kt"
-            ? "Kiểm tra lò sấy"
-            : progress === "ls"
-            ? "Chạy lò sấy"
-            : progress === "dg"
-            ? "Đánh giá mẻ sấy"
-            : "";
+                ? "Vào lò"
+                : progress === "kt"
+                    ? "Kiểm tra lò sấy"
+                    : progress === "ls"
+                        ? "Chạy lò sấy"
+                        : progress === "dg"
+                            ? "Đánh giá mẻ sấy"
+                            : "";
 
     const content =
         progress === "kh" ? (
@@ -758,7 +795,7 @@ function ControllerCard(props) {
                                                 description={item.description}
                                                 isChecked={
                                                     checkboxStates[
-                                                        `CT${index + 1}`
+                                                    `CT${index + 1}`
                                                     ] === 1
                                                 }
                                                 onCheckboxChange={(isChecked) =>
@@ -769,12 +806,12 @@ function ControllerCard(props) {
                                                 }
                                                 isDisabled={
                                                     checkboxData[
-                                                        `CT${item.value}`
+                                                    `CT${item.value}`
                                                     ] === 1
                                                 }
                                                 defaultChecked={
                                                     checkboxData[
-                                                        `CT${item.value}`
+                                                    `CT${item.value}`
                                                     ] === 1
                                                 }
                                                 fixedSoLan={checkData.SoLan}
@@ -811,11 +848,10 @@ function ControllerCard(props) {
                                     Kết luận:{" "}
                                 </strong>
                                 <p
-                                    className={`ml-2  ${
-                                        checkedCount === 12
-                                            ? "text-[#0E8E59]"
-                                            : "text-[#961717]"
-                                    }`}
+                                    className={`ml-2  ${checkedCount === 12
+                                        ? "text-[#0E8E59]"
+                                        : "text-[#961717]"
+                                        }`}
                                 >
                                     {checkedCount === 12
                                         ? "Mẻ sấy đã đủ điều kiện hoạt động."

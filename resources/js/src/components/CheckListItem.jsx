@@ -78,6 +78,7 @@ function CheckListItem(props) {
     const [localIsChecked, setLocalIsChecked] = useState(false);
 
     const [soLan, setSoLan] = useState("");
+    const [note, setNote] = useState("");
     const [CBL, setCBL] = useState("");
     const [doThucTe, setDoThucTe] = useState("");
 
@@ -128,17 +129,20 @@ function CheckListItem(props) {
     const handleCheckboxNo7Change = (value) => {
         if (soLan === 0 || soLan === "") {
             toast.error("Giá trị không được bỏ trống.");
-        } else if (soLan <= 1) {
+        } else if (soLan < 1) {
             toast.error("Số lần phải lớn hơn 1.");
         } else if (soLan > 3) {
-            onSoLanChange(soLan);
-            toast.success("Dữ liệu đã được cập nhật.");
-            onNo7Close();
+            // let _soLan = `${soLan}_${note}`;
+            // onSoLanChange(_soLan);
+            // toast.success("Dữ liệu đã được cập nhật.");
+            // onNo7Close();
+            toast.error("Số lần phải nhỏ hơn 3.");
         } else {
             onCheckboxChange(!localIsChecked);
             setLocalIsChecked(!localIsChecked);
             onCheckboxChange(1);
-            onSoLanChange(soLan);
+            let _soLan = `${soLan}_${note}`;
+            onSoLanChange(_soLan);
             toast.success("Dữ liệu đã được cập nhật.");
             onNo7Close();
         }
@@ -230,7 +234,7 @@ function CheckListItem(props) {
         // 2) Kiểm tra giá trị (chỉ kiểm tra TRÊN NHỮNG MẪU ĐÃ NHẬP)
         const firstInvalid = filled.find(([key, v]) => {
             const num = Number(v);
-            return !(Number.isInteger(num) && num >= 1);
+            return !(num && num >= 1);
         });
 
         if (firstInvalid) {
@@ -385,7 +389,7 @@ function CheckListItem(props) {
                                                 </div>
                                             </ModalHeader>
                                             <ModalBody>
-                                                <div>
+                                                <div className="mb-2">
                                                     <label
                                                         htmlFor="soLan"
                                                         className="block mb-2 text-md font-medium text-gray-900 "
@@ -400,6 +404,26 @@ function CheckListItem(props) {
                                                         placeholder="Nhập số lần"
                                                         onChange={(e) =>
                                                             handleSoLanOnChange(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        htmlFor="note"
+                                                        className="block mb-2 text-md font-medium text-gray-900 "
+                                                    >
+                                                        Ghi chú
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="note"
+                                                        className="border border-gray-300 text-gray-900 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5"
+                                                        value={note}
+                                                        placeholder="Nhập ghi chú"
+                                                        onChange={(e) =>
+                                                            setNote(
                                                                 e.target.value
                                                             )
                                                         }

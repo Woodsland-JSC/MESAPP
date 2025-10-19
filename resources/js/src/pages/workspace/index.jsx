@@ -355,6 +355,15 @@ function Workspace() {
                                                     type: "CBG",
                                                 },
                                                 {
+                                                    permission: ["QCCBG",],
+                                                    link: "/workspace/qc-che-bien-go",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Kiểm định chất lượng chế biến gỗ đầu vào",
+                                                    description:
+                                                        "Kiểm định chất lượng chế biến gỗ đầu vào",
+                                                    type: "CBG",
+                                                },
+                                                {
                                                     permission: [
                                                         "VCN",
                                                         "VCN(CX)",
@@ -415,7 +424,7 @@ function Workspace() {
                                                     description:
                                                         "Báo cáo tiến độ lắp đặt đồ nội thất.",
                                                     type: "ND",
-                                                },
+                                                }
                                             ].map(
                                                 ({
                                                     permission,

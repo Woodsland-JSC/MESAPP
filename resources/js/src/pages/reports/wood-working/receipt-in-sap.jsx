@@ -68,7 +68,7 @@ function ReceiptInSapReportCBG() {
     const [teamOptions, setTeamOptions] = useState([]);
 
     const [reportData, setReportData] = useState(null);
-    const [reportDataMobile, setReportDataMobile] = useState(null);
+    const [reportDataMobile, setReportDataMobile] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredData = useMemo(() => {
@@ -202,13 +202,12 @@ function ReceiptInSapReportCBG() {
         console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDeliveryDetailReportCBG(
-                params.status_code,
-                params.To,
-                params.branch,
-                params.plant,
+            const res = await reportApi.getReceiptInSAPReport(
                 params.from_date,
-                params.to_date
+                params.to_date,
+                params.plant,
+                [params.To],
+                "CBG"
             );
             setIsDataReportLoading(false);
             setReportDataMobile(res);
@@ -954,7 +953,7 @@ function ReceiptInSapReportCBG() {
                     ) : (
                         <>
                             {reportData?.length > 0 ? (
-                                <div>
+                                <div className="xl:display:block lg:block md:block hidden">
                                     <div
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
                                         style={{
@@ -1010,9 +1009,9 @@ function ReceiptInSapReportCBG() {
                                                     <div className="grid grid-cols-2 font-semibold">
                                                         <span>Quy cách: </span>
                                                         <span className="font-normal">
-                                                            {Number(item.CDay)}*
-                                                            {Number(item.CRong)}
-                                                            *{Number(item.CDai)}
+                                                            {Number(item.U_CDay)}*
+                                                            {Number(item.U_CRong)}
+                                                            *{Number(item.U_CDai)}
                                                         </span>
                                                     </div>
                                                     <div className="grid grid-cols-2 font-semibold mb-2">
@@ -1036,21 +1035,21 @@ function ReceiptInSapReportCBG() {
                                                                         </div>
                                                                         <div className="font-semibold text-[17px] text-[#1B536E]">
                                                                             {
-                                                                                item.NguoiGiao
+                                                                                item.DeliveryPerson
                                                                             }
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex text-gray-500 space-x-2 items-center">
                                                                         <div>
-                                                                            {
+                                                                            {/* {
                                                                                 item.ngaygiao
-                                                                            }
+                                                                            } */}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div className="relative w-full ">
-                                                                {item.NguoiNhan ? (
+                                                                {item.Recipient ? (
                                                                     <>
                                                                         <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
                                                                         <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
@@ -1061,14 +1060,14 @@ function ReceiptInSapReportCBG() {
                                                                                 </div>
                                                                                 <div className="font-semibold text-[17px] text-[#1B536E]">
                                                                                     {
-                                                                                        item.NguoiNhan
+                                                                                        item.Recipient
                                                                                     }
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex text-gray-500 space-x-2 items-center">
                                                                                 <div>
                                                                                     {
-                                                                                        item.ngaynhan
+                                                                                        item.CreateDate + " " + item.CreateTime
                                                                                     }
                                                                                 </div>
                                                                             </div>

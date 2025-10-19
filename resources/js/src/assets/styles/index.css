@@ -307,10 +307,10 @@ div:where(.swal2-container) {
 }
 
 .special-spinner {
-    width: 56px;
-    height: 56px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 9px solid #137aa9;
+    border: 6px solid #17506B;
     animation: spinner-bulqg1 0.8s infinite linear alternate,
         spinner-oaa3wk 1.6s infinite linear;
 }
@@ -531,4 +531,51 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 #grid-ket-cau-vcn .ag-header-cell-resize::after{
     color: #FFFFFF !important;
+}
+
+#accordion-ket-cau-vcn .chakra-accordion__panel{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+/* #ag-grid-baocao-dieuchuyen .ag-row.ag-row-last:not(.ag-row-group) {
+    background-color: #FFFFFF !important;
+}
+
+#ag-grid-baocao-dieuchuyen .ag-row-footer{
+    background-color: #17506B !important;
+    color: #FFFFFF !important;
+} */
+
+/* #app-ag-grid .ag-row.ag-row-last:not(.ag-row-group) {
+    background-color: #e4f2fd !important;
+} */
+
+#app-ag-grid .ag-header-cell{
+    background-color: #17506B;
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-menu-alt{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-asc{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-desc{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-icon-filter{
+    color: #FFFFFF;
+}
+
+#app-ag-grid .ag-header-cell-resize::after{
+    color: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+#app-ag-grid .ag-header-viewport {
+    background-color: #17506B;
 }

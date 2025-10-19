@@ -262,7 +262,7 @@ const ReportResolution = () => {
                 {/* Header */}
                 <div className=" bg-white rounded-xl py-2 pb-3">
                     {/* Filter */}
-                    <div className="flex items-center space-x-3 divide-x-2 divide-gray-150 px-4 mt-1">
+                    <div className="flex items-center space-x-3 px-4 mt-1">
                         <div className="w-3/4">
                             <div className="w-full">
                                 <label
@@ -309,7 +309,7 @@ const ReportResolution = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-3 divide-x-2 divide-gray-150 px-4 mt-1">
+                    <div className="flex items-center space-x-3 px-4 mt-1">
                         <div className="flex space-x-3 w-1/4">
                             <div className="col-span-1 w-full">
                                 <label
@@ -389,6 +389,9 @@ const ReportResolution = () => {
                                                         CĐ báo lỗi
                                                     </td>
                                                     <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                        Nguồn lỗi
+                                                    </td>
+                                                    <td className="w-[230px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Tên sản phẩm
                                                     </td>
                                                     <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
@@ -403,10 +406,10 @@ const ReportResolution = () => {
                                                     <td className="w-[120px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Số Lượng (T)
                                                     </td>
-                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[200px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Diễn giải
                                                     </td>
-                                                    <td className="w-[150px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
+                                                    <td className="w-[250px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold">
                                                         Cách xử lý
                                                     </td>
                                                     <td className="w-[110px] h-[48px] border-r border-b border-gray-400 p-2 text-center font-bold" >
@@ -419,12 +422,13 @@ const ReportResolution = () => {
                                                     reports.map((item, index) => (
                                                         <tr key={index} className="bg-white !text-[13px]">
                                                             <td className="border border-gray-400 break-words p-1">{item.NoiBaoLoi}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item.LoiNhaMay}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.ItemName}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.LoiLoai}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.LSX}</td>
                                                             <td className="border border-gray-400 break-words p-1 text-center">{item.DVT}</td>
                                                             <td className="border border-gray-400 break-words p-1 text-center">{item.Quantity}</td>
-                                                            <td className="border border-gray-400 break-words p-1">{item.LoiLoai}</td>
+                                                            <td className="border border-gray-400 break-words p-1">{item?.note ?? ''}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.HXL}</td>
                                                             <td className="border border-gray-400 break-words p-1">{item.ToChuyenVe}</td>
                                                         </tr>

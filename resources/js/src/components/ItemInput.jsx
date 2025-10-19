@@ -28,6 +28,14 @@ import {
     RadioGroup,
     Spinner,
     useDisclosure,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuItemOption,
+    MenuGroup,
+    MenuOptionGroup,
+    MenuDivider,
 } from "@chakra-ui/react";
 import Select from "react-select";
 import toast from "react-hot-toast";
@@ -71,6 +79,8 @@ const ItemInput = ({
 
     // Hàm xem kết cấu ván công nghiệp
     viewStructure,
+    // Xem vật tư
+    viewMaterial
 }) => {
     const checkRef = useRef(null);
     const itemCheckRef = useRef(null);
@@ -79,10 +89,10 @@ const ItemInput = ({
 
     const filteredData = Array.isArray(data)
         ? data.filter((item) =>
-              `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
-          )
+            `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+        )
         : [];
 
     const { user } = useAppContext();
@@ -606,7 +616,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             amount < 0
         ) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
@@ -617,7 +627,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             amount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng tối đa có thể xuất");
@@ -626,7 +636,7 @@ const ItemInput = ({
         } else if (
             amount >
             selectedItemDetails.remainQty -
-                selectedItemDetails.WaitingConfirmQty
+            selectedItemDetails.WaitingConfirmQty
         ) {
             toast.error(
                 <span>
@@ -647,7 +657,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             faultyAmount < 0
         ) {
             toast.error("Số lượng lỗi phải lớn hơn 0");
@@ -659,7 +669,7 @@ const ItemInput = ({
             selectedFaultItem.ItemCode !== "" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             faultyAmount > selectedItemDetails.maxQty
         ) {
             toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
@@ -670,7 +680,7 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             selectedFaultItem.SubItemCode === "" &&
             selectedFaultItem.ItemCode === "" &&
             faultyAmount
@@ -683,10 +693,10 @@ const ItemInput = ({
             selectedItemDetails.CongDoan !== "XV" &&
             (selectedItemDetails?.stocks?.length !== 1 ||
                 selectedItemDetails?.stocks[0]?.SubItemCode !==
-                    "MM010000178") &&
+                "MM010000178") &&
             selectedFaultItem.ItemCode !== "" &&
             parseInt(faultyAmount) + parseInt(amount) >
-                parseInt(selectedItemDetails.maxQty)
+            parseInt(selectedItemDetails.maxQty)
         ) {
             toast.error(
                 <span>
@@ -707,19 +717,19 @@ const ItemInput = ({
             // Object chứa dữ liệu lỗi
             const ErrorData = isItemCodeDetech
                 ? {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  }
+                    SubItemWhs: selectedItemDetails.SubItemWhs,
+                    SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                        SubItemCode: item.SubItemCode,
+                        BaseQty: item.BaseQty,
+                    })),
+                }
                 : {
-                      SubItemWhs: selectedItemDetails.SubItemWhs,
-                      SubItemQty: selectedItemDetails.stocks.map((item) => ({
-                          SubItemCode: item.SubItemCode,
-                          BaseQty: item.BaseQty,
-                      })),
-                  };
+                    SubItemWhs: selectedItemDetails.SubItemWhs,
+                    SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                        SubItemCode: item.SubItemCode,
+                        BaseQty: item.BaseQty,
+                    })),
+                };
 
             try {
                 const payload = {
@@ -1111,9 +1121,25 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
+    const MenuView = ({actionKetCau, actionVatTu}) => {
+        return (
+            <Menu>
+                <MenuButton as={Button} background={"unset"} backgroundColor={"unset"} className="!text-[#17506B] !font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+                    </svg>
+                </MenuButton>
+                <MenuList className="z-50">
+                    <MenuItem onClick={() => viewStructure(actionKetCau.LSX, actionKetCau.data)}>Xem kết cấu</MenuItem>
+                    <MenuItem onClick={() => viewMaterial(actionKetCau.LSX, actionKetCau.data)}>Xem vật tư</MenuItem>
+                </MenuList>
+            </Menu>
+        )
+    }
+
     return (
         <>
-            <div className="shadow-md relative  rounded-lg bg-white/30 backdrop-blur-xs z-1">
+            <div className="shadow-md relative  rounded-lg bg-white/30 z-1">
                 <div
                     className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5
                  xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
@@ -1404,12 +1430,11 @@ const ItemInput = ({
                                         <div className="p-3 border-2 border-[#DADADA] bg-white rounded-xl shadow-sm">
                                             <div className="">
                                                 <div
-                                                    className={`w-full flex items-center justify-between rounded-xl p-3 ${
-                                                        selectedItemDetails?.FatherStock <=
+                                                    className={`w-full flex items-center justify-between rounded-xl p-3 ${selectedItemDetails?.FatherStock <=
                                                         0
-                                                            ? "bg-gray-200"
-                                                            : "bg-blue-100"
-                                                    }`}
+                                                        ? "bg-gray-200"
+                                                        : "bg-blue-100"
+                                                        }`}
                                                 >
                                                     <div className="w-[90%]">
                                                         <div className="text-xs m-0 text-[#647C9C]">
@@ -1426,12 +1451,11 @@ const ItemInput = ({
                                                         </div>
                                                     </div>
                                                     <div
-                                                        className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${
-                                                            selectedItemDetails?.FatherStock <=
+                                                        className={`flex justify-end text-right rounded-lg cursor-pointer px-3 py-1 text-white duration-300 ${selectedItemDetails?.FatherStock <=
                                                             0
-                                                                ? "bg-gray-500"
-                                                                : "bg-[#155979]"
-                                                        } `}
+                                                            ? "bg-gray-500"
+                                                            : "bg-[#155979]"
+                                                            } `}
                                                     >
                                                         {selectedItemDetails?.FatherStock ||
                                                             0}
@@ -1444,7 +1468,7 @@ const ItemInput = ({
                                                     phẩm:
                                                 </label>
                                                 {selectedItemDetails?.FatherStock <=
-                                                0 ? (
+                                                    0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
                                                         <div>
@@ -1522,7 +1546,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.SanLuong ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1534,7 +1558,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.DaLam ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1545,7 +1569,7 @@ const ItemInput = ({
                                                                     <div className="text-xl font-bold text-[#1F2937]">
                                                                         {parseInt(
                                                                             stockItem?.Loi ||
-                                                                                0
+                                                                            0
                                                                         )}
                                                                     </div>
                                                                     <div className="uppercase font-semibold text-[13px] text-gray-500">
@@ -1593,7 +1617,7 @@ const ItemInput = ({
                                                                         phẩm:
                                                                     </label>
                                                                     {selectedItemDetails?.FatherStock <=
-                                                                    0 ? (
+                                                                        0 ? (
                                                                         <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                                             <MdDangerous className="w-6 h-6" />
                                                                             <div>
@@ -1626,7 +1650,7 @@ const ItemInput = ({
                                                                             ) => {
                                                                                 if (
                                                                                     value ===
-                                                                                        0 ||
+                                                                                    0 ||
                                                                                     !value ||
                                                                                     isNaN(
                                                                                         value
@@ -1710,7 +1734,7 @@ const ItemInput = ({
                                                                         ) => {
                                                                             if (
                                                                                 value ===
-                                                                                    0 ||
+                                                                                0 ||
                                                                                 !value ||
                                                                                 isNaN(
                                                                                     value
@@ -1803,7 +1827,7 @@ const ItemInput = ({
                                                                                     stockIndex
                                                                                 ]
                                                                                     .RejectQty <
-                                                                                    1
+                                                                                1
                                                                             ) {
                                                                                 toast.error(
                                                                                     "Vui lòng khai báo số lượng lỗi."
@@ -2150,14 +2174,13 @@ const ItemInput = ({
                                                     .map((item, index) => (
                                                         <div
                                                             key={index}
-                                                            className={`${
-                                                                parseInt(
-                                                                    item.OnHand ||
-                                                                        0
-                                                                ) <= 0
-                                                                    ? "bg-gray-200"
-                                                                    : "bg-blue-100"
-                                                            } flex flex-col py-2  mb-6 rounded-xl`}
+                                                            className={`${parseInt(
+                                                                item.OnHand ||
+                                                                0
+                                                            ) <= 0
+                                                                ? "bg-gray-200"
+                                                                : "bg-blue-100"
+                                                                } flex flex-col py-2  mb-6 rounded-xl`}
                                                         >
                                                             <div className="flex items-center justify-between gap-4 px-4">
                                                                 <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
@@ -2170,15 +2193,15 @@ const ItemInput = ({
                                                                             {item.BaseQty.toString().includes(
                                                                                 "."
                                                                             ) && (
-                                                                                <span>
-                                                                                    {
-                                                                                        "-"
-                                                                                    }
-                                                                                    {Math.ceil(
-                                                                                        item.BaseQty
-                                                                                    )}
-                                                                                </span>
-                                                                            )}
+                                                                                    <span>
+                                                                                        {
+                                                                                            "-"
+                                                                                        }
+                                                                                        {Math.ceil(
+                                                                                            item.BaseQty
+                                                                                        )}
+                                                                                    </span>
+                                                                                )}
                                                                             ]
                                                                         </span>
                                                                         {
@@ -2187,29 +2210,28 @@ const ItemInput = ({
                                                                     </div>
                                                                     <div className="font-medium text-[15px]">
                                                                         {item.SubItemName ===
-                                                                        "Gỗ"
+                                                                            "Gỗ"
                                                                             ? "Nguyên liệu gỗ"
                                                                             : item.SubItemName ===
-                                                                                  null ||
-                                                                              item.SubItemName ===
-                                                                                  ""
-                                                                            ? "Nguyên vật liệu chưa xác định"
-                                                                            : item.SubItemName}
+                                                                                null ||
+                                                                                item.SubItemName ===
+                                                                                ""
+                                                                                ? "Nguyên vật liệu chưa xác định"
+                                                                                : item.SubItemName}
                                                                     </div>
                                                                 </div>
                                                                 <span
-                                                                    className={`${
-                                                                        parseInt(
-                                                                            item.OnHand ||
-                                                                                0
-                                                                        ) <= 0
-                                                                            ? "bg-gray-500"
-                                                                            : "bg-[#155979]"
-                                                                    } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
+                                                                    className={`${parseInt(
+                                                                        item.OnHand ||
+                                                                        0
+                                                                    ) <= 0
+                                                                        ? "bg-gray-500"
+                                                                        : "bg-[#155979]"
+                                                                        } rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                 >
                                                                     {parseInt(
                                                                         item.OnHand ||
-                                                                            0
+                                                                        0
                                                                     ).toLocaleString()}
                                                                 </span>
                                                             </div>
@@ -2223,11 +2245,11 @@ const ItemInput = ({
                                                 </Text>
                                                 <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                                     {selectedItemDetails?.maxQty >
-                                                    0
+                                                        0
                                                         ? parseInt(
-                                                              selectedItemDetails?.maxQty ||
-                                                                  0
-                                                          ).toLocaleString()
+                                                            selectedItemDetails?.maxQty ||
+                                                            0
+                                                        ).toLocaleString()
                                                         : 0}
                                                 </span>
                                             </div>
@@ -2240,7 +2262,7 @@ const ItemInput = ({
                                                     {formatNumber(
                                                         Number(
                                                             selectedItemDetails?.remainQty -
-                                                                selectedItemDetails?.WaitingConfirmQty
+                                                            selectedItemDetails?.WaitingConfirmQty
                                                         )
                                                     ) || 0}
                                                 </span>
@@ -2282,7 +2304,7 @@ const ItemInput = ({
                                                     .filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 0
                                                     )
                                                     ?.map((item, index) => (
@@ -2312,31 +2334,31 @@ const ItemInput = ({
                                                                         </Text>
                                                                         {selectedItemDetails?.CongDoan ==
                                                                             "DG" && (
-                                                                            <div className="flex text-sm">
-                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
-                                                                                    Số
-                                                                                    lượng
-                                                                                    đã
-                                                                                    đóng
-                                                                                    gói
-                                                                                    chờ
-                                                                                    giao:{" "}
-                                                                                </Text>
-                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
-                                                                                    Đã
-                                                                                    đóng
-                                                                                    gói
-                                                                                    chờ
-                                                                                    giao:{" "}
-                                                                                </Text>
-                                                                                <span className="ml-1 text-gray-600">
-                                                                                    {Number(
-                                                                                        item?.SLDG ||
+                                                                                <div className="flex text-sm">
+                                                                                    <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                        Số
+                                                                                        lượng
+                                                                                        đã
+                                                                                        đóng
+                                                                                        gói
+                                                                                        chờ
+                                                                                        giao:{" "}
+                                                                                    </Text>
+                                                                                    <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                        Đã
+                                                                                        đóng
+                                                                                        gói
+                                                                                        chờ
+                                                                                        giao:{" "}
+                                                                                    </Text>
+                                                                                    <span className="ml-1 text-gray-600">
+                                                                                        {Number(
+                                                                                            item?.SLDG ||
                                                                                             0
-                                                                                    )}
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
+                                                                                        )}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
                                                                         <div className="flex text-sm">
                                                                             <Text className=" font-medium text-gray-600">
                                                                                 Thời
@@ -2391,7 +2413,7 @@ const ItemInput = ({
                                             {selectedItemDetails?.CongDoan ===
                                                 "DG" &&
                                                 selectedItemDetails?.maxQty >
-                                                    0 && (
+                                                0 && (
                                                     <div className="">
                                                         <Box className="px-0">
                                                             <label className="mt-6 font-semibold">
@@ -2438,15 +2460,15 @@ const ItemInput = ({
                                                 </span>
                                                 {selectedItemDetails?.CongDoan !==
                                                     "SC" &&
-                                                selectedItemDetails?.CongDoan !==
+                                                    selectedItemDetails?.CongDoan !==
                                                     "XV" &&
-                                                selectedItemDetails?.maxQty <=
+                                                    selectedItemDetails?.maxQty <=
                                                     0 &&
-                                                (selectedItemDetails?.stocks
-                                                    ?.length !== 1 ||
-                                                    selectedItemDetails
-                                                        ?.stocks[0]
-                                                        ?.SubItemCode !==
+                                                    (selectedItemDetails?.stocks
+                                                        ?.length !== 1 ||
+                                                        selectedItemDetails
+                                                            ?.stocks[0]
+                                                            ?.SubItemCode !==
                                                         "MM010000178") ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
@@ -2456,8 +2478,8 @@ const ItemInput = ({
                                                         </div>
                                                     </div>
                                                 ) : selectedItemDetails?.remainQty -
-                                                      selectedItemDetails?.WaitingConfirmQty <=
-                                                  0 ? (
+                                                    selectedItemDetails?.WaitingConfirmQty <=
+                                                    0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
                                                         <BiSolidBadgeCheck className="w-6 h-6" />
                                                         <div className="text-white">
@@ -2520,9 +2542,9 @@ const ItemInput = ({
                                                                 selectedItemDetails?.notifications.filter(
                                                                     (notif) =>
                                                                         notif.confirm ===
-                                                                            0 &&
+                                                                        0 &&
                                                                         notif.type ===
-                                                                            1
+                                                                        1
                                                                 ).length || 0 // Đóng đúng cặp ở đây
                                                             )
                                                         )}
@@ -2535,13 +2557,13 @@ const ItemInput = ({
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     ) && (
                                                         <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
@@ -2555,14 +2577,14 @@ const ItemInput = ({
                                                     selectedItemDetails?.notifications.filter(
                                                         (notif) =>
                                                             notif.confirm ==
-                                                                0 &&
+                                                            0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
                                                     selectedItemDetails?.notifications
                                                         .filter(
                                                             (notif) =>
                                                                 notif.confirm ==
-                                                                    0 &&
+                                                                0 &&
                                                                 notif.type == 1
                                                         )
                                                         .map((item, index) => (
@@ -2583,7 +2605,7 @@ const ItemInput = ({
                                                                     {item?.loinhamay !==
                                                                         null &&
                                                                         item?.loinhamay !==
-                                                                            user.plant && (
+                                                                        user.plant && (
                                                                             <Text className="flex space-x-1 font-medium text-xs text-red-500 mb-1">
                                                                                 <MdOutlineSubdirectoryArrowRight />
                                                                                 <span className=" ">
@@ -2593,21 +2615,21 @@ const ItemInput = ({
                                                                                     nhà
                                                                                     máy{" "}
                                                                                     {item?.loinhamay ==
-                                                                                    "YS"
+                                                                                        "YS"
                                                                                         ? "Yên Sơn"
                                                                                         : item?.loinhamay ==
-                                                                                          "TH"
-                                                                                        ? "Thuận Hưng"
-                                                                                        : item?.loinhamay ==
-                                                                                          "TB"
-                                                                                        ? "Thái Bình"
-                                                                                        : item?.loinhamay ==
-                                                                                          "CH"
-                                                                                        ? "Chiêm Hóa"
-                                                                                        : item?.loinhamay ==
-                                                                                          "VF"
-                                                                                        ? "Viforex"
-                                                                                        : "không xác định"}
+                                                                                            "TH"
+                                                                                            ? "Thuận Hưng"
+                                                                                            : item?.loinhamay ==
+                                                                                                "TB"
+                                                                                                ? "Thái Bình"
+                                                                                                : item?.loinhamay ==
+                                                                                                    "CH"
+                                                                                                    ? "Chiêm Hóa"
+                                                                                                    : item?.loinhamay ==
+                                                                                                        "VF"
+                                                                                                        ? "Viforex"
+                                                                                                        : "không xác định"}
                                                                                 </span>
                                                                             </Text>
                                                                         )}
@@ -2755,12 +2777,11 @@ const ItemInput = ({
                                                             </div>
                                                             <div
                                                                 className={`mb-4 ml-3 text-gray-600 
-                                                                ${
-                                                                    selectedFaultItem.ItemCode ===
-                                                                    choosenItem.ItemChild
+                                                                ${selectedFaultItem.ItemCode ===
+                                                                        choosenItem.ItemChild
                                                                         ? "font-semibold text-gray-800 "
                                                                         : "text-gray-600"
-                                                                }`}
+                                                                    }`}
                                                                 key={index}
                                                             >
                                                                 <Radio
@@ -2807,7 +2828,7 @@ const ItemInput = ({
                                                             {selectedItemDetails?.CongDoan !==
                                                                 "SC" &&
                                                                 selectedItemDetails?.CongDoan !==
-                                                                    "XV" && (
+                                                                "XV" && (
                                                                     <>
                                                                         {" "}
                                                                         <div className="my-3 font-medium text-[15px] text-red-700">
@@ -2825,12 +2846,11 @@ const ItemInput = ({
                                                                                 index
                                                                             ) => (
                                                                                 <div
-                                                                                    className={`mb-4 ml-3  ${
-                                                                                        selectedFaultItem.SubItemCode ===
+                                                                                    className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode ===
                                                                                         item.SubItemCode
-                                                                                            ? "font-semibold text-gray-800 "
-                                                                                            : "text-gray-600"
-                                                                                    }`}
+                                                                                        ? "font-semibold text-gray-800 "
+                                                                                        : "text-gray-600"
+                                                                                        }`}
                                                                                     key={
                                                                                         index
                                                                                     }
@@ -3002,7 +3022,7 @@ const ItemInput = ({
                                             ) : (
                                                 <>
                                                     {filteredReturnedData.length >
-                                                    0 ? (
+                                                        0 ? (
                                                         <div>
                                                             <div className="text-orange-600 text-sm pb-2">
                                                                 Có{" "}
@@ -3150,14 +3170,14 @@ const ItemInput = ({
                             {["CBG", "VCN", "DAND"].some((permission) =>
                                 user.permissions.includes(permission)
                             ) && (
-                                <button
-                                    className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
-                                    type="button"
-                                    onClick={onAlertDialogOpen}
-                                >
-                                    Xác nhận
-                                </button>
-                            )}
+                                    <button
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        type="button"
+                                        onClick={onAlertDialogOpen}
+                                    >
+                                        Xác nhận
+                                    </button>
+                                )}
                         </div>
                     </ModalFooter>
                 </ModalContent>
@@ -3200,9 +3220,9 @@ const ItemInput = ({
                                                     .filter(
                                                         (data) =>
                                                             data.CompleQty !==
-                                                                "" ||
+                                                            "" ||
                                                             data.RejectQty !==
-                                                                ""
+                                                            ""
                                                     )
                                                     .map((data, index) => (
                                                         <div className="">
@@ -3255,7 +3275,7 @@ const ItemInput = ({
                             ) : (
                                 <>
                                     {(amount && amount !== "") ||
-                                    (faultyAmount && faultyAmount !== "") ? (
+                                        (faultyAmount && faultyAmount !== "") ? (
                                         <div className="space-y-1">
                                             {packagedAmount && (
                                                 <div className="text-yellow-700">
@@ -3310,25 +3330,25 @@ const ItemInput = ({
                             {(amount ||
                                 faultyAmount ||
                                 (RONGInputQty && rongData)) && (
-                                <button
-                                    disabled={confirmLoading}
-                                    className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
-                                    onClick={
-                                        selectedItemDetails?.CongDoan === "RO"
-                                            ? handleSubmitQuantityRong
-                                            : handleSubmitQuantity
-                                    }
-                                >
-                                    {confirmLoading ? (
-                                        <div className="flex items-center space-x-4">
-                                            <Spinner size="sm" color="white" />
-                                            <div>Đang tải</div>
-                                        </div>
-                                    ) : (
-                                        "Xác nhận"
-                                    )}
-                                </button>
-                            )}
+                                    <button
+                                        disabled={confirmLoading}
+                                        className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                        onClick={
+                                            selectedItemDetails?.CongDoan === "RO"
+                                                ? handleSubmitQuantityRong
+                                                : handleSubmitQuantity
+                                        }
+                                    >
+                                        {confirmLoading ? (
+                                            <div className="flex items-center space-x-4">
+                                                <Spinner size="sm" color="white" />
+                                                <div>Đang tải</div>
+                                            </div>
+                                        ) : (
+                                            "Xác nhận"
+                                        )}
+                                    </button>
+                                )}
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
@@ -3349,8 +3369,8 @@ const ItemInput = ({
                                 {dialogType === "product"
                                     ? "Bạn chắc chắn muốn xoá số lượng đã giao chờ xác nhận?"
                                     : dialogType === "qc"
-                                    ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
-                                    : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
+                                        ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
+                                        : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
                             </div>
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">

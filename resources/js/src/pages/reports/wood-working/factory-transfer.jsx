@@ -269,7 +269,7 @@ function FactoryTransfer() {
                     params.node.rowPinned
                         ? { fontWeight: "bold", textAlign: "left", backgroundColor: "#B9E0F6" }
                         : { textAlign: "left" },
-            },
+            }
         ]);
     }, []);
 
@@ -627,6 +627,17 @@ function FactoryTransfer() {
         }
     }
 
+    // Tính tổng M3
+    const totalM3 = useMemo(
+        () => rowData.reduce((sum, r) => sum + (r.M3SP || 0), 0),
+        [rowData]
+    );
+
+    const totalQty = useMemo(
+        () => rowData.reduce((sum, r) => sum + (r.Quantity || 0), 0),
+        [rowData]
+    );
+
     useEffect(() => {
         getAllFactory();
     }, [])
@@ -816,10 +827,11 @@ function FactoryTransfer() {
                             {rowData?.length > 0 ? (
                                 <div>
                                     <div
+                                        id="ag-grid-baocao-dieuchuyen"
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 h-[calc(100vh-320px)]"
                                         style={{
                                             // height: calc(window.innerHeight - 300),
-                                            fontSize: 16,
+                                            fontSize: 14,
                                         }}
                                     >
 
@@ -829,20 +841,8 @@ function FactoryTransfer() {
                                             columnDefs={colDefs}
                                             excelStyles={excelStyles}
                                             rowGroupPanelShow={"always"}
-                                            animateRows={true}
-                                            suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
                                             localeText={localeText}
-                                            suppressAutoGroupColumn={false}
-                                            // autoGroupColumnDef={{
-                                            //     headerName: 'Nhóm',
-                                            //     field: 'ag-Grid-AutoColumn',
-                                            //     cellRenderer: 'agGroupCellRenderer',
-                                            //     cellRendererParams: {
-                                            //         suppressCount: true,
-                                            //         checkbox: false
-                                            //     }
-                                            // }}
                                             groupDefaultExpanded={-1}
                                             groupDisplayType={'multipleColumns'}
                                             onGridReady={(params) => {
@@ -856,6 +856,7 @@ function FactoryTransfer() {
 
                                                 params.api.refreshCells();
                                             }}
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>
