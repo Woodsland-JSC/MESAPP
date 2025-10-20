@@ -926,9 +926,10 @@ class ProductionController extends Controller
         $data = DB::table('notireceipt as a')
             ->where('a.id', $request->id)
             ->where('a.deleted', 0)
+            ->where('a.confirm', 0)
             ->first();
         if (!$data) {
-            throw new \Exception('data không hợp lệ.');
+            throw new \Exception('Thông báo đã được nhận hoặc trả lại. Vui lòng load lại trang');
         }
 
         // Xóa số lượng giao chờ xác nhận

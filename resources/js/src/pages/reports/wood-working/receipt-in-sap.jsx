@@ -953,7 +953,7 @@ function ReceiptInSapReportCBG() {
                     ) : (
                         <>
                             {reportData?.length > 0 ? (
-                                <div>
+                                <div className="xl:display:block lg:block md:block hidden">
                                     <div
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
                                         style={{

@@ -78,8 +78,6 @@ function Details() {
         palletsApi
             .getBOWById(id)
             .then((response) => {
-                console.log("Dữ liệu từ API:", response);
-
                 setBOWData(response.plandrying);
                 setCheckboxData({
                     CT1: response.plandrying.CT1 || 0,
@@ -147,8 +145,6 @@ function Details() {
         palletsApi
             .getBOWById(id)
             .then((response) => {
-                console.log("Dữ liệu từ API:", response);
-
                 setBOWData(response.plandrying);
                 setCheckboxData({
                     CT1: response.plandrying.CT1 || 0,
@@ -171,6 +167,7 @@ function Details() {
                     DateChecked: response.plandrying.DateChecked,
                     NoCheck: response.plandrying.NoCheck,
                 });
+                setLoadedPalletList(response.plandrying.details);
                 setPalletData(response.plandrying.details);
                 setCT11Data(response.CT11Detail[0]);
                 setCT12Data(response.CT12Detail[0]);

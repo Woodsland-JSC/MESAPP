@@ -190,6 +190,18 @@ const CBGReports = [
         link: "/reports/wood-working/report-resolution",
         description: "Biên bản xử ly sản phẩm không phù hợp"
     },
+    {
+        id: "0014",
+        name: "Báo cáo sản lượng quy đổi",
+        link: "/reports/wood-working/san-luong-quy-doi",
+        description: "Báo cáo sản lượng quy đổi"
+    },
+    {
+        id: "0015",
+        name: "Báo cáo quỹ lương",
+        link: "/reports/wood-working/quy-luong",
+        description: "Báo cáo quỹ lương"
+    },
 ];
 
 const QCReports = [

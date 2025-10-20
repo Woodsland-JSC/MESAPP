@@ -17,8 +17,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/reject-receipts', [VCNController::class, 'reject']);
         Route::post('/accept-qc', [VCNController::class, 'AcceptQCVCN']);
         Route::get('/danh-sach-phoi-cho-nhan', [VCNController::class, 'dsphoipending']);
+        Route::post('/cancel-disassembly-order', [VCNController::class, 'cancelDisassemblyOrder']);
+        Route::post('/close-disassembly-order', [VCNController::class, 'closeDisassemblyOrder']);
+        Route::post('/adjust-rong-quantity', [VCNController::class, 'adjustRongQuantity']);
 
         // Kết cấu ván công nghiệp
         Route::get('/ket-cau/{lsx}', [VCNController::class, 'xem_ket_cau'])->name('xem_ket_cau');
+        Route::get('/vat-tu/{lsx}', [VCNController::class, 'xem_vat_tu'])->name('xem_vat_tu');
     });
 });

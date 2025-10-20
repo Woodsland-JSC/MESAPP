@@ -338,7 +338,7 @@ function ProductionOutputByProductionOrderVCN() {
                             length: item.U_CDai,
                             width: item.U_CRong,
                             thickness: item.U_CDay,
-                            plannedQty: Number(item.PlannedQty),
+                            plannedQty: Math.abs(Number(item.PlannedQty)),
                             errorQty: Number(item.ErrorQty),
                             completedQty: Number(item.CompletedQty),
                             completedQtyM3: Number(item.CompletedM3),

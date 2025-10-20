@@ -831,7 +831,7 @@ function FactoryTransfer() {
                                         className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 h-[calc(100vh-320px)]"
                                         style={{
                                             // height: calc(window.innerHeight - 300),
-                                            fontSize: 16,
+                                            fontSize: 14,
                                         }}
                                     >
 
@@ -841,11 +841,8 @@ function FactoryTransfer() {
                                             columnDefs={colDefs}
                                             excelStyles={excelStyles}
                                             rowGroupPanelShow={"always"}
-                                            animateRows={true}
-                                            suppressAggFuncInHeader
                                             getRowStyle={getRowStyle}
                                             localeText={localeText}
-                                            suppressAutoGroupColumn={false}
                                             groupDefaultExpanded={-1}
                                             groupDisplayType={'multipleColumns'}
                                             onGridReady={(params) => {
@@ -859,7 +856,7 @@ function FactoryTransfer() {
 
                                                 params.api.refreshCells();
                                             }}
-                                            pinnedBottomRowData={[{ItemCode: 'Tổng', Quantity: totalQty, M3SP: totalM3 }]}
+                                            grandTotalRow={"bottom"}
                                         />
                                     </div>
                                 </div>
