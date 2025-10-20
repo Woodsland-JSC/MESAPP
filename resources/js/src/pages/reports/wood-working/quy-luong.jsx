@@ -503,6 +503,11 @@ const BaoCaoQuyLuong = () => {
                                                 getRowStyle={getRowStyle}
                                                 grandTotalRow={"bottom"}
                                                 localeText={AG_GRID_LOCALE_VI}
+                                                autoGroupColumnDef={{
+                                                    headerName: "Mã Tổ",
+                                                    field: "To",
+                                                    width: 250
+                                                }}
                                             />
                                         </div>
                                     </div>
