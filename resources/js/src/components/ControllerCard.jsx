@@ -501,6 +501,8 @@ function ControllerCard(props) {
     };
 
     const loadUserStockController = async () => {
+        if(planDrying?.Status != 1) return;
+
         try {
             let res = await getUserStock();
             let options = [];
