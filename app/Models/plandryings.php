@@ -50,6 +50,8 @@ class planDryings extends Model
         'reviewDate',
         'CompletedDate',
         'plant',
+        'delivery_id',
+        'receiver_id'
     ];
     // Sự kiện trước khi tạo mới record
     protected static function boot()

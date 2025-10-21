@@ -146,6 +146,10 @@ const palletsApi = {
         const url = `pallets/dismantle-pallet`;
         return axiosClient().post(url, data);
     },
+    completeByPallets: (data) => {
+        const url = `ovens/production-complete-by-pallets`;
+        return axiosClient().post(url, data);
+    }
 };
 
 export default palletsApi;

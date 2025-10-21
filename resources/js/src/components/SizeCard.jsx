@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import SizeListItem from "./SizeListItem";
 import {
     Modal,
@@ -10,50 +9,35 @@ import {
     ModalBody,
     ModalCloseButton,
     useDisclosure,
-    Button,
+    Box,
 } from "@chakra-ui/react";
 import { IoScanCircleSharp } from "react-icons/io5";
 import { TbMoodEmpty } from "react-icons/tb";
 import palletsApi from "../api/palletsApi";
-import axios from "axios";
-import toast from "react-hot-toast";
 import { Spinner } from "@chakra-ui/react";
 import "../assets/styles/index.css";
 import {
     Table,
     Thead,
     Tbody,
-    Tfoot,
     Tr,
     Th,
     Td,
-    TableCaption,
     TableContainer,
 } from "@chakra-ui/react";
+import Swal from "sweetalert2";
+import { COMPLETE_PALLET_STATUS } from "../shared/data";
+import useAppContext from "../store/AppContext";
 
 function SizeCard(props) {
-    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason } = props;
+    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback } = props;
+    const { user } = useAppContext();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [sizeData, setSizeData] = useState([]);
     const [isPalletLoading, setPalletLoading] = useState(true);
-
-    // useEffect(() => {
-    //     palletsApi
-    //         .getBOWById(planID)
-    //         .then((response) => {
-    //             console.log("Dữ liệu trả về ở SizeCard:", response);
-
-    //             setSizeData(response.plandrying.details);
-    //             setPalletLoading(false);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Lỗi khi gọi API:", error);
-
-    //             setPalletLoading(false);
-    //         })
-    //         .finally(() => {});
-    // }, [props.reload]);
+    const [palletSelected, setPalletSelected] = useState([]);
+    const [palletStatus, setPalletStatus] = useState(COMPLETE_PALLET_STATUS.ALL);
 
     const loadSizeData = () => {
         palletsApi.getBOWById(planID)
@@ -67,12 +51,72 @@ function SizeCard(props) {
             });
     };
 
+    const selectAllPallet = (selected) => {
+        setPalletSelected([]);
+
+        if (selected) {
+            let p = [];
+            sizeData.forEach(item => {
+                p.push(item.pallet);
+            })
+            setPalletSelected(p);
+        }
+    }
+
+    const selectPallet = (selected, pallet) => {
+        if (selected) {
+            setPalletSelected(prev => [...prev, pallet])
+        } else {
+            let pallets = palletSelected.filter(item => item != pallet);
+            setPalletSelected(pallets)
+        }
+    }
+
+    const completePallet = () => {
+        if (type != 'ls') return;
+
+        Swal.fire({
+            title: `Xác nhận ra lò các Pallet đã chọn?`,
+            text: "Hành động này sẽ không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ra lò',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    let data = {
+                        planId: planID,
+                        palletIds: palletSelected,
+                        result: 'SD'
+                    };
+                    await palletsApi.completeByPallets(data);
+                    loadSizeData();
+                    onCallback();
+                    setPalletSelected([]);
+
+                    Swal.fire(
+                        'Thành công',
+                        'Ra lò các pallet thành công.',
+                        'success'
+                    );
+                } catch (error) {
+                    Swal.fire(
+                        'Có lỗi',
+                        'Ra lò các pallet có lỗi.',
+                        'error'
+                    )
+                }
+            }
+        });
+    }
+
     useEffect(() => {
-        // setSizeData(palletData);
-        if(planID){
+        if (planID) {
             loadSizeData();
         }
-    }, [planID, props.reload ]);
+    }, [planID, props.reload]);
 
     return (
         <div className="border-2 mb-4 border-gray-300 rounded-xl">
@@ -88,7 +132,7 @@ function SizeCard(props) {
                 </div>
                 <button
                     onClick={onOpen}
-                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium xl:mt-o lg:mt-0 md:mt-0 mt-2"
+                    className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium xl:mt-o lg:mt-0 md:mt-0 mt-2"
                 >
                     Xem tất cả
                 </button>
@@ -104,13 +148,45 @@ function SizeCard(props) {
             >
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Tất cả kích thước haha</ModalHeader>
+                    <ModalHeader>Tất cả kích thước</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
+                        <Box className="mb-3">
+                            <label className="block mb-2 text-sm font-medium text-gray-900">Lọc theo trạng thái</label>
+                            <select
+                                value={palletStatus}
+                                onChange={e => setPalletStatus(Number(e.target.value))}
+                                name="pallet-status"
+                                id="pallet-status"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 md:w-[300px]"
+                            >
+                                <option value={COMPLETE_PALLET_STATUS.ALL}>Tất cả</option>
+                                <option value={COMPLETE_PALLET_STATUS.COMPLETE}>Đã ra lò</option>
+                                <option value={COMPLETE_PALLET_STATUS.UN_COMPLETE}>Chưa ra lò</option>
+                            </select>
+                        </Box>
                         <TableContainer>
                             <Table variant="simple">
                                 <Thead className="bg-gray-50 top-0 sticky z-40">
                                     <Tr>
+                                        {
+                                            (type == 'ls' && sizeData.filter(pallet => {
+                                                if (palletStatus == COMPLETE_PALLET_STATUS.ALL) {
+                                                    return pallet
+                                                }
+                                                else if (palletStatus == COMPLETE_PALLET_STATUS.COMPLETE) {
+                                                    return pallet.CompletedBy != null
+                                                } else {
+                                                    return pallet.CompletedBy == null
+                                                }
+                                            }).filter(pl => pl.CompletedBy == null).length > 0) ? (
+                                                <Th width={40}>
+                                                    <input type="checkbox" checked={palletSelected.length == sizeData.length} className="cursor-pointer w-4 h-4" name="select-all-pallet" onChange={e => selectAllPallet(e.target.checked)} />
+                                                </Th>
+                                            ) : (
+                                                <Td width={40}></Td>
+                                            )
+                                        }
                                         <Th>Pallet</Th>
                                         <Th>Mục đích sấy</Th>
                                         <Th>Kích thước</Th>
@@ -119,34 +195,64 @@ function SizeCard(props) {
                                     </Tr>
                                 </Thead>
                                 <Tbody className="">
-                                        {sizeData.map((item, index) => (
-                                            <Tr>
+                                    {
+                                        sizeData.filter(pallet => {
+                                            if (palletStatus == COMPLETE_PALLET_STATUS.ALL) {
+                                                return pallet
+                                            }
+                                            else if (palletStatus == COMPLETE_PALLET_STATUS.COMPLETE) {
+                                                return pallet.CompletedBy != null
+                                            } else {
+                                                return pallet.CompletedBy == null
+                                            }
+                                        }).map((item, index) => (
+                                            <Tr key={index} className={`${item.CompletedBy ? 'bg-[#e5f3eb]' : ''}`}>
+                                                {
+                                                    (type == 'ls' && item.CompletedBy == null) ?
+                                                        <Td width={40}><input checked={palletSelected.some(pallet => pallet == item.pallet)} type="checkbox" className="cursor-pointer w-4 h-4" name="select-pallet" onChange={e => selectPallet(e.target.checked, item.pallet)} />
+                                                        </Td> :
+                                                        <Td width={40}></Td>
+                                                }
                                                 <Td>{item.Code}</Td>
                                                 <Td>{item.LyDo}</Td>
                                                 <Td>{item.size}</Td>
                                                 <Td isNumeric>{item.Qty}</Td>
                                                 <Td isNumeric>{Number(item.Mass).toFixed(4)}</Td>
                                             </Tr>
-                                        ))}
-                                    </Tbody>
+                                        ))
+                                    }
+                                </Tbody>
                             </Table>
                         </TableContainer>
-                        {/* <div className="relative overflow-y-auto max-h-[450px]">
-                            <TableContainer>
-                                <Table variant="simple">
-                                    
-                                </Table>
-                            </TableContainer>
-                        </div> */}
                     </ModalBody>
-
                     <ModalFooter>
-                        <button
-                            onClick={onClose}
-                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
-                        >
-                            Đóng
-                        </button>
+                        <div className="flex gap-x-3">
+                            {
+                                palletSelected.length > 0 && (
+                                    user?.permissions?.some(p => p == 'xacnhanlosay') && (
+                                        <button
+                                            onClick={completePallet}
+                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                        >
+                                            <span className="hidden sm:hidden md:block">Xác nhận ra lò các pallet được chọn</span>
+                                            <span className="block sm:block md:hidden ">Ra lò</span>
+                                        </button>
+                                    )
+
+                                )
+                            }
+
+                            <button
+                                onClick={() => {
+                                    onClose()
+                                    setPalletSelected([])
+                                }}
+                                className="bg-[#000000] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+
                     </ModalFooter>
                 </ModalContent>
             </Modal>
@@ -166,37 +272,37 @@ function SizeCard(props) {
                 ) : (
                     <div className="grid w-full py-1 overflow-x-auto">
                         <div className=" flex flex-row mb-1 mt-2 space-x-4 w-full">
-                        {sizeData.length === 0 ? (
-                            <div className="h-[4.3rem] w-full flex flex-col justify-center items-center ">
-                                <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2"/>
-                                <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
-                            </div>
-                        ) : (
-                            <>
-                                {sizeData.map((item, index) => (
-                                    <SizeListItem
-                                        planID={planID}
-                                        reason={reason}
-                                        id={item.pallet}
-                                        code={item.Code}
-                                        size={item.size}
-                                        pallet={item.pallet}
-                                        Qty={item.Qty}
-                                        weight={item.Mass}
-                                        method={item.LyDo}
-                                        onDelete={loadSizeData}
-                                        onReload={onReload}
-                                        onReloadPalletList={onReloadPalletList}
-                                    />
-                                ))}
-                            </>
-                        )}
-                            
+                            {sizeData.length === 0 ? (
+                                <div className="h-[4.3rem] w-full flex flex-col justify-center items-center ">
+                                    <TbMoodEmpty className="text-center text-gray-400 w-12 h-12 mb-2" />
+                                    <div className="text-center text-gray-400">Hiện tại lò đang trống.</div>
+                                </div>
+                            ) : (
+                                <>
+                                    {sizeData.map((item, index) => (
+                                        <SizeListItem
+                                            planID={planID}
+                                            reason={reason}
+                                            id={item.pallet}
+                                            code={item.Code}
+                                            size={item.size}
+                                            pallet={item.pallet}
+                                            Qty={item.Qty}
+                                            weight={item.Mass}
+                                            method={item.LyDo}
+                                            onDelete={loadSizeData}
+                                            onReload={onReload}
+                                            onReloadPalletList={onReloadPalletList}
+                                        />
+                                    ))}
+                                </>
+                            )}
+
                         </div>
                     </div>
-                )}               
+                )}
             </div>
-            
+
         </div>
     );
 }

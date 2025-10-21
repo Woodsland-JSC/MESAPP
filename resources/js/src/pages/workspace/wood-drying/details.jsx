@@ -235,10 +235,10 @@ function Details() {
                                         finishedDate={
                                             BOWData?.Time && BOWData?.created_at
                                                 ? moment(BOWData.created_at)
-                                                      .add(BOWData.Time, "days")
-                                                      .format(
-                                                          "YYYY-MM-DD HH:mm:ss"
-                                                      )
+                                                    .add(BOWData.Time, "days")
+                                                    .format(
+                                                        "YYYY-MM-DD HH:mm:ss"
+                                                    )
                                                 : "Invalid Date"
                                         }
                                         palletQty={BOWData.details?.length}
@@ -417,6 +417,7 @@ function Details() {
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
                                                     CT12Data={CT12Data}
+                                                    planDrying={BOWData}
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -438,6 +439,8 @@ function Details() {
                                                 <SizeCard
                                                     planID={BOWData.PlanID}
                                                     palletData={palletData}
+                                                    type={"ls"}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
                                         </div>
