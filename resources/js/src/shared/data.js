@@ -66,15 +66,59 @@ export const FACTORIES = {
         label: "Yên Sơn"
     },
     TB: {
-         value: "TB",
+        value: "TB",
         label: "Thái Bình"
     }
 }
 
 export const VAN_CONG_NGHIEP = "VCN";
+export const CHE_BIEN_GO = "CBG";
 
 export const COMPLETE_PALLET_STATUS = {
     ALL: 0,
     COMPLETE: 1,
     UN_COMPLETE: 2
 }
+
+export const DRYING_PERMISSIONS = [
+    {
+        value: "xepsay",
+        name: "Tạo pallet xếp sấy",
+        description: "Chất gỗ lên pallet để chuẩn bị đưa vào lò",
+    },
+    {
+        value: "kehoachsay",
+        name: "Tạo kế hoạch sấy",
+        description: "Chọn lò và đặt một kế hoạch sấy",
+    },
+    {
+        value: "vaolo",
+        name: "Vào lò",
+        description: "Cho pallet vào lò để chuẩn bị sấy",
+    },
+    {
+        value: "kiemtralo",
+        name: "Kiểm tra lò sấy",
+        description: "Kiểm tra lò trước khi bắt đầu sấy",
+    },
+    {
+        value: "losay",
+        name: "Lò sấy",
+        description: "Bắt đầu giai đoạn sấy",
+    },
+    {
+        value: "danhgiame",
+        name: "Đánh giá mẻ sấy",
+        description: "Đánh giá mẻ sấy trong lò",
+    },
+    {
+        value: "xacnhanlosay",
+        name: "Xác nhận hoàn thành lò",
+        description: "Xác nhận hoàn thành lò",
+    },
+    {
+        value: "xulypallet",
+        name: "Xử lý Pallet",
+        description: "Xử lý Pallet trong lò",
+    }
+];

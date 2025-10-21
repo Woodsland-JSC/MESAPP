@@ -97,6 +97,7 @@ import QCCBG from '../pages/workspace/wood-working/qc-cbg/index';
 import ChungTuNhapKhoChiTiet from "../pages/workspace/wood-working/qc-cbg/chung_tu_nhap_kho/detail";
 import SanLuongQuyDoi from "../pages/reports/wood-working/san-luong-quy-doi";
 import BaoCaoQuyLuong from "../pages/reports/wood-working/quy-luong";
+import XuLyDieuChuyenPallet from "../pages/workspace/wood-drying/xu-ly-pallet";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -175,7 +176,14 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
-
+                    <Route
+                        path="/workspace/xu-ly-dieu-chuyen-pallet"
+                        element={
+                            <ProtectedRoute permissionsRequired={["xulypallet"]}>
+                                <XuLyDieuChuyenPallet />
+                            </ProtectedRoute>
+                        }
+                    />
                     {/* Wood Working Processing */}
                     <Route
                         path="/workspace/wood-working/finished-goods-receipt"

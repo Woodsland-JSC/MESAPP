@@ -1,37 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "../../layouts/layout";
-import { MdPlaylistAddCheckCircle } from "react-icons/md";
-import { FaCalendar, FaPallet, FaRegCalendar } from "react-icons/fa";
-import { FaCalendarCheck } from "react-icons/fa6";
 import { HiSearchCircle, HiBadgeCheck } from "react-icons/hi";
 import {
     HiSquare3Stack3D,
-    HiMiniMagnifyingGlassCircle,
     HiClipboardDocumentList,
     HiHomeModern,
     HiRectangleStack,
     HiHandThumbUp,
-    HiMiniArchiveBoxArrowDown,
-    HiMiniBanknotes,
     HiArchiveBoxArrowDown,
     HiViewColumns,
-    HiArchiveBox,
     HiMiniTruck,
-    HiMiniWrenchScrewdriver,
+    HiArrowsRightLeft
 } from "react-icons/hi2";
-import { LuLayers } from "react-icons/lu";
 import {
     Tabs,
     TabList,
     TabPanels,
     Tab,
-    TabPanel,
-    Box,
-    Text,
-    Flex,
-    IconButton,
-    Button,
-    VStack,
+    TabPanel
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAppContext from "../../store/AppContext";
@@ -39,8 +25,7 @@ import "../../assets/styles/customTabs.css";
 import "../../assets/styles/index.css";
 
 function Workspace() {
-    const { user, setUser, isAuthenticated, setIsAuthenticated } =
-        useAppContext();
+    const { user } = useAppContext();
 
     const FirstTab = useRef();
     const SecondTab = useRef();
@@ -111,21 +96,6 @@ function Workspace() {
             document.title = "Woodsland";
         };
     }, []);
-
-    // useEffect(() => {
-    //     document.title = "Woodsland - Workspace";
-    //     const params = new URLSearchParams(window.location.search);
-
-    //     if (params.get("production") === "true") {
-    //         setTimeout(() => {
-    //             SecondTab.current.click();
-    //         });
-    //     }
-
-    //     return () => {
-    //         document.title = "Woodsland";
-    //     };
-    // }, []);
 
     return (
         <Layout>
@@ -253,6 +223,13 @@ function Workspace() {
                                                     description:
                                                         "Đánh giá mẻ gỗ sau khi sấy và kết thúc quy trình.",
                                                 },
+                                                // {
+                                                //     permission: "xulypallet",
+                                                //     link: "/workspace/xu-ly-dieu-chuyen-pallet",
+                                                //     icon: <HiArrowsRightLeft />,
+                                                //     title: "Điều chuyển Pallet",
+                                                //     description: "Xử lý điều chuyển Pallet trong lò.",
+                                                // }
                                             ].map(
                                                 ({
                                                     permission,
@@ -263,7 +240,7 @@ function Workspace() {
                                                 }) =>
                                                     user.permissions?.includes(
                                                         permission
-                                                    ) ? (
+                                                    ) && (
                                                         <Link
                                                             to={link}
                                                             key={permission}
@@ -292,32 +269,6 @@ function Workspace() {
                                                                 </div>
                                                             </div>
                                                         </Link>
-                                                    ) : (
-                                                        <div key={permission}>
-                                                            <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-7 p-4 bg-[#bbbbc3] rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl ">
-                                                                    <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
-                                                                        <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[22px] text-left font-bold tracking-tight text-transparent">
-                                                                            {
-                                                                                title
-                                                                            }
-                                                                        </h5>
-                                                                        <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-transparent">
-                                                                            {
-                                                                                description
-                                                                            }
-                                                                        </p>
-                                                                    </div>
-                                                                    <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
-                                                                        <div className=" text-3xl h-fit rounded-full m-1 p-3 bg-transparent text-transparent">
-                                                                            {
-                                                                                icon
-                                                                            }
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                     )
                                             )}
                                         </div>
@@ -762,69 +713,8 @@ function Workspace() {
                             </TabPanels>
                         </Tabs>
                     </div>
-
-                    {/* <div className="flex gap-x-3">
-                        <div className="cursor-pointer text-base font-medium p-2 px-4 border-2 border-gray-200 bg-[#222222] text-white w-fit rounded-full  my-5">
-                            Quản lý sấy gỗ
-                        </div>
-                        <div className="cursor-pointer text-base font-medium p-2 px-4 border-2 border-gray-200 bg-white w-fit rounded-full text-gray-500 my-5">
-                            Quản lý sản xuất
-                        </div>
-                        <div className=" cursor-pointer text-base font-medium p-2 px-4 border-2 border-gray-200 bg-white w-fit rounded-full text-gray-500 my-5">
-                            Quản lý bán hàng
-                        </div>
-                    </div> */}
                 </div>
             </div>
-            {/* {openInlandSelect && (
-                <div
-                    className="loader bg-[#eaeaed] bg-opacity-75 backdrop-blur-sm flex justify-center items-center"
-                    onClick={() => setOpenInlandSelect(false)}
-                >
-                    <IconButton
-                        aria-label="Close Overlay"
-                        icon={<>✖</>}
-                        position="absolute"
-                        top="4"
-                        right="4"
-                        onClick={() => setOpenInlandSelect(false)}
-                    />
-                    <div
-                        className="bg-white p-6 rounded-md shadow-lg gap-4 relative"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex flex-col md:flex-row gap-8">
-                            <Link
-                                to={
-                                    "/workspace/inland/finished-details-receipt"
-                                }
-                                className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center gap-2 w-52"
-                            >
-                                <Text fontWeight="bold">
-                                    Sản lượng chi tiết
-                                </Text>
-                                <Box fontSize="3xl" color="blue.500">
-                                    📊
-                                </Box>
-                            </Link>
-
-                            <Link
-                                to={
-                                    "/workspace/inland/finished-packaging-receipt"
-                                }
-                                className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center gap-2 w-52"
-                            >
-                                <Text fontWeight="bold">
-                                    Sản lượng đóng gói
-                                </Text>
-                                <Box fontSize="3xl" color="green.500">
-                                    📦
-                                </Box>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            )} */}
         </Layout>
     );
 }

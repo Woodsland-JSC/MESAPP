@@ -417,6 +417,7 @@ function Details() {
                                                     checkboxData={checkboxData}
                                                     CT11Data={CT11Data}
                                                     CT12Data={CT12Data}
+                                                    planDrying={BOWData}
                                                 />
                                             </Skeleton>
                                             <Skeleton
@@ -439,6 +440,7 @@ function Details() {
                                                     planID={BOWData.PlanID}
                                                     palletData={palletData}
                                                     type={"ls"}
+                                                    onCallback={updateData}
                                                 />
                                             </Skeleton>
                                         </div>

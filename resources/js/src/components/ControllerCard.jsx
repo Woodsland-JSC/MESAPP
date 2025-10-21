@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 import { PiCaretCircleDoubleRightFill } from "react-icons/pi";
@@ -37,6 +37,10 @@ import { useNavigate } from "react-router-dom";
 import { MdFormatColorReset } from "react-icons/md";
 import KilnCheck from "./KilnCheck";
 import { max, min, set } from "date-fns";
+import Swal from "sweetalert2";
+import { getUserStock } from "../api/user.api";
+import { sendPlanDryingToStockController } from "../api/plan-drying.api";
+import useAppContext from "../store/AppContext";
 
 const checkItems = [
     {
@@ -127,8 +131,10 @@ function ControllerCard(props) {
         onReloadPalletList,
         palletOptions,
         palletListLoading,
+        planDrying
     } = props;
 
+    const { user } = useAppContext();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -139,6 +145,12 @@ function ControllerCard(props) {
         isOpen: isFinalOpen,
         onOpen: onFinalOpen,
         onClose: onFinalClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isUserSelectOpen,
+        onOpen: onUserSelectOpen,
+        onClose: onUserSelectClose,
     } = useDisclosure();
 
     let navigate = useNavigate();
@@ -204,6 +216,9 @@ function ControllerCard(props) {
         Q7: "",
         Q8: "",
     });
+
+    const [userStock, setUserStock] = useState([]);
+    const [userStockSelect, setUserStockSelect] = useState(null);
 
     const handleSoLanChange = (newSoLan) => {
         setSoLan(newSoLan);
@@ -357,14 +372,14 @@ function ControllerCard(props) {
                 loadedPalletList.forEach(item => {
                     let quyCach = item.size;
 
-                    if(quyCach){
+                    if (quyCach) {
                         let CDay = quyCach.split('x')[0];
                         thinkness.push(CDay);
                     }
                 });
 
                 let min = Math.min(...thinkness);
-                let max = Math.max(...thinkness);                
+                let max = Math.max(...thinkness);
 
                 if (selectedPallet.thickness < min - 3) {
                     toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
@@ -485,6 +500,59 @@ function ControllerCard(props) {
         }
     };
 
+    const loadUserStockController = async () => {
+        try {
+            let res = await getUserStock();
+            let options = [];
+            setUserStock(res.users);
+            res.users?.forEach(user => {
+                options.push({
+                    label: `${user.username}_${user.first_name} ${user.last_name}`,
+                    value: user.id
+                });
+            });
+        } catch (error) {
+            toast.error("Lấy danh sách thủ kho có lỗi.");
+        }
+    }
+
+    const onHandleDelivery = () => {
+        try {
+            Swal.fire({
+                title: 'Xác nhận gửi đến thủ kho?',
+                text: 'Hành động này không thể hoàn tác!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Huỷ',
+                reverseButtons: true,
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    let res = await sendPlanDryingToStockController({
+                        planId: planID,
+                        receiverId: userStockSelect?.value
+                    });
+
+                    onCallback();
+
+                    toast.success('Đã gửi cho người xác nhận!');
+
+                    console.log("res", res);
+                }
+            });
+        } catch (error) {
+            toast.success('Gửi xác nhận có lỗi!');
+        }
+    }
+
+    const isUnComplete = useMemo(() => {
+        return planDrying?.details?.some(pallet => !pallet.CompletedBy)
+    })
+
+    useEffect(() => {
+        loadUserStockController();
+    }, [])
+
     const progressTitle =
         progress === "kh"
             ? "Tạo kế hoạch sấy"
@@ -514,10 +582,7 @@ function ControllerCard(props) {
             <div>
                 <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 p-4">
                     <div className="pt-0 xl:w-[75%] w-full md:w-[85%]">
-                        <label
-                            htmlFor="company"
-                            className="block mb-2 text-md font-medium text-gray-900 "
-                        >
+                        <label className="block mb-2 text-md font-medium text-gray-900 ">
                             Chọn pallet
                         </label>
                         <Select
@@ -526,11 +591,6 @@ function ControllerCard(props) {
                             loadOptions={onReloadPalletList}
                             options={palletOptions}
                             onChange={(value) => {
-                                console.log("Selected Pallet:", value);
-                                console.log(
-                                    "Selected Pallet Thickness:",
-                                    value.thickness
-                                );
                                 setSelectedPallet(value);
                             }}
                             isLoading={palletListLoading}
@@ -685,12 +745,36 @@ function ControllerCard(props) {
                                 Mẻ sấy đã đủ điều kiện ra lò.
                             </div>
                         </div>
-                        <button
-                            className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                            onClick={onFinalOpen}
-                        >
-                            Xác nhận ra lò
-                        </button>
+                        {/* {
+                            user.permissions?.some(p => p != 'xacnhanlosay') && (
+                                planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                                    <button
+                                        className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                        onClick={onUserSelectOpen}
+                                    >
+                                        Gửi Thủ kho xác nhận
+                                    </button>
+                            )
+                        } */}
+                        {
+                            user?.permissions?.some(p => p == 'xacnhanlosay') ? (
+                                <button
+                                    disabled={isUnComplete}
+                                    className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
+                                    onClick={onFinalOpen}
+                                >
+                                    Xác nhận hoàn thành
+                                </button>
+                            ) : (
+                                planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                                    <button
+                                        className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                        onClick={onUserSelectOpen}
+                                    >
+                                        Gửi Thủ kho xác nhận
+                                    </button>
+                            )
+                        }
                     </div>
                 ) : null}
             </div>
@@ -980,6 +1064,51 @@ function ControllerCard(props) {
                                     "Xác nhận"
                                 )}
                             </button>
+                        </div>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Modal
+                closeOnOverlayClick={false}
+                isOpen={isUserSelectOpen}
+                onClose={onUserSelectClose}
+                isCentered
+                size="sm"
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Chọn Thủ kho</ModalHeader>
+                    <ModalBody pb={6}>
+                        <Select
+                            options={userStock}
+                            placeholder="Chọn Thủ kho"
+                            value={userStockSelect}
+                            onChange={(option) => {
+                                console.log("option", option);
+                                setUserStockSelect(option);
+                            }}
+                        />
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <div className="w-full flex xl:justify-end lg:justify-end md:justify-end gap-x-3">
+                            <button
+                                onClick={onUserSelectClose}
+                                className="w-full bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Đóng
+                            </button>
+                            {
+                                userStockSelect && (
+                                    <button
+                                        className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                        onClick={onHandleDelivery}
+                                    >
+                                        Xác nhận
+                                    </button>
+                                )
+                            }
                         </div>
                     </ModalFooter>
                 </ModalContent>

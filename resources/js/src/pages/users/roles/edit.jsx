@@ -28,39 +28,7 @@ import { FaDiamond } from "react-icons/fa6";
 import { Select } from "@chakra-ui/react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { set } from "date-fns";
-
-const dryingPermissions = [
-    {
-        value: "xepsay",
-        name: "Tạo pallet xếp sấy",
-        description: "Chất gỗ lên pallet để chuẩn bị đưa vào lò",
-    },
-    {
-        value: "kehoachsay",
-        name: "Tạo kế hoạch sấy",
-        description: "Chọn lò và đặt một kế hoạch sấy",
-    },
-    {
-        value: "vaolo",
-        name: "Vào lò",
-        description: "Cho pallet vào lò để chuẩn bị sấy",
-    },
-    {
-        value: "kiemtralo",
-        name: "Kiểm tra lò sấy",
-        description: "Kiểm tra lò trước khi bắt đầu sấy",
-    },
-    {
-        value: "losay",
-        name: "Lò sấy",
-        description: "Bắt đầu giai đoạn sấy",
-    },
-    {
-        value: "danhgiame",
-        name: "Đánh giá mẻ sấy",
-        description: "Đánh giá mẻ sấy trong lò",
-    },
-];
+import { DRYING_PERMISSIONS } from "../../../shared/data";
 
 const goodsManagementPermissions = [
     {
@@ -500,7 +468,7 @@ function EditRole() {
                                 </div>
 
                                 <div className="py-2">
-                                    {dryingPermissions?.map((item, index) => (
+                                    {DRYING_PERMISSIONS?.map((item, index) => (
                                         <div className="flex px-6 py-3">
                                             <div className="font-medium w-[40%] pl-8">
                                                 {item.name}

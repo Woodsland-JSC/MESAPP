@@ -27,9 +27,11 @@ import {
 } from "@chakra-ui/react";
 import Swal from "sweetalert2";
 import { COMPLETE_PALLET_STATUS } from "../shared/data";
+import useAppContext from "../store/AppContext";
 
 function SizeCard(props) {
-    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type } = props;
+    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback } = props;
+    const { user } = useAppContext();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [sizeData, setSizeData] = useState([]);
@@ -89,9 +91,9 @@ function SizeCard(props) {
                         palletIds: palletSelected,
                         result: 'SD'
                     };
-
-                    let res = await palletsApi.completeByPallets(data);
+                    await palletsApi.completeByPallets(data);
                     loadSizeData();
+                    onCallback();
                     setPalletSelected([]);
 
                     Swal.fire(
@@ -130,7 +132,7 @@ function SizeCard(props) {
                 </div>
                 <button
                     onClick={onOpen}
-                    className="bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium xl:mt-o lg:mt-0 md:mt-0 mt-2"
+                    className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all font-medium xl:mt-o lg:mt-0 md:mt-0 mt-2"
                 >
                     Xem tất cả
                 </button>
@@ -207,9 +209,9 @@ function SizeCard(props) {
                                             <Tr key={index} className={`${item.CompletedBy ? 'bg-[#e5f3eb]' : ''}`}>
                                                 {
                                                     (type == 'ls' && item.CompletedBy == null) ?
-                                                    <Td width={40}><input checked={palletSelected.some(pallet => pallet == item.pallet)} type="checkbox" className="cursor-pointer w-4 h-4" name="select-pallet" onChange={e => selectPallet(e.target.checked, item.pallet)} />
-                                                    </Td> : 
-                                                    <Td width={40}></Td>
+                                                        <Td width={40}><input checked={palletSelected.some(pallet => pallet == item.pallet)} type="checkbox" className="cursor-pointer w-4 h-4" name="select-pallet" onChange={e => selectPallet(e.target.checked, item.pallet)} />
+                                                        </Td> :
+                                                        <Td width={40}></Td>
                                                 }
                                                 <Td>{item.Code}</Td>
                                                 <Td>{item.LyDo}</Td>
@@ -227,13 +229,16 @@ function SizeCard(props) {
                         <div className="flex gap-x-3">
                             {
                                 palletSelected.length > 0 && (
-                                    <button
-                                        onClick={completePallet}
-                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
-                                    >
-                                        <span className="hidden sm:hidden md:block">Xác nhận ra lò các pallet được chọn</span>
-                                        <span className="block sm:block md:hidden ">Ra lò</span>
-                                    </button>
+                                    user?.permissions?.some(p => p == 'xacnhanlosay') && (
+                                        <button
+                                            onClick={completePallet}
+                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                        >
+                                            <span className="hidden sm:hidden md:block">Xác nhận ra lò các pallet được chọn</span>
+                                            <span className="block sm:block md:hidden ">Ra lò</span>
+                                        </button>
+                                    )
+
                                 )
                             }
 
