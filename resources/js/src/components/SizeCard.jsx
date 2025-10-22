@@ -30,7 +30,8 @@ import { COMPLETE_PALLET_STATUS } from "../shared/data";
 import useAppContext from "../store/AppContext";
 
 function SizeCard(props) {
-    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback } = props;
+    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback,planDrying } = props;
+    
     const { user } = useAppContext();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -229,7 +230,7 @@ function SizeCard(props) {
                         <div className="flex gap-x-3">
                             {
                                 palletSelected.length > 0 && (
-                                    user?.permissions?.some(p => p == 'xacnhanlosay') && (
+                                    (user?.id == planDrying.receiver_id) && (
                                         <button
                                             onClick={completePallet}
                                             className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
@@ -238,7 +239,6 @@ function SizeCard(props) {
                                             <span className="block sm:block md:hidden ">Ra lò</span>
                                         </button>
                                     )
-
                                 )
                             }
 
