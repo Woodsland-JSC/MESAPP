@@ -441,6 +441,7 @@ function Details() {
                                                     palletData={palletData}
                                                     type={"ls"}
                                                     onCallback={updateData}
+                                                    planDrying={BOWData}
                                                 />
                                             </Skeleton>
                                         </div>
