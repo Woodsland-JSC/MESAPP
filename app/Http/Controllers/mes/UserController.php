@@ -23,7 +23,7 @@ class UserController extends Controller
                 ->join('permissions as p', 'rhp.permission_id', '=', 'p.id')
                 ->where('p.name', 'xacnhanlosay')
                 ->where('u.plant', $plantId)
-                ->select('u.*', 'p.*')
+                ->select('u.*')
                 ->get();
 
             return response()->json([

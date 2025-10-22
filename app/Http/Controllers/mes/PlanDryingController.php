@@ -26,7 +26,10 @@ class PlanDryingController extends Controller
 
             $userId = Auth::user()->id;
 
-            $count = PlanDrying::where('delivery_id', '=', $userId)->where('receiver_id', '=', $params['receiverId'])->count();
+            $count = PlanDrying::where('delivery_id', '=', $userId)
+            ->where('receiver_id', '=', $params['receiverId'])
+            ->where('PlanID', '=', $params['planId'])
+            ->count();
 
             if ($count > 0) {
                 return response()->json([

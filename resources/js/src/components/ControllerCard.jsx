@@ -133,8 +133,8 @@ function ControllerCard(props) {
         palletListLoading,
         planDrying
     } = props;
-
     const { user } = useAppContext();
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -746,33 +746,23 @@ function ControllerCard(props) {
                             </div>
                         </div>
                         {
-                            user?.role == 1 && (
-                                planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
-                                    <button
-                                        className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                        onClick={onUserSelectOpen}
-                                    >
-                                        Gửi Thủ kho xác nhận
-                                    </button>
-                            )
+                            planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                                (user?.role == 1 || !user?.permissions.some('xacnhanlosay')) && <button
+                                    className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                    onClick={onUserSelectOpen}
+                                >
+                                    Gửi Thủ kho xác nhận
+                                </button>
                         }
                         {
-                            user?.permissions?.some(p => p == 'xacnhanlosay') ? (
-                                <button
+                            (planDrying.receiver_id == user.id) && (
+                                (user?.role == 1 || user?.permissions.some('xacnhanlosay')) && <button
                                     disabled={isUnComplete}
                                     className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
                                     onClick={onFinalOpen}
                                 >
                                     Xác nhận hoàn thành
                                 </button>
-                            ) : (
-                                planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
-                                    <button
-                                        className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                        onClick={onUserSelectOpen}
-                                    >
-                                        Gửi Thủ kho xác nhận
-                                    </button>
                             )
                         }
                     </div>
