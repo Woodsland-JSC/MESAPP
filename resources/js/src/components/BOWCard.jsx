@@ -18,6 +18,9 @@ function BOWCard(props) {
         isReviewed,
         isChecked,
         type,
+        isHandlePallet,
+        openModalPallet,
+        bowCard
     } = props;
 
     const location = useLocation();
@@ -49,7 +52,7 @@ function BOWCard(props) {
                     <div className="bow-status p-1 px-3 text-xs text-orange-600 font-semibold bg-orange-100 w-fit rounded-full justify-end my-4">
                         Đã kiểm tra lò
                     </div>
-                ) : palletQty > 0 ?(
+                ) : palletQty > 0 ? (
                     <div className="bow-status p-1 px-3 text-xs text-violet-600 font-semibold bg-violet-100 w-fit rounded-full justify-end my-4">
                         Đã vào lò
                     </div>
@@ -57,11 +60,11 @@ function BOWCard(props) {
                     <div className="bow-status p-1 px-3 text-xs text-[#1B75D0] font-semibold bg-[#EDF5FD] w-fit rounded-full justify-end my-4">
                         Tạo mới kế hoạch sấy
                     </div>
-                )}   
-            </>      
+                )}
+            </>
         ) : status === 1 ? (
             <>
-                { isReviewed === 1 ? (
+                {isReviewed === 1 ? (
                     <div className="bow-status p-1 px-3 text-xs text-green-500 font-semibold bg-green-50 w-fit rounded-full justify-end my-4">
                         Đang sấy và đã đánh giá
                     </div>
@@ -70,7 +73,7 @@ function BOWCard(props) {
                         Đang sấy chưa đánh giá
                     </div>
                 )}
-            </>   
+            </>
         ) : (
             <div className="bow-status p-1 px-3 text-xs text-gray-600 font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">
                 Trạng thái không xác định
@@ -82,8 +85,13 @@ function BOWCard(props) {
         <div className=" rounded-2xl bg-gray-50 h-[24rem] shadow-sm">
             {/* Header */}
             <div className="flex flex-col justify-start rounded-t-xl py-2 pt-0.5 px-4 h-[31%]">
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 justify-between">
                     {getStatusContent()}
+                    {
+                        (!isHandlePallet && bowCard?.receiver_id) && (
+                            <div className="bow-status p-1 px-3 text-xs text-[#17506B] font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">Chờ xác nhận</div>
+                        )
+                    }
                 </div>
 
                 <div className="text-[1.25rem] font-bold px-1 text-[#17506B] ">
@@ -123,16 +131,25 @@ function BOWCard(props) {
                     <div className="font-medium ">{weight} (m3)</div>
                 </div>
             </div>
-
-            {/* Controller */}
-            <Link to={`${detailLink}`} className="">
-                <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#f4f7fa] rounded-b-2xl h-[20%]">
-                    <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
-                        Xem chi tiết
-                        <HiArrowRight className="ml-2" />
+            {
+                isHandlePallet ? (
+                    <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#f4f7fa] rounded-b-2xl h-[20%]" onClick={openModalPallet}>
+                        <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
+                            Xem Pallet
+                            <HiArrowRight className="ml-2" />
+                        </div>
                     </div>
-                </div>
-            </Link>
+                ) : (
+                    <Link to={`${detailLink}`} className="">
+                        <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#f4f7fa] rounded-b-2xl h-[20%]">
+                            <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
+                                Xem chi tiết
+                                <HiArrowRight className="ml-2" />
+                            </div>
+                        </div>
+                    </Link>
+                )
+            }
         </div>
     );
 }
