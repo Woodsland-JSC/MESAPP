@@ -176,6 +176,7 @@ function Kiln() {
                                                 weight={bowCard.Mass}
                                                 isChecked={bowCard.Checked}
                                                 isReviewed={bowCard.Review}
+                                                bowCard={bowCard}
                                             />
                                         )
                                 )
