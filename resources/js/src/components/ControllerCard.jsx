@@ -501,18 +501,18 @@ function ControllerCard(props) {
     };
 
     const loadUserStockController = async () => {
-        if(planDrying?.Status != 1) return;
+        if (planDrying?.Status != 1) return;
 
         try {
             let res = await getUserStock();
             let options = [];
-            setUserStock(res.users);
             res.users?.forEach(user => {
                 options.push({
                     label: `${user.username}_${user.first_name} ${user.last_name}`,
                     value: user.id
                 });
             });
+            setUserStock(options)
         } catch (error) {
             toast.error("Lấy danh sách thủ kho có lỗi.");
         }
@@ -534,11 +534,9 @@ function ControllerCard(props) {
                         planId: planID,
                         receiverId: userStockSelect?.value
                     });
-
                     onCallback();
-
+                    onUserSelectClose();
                     toast.success('Đã gửi cho người xác nhận!');
-
                     console.log("res", res);
                 }
             });
@@ -747,8 +745,8 @@ function ControllerCard(props) {
                                 Mẻ sấy đã đủ điều kiện ra lò.
                             </div>
                         </div>
-                        {/* {
-                            user.permissions?.some(p => p != 'xacnhanlosay') && (
+                        {
+                            user?.role == 1 && (
                                 planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
                                     <button
                                         className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
@@ -757,7 +755,7 @@ function ControllerCard(props) {
                                         Gửi Thủ kho xác nhận
                                     </button>
                             )
-                        } */}
+                        }
                         {
                             user?.permissions?.some(p => p == 'xacnhanlosay') ? (
                                 <button
