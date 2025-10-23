@@ -315,6 +315,7 @@ const ItemInput = ({
                 maxQty: res.maxQty,
                 WaitingConfirmQty: res.WaitingConfirmQty,
                 WaitingQCItemQty: res.WaitingQCItemQty,
+                returnedData: res.returnData
             });
             onModalOpen();
         } catch (error) {
@@ -1131,7 +1132,7 @@ const ItemInput = ({
                 </MenuButton>
                 <MenuList className="z-50">
                     <MenuItem onClick={() => viewStructure(actionKetCau.LSX, actionKetCau.data)}>Xem kết cấu</MenuItem>
-                    <MenuItem onClick={() => viewMaterial(actionKetCau.LSX, actionKetCau.data)}>Xem vật tư</MenuItem>
+                    <MenuItem onClick={() => viewMaterial(actionVatTu.LSX, actionVatTu.data)}>Xem vật tư</MenuItem>
                 </MenuList>
             </Menu>
         )
@@ -1310,7 +1311,7 @@ const ItemInput = ({
                                                                                 e.stopPropagation()
                                                                             }
                                                                         >
-                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX }} />
+                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX, data: data }} />
                                                                         </td>
                                                                     )}
                                                             </tr>
