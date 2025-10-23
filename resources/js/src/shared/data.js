@@ -122,3 +122,7 @@ export const DRYING_PERMISSIONS = [
         description: "Xử lý Pallet trong lò",
     }
 ];
+
+export const PALLET_LOG_TYPE = {
+    MOVE: 1
+};

@@ -16,6 +16,7 @@ use App\Http\Controllers\mes\UserController as MesUserController;
 use App\Http\Controllers\sap_controller\ORSCController;
 use App\Http\Controllers\sap\GoodsManagementController;
 use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
+use App\Http\Controllers\sap_controller\OvenController;
 use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
 
 /*
@@ -196,10 +197,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('bao-cao-quy-luong-cbg', [Sap_controllerReportController::class, 'baoCaoQuyLuongCBG'])->name('baoCaoQuyLuongCBG');
     });
 
+    Route::group(['prefix' => 'sap/oven'], function(){
+        Route::get('getOvensByFactory', [OvenController::class, 'getOvensByFactory'])->name('getOvensByFactory');
+    });
+
+
+    
+
     Route::group(['prefix' => 'mes/plan-drying'], function(){
         Route::get('sendPlanDryingToStockController', [PlanDryingController::class, 'sendPlanDryingToStockController'])->name('sendPlanDryingToStockController');
         Route::get('getAllPlantInPlanDrying', [PlanDryingController::class, 'getAllPlantInPlanDrying'])->name('getAllPlantInPlanDrying');
         Route::get('getPlanDryingByFactory', [PlanDryingController::class, 'getPlanDryingByFactory'])->name('getPlanDryingByFactory');
+        Route::get('getPalletsByPlanId', [PlanDryingController::class, 'getPalletsByPlanId'])->name('getPalletsByPlanId');
+        Route::post('movePalletToPlanDrying', [PlanDryingController::class, 'movePalletToPlanDrying'])->name('movePalletToPlanDrying');
 
         
     });
