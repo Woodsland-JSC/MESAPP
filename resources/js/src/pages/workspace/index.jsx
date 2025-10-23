@@ -223,13 +223,13 @@ function Workspace() {
                                                     description:
                                                         "Đánh giá mẻ gỗ sau khi sấy và kết thúc quy trình.",
                                                 },
-                                                // {
-                                                //     permission: "xulypallet",
-                                                //     link: "/workspace/xu-ly-dieu-chuyen-pallet",
-                                                //     icon: <HiArrowsRightLeft />,
-                                                //     title: "Điều chuyển Pallet",
-                                                //     description: "Xử lý điều chuyển Pallet trong lò.",
-                                                // }
+                                                {
+                                                    permission: "xulypallet",
+                                                    link: "/workspace/xu-ly-dieu-chuyen-pallet",
+                                                    icon: <HiArrowsRightLeft />,
+                                                    title: "Điều chuyển Pallet",
+                                                    description: "Xử lý điều chuyển Pallet trong lò.",
+                                                }
                                             ].map(
                                                 ({
                                                     permission,

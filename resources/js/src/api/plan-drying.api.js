@@ -19,3 +19,17 @@ export const getPlanDryingByFactory = (plantId) => {
         }
     });
 }
+
+export const getPalletsByPlanDrying = (planId) => {
+    return axiosClient().get(`${BASEURL}/getPalletsByPlanId`, {
+        params: {
+            planId
+        }
+    });
+}
+
+export const movePalletToPlanDrying = (data) => {
+    return axiosClient().post(`${BASEURL}/movePalletToPlanDrying`, {
+        data
+    });
+}
