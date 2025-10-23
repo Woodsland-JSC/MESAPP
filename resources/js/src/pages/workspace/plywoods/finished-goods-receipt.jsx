@@ -416,7 +416,7 @@ function PlywoodFinishedGoodsReceipt() {
                     uTiDai: item.U_TIDai,
                     dungSai: item.U_DungS
                 };
-                formatData.push(aggridData);
+                formatData.push(obj);
             })
 
             details.forEach(detail => {
@@ -435,6 +435,8 @@ function PlywoodFinishedGoodsReceipt() {
             });
             onModalStructureOpen();
         } catch (error) {
+            console.log("error",error);
+            
             toast.error("Lỗi khi lấy kết cấu.")
             setViewedStructureLSX({
                 lsx: null,
