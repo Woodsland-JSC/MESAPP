@@ -90,6 +90,12 @@ const SAYReports = [
         description: "Báo cáo thông tin xếp chờ sấy.",
         // updated: true,
     },
+    {
+        id: "0011",
+        name: "Báo cáo điều chuyển Pallet",
+        link: "/reports/wood-drying/dieu-chuyen-pallet",
+        description: "Báo cáo điều chuyển Pallet trong lò."
+    },
 ];
 
 const CBGReports = [

@@ -176,7 +176,8 @@ class PlanDryingController extends Controller
                     'new_oven' => $planDryingByNewOven['Oven'],
                     'user_id' => Auth::user()->id,
                     'created_at' => $now, 
-                    'updated_at' => $now
+                    'updated_at' => $now,
+                    'factory' => $data['factory']
                 ];
             }
 
@@ -189,7 +190,7 @@ class PlanDryingController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Lấy Pallets có lỗi!'
+                'message' => 'Điều chuyển Pallet có lỗi!'
             ], 500);
         }
     }

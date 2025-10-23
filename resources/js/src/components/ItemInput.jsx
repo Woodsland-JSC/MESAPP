@@ -315,6 +315,7 @@ const ItemInput = ({
                 maxQty: res.maxQty,
                 WaitingConfirmQty: res.WaitingConfirmQty,
                 WaitingQCItemQty: res.WaitingQCItemQty,
+                returnedData: res.returnData
             });
             onModalOpen();
         } catch (error) {
@@ -1131,7 +1132,7 @@ const ItemInput = ({
                 </MenuButton>
                 <MenuList className="z-50">
                     <MenuItem onClick={() => viewStructure(actionKetCau.LSX, actionKetCau.data)}>Xem kết cấu</MenuItem>
-                    <MenuItem onClick={() => viewMaterial(actionKetCau.LSX, actionKetCau.data)}>Xem vật tư</MenuItem>
+                    <MenuItem onClick={() => viewMaterial(actionVatTu.LSX, actionVatTu.data)}>Xem vật tư</MenuItem>
                 </MenuList>
             </Menu>
         )
@@ -1154,7 +1155,7 @@ const ItemInput = ({
                                     openInputModal(item);
                                     setChoosenItem(item);
                                 }}
-                                className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                className="rounded-b-xl cursor-pointer duration-200 ease-linear"
                                 key={index}
                             >
                                 <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
@@ -1183,7 +1184,7 @@ const ItemInput = ({
                                         </span>
                                     </div>
                                 </div>
-                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
+                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
                                     <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
                                         <thead className="bg-[#dae0ec] ">
                                             <tr>
@@ -1310,7 +1311,7 @@ const ItemInput = ({
                                                                                 e.stopPropagation()
                                                                             }
                                                                         >
-                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX }} />
+                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX, data: data }} />
                                                                         </td>
                                                                     )}
                                                             </tr>
