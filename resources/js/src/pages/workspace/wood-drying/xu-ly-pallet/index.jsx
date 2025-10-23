@@ -125,7 +125,8 @@ const XuLyDieuChuyenPallet = () => {
                 newOven: oven.value,
                 pallets: palletSelected,
                 log_type: PALLET_LOG_TYPE.MOVE,
-                log_data: note
+                log_data: note,
+                factory: factory.value
             }            
 
             Swal.fire({

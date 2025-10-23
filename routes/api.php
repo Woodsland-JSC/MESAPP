@@ -11,6 +11,7 @@ use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
 use App\Http\Controllers\api\ReportController;
+use App\Http\Controllers\mes\PalletLogController;
 use App\Http\Controllers\mes\PlanDryingController;
 use App\Http\Controllers\mes\UserController as MesUserController;
 use App\Http\Controllers\sap_controller\ORSCController;
@@ -216,6 +217,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'mes/users'], function(){
         Route::get('danhSachThuKho', [MesUserController::class, 'danhSachThuKho'])->name('danhSachThuKho');
+        
+    });
+
+    Route::group(['prefix' => 'mes/pallet-log'], function(){
+        Route::get('getLogsByFactory', [PalletLogController::class, 'getLogsByFactory'])->name('getLogsByFactory');
         
     });
 });

@@ -98,6 +98,7 @@ import ChungTuNhapKhoChiTiet from "../pages/workspace/wood-working/qc-cbg/chung_
 import SanLuongQuyDoi from "../pages/reports/wood-working/san-luong-quy-doi";
 import BaoCaoQuyLuong from "../pages/reports/wood-working/quy-luong";
 import XuLyDieuChuyenPallet from "../pages/workspace/wood-drying/xu-ly-pallet";
+import BaoCaoDieuChuyenPallet from "../pages/reports/wood-drying/dieu-chuyen-pallet";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -382,6 +383,14 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <DryingQueueReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-drying/dieu-chuyen-pallet"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoDieuChuyenPallet />
                             </ProtectedRoute>
                         }
                     />
