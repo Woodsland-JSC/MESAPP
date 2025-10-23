@@ -435,8 +435,6 @@ function PlywoodFinishedGoodsReceipt() {
             });
             onModalStructureOpen();
         } catch (error) {
-            console.log("error",error);
-            
             toast.error("Lỗi khi lấy kết cấu.")
             setViewedStructureLSX({
                 lsx: null,
