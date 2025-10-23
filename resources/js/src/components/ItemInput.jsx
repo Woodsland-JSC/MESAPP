@@ -172,13 +172,13 @@ const ItemInput = ({
     const [selectedError, setSelectedError] = useState(null);
     const [dialogType, setDialogType] = useState(null);
     const [selectedQCLogging, setSelectedQCLogging] = useState(null);
-    const [selectedOrder, setSelectedOrder] = useState(null); 
+    const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedNotification, setSelectedNotification] = useState({
         ItemCode: "",
         ItemName: "",
         Quantity: "",
-    }); 
-    const [adjustQuantity, setAdjustQuantity] = useState(""); 
+    });
+    const [adjustQuantity, setAdjustQuantity] = useState("");
 
     const [fromDate, setFromDate] = useState(new Date().setHours(0, 0, 0, 0));
     const [toDate, setToDate] = useState(new Date().setHours(23, 59, 59, 999));
@@ -274,7 +274,7 @@ const ItemInput = ({
         } catch (error) {
             toast.error(
                 error.response?.data?.error ||
-                    "Có lỗi khi lấy dữ liệu item."
+                "Có lỗi khi lấy dữ liệu item."
             );
             console.error(error);
         }
@@ -320,7 +320,7 @@ const ItemInput = ({
         } catch (error) {
             toast.error(
                 error.response?.data?.error ||
-                    "Có lỗi khi lấy dữ liệu item."
+                "Có lỗi khi lấy dữ liệu item."
             );
             console.error(error);
         }
@@ -333,10 +333,10 @@ const ItemInput = ({
                 id: order.id,
             };
             setCancelDisassemblyOrderLoading(true);
-            
+
             const res = await productionApi.cancelDisassemblyOrder(payload);
             toast.success("Hủy lệnh thành công!");
-            
+
             if (choosenItem) {
                 if (choosenItem.CDOAN === "RO") {
                     await loadRongItemDetails(choosenItem);
@@ -344,12 +344,12 @@ const ItemInput = ({
             }
 
             setCancelDisassemblyOrderLoading(false);
-            
+
             onCancelOrderModalClose();
         } catch (error) {
             toast.error(
                 error.response?.data?.error ||
-                    "Đã xảy ra lỗi khi hủy lệnh. Vui lòng thử lại sau."
+                "Đã xảy ra lỗi khi hủy lệnh. Vui lòng thử lại sau."
             );
             setCancelDisassemblyOrderLoading(false);
             console.error(error);
@@ -363,10 +363,10 @@ const ItemInput = ({
             };
 
             setCloseDisassemblyOrderLoading(true);
-            
+
             const res = await productionApi.closeDisassemblyOrder(payload);
             toast.success("Đóng lệnh thành công!");
-            
+
             if (choosenItem) {
                 if (choosenItem.CDOAN === "RO") {
                     await loadRongItemDetails(choosenItem);
@@ -374,12 +374,12 @@ const ItemInput = ({
             }
 
             setCloseDisassemblyOrderLoading(false);
-            
+
             onCloseOrderModalClose();
         } catch (error) {
             toast.error(
                 error.response?.data?.error ||
-                    "Đã xảy ra lỗi khi đóng lệnh. Vui lòng thử lại sau."
+                "Đã xảy ra lỗi khi đóng lệnh. Vui lòng thử lại sau."
             );
             setCloseDisassemblyOrderLoading(false);
             console.error(error);
@@ -442,7 +442,7 @@ const ItemInput = ({
 
             const res = await productionApi.adjustRongQuantity(data);
             toast.success("Cập nhật số lượng thành công!");
-            
+
             // Close modal and reset state
             setAdjustRongQuantityLoading(false);
             onAdjustRongQuantityModalClose();
@@ -452,7 +452,7 @@ const ItemInput = ({
                 ItemName: "",
                 Quantity: "",
             });
-            
+
             // Refresh the data
             if (selectedItemDetails) {
                 openInputModal(selectedItemDetails);
@@ -1121,7 +1121,7 @@ const ItemInput = ({
         }
     }, [faultyAmount]);
 
-    const MenuView = ({actionKetCau, actionVatTu}) => {
+    const MenuView = ({ actionKetCau, actionVatTu }) => {
         return (
             <Menu>
                 <MenuButton as={Button} background={"unset"} backgroundColor={"unset"} className="!text-[#17506B] !font-bold">
@@ -1149,252 +1149,247 @@ const ItemInput = ({
                 <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
                     {data.Details.length > 0
                         ? data.Details.map((item, index) => (
-                              <section
-                                  onClick={() => {
-                                      openInputModal(item);
-                                      setChoosenItem(item);
-                                  }}
-                                  className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
-                                  key={index}
-                              >
-                                  <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
-                                      <div className="flex items-center">
-                                          <span>
-                                              <IoIosArrowDown className="inline-block text-gray-500" />{" "}
-                                              {item.ChildName}{" "}
-                                              {item.CDOAN === "RO" ? (
-                                                  <span className="text-[#0da0ea]">
-                                                      {item.QuyCach2 || ""}
-                                                  </span>
-                                              ) : (
-                                                  <span className="">
-                                                      ({item.CDay}*{item.CRong}*
-                                                      {item.CDai})
-                                                  </span>
-                                              )}
-                                              {item.Version && (
-                                                  <span className="pl-2 font-medium text-[#17506b]">
-                                                      V.
-                                                      <span>
-                                                          {item.Version}
-                                                      </span>
-                                                  </span>
-                                              )}
-                                          </span>
-                                      </div>
-                                  </div>
-                                  <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
-                                      <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
-                                          <thead className="bg-[#dae0ec] ">
-                                              <tr>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
-                                                  >
-                                                      LSX
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Sản lượng
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          SL
-                                                      </span>
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Đã làm
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          ĐL
-                                                      </span>
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
-                                                  >
-                                                      Lỗi
-                                                  </th>
-                                                  <th
-                                                      scope="col"
-                                                      className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
-                                                  >
-                                                      <span className="xl:block lg:block md:block hidden">
-                                                          Còn lại
-                                                      </span>
-                                                      <span className="xl:hidden lg:hidden md:hidden block">
-                                                          CL
-                                                      </span>
-                                                  </th>
-                                                  {variant ==
-                                                      VAN_CONG_NGHIEP && (
-                                                      <th
-                                                          scope="col"
-                                                          className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
-                                                      >
-                                                          <span className="xl:block lg:block md:block hidden"></span>
-                                                          <span className="xl:hidden lg:hidden md:hidden block"></span>
-                                                      </th>
-                                                  )}
-                                              </tr>
-                                          </thead>
-                                          <tbody className=" border-t border-[#c4cfe7]  ">
-                                              {item.LSX?.length > 0 ? (
-                                                  item.LSX.filter(
-                                                      (production) =>
-                                                          production.ConLai > 0
-                                                  )
-                                                      .sort((a, b) => {
-                                                          return a.LSX.localeCompare(
-                                                              b.LSX
-                                                          );
-                                                      })
-                                                      .map(
-                                                          (
-                                                              production,
-                                                              index
-                                                          ) => (
-                                                              <tr
-                                                                  className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
-                                                                  key={index}
-                                                              >
-                                                                  <th
-                                                                      scope="row"
-                                                                      className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
-                                                                  >
-                                                                      {
-                                                                          production.LSX
-                                                                      }
-                                                                  </th>
-                                                                  <td className="px-2 py-2 text-right text-gray-800">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.SanLuong
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right text-gray-900">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.DaLam
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2 py-2 text-right text-gray-900">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.Loi
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  <td className="px-2  py-2 text-right text-gray-800">
-                                                                      {formatNumber(
-                                                                          Number(
-                                                                              production.ConLai
-                                                                          )
-                                                                      )}
-                                                                  </td>
-                                                                  {/* {variant ==
-                                                                      VAN_CONG_NGHIEP && (
-                                                                      <td
-                                                                          className="px-2 py-2 text-right text-[#17506B] underline"
-                                                                          onClick={(
-                                                                              e
-                                                                          ) =>
-                                                                              viewStructure(
-                                                                                  e,
-                                                                                  production.LSX
-                                                                              )
-                                                                          }
-                                                                      >
-                                                                          Xem
-                                                                          kết
-                                                                          cấu
-                                                                      </td>
-                                                                  )} */}
-                                                              </tr>
-                                                          )
-                                                      )
-                                              ) : (
-                                                  <span>Không có dữ liệu</span>
-                                              )}
-                                          </tbody>
-                                          <tfoot className="!text-[12px]">
-                                              <tr>
-                                                  <td className="font-bold  text-gray-700 px-2 py-2">
-                                                      Tổng
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.SanLuong
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.DaLam
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.Loi
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                                  <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                      {formatNumber(
-                                                          Number(
-                                                              item.LSX.reduce(
-                                                                  (acc, curr) =>
-                                                                      acc +
-                                                                      Number(
-                                                                          curr.ConLai
-                                                                      ),
-                                                                  0
-                                                              )
-                                                          )
-                                                      )}
-                                                  </td>
-                                              </tr>
-                                          </tfoot>
-                                      </table>
-                                  </div>
-                              </section>
-                          ))
+                            <section
+                                onClick={() => {
+                                    openInputModal(item);
+                                    setChoosenItem(item);
+                                }}
+                                className="rounded-b-xl cursor-pointer duration-200 ease-linear hover:opacity-80"
+                                key={index}
+                            >
+                                <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
+                                    <div className="flex items-center">
+                                        <span>
+                                            <IoIosArrowDown className="inline-block text-gray-500" />{" "}
+                                            {item.ChildName}{" "}
+                                            {item.CDOAN === "RO" ? (
+                                                <span className="text-[#0da0ea]">
+                                                    {item.QuyCach2 || ""}
+                                                </span>
+                                            ) : (
+                                                <span className="">
+                                                    ({item.CDay}*{item.CRong}*
+                                                    {item.CDai})
+                                                </span>
+                                            )}
+                                            {item.Version && (
+                                                <span className="pl-2 font-medium text-[#17506b]">
+                                                    V.
+                                                    <span>
+                                                        {item.Version}
+                                                    </span>
+                                                </span>
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] mx-1.5 ">
+                                    <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
+                                        <thead className="bg-[#dae0ec] ">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
+                                                >
+                                                    LSX
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Sản lượng
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        SL
+                                                    </span>
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Đã làm
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        ĐL
+                                                    </span>
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
+                                                >
+                                                    Lỗi
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
+                                                >
+                                                    <span className="xl:block lg:block md:block hidden">
+                                                        Còn lại
+                                                    </span>
+                                                    <span className="xl:hidden lg:hidden md:hidden block">
+                                                        CL
+                                                    </span>
+                                                </th>
+                                                {variant ==
+                                                    VAN_CONG_NGHIEP && (
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden"></span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block"></span>
+                                                        </th>
+                                                    )}
+                                            </tr>
+                                        </thead>
+                                        <tbody className=" border-t border-[#c4cfe7]  ">
+                                            {item.LSX?.length > 0 ? (
+                                                item.LSX.filter(
+                                                    (production) =>
+                                                        production.ConLai > 0
+                                                )
+                                                    .sort((a, b) => {
+                                                        return a.LSX.localeCompare(
+                                                            b.LSX
+                                                        );
+                                                    })
+                                                    .map(
+                                                        (
+                                                            production,
+                                                            index
+                                                        ) => (
+                                                            <tr
+                                                                className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
+                                                                key={index}
+                                                            >
+                                                                <th
+                                                                    scope="row"
+                                                                    className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
+                                                                >
+                                                                    {
+                                                                        production.LSX
+                                                                    }
+                                                                </th>
+                                                                <td className="px-2 py-2 text-right text-gray-800">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.SanLuong
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right text-gray-900">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.DaLam
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2 py-2 text-right text-gray-900">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.Loi
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-2  py-2 text-right text-gray-800">
+                                                                    {formatNumber(
+                                                                        Number(
+                                                                            production.ConLai
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                                {variant ==
+                                                                    VAN_CONG_NGHIEP && (
+                                                                        <td
+                                                                            className="px-2 py-2 text-right text-[#17506B] underline"
+                                                                            onClick={(
+                                                                                e
+                                                                            ) =>
+                                                                                e.stopPropagation()
+                                                                            }
+                                                                        >
+                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX }} />
+                                                                        </td>
+                                                                    )}
+                                                            </tr>
+                                                        )
+                                                    )
+                                            ) : (
+                                                <span>Không có dữ liệu</span>
+                                            )}
+                                        </tbody>
+                                        <tfoot className="!text-[12px]">
+                                            <tr>
+                                                <td className="font-bold  text-gray-700 px-2 py-2">
+                                                    Tổng
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.SanLuong
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.DaLam
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.Loi
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                    {formatNumber(
+                                                        Number(
+                                                            item.LSX.reduce(
+                                                                (acc, curr) =>
+                                                                    acc +
+                                                                    Number(
+                                                                        curr.ConLai
+                                                                    ),
+                                                                0
+                                                            )
+                                                        )
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </section>
+                        ))
                         : null}
                 </div>
-            </div>
+            </div >
             <Modal
                 isCentered
                 isOpen={isModalOpen}
@@ -1526,7 +1521,7 @@ const ItemInput = ({
                                                                 [
                                                                 {Math.abs(
                                                                     stockItem?.BaseQty ||
-                                                                        0
+                                                                    0
                                                                 )}
                                                                 ]{" "}
                                                                 {stockItem?.ItemCode ||
@@ -1866,173 +1861,173 @@ const ItemInput = ({
                                         )}
                                         {selectedItemDetails?.disassemblyOrders
                                             ?.length > 0 && (
-                                            <>
-                                                <div>
-                                                    <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
-                                                        <div className="flex items-center space-x-1">
-                                                            <div className="px-1 rounded-xl">
-                                                                <FaClock className="text-[#5777ae] w-5 h-5" />
-                                                            </div>
-                                                            <div className="uppercase">
-                                                                Lịch sử ghi nhận{" "}
+                                                <>
+                                                    <div>
+                                                        <div className="flex items-center justify-between space-x-1 text-gray-800 font-bold text-lg mt-6 mb-2">
+                                                            <div className="flex items-center space-x-1">
+                                                                <div className="px-1 rounded-xl">
+                                                                    <FaClock className="text-[#5777ae] w-5 h-5" />
+                                                                </div>
+                                                                <div className="uppercase">
+                                                                    Lịch sử ghi nhận{" "}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="space-y-4">
-                                                        {selectedItemDetails?.disassemblyOrders?.map(
-                                                            (order, index) => (
-                                                                <div className="bg-gray-100 border border-gray-300 py-4 pb-2 rounded-xl ">
-                                                                    <div className="px-3">
-                                                                        <div className=" flex items-center justify-between">
-                                                                            <div className="w-[85%]">
-                                                                                <div className="text-[#898c90] font-medium text-xs uppercase">
-                                                                                    Bán
-                                                                                    thành
-                                                                                    phẩm
-                                                                                    rong
+                                                        <div className="space-y-4">
+                                                            {selectedItemDetails?.disassemblyOrders?.map(
+                                                                (order, index) => (
+                                                                    <div className="bg-gray-100 border border-gray-300 py-4 pb-2 rounded-xl ">
+                                                                        <div className="px-3">
+                                                                            <div className=" flex items-center justify-between">
+                                                                                <div className="w-[85%]">
+                                                                                    <div className="text-[#898c90] font-medium text-xs uppercase">
+                                                                                        Bán
+                                                                                        thành
+                                                                                        phẩm
+                                                                                        rong
+                                                                                    </div>
+                                                                                    <p className="text-[#185B7B] font-semibold text-[17px] truncate">
+                                                                                        {
+                                                                                            selectedItemDetails?.SubItemCode
+                                                                                        }
+                                                                                    </p>
                                                                                 </div>
-                                                                                <p className="text-[#185B7B] font-semibold text-[17px] truncate">
+                                                                                <p className="text-2xl mr-1 text-[#185B7B] font-medium">
                                                                                     {
-                                                                                        selectedItemDetails?.SubItemCode
+                                                                                        order.quantity
                                                                                     }
                                                                                 </p>
                                                                             </div>
-                                                                            <p className="text-2xl mr-1 text-[#185B7B] font-medium">
-                                                                                {
-                                                                                    order.quantity
-                                                                                }
-                                                                            </p>
+                                                                            <div className="flex flex-col  mt-3 text-sm text-gray-600">
+                                                                                <p className="w-full xl: flex justify-between">
+                                                                                    Thời
+                                                                                    gian:{" "}
+                                                                                    <span className="font-semibold">
+                                                                                        {
+                                                                                            order.created_at
+                                                                                        }
+                                                                                    </span>
+                                                                                </p>
+                                                                                <p className="w-full flex justify-between">
+                                                                                    Người
+                                                                                    thực
+                                                                                    hiện:{" "}
+                                                                                    <span className="font-semibold">
+                                                                                        {
+                                                                                            order.created_by
+                                                                                        }
+                                                                                    </span>
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="flex flex-col  mt-3 text-sm text-gray-600">
-                                                                            <p className="w-full xl: flex justify-between">
-                                                                                Thời
-                                                                                gian:{" "}
-                                                                                <span className="font-semibold">
-                                                                                    {
-                                                                                        order.created_at
-                                                                                    }
-                                                                                </span>
-                                                                            </p>
-                                                                            <p className="w-full flex justify-between">
-                                                                                Người
-                                                                                thực
-                                                                                hiện:{" "}
-                                                                                <span className="font-semibold">
-                                                                                    {
-                                                                                        order.created_by
-                                                                                    }
-                                                                                </span>
-                                                                            </p>
+
+                                                                        <div className="my-2 mb-1 border-b-2 border-dashed border-gray-300"></div>
+
+                                                                        <div className="px-3 text-[#898c90] my-3 mb-2 font-medium text-xs uppercase">
+                                                                            Thành
+                                                                            phẩm
+                                                                            rong
                                                                         </div>
-                                                                    </div>
-
-                                                                    <div className="my-2 mb-1 border-b-2 border-dashed border-gray-300"></div>
-
-                                                                    <div className="px-3 text-[#898c90] my-3 mb-2 font-medium text-xs uppercase">
-                                                                        Thành
-                                                                        phẩm
-                                                                        rong
-                                                                    </div>
-                                                                    <div className="px-1 space-y-1.5 bg-gray-100 ">
-                                                                        {order.notifications?.map(
-                                                                            (
-                                                                                item,
-                                                                                index
-                                                                            ) => (
-                                                                                <div>
-                                                                                    {item?.Type ===
-                                                                                    0 ? (
-                                                                                        <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
-                                                                                            {/* Sản lượng */}
-                                                                                            <div className="">
-                                                                                                {transformDetail(
-                                                                                                    item?.detail,
-                                                                                                    item?.Type
-                                                                                                ).map(
-                                                                                                    (
-                                                                                                        detailItem,
-                                                                                                        detailIndex
-                                                                                                    ) => (
-                                                                                                        <div className=" flex items-center justify-between">
-                                                                                                            <div className="w-[85%]">
-                                                                                                                <p className="text-xs text-gray-500">
-                                                                                                                    Sản
-                                                                                                                    lượng <span>({item?.confirm == 0 ? 'đã giao' :item?.confirm == 1 ?  'đã nhận' : 'đã bị trả lại'})</span>
-                                                                                                                </p>
-                                                                                                                <div className="font-medium truncate ">
-                                                                                                                    {
-                                                                                                                        detailItem.ItemName
-                                                                                                                    }
+                                                                        <div className="px-1 space-y-1.5 bg-gray-100 ">
+                                                                            {order.notifications?.map(
+                                                                                (
+                                                                                    item,
+                                                                                    index
+                                                                                ) => (
+                                                                                    <div>
+                                                                                        {item?.Type ===
+                                                                                            0 ? (
+                                                                                            <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
+                                                                                                {/* Sản lượng */}
+                                                                                                <div className="">
+                                                                                                    {transformDetail(
+                                                                                                        item?.detail,
+                                                                                                        item?.Type
+                                                                                                    ).map(
+                                                                                                        (
+                                                                                                            detailItem,
+                                                                                                            detailIndex
+                                                                                                        ) => (
+                                                                                                            <div className=" flex items-center justify-between">
+                                                                                                                <div className="w-[85%]">
+                                                                                                                    <p className="text-xs text-gray-500">
+                                                                                                                        Sản
+                                                                                                                        lượng <span>({item?.confirm == 0 ? 'đã giao' : item?.confirm == 1 ? 'đã nhận' : 'đã bị trả lại'})</span>
+                                                                                                                    </p>
+                                                                                                                    <div className="font-medium truncate ">
+                                                                                                                        {
+                                                                                                                            detailItem.ItemName
+                                                                                                                        }
+                                                                                                                    </div>
+                                                                                                                    <div className="font-semibold text-lg text-green-600">
+                                                                                                                        +{parseInt(
+                                                                                                                            detailItem.Qty_Type0
+                                                                                                                        ) ||
+                                                                                                                            0}
+                                                                                                                    </div>
                                                                                                                 </div>
-                                                                                                                <div className="font-semibold text-lg text-green-600">
-                                                                                                                +{parseInt(
-                                                                                                                    detailItem.Qty_Type0
-                                                                                                                ) ||
-                                                                                                                    0}
+
+                                                                                                                <div className="flex items-center ">
+                                                                                                                    {item.confirm == "2" ? (
+                                                                                                                        // Adjust Rong Quantity
+                                                                                                                        <button
+                                                                                                                            onClick={() => {
+                                                                                                                                // Set the selected notification and open the adjust modal
+                                                                                                                                setSelectedNotification({
+                                                                                                                                    ItemCode: detailItem.ItemCode || "",
+                                                                                                                                    ItemName: detailItem.ItemName || "",
+                                                                                                                                    Quantity: detailItem.Qty_Type0 || detailItem.Qty_Type1 || 0,
+                                                                                                                                    id: item.id || item.notiID || ""
+                                                                                                                                });
+                                                                                                                                setAdjustQuantity(item.Quantity || "");
+                                                                                                                                onAdjustRongQuantityModalOpen();
+                                                                                                                            }}
+                                                                                                                            className="flex text-white text-sm rounded-full duration-200 ease bg-black hover:bg-orange-700 p-1.5"
+                                                                                                                        >
+                                                                                                                            <TbPencil className="text-white text-2xl h-fit" />
+                                                                                                                        </button>) :
+                                                                                                                        (<button className="flex text-black text-sm rounded-full duration-200 ease bg-gray-100 hover:bg-gray-200 p-1.5">
+                                                                                                                            <TbDotsVertical className=" text-xl h-fit" />
+                                                                                                                        </button>)}
+                                                                                                                </div>
                                                                                                             </div>
-                                                                                                            </div>
-                                                                                                            
-                                                                                                            <div className="flex items-center ">
-                                                                                                                {item.confirm == "2" ? (
-                                                                                                                // Adjust Rong Quantity
-                                                                                                                <button
-                                                                                                                    onClick={() => {
-                                                                                                                        // Set the selected notification and open the adjust modal
-                                                                                                                        setSelectedNotification({
-                                                                                                                            ItemCode: detailItem.ItemCode || "",
-                                                                                                                            ItemName: detailItem.ItemName || "",
-                                                                                                                            Quantity: detailItem.Qty_Type0 || detailItem.Qty_Type1 || 0,
-                                                                                                                            id: item.id || item.notiID || ""
-                                                                                                                        });
-                                                                                                                        setAdjustQuantity(item.Quantity || "");
-                                                                                                                        onAdjustRongQuantityModalOpen();
-                                                                                                                    }}
-                                                                                                                    className="flex text-white text-sm rounded-full duration-200 ease bg-black hover:bg-orange-700 p-1.5"
-                                                                                                                >
-                                                                                                                    <TbPencil className="text-white text-2xl h-fit" />
-                                                                                                                </button>) :
-                                                                                                                (<button className="flex text-black text-sm rounded-full duration-200 ease bg-gray-100 hover:bg-gray-200 p-1.5">
-                                                                                                                    <TbDotsVertical className=" text-xl h-fit"/>
-                                                                                                                </button>)}
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    )
-                                                                                                )}
+                                                                                                        )
+                                                                                                    )}
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-                                                                                    ) : item?.Type ===
-                                                                                      1 ? (
-                                                                                        <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
-                                                                                            {/* Lỗi */}
-                                                                                            <div className="">
-                                                                                                {transformDetail(
-                                                                                                    item?.detail,
-                                                                                                    item?.Type
-                                                                                                ).map(
-                                                                                                    (
-                                                                                                        detailItem,
-                                                                                                        detailIndex
-                                                                                                    ) => (
-                                                                                                        <div className=" flex items-center justify-between">
-                                                                                                            <div className="w-[85%]">
-                                                                                                                <p className="text-xs text-gray-500">
-                                                                                                                    Lỗi thành phẩm
-                                                                                                                </p>
-                                                                                                                <div className="font-medium truncate ">
-                                                                                                                    {
-                                                                                                                        detailItem.ItemName
-                                                                                                                    }
+                                                                                        ) : item?.Type ===
+                                                                                            1 ? (
+                                                                                            <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
+                                                                                                {/* Lỗi */}
+                                                                                                <div className="">
+                                                                                                    {transformDetail(
+                                                                                                        item?.detail,
+                                                                                                        item?.Type
+                                                                                                    ).map(
+                                                                                                        (
+                                                                                                            detailItem,
+                                                                                                            detailIndex
+                                                                                                        ) => (
+                                                                                                            <div className=" flex items-center justify-between">
+                                                                                                                <div className="w-[85%]">
+                                                                                                                    <p className="text-xs text-gray-500">
+                                                                                                                        Lỗi thành phẩm
+                                                                                                                    </p>
+                                                                                                                    <div className="font-medium truncate ">
+                                                                                                                        {
+                                                                                                                            detailItem.ItemName
+                                                                                                                        }
+                                                                                                                    </div>
+                                                                                                                    <div className="font-semibold text-lg text-red-600">
+                                                                                                                        +{parseInt(
+                                                                                                                            detailItem.Qty_Type1
+                                                                                                                        ) ||
+                                                                                                                            0}
+                                                                                                                    </div>
                                                                                                                 </div>
-                                                                                                                <div className="font-semibold text-lg text-red-600">
-                                                                                                                +{parseInt(
-                                                                                                                    detailItem.Qty_Type1
-                                                                                                                ) ||
-                                                                                                                    0}
-                                                                                                            </div>
-                                                                                                            </div>
-                                                                                                            
-                                                                                                            <div className="flex items-center gap-x-6">
-                                                                                                                {/* <button
+
+                                                                                                                <div className="flex items-center gap-x-6">
+                                                                                                                    {/* <button
                                                                                                                     onClick={() => {
                                                                                                                         onDeleteProcessingDialogOpen();
                                                                                                                         console.log(
@@ -2050,49 +2045,49 @@ const ItemInput = ({
                                                                                                                 >
                                                                                                                     <TbPencil className="text-white text-2xl h-fit" />
                                                                                                                 </button> */}
+                                                                                                                </div>
                                                                                                             </div>
-                                                                                                        </div>
-                                                                                                    )
-                                                                                                )}
+                                                                                                        )
+                                                                                                    )}
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-                                                                                    ) : null}
-                                                                                </div>
-                                                                            )
-                                                                        )}
+                                                                                        ) : null}
+                                                                                    </div>
+                                                                                )
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="w-full px-3 space-x-3 flex items-center justify-end mt-3">
+                                                                            {order.status == "new" && (
+                                                                                <button
+                                                                                    className="p-2 px-4 hover:bg-red-200 bg-red-100 rounded-full font-medium text-red-600"
+                                                                                    onClick={() => {
+                                                                                        setSelectedOrder(order);
+                                                                                        onCancelOrderModalOpen();
+                                                                                    }}
+                                                                                >
+                                                                                    Hủy lệnh
+                                                                                </button>
+                                                                            )}
+                                                                            {order.status == "complete" && (
+                                                                                <button
+                                                                                    className="p-2 px-4 bg-blue-900 hover:bg-blue-800 rounded-full font-medium text-blue-100"
+                                                                                    onClick={() => {
+                                                                                        setSelectedOrder(order);
+                                                                                        onCloseOrderModalOpen();
+                                                                                    }}
+                                                                                >
+                                                                                    Đóng lệnh
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="w-full px-3 space-x-3 flex items-center justify-end mt-3">
-                                                                        {order.status == "new" && (
-                                                                            <button
-                                                                                className="p-2 px-4 hover:bg-red-200 bg-red-100 rounded-full font-medium text-red-600"
-                                                                                onClick={() => {
-                                                                                    setSelectedOrder(order);
-                                                                                    onCancelOrderModalOpen();
-                                                                                }}
-                                                                            >
-                                                                                Hủy lệnh
-                                                                            </button>
-                                                                        )}
-                                                                        {order.status == "complete" && (
-                                                                            <button
-                                                                                className="p-2 px-4 bg-blue-900 hover:bg-blue-800 rounded-full font-medium text-blue-100"
-                                                                                onClick={() => {
-                                                                                    setSelectedOrder(order);
-                                                                                    onCloseOrderModalOpen();
-                                                                                }}
-                                                                            >
-                                                                                Đóng lệnh
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        )}
+                                                                )
+                                                            )}
+                                                        </div>
+
                                                     </div>
-                                                    
-                                                </div>
-                                            </>
-                                        )}
+                                                </>
+                                            )}
                                     </div>
                                 ) : (
                                     <>
@@ -3537,14 +3532,14 @@ const ItemInput = ({
                                         {selectedNotification.ItemName}
                                     </div>
                                 </div>
-                                
+
                                 <div className=" rounded-lg">
                                     <div className="font-medium">Số lượng hiện tại:</div>
                                     <div className="text-lg font-semibold">
                                         {Number(selectedNotification.Quantity)}
                                     </div>
                                 </div>
-                                
+
                                 <Box>
                                     <label className="font-semibold">
                                         Số lượng điều chỉnh: <span className="text-red-500">*</span>
@@ -3566,7 +3561,7 @@ const ItemInput = ({
                         )}
                     </ModalBody>
                     <ModalFooter className="gap-3">
-                        <Button 
+                        <Button
                             onClick={onAdjustRongQuantityModalClose}
                             isDisabled={adjustRongQuantityLoading}
                         >
