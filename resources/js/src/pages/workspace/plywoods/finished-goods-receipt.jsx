@@ -416,7 +416,7 @@ function PlywoodFinishedGoodsReceipt() {
                     uTiDai: item.U_TIDai,
                     dungSai: item.U_DungS
                 };
-                formatData.push(aggridData);
+                formatData.push(obj);
             })
 
             details.forEach(detail => {
