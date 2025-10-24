@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import SizeListItem from "./SizeListItem";
 import {
     Modal,
@@ -30,8 +30,8 @@ import { COMPLETE_PALLET_STATUS } from "../shared/data";
 import useAppContext from "../store/AppContext";
 
 function SizeCard(props) {
-    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback,planDrying } = props;
-    
+    const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback, planDrying } = props;
+
     const { user } = useAppContext();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -113,6 +113,22 @@ function SizeCard(props) {
         });
     }
 
+    const totalM3 = useMemo(() => {
+        let pallets = sizeData.filter(pallet => {
+            if (palletStatus == COMPLETE_PALLET_STATUS.ALL) {
+                return pallet
+            }
+            else if (palletStatus == COMPLETE_PALLET_STATUS.COMPLETE) {
+                return pallet.CompletedBy != null
+            } else {
+                return pallet.CompletedBy == null
+            }
+        });
+
+        let total = pallets.reduce((sum, item) => sum + Number(item.Mass), 0);
+        return total
+    }, [palletStatus]);
+
     useEffect(() => {
         if (planID) {
             loadSizeData();
@@ -149,8 +165,13 @@ function SizeCard(props) {
             >
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Tất cả kích thước</ModalHeader>
-                    <ModalCloseButton />
+                    <ModalHeader>
+                        <div className="flex justify-between">
+                            <span className="text-[15px] md:text-[21px]">Tất cả kích thước</span>
+                            <span className="text-[15px] md:text-[21px] text-[#17506B]">Tổng M3: {totalM3}</span>
+                        </div>
+                    </ModalHeader>
+                    <div className="border-b-2 border-gray-200"></div>
                     <ModalBody>
                         <Box className="mb-3">
                             <label className="block mb-2 text-sm font-medium text-gray-900">Lọc theo trạng thái</label>
@@ -226,32 +247,36 @@ function SizeCard(props) {
                             </Table>
                         </TableContainer>
                     </ModalBody>
+                    <div className="border-b-2 border-gray-200"></div>
                     <ModalFooter>
-                        <div className="flex gap-x-3">
-                            {
-                                palletSelected.length > 0 && (
-                                    (user?.id == planDrying.receiver_id) && (
-                                        <button
-                                            onClick={completePallet}
-                                            className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
-                                        >
-                                            <span className="hidden sm:hidden md:block">Xác nhận ra lò các pallet được chọn</span>
-                                            <span className="block sm:block md:hidden ">Ra lò</span>
-                                        </button>
+                        <div>
+                            <div className="flex gap-x-3">
+                                {
+                                    palletSelected.length > 0 && (
+                                        (user?.id == planDrying.receiver_id) && (
+                                            <button
+                                                onClick={completePallet}
+                                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                            >
+                                                <span className="hidden sm:hidden md:block">Xác nhận ra lò các pallet được chọn</span>
+                                                <span className="block sm:block md:hidden ">Ra lò</span>
+                                            </button>
+                                        )
                                     )
-                                )
-                            }
+                                }
 
-                            <button
-                                onClick={() => {
-                                    onClose()
-                                    setPalletSelected([])
-                                }}
-                                className="bg-[#000000] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
-                            >
-                                Đóng
-                            </button>
+                                <button
+                                    onClick={() => {
+                                        onClose()
+                                        setPalletSelected([])
+                                    }}
+                                    className="bg-[#000000] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                >
+                                    Đóng
+                                </button>
+                            </div>
                         </div>
+
 
                     </ModalFooter>
                 </ModalContent>
