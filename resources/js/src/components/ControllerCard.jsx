@@ -135,6 +135,9 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
+    console.log("user", user?.permissions?.some(p => p == 'xacnhanlosay'));
+    
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -747,7 +750,7 @@ function ControllerCard(props) {
                         </div>
                         {
                             planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
-                                (user?.role == 1 || !user?.permissions.some('xacnhanlosay')) && <button
+                                (user?.role == 1 || !user?.permissions.some(p => p == 'xacnhanlosay')) && <button
                                     className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
                                     onClick={onUserSelectOpen}
                                 >
@@ -756,7 +759,7 @@ function ControllerCard(props) {
                         }
                         {
                             (planDrying.receiver_id == user.id) && (
-                                (user?.role == 1 || user?.permissions.some('xacnhanlosay')) && <button
+                                (user?.role == 1 || user?.permissions.some(p => p == 'xacnhanlosay')) && <button
                                     disabled={isUnComplete}
                                     className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
                                     onClick={onFinalOpen}
