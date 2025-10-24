@@ -135,9 +135,6 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
-    console.log("user", user?.permissions?.some(p => p == 'xacnhanlosay'));
-    
-
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
