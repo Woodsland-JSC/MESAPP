@@ -579,3 +579,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 #app-ag-grid .ag-header-viewport {
     background-color: #17506B;
 }
+
+/* Giữ màu mặc định của SweetAlert2 */
+.swal2-confirm, .swal2-cancel {
+  color: #fff !important;
+  background-color: #17506B !important; /* màu nút xác nhận */
+  border: none !important;
+}
+
+.swal2-cancel {
+  background-color: #aaa !important; /* màu nút hủy */
+}
+
+/* Khi hover */
+.swal2-confirm:hover {
+  background-color: #17506B !important;
+}
+
+.swal2-cancel:hover {
+  background-color: #6b7280 !important;
+}
