@@ -29,13 +29,14 @@ function Kiln() {
 
     const { user } = useAppContext();
 
+    const isThuKhoXacNhan = useMemo(() => {
+        return user?.permissions.some(p => p == 'xacnhanlosay');
+    }, [user])
+
     useEffect(() => {
         palletsApi
             .getBOWList([0, 1], 1, 1, null)
-
             .then((response) => {
-                console.log("1. Load danh sách BOWCard:", response);
-
                 setBowCards(response || []);
             })
             .catch((error) => {
@@ -151,35 +152,44 @@ function Kiln() {
                                 filteredBowCards.some(
                                     (card) => card.Review === 1
                                 )))) &&
-                    bowCards.some((card) => card?.plant === user?.plant) ? (
+                        bowCards.some((card) => card?.plant === user?.plant) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
-                            {sortedBowCards
-                                ?.map(
-                                    (bowCard, index) =>
-                                         (
-                                            <BOWCard
-                                                key={index}
-                                                planID={bowCard.PlanID}
-                                                status={bowCard.Status}
-                                                batchNumber={bowCard.Code}
-                                                kilnNumber={bowCard.Oven}
-                                                thickness={bowCard.Method}
-                                                purpose={bowCard.Reason}
-                                                finishedDate={moment(
-                                                    bowCard?.created_at
-                                                )
-                                                    .add(bowCard?.Time, "days")
-                                                    .format(
-                                                        "YYYY-MM-DD HH:mm:ss"
-                                                    )}
-                                                palletQty={bowCard.TotalPallet}
-                                                weight={bowCard.Mass}
-                                                isChecked={bowCard.Checked}
-                                                isReviewed={bowCard.Review}
-                                                bowCard={bowCard}
-                                            />
+                            {sortedBowCards.filter(item => {
+                                if (user?.role == 1) {
+                                    return item
+                                } else {
+                                    if (isThuKhoXacNhan) {
+                                        return item.receiver_id;
+                                    } else {
+                                        return item
+                                    }
+                                }
+                            })?.map(
+                                (bowCard, index) =>
+                                (
+                                    <BOWCard
+                                        key={index}
+                                        planID={bowCard.PlanID}
+                                        status={bowCard.Status}
+                                        batchNumber={bowCard.Code}
+                                        kilnNumber={bowCard.Oven}
+                                        thickness={bowCard.Method}
+                                        purpose={bowCard.Reason}
+                                        finishedDate={moment(
+                                            bowCard?.created_at
                                         )
+                                            .add(bowCard?.Time, "days")
+                                            .format(
+                                                "YYYY-MM-DD HH:mm:ss"
+                                            )}
+                                        palletQty={bowCard.TotalPallet}
+                                        weight={bowCard.Mass}
+                                        isChecked={bowCard.Checked}
+                                        isReviewed={bowCard.Review}
+                                        bowCard={bowCard}
+                                    />
                                 )
+                            )
                                 .reverse()}
                         </div>
                     ) : (
@@ -189,7 +199,7 @@ function Kiln() {
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
                                     <div className="  text-xl text-gray-400">
                                         {filteredBowCards.length === 0 &&
-                                        searchTerm !== ""
+                                            searchTerm !== ""
                                             ? "Không tìm thấy kết quả nào phù hợp"
                                             : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
                                     </div>

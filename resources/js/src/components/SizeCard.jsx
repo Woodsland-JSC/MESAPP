@@ -28,6 +28,9 @@ import {
 import Swal from "sweetalert2";
 import { COMPLETE_PALLET_STATUS } from "../shared/data";
 import useAppContext from "../store/AppContext";
+import ExcelJS from 'exceljs';
+import toast from "react-hot-toast";
+import { saveAs } from 'file-saver';
 
 function SizeCard(props) {
     const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback, planDrying } = props;
@@ -39,6 +42,7 @@ function SizeCard(props) {
     const [isPalletLoading, setPalletLoading] = useState(true);
     const [palletSelected, setPalletSelected] = useState([]);
     const [palletStatus, setPalletStatus] = useState(COMPLETE_PALLET_STATUS.ALL);
+    const [loadingExport, setLoadingExport] = useState(false);
 
     const loadSizeData = () => {
         palletsApi.getBOWById(planID)
@@ -114,7 +118,7 @@ function SizeCard(props) {
     }
 
     const totalM3 = useMemo(() => {
-        let pallets = sizeData.filter(pallet => {
+        let pallets = sizeData?.filter(pallet => {
             if (palletStatus == COMPLETE_PALLET_STATUS.ALL) {
                 return pallet
             }
@@ -127,7 +131,65 @@ function SizeCard(props) {
 
         let total = pallets.reduce((sum, item) => sum + Number(item.Mass), 0);
         return total
-    }, [palletStatus]);
+    }, [palletStatus, sizeData]);
+
+    const exportExcel = async () => {
+        try {
+            setLoadingExport(true)
+            // Tạo workbook mới
+            let workbook = new ExcelJS.Workbook();
+            let worksheet = workbook.addWorksheet('Danh sách Pallet');
+            // Tạo tiêu đề cột
+            worksheet.columns = [
+                { header: 'Pallet', key: 'Code', width: 20 },
+                { header: 'Mục đích sấy', key: 'LyDo', width: 15 },
+                { header: 'Kích thước', key: 'size', width: 15 },
+                { header: 'Số lượng', key: 'Qty', width: 15 },
+                { header: 'Khối lượng', key: 'Mass', width: 15 },
+            ];
+
+            let totalQty = 0;
+            let totalMass = 0;
+
+            sizeData?.filter(pallet => {
+                if (palletStatus == COMPLETE_PALLET_STATUS.ALL) {
+                    return pallet
+                }
+                else if (palletStatus == COMPLETE_PALLET_STATUS.COMPLETE) {
+                    return pallet.CompletedBy != null
+                } else {
+                    return pallet.CompletedBy == null
+                }
+            }).forEach(item => {
+                totalQty += Number(item.Qty);
+                totalMass += Number(item.Mass);
+
+                // Thêm dữ liệu
+                worksheet.addRows([
+                    item
+                ]);
+            })
+
+            worksheet.addRows([{
+                Code: '',
+                LyDo: '',
+                size: '',
+                Qty: totalQty,
+                Mass: totalMass
+            }]);
+
+            let buffer = await workbook.xlsx.writeBuffer();
+            let blob = new Blob([buffer], {
+                type:
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            setLoadingExport(false);
+            saveAs(blob, `Danh sách Pallet trong lò ${planDrying.Oven}.xlsx`);
+        } catch (error) {
+            setLoadingExport(false);
+            toast.error("Xuất Excel có lỗi!");
+        }
+    }
 
     useEffect(() => {
         if (planID) {
@@ -173,19 +235,29 @@ function SizeCard(props) {
                     </ModalHeader>
                     <div className="border-b-2 border-gray-200"></div>
                     <ModalBody>
-                        <Box className="mb-3">
-                            <label className="block mb-2 text-sm font-medium text-gray-900">Lọc theo trạng thái</label>
-                            <select
-                                value={palletStatus}
-                                onChange={e => setPalletStatus(Number(e.target.value))}
-                                name="pallet-status"
-                                id="pallet-status"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 md:w-[300px]"
-                            >
-                                <option value={COMPLETE_PALLET_STATUS.ALL}>Tất cả</option>
-                                <option value={COMPLETE_PALLET_STATUS.COMPLETE}>Đã ra lò</option>
-                                <option value={COMPLETE_PALLET_STATUS.UN_COMPLETE}>Chưa ra lò</option>
-                            </select>
+                        <Box className="mb-3 w-full flex justify-between items-center">
+                            <div>
+                                <label className="block mb-2 text-sm font-medium text-gray-900">Lọc theo trạng thái</label>
+                                <select
+                                    value={palletStatus}
+                                    onChange={e => setPalletStatus(Number(e.target.value))}
+                                    name="pallet-status"
+                                    id="pallet-status"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 md:w-[300px]"
+                                >
+                                    <option value={COMPLETE_PALLET_STATUS.ALL}>Tất cả</option>
+                                    <option value={COMPLETE_PALLET_STATUS.COMPLETE}>Đã ra lò</option>
+                                    <option value={COMPLETE_PALLET_STATUS.UN_COMPLETE}>Chưa ra lò</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button
+                                    onClick={exportExcel}
+                                    className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                >
+                                    <span className="">{loadingExport ? 'Đang xử lý' : 'Xuất Excel'}</span>
+                                </button>
+                            </div>
                         </Box>
                         <TableContainer>
                             <Table variant="simple">
@@ -239,7 +311,7 @@ function SizeCard(props) {
                                                 <Td>{item.LyDo}</Td>
                                                 <Td>{item.size}</Td>
                                                 <Td isNumeric>{item.Qty}</Td>
-                                                <Td isNumeric>{Number(item.Mass).toFixed(4)}</Td>
+                                                <Td isNumeric>{Number(item.Mass).toFixed(6)}</Td>
                                             </Tr>
                                         ))
                                     }
