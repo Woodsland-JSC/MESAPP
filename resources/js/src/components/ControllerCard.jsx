@@ -537,7 +537,6 @@ function ControllerCard(props) {
                     onCallback();
                     onUserSelectClose();
                     toast.success('Đã gửi cho người xác nhận!');
-                    console.log("res", res);
                 }
             });
         } catch (error) {
@@ -746,7 +745,7 @@ function ControllerCard(props) {
                             </div>
                         </div>
                         {
-                            planDrying.delivery_id ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                           ( planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay'))  ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
                                 (user?.role == 1 || !user?.permissions.some(p => p == 'xacnhanlosay')) && <button
                                     className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
                                     onClick={onUserSelectOpen}
@@ -755,7 +754,7 @@ function ControllerCard(props) {
                                 </button>
                         }
                         {
-                            (planDrying.receiver_id == user.id) && (
+                            (planDrying?.receiver_id == user?.id) && (
                                 (user?.role == 1 || user?.permissions.some(p => p == 'xacnhanlosay')) && <button
                                     disabled={isUnComplete}
                                     className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
