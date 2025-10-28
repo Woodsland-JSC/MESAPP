@@ -11,6 +11,7 @@ use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
 use App\Http\Controllers\api\ReportController;
+use App\Http\Controllers\mes\PalletController;
 use App\Http\Controllers\mes\PalletLogController;
 use App\Http\Controllers\mes\PlanDryingController;
 use App\Http\Controllers\mes\UserController as MesUserController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\sap\GoodsManagementController;
 use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
 use App\Http\Controllers\sap_controller\OvenController;
 use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
+use App\Http\Controllers\sap_controller\VcnController;
 
 /*
 |--------------------------------------------------------------------------
@@ -191,6 +193,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'sap/masterdata'], function () {
         Route::get('danhSachNhaMayCBG', [SapMasterDataController::class, 'danhSachNhaMayCBG'])->name('danhSachNhaMayCBG');
+        Route::get('danhSachNhaMayND', [SapMasterDataController::class, 'danhSachNhaMayND'])->name('danhSachNhaMayND');
+        Route::get('factoryNDByUser', [SapMasterDataController::class, 'factoryNDByUser'])->name('factoryNDByUser');
+        Route::get('getFactoryUTub', [SapMasterDataController::class, 'getFactoryUTub'])->name('getFactoryUTub');
+        Route::get('getTeamUTub', [SapMasterDataController::class, 'getTeamUTub'])->name('getTeamUTub');
     });
 
     Route::group(['prefix' => 'sap/report'], function(){
@@ -211,7 +217,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getPlanDryingByFactory', [PlanDryingController::class, 'getPlanDryingByFactory'])->name('getPlanDryingByFactory');
         Route::get('getPalletsByPlanId', [PlanDryingController::class, 'getPalletsByPlanId'])->name('getPalletsByPlanId');
         Route::post('movePalletToPlanDrying', [PlanDryingController::class, 'movePalletToPlanDrying'])->name('movePalletToPlanDrying');
+        Route::post('removePallets', [PlanDryingController::class, 'removePallets'])->name('removePallets');
 
+        
         
     });
 
@@ -222,6 +230,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'mes/pallet-log'], function(){
         Route::get('getLogsByFactory', [PalletLogController::class, 'getLogsByFactory'])->name('getLogsByFactory');
+        
+    });
+
+    Route::group(['prefix' => 'mes/pallet'], function(){
+        Route::get('getPalletReport', [PalletController::class, 'getPalletReport'])->name('getPalletReport');
+        
+    });
+
+    
+
+    Route::group(['prefix' => 'sap/vcn'], function(){
+        Route::get('receiptsProductionsDetail', [VcnController::class, 'receiptsProductionsDetail'])->name('receiptsProductionsDetail');
+        Route::post('ghiNhanSanLuongVCN', [VcnController::class, 'ghiNhanSanLuongVCN'])->name('ghiNhanSanLuongVCN');
+        Route::get('receiptsProductionsDetailRong', [VcnController::class, 'receiptsProductionsDetailRong'])->name('receiptsProductionsDetailRong');
         
     });
 });

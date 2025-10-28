@@ -33,3 +33,7 @@ export const movePalletToPlanDrying = (data) => {
         data
     });
 }
+
+export const removePallets = (data) => {
+    return axiosClient().post(`${BASEURL}/removePallets`, data);
+}

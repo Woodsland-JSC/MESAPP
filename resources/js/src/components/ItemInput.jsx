@@ -64,8 +64,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
 import { BiSolidBadgeCheck } from "react-icons/bi";
-import { VAN_CONG_NGHIEP } from "../shared/data";
-import { set } from "date-fns";
+import { NOI_DIA, VAN_CONG_NGHIEP } from "../shared/data";
+import { ghiNhanSanLuongVCN, receiptsProductionsDetail } from "../api/vcn.api";
 
 const ItemInput = ({
     data,
@@ -182,6 +182,7 @@ const ItemInput = ({
 
     const [fromDate, setFromDate] = useState(new Date().setHours(0, 0, 0, 0));
     const [toDate, setToDate] = useState(new Date().setHours(23, 59, 59, 999));
+    const [LSX, setLSX] = useState();
 
     const loadCBGItemDetails = async (item) => {
         setLoading(true);
@@ -192,7 +193,6 @@ const ItemInput = ({
         };
         try {
             const res = await productionApi.getFinishedGoodsDetail(params);
-            console.log("Chi tiết thành phẩm: ", res);
             setSelectedItemDetails({
                 ...item,
                 CDay: item.CDay,
@@ -239,10 +239,6 @@ const ItemInput = ({
                 await productionApi.getFinishedRongPlywoodGoodsDetail(
                     params
                 );
-            console.log(
-                "Thông tin lệnh phân rã rong: ",
-                res.disassemblyOrders
-            );
             setSelectedItemDetails({
                 ...item,
                 CongDoan: res.CongDoan,
@@ -295,7 +291,6 @@ const ItemInput = ({
                 await productionApi.getFinishedPlywoodGoodsDetail(
                     params
                 );
-            console.log("Chi tiết thành phẩm: ", res);
             setSelectedItemDetails({
                 ...item,
                 ItemInfo: res.ItemInfo,
@@ -388,8 +383,6 @@ const ItemInput = ({
     };
 
     const openInputModal = async (item) => {
-        console.log("Item đã chọn: ", item);
-        console.log("Nhà máy hiện tại: ", selectedFactory);
         if (variant === "CBG") {
             await loadCBGItemDetails(item);
         } else {
@@ -398,6 +391,15 @@ const ItemInput = ({
             } else {
                 await loadPlywoodItemDetails(item);
             }
+        }
+    };
+
+    const viewProductionsDetails = async (item, lsx) => {
+        setLSX(lsx)
+        if (item.CDOAN === "RO") {
+            await loadRongItemDetails(item);
+        } else {
+            await loadPlywoodItemDetailByLSX(item, lsx);
         }
     };
 
@@ -468,8 +470,6 @@ const ItemInput = ({
     };
 
     const handleSubmitQuantityRong = async () => {
-        console.log("Dữ liệu: ", rongData, RONGInputQty);
-
         // Validate RONGInputQty
         if (!RONGInputQty || RONGInputQty === "" || RONGInputQty === null) {
             toast.error("Vui lòng nhập số lượng ghi nhận bán thành phẩm.");
@@ -597,11 +597,9 @@ const ItemInput = ({
                 Data: rongData,
                 KHOI: "VCN",
             };
-            console.log("Dữ liệu sẽ được gửi đi: ", Data);
             const res = await productionApi.enterFinishedRongAmountVCN(Data);
             toast.success("Ghi nhận & chuyển tiếp thành công!");
         } catch (error) {
-            console.error("Đã xảy ra lỗi:", error);
             toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
         setConfirmLoading(false);
@@ -770,7 +768,6 @@ const ItemInput = ({
                 if (payload.FatherCode && payload.ItemCode) {
                     if (payload.CompleQty || payload.RejectQty) {
                         if (variant === "CBG") {
-                            console.log("Dữ liệu sẽ được gửi đi:", payload);
                             const res =
                                 await productionApi.enterFinishedGoodsAmountCBG(
                                     payload
@@ -847,7 +844,6 @@ const ItemInput = ({
             }
         });
 
-        console.log("Kết quả transformDetail: ", result);
         return result;
     }
 
@@ -884,7 +880,6 @@ const ItemInput = ({
             onDeleteProcessingDialogClose();
             setDeleteProcessingLoading(false);
         } else {
-            console.log("Công đoạn hiện tại", choosenItem.CDOAN);
             if (choosenItem.CDOAN === "RO") {
                 try {
                     const payload = {
@@ -895,7 +890,6 @@ const ItemInput = ({
                         FatherCode: choosenItem.ItemChild,
                         version: choosenItem.Version,
                     };
-                    console.log("Dữ liệu sẽ được gửi đi", payload);
                     const res = await productionApi.deleteReceiptVCNRong(
                         payload
                     );
@@ -916,7 +910,6 @@ const ItemInput = ({
                         // SubItemCode: item.ChildName,
                         // SubItemName: item.ItemChild,
                     }));
-                    console.log("Dữ liệu sau khi xóa", selectedItemDetails);
                     const RONGReceiptData = res.stocks.map((stock, key) => ({
                         ItemCode: stock.ItemCode,
                         ItemName: stock.ItemName,
@@ -993,7 +986,6 @@ const ItemInput = ({
             onDeleteProcessingDialogClose();
             setDeleteProcessingLoading(false);
         } else {
-            console.log("Công đoạn hiện tại", choosenItem.CDOAN);
             if (choosenItem.CDOAN === "RO") {
                 try {
                     const payload = {
@@ -1004,7 +996,6 @@ const ItemInput = ({
                         FatherCode: choosenItem.ItemChild,
                         version: choosenItem.Version,
                     };
-                    console.log("Dữ liệu sẽ được gửi đi", payload);
                     const res = await productionApi.deleteReceiptVCNRong(
                         payload
                     );
@@ -1106,6 +1097,100 @@ const ItemInput = ({
         }, 1000);
     };
 
+    const loadPlywoodItemDetailByLSX = async (item, lsx) => {
+        try {
+            setLoading(true);
+            const params = {
+                SPDICH: data.SPDICH,
+                ItemCode: item.ItemChild,
+                TO: item.TO,
+                Version: item.Version,
+                ProdType: item.ProdType,
+                LSX: lsx
+            };
+            const res = await receiptsProductionsDetail(params);
+            console.log("Chi tiết thành phẩm: ", res);
+            setSelectedItemDetails({
+                ...item,
+                ItemInfo: res.ItemInfo,
+                stockQuantity: res.maxQuantity,
+                remainQty: res.remainQty,
+                CongDoan: res.CongDoan,
+                ProdType: res.ProdType,
+                SubItemWhs: res.SubItemWhs,
+                factories: res.Factorys?.filter(
+                    (item) => item.Factory !== user.plant
+                ).map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+                stocks: res.stocks,
+                maxQty: res.maxQty,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
+                returnedData: res.returnData
+            });
+            onModalOpen();
+            setLoading(false);
+        } catch (error) {
+            toast.error("Có lỗi khi lấy dữ liệu item.");
+            setLoading(false);
+        }
+    }
+
+    const loadPlywoodItemRongByLSX = async (item, lsx) => {
+        setLoading(true);
+        try {
+            const params = {
+                FatherCode: item.ItemChild,
+                TO: item.TO,
+                version: item.Version,
+                ProdType: item.ProdType,
+                LSX: lsx
+            };
+            const res =
+                await productionApi.getFinishedRongPlywoodGoodsDetail(
+                    params
+                );
+            setSelectedItemDetails({
+                ...item,
+                CongDoan: res.CongDoan,
+                FatherStock: res.FatherStock,
+                factories: res.Factorys?.map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                disassemblyOrders: res.disassemblyOrders,
+                stocks: res.stocks,
+                SubItemCode: item.ChildName,
+                SubItemName: item.ItemChild,
+            });
+
+            // Tạo mảng lưu dữ liệu rong
+            const RONGReceiptData = res.stocks.map((stock, key) => ({
+                ItemCode: stock.ItemCode,
+                ItemName: stock.ItemName,
+                CompleQty: "",
+                RejectQty: "",
+                ConLai: parseInt(stock.ConLai),
+                CDay: stock.CDay,
+                CRong: stock.CRong,
+                CDai: stock.CDai,
+                factories: "",
+            }));
+            setRongData(RONGReceiptData);
+            onModalOpen();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.error ||
+                "Có lỗi khi lấy dữ liệu item."
+            );
+            console.error(error);
+        }
+        setLoading(false);
+    }
+
     useEffect(() => {
         const checkElement = checkRef.current;
         if (faultyAmount && checkElement) {
@@ -1148,248 +1233,476 @@ const ItemInput = ({
                     {data.NameSPDich || "Sản phẩm không xác định"}
                 </div>
                 <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
-                    {data.Details.length > 0
-                        ? data.Details.map((item, index) => (
-                            <section
-                                onClick={() => {
-                                    openInputModal(item);
-                                    setChoosenItem(item);
-                                }}
-                                className="rounded-b-xl cursor-pointer duration-200 ease-linear"
-                                key={index}
-                            >
-                                <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
-                                    <div className="flex items-center">
-                                        <span>
-                                            <IoIosArrowDown className="inline-block text-gray-500" />{" "}
-                                            {item.ChildName}{" "}
-                                            {item.CDOAN === "RO" ? (
-                                                <span className="text-[#0da0ea]">
-                                                    {item.QuyCach2 || ""}
+                    {
+                        data.Details.length > 0
+                            ? data.Details.map((item, index) => (
+                                (variant == VAN_CONG_NGHIEP || variant == NOI_DIA) ? (
+                                    <section
+                                        className="rounded-b-xl cursor-pointer duration-200 ease-linear"
+                                        key={index}
+                                    >
+                                        <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
+                                            <div className="flex items-center">
+                                                <span>
+                                                    <IoIosArrowDown className="inline-block text-gray-500" />{" "}
+                                                    {item.ChildName}{" "}
+                                                    {item.CDOAN === "RO" ? (
+                                                        <span className="text-[#0da0ea]">
+                                                            {item.QuyCach2 || ""}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="">
+                                                            ({item.CDay}*{item.CRong}*
+                                                            {item.CDai})
+                                                        </span>
+                                                    )}
+                                                    {item.Version && (
+                                                        <span className="pl-2 font-medium text-[#17506b]">
+                                                            V.
+                                                            <span>
+                                                                {item.Version}
+                                                            </span>
+                                                        </span>
+                                                    )}
                                                 </span>
-                                            ) : (
-                                                <span className="">
-                                                    ({item.CDay}*{item.CRong}*
-                                                    {item.CDai})
-                                                </span>
-                                            )}
-                                            {item.Version && (
-                                                <span className="pl-2 font-medium text-[#17506b]">
-                                                    V.
-                                                    <span>
-                                                        {item.Version}
-                                                    </span>
-                                                </span>
-                                            )}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
-                                    <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
-                                        <thead className="bg-[#dae0ec] ">
-                                            <tr>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
-                                                >
-                                                    LSX
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
-                                                >
-                                                    <span className="xl:block lg:block md:block hidden">
-                                                        Sản lượng
-                                                    </span>
-                                                    <span className="xl:hidden lg:hidden md:hidden block">
-                                                        SL
-                                                    </span>
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
-                                                >
-                                                    <span className="xl:block lg:block md:block hidden">
-                                                        Đã làm
-                                                    </span>
-                                                    <span className="xl:hidden lg:hidden md:hidden block">
-                                                        ĐL
-                                                    </span>
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
-                                                >
-                                                    Lỗi
-                                                </th>
-                                                <th
-                                                    scope="col"
-                                                    className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
-                                                >
-                                                    <span className="xl:block lg:block md:block hidden">
-                                                        Còn lại
-                                                    </span>
-                                                    <span className="xl:hidden lg:hidden md:hidden block">
-                                                        CL
-                                                    </span>
-                                                </th>
-                                                {variant ==
-                                                    VAN_CONG_NGHIEP && (
+                                            </div>
+                                        </div>
+                                        <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
+                                            <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
+                                                <thead className="bg-[#dae0ec] ">
+                                                    <tr>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
+                                                        >
+                                                            LSX
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Sản lượng
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                SL
+                                                            </span>
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Đã làm
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                ĐL
+                                                            </span>
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
+                                                        >
+                                                            Lỗi
+                                                        </th>
                                                         <th
                                                             scope="col"
                                                             className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
                                                         >
-                                                            <span className="xl:block lg:block md:block hidden"></span>
-                                                            <span className="xl:hidden lg:hidden md:hidden block"></span>
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Còn lại
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                CL
+                                                            </span>
                                                         </th>
-                                                    )}
-                                            </tr>
-                                        </thead>
-                                        <tbody className=" border-t border-[#c4cfe7]  ">
-                                            {item.LSX?.length > 0 ? (
-                                                item.LSX.filter(
-                                                    (production) =>
-                                                        production.ConLai > 0
-                                                )
-                                                    .sort((a, b) => {
-                                                        return a.LSX.localeCompare(
-                                                            b.LSX
-                                                        );
-                                                    })
-                                                    .map(
-                                                        (
-                                                            production,
-                                                            index
-                                                        ) => (
-                                                            <tr
-                                                                className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
-                                                                key={index}
-                                                            >
+                                                        {variant ==
+                                                            VAN_CONG_NGHIEP && (
                                                                 <th
-                                                                    scope="row"
-                                                                    className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
+                                                                    scope="col"
+                                                                    className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
                                                                 >
-                                                                    {
-                                                                        production.LSX
-                                                                    }
+                                                                    <span className="xl:block lg:block md:block hidden"></span>
+                                                                    <span className="xl:hidden lg:hidden md:hidden block"></span>
                                                                 </th>
-                                                                <td className="px-2 py-2 text-right text-gray-800">
-                                                                    {formatNumber(
-                                                                        Number(
-                                                                            production.SanLuong
-                                                                        )
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-2 py-2 text-right text-gray-900">
-                                                                    {formatNumber(
-                                                                        Number(
-                                                                            production.DaLam
-                                                                        )
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-2 py-2 text-right text-gray-900">
-                                                                    {formatNumber(
-                                                                        Number(
-                                                                            production.Loi
-                                                                        )
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-2  py-2 text-right text-gray-800">
-                                                                    {formatNumber(
-                                                                        Number(
-                                                                            production.ConLai
-                                                                        )
-                                                                    )}
-                                                                </td>
-                                                                {variant ==
-                                                                    VAN_CONG_NGHIEP && (
-                                                                        <td
-                                                                            className="px-2 py-2 text-right text-[#17506B] underline"
-                                                                            onClick={(
-                                                                                e
-                                                                            ) =>
-                                                                                e.stopPropagation()
+                                                            )}
+                                                    </tr>
+                                                </thead>
+                                                <tbody className=" border-t border-[#c4cfe7]  ">
+                                                    {item.LSX?.length > 0 ? (
+                                                        item.LSX.filter(
+                                                            (production) =>
+                                                                production.ConLai > 0
+                                                        )
+                                                            .sort((a, b) => {
+                                                                return a.LSX.localeCompare(
+                                                                    b.LSX
+                                                                );
+                                                            })
+                                                            .map(
+                                                                (
+                                                                    production,
+                                                                    index
+                                                                ) => (
+                                                                    <tr
+                                                                        className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
+                                                                        key={index}
+                                                                    >
+                                                                        <th
+                                                                            onClick={
+                                                                                () => {
+                                                                                    viewProductionsDetails(item, production.LSX);
+                                                                                    setChoosenItem(item);
+                                                                                }
                                                                             }
+                                                                            scope="row"
+                                                                            className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap hover:underline"
                                                                         >
-                                                                            <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX, data: data }} />
+                                                                            {
+                                                                                production.LSX
+                                                                            }
+                                                                        </th>
+                                                                        <td className="px-2 py-2 text-right text-gray-800">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.SanLuong
+                                                                                )
+                                                                            )}
                                                                         </td>
-                                                                    )}
-                                                            </tr>
-                                                        )
-                                                    )
-                                            ) : (
-                                                <span>Không có dữ liệu</span>
-                                            )}
-                                        </tbody>
-                                        <tfoot className="!text-[12px]">
-                                            <tr>
-                                                <td className="font-bold  text-gray-700 px-2 py-2">
-                                                    Tổng
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                    {formatNumber(
-                                                        Number(
-                                                            item.LSX.reduce(
-                                                                (acc, curr) =>
-                                                                    acc +
-                                                                    Number(
-                                                                        curr.SanLuong
-                                                                    ),
-                                                                0
+                                                                        <td className="px-2 py-2 text-right text-gray-900">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.DaLam
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="px-2 py-2 text-right text-gray-900">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.Loi
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="px-2  py-2 text-right text-gray-800">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.ConLai
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        {variant ==
+                                                                            VAN_CONG_NGHIEP && (
+                                                                                <td
+                                                                                    className="px-2 py-2 text-right text-[#17506B] underline"
+                                                                                    onClick={(
+                                                                                        e
+                                                                                    ) =>
+                                                                                        e.stopPropagation()
+                                                                                    }
+                                                                                >
+                                                                                    <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX, data: data }} />
+                                                                                </td>
+                                                                            )}
+                                                                    </tr>
+                                                                )
                                                             )
-                                                        )
+                                                    ) : (
+                                                        <span>Không có dữ liệu</span>
                                                     )}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                    {formatNumber(
-                                                        Number(
-                                                            item.LSX.reduce(
-                                                                (acc, curr) =>
-                                                                    acc +
-                                                                    Number(
-                                                                        curr.DaLam
-                                                                    ),
-                                                                0
+                                                </tbody>
+                                                <tfoot className="!text-[12px]">
+                                                    <tr>
+                                                        <td className="font-bold  text-gray-700 px-2 py-2">
+                                                            Tổng
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.SanLuong
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.DaLam
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.Loi
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.ConLai
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </section>
+                                ) : (
+                                    <section
+                                        onClick={
+                                            () => {
+                                                openInputModal(item);
+                                                setChoosenItem(item);
+                                            }
+                                        }
+                                        className="rounded-b-xl cursor-pointer duration-200 ease-linear"
+                                        key={index}
+                                    >
+                                        <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
+                                            <div className="flex items-center">
+                                                <span>
+                                                    <IoIosArrowDown className="inline-block text-gray-500" /> {" "}
+                                                    {item.ChildName}{" "}
+                                                    {
+                                                        item.CDOAN === "RO" ? (
+                                                            <span className="text-[#0da0ea]">
+                                                                {item.QuyCach2 || ""}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="">
+                                                                ({item.CDay}*{item.CRong}*
+                                                                {item.CDai})
+                                                            </span>
+                                                        )
+                                                    }
+                                                    {
+                                                        item.Version && (
+                                                            <span className="pl-2 font-medium text-[#17506b]">
+                                                                V.
+                                                                <span>
+                                                                    {item.Version}
+                                                                </span>
+                                                            </span>
+                                                        )
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div >
+                                        <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
+                                            <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
+                                                <thead className="bg-[#dae0ec] ">
+                                                    <tr>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
+                                                        >
+                                                            LSX
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Sản lượng
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                SL
+                                                            </span>
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Đã làm
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                ĐL
+                                                            </span>
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
+                                                        >
+                                                            Lỗi
+                                                        </th>
+                                                        <th
+                                                            scope="col"
+                                                            className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
+                                                        >
+                                                            <span className="xl:block lg:block md:block hidden">
+                                                                Còn lại
+                                                            </span>
+                                                            <span className="xl:hidden lg:hidden md:hidden block">
+                                                                CL
+                                                            </span>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className=" border-t border-[#c4cfe7]  ">
+                                                    {item.LSX?.length > 0 ? (
+                                                        item.LSX.filter(
+                                                            (production) =>
+                                                                production.ConLai > 0
+                                                        )
+                                                            .sort((a, b) => {
+                                                                return a.LSX.localeCompare(
+                                                                    b.LSX
+                                                                );
+                                                            })
+                                                            .map(
+                                                                (
+                                                                    production,
+                                                                    index
+                                                                ) => (
+                                                                    <tr
+                                                                        className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
+                                                                        key={index}
+                                                                    >
+                                                                        <th
+                                                                            scope="row"
+                                                                            className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap"
+                                                                        >
+                                                                            {
+                                                                                production.LSX
+                                                                            }
+                                                                        </th>
+                                                                        <td className="px-2 py-2 text-right text-gray-800">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.SanLuong
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="px-2 py-2 text-right text-gray-900">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.DaLam
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="px-2 py-2 text-right text-gray-900">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.Loi
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="px-2  py-2 text-right text-gray-800">
+                                                                            {formatNumber(
+                                                                                Number(
+                                                                                    production.ConLai
+                                                                                )
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )
                                                             )
-                                                        )
+                                                    ) : (
+                                                        <span>Không có dữ liệu</span>
                                                     )}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                    {formatNumber(
-                                                        Number(
-                                                            item.LSX.reduce(
-                                                                (acc, curr) =>
-                                                                    acc +
-                                                                    Number(
-                                                                        curr.Loi
-                                                                    ),
-                                                                0
-                                                            )
-                                                        )
-                                                    )}
-                                                </td>
-                                                <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                    {formatNumber(
-                                                        Number(
-                                                            item.LSX.reduce(
-                                                                (acc, curr) =>
-                                                                    acc +
-                                                                    Number(
-                                                                        curr.ConLai
-                                                                    ),
-                                                                0
-                                                            )
-                                                        )
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </section>
-                        ))
-                        : null}
-                </div>
+                                                </tbody>
+                                                <tfoot className="!text-[12px]">
+                                                    <tr>
+                                                        <td className="font-bold  text-gray-700 px-2 py-2">
+                                                            Tổng
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.SanLuong
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.DaLam
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.Loi
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right font-bold text-gray-700">
+                                                            {formatNumber(
+                                                                Number(
+                                                                    item.LSX.reduce(
+                                                                        (acc, curr) =>
+                                                                            acc +
+                                                                            Number(
+                                                                                curr.ConLai
+                                                                            ),
+                                                                        0
+                                                                    )
+                                                                )
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </section >
+                                )
+
+                            ))
+                            : null
+                    }
+                </div >
             </div >
             <Modal
                 isCentered
@@ -1683,10 +1996,6 @@ const ItemInput = ({
                                                                                             return newData;
                                                                                         }
                                                                                     );
-                                                                                    console.log(
-                                                                                        "dữ liệu cập nhật:",
-                                                                                        rongData
-                                                                                    );
                                                                                 }
                                                                             }}
                                                                         >
@@ -1755,10 +2064,6 @@ const ItemInput = ({
                                                                                         return newData;
                                                                                     }
                                                                                 );
-                                                                                console.log(
-                                                                                    "dữ liệu cập nhật:",
-                                                                                    rongData
-                                                                                );
                                                                             } else {
                                                                                 setRongData(
                                                                                     (
@@ -1774,10 +2079,6 @@ const ItemInput = ({
                                                                                             value;
                                                                                         return newData;
                                                                                     }
-                                                                                );
-                                                                                console.log(
-                                                                                    "dữ liệu cập nhật:",
-                                                                                    rongData
                                                                                 );
                                                                             }
                                                                         }}
@@ -1844,9 +2145,6 @@ const ItemInput = ({
                                                                                     }
                                                                                 );
                                                                             } else {
-                                                                                console.log(
-                                                                                    value
-                                                                                );
                                                                                 setSelectedFactory(
                                                                                     value.value
                                                                                 );
@@ -1877,7 +2175,7 @@ const ItemInput = ({
                                                         <div className="space-y-4">
                                                             {selectedItemDetails?.disassemblyOrders?.map(
                                                                 (order, index) => (
-                                                                    <div className="bg-gray-100 border border-gray-300 py-4 pb-2 rounded-xl ">
+                                                                    <div className="bg-gray-100 border border-gray-300 py-4 pb-2 rounded-xl" key={index}>
                                                                         <div className="px-3">
                                                                             <div className=" flex items-center justify-between">
                                                                                 <div className="w-[85%]">
@@ -2454,12 +2752,7 @@ const ItemInput = ({
                                                     {" "}
                                                     *
                                                 </span>
-                                                {selectedItemDetails?.CongDoan !==
-                                                    "SC" &&
-                                                    selectedItemDetails?.CongDoan !==
-                                                    "XV" &&
-                                                    selectedItemDetails?.maxQty <=
-                                                    0 &&
+                                                {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.CongDoan !== "XV" && selectedItemDetails?.maxQty <= 0 &&
                                                     (selectedItemDetails?.stocks
                                                         ?.length !== 1 ||
                                                         selectedItemDetails
@@ -2473,9 +2766,7 @@ const ItemInput = ({
                                                             ghi nhận
                                                         </div>
                                                     </div>
-                                                ) : selectedItemDetails?.remainQty -
-                                                    selectedItemDetails?.WaitingConfirmQty <=
-                                                    0 ? (
+                                                ) : selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty <= 0 ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
                                                         <BiSolidBadgeCheck className="w-6 h-6" />
                                                         <div className="text-white">
@@ -2810,10 +3101,6 @@ const ItemInput = ({
                                                                         setIsItemCodeDetech(
                                                                             true
                                                                         );
-                                                                        console.log(
-                                                                            "Giá trị đã chọn: ",
-                                                                            selectedFaultItem
-                                                                        );
                                                                     }}
                                                                 >
                                                                     {
@@ -2880,10 +3167,6 @@ const ItemInput = ({
                                                                                             );
                                                                                             setIsItemCodeDetech(
                                                                                                 false
-                                                                                            );
-                                                                                            console.log(
-                                                                                                "Giá trị đã chọn: ",
-                                                                                                selectedFaultItem
                                                                                             );
                                                                                         }}
                                                                                     >
@@ -3592,3 +3875,4 @@ const ItemInput = ({
 };
 
 export default ItemInput;
+ 
