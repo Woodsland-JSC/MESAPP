@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\mes;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pallet;
 use App\Models\PalletLog;
 use App\Models\plandetail;
 use Illuminate\Http\Request;
 use App\Models\planDryings as PlanDrying;
+use App\Models\planDryings;
+use App\Services\mes\PalletLogService;
 use App\Services\OvenService;
 use Auth;
 use DB;
@@ -171,7 +174,7 @@ class PlanDryingController extends Controller
                     'old_oven' => $planDryingByOldOven['Oven'],
                     'new_oven' => $planDryingByNewOven['Oven'],
                     'user_id' => Auth::user()->id,
-                    'created_at' => $now, 
+                    'created_at' => $now,
                     'updated_at' => $now,
                     'factory' => $data['factory']
                 ];
@@ -187,6 +190,78 @@ class PlanDryingController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Điều chuyển Pallet có lỗi!'
+            ], 500);
+        }
+    }
+
+    public function removePallets(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $data = [
+                'planId' => $request->planId,
+                'pallets' => $request->pallets,
+                'log_type' => $request->log_type,
+                'log_data' => $request->log_data,
+                'factory' => $request->factory,
+
+            ];
+
+            $check = planDryings::where('PlanID', $data['planId'])->first();
+
+            if ($check) {
+                Pallet::whereIn('palletID', $data['pallets'])
+                    ->update([
+                        'LoadedBy' => null,
+                        'LoadedIntoKilnDate' => null,
+                        'activeStatus' => 0,
+                    ]);
+
+                plandetail::whereIn('pallet', $data['pallets'])
+                    ->where('PlanID',  $data['planId'])
+                    ->delete();
+
+                $totalMass = plandetail::where('PlanID', $data['planId'])
+                    ->sum('Mass');
+                $totalPallet = plandetail::where('PlanID', $data['planId'])
+                    ->count();
+
+                planDryings::where('PlanID', $data['planId'])
+                    ->update([
+                        'Mass' => $totalMass,
+                        'TotalPallet' => $totalPallet
+                    ]);
+
+                $palletLogs = [];
+                $now = now();
+
+                foreach ($data['pallets'] as $key => $value) {
+                    $palletLogs[] = [
+                        'type_log' => $data['log_type'],
+                        'log_data' => $data['log_data'],
+                        'palletId' => $value,
+                        'old_plan' => null,
+                        'new_plan' => null,
+                        'old_oven' => null,
+                        'new_oven' => null,
+                        'user_id' => Auth::user()->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                        'factory' => $data['factory']
+                    ];
+                }
+
+                PalletLog::insert($palletLogs);
+            } else {
+                return response()->json(['error' => 'Lò không tồn tại'], 500);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Xóa Pallet có lỗi'
             ], 500);
         }
     }

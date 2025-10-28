@@ -217,7 +217,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getPlanDryingByFactory', [PlanDryingController::class, 'getPlanDryingByFactory'])->name('getPlanDryingByFactory');
         Route::get('getPalletsByPlanId', [PlanDryingController::class, 'getPalletsByPlanId'])->name('getPalletsByPlanId');
         Route::post('movePalletToPlanDrying', [PlanDryingController::class, 'movePalletToPlanDrying'])->name('movePalletToPlanDrying');
+        Route::post('removePallets', [PlanDryingController::class, 'removePallets'])->name('removePallets');
 
+        
         
     });
 

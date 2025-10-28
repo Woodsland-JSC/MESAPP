@@ -126,5 +126,6 @@ export const DRYING_PERMISSIONS = [
 ];
 
 export const PALLET_LOG_TYPE = {
-    MOVE: 1
+    MOVE: 1,
+    REMOVE: 2
 };

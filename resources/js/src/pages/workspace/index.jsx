@@ -227,8 +227,8 @@ function Workspace() {
                                                     permission: "xulypallet",
                                                     link: "/workspace/xu-ly-dieu-chuyen-pallet",
                                                     icon: <HiArrowsRightLeft />,
-                                                    title: "Điều chuyển Pallet",
-                                                    description: "Xử lý điều chuyển Pallet trong lò.",
+                                                    title: "Xử lý Pallet",
+                                                    description: "Xử lý Pallet trong lò.",
                                                 }
                                             ].map(
                                                 ({
