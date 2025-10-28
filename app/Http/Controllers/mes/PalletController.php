@@ -38,7 +38,7 @@ class PalletController extends Controller
                 FROM pallets p
                 JOIN pallet_details pd ON pd.palletID = p.palletID
                 JOIN plan_detail pld ON pld.pallet = p.palletID
-                JOIN plandryings pl ON pld.PlanID = pl.PlanID
+                JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 JOIN users u ON u.id = p.CompletedBy
                 WHERE p.CompletedDate BETWEEN ? AND ? 
                 AND p.factory = ?',
