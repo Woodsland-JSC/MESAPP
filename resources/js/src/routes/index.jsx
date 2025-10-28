@@ -99,6 +99,9 @@ import SanLuongQuyDoi from "../pages/reports/wood-working/san-luong-quy-doi";
 import BaoCaoQuyLuong from "../pages/reports/wood-working/quy-luong";
 import XuLyDieuChuyenPallet from "../pages/workspace/wood-drying/xu-ly-pallet";
 import BaoCaoDieuChuyenPallet from "../pages/reports/wood-drying/dieu-chuyen-pallet";
+import NoiDia from "../pages/workspace/domestic/noi-dia";
+import TuBep from "../pages/workspace/domestic/tu-bep";
+import BaoCaoRaLoPallet from "../pages/reports/wood-drying/ra-lo-pallet";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -239,6 +242,24 @@ function AppRoutes() {
                     />
 
                     {/* Domestic  */}
+                    <Route
+                        path="/workspace/domestic/noi-dia"
+                        element={
+                            <ProtectedRoute>
+                                <NoiDia />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/domestic/tu-bep"
+                        element={
+                            <ProtectedRoute>
+                                <TuBep />
+                            </ProtectedRoute>
+                        }
+                    />
+                    
                     <Route
                         path="/workspace/domestic/finished-goods-receipt"
                         element={
@@ -395,6 +416,15 @@ function AppRoutes() {
                         }
                     />
 
+                    <Route
+                        path="/reports/wood-drying/ra-lo-pallet"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoRaLoPallet />
+                            </ProtectedRoute>
+                        }
+                    />
+
                     {/* CBG Reports */}
                     <Route
                         path="/reports/wood-working/receipt-in-sap"
@@ -509,7 +539,7 @@ function AppRoutes() {
                                 <SanLuongQuyDoi />
                             </ProtectedRoute>
                         }
-                        
+
                     />
 
                     <Route
@@ -519,7 +549,7 @@ function AppRoutes() {
                                 <BaoCaoQuyLuong />
                             </ProtectedRoute>
                         }
-                        
+
                     />
 
                     {/* VCN Reports */}

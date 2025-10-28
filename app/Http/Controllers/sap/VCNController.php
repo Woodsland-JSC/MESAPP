@@ -954,16 +954,16 @@ class VCNController extends Controller
         ], 200);
     }
 
-    function collectdata($spdich, $item, $to, $version)
+    function collectdata($spdich, $item, $to, $version, $lsx)
     {
 
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'select * from UV_DETAILGHINHANSL_VCN where "SPDICH"=? and "ItemChild"=? and "TO"=? and "Version"=? order by "LSX" asc';
+        $query = 'select * from UV_DETAILGHINHANSL_VCN where "SPDICH"=? and "ItemChild"=? and "TO"=? and "Version"=? and "LSX" = ?';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [$spdich, $item, $to, $version])) {
+        if (!odbc_execute($stmt, [$spdich, $item, $to, $version, $lsx])) {
             // Handle execution error
             // die("Error executing SQL statement: " . odbc_errormsg());
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
@@ -980,10 +980,7 @@ class VCNController extends Controller
     function allocate($data, $totalQty)
     {
         foreach ($data as &$item) {
-            // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
-            if (
-                isset($item['ConLai']) && $item['ConLai'] <= $totalQty
-            ) {
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
                 $item['Allocate'] = $item['ConLai'];
                 $totalQty -= $item['ConLai'];
             } else {
@@ -1006,7 +1003,7 @@ class VCNController extends Controller
     function accept(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required',
+            'id' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
@@ -1019,7 +1016,7 @@ class VCNController extends Controller
                 throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
             }
             if ($data->NextTeam != "TH-QC"  && $data->NextTeam != "TQ-QC"  && $data->NextTeam != "HG-QC") {
-                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version, $data->LSX);
                 $allocates = $this->allocate($dataallocate, $data->Quantity);
                 if (count($allocates) == 0) {
                     return response()->json([
@@ -1032,7 +1029,6 @@ class VCNController extends Controller
                     ], 500);
                 }
                 foreach ($allocates as $allocate) {
-
                     $body = [
                         "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                         "U_LSX" => $data->LSX,
@@ -1868,7 +1864,7 @@ class VCNController extends Controller
 
             // Validate phân bổ
             if ($data->NextTeam != "YS-QC"  && $data->NextTeam != "CH-QC"  && $data->NextTeam != "HG-QC") {
-                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+                $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version, $data->LSX);
                 $allocates = $this->allocate_v2($dataallocate, $data->Quantity);
                 if (count($allocates) == 0) {
                     return response()->json([
@@ -2482,7 +2478,7 @@ class VCNController extends Controller
                 $qtypush = $request->Qty;
             }
             //allocate data
-            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version);
+            $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version, $data->LSX);
             $allocates = $this->allocate_v2($dataallocate, $request->Qty);
             if (isset($allocates['error']) && $allocates['error']) {
                 return response()->json([

@@ -73,6 +73,8 @@ export const FACTORIES = {
 
 export const VAN_CONG_NGHIEP = "VCN";
 export const CHE_BIEN_GO = "CBG";
+export const NOI_DIA = "ND";
+export const TU_BEP = "TUB"
 
 export const COMPLETE_PALLET_STATUS = {
     ALL: 0,

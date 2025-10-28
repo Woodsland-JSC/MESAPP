@@ -142,10 +142,6 @@ class PlanDryingController extends Controller
                 ->selectRaw('SUM(Mass) as totalMass, COUNT(*) as totalPallet')
                 ->first();
 
-            if ($totalOld['totalPallet'] == 0) {
-                $ovenService->unlockOven($planDryingByOldOven['Oven']);
-            }
-
             $totalNew = plandetail::where('PlanID', $planDryingByNewOven['PlanID'])
                 ->selectRaw('SUM(Mass) as totalMass, COUNT(*) as totalPallet')
                 ->first();

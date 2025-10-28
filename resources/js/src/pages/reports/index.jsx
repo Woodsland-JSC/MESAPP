@@ -96,6 +96,12 @@ const SAYReports = [
         link: "/reports/wood-drying/dieu-chuyen-pallet",
         description: "Báo cáo điều chuyển Pallet trong lò."
     },
+    {
+        id: "0012",
+        name: "Báo cáo ra lò Pallet",
+        link: "/reports/wood-drying/ra-lo-pallet",
+        description: "Báo cáo chi tiết các pallet được ra lò."
+    },
 ];
 
 const CBGReports = [
@@ -240,11 +246,11 @@ const VCNReports = [
             "Báo cáo thông tin sản lượng ghi nhận về SAP của từng nhà máy.",
         // priority: true,
     },
-        {
+    {
         id: "0003",
         name: "Báo cáo biện pháp xử lý lỗi (VCN)",
         link: "/reports/plywoods/defect-handling",
-              description:
+        description:
             "Chi tiết thông tin xử lý lỗi của từng nhà máy trong một khoảng thời gian.",
         // priority: true,
     },
