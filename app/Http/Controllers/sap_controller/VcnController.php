@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
+use App\Models\awaitingstocksvcn;
 use App\Models\DisassemblyOrder;
 use App\Models\notireceiptVCN;
 use App\Services\HanaService;
@@ -134,33 +135,81 @@ class VcnController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 500);
             }
 
-            // if ($request->ProdType == null) {
-            //     return response()->json(['error' => 'Giá trị "ProdType" trong lệnh hoặc trong sản phẩm không được bỏ trống. Vui lòng kiểm tra lại.'], 500);
-            // }
-
             $params = $request->query();
 
             $dataSanLuongVCN = $this->hanaService->selectOne($this->SQL_GET_QUANTITY_SANLUONG_VCN, [$params['ItemCode'], $params['TO'], $params['SPDICH'], $params['LSX']]);
             $quantity = $dataSanLuongVCN['Quantity'] ? (float) $dataSanLuongVCN['Quantity'] : 0;
 
-            $dataSLTon = $this->hanaService->selectOne($this->SQL_SO_LUONG_TON_THEO_LSX, [$params['SPDICH'], $params['ItemCode'], $params['TO'], $params['LSX']]);
-
-            $congDoan = $dataSLTon['U_CDOAN'];
-            $subItemWhs = $dataSLTon['wareHouse'];
-            $prodType =  $dataSLTon['ProdType'];
-            $subItemCode = $dataSLTon['SubItemCode'];
+            $dataSLTon = $this->hanaService->select($this->SQL_SO_LUONG_TON_THEO_LSX, [$params['SPDICH'], $params['ItemCode'], $params['TO'], $params['LSX']]);
 
             $groupedResults = [];
 
-            $groupedResults[] = [
-                'SubItemCode' => $subItemCode,
-                'SubItemName' => $dataSLTon['SubItemName'],
-                'OnHand' => $dataSLTon['OnHand'] ? (float) $dataSLTon['OnHand'] : 0,
-                'BaseQty' => $dataSLTon['BaseQty'] ? (float) $dataSLTon['BaseQty'] : 0,
-            ];
+            foreach ($dataSLTon as $result) {
+                $itemCode = $result['ItemCode'];
+                $subItemCode = $result['SubItemCode'];
+                $subItemName = $result['SubItemName'];
+                $onHand = (float) $result['OnHand'];
+                $baseQty = (float) $result['BaseQty'];
 
-            $awaitingQtySum = $awaitingStockVcnService->soLuongTonThucTe($subItemCode, $params['TO']);
-            $groupedResults[0]['OnHand'] -= $awaitingQtySum;
+                if (!array_key_exists($subItemCode, $groupedResults)) {
+                    $groupedResults[$subItemCode] = [
+                        'SubItemCode' => $subItemCode,
+                        'SubItemName' => $subItemName,
+                        'OnHand' => 0,
+                        'BaseQty' => $baseQty,
+                    ];
+                }
+
+                $groupedResults[$subItemCode]['OnHand'] = $onHand;
+            }
+
+            $CongDoan = null;
+            foreach ($dataSLTon as $result) {
+                $U_CDOAN = $result['U_CDOAN'];
+
+                if ($CongDoan === null) {
+                    $CongDoan = $U_CDOAN;
+                } else {
+                    if ($U_CDOAN !== $CongDoan) {
+                        return response()->json(['error' => 'Các giá trị của U_CDOAN trong LSX không giống nhau!'], 422);
+                    }
+                }
+            }
+
+            // Lấy kho của bán thành phẩm
+            $SubItemWhs = null;
+            foreach ($dataSLTon as $result) {
+                $wareHouse = $result['wareHouse'];
+
+                if ($SubItemWhs === null) {
+                    $SubItemWhs = $wareHouse;
+                } else {
+                    if ($wareHouse !== $SubItemWhs) {
+                        return response()->json(['error' => 'Các giá trị của wareHouse trong LSX không giống nhau!'], 422);
+                    }
+                }
+            }
+
+            // Lấy loại ván
+            $ProdType = null;
+            foreach ($dataSLTon as $result) {
+                $prodType = $result['ProdType'];
+
+                if ($ProdType === null) {
+                    $ProdType = $prodType;
+                } else {
+                    if ($prodType !== $ProdType) {
+                        return response()->json(['error' => 'Các giá trị của U_IType trong LSX không giống nhau!'], 422);
+                    }
+                }
+            }
+
+            // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
+            foreach ($groupedResults as $item) {
+                $awaitingQtySum = $awaitingStockVcnService->soLuongTonThucTe($item['SubItemCode'], $params['TO']);
+                $item['OnHand'] -= $awaitingQtySum;
+            }
+            $groupedResults = array_values($groupedResults);
 
             // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
@@ -193,6 +242,7 @@ class VcnController extends Controller
                 $maxQuantity = $baseQty ? floor($onHand / $baseQty) : 0;
                 $maxQuantities[] = $maxQuantity;
             }
+
             $maxQty = !empty($maxQuantities) ? min($maxQuantities) : 0;
 
             // Tính tống số lượng chờ xác nhận và chờ xử lý lỗi
@@ -202,8 +252,8 @@ class VcnController extends Controller
             // 4. Trả về kết quả cho người dùng
             return response()->json([
                 'ItemInfo' => $itemInfo,
-                'CongDoan'  =>  $congDoan,
-                'SubItemWhs' => $subItemWhs,
+                'CongDoan'  =>  $CongDoan,
+                'SubItemWhs' => $SubItemWhs,
                 'ProdType' => $prodType,
                 'notifications' => $notification,
                 'stocks' => $groupedResults,
@@ -216,7 +266,7 @@ class VcnController extends Controller
             ]);
         } catch (Exception $e) {
             Log::info($e);
-            return response()->json(['error' => 'Lấy dữ liệu có lỗi!', 'message' => [$params['ItemCode'], $params['TO'], $params['SPDICH'], $params['LSX']]], 500);
+            return response()->json(['error' => 'Lấy dữ liệu có lỗi!'], 500);
         }
     }
 
