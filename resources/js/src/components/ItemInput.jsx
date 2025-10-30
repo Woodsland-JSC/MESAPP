@@ -394,7 +394,7 @@ const ItemInput = ({
         }
     };
 
-    const viewProductionsDetails = async (item, lsx) => {
+    const viewProductionsDetails = async (item, lsx) => {        
         setLSX(lsx)
         if (item.CDOAN === "RO") {
             await loadRongItemDetails(item);
@@ -585,7 +585,7 @@ const ItemInput = ({
         setConfirmLoading(true);
         try {
             const Data = {
-                LSX: choosenItem.LSX[0].LSX,
+                LSX: LSX,
                 QtyIssue: RONGInputQty,
                 CongDoan: choosenItem.CDOAN,
                 version: choosenItem.Version,
@@ -748,7 +748,7 @@ const ItemInput = ({
                     Type: variant,
                     version: choosenItem.Version || "",
                     ProdType: selectedItemDetails.ProdType || "",
-                    LSX: selectedItemDetails.LSX[0].LSX,
+                    LSX: LSX,
                     CompleQty: 0,
                     RejectQty: 0,
                     PackagedQty: 0,
@@ -3441,6 +3441,7 @@ const ItemInput = ({
                                     setFaultyAmount("");
                                     setIsItemCodeDetech(false);
                                     setRongData(null);
+                                    setLSX("");
                                 }}
                                 className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                             >
