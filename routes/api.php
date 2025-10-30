@@ -218,6 +218,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getPalletsByPlanId', [PlanDryingController::class, 'getPalletsByPlanId'])->name('getPalletsByPlanId');
         Route::post('movePalletToPlanDrying', [PlanDryingController::class, 'movePalletToPlanDrying'])->name('movePalletToPlanDrying');
         Route::post('removePallets', [PlanDryingController::class, 'removePallets'])->name('removePallets');
+        Route::delete('removePlanDrying', [PlanDryingController::class, 'removePlanDrying'])->name('removePlanDrying');
 
         
         

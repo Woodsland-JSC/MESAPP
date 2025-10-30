@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\planDryings as PlanDrying;
 use App\Models\planDryings;
 use App\Services\mes\PalletLogService;
+use App\Services\mes\PlanDryingService;
 use App\Services\OvenService;
 use Auth;
 use DB;
@@ -262,6 +263,42 @@ class PlanDryingController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Xóa Pallet có lỗi'
+            ], 500);
+        }
+    }
+
+    public function removePlanDrying(Request $request, PlanDryingService $planDryingService, OvenService $ovenService)
+    {
+        DB::beginTransaction();
+        try {
+
+            $id = $request->query('id');
+            if (!$id) {
+                return response()->json([
+                    'message' => 'Thiếu mã kế hoạch'
+                ], 500);
+            }
+
+            $plan = $planDryingService->getPlanDryingById($request->query('id'));
+
+            if (!$plan) {
+                return response()->json([
+                    'message' => 'Không tìm thấy kế hoạch sấy.'
+                ], 500);
+            }
+
+            $oven = $plan->Oven;
+            $ovenService->unlockOven($oven);
+            $plan->delete();
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Xóa kế hoạch thành công.'
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Xóa Kế hoạch sấy có lỗi'
             ], 500);
         }
     }

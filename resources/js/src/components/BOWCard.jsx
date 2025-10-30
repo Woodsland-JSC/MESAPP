@@ -1,6 +1,7 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi";
+import { IoCloseSharp } from "react-icons/io5";
+import { useDisclosure } from "@chakra-ui/react";
 
 function BOWCard(props) {
     const {
@@ -20,7 +21,8 @@ function BOWCard(props) {
         type,
         isHandlePallet,
         openModalPallet,
-        bowCard
+        bowCard,
+        removePlanDrying
     } = props;
 
     const location = useLocation();
@@ -82,14 +84,20 @@ function BOWCard(props) {
     };
 
     return (
-        <div className=" rounded-2xl bg-gray-50 h-[24rem] shadow-sm">
+        <div className="relative rounded-2xl bg-gray-50 h-[24rem] shadow-sm">
             {/* Header */}
             <div className="flex flex-col justify-start rounded-t-xl py-2 pt-0.5 px-4 h-[31%]">
-                <div className="flex space-x-4 justify-between">
+                <div className="flex space-x-4 justify-between items-center">
                     {getStatusContent()}
                     {
-                        (!isHandlePallet && bowCard?.receiver_id) && (
+                        (!isHandlePallet && bowCard?.receiver_id) ? (
                             <div className="bow-status p-1 px-3 text-xs text-[#17506B] font-semibold bg-gray-200 w-fit rounded-full justify-end my-4">Chờ xác nhận</div>
+                        ) : (
+                            palletQty == 0 ? (
+                                <div className={`cursor-pointer text-[#17506B] text-[26px]`} >
+                                    <IoCloseSharp className="" width={10} onClick={() => removePlanDrying(planID, batchNumber, kilnNumber)} />
+                                </div>
+                            ) : null
                         )
                     }
                 </div>
@@ -141,7 +149,7 @@ function BOWCard(props) {
                     </div>
                 ) : (
                     <Link to={`${detailLink}`} className="">
-                        <div className="py-2 px-6 border-t-2 border-[#cedde4] flex items-center justify-end bg-[#f4f7fa] rounded-b-2xl h-[20%]">
+                        <div className="py-2 px-6 bg-[#f4f7fa] border-t-2 border-[#cedde4] flex items-center justify-end  rounded-b-2xl h-[20%]">
                             <div className="flex items-center font-medium cursor-pointer border-2 border-[#8ab4c7] hover:border-[#17506B] px-4 text-[#17506B] hover:text-white bg-[#F8FAFC] hover:bg-[#17506B] w-fit p-2 rounded-full active:scale-[.95] h-fit active:duration-75 transition-all">
                                 Xem chi tiết
                                 <HiArrowRight className="ml-2" />
