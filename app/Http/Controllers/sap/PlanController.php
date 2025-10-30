@@ -144,8 +144,9 @@ class PlanController extends Controller
         }
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
+            ->join('pallet_details as pd', 'a.palletID', '=', 'pd.palletID')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
-            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach')
+            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach', 'pd.Qty_T')
             ->where('b.plant', '=', Auth::user()->plant)
             ->whereNull('c.pallet')
             ->where('a.activeStatus', '=', 0);
