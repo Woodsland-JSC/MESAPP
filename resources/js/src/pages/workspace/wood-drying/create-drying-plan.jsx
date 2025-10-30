@@ -28,6 +28,8 @@ import useAppContext from "../../../store/AppContext";
 import { BiConfused } from "react-icons/bi";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoSearch } from "react-icons/io5";
+import Swal from "sweetalert2";
+import { removePlanDryingById } from "../../../api/plan-drying.api";
 
 const sortOption = [
     { value: "desc", label: "Từ mới nhất đến cũ nhất" },
@@ -247,6 +249,54 @@ function CreateDryingPlan() {
         });
     }, [filteredBowCards, sortBy]);
 
+    const {
+        isOpen: isModalRemove,
+        onOpen: onModalRemoveOpen,
+        onClose: onModalRemoveClose,
+    } = useDisclosure();
+
+    const [planRemove, setPlanRemove] = useState({
+        id: null,
+        batchNumber: null,
+        kilnNumber: null
+    });
+
+    const removePlanDrying = (planId, batchNumber, kilnNumber) => {
+        setPlanRemove({
+            id: planId,
+            batchNumber,
+            kilnNumber
+        });
+        onModalRemoveOpen();
+    }
+
+    const submitRemove = () => {
+        try {
+            Swal.fire({
+                title: 'Xóa kế hoạch sấy?',
+                text: "Hành động này không thể hoàn tác!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    removePlanDryingById(planRemove.id);
+                    onModalRemoveClose();
+                    setPlanRemove({
+                        id: null,
+                        batchNumber: null,
+                        kilnNumber: null
+                    });
+                    getBOWLists();
+                    toast.success('Xóa kế hoạch sấy thành công.')
+                }
+            })
+        } catch (error) {
+            toast.error('Xóa kế hoạch sấy có lỗi.');
+        }
+    }
+
     return (
         <Layout>
             {/* Container */}
@@ -448,9 +498,9 @@ function CreateDryingPlan() {
                             filteredBowCards.some(
                                 (card) => card.TotalPallet === 0
                             ))) &&
-                    filteredBowCards.some(
-                        (card) => card?.plant === user?.plant
-                    ) ? (
+                        filteredBowCards.some(
+                            (card) => card?.plant === user?.plant
+                        ) ? (
                         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-6">
                             {/* {createdBowCards.map((createdbowCard, index) => (
                                 <BOWCard key={index} {...createdbowCard} />
@@ -474,6 +524,7 @@ function CreateDryingPlan() {
                                         weight={bowCard.Mass}
                                         isChecked={bowCard.Checked}
                                         isReviewed={bowCard.Review}
+                                        removePlanDrying={removePlanDrying}
                                     />
                                 ))
                                 .reverse()}
@@ -485,7 +536,7 @@ function CreateDryingPlan() {
                                     <BiConfused className="text-center text-gray-400 w-12 h-12 mb-2" />
                                     <div className="text-xl text-gray-400">
                                         {filteredBowCards?.length === 0 &&
-                                        searchTerm !== ""
+                                            searchTerm !== ""
                                             ? "Không tìm thấy kết quả nào phù hợp"
                                             : "Tiến trình hiện tại của nhà máy không có hoạt động nào."}
                                     </div>
@@ -504,6 +555,59 @@ function CreateDryingPlan() {
                 </div>
             </div>
             {loading && <Loader />}
+
+            {
+                planRemove.id && (
+                    <Modal
+                        isCentered
+                        isOpen={isModalRemove}
+                        size="lg"
+                        scrollBehavior="inside"
+                        trapFocus={false}
+                    >
+                        <ModalOverlay bg="blackAlpha.100" backdropFilter="blur(10px)" />
+                        <ModalContent className="!px-0">
+                            <ModalHeader className="h-[50px] flex items-center justify-center">
+                                <div className="xl:ml-6 serif font-bold text-2xl  ">
+                                    Xóa kế hoạch
+                                </div>
+                            </ModalHeader>
+                            <div className="border-b-2 border-[#DADADA]"></div>
+                            <ModalBody px={0} py={0}>
+                                <div className="flex justify-center py-2">
+                                    <div>Xác nhận xóa kế hoạch <span className="text-[#17506B] font-bold">{planRemove.batchNumber}</span> ở lò <span className="text-[#17506B] font-bold">{planRemove.kilnNumber}</span></div>
+                                </div>
+                            </ModalBody>
+
+                            <ModalFooter className="flex flex-col !p-0 ">
+                                <div className="border-b-2 border-gray-100"></div>
+                                <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                                    <button
+                                        onClick={() => {
+                                            onModalRemoveClose();
+                                            setPlanRemove({
+                                                id: null,
+                                                batchNumber: null,
+                                                kilnNumber: null
+                                            });
+                                        }}
+                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        onClick={submitRemove}
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        type="button"
+                                    >
+                                        Xác nhận
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
+                )
+            }
         </Layout>
     );
 }

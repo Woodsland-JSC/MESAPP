@@ -137,7 +137,6 @@ function Details() {
             label: `${item.Code} (${item.QuyCach}) ${item.Qty_T}T - ${item.MaLo}`,
             thickness: item.QuyCach.split("x")[0],
         }));
-        console.log("data", data);
         
         setPalletOptions(options);
         setPalletListLoading(false);

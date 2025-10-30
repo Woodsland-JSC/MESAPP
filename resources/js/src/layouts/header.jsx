@@ -614,7 +614,7 @@ function Header(props) {
                                             )}
                                         </div>
                                     </Tooltip>
-                                    <MenuButton righticon={<TbChevronDown />}>
+                                    <MenuButton as={"div"} className="cursor-pointer">
                                         <Button
                                             variant="ghost"
                                             fontWeight="regular"

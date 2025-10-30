@@ -37,3 +37,11 @@ export const movePalletToPlanDrying = (data) => {
 export const removePallets = (data) => {
     return axiosClient().post(`${BASEURL}/removePallets`, data);
 }
+
+export const removePlanDryingById = (id) => {
+    return axiosClient().delete(`${BASEURL}/removePlanDrying`, {
+        params: {
+            id
+        }
+    });
+}
