@@ -40,7 +40,7 @@ class PalletController extends Controller
                 JOIN plan_detail pld ON pld.pallet = p.palletID
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 JOIN users u ON u.id = p.CompletedBy
-                WHERE p.CompletedDate BETWEEN ? AND ? 
+                WHERE p.CompletedDate >= ? AND p.CompletedDate <= ? 
                 AND p.factory = ?',
                 [$fromDate, $toDate, $factory]
             );
