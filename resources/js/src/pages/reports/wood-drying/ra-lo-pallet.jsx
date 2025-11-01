@@ -152,7 +152,7 @@ const BaoCaoRaLoPallet = () => {
 
     useEffect(() => {
         if (factory) getReportPallets();
-    }, [factory])
+    }, [factory, filter.fromDate, filter.toDate])
 
     useEffect(() => {
         getFactories();
