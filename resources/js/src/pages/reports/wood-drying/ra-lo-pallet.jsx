@@ -51,8 +51,8 @@ const BaoCaoRaLoPallet = () => {
             setLoading(true)
             let res = await getPalletReport({
                 factory: factory.value,
-                fromDate: moment(new Date(filter.fromDate)).format('yyyy-MM-DD'),
-                toDate: moment(new Date(filter.toDate)).format('yyyy-MM-DD')
+                fromDate: moment(new Date(filter.fromDate)).format('yyyy-MM-DD') + ' 00:00:00',
+                toDate: moment(new Date(filter.toDate)).format('yyyy-MM-DD') + ' 23:59:59'
             });
             let reports = res.reports;
             reports.forEach(item => {
