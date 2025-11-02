@@ -9,13 +9,15 @@ import { NOI_DIA, TU_BEP, VAN_CONG_NGHIEP } from "../../../shared/data";
 import toast from "react-hot-toast";
 import productionApi from "../../../api/productionApi";
 import { formatNumber } from "../../../utils/numberFormat";
-import { BiConfused } from "react-icons/bi";
+import { BiConfused, BiSolidBadgeCheck } from "react-icons/bi";
 import { getFactoryUTub, getTeamUTub } from "../../../api/MasterDataApi";
-import { Alert, Box, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, useDisclosure } from "@chakra-ui/react";
+import { Alert, Box, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Radio, Text, useDisclosure } from "@chakra-ui/react";
 import { FaBox, FaCircleRight, FaClock, FaDiceD6, FaInstalod } from "react-icons/fa6";
 import { MdDangerous } from "react-icons/md";
 import { FaExclamationCircle } from "react-icons/fa";
-import { TbPlayerTrackNextFilled } from "react-icons/tb";
+import { TbPlayerTrackNextFilled, TbTrash } from "react-icons/tb";
+import { sanLuongTB, viewDetail } from "../../../api/tb.api";
+import Loading from '../../../components/loading/Loading';
 
 const TuBep = () => {
     const { user } = useAppContext();
@@ -36,6 +38,24 @@ const TuBep = () => {
 
     const [loadingData, setLoadingData] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [selectedItemDetails, setSelectedItemDetails] = useState(null);
+    const [selectedFaultItem, setSelectedFaultItem] = useState({
+        ItemCode: "",
+        ItemName: "",
+        SubItemCode: "",
+        SubItemName: "",
+        SubItemBaseQty: "",
+        OnHand: "",
+    });
+    const [faultyAmount, setFaultyAmount] = useState();
+    const [faults, setFaults] = useState({});
+    const [choosenItem, setChoosenItem] = useState(null);
+    const [awaitingReception, setAwaitingReception] = useState([]);
+    const [lsxSelected, setLsxSelected] = useState({
+        lsx: null,
+        itemTB: null,
+        itemDetail: null
+    });
 
     const {
         isOpen: isModalOpen,
@@ -43,9 +63,100 @@ const TuBep = () => {
         onClose: onModalClose,
     } = useDisclosure();
 
+    const getDataTB = async () => {
+        try {
+            setLoadingData(true);
+            const res = await sanLuongTB({
+                TO: 'NMTH-X03-TC1'
+            });
+
+            if (typeof res?.data === "object") {
+                setData(Object.values(res.data));
+            } else {
+                setData([]);
+            }
+
+            if (res?.noti_choxacnhan && res?.noti_choxacnhan.length > 0) {
+                setAwaitingReception(res?.noti_choxacnhan);
+            } else {
+                setAwaitingReception([]);
+            }
+            setLoadingData(false);
+        } catch (error) {
+            setLoadingData(false);
+            toast.error("Có lỗi trong quá trình lấy dữ liệu.");
+        }
+    };
+
+    const viewProductionsDetails = async (itemTB, itemDetail, lsx) => {
+        setLsxSelected({
+            lsx,
+            itemDetail,
+            itemTB
+        });
+
+        loadPlywoodItemDetailByLSX(itemTB, itemDetail, lsx);
+    };
+
+    const loadPlywoodItemDetailByLSX = async (itemTB, itemDetail, lsx) => {
+        try {
+            setLoading(true);
+            const params = {
+                SPDICH: itemTB.SPDICH,
+                ItemCode: itemDetail.ItemChild,
+                TO: itemDetail.TO,
+                Version: itemDetail.Version,
+                ProdType: itemDetail.ProdType,
+                LSX: lsx
+            };
+
+            let res = await viewDetail(params);
+            console.log("res", res);
+
+            setSelectedItemDetails({
+                ...itemDetail,
+                ItemInfo: res.ItemInfo,
+                stockQuantity: res.maxQuantity,
+                remainQty: res.remainQty,
+                CongDoan: res.CongDoan,
+                ProdType: res.ProdType,
+                SubItemWhs: res.SubItemWhs,
+                factories: res.Factorys?.filter(
+                    (item) => item.Factory !== user.plant
+                ).map((item) => ({
+                    value: item.Factory,
+                    label: item.FactoryName,
+                })),
+                notifications: res.notifications,
+                stocks: res.stocks,
+                maxQty: res.maxQty,
+                WaitingConfirmQty: res.WaitingConfirmQty,
+                WaitingQCItemQty: res.WaitingQCItemQty,
+                returnedData: res.returnData
+            });
+            onModalOpen();
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            toast.error(
+                error.response?.data?.error ||
+                "Có lỗi khi lấy dữ liệu item."
+            );
+        }
+    };
+
+    const clearData = () => {
+        setSelectedItemDetails(null);
+        setLsxSelected({
+            lsx: null,
+            itemDetail: null,
+            itemTB: null
+        });
+    }
+
     useEffect(() => {
         if (!selectedGroup) return;
-
+        getDataTB();
     }, [selectedGroup])
 
     useEffect(() => {
@@ -135,8 +246,6 @@ const TuBep = () => {
                                                 ref={factorySelectRef}
                                                 options={factories}
                                                 onChange={(value) => {
-                                                    console.log(value);
-
                                                     setSelectedFactory(value);
                                                 }}
                                                 placeholder="Tìm kiếm"
@@ -222,184 +331,21 @@ const TuBep = () => {
                     </div>
 
                     <div className="w-full flex flex-col pb-2 gap-4 gap-y-4 sm:px-0">
-                        <div className="shadow-md relative  rounded-lg bg-white/30 z-1">
-                            <div
-                                className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5 xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
-                            >
-                                Tấm LVL 13.5x1200x2440 (DA)
-                            </div>
-                            <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
-                                <section
-                                    className="rounded-b-xl cursor-pointer duration-200 ease-linear"
-                                >
-                                    <div className="text-[#17506B] xl:flex lg:flex md:flex  items-center space-x-2 pt-2 px-4 font-medium ">
-                                        <div className="flex items-center">
-                                            <span>
-                                                <IoIosArrowDown className="inline-block text-gray-500" />{" "}
-                                                {" "}
-                                                <span className="pl-2 font-medium text-[#17506b]">
-                                                    <span>
-                                                        XV {" "}(19*1200*2440)V.0
-                                                    </span>
-                                                </span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="mb-2 mt-1 overflow-hidden rounded-lg border-2 border-[#c4cfe7] mx-1.5 ">
-                                        <table className="w-full divide-y divide-[#c4cfe7] border-collapse bg-[#ECEFF5] text-left text-sm text-gray-500">
-                                            <thead className="bg-[#dae0ec] ">
-                                                <tr>
-                                                    <th
-                                                        scope="col"
-                                                        className="px-2 py-2 text-xs font-medium uppercase text-gray-500 "
-                                                    >
-                                                        LSX
-                                                    </th>
-                                                    <th
-                                                        scope="col"
-                                                        className="px-1 py-2 text-xs font-medium uppercase text-gray-500 text-right"
-                                                    >
-                                                        <span className="xl:block lg:block md:block hidden">
-                                                            Sản lượng
-                                                        </span>
-                                                        <span className="xl:hidden lg:hidden md:hidden block">
-                                                            SL
-                                                        </span>
-                                                    </th>
-                                                    <th
-                                                        scope="col"
-                                                        className="px-2 py-2 text-xs font-medium uppercase  text-right text-gray-500"
-                                                    >
-                                                        <span className="xl:block lg:block md:block hidden">
-                                                            Đã làm
-                                                        </span>
-                                                        <span className="xl:hidden lg:hidden md:hidden block">
-                                                            ĐL
-                                                        </span>
-                                                    </th>
-                                                    <th
-                                                        scope="col"
-                                                        className="px-2 py-2 text-xs font-medium uppercase text-right text-gray-500"
-                                                    >
-                                                        Lỗi
-                                                    </th>
-                                                    <th
-                                                        scope="col"
-                                                        className="px-2 py-2 text-xs text-right font-medium uppercase text-gray-500"
-                                                    >
-                                                        <span className="xl:block lg:block md:block hidden">
-                                                            Còn lại
-                                                        </span>
-                                                        <span className="xl:hidden lg:hidden md:hidden block">
-                                                            CL
-                                                        </span>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className=" border-t border-[#c4cfe7]  ">
-                                                <tr
-                                                    className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
-                                                >
-                                                    <th
-                                                        onClick={
-                                                            () => {
-                                                                onModalOpen()
-                                                            }
-                                                        }
-                                                        scope="row"
-                                                        className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap hover:underline"
-                                                    >
-                                                        LVL-CH-2025-00037
-                                                    </th>
-                                                    <td className="px-2 py-2 text-right text-gray-800">
-                                                        {formatNumber(
-                                                            Number(1000)
-                                                        )}
-                                                    </td>
-                                                    <td className="px-2 py-2 text-right text-gray-900">
-                                                        {formatNumber(
-                                                            Number(200)
-                                                        )}
-                                                    </td>
-                                                    <td className="px-2 py-2 text-right text-gray-900">
-                                                        {formatNumber(
-                                                            Number(20)
-                                                        )}
-                                                    </td>
-                                                    <td className="px-2  py-2 text-right text-gray-800">
-                                                        {formatNumber(
-                                                            Number(800)
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                            {/* <tfoot className="!text-[12px]">
-                                                                        <tr>
-                                                                            <td className="font-bold  text-gray-700 px-2 py-2">
-                                                                                Tổng
-                                                                            </td>
-                                                                            <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                                {
-                                                                                    formatNumber(Number(item.LSX.reduce((acc, curr) => acc + Number(curr.SanLuong), 0)))
-                                                                                }
-                                                                            </td>
-                                                                            <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                                {
-                                                                                    formatNumber(Number(tem.LSX.reduce((acc, curr) => acc + Number(curr.DaLam), 0)))
-                                                                                }
-                                                                            </td>
-                                                                            <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                                {formatNumber(
-                                                                                    Number(
-                                                                                        item.LSX.reduce(
-                                                                                            (acc, curr) =>
-                                                                                                acc +
-                                                                                                Number(
-                                                                                                    curr.Loi
-                                                                                                ),
-                                                                                            0
-                                                                                        )
-                                                                                    )
-                                                                                )}
-                                                                            </td>
-                                                                            <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                                {formatNumber(
-                                                                                    Number(
-                                                                                        item.LSX.reduce(
-                                                                                            (acc, curr) =>
-                                                                                                acc +
-                                                                                                Number(
-                                                                                                    curr.ConLai
-                                                                                                ),
-                                                                                            0
-                                                                                        )
-                                                                                    )
-                                                                                )}
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tfoot> */}
-                                        </table>
-                                    </div>
-                                </section>
-                            </div >
-                        </div >
-                        {/* {
+                        {
                             loadingData ? (
-                                <div className="flex justify-center mt-12">
-                                    <div className="special-spinner"></div>
-                                </div>
+                                <Loading />
                             ) : data.length > 0 ? (
-                                data.map((item, index) => (
-                                    <div className="shadow-md relative  rounded-lg bg-white/30 z-1">
+                                data.map((itemTB, index) => (
+                                    <div className="shadow-md relative  rounded-lg bg-white/30 z-1" key={index}>
                                         <div
                                             className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5 xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
                                         >
-                                            {data.NameSPDich || "Sản phẩm không xác định"}
+                                            {itemTB.NameSPDich || "Sản phẩm không xác định"}
                                         </div>
                                         <div className="gap-y-2 w-full h-full rounded-b-xl flex flex-col pt-1 pb-1 bg-white ">
                                             {
-                                                data.Details.length > 0
-                                                && data.Details.map((item, index) => (
+                                                itemTB?.Details.length > 0
+                                                && itemTB.Details.map((item, index) => (
                                                     <section
                                                         className="rounded-b-xl cursor-pointer duration-200 ease-linear"
                                                         key={index}
@@ -415,8 +361,7 @@ const TuBep = () => {
                                                                         </span>
                                                                     ) : (
                                                                         <span className="">
-                                                                            ({item.CDay}*{item.CRong}*
-                                                                            {item.CDai})
+                                                                            ({item.CDay}*{item.CRong}*{item.CDai})
                                                                         </span>
                                                                     )}
                                                                     {item.Version && (
@@ -497,17 +442,17 @@ const TuBep = () => {
                                                                                     production,
                                                                                     index
                                                                                 ) => (
-                                                                                    <tr
+                                                                                    <tr onClick={
+                                                                                        () => {
+                                                                                            viewProductionsDetails(itemTB, item, production.LSX);
+                                                                                            setChoosenItem(item);
+                                                                                        }
+                                                                                    }
                                                                                         className="bg-[#ECEFF5] border-[#c4cfe7] border-b !text-[13px]"
                                                                                         key={index}
                                                                                     >
                                                                                         <th
-                                                                                            onClick={
-                                                                                                () => {
-                                                                                                    viewProductionsDetails(item, production.LSX);
-                                                                                                    setChoosenItem(item);
-                                                                                                }
-                                                                                            }
+
                                                                                             scope="row"
                                                                                             className="px-2 py-1 font-medium text-[#17506B] whitespace-nowrap hover:underline"
                                                                                         >
@@ -543,19 +488,6 @@ const TuBep = () => {
                                                                                                 )
                                                                                             )}
                                                                                         </td>
-                                                                                        {variant ==
-                                                                                            VAN_CONG_NGHIEP && (
-                                                                                                <td
-                                                                                                    className="px-2 py-2 text-right text-[#17506B] underline"
-                                                                                                    onClick={(
-                                                                                                        e
-                                                                                                    ) =>
-                                                                                                        e.stopPropagation()
-                                                                                                    }
-                                                                                                >
-                                                                                                    <MenuView actionKetCau={{ LSX: production.LSX, data: data }} actionVatTu={{ LSX: production.LSX, data: data }} />
-                                                                                                </td>
-                                                                                            )}
                                                                                     </tr>
                                                                                 )
                                                                             )
@@ -575,7 +507,7 @@ const TuBep = () => {
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                                             {
-                                                                                formatNumber(Number(tem.LSX.reduce((acc, curr) => acc + Number(curr.DaLam), 0)))
+                                                                                formatNumber(Number(item.LSX.reduce((acc, curr) => acc + Number(curr.DaLam), 0)))
                                                                             }
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
@@ -624,69 +556,751 @@ const TuBep = () => {
                                     </div>
                                 </div>
                             )
-                        } */}
+                        }
                     </div>
                 </div>
             </div>
 
+            {
+                lsxSelected.lsx && (
+                    <Modal
+                        isCentered
+                        isOpen={isModalOpen}
+                        size="full"
+                        scrollBehavior="inside"
+                        trapFocus={false}
+                    >
+                        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                        <ModalContent className="!px-0">
+                            <ModalHeader className="h-[50px] flex items-center justify-center">
+                                <div className="xl:ml-6 serif font-bold text-2xl  ">
+                                    Ghi nhận sản lượng
+                                </div>
+                            </ModalHeader>
+                            <div className="border-b-2 border-[#DADADA]"></div>
+                            <ModalBody px={0} py={0}>
+                                <div className="flex flex-col justify-center pb-4 bg-[#FAFAFA] ">
+                                    <div className="xl:mx-auto xl:px-8 text-base w-full xl:w-[55%] space-y-3 ">
+                                        <div className="flex flex-col md:flex-row justify-between pt-2 items-center xl:px-0 md:px-0 lg:px-0 px-3">
+                                            <div className="flex flex-col  w-full">
+                                                <label className="font-medium">
+                                                    Sản phẩm/Chi tiết
+                                                </label>
+                                                <span className="text-[#17506B] text-2xl font-bold">
+                                                    {
+                                                        selectedItemDetails?.ChildName
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between py-3 border-2 divide-x-2 border-[#DADADA] shadow-sm rounded-xl xl:mx-0 md:mx-0 lg:mx-0 mx-3 bg-white">
+                                            <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                                <label className="font-medium uppercase text-sm text-gray-400">
+                                                    Chiều Dày
+                                                </label>
+                                                <span className="text-[20px] font-bold">
+                                                    {selectedItemDetails?.CDay ||
+                                                        0}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                                <label className="font-medium uppercase text-sm text-gray-400 ">
+                                                    Chiều Rộng
+                                                </label>
+                                                <span className="text-[20px] font-bold">
+                                                    {selectedItemDetails?.CRong ||
+                                                        0}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col justify-start xl:pl-6 md:pl-6 lg:pl-6 pl-4 w-1/3">
+                                                <label className="font-medium uppercase text-sm text-gray-400">
+                                                    Chiều Dài
+                                                </label>
+                                                <span className="text-[20px] font-bold">
+                                                    {selectedItemDetails?.CDai ||
+                                                        0}
+                                                </span>
+                                            </div>
+                                        </div>
 
-            <Modal
-                isCentered
-                isOpen={isModalOpen}
-                size="full"
-                scrollBehavior="inside"
-                trapFocus={false}
-            >
-                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-                <ModalContent className="!px-0">
-                    <ModalHeader className="h-[50px] flex items-center justify-center">
-                        <div className="xl:ml-6 serif font-bold text-2xl  ">
-                            Ghi nhận sản lượng
-                        </div>
-                    </ModalHeader>
-                    <div className="border-b-2 border-[#DADADA]"></div>
-                    <ModalBody px={0} py={0}>
-                        
-                    </ModalBody>
+                                        {/* Nguyên vật liệu */}
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                            <div className="flex justify-between pb-1 ">
+                                                <div className="flex items-center space-x-2">
+                                                    <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                                    <div className="font-semibold text-lg ">
+                                                        Nguyên vật liệu
+                                                    </div>
+                                                </div>
+                                                <div className="text-blue-600 p-1.5 px-4 bg-blue-50 rounded-full border-2 border-blue-200">
+                                                    <span className="xl:inline-block lg:inline-block md:inline-block hidden">
+                                                        Công đoạn:{" "}
+                                                    </span>
+                                                    <span>
+                                                        {" "}
+                                                        {
+                                                            selectedItemDetails?.CongDoan
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2 pb-3">
+                                                <Text className="font-semibold px-2">
+                                                    Số lượng tồn nguyên vật liệu:
+                                                </Text>
 
-                    <ModalFooter className="flex flex-col !p-0 ">
-                        <Alert status="info" className="!py-2 !bg-[#A3DEFF]">
-                            <TbPlayerTrackNextFilled className="text-[#155979] xl:mr-2 lg:mr-2 md:mr-2 mr-4 xl:text-xl lg:text-xl md:text-xl text-2xl" />
-                            {/* <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col">
-                                <span className="text-[15px] mr-1 sm:text-base">
-                                    Công đoạn sản xuất tiếp theo:{"  "}
-                                </span>
-                                <span className="xl:text-[15px] lg:text-[15px] md:text-[15px] text-[17px] sm:text-base font-bold xl:ml-1 lg:ml-1 md:ml-1 ml-0">
-                                    {selectedItemDetails?.NameTOTT ||
-                                        "Chưa được thiết lập ở SAP"}{" "}
-                                    (
-                                    {selectedItemDetails?.TOTT?.split("-")[0] ||
-                                        ""}
-                                    )
-                                </span>
-                            </div> */}
-                        </Alert>
+                                                {
+                                                    selectedItemDetails?.stocks
+                                                        .sort((a, b) => a.SubItemCode.localeCompare(b.SubItemCode))
+                                                        .map((item, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className={`${parseInt(
+                                                                    item.OnHand ||
+                                                                    0
+                                                                ) <= 0
+                                                                    ? "bg-gray-200"
+                                                                    : "bg-blue-100"
+                                                                    } flex flex-col py-2  mb-6 rounded-xl`}
+                                                            >
+                                                                <div className="flex items-center justify-between gap-4 px-4">
+                                                                    <div className="xl:max-w-[90%] lg:max-w-[90%] md:max-w-[80%] max-w-[65%]">
+                                                                        <div className="text-xs text-[#647C9C]">
+                                                                            <span className="mr-1">
+                                                                                [
+                                                                                {
+                                                                                    item.BaseQty
+                                                                                }
+                                                                                {
+                                                                                    item.BaseQty.toString().includes(".") && (
+                                                                                        <span>
+                                                                                            {"-"}{Math.ceil(item.BaseQty)}
+                                                                                        </span>
+                                                                                    )
+                                                                                }
+                                                                                ]
+                                                                            </span>
+                                                                            {
+                                                                                item.SubItemCode
+                                                                            }
+                                                                        </div>
+                                                                        <div className="font-medium text-[15px]">
+                                                                            {
+                                                                                item.SubItemName === "Gỗ" ? "Nguyên liệu gỗ" : item.SubItemName === null || item.SubItemName === "" ? "Nguyên vật liệu chưa xác định" : item.SubItemName
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                    <span
+                                                                        className={`${parseInt(item.OnHand || 0) <= 0 ? "bg-gray-500" : "bg-[#155979]"} rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
+                                                                    >
+                                                                        {
+                                                                            parseInt(item.OnHand || 0).toLocaleString()
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                        )
+                                                }
+                                            </div>
 
-                        <div className="border-b-2 border-gray-100"></div>
-                        <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
-                            <button
-                                onClick={() => {
-                                    onModalClose();
-                                }}
-                                className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
-                            >
-                                Đóng
-                            </button>
-                            <button
-                                className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
-                                type="button"
-                            >
-                                Xác nhận
-                            </button>
-                        </div>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                                            <div className="flex gap-2 items-center justify-between py-3 border-t px-0 pr-2 ">
+                                                <Text className="font-semibold">
+                                                    Số lượng tối đa có thể xuất:
+                                                </Text>
+                                                <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
+                                                    {
+                                                        selectedItemDetails?.maxQty > 0 ? parseInt(selectedItemDetails?.maxQty || 0).toLocaleString() : 0
+                                                    }
+                                                </span>
+                                            </div>
+
+                                            <div className="flex gap-2 items-center py-3 border-t border-b !mt-0 px-0 pr-2 justify-between">
+                                                <Text className="font-semibold">
+                                                    Số lượng còn phải sản xuất:
+                                                </Text>
+                                                <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
+                                                    {
+                                                        formatNumber(Number(selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty)) || 0
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Ghi nhận sản lượng */}
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                            <div className="flex justify-between pb-1 ">
+                                                <div className="flex items-center space-x-2">
+                                                    <FaCircleRight className="w-7 h-7 text-blue-700" />
+                                                    <div className="font-semibold text-lg ">
+                                                        Ghi nhận sản lượng
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Số lượng giao chờ xác nhận */}
+                                            {
+                                                selectedItemDetails?.notifications &&
+                                                selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.length > 0 && (
+                                                    <div className="flex items-center justify-between w-full p-1 px-0 !mt-2 !mb-1">
+                                                        <Text className="font-semibold">
+                                                            Số lượng đã giao chờ xác nhận:{" "}
+                                                        </Text>{" "}
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                selectedItemDetails?.notifications &&
+                                                selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.length > 0 &&
+                                                selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.map((item, index) => (
+                                                    <>
+                                                        <div className="">
+                                                            <div key={"Processing_" + index}
+                                                                className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
+                                                                        {
+                                                                            Number(item?.Quantity)
+                                                                        }
+                                                                    </div>
+                                                                    <Text className="font-semibold text-[15px] ">
+                                                                        Người giao:{" "}
+                                                                        <span className="text-green-700">
+                                                                            {
+                                                                                item?.last_name + " " + item?.first_name
+                                                                            }
+                                                                        </span>
+                                                                    </Text>
+                                                                    {
+                                                                        selectedItemDetails?.CongDoan == "DG" && (
+                                                                            <div className="flex text-sm">
+                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                    Số lượng đã đóng gói chờ giao:{" "}
+                                                                                </Text>
+                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                    Đã đóng gói chờ giao:{" "}
+                                                                                </Text>
+                                                                                <span className="ml-1 text-gray-600">
+                                                                                    {
+                                                                                        Number(item?.SLDG || 0)
+                                                                                    }
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
+                                                                    <div className="flex text-sm">
+                                                                        <Text className=" font-medium text-gray-600">
+                                                                            Thời gian  giao:{" "}
+                                                                        </Text>
+                                                                        <span className="ml-1 text-gray-600">
+                                                                            {
+                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""
+                                                                            }
+                                                                            {" "}
+                                                                            {
+                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format() || ""
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex gap-x-6">
+                                                                    <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
+                                                                        {
+                                                                            Number(item?.Quantity)
+                                                                        }
+                                                                    </div>
+
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            // onDeleteProcessingDialogOpen();
+                                                                            // setSelectedDelete(
+                                                                            //     item?.id
+                                                                            // );
+                                                                            // setDialogType(
+                                                                            //     "product"
+                                                                            // );
+                                                                        }}
+                                                                        className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
+                                                                    >
+                                                                        <TbTrash className="text-white text-2xl" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ))}
+
+                                            {
+                                                selectedItemDetails?.CongDoan === "DG" && selectedItemDetails?.maxQty > 0 && (
+                                                    <div className="">
+                                                        <Box className="px-0">
+                                                            <label className="mt-6 font-semibold">
+                                                                Số lượng đã đóng gói chờ giao:
+                                                            </label>
+
+                                                            <NumberInput
+                                                                step={1}
+                                                                min={1}
+                                                                className="mt-2 mb-2"
+                                                                onChange={(
+                                                                    value
+                                                                ) => {
+
+                                                                }}
+                                                            >
+                                                                <NumberInputField />
+                                                                <NumberInputStepper>
+                                                                    <NumberIncrementStepper />
+                                                                    <NumberDecrementStepper />
+                                                                </NumberInputStepper>
+                                                            </NumberInput>
+                                                        </Box>
+                                                        <div className="border-b pt-2"></div>
+                                                    </div>
+                                                )
+                                            }
+
+                                            <Box className="px-0">
+                                                <label className="mt-6 font-semibold">
+                                                    Số lượng ghi nhận sản phẩm:
+                                                </label>
+                                                <span className="font-bold text-red-500">
+                                                    {" "} *
+                                                </span>
+                                                {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.CongDoan !== "XV" && selectedItemDetails?.maxQty <= 0 &&
+                                                    (selectedItemDetails?.stocks?.length !== 1 || selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") ? (
+                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
+                                                        <MdDangerous className="w-6 h-6" />
+                                                        <div>
+                                                            Không đủ số lượng để  ghi nhận
+                                                        </div>
+                                                    </div>
+                                                ) : selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty <= 0 ? (
+                                                    <div className="flex space-x-2 items-center px-4 py-3 bg-gray-800 rounded-xl text-green-500 mt-2 mb-2">
+                                                        <BiSolidBadgeCheck className="w-6 h-6" />
+                                                        <div className="text-white">
+                                                            Đã đủ số lượng hoàn thành của lệnh.
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <NumberInput
+                                                        step={1}
+                                                        min={1}
+                                                        className="mt-2 mb-2"
+                                                        onChange={(value) => {
+                                                            // if (
+                                                            //     value >
+                                                            //     selectedItemDetails.stockQuantity
+                                                            // ) {
+                                                            //     setAmount(
+                                                            //         selectedItemDetails.stockQuantity
+                                                            //     );
+                                                            // } else {
+                                                            //     setAmount(
+                                                            //         value
+                                                            //     );
+                                                            // }
+                                                        }}
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                )}
+                                            </Box>
+                                        </div>
+
+                                        {/* Ghi nhận lỗi */}
+                                        <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 mb-3 border-2 border-[#DADADA] shadow-sm rounded-xl space-y-2 bg-white">
+                                            <div className="flex space-x-2 pb-1 items-center">
+                                                <FaExclamationCircle className="w-7 h-7 text-red-700" />
+                                                <div className="font-semibold text-lg ">
+                                                    Ghi nhận lỗi
+                                                </div>
+                                            </div>
+                                            <Alert
+                                                status="error"
+                                                className="rounded-xl flex items-center !mb-3"
+                                            >
+                                                <div className="w-full flex items-center justify-between gap-3">
+                                                    <div className="">
+                                                        Tổng số lượng ghi nhận lỗi:{" "}
+                                                    </div>
+                                                    <div className="rounded-lg cursor-pointer px-3 py-1 text-white bg-red-800 hover:bg-red-500 duration-300">
+                                                        {
+                                                            formatNumber(Number(selectedItemDetails?.notifications.filter((notif) => notif.confirm === 0 && notif.type === 1).length || 0))
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </Alert>
+                                            <div className="border-b border-gray-200">
+                                                {/* Số lượng ghi nhận lỗi */}
+                                                {
+                                                    selectedItemDetails?.notifications &&
+                                                    selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1)?.length > 0 &&
+                                                    selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1) && (
+                                                        <div className="flex items-center justify-between w-full p-1 px-2 !mb-2">
+                                                            <Text className="font-semibold">
+                                                                Số lượng lỗi đã ghi nhận:{" "}
+                                                            </Text>{" "}
+                                                        </div>
+                                                    )
+                                                }
+                                                {
+                                                    selectedItemDetails?.notifications &&
+                                                    selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1)?.length > 0 &&
+                                                    selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1).map((item, index) => (
+                                                        <div
+                                                            key={"Error_" + index}
+                                                            className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
+                                                        >
+                                                            {/*  */}
+                                                            <div className="flex flex-col">
+                                                                <div className="xl:hidden lg:hidden md:hidden block  text-red-700 text-2xl">
+                                                                    {
+                                                                        Number(item?.Quantity)
+                                                                    }
+                                                                </div>
+                                                                {
+                                                                    item?.loinhamay !== null && item?.loinhamay !== user.plant && (
+                                                                        <Text className="flex space-x-1 font-medium text-xs text-red-500 mb-1">
+                                                                            <MdOutlineSubdirectoryArrowRight />
+                                                                            <span className=" ">
+                                                                                Lỗi nhận từ  nhà máy{" "}
+                                                                                {
+                                                                                    item?.loinhamay == "YS" ?
+                                                                                        "Yên Sơn" : item?.loinhamay == "TH" ?
+                                                                                            "Thuận Hưng" : item?.loinhamay == "TB" ?
+                                                                                                "Thái Bình" : item?.loinhamay == "CH" ?
+                                                                                                    "Chiêm Hóa" : item?.loinhamay == "VF" ?
+                                                                                                        "Viforex" : "không xác định"
+                                                                                }
+                                                                            </span>
+                                                                        </Text>
+                                                                    )}
+
+                                                                <div className="text-[15px] font-semibold ">
+                                                                    {item.SubItemName || item.ItemName}
+                                                                </div>
+                                                                <Text className="font-medium text-sm ">
+                                                                    Người giao:{" "}
+                                                                    <span className="font-semibold text-red-700">
+                                                                        {item?.last_name + " " + item?.first_name}
+                                                                    </span>
+                                                                </Text>
+                                                                <div className="flex text-sm">
+                                                                    <Text className=" font-medium text-gray-600">
+                                                                        Thời gian giao:{" "}
+                                                                    </Text>
+                                                                    <span className="ml-1 text-gray-600">
+                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""}
+                                                                        {" "}
+                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("HH:mm:ss") || ""}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-x-6 items-center">
+                                                                <div className="xl:block lg;block md:block hidden text-red-700 rounded-lg cursor-pointer px-3 py-1 bg-red-200 font-semibold h-fit mr-6">
+                                                                    {Number(item?.Quantity)}
+                                                                </div>
+                                                                <button
+                                                                    // onClick={() => {
+                                                                    //     onDeleteProcessingDialogOpen();
+                                                                    //     setSelectedDelete(
+                                                                    //         item?.id
+                                                                    //     );
+                                                                    //     setDialogType(
+                                                                    //         "qc"
+                                                                    //     );
+                                                                    // }}
+                                                                    className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
+                                                                >
+                                                                    <TbTrash className="text-white text-2xl" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                            <Box className="px-0 pt-2">
+                                                <label className="font-semibold ">
+                                                    Số lượng ghi nhận lỗi:{" "}
+                                                    <span className="text-red-600">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                {/*  */}
+                                                <NumberInput
+                                                    step={1}
+                                                    min={0}
+                                                    className="mt-2"
+                                                    onChange={(value) => {
+                                                        // if (
+                                                        //     value >
+                                                        //     selectedItemDetails.stockQuantity
+                                                        // ) {
+                                                        //     setFaultyAmount(
+                                                        //         selectedItemDetails.stockQuantity
+                                                        //     );
+                                                        //     setFaults(
+                                                        //         (prev) => ({
+                                                        //             ...prev,
+                                                        //             amount: selectedItemDetails.stockQuantity,
+                                                        //         })
+                                                        //     );
+                                                        // } else {
+                                                        //     setFaultyAmount(
+                                                        //         value
+                                                        //     );
+                                                        //     setFaults(
+                                                        //         (prev) => ({
+                                                        //             ...prev,
+                                                        //             amount: value,
+                                                        //         })
+                                                        //     );
+                                                        // }
+                                                        // if (
+                                                        //     value == 0 ||
+                                                        //     !value
+                                                        // ) {
+                                                        //     setSelectedFaultItem(
+                                                        //         {
+                                                        //             ItemCode:
+                                                        //                 "",
+                                                        //             ItemName:
+                                                        //                 "",
+                                                        //             SubItemCode:
+                                                        //                 "",
+                                                        //             SubItemName:
+                                                        //                 "",
+                                                        //             SubItemBaseQty:
+                                                        //                 "",
+                                                        //             OnHand: "",
+                                                        //         }
+                                                        //     );
+                                                        //     setFaults(
+                                                        //         (prev) => ({
+                                                        //             ...prev,
+                                                        //             factory:
+                                                        //                 null,
+                                                        //         })
+                                                        //     );
+                                                        // }
+                                                    }}
+                                                >
+                                                    <NumberInputField />
+                                                    <NumberInputStepper>
+                                                        <NumberIncrementStepper />
+                                                        <NumberDecrementStepper />
+                                                    </NumberInputStepper>
+                                                </NumberInput>
+
+                                                {!faultyAmount ||
+                                                    (faultyAmount > 0 && (
+                                                        <>
+                                                            <div className="my-3 font-medium text-[15px] text-red-700">
+                                                                Lỗi thành phẩm:
+                                                            </div>
+                                                            <div
+                                                                className={`mb-4 ml-3 text-gray-600  ${selectedFaultItem.ItemCode === choosenItem.ItemChild
+                                                                    ? "font-semibold text-gray-800 "
+                                                                    : "text-gray-600"
+                                                                    }`}
+                                                                key={index}
+                                                            >
+                                                                <Radio
+                                                                    value={
+                                                                        choosenItem.ChildName
+                                                                    }
+                                                                    isChecked={
+                                                                        selectedFaultItem.ItemCode === choosenItem.ItemChild
+                                                                    }
+                                                                    onChange={() => {
+                                                                        // setSelectedFaultItem(
+                                                                        //     {
+                                                                        //         ItemCode:
+                                                                        //             choosenItem.ItemChild,
+                                                                        //         ItemName:
+                                                                        //             choosenItem.ChildName,
+                                                                        //         SubItemCode:
+                                                                        //             "",
+                                                                        //         SubItemName:
+                                                                        //             "",
+                                                                        //         SubItemBaseQty:
+                                                                        //             "",
+                                                                        //         OnHand: "",
+                                                                        //     }
+                                                                        // );
+                                                                        // setIsItemCodeDetech(
+                                                                        //     true
+                                                                        // );
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        choosenItem.ChildName
+                                                                    }
+                                                                </Radio>
+                                                            </div>
+                                                            {/* {
+                                                        selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.CongDoan !== "XV" && (
+                                                            <>
+                                                                {" "}
+                                                                <div className="my-3 font-medium text-[15px] text-red-700">
+                                                                    Lỗi bán thành phẩm công đoạn trước:
+                                                                </div>
+                                                                {selectedItemDetails?.stocks.map(
+                                                                    (
+                                                                        item,
+                                                                        index
+                                                                    ) => (
+                                                                        <div
+                                                                            className={`mb-4 ml-3  ${selectedFaultItem.SubItemCode ===
+                                                                                item.SubItemCode
+                                                                                ? "font-semibold text-gray-800 "
+                                                                                : "text-gray-600"
+                                                                                }`}
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                        >
+                                                                            <Radio
+                                                                                ref={
+                                                                                    checkRef
+                                                                                }
+                                                                                value={
+                                                                                    item.SubItemCode
+                                                                                }
+                                                                                isChecked={
+                                                                                    selectedFaultItem.SubItemCode ===
+                                                                                    item.SubItemCode
+                                                                                }
+                                                                                onChange={() => {
+                                                                                    setSelectedFaultItem(
+                                                                                        {
+                                                                                            ItemCode:
+                                                                                                "",
+                                                                                            ItemName:
+                                                                                                "",
+                                                                                            SubItemCode:
+                                                                                                item.SubItemCode,
+                                                                                            SubItemName:
+                                                                                                item.SubItemName,
+                                                                                            SubItemBaseQty:
+                                                                                                item.BaseQty,
+                                                                                            OnHand: item.OnHand,
+                                                                                        }
+                                                                                    );
+                                                                                    setIsItemCodeDetech(
+                                                                                        false
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    item.SubItemName
+                                                                                }
+                                                                            </Radio>
+                                                                        </div>
+                                                                    )
+                                                                )}
+                                                            </>
+                                                        )} */}
+                                                        </>
+                                                    ))}
+                                            </Box>
+                                            <Box className="px-0 pt-2">
+                                                <label className="font-semibold">
+                                                    Lỗi phôi nhận từ nhà máy  khác:
+                                                </label>
+                                                <Select
+                                                    className="mt-2 mb-2"
+                                                    placeholder="Lựa chọn"
+                                                    options={
+                                                        selectedItemDetails?.factories
+                                                    }
+                                                    isClearable
+                                                    isSearchable
+                                                    value={faults.factory}
+                                                    onChange={(value) => {
+                                                        // if (
+                                                        //     !faultyAmount ||
+                                                        //     faultyAmount < 1
+                                                        // ) {
+                                                        //     toast(
+                                                        //         "Vui lòng khai báo số lượng lỗi."
+                                                        //     );
+                                                        //     setFaults(
+                                                        //         (prev) => ({
+                                                        //             ...prev,
+                                                        //             factory:
+                                                        //                 null,
+                                                        //         })
+                                                        //     );
+                                                        // } else {
+                                                        //     setFaults(
+                                                        //         (prev) => ({
+                                                        //             ...prev,
+                                                        //             factory:
+                                                        //                 value,
+                                                        //         })
+                                                        //     );
+                                                        // }
+                                                    }}
+                                                />
+                                                <p className="text-sm text-gray-500 mb-1">
+                                                    *Bỏ qua phần này nếu lỗi ghi
+                                                    nhận là của nhà máy hiện
+                                                    tại.
+                                                </p>
+                                            </Box>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ModalBody>
+
+                            <ModalFooter className="flex flex-col !p-0 ">
+                                <Alert status="info" className="!py-2 !bg-[#A3DEFF]">
+                                    <TbPlayerTrackNextFilled className="text-[#155979] xl:mr-2 lg:mr-2 md:mr-2 mr-4 xl:text-xl lg:text-xl md:text-xl text-2xl" />
+                                    <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col">
+                                        <span className="text-[15px] mr-1 sm:text-base">
+                                            Công đoạn sản xuất tiếp theo:{"  "}
+                                        </span>
+                                        <span className="xl:text-[15px] lg:text-[15px] md:text-[15px] text-[17px] sm:text-base font-bold xl:ml-1 lg:ml-1 md:ml-1 ml-0">
+                                            {selectedItemDetails?.NameTOTT ||
+                                                "Chưa được thiết lập ở SAP"}{" "}
+                                            (
+                                            {selectedItemDetails?.TOTT?.split("-")[0] ||
+                                                ""}
+                                            )
+                                        </span>
+                                    </div>
+                                </Alert>
+
+                                <div className="border-b-2 border-gray-100"></div>
+                                <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                                    <button
+                                        onClick={() => {
+                                            clearData();
+                                            onModalClose();
+
+                                        }}
+                                        className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                                    >
+                                        Đóng
+                                    </button>
+                                    <button
+                                        className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
+                                        type="button"
+                                    >
+                                        Xác nhận
+                                    </button>
+                                </div>
+                            </ModalFooter>
+                        </ModalContent>
+                    </Modal>
+                )
+            }
+
         </Layout >
     );
 }

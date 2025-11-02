@@ -337,17 +337,17 @@ function Workspace() {
                                                         "Xử lý lỗi nhập thành phẩm.",
                                                     type: "VCN",
                                                 },
-                                                // {
-                                                //     permission: ["DAND"],
-                                                //     link: "/workspace/domestic/tu-bep",
-                                                //     icon: (
-                                                //         <HiArchiveBoxArrowDown />
-                                                //     ),
-                                                //     title: "Sản lượng Tủ bếp",
-                                                //     description:
-                                                //         "Nhập sản lượng lắp đặt tủ bếp",
-                                                //     type: "ND",
-                                                // },
+                                                {
+                                                    permission: ["DAND"],
+                                                    link: "/workspace/domestic/tu-bep",
+                                                    icon: (
+                                                        <HiArchiveBoxArrowDown />
+                                                    ),
+                                                    title: "Sản lượng Tủ bếp",
+                                                    description:
+                                                        "Nhập sản lượng lắp đặt tủ bếp",
+                                                    type: "ND",
+                                                },
                                                 // {
                                                 //     permission: [
                                                 //         "DAND",
