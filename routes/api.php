@@ -20,6 +20,7 @@ use App\Http\Controllers\sap\GoodsManagementController;
 use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
 use App\Http\Controllers\sap_controller\OvenController;
 use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
+use App\Http\Controllers\sap_controller\TBController;
 use App\Http\Controllers\sap_controller\VcnController;
 
 /*
@@ -239,12 +240,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
     });
 
-    
-
     Route::group(['prefix' => 'sap/vcn'], function(){
         Route::get('receiptsProductionsDetail', [VcnController::class, 'receiptsProductionsDetail'])->name('receiptsProductionsDetail');
         Route::post('ghiNhanSanLuongVCN', [VcnController::class, 'ghiNhanSanLuongVCN'])->name('ghiNhanSanLuongVCN');
         Route::get('receiptsProductionsDetailRong', [VcnController::class, 'receiptsProductionsDetailRong'])->name('receiptsProductionsDetailRong');
+        
+    });
+    
+    Route::group(['prefix' => 'sap/tb'], function(){
+        Route::get('sanLuongTB', [TBController::class, 'sanLuongTB'])->name('sanLuongTB');
+        Route::get('viewDetail', [TBController::class, 'viewDetail'])->name('viewDetail');
+
         
     });
 });
