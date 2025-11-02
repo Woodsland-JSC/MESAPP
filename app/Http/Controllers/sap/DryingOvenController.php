@@ -504,7 +504,7 @@ class DryingOvenController extends Controller
                     . substr($current_year, -2)
                     . $current_week
                     . '-'
-                    . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+                    . str_pad($recordCount, 5, '0', STR_PAD_LEFT);
 
                 // Kiểm tra mã đã tồn tại chưa (kiểm tra cả trong DB và trong SAP nếu cần)
                 $existingPallet = Pallet::where('Code', $generatedCode)->first();
