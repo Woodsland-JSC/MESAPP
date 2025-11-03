@@ -220,6 +220,8 @@ function ControllerCard(props) {
     const [userStock, setUserStock] = useState([]);
     const [userStockSelect, setUserStockSelect] = useState(null);
 
+    const [quyCach, setQuyCach] = useState();
+
     const handleSoLanChange = (newSoLan) => {
         setSoLan(newSoLan);
     };
@@ -548,6 +550,26 @@ function ControllerCard(props) {
         return planDrying?.details?.some(pallet => !pallet.CompletedBy)
     })
 
+    const quyCachList = useMemo(() => {
+        let options = [];
+        palletOptions.forEach(pallet => {
+            let s = pallet.label;
+            let inner = s.match(/\((\d+x\d+x\d+)\)/);
+            if (!options.some(item => item.value == inner[1])) {
+                options.push({
+                    value: inner[1],
+                    label: inner[1]
+                });
+            }
+        });
+
+        return options;
+    }, [palletOptions]);
+
+    const filteredPallet = useMemo(() => {
+        return quyCach ? palletOptions.filter(p => p.label.includes(quyCach.value)) : palletOptions;
+    }, [palletOptions, quyCach])
+
     useEffect(() => {
         loadUserStockController();
     }, [])
@@ -579,6 +601,21 @@ function ControllerCard(props) {
             </div>
         ) : progress === "vl" ? (
             <div>
+                <div className="items-end gap-x-4 p-4">
+                    <label className="block mb-2 text-md font-medium text-gray-900 ">
+                        Tìm theo Quy cách
+                    </label>
+                    <Select
+                        placeholder="Chọn quy cách"
+                        value={quyCach}
+                        options={quyCachList}
+                        onChange={(value) => {
+                            setQuyCach(value);
+                            setSelectedPallet();
+                        }}
+                        isLoading={palletListLoading}
+                    />
+                </div>
                 <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 p-4">
                     <div className="pt-0 xl:w-[75%] w-full md:w-[85%]">
                         <label className="block mb-2 text-md font-medium text-gray-900 ">
@@ -588,7 +625,7 @@ function ControllerCard(props) {
                             placeholder="Chọn pallet"
                             value={selectedPallet}
                             loadOptions={onReloadPalletList}
-                            options={palletOptions}
+                            options={filteredPallet}
                             onChange={(value) => {
                                 setSelectedPallet(value);
                             }}
@@ -615,7 +652,21 @@ function ControllerCard(props) {
             <div>
                 {/* {status === 1 ? ( */}
                 <div>
-                    {/* {!isCompleteChecking ? ( */}
+                    <div className="xl:space-y-0 space-y-3 items-end gap-x-4 p-4">
+                        <label className="block mb-2 text-md font-medium text-gray-900 ">
+                            Tìm theo Quy cách
+                        </label>
+                        <Select
+                            placeholder="Chọn quy cách"
+                            value={quyCach}
+                            options={quyCachList}
+                            onChange={(value) => {
+                                setQuyCach(value);
+                                setSelectedPallet();
+                            }}
+                            isLoading={palletListLoading}
+                        />
+                    </div>
                     <div className="flex xl:flex-row flex-col xl:space-y-0 space-y-3 items-end gap-x-4 px-4 pt-6">
                         <div className="pt-0 xl:w-[85%] w-full md:w-[85%]">
                             <label
@@ -628,9 +679,8 @@ function ControllerCard(props) {
                                 placeholder="Chọn pallet"
                                 value={selectedPallet}
                                 loadOptions={onReloadPalletList}
-                                options={palletOptions}
+                                options={filteredPallet}
                                 onChange={(value) => {
-                                    console.log("Selected Pallet:", value);
                                     setSelectedPallet(value);
                                 }}
                                 isLoading={palletListLoading}
@@ -745,7 +795,7 @@ function ControllerCard(props) {
                             </div>
                         </div>
                         {
-                           ( planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay'))  ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                            (planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay')) ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
                                 (user?.role == 1 || !user?.permissions.some(p => p == 'xacnhanlosay')) && <button
                                     className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
                                     onClick={onUserSelectOpen}
