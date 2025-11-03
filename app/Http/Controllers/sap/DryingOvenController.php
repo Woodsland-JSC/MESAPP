@@ -484,15 +484,30 @@ class DryingOvenController extends Controller
             // 1.1. Tạo pallet mới với kiểm tra mã trùng lặp
             $combinedQuyCach = implode('_', $quyCachList);
 
-            // Bộ đếm mới với kiểm tra mã trùng lặp
-            $baseRecordCount = Pallet::whereYear('created_at', $current_year)
-                ->whereRaw('WEEK(created_at, 1) = ?', [$current_week])
-                ->where('factory', $palletData['MaNhaMay'])  // Thêm điều kiện lọc theo nhà máy
-                ->count() + 1;
+            $prefix = $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . "-";
+            $lastCode = Pallet::where('Code', 'like', $prefix . '%')
+                ->orderBy('Code', 'desc')
+                ->value('Code');
 
-            // Tạo mã pallet với logic kiểm tra trùng lặp
             $generatedCode = '';
-            $recordCount = $baseRecordCount;
+
+            if ($lastCode) {
+                $lastNumber = intval(substr($lastCode, strlen($prefix)));
+            } else {
+                $lastNumber = 0;
+            }
+
+            $nextNumber =  $lastNumber + 1;
+
+            // Bộ đếm mới với kiểm tra mã trùng lặp
+            // $baseRecordCount = Pallet::whereYear('created_at', $current_year)
+            //     ->whereRaw('WEEK(created_at, 1) = ?', [$current_week])
+            //     ->where('factory', $palletData['MaNhaMay'])  // Thêm điều kiện lọc theo nhà máy
+            //     ->count() + 1;
+
+            // // Tạo mã pallet với logic kiểm tra trùng lặp
+            $generatedCode = '';
+            $recordCount = $nextNumber;
             $maxAttempts = 1000; // Giới hạn số lần thử để tránh vòng lặp vô hạn
             $attempt = 0;
 
