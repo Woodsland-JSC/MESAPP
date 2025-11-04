@@ -40,6 +40,7 @@ class Pallet extends Model
         'stacking_time',
         'employee',
         'activeStatus',
+        'old_pallet_code'
     ];
 
     public function details()

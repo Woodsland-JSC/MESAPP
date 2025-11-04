@@ -8,6 +8,7 @@ use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\User;
 use DateTime;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -19,6 +20,34 @@ class ImportController extends Controller
     public function index()
     {
         return view('imports.pallet');
+    }
+
+    public function solve(Request $request)
+    {
+        // try {
+        //     $data = Excel::toArray([], $request->file('file'))[0];
+        //     $filtered = array_filter($data, function ($row) {
+        //         return !empty(array_filter($row, fn($cell) => $cell !== null && $cell !== ''));
+        //     });
+        //     $factory = $request->factory;
+        //     DB::beginTransaction();
+        //     foreach ($filtered as $key => $item) {
+        //         $palletCode = $item[0];
+        //         $palletCodeOld = $item[4];
+
+        //         Pallet::query()->where(
+        //             'Code', '=', $palletCode
+        //         )->where(
+        //             'factory', '=', $factory
+        //         )->update([
+        //             'old_pallet_code' => $palletCodeOld
+        //         ]);
+        //     }
+        //     DB::commit();
+        //     return redirect()->back();
+        // } catch (Exception $e) {
+        //     dd($e);
+        // }
     }
 
     public function import_pallet(Request $request)
