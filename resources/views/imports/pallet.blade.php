@@ -201,7 +201,7 @@
 <body>
     <main class="container" role="main" aria-labelledby="title">
         <h1 id="title">Import file</h1>
-        <form action="" method="post" enctype="multipart/form-data">
+        <form action="solve" method="post" enctype="multipart/form-data">
             @csrf
             <section class="import-area" id="dropzone" tabindex="0" aria-label="Vùng kéo thả file">
                 <div class="icon">📁</div>

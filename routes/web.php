@@ -21,12 +21,12 @@ Route::prefix('jobs_wl')->group(function () {
     Route::post('/retry', [JobController::class, 'retry'])->name('jobs.retry');
     Route::post('/delete', [\App\Http\Controllers\JobController::class, 'delete'])->name('jobs.delete');
     Route::post('/retry-all', [\App\Http\Controllers\JobController::class, 'retryAll'])->name('jobs.retryAll');
-
 });
 
 Route::prefix('imports')->group(function () {
     Route::get('import-pallet', [ImportController::class, 'index'])->name('imports.pallet');
-    Route::post('import-pallet', [ImportController::class, 'import_pallet'])->name('import-pallet');
+    Route::post('import-pallet', [ImportController::class, 'import_pallet'])->name('import-pallet-post');
+    Route::post('solve', [ImportController::class, 'solve'])->name('solve');
 });
 
 Route::get('/{any}', function () {
