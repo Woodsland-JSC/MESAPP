@@ -134,7 +134,7 @@ function Details() {
         const data = await palletsApi.getPalletList(BOWData.Reason);
         const options = data.map((item) => ({
             value: item.palletID,
-            label: `${item.Code} (${item.QuyCach}) ${item.Qty_T}T - ${item.MaLo} ${item.old_pallet_code ? ' - ' + ' ' + item.old_pallet_code : ''}`,
+            label: `${item.Code} (${item.QuyCach}) ${item.Qty_T}T - ${item.MaLo} ${item.old_pallet_code ? ' - ' + ' ' + item.old_pallet_code + "C" : ''}`,
             thickness: item.QuyCach.split("x")[0],
         }));
         
