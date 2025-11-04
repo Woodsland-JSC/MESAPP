@@ -276,27 +276,6 @@ class DryingOvenController extends Controller
             $maxAttempts = 1000;
             $attempt = 0;
 
-            do {
-                $attempt++;
-                $generatedCode = $palletData['MaNhaMay']
-                    . substr($current_year, -2)
-                    . $current_week
-                    . '-'
-                    . str_pad($recordCount, 5, '0', STR_PAD_LEFT);
-
-                $existingPallet = Pallet::where('Code', $generatedCode)->first();
-
-                if ($existingPallet) {
-                    $recordCount++;
-                } else {
-                    break;
-                }
-
-                if ($attempt >= $maxAttempts) {
-                    throw new \Exception("Unable to generate unique pallet code after {$maxAttempts} attempts");
-                }
-            } while (true);
-
             $pallet = Pallet::create($palletData + [
                 'Code' => $generatedCode,
                 'factory' => $palletData['MaNhaMay'],
@@ -402,19 +381,36 @@ class DryingOvenController extends Controller
             $pallet_error_log['palletBody'] = $body2;
             $pallet_error_log['pallet'] = $pallet;
 
-            $palletResponse = Http::withOptions([
-                'verify' => false,
-            ])->withHeaders([
-                "Content-Type" => "application/json",
-                "Accept" => "application/json",
-                "Authorization" => "Basic " . BasicAuthToken(),
-            ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
-            $palletResult = $palletResponse->json();
+            do {
+                $attempt++;
+                $generatedCode = $palletData['MaNhaMay']
+                    . substr($current_year, -2)
+                    . $current_week
+                    . '-'
+                    . str_pad($recordCount, 5, '0', STR_PAD_LEFT);
 
-            if (!$palletResponse->successful()) {
-                $pallet_error_log['palletResponse'] = $palletResponse;
-                throw new \Exception('Tạo Pallet SAP có lỗi.');
-            }
+                $body2['U_Code'] = $generatedCode;
+                $pallet->Code = $generatedCode;
+
+                $palletResponse = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    "Content-Type" => "application/json",
+                    "Accept" => "application/json",
+                    "Authorization" => "Basic " . BasicAuthToken(),
+                ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
+                $palletResult = $palletResponse->json();
+
+                if (!$palletResponse->successful()) {
+                    $recordCount++;
+                } else {
+                    break;
+                }
+
+                if ($attempt >= $maxAttempts) {
+                    throw new \Exception("Tạo Pallet SAP có lỗi. Vui lòng thử lại.");
+                }
+            } while (true);
 
             $stockTransferResponse = Http::withOptions([
                 'verify' => false,
@@ -428,9 +424,11 @@ class DryingOvenController extends Controller
                 $pallet_error_log['palletResponse'] = $palletResponse;
                 throw new \Exception('Tạo StockTransfer SAP có lỗi.');
             }
+
             $stockTransferResult = $stockTransferResponse->json();
 
             Pallet::where('palletID', $pallet->palletID)->update([
+                'Code' => $generatedCode,
                 'DocNum' => $stockTransferResult['DocNum'],
                 'DocEntry' => $stockTransferResult['DocEntry'],
                 'palletSAP' => $palletResult['DocEntry'],
