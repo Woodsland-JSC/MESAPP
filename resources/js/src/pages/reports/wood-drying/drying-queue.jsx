@@ -230,18 +230,21 @@ function DryingQueueReport() {
             field: "thickness",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Rộng",
             field: "width",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Dài",
             field: "height",
             width: 80,
             suppressHeaderMenuButton: true,
+            filter: true,
         },
         {
             headerName: "Số lượng (T)",
