@@ -401,9 +401,11 @@ class DryingOvenController extends Controller
                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
                 $palletResult = $palletResponse->json();
 
-                if (!$palletResponse->successful()) {
+                if (!$palletResponse->successful() && $palletResult['error']['code'] == -1116) {
                     $recordCount++;
                 } else {
+                    throw new \Exception("Tạo Pallet SAP có lỗi. Vui lòng thử lại.");
+                    $pallet_error_log['palletResult'] = $palletResult;
                     break;
                 }
 
@@ -419,13 +421,12 @@ class DryingOvenController extends Controller
                 "Accept" => "application/json",
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
+            $stockTransferResult = $stockTransferResponse->json();
 
             if (!$stockTransferResponse->successful()) {
-                $pallet_error_log['palletResponse'] = $palletResponse;
+                $pallet_error_log['stockTransferResult'] = $stockTransferResult;
                 throw new \Exception('Tạo StockTransfer SAP có lỗi.');
             }
-
-            $stockTransferResult = $stockTransferResponse->json();
 
             Pallet::where('palletID', $pallet->palletID)->update([
                 'Code' => $generatedCode,
