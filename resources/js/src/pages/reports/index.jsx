@@ -100,7 +100,7 @@ const SAYReports = [
         id: "0012",
         name: "Báo cáo Pallet lò sấy",
         link: "/reports/wood-drying/pallets",
-        description: "Báo cáo chi tiết các pallet được ra lò."
+        description: "Báo cáo chi tiết các pallet lò sấy."
     },
 ];
 
