@@ -90,11 +90,11 @@ const validationSchema = Yup.object().shape({
 });
 
 const SelectField = forwardRef(
-    ({ options, name, setInput, innerRef, defaultValue, ...props }, ref) => {
-        const [selectedOption, setSelectedOption] = useState(defaultValue ?? null);
+    ({ options, name, setInput, innerRef, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState();
         const { setFieldValue } = useFormikContext();
 
-        const handleChange = (option) => {            
+        const handleChange = (option) => {
             setSelectedOption(option);
             setFieldValue(name, option?.value || "");
             setInput((prev) => ({
@@ -690,7 +690,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.lastName &&
-                                                    touched.lastName ? (
+                                                        touched.lastName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="lastName" />
                                                         </span>
@@ -724,7 +724,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.firstName &&
-                                                    touched.firstName ? (
+                                                        touched.firstName ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="firstName" />
                                                         </span>
@@ -762,7 +762,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.email &&
-                                                    touched.email ? (
+                                                        touched.email ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="email" />
                                                         </span>
@@ -800,7 +800,7 @@ function User() {
                                                         }}
                                                     />
                                                     {errors.username &&
-                                                    touched.username ? (
+                                                        touched.username ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="username" />
                                                         </span>
@@ -829,7 +829,7 @@ function User() {
                                                         setInput={setInput}
                                                     />
                                                     {errors.gender &&
-                                                    touched.gender ? (
+                                                        touched.gender ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="gender" />
                                                         </span>
@@ -890,14 +890,14 @@ function User() {
                                                             }
                                                         >
                                                             {showPassword ? (
-                                                                <RiEyeOffFill className="w-5 h-5 mr-2 text-gray-500"/>
+                                                                <RiEyeOffFill className="w-5 h-5 mr-2 text-gray-500" />
                                                             ) : (
-                                                                <RiEyeFill className="w-5 h-5 mr-2 text-gray-500"/>
+                                                                <RiEyeFill className="w-5 h-5 mr-2 text-gray-500" />
                                                             )}
                                                         </InputRightElement>
                                                     </InputGroup>
                                                     {errors.password &&
-                                                    touched.password ? (
+                                                        touched.password ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="password" />
                                                         </span>
@@ -938,7 +938,7 @@ function User() {
                                                         setInput={setInput}
                                                     />
                                                     {errors.authorization &&
-                                                    touched.authorization ? (
+                                                        touched.authorization ? (
                                                         <span className="text-xs text-red-600">
                                                             <ErrorMessage name="authorization" />
                                                         </span>
@@ -1044,7 +1044,7 @@ function User() {
                                                     </label>
                                                 </button>
                                                 {avatar.imgSrc &&
-                                                avatar.imgSrc !=
+                                                    avatar.imgSrc !=
                                                     DefaultAvatar ? (
                                                     <span
                                                         className="flex justify-center items-center cursor-pointer border rounded-lg border-red-600 px-3 group transition-all duration-150 ease-in hover:bg-red-500"
@@ -1116,7 +1116,7 @@ function User() {
                                                 value="1"
                                             />
                                             {errors.integrationId &&
-                                            touched.integrationId ? (
+                                                touched.integrationId ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="integrationId" />
                                                 </span>
@@ -1165,22 +1165,31 @@ function User() {
                                                     *
                                                 </span>
                                             </label>
-                                            <SelectField
-                                                innerRef={factorySelectRef}
+                                            <Select
+                                                ref={factorySelectRef}
                                                 name="factory"
-                                                defaultValue={
-                                                    factories.find(
-                                                        (item) =>
-                                                            item.value ==
-                                                            values.factory
-                                                    ) || null
-                                                }
                                                 options={factories}
+                                                defaultValue={factories.find(
+                                                    (item) =>
+                                                        item.value ==
+                                                        values.factory
+                                                ) || null}
+                                                onChange={(e) => {
+                                                    let factory = e.value;
+                                                    setInput((prev) => ({
+                                                        ...prev,
+                                                        factory: factory
+                                                    }));
+                                                    setFieldValue(
+                                                        "factory",
+                                                        factory
+                                                    );
+                                                }}
+                                                placeholder="Lựa chọn nhà máy"
                                                 isLoading={factoryLoading}
-                                                setInput={setInput}
                                             />
                                             {errors.factory &&
-                                            touched.factory ? (
+                                                touched.factory ? (
                                                 <span className="text-xs text-red-600">
                                                     <ErrorMessage name="factory" />
                                                 </span>
