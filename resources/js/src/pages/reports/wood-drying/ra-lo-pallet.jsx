@@ -24,11 +24,24 @@ const BaoCaoRaLoPallet = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    
 
     const [filter, setFilter] = useState({
         fromDate: getFirstDayOfCurrentMonth(),
         toDate: new Date(),
     });
+
+    const [statusPallets, setStatusPallets] = useState([
+        {
+            label: "Đã ra lò",
+            value: 1
+        },
+        {
+            label: "Chưa ra lò",
+            value: 2
+        }
+    ]);
+    const [statusPallet, setStatusPallet] = useState(statusPallets[0]);
 
     const getFactories = async () => {
         try {
@@ -174,7 +187,7 @@ const BaoCaoRaLoPallet = () => {
 
                     {/* Header */}
                     <div className="flex space-x-4 mb-4 justify-between">
-                        <div className="serif text-xl md:text-4xl font-bold">Báo cáo Pallet ra lò</div>
+                        <div className="serif text-xl md:text-4xl font-bold">Báo cáo Pallet lò sấy</div>
                         <div className="md:block hidden">
                             {
                                 reports.length > 0 && (
@@ -233,6 +246,20 @@ const BaoCaoRaLoPallet = () => {
                                 </div>
                             </div>
                         </div>
+                        <div className="md:w-1/3 w-full">
+                            <label className=" text-sm font-medium text-gray-900">
+                                Trạng thái Pallet
+                            </label>
+                            <Select
+                                options={statusPallets}
+                                defaultValue={statusPallet}
+                                placeholder=""
+                                className="w-full mt-2 cursor-pointer"
+                                onChange={(pallet) => {
+                                    setStatusPallet(pallet);
+                                }}
+                            />
+                        </div>
                     </div>
 
 
@@ -251,7 +278,9 @@ const BaoCaoRaLoPallet = () => {
                                         >
                                             <AgGridReact
                                                 ref={gridRef}
-                                                rowData={reports}
+                                                rowData={reports.filter(report => {
+                                                   return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
+                                                })}
                                                 columnDefs={colDefs}
                                                 groupDisplayType={"multipleColumns"}
                                                 getRowStyle={getRowStyle}

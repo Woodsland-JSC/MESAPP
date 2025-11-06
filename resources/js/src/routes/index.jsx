@@ -417,7 +417,7 @@ function AppRoutes() {
                     />
 
                     <Route
-                        path="/reports/wood-drying/ra-lo-pallet"
+                        path="/reports/wood-drying/pallets"
                         element={
                             <ProtectedRoute>
                                 <BaoCaoRaLoPallet />
