@@ -24,7 +24,7 @@ const BaoCaoRaLoPallet = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
-    
+
 
     const [filter, setFilter] = useState({
         fromDate: getFirstDayOfCurrentMonth(),
@@ -279,7 +279,7 @@ const BaoCaoRaLoPallet = () => {
                                             <AgGridReact
                                                 ref={gridRef}
                                                 rowData={reports.filter(report => {
-                                                   return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
+                                                    return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
                                                 })}
                                                 columnDefs={colDefs}
                                                 groupDisplayType={"multipleColumns"}
@@ -327,6 +327,8 @@ const BaoCaoRaLoPallet = () => {
                                         </div>
                                         {
                                             reports.filter(report => {
+                                                return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
+                                            }).filter(report => {
                                                 if (search == "") {
                                                     return report
                                                 } else {
