@@ -229,9 +229,9 @@ function WoodSorting() {
                 label:
                     item.username +
                     " - " +
-                    item.last_name +
+                    item.first_name +
                     " " +
-                    item.first_name,
+                    item.last_name,
             }));
             setEmployeeOptions(employeeOptions);
         } catch (error) {
