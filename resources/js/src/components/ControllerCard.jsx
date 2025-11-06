@@ -552,7 +552,7 @@ function ControllerCard(props) {
 
     const quyCachList = useMemo(() => {
         let options = [];
-        palletOptions.forEach(pallet => {
+        palletOptions?.forEach(pallet => {
             let s = pallet.label;
             let inner = s.match(/\((\d+x\d+x\d+)\)/);
             if (!options.some(item => item.value == inner[1])) {
