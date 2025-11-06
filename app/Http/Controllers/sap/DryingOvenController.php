@@ -273,7 +273,7 @@ class DryingOvenController extends Controller
 
             $generatedCode = '';
             $recordCount = $nextNumber;
-            $maxAttempts = 1000;
+            $maxAttempts = 10;
             $attempt = 0;
 
             $pallet = Pallet::create($palletData + [
@@ -403,6 +403,9 @@ class DryingOvenController extends Controller
                 $pallet_error_log['palletResult'] = $palletResult;
 
                 if (!$palletResponse->successful()) {
+                    Log::channel('pallets')->error($generatedCode . ' palletResult', $palletResult);
+                    Log::channel('pallets')->error($generatedCode . ' palletBody', $body2);
+                    Log::channel('pallets')->error($generatedCode . ' palletBody', $body);
                     $recordCount++;
                 } else {
                     break;
