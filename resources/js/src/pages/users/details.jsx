@@ -90,11 +90,11 @@ const validationSchema = Yup.object().shape({
 });
 
 const SelectField = forwardRef(
-    ({ options, name, setInput, innerRef, ...props }, ref) => {
-        const [selectedOption, setSelectedOption] = useState();
+    ({ options, name, setInput, innerRef, defaultValue, ...props }, ref) => {
+        const [selectedOption, setSelectedOption] = useState(defaultValue ?? null);
         const { setFieldValue } = useFormikContext();
 
-        const handleChange = (option) => {
+        const handleChange = (option) => {            
             setSelectedOption(option);
             setFieldValue(name, option?.value || "");
             setInput((prev) => ({
