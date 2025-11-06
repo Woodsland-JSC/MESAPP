@@ -40,9 +40,10 @@ class PalletController extends Controller
                 JOIN plan_detail pld ON pld.pallet = p.palletID
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 LEFT JOIN users u ON u.id = p.CompletedBy
-                WHERE p.CompletedDate >= ? AND p.CompletedDate <= ? 
-                AND p.factory = ?',
-                [$fromDate, $toDate, $factory]
+                WHERE p.factory = ? AND p.activeStatus = 1
+                AND p.LoadedIntoKilnDate >= ?
+                AND p.LoadedIntoKilnDate <= ?',
+                [$factory, $fromDate, $toDate]
             );
             return response()->json([
                 'reports' => $data
