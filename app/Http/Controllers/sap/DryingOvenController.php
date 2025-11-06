@@ -400,12 +400,11 @@ class DryingOvenController extends Controller
                     "Authorization" => "Basic " . BasicAuthToken(),
                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
                 $palletResult = $palletResponse->json();
+                $pallet_error_log['palletResult'] = $palletResult;
 
-                if (!$palletResponse->successful() && $palletResult['error']['code'] == -1116) {
+                if (!$palletResponse->successful()) {
                     $recordCount++;
                 } else {
-                    throw new \Exception("Tạo Pallet SAP có lỗi. Vui lòng thử lại.");
-                    $pallet_error_log['palletResult'] = $palletResult;
                     break;
                 }
 
@@ -422,9 +421,9 @@ class DryingOvenController extends Controller
                 "Authorization" => "Basic " . BasicAuthToken(),
             ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers", $body);
             $stockTransferResult = $stockTransferResponse->json();
+            $pallet_error_log['stockTransferResult'] = $stockTransferResult;
 
             if (!$stockTransferResponse->successful()) {
-                $pallet_error_log['stockTransferResult'] = $stockTransferResult;
                 throw new \Exception('Tạo StockTransfer SAP có lỗi.');
             }
 
