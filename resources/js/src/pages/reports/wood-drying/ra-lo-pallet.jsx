@@ -88,19 +88,19 @@ const BaoCaoRaLoPallet = () => {
 
     const [colDefs] = useState([
         {
-            headerName: "Lò",
+            headerName: "Mã Lò",
             field: "Oven",
             filter: true,
             width: 150,
             rowGroup: true,
             enableRowGroup: true,
         },
-        {
-            headerName: "Mã lò",
-            field: "OvenCode",
-            filter: true,
-            width: 150,
-        },
+        // {
+        //     headerName: "Mã lò",
+        //     field: "OvenCode",
+        //     filter: true,
+        //     width: 150,
+        // },
         {
             headerName: "Pallet",
             field: "Code",
@@ -110,6 +110,12 @@ const BaoCaoRaLoPallet = () => {
         {
             headerName: "Quy cách",
             field: "QuyCach",
+            filter: true,
+            width: 150,
+        },
+        {
+            headerName: "Mục đích sấy",
+            field: "LyDo",
             filter: true,
             width: 150,
         },
@@ -127,7 +133,7 @@ const BaoCaoRaLoPallet = () => {
             field: "CompletedDate",
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY hh:mm:ss')
+                return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : "Chưa ra lò"
             },
             width: 170
         },
@@ -149,7 +155,7 @@ const BaoCaoRaLoPallet = () => {
             headerName: "Người hoàn thành",
             valueGetter: (params) => {
                 if (params.node.id == 'rowGroupFooter_ROOT_NODE_ID' || params.node.group) return "";
-                return `${params?.data.username}_${params?.data.first_name} ${params?.data.last_name}`
+                return params?.data.username ? `${params?.data.username}_${params?.data.last_name} ${params?.data.first_name}` : ""
             },
             minWidth: 170,
             flex: 1
