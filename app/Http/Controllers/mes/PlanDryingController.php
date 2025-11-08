@@ -302,4 +302,25 @@ class PlanDryingController extends Controller
             ], 500);
         }
     }
+
+    public function getOvenIsDrying(Request $request){
+        try {
+            $factory = $request->query('factory');
+            $data = PlanDrying::query()
+                ->with('userRunOven')
+                ->with('userCheckOven')
+                ->where('plant', '=' , $factory ? $factory : Auth::user()->plant)
+                ->where('Status', '=', 1)
+                ->whereNull('CompletedBy')
+                ->orderBy('PlanID', 'desc')
+                ->get();
+            return response()->json([
+                'reports' => $data
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lấy lò sấy đang hoạt động có lỗi'
+            ], 500);
+        }
+    }
 }

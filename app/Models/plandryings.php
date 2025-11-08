@@ -106,4 +106,12 @@ class planDryings extends Model
     {
         return $this->hasOne(ActualThickness::class);
     }
+
+    public function userRunOven(){
+        return $this->hasOne(User::class, 'id', 'RunBy');
+    }
+
+    public function userCheckOven(){
+        return $this->hasOne(User::class, 'id', 'CheckedBy');
+    }
 }

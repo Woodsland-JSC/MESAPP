@@ -222,7 +222,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('removePlanDrying', [PlanDryingController::class, 'removePlanDrying'])->name('removePlanDrying');
 
         
-        
+        Route::get('getOvenIsDrying', [PlanDryingController::class, 'getOvenIsDrying'])->name('getOvenIsDrying');
     });
 
     Route::group(['prefix' => 'mes/users'], function(){

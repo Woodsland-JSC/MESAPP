@@ -45,3 +45,11 @@ export const removePlanDryingById = (id) => {
         }
     });
 }
+
+export const getOvenIsDrying = (factory) => {
+    return axiosClient().get(`${BASEURL}/getOvenIsDrying`, {
+        params: {
+            factory
+        }
+    });
+}
