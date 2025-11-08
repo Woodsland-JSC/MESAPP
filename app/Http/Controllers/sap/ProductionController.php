@@ -580,14 +580,14 @@ class ProductionController extends Controller
         // dd($quantity);
 
         // Code mới (thêm "stock")
-        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=?';
+        $querystock = 'SELECT * FROM UV_SOLUONGTON WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=? AND "IssueType" = ?;';
         $stmtstock = odbc_prepare($conDB, $querystock);
 
         if (!$stmtstock) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
+        if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO, 'M'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 

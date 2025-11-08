@@ -102,6 +102,7 @@ import BaoCaoDieuChuyenPallet from "../pages/reports/wood-drying/dieu-chuyen-pal
 import NoiDia from "../pages/workspace/domestic/noi-dia";
 import TuBep from "../pages/workspace/domestic/tu-bep";
 import BaoCaoRaLoPallet from "../pages/reports/wood-drying/ra-lo-pallet";
+import OvenDrying from "../pages/reports/wood-drying/oven-drying";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -421,6 +422,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <BaoCaoRaLoPallet />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/reports/wood-drying/oven-drying"
+                        element={
+                            <ProtectedRoute>
+                                <OvenDrying />
                             </ProtectedRoute>
                         }
                     />
