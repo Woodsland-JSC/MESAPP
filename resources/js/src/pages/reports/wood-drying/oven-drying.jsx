@@ -18,9 +18,6 @@ import useAppContext from "../../../store/AppContext";
 const OvenDrying = () => {
     const navigate = useNavigate();
     const { user } = useAppContext();
-    console.log(user);
-
-
     const gridRef = useRef();
 
     const [factories, setFactories] = useState([]);
@@ -315,91 +312,58 @@ const OvenDrying = () => {
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
                                                             <span>Mã lò: </span>
                                                             <span className="font-normal">
-                                                                {report.OvenCode}
+                                                                {report.Oven}
                                                             </span>
                                                         </div>
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Quy cách: </span>
+                                                            <span>Kế hoạch sấy: </span>
                                                             <span className="font-normal">
-                                                                {report.QuyCach}
+                                                                {report.Code}
                                                             </span>
                                                         </div>
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Ngày vào lò: </span>
+                                                            <span>Mục đích sấy: </span>
                                                             <span className="font-normal">
-                                                                {moment(report.LoadedIntoKilnDate).format(`DD/MM/YYYY HH:mm:ss`)}
+                                                                {report.Reason}
                                                             </span>
                                                         </div>
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Ngày ra lò: </span>
+                                                            <span>Chiều dày sấy: </span>
                                                             <span className="font-normal">
-                                                                {moment(report.CompletedDate).format(`DD/MM/YYYY HH:mm:ss`)}
+                                                                {report.Method}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold mb-2">
+                                                            <span>Tổng khối lượng: </span>
+                                                            <span className="font-normal">
+                                                                {report.Mass}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold mb-2">
+                                                            <span>Tổng Pallet: </span>
+                                                            <span className="font-normal">
+                                                                {report.TotalPallet}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold mb-2">
+                                                            <span>Ngày chạy lò: </span>
+                                                            <span className="font-normal">
+                                                                {report.runDate ? moment(report.runDate).format(`DD/MM/YYYY HH:mm:ss`) : ''}
+                                                            </span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 font-semibold mb-2">
+                                                            <span>Người chạy lò: </span>
+                                                            <span className="font-normal">
+                                                                {report.userRunOven ? report.userRunOven : ''}
                                                             </span>
                                                         </div>
 
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Người thao tác: </span>
+                                                            <span>Người đánh giá: </span>
                                                             <span className="font-normal">
-                                                                {report.username}_{report.first_name} {report.last_name}
+                                                                 {report.userCheckOven ? report.userCheckOven : ''}
                                                             </span>
                                                         </div>
-
-
-                                                        {/* <div className="mt-3 flex items-center w-full pl-3 ">
-                                                            <div className="space-y-3 border-l-2 border-dashed border-gray-400 w-full">
-                                                                <div className="relative w-full">
-                                                                    <FaArrowDown className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-blue-600 p-1" />
-                                                                    <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
-                                                                        <div className="flex-col  ">
-                                                                            <div className="font-medium text-[15px]">
-                                                                                Lò điều chuyển
-                                                                            </div>
-                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                {
-                                                                                    report.old_oven
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex-col  ">
-                                                                            <div className="font-medium text-[15px]">
-                                                                                Mã kế hoạch sấy
-                                                                            </div>
-                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                {
-                                                                                    report.OldPlanCode
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="relative w-full ">
-                                                                    <FaCheck className="absolute -top-0.5 -ml-3.5 h-6 w-6 rounded-full text-white bg-green-500 p-1" />
-                                                                    <div className="ml-6 p-4 py-2 rounded-xl bg-gray-200">
-                                                                        <div className="flex-col ">
-                                                                            <div className="font-medium text-[15px]">
-                                                                                Lò nhận
-                                                                            </div>
-                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                {
-                                                                                    report.new_oven
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex-col  ">
-                                                                            <div className="font-medium text-[15px]">
-                                                                                Mã kế hoạch sấy mới
-                                                                            </div>
-                                                                            <div className="font-semibold text-[17px] text-[#1B536E]">
-                                                                                {
-                                                                                    report.NewPlanCode
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div> */}
                                                     </div>
                                                 </div>
                                             ))
