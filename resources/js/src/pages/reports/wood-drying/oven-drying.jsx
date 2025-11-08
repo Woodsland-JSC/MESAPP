@@ -18,9 +18,6 @@ import useAppContext from "../../../store/AppContext";
 const OvenDrying = () => {
     const navigate = useNavigate();
     const { user } = useAppContext();
-    console.log(user);
-
-
     const gridRef = useRef();
 
     const [factories, setFactories] = useState([]);
