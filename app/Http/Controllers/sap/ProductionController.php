@@ -587,7 +587,7 @@ class ProductionController extends Controller
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
 
-        if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO])) {
+        if (!odbc_execute($stmtstock, [$request->SPDICH, $request->ItemCode, $request->TO, 'N'])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
 
