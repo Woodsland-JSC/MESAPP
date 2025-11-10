@@ -65,7 +65,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
 import { BiSolidBadgeCheck } from "react-icons/bi";
 import { NOI_DIA, VAN_CONG_NGHIEP } from "../shared/data";
-import { ghiNhanSanLuongVCN, receiptsProductionsDetail } from "../api/vcn.api";
+import { ghiNhanSanLuongVCN, receiptsProductionsDetail, receiptsProductionsDetailRong } from "../api/vcn.api";
 
 const ItemInput = ({
     data,
@@ -239,6 +239,7 @@ const ItemInput = ({
                 await productionApi.getFinishedRongPlywoodGoodsDetail(
                     params
                 );
+                
             setSelectedItemDetails({
                 ...item,
                 CongDoan: res.CongDoan,
@@ -394,10 +395,10 @@ const ItemInput = ({
         }
     };
 
-    const viewProductionsDetails = async (item, lsx) => {        
+    const viewProductionsDetails = async (item, lsx) => {
         setLSX(lsx)
         if (item.CDOAN === "RO") {
-            await loadRongItemDetails(item);
+            await loadPlywoodItemRongByLSX(item, lsx);
         } else {
             await loadPlywoodItemDetailByLSX(item, lsx);
         }
@@ -597,6 +598,8 @@ const ItemInput = ({
                 Data: rongData,
                 KHOI: "VCN",
             };
+            console.log("Data", Data);
+            
             const res = await productionApi.enterFinishedRongAmountVCN(Data);
             toast.success("Ghi nhận & chuyển tiếp thành công!");
         } catch (error) {
@@ -1149,10 +1152,7 @@ const ItemInput = ({
                 ProdType: item.ProdType,
                 LSX: lsx
             };
-            const res =
-                await productionApi.getFinishedRongPlywoodGoodsDetail(
-                    params
-                );
+            const res = await receiptsProductionsDetailRong(params);
             setSelectedItemDetails({
                 ...item,
                 CongDoan: res.CongDoan,
@@ -2233,7 +2233,7 @@ const ItemInput = ({
                                                                                     item,
                                                                                     index
                                                                                 ) => (
-                                                                                    <div>
+                                                                                    <div key={index}>
                                                                                         {item?.Type ===
                                                                                             0 ? (
                                                                                             <div className=" p-2 px-3 rounded-2xl bg-[#ffffff] border border-gray-300">
@@ -2247,7 +2247,7 @@ const ItemInput = ({
                                                                                                             detailItem,
                                                                                                             detailIndex
                                                                                                         ) => (
-                                                                                                            <div className=" flex items-center justify-between">
+                                                                                                            <div className=" flex items-center justify-between" key={detailIndex}>
                                                                                                                 <div className="w-[85%]">
                                                                                                                     <p className="text-xs text-gray-500">
                                                                                                                         Sản
@@ -2307,7 +2307,7 @@ const ItemInput = ({
                                                                                                             detailItem,
                                                                                                             detailIndex
                                                                                                         ) => (
-                                                                                                            <div className=" flex items-center justify-between">
+                                                                                                            <div className=" flex items-center justify-between" key={detailIndex}>
                                                                                                                 <div className="w-[85%]">
                                                                                                                     <p className="text-xs text-gray-500">
                                                                                                                         Lỗi thành phẩm

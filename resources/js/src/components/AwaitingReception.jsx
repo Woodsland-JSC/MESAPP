@@ -40,6 +40,7 @@ import "../assets/styles/index.css";
 import useAppContext from "../store/AppContext";
 import { TbClock } from "react-icons/tb";
 import { id } from "date-fns/locale";
+import { acceptVCNRong, accpetVCNQCRong } from "../api/vcn.api";
 
 const reasonOfReturn = [
     {
@@ -187,8 +188,6 @@ const AwaitingReception = ({
             onInputAlertDialogClose();
         };
 
-        console.log("Số lượng lỗi:", data);
-
         if ((!faults.Qty || faults.Qty <= 0) && variant === "QC") {
             checkAndDisplayError("Số lượng lỗi phải lớn hơn 0.");
         } else if (
@@ -224,12 +223,13 @@ const AwaitingReception = ({
                     Factory: Factory || null,
                 };
                 let res;
+                
                 if (payload.id) {
                     switch (type) {
                         case "plywood":
                             res = await (variant === "QC"
-                                ? productionApi.acceptReceiptsVCNQC(payload)
-                                : productionApi.acceptReceiptsVCN(payload));
+                                ? (data.CongDoan == 'RO' ? accpetVCNQCRong(payload) : productionApi.acceptReceiptsVCNQC(payload))
+                                : (data.CongDoan == 'RO' ? acceptVCNRong(payload) : productionApi.acceptReceiptsVCN(payload)))
                             break;
                         default:
                             res = await (variant === "QC"

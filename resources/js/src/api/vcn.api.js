@@ -59,3 +59,12 @@ export const ghiNhanSanLuongVCN = (data) => {
     return axiosClient().post(url, data);
 }
 
+export const acceptVCNRong = (data) => {
+    const url = `/v2/vcn/accept-receipts-rong`;
+    return axiosClient().post(url, data);
+}
+
+export const accpetVCNQCRong = (data) => {
+    const url = `/v2/vcn/confirm-qc-rong`;
+     return axiosClient().post(url, data);
+}

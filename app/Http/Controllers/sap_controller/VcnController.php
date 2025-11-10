@@ -4,13 +4,16 @@ namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
 use App\Models\awaitingstocksvcn;
+use App\Models\ChiTietRong;
 use App\Models\DisassemblyOrder;
 use App\Models\notireceiptVCN;
+use App\Rules\AtLeastOneQty;
 use App\Services\HanaService;
 use App\Services\mes\AwaitingStockVcnService;
 use App\Services\mes\NotireceiptVcnService;
 use App\Services\OvenService;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
@@ -27,93 +30,8 @@ class VcnController extends Controller
     private HanaService $hanaService;
     private $SQL_GET_QUANTITY_SANLUONG_VCN = 'SELECT "ConLai" as "Quantity" FROM UV_GHINHANSLVCN WHERE "ItemChild"= ? AND "TO"= ? AND "SPDICH"=? AND "LSX" = ?';
     private $SQL_SO_LUONG_TON_THEO_LSX = 'SELECT * FROM UV_SOLUONGTONVCN WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=? AND "U_GRID" = ?;';
-    private $SQL_CHI_TIET_SL_RONG = 'CALL "USP_ChiTietSLVCN_RONG"(?,?,?)';
-    private $SQL_CHI_TIET_RONG = <<<SQL
-        SELECT
-            T0."DocEntry",
-            T0."ItemFather",
-            T0."FatherName",
-            T0."ItemCode",
-            T0."ItemName",
-            T0."SanLuong",
-            T0."DaLam",
-            T0."Loi",
-            (T0."SanLuong" - T0."DaLam" - T0."Loi")            AS "ConLai",
-            T0."U_CDOAN",
-            T0."CDai",
-            T0."CRong",
-            T0."CDay",
-            T0."BaseQty",
-            T0."U_GRID"
-        FROM (
-            SELECT
-                    T1."DocEntry",    
-                TF."ItemCode"                                     AS "ItemFather",
-                T0."U_To",
-                T0."U_Version"                                    AS "Version",
-                TF."ItemName"                                     AS "FatherName",
-                T1."ItemCode",
-                T5."ItemName",
-                SUM(T1."PlannedQty" * -1)                         AS "SanLuong",
-                SUM(IFNULL(T3."Quantity", 0))                     AS "DaLam",
-                SUM(IFNULL(T4."Quantity", 0))                     AS "Loi",
-                IFNULL(T5."U_CDai", 0)                            AS "CDai",
-                IFNULL(T5."U_CRong", 0)                           AS "CRong",
-                IFNULL(T5."U_CDay", 0)                            AS "CDay",
-                T0."U_CDOAN",
-                T1."BaseQty",
-                T0."U_GRID"
-            FROM OWOR T0
-            JOIN WOR1 T1
-                ON T0."DocEntry" = T1."DocEntry"
-            JOIN (
-                SELECT
-                    T0."DocEntry",
-                    T1."ItemCode",
-                    T1."ItemName"
-                FROM OWOR T0
-                JOIN WOR1 T1
-                    ON T0."DocEntry" = T1."DocEntry"
-                AND T1."BaseQty"  > 0
-                AND T1."ItemType" = 4
-                AND T0."Status"   = 'R'
-                AND T0."U_CDOAN"  = 'RO'
-            ) TF
-                ON T0."DocEntry" = TF."DocEntry"
-            LEFT JOIN IGN1 T3
-                ON T1."DocEntry" = T3."BaseEntry"
-            AND T3."BaseType" = 202
-            AND T3."TranType" = 'C'
-            AND T3."ItemCode" = T1."ItemCode"
-            LEFT JOIN IGN1 T4
-                ON T1."DocEntry" = T4."BaseEntry"
-            AND T4."BaseType" = 202
-            AND T4."TranType" = 'R'
-            AND T4."ItemCode" = T1."ItemCode"
-            INNER JOIN OITM T5
-                ON T1."ItemCode" = T5."ItemCode"
-            INNER JOIN OITM T6
-                ON T0."U_SPDICH" = T6."ItemCode"
-            WHERE
-                    T0."U_CDOAN"   = 'RO'
-                AND T0."Status"    = 'R'
-                AND T1."ItemType"  = 4
-                AND T1."PlannedQty" < 0
-                AND TF."ItemCode"  = ?
-                AND T0."U_To"      = ?
-                AND TO."U_GRID" = ?
-            GROUP BY
-                    "T1"."DocEntry",
-                TF."ItemCode", TF."ItemName", T1."ItemCode",
-                T0."U_CDOAN", T5."ItemName", T0."U_Version", "U_To",
-                T5."U_CDai", T5."U_CRong", T5."U_CDay", T1."BaseQty",
-                T0."U_GRID"
-            HAVING
-                SUM(T1."PlannedQty" * -1)
-                - SUM(IFNULL(T3."Quantity", 0))
-                - SUM(IFNULL(T4."Quantity", 0)) > 0
-        ) T0
-    SQL;
+    private $SQL_CHI_TIET_RONG = 'CALL "USP_DETAILVCN_RONG"(?,?,?,?)';
+    private $SQL_UV_WEB_VCN_STOCKRONG = 'CALL "UV_WEB_VCN_STOCKRONG"(?,?)';
 
     public function __construct(HanaService $hanaService)
     {
@@ -272,7 +190,6 @@ class VcnController extends Controller
 
     public function receiptsProductionsDetailRong(Request $request, HanaService $hanaService)
     {
-        // 1. Nhận vào giá trị "SPDICH", "ItemCode', "To" từ request
         $validator = Validator::make($request->all(), [
             'FatherCode' => 'required|string|max:254',
             'TO' => 'required|string|max:254',
@@ -285,9 +202,8 @@ class VcnController extends Controller
         }
 
         try {
-            $chiTietSLRong = $hanaService->select($this->SQL_CHI_TIET_RONG, [$request->FatherCode, $request->TO, $request->LSX]);
+            $chiTietSLRong = $hanaService->select($this->SQL_CHI_TIET_RONG, [$request->FatherCode, $request->TO, $request->version, $request->LSX]);
 
-            //3. Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
                     'Factory' => 'YS',
@@ -303,7 +219,6 @@ class VcnController extends Controller
                 ],
             ];
 
-            // Lấy công đoạn hiện tại
             $CongDoan = null;
             foreach ($chiTietSLRong as $key => $result) {
 
@@ -321,21 +236,20 @@ class VcnController extends Controller
                 // Quantity của bảng chitietrong có baseID = $notification->id. Nhóm theo ItemCode.
                 // Sau đó cập nhật giá trị ConLai mới trong $results = ConLai - Qty theo ItemCode của $results.
                 $itemCode = $result['ItemCode'];
+                $lsx = $result['U_GRID'];
                 $chitietrongQty = DB::table('chitietrong')
                     ->join('notireceiptVCN', 'chitietrong.baseID', '=', 'notireceiptVCN.id')
                     ->where('notireceiptVCN.FatherCode', $request->FatherCode)
                     ->where('notireceiptVCN.team', $request->TO)
                     ->where('notireceiptVCN.version', $request->version)
                     ->where('chitietrong.ItemCode', $itemCode)
+                    ->where('notireceiptVCN.LSX', '=', $lsx)
                     ->sum('chitietrong.Quantity');
-
                 $result['ConLai'] = (float) $result['ConLai'] - (float) $chitietrongQty;
-                $results[$key] = $result;
+                $chiTietSLRong[$key] = $result;
             }
 
-            //Gọi hàm để lấy số lượng tồn bán thành phẩm từ SAP
-            $query2 = 'call UV_WEB_StockRong(?)';
-            $stockRong = $hanaService->select($query2, [$request->FatherCode]);
+            $stockRong = $hanaService->select($this->SQL_UV_WEB_VCN_STOCKRONG, [$request->FatherCode, $request->LSX]);
 
             $TotalFather = 0;
             $stockFather = [];
@@ -435,6 +349,7 @@ class VcnController extends Controller
                 ->where('version', $request->version)
                 ->where('FatherCode', $request->FatherCode)
                 ->where('notireceiptVCN.team', $request->TO)
+                ->where('notireceiptVCN.LSX', '=', $request->LSX)
                 ->groupBy(
                     'notireceiptVCN.id',
                     'notireceiptVCN.disassembly_order_id',
@@ -503,7 +418,7 @@ class VcnController extends Controller
             return response()->json([
                 'CongDoan' => $CongDoan,
                 'FatherStock' => $TotalFather,
-                'stocks' => $results,
+                'stocks' => $chiTietSLRong,
                 'Factorys' => $factory,
                 // 'notifications' => $notification,
                 'disassemblyOrders' => $notiWithDisassemblyOrder
@@ -515,5 +430,121 @@ class VcnController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    function receiptVCNRong(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'LSX' => 'required|string|max:254',
+            'QtyIssue',
+            'CongDoan' => 'required|string|max:254',
+            'version' => 'required|string|max:254',
+            'ProdType' => 'required|string|max:254',
+            'SubItemCode' => 'required|string|max:254',
+            'SubItemName' => 'required|string|max:254',
+            'NextTeam' => 'required|string|max:254',
+            'team' => 'required|string|max:254',
+            'Data.*.ItemCode' => 'required|string|max:254',
+            'Data.*.ItemName' => 'required|string|max:254',
+            'Data.*' => [new AtLeastOneQty()],
+            'Data.*.CDay' => 'required|numeric',
+            'Data.*.CRong' => 'required|numeric',
+            'Data.*.CDai' => 'required|numeric',
+        ]);
+
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 500);
+        }
+        // $toqc = "";
+        // if (Auth::user()->plant == 'TH') {
+        //     $toqc = 'TH-QC';
+        // } else if (Auth::user()->plant == 'YS') {
+        //     $toqc = 'YS1-QC';
+        // } else {
+        //     $toqc = 'HG-QC';
+        // }
+        try {
+            DB::beginTransaction();
+
+            $newOrder = DisassemblyOrder::create([
+                'SubItemCode' => $request->SubItemCode,
+                'team' => $request->team,
+                'Qty' => $request->QtyIssue,
+                'status' => "new",
+                'CreatedBy' => Auth::user()->id,
+                'created_at' => Carbon::now(),
+            ]);
+
+            // data header
+            foreach ($request->Data as $dt) {
+                if ($dt['CompleQty'] > 0) {
+                    $notidata = notireceiptVCN::create([
+                        'LSX' => $request->LSX,
+                        'text' => 'Production information waiting for confirmation',
+                        'MaThiTruong' => $request->MaThiTruong ?? null,
+                        'FatherCode' => $request->SubItemCode,
+                        'SubItemCode' => $request->SubItemCode,
+                        'SubItemName' => $request->SubItemName,
+                        'team' => $request->team,
+                        'NextTeam' => $request->NextTeam,
+                        'CongDoan' => $request->CongDoan,
+                        'type' => 0,
+                        'openQty' => 0,
+                        'ProdType' => $request->ProdType,
+                        'version' => $request->version,
+                        'isRONG' => true,
+                        'QtyIssueRong' => $request->QtyIssue,
+                        'CreatedBy' => Auth::user()->id,
+                        'disassembly_order_id' => $newOrder->id,
+                    ]);
+                    ChiTietRong::create([
+                        'baseID' => $notidata->id,
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'type' => 0,
+                        'openQty' => 0,
+                        'Quantity' => $dt['CompleQty'],
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'Team' => $request->Team,
+                        'NextTeam' => $request->NextTeam,
+                        'CDay' => $dt['CDay'],
+                        'CRong' => $dt['CRong'],
+                        'CDai' => $dt['CDai']
+                    ]);
+                }
+                if ($dt['RejectQty'] > 0) {
+                    $noti = notireceiptVCN::create([
+                        'LSX' => $request->LSX,
+                        'text' => 'Error information sent to QC',
+                        'MaThiTruong' => $request->MaThiTruong ?? null,
+                        'FatherCode' => $request->SubItemCode,
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
+                        'team' => $request->team,
+                        'Quantity' => $dt['RejectQty'],
+                        'NextTeam' => $request->NextTeam,
+                        'CongDoan' => $request->CongDoan,
+                        'type' => 1,
+                        'openQty' => 0,
+                        'ProdType' => $request->ProdType,
+                        'version' => $request->version,
+                        'isRONG' => true,
+                        'QtyIssueRong' => $request->QtyIssue,
+                        'CreatedBy' => Auth::user()->id,
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'disassembly_order_id' => $newOrder->id,
+                    ]);
+                }
+            }
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
+        }
+        return response()->json([
+            'message' => 'Successful',
+        ], 200);
     }
 }

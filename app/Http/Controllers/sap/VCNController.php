@@ -1866,6 +1866,7 @@ class VCNController extends Controller
             if ($data->NextTeam != "YS-QC"  && $data->NextTeam != "CH-QC"  && $data->NextTeam != "HG-QC") {
                 $dataallocate = $this->collectdata($data->FatherCode, $data->ItemCode, $data->team, $data->version, $data->LSX);
                 $allocates = $this->allocate_v2($dataallocate, $data->Quantity);
+
                 if (count($allocates) == 0) {
                     return response()->json([
                         'error' => false,
@@ -2802,6 +2803,8 @@ class VCNController extends Controller
                     $notidata = notireceiptVCN::create([
                         'LSX' => $request->LSX,
                         'text' => 'Production information waiting for confirmation',
+                        'ItemCode' => $dt['ItemCode'],
+                        'ItemName' => $dt['ItemName'],
                         'MaThiTruong' => $request->MaThiTruong ?? null,
                         'FatherCode' => $request->SubItemCode,
                         'SubItemCode' => $request->SubItemCode,
@@ -2817,6 +2820,8 @@ class VCNController extends Controller
                         'QtyIssueRong' => $request->QtyIssue,
                         'CreatedBy' => Auth::user()->id,
                         'disassembly_order_id' => $newOrder->id,
+                        'QuyCach' => $dt['CDay'] . "*" . $dt['CRong'] . "*" . $dt['CDai'],
+                        'Quantity' => $dt['CompleQty'],
                     ]);
                     ChiTietRong::create([
                         'baseID' => $notidata->id,
@@ -2876,6 +2881,7 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+
         try {
             DB::beginTransaction();
             // to bình thường
@@ -2891,31 +2897,14 @@ class VCNController extends Controller
                     'message' => "Tổ không hợp lệ."
                 ], 500);
             }
-            //Item father issue
 
-            //            $dataissueRong = $this->collecteEntryIssueRong($data->FatherCode, $data->team, $data->version);
-            //            $dataAllocateIssue = $this->allocatedIssueRong($dataissueRong, $data->QtyIssueRong);
-            //            if (count($dataAllocateIssue) == 0) {
-            //                return response()->json([
-            //                    'error' => false,
-            //                    'status_code' => 500,
-            //                    'message' => "Không có sản phẩm còn lại để phân bổ. kiểm tra tổ:" .
-            //                        $data->team . " sản phẩm: " .
-            //                        $data->ItemCode . " sản phẩm đích: " .
-            //                        $data->FatherCode . " LSX." . $data->LSX
-            //                ], 500);
-            //            }
-            //            $string = '';
-            //            foreach ($dataAllocateIssue as $allocate) {
-            //                $string .= $allocate['DocEntry'] . '-' . $allocate['Allocated'] . ';';
-            //            }
-            // $stockissue = $this->collectStockAllocate($string, $request->id);
-            $stockissue = null; // yêu cầu không cần gửi stock issue item manual nữa
-            //lấy data receipt detail
+            $stockissue = null;
             $dataReceipt = chiTietRong::where('baseID', $request->id)->where('type', 0)->get();
+
+            
             $allocates = [];
             foreach ($dataReceipt as $dtreceipt) {
-                $dataallocate = $this->collectdatadetailrong($data->FatherCode, $dtreceipt->ItemCode, $data->team, $data->version);
+                $dataallocate = $this->collectdatadetailrong($data->FatherCode, $dtreceipt->ItemCode, $data->team, $data->version, $data->LSX);
                 $newAllocates = $this->allocatedIssueRong($dataallocate, $dtreceipt->Quantity);
                 if (count($newAllocates) == 0) {
                     return response()->json([
@@ -3029,10 +3018,6 @@ class VCNController extends Controller
                 }
             }
             return response()->json('success', 200);
-
-            //verion, Itemfather,team version,
-
-            return response()->json('success', 200);
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
             return response()->json([
@@ -3108,7 +3093,7 @@ class VCNController extends Controller
                 };
             }
             // if( )
-            $dataallocate = $this->collectdatadetailrong($data->FatherCode, $ctrong->ItemCode, $data->team, $data->version);
+            $dataallocate = $this->collectdatadetailrong($data->FatherCode, $ctrong->ItemCode, $data->team, $data->version, $data->LSX);
 
             if (count($dataallocate) == 0) {
                 return response()->json([
@@ -3298,18 +3283,16 @@ class VCNController extends Controller
         odbc_close($conDB);
         return  $results;
     }
-    function collectdatadetailrong($spdich, $item, $to, $version)
+    function collectdatadetailrong($spdich, $item, $to, $version, $lsx)
     {
 
         $conDB = (new ConnectController)->connect_sap();
-        $query = 'call "usp_web_detailrong" (?,?,?,?)';
+        $query = 'call "usp_web_detailrong" (?,?,?,?,?)';
         $stmt = odbc_prepare($conDB, $query);
         if (!$stmt) {
             throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
         }
-        if (!odbc_execute($stmt, [$spdich, $item, $to, $version])) {
-            // Handle execution error
-            // die("Error executing SQL statement: " . odbc_errormsg());
+        if (!odbc_execute($stmt, [$spdich, $item, $to, $version, $lsx])) {
             throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
         }
         $results = array();
