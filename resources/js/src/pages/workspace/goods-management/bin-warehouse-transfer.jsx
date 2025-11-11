@@ -460,7 +460,7 @@ function BinWarehouseTransfer() {
             let options = [];
             items.forEach((data, i) => {
                 options.push({
-                    label: `${data.DistNumber} - ${data.OnHandQty}`,
+                    label: `${data.DistNumber} - ${Number(data.OnHandQty)}`,
                     value: data.DistNumber,
                     onHand: data.OnHandQty
                 })
@@ -608,7 +608,7 @@ function BinWarehouseTransfer() {
                 setBatchOptions(
                     res.map((batch) => ({
                         value: batch.DistNumber,
-                        label: `${batch.DistNumber} - ${batch.OnHandQty}`,
+                        label: `${batch.DistNumber} - ${Number(batch.OnHandQty)}`,
                         onHand: batch.OnHandQty,
                     }))
                 );
