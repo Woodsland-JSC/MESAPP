@@ -11,12 +11,49 @@ import productionApi from "../../../api/productionApi";
 import { formatNumber } from "../../../utils/numberFormat";
 import { BiConfused, BiSolidBadgeCheck } from "react-icons/bi";
 import { getFactoryUTub, getTeamUTub } from "../../../api/MasterDataApi";
-import { Alert, Box, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Radio, Text, useDisclosure } from "@chakra-ui/react";
+import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    AlertDialogCloseButton,
+    Alert,
+    ModalOverlay,
+    Modal,
+    ModalHeader,
+    ModalContent,
+    ModalCloseButton,
+    ModalBody,
+    ModalFooter,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Badge,
+    Button,
+    Box,
+    Text,
+    Radio,
+    RadioGroup,
+    Spinner,
+    useDisclosure,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuItemOption,
+    MenuGroup,
+    MenuOptionGroup,
+    MenuDivider,
+} from "@chakra-ui/react";
 import { FaBox, FaCircleRight, FaClock, FaDiceD6, FaInstalod } from "react-icons/fa6";
 import { MdDangerous } from "react-icons/md";
 import { FaExclamationCircle } from "react-icons/fa";
 import { TbPlayerTrackNextFilled, TbTrash } from "react-icons/tb";
-import { sanLuongTB, viewDetail } from "../../../api/tb.api";
+import { acceptReceiptTB, sanLuongTB, viewDetail } from "../../../api/tb.api";
 import Loading from '../../../components/loading/Loading';
 
 const TuBep = () => {
@@ -35,6 +72,10 @@ const TuBep = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [data, setData] = useState([]);
     const [groupList, setGroupList] = useState([]);
+    const [amount, setAmount] = useState("");
+    const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [packagedAmount, setPackagedAmount] = useState("");
 
     const [loadingData, setLoadingData] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -63,11 +104,17 @@ const TuBep = () => {
         onClose: onModalClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isAlertDialogOpen,
+        onOpen: onAlertDialogOpen,
+        onClose: onAlertDialogClose,
+    } = useDisclosure();
+
     const getDataTB = async () => {
         try {
             setLoadingData(true);
             const res = await sanLuongTB({
-                TO: 'NMTH-X03-TC1'
+                TO: selectedGroup.value
             });
 
             if (typeof res?.data === "object") {
@@ -89,16 +136,18 @@ const TuBep = () => {
     };
 
     const viewProductionsDetails = async (itemTB, itemDetail, lsx) => {
+        console.log("itemTB", itemTB);
+
         setLsxSelected({
             lsx,
             itemDetail,
             itemTB
         });
 
-        loadPlywoodItemDetailByLSX(itemTB, itemDetail, lsx);
+        loadItemByLSX(itemTB, itemDetail, lsx);
     };
 
-    const loadPlywoodItemDetailByLSX = async (itemTB, itemDetail, lsx) => {
+    const loadItemByLSX = async (itemTB, itemDetail, lsx) => {
         try {
             setLoading(true);
             const params = {
@@ -152,7 +201,172 @@ const TuBep = () => {
             itemDetail: null,
             itemTB: null
         });
+
+        setIsItemCodeDetech(false);
+        setConfirmLoading(false);
+        setFaults({});
+        setAmount();
+        setFaultyAmount();
+        onAlertDialogClose();
     }
+
+    const handleSubmitQuantity = async () => {
+        console.log("selectedItemDetails", selectedItemDetails);
+        console.log("lsxselected", lsxSelected);
+
+        if (amount < 0) {
+            toast.error("Số lượng ghi nhận phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (amount > selectedItemDetails.maxQty) {
+            toast.error("Đã vượt quá số lượng tối đa có thể xuất");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty) {
+            toast.error(
+                <span>
+                    Số lượng ghi nhận (
+                    <span style={{ fontWeight: "bold" }}>{amount}</span>) đã
+                    vượt quá số lượng còn lại phải sản xuất (
+                    <span style={{ fontWeight: "bold" }}>
+                        {selectedItemDetails.remainQty -
+                            selectedItemDetails.WaitingConfirmQty}
+                    </span>
+                    )
+                </span>
+            );
+            onAlertDialogClose();
+            return;
+        }
+
+        if (faultyAmount < 0) {
+            toast.error("Số lượng lỗi phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (faultyAmount > selectedItemDetails.maxQty) {
+            toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (selectedFaultItem.SubItemCode === "" && selectedFaultItem.ItemCode === "" && faultyAmount) {
+            toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (selectedFaultItem.ItemCode !== "" && parseInt(faultyAmount) + parseInt(amount) > parseInt(selectedItemDetails.maxQty)) {
+            toast.error(
+                <span>
+                    Tổng số lượng ghi nhận (
+                    <span style={{ fontWeight: "bold" }}>
+                        {parseInt(faultyAmount) + parseInt(amount)}
+                    </span>
+                    ) đã vượt quá số lượng tối đa có thể xuất (
+                    <span style={{ fontWeight: "bold" }}>
+                        {selectedItemDetails.maxQty}
+                    </span>
+                    )
+                </span>
+            );
+            return;
+        }
+
+        setConfirmLoading(true);
+        // Object chứa dữ liệu lỗi
+        const Data = isItemCodeDetech
+            ? {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+            }
+            : {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+            };
+
+        try {
+            const payload = {
+                FatherCode: lsxSelected.itemTB.SPDICH,
+                ItemCode: selectedItemDetails.ItemChild,
+                ItemName: selectedItemDetails.ChildName,
+                SubItemName: selectedFaultItem.SubItemName,
+                SubItemCode: selectedFaultItem.SubItemCode,
+                MaThiTruong: lsxSelected.itemTB.MaThiTruong,
+                CDay: selectedItemDetails.CDay,
+                CRong: selectedItemDetails.CRong,
+                CDai: selectedItemDetails.CDai,
+                Team: selectedItemDetails.TO,
+                CongDoan: selectedItemDetails.NameTO,
+                NexTeam: selectedItemDetails.TOTT,
+                Data: Data,
+                Type: "TUBEP",
+                version: choosenItem.Version || "",
+                ProdType: selectedItemDetails.ProdType || "",
+                LSX: lsxSelected.lsx,
+                CompleQty: 0,
+                RejectQty: 0,
+                PackagedQty: 0,
+                KHOI: "CBG" || "",
+                loinhamay: faults?.factory?.value || user.plant || "",
+                Factory: selectedFactory || "",
+            };
+
+
+            if (amount && amount > 0) {
+                payload.CompleQty = Number(amount);
+            }
+            if (faultyAmount && faultyAmount > 0) {
+                payload.RejectQty = Number(faultyAmount);
+            }
+            if (packagedAmount && packagedAmount > 0) {
+                payload.PackagedQty = Number(packagedAmount);
+            }
+            if (payload.FatherCode && payload.ItemCode) {
+                if (payload.CompleQty || payload.RejectQty) {
+                    console.log("payload", payload);
+                    let res = await acceptReceiptTB(payload);
+                    console.log("res", res);
+                    toast.success("Ghi nhận & chuyển tiếp thành công!");
+                    setSelectedFaultItem({
+                        ItemCode: "",
+                        ItemName: "",
+                        SubItemCode: "",
+                        SubItemName: "",
+                        SubItemBaseQty: "",
+                        OnHand: "",
+                    });
+
+                    setIsItemCodeDetech(false);
+                    setConfirmLoading(false);
+                    setFaults({});
+                    setAmount();
+                    setFaultyAmount();
+                    onAlertDialogClose();
+                } else {
+                    toast("Chưa nhập bất kì số lượng nào.");
+                }
+            } else {
+                toast("Có lỗi xảy ra. Vui lòng thử lại");
+            }
+        } catch (error) {
+            // Xử lý lỗi (nếu có)
+            console.error("Đã xảy ra lỗi:", error);
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+        }
+
+    };
 
     useEffect(() => {
         if (!selectedGroup) return;
@@ -888,18 +1102,18 @@ const TuBep = () => {
                                                         min={1}
                                                         className="mt-2 mb-2"
                                                         onChange={(value) => {
-                                                            // if (
-                                                            //     value >
-                                                            //     selectedItemDetails.stockQuantity
-                                                            // ) {
-                                                            //     setAmount(
-                                                            //         selectedItemDetails.stockQuantity
-                                                            //     );
-                                                            // } else {
-                                                            //     setAmount(
-                                                            //         value
-                                                            //     );
-                                                            // }
+                                                            if (
+                                                                value >
+                                                                selectedItemDetails.stockQuantity
+                                                            ) {
+                                                                setAmount(
+                                                                    selectedItemDetails.stockQuantity
+                                                                );
+                                                            } else {
+                                                                setAmount(
+                                                                    value
+                                                                );
+                                                            }
                                                         }}
                                                     >
                                                         <NumberInputField />
@@ -952,8 +1166,7 @@ const TuBep = () => {
                                                     selectedItemDetails?.notifications &&
                                                     selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1)?.length > 0 &&
                                                     selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1).map((item, index) => (
-                                                        <div
-                                                            key={"Error_" + index}
+                                                        <div key={"Error_" + index}
                                                             className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
                                                         >
                                                             {/*  */}
@@ -1036,57 +1249,57 @@ const TuBep = () => {
                                                     min={0}
                                                     className="mt-2"
                                                     onChange={(value) => {
-                                                        // if (
-                                                        //     value >
-                                                        //     selectedItemDetails.stockQuantity
-                                                        // ) {
-                                                        //     setFaultyAmount(
-                                                        //         selectedItemDetails.stockQuantity
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             amount: selectedItemDetails.stockQuantity,
-                                                        //         })
-                                                        //     );
-                                                        // } else {
-                                                        //     setFaultyAmount(
-                                                        //         value
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             amount: value,
-                                                        //         })
-                                                        //     );
-                                                        // }
-                                                        // if (
-                                                        //     value == 0 ||
-                                                        //     !value
-                                                        // ) {
-                                                        //     setSelectedFaultItem(
-                                                        //         {
-                                                        //             ItemCode:
-                                                        //                 "",
-                                                        //             ItemName:
-                                                        //                 "",
-                                                        //             SubItemCode:
-                                                        //                 "",
-                                                        //             SubItemName:
-                                                        //                 "",
-                                                        //             SubItemBaseQty:
-                                                        //                 "",
-                                                        //             OnHand: "",
-                                                        //         }
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 null,
-                                                        //         })
-                                                        //     );
-                                                        // }
+                                                        if (
+                                                            value >
+                                                            selectedItemDetails.stockQuantity
+                                                        ) {
+                                                            setFaultyAmount(
+                                                                selectedItemDetails.stockQuantity
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    amount: selectedItemDetails.stockQuantity,
+                                                                })
+                                                            );
+                                                        } else {
+                                                            setFaultyAmount(
+                                                                value
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    amount: value,
+                                                                })
+                                                            );
+                                                        }
+                                                        if (
+                                                            value == 0 ||
+                                                            !value
+                                                        ) {
+                                                            setSelectedFaultItem(
+                                                                {
+                                                                    ItemCode:
+                                                                        "",
+                                                                    ItemName:
+                                                                        "",
+                                                                    SubItemCode:
+                                                                        "",
+                                                                    SubItemName:
+                                                                        "",
+                                                                    SubItemBaseQty:
+                                                                        "",
+                                                                    OnHand: "",
+                                                                }
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        null,
+                                                                })
+                                                            );
+                                                        }
                                                     }}
                                                 >
                                                     <NumberInputField />
@@ -1107,7 +1320,7 @@ const TuBep = () => {
                                                                     ? "font-semibold text-gray-800 "
                                                                     : "text-gray-600"
                                                                     }`}
-                                                                key={index}
+                                                            // key={index}
                                                             >
                                                                 <Radio
                                                                     value={
@@ -1117,24 +1330,24 @@ const TuBep = () => {
                                                                         selectedFaultItem.ItemCode === choosenItem.ItemChild
                                                                     }
                                                                     onChange={() => {
-                                                                        // setSelectedFaultItem(
-                                                                        //     {
-                                                                        //         ItemCode:
-                                                                        //             choosenItem.ItemChild,
-                                                                        //         ItemName:
-                                                                        //             choosenItem.ChildName,
-                                                                        //         SubItemCode:
-                                                                        //             "",
-                                                                        //         SubItemName:
-                                                                        //             "",
-                                                                        //         SubItemBaseQty:
-                                                                        //             "",
-                                                                        //         OnHand: "",
-                                                                        //     }
-                                                                        // );
-                                                                        // setIsItemCodeDetech(
-                                                                        //     true
-                                                                        // );
+                                                                        setSelectedFaultItem(
+                                                                            {
+                                                                                ItemCode:
+                                                                                    choosenItem.ItemChild,
+                                                                                ItemName:
+                                                                                    choosenItem.ChildName,
+                                                                                SubItemCode:
+                                                                                    "",
+                                                                                SubItemName:
+                                                                                    "",
+                                                                                SubItemBaseQty:
+                                                                                    "",
+                                                                                OnHand: "",
+                                                                            }
+                                                                        );
+                                                                        setIsItemCodeDetech(
+                                                                            true
+                                                                        );
                                                                     }}
                                                                 >
                                                                     {
@@ -1208,7 +1421,7 @@ const TuBep = () => {
                                                         </>
                                                     ))}
                                             </Box>
-                                            <Box className="px-0 pt-2">
+                                            {/* <Box className="px-0 pt-2">
                                                 <label className="font-semibold">
                                                     Lỗi phôi nhận từ nhà máy  khác:
                                                 </label>
@@ -1222,29 +1435,29 @@ const TuBep = () => {
                                                     isSearchable
                                                     value={faults.factory}
                                                     onChange={(value) => {
-                                                        // if (
-                                                        //     !faultyAmount ||
-                                                        //     faultyAmount < 1
-                                                        // ) {
-                                                        //     toast(
-                                                        //         "Vui lòng khai báo số lượng lỗi."
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 null,
-                                                        //         })
-                                                        //     );
-                                                        // } else {
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 value,
-                                                        //         })
-                                                        //     );
-                                                        // }
+                                                        if (
+                                                            !faultyAmount ||
+                                                            faultyAmount < 1
+                                                        ) {
+                                                            toast(
+                                                                "Vui lòng khai báo số lượng lỗi."
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        null,
+                                                                })
+                                                            );
+                                                        } else {
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        value,
+                                                                })
+                                                            );
+                                                        }
                                                     }}
                                                 />
                                                 <p className="text-sm text-gray-500 mb-1">
@@ -1252,7 +1465,7 @@ const TuBep = () => {
                                                     nhận là của nhà máy hiện
                                                     tại.
                                                 </p>
-                                            </Box>
+                                            </Box> */}
                                         </div>
                                     </div>
                                 </div>
@@ -1283,12 +1496,14 @@ const TuBep = () => {
                                             clearData();
                                             onModalClose();
 
+
                                         }}
                                         className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Đóng
                                     </button>
                                     <button
+                                        onClick={onAlertDialogOpen}
                                         className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                         type="button"
                                     >
@@ -1300,6 +1515,84 @@ const TuBep = () => {
                     </Modal>
                 )
             }
+
+            <AlertDialog
+                isOpen={isAlertDialogOpen}
+                closeOnOverlayClick={false}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>Xác nhận ghi nhận</AlertDialogHeader>
+                        <AlertDialogBody>
+                            {(amount && amount !== "") ||
+                                (faultyAmount && faultyAmount !== "") ? (
+                                <div className="space-y-1">
+                                    {packagedAmount && (
+                                        <div className="text-yellow-700">
+                                            Số lượng đã đóng gói chờ giao:{" "}
+                                            <span className="font-bold">
+                                                {packagedAmount || 0}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {amount && (
+                                        <div className="text-green-700">
+                                            Ghi nhận sản lượng:{" "}
+                                            <span className="font-bold">
+                                                {amount}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {faultyAmount && (
+                                        <div className="text-red-700">
+                                            Ghi nhận lỗi:{" "}
+                                            <span className="font-bold">
+                                                {faultyAmount}
+                                            </span>
+                                            {faults &&
+                                                faults.ItemCode &&
+                                                faults.factory && (
+                                                    <span>
+                                                        {" "}
+                                                        từ{" "}
+                                                        {
+                                                            faults
+                                                                .factory
+                                                                .label
+                                                        }
+                                                    </span>
+                                                )}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <p>
+                                    Bạn chưa ghi nhận bất kỳ giá trị
+                                    nào.
+                                </p>
+                            )}
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
+                            <button
+                                disabled={confirmLoading}
+                                className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleSubmitQuantity}
+                            >
+                                {confirmLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
 
         </Layout >
     );

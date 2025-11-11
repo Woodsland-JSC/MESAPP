@@ -14,3 +14,6 @@ export const viewDetail = (params) => {
     });
 }
 
+export const acceptReceiptTB = (data) => {
+    return axiosClient().post(`${BASEURL}/acceptReceiptTB`, data);
+}

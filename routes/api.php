@@ -250,6 +250,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'sap/tb'], function(){
         Route::get('sanLuongTB', [TBController::class, 'sanLuongTB'])->name('sanLuongTB');
         Route::get('viewDetail', [TBController::class, 'viewDetail'])->name('viewDetail');
+        Route::post('acceptReceiptTB', [TBController::class, 'acceptReceiptTB'])->name('acceptReceiptTB');
+
+        
 
         
     });

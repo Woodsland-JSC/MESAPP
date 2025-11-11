@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AwaitingstocksTb;
+use App\Models\NotireceiptTb;
 use App\Services\HanaService;
 use App\Services\mes\AwaitingstocksTbService;
 use App\Services\mes\NotireceiptTbService;
@@ -11,12 +13,13 @@ use Exception;
 use Log;
 
 
+
 class TBService
 {
     private HanaService $hanaService;
     private NotireceiptTbService $notireceiptTbService;
     private AwaitingstocksTbService $awaitingstocksTbService;
-    private $SQL_GHINHAN_SL_TB = 'SELECT * FROM UV_GHINHANSLTB ORDER BY "LSX" ASC';
+    private $SQL_GHINHAN_SL_TB = 'SELECT * FROM UV_GHINHANSLTB WHERE "TO" = ? ORDER BY "LSX" ASC';
     private $SQL_SOLUONG_GHINHAN_TB = 'SELECT IFNULL(sum("ConLai"),0) "Quantity" FROM UV_GHINHANSLTB WHERE "ItemChild"=? AND "TO"=? AND "SPDICH"=? AND "LSX" = ?';
     private $SQL_SL_TON_TB = 'SELECT * FROM UV_SOLUONGTONTB WHERE "U_SPDICH"=? AND "ItemCode"=? AND"U_To"=? AND "U_GRID" = ?';
 
@@ -30,7 +33,7 @@ class TBService
     public function sanLuongTB($params)
     {
         try {
-            $slTB = $this->hanaService->select($this->SQL_GHINHAN_SL_TB, [$params]);
+            $slTB = $this->hanaService->select($this->SQL_GHINHAN_SL_TB, [$params['TO']]);
 
             $results = [];
 
@@ -282,20 +285,6 @@ class TBService
                 }
             }
 
-            // Lấy loại ván
-            $ProdType = null;
-            foreach ($dataSLTon as $result) {
-                $prodType = $result['ProdType'];
-
-                if ($ProdType === null) {
-                    $ProdType = $prodType;
-                } else {
-                    if ($prodType !== $ProdType) {
-                        return response()->json(['error' => 'Các giá trị của U_IType trong LSX không giống nhau!'], 422);
-                    }
-                }
-            }
-
             // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
             foreach ($groupedResults as $item) {
                 $awaitingQtySum = $this->awaitingstocksTbService->soLuongTonThucTe($item['SubItemCode'], $params['TO']);
@@ -347,7 +336,7 @@ class TBService
                 'ItemInfo' => $itemInfo,
                 'CongDoan'  =>  $CongDoan,
                 'SubItemWhs' => $SubItemWhs,
-                'ProdType' => $prodType,
+                'ProdType' => null,
                 'notifications' => $notification,
                 'stocks' => $groupedResults,
                 'maxQty' =>   $maxQty,
@@ -399,5 +388,116 @@ class TBService
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    public function acceptReceiptTB($payload)
+    {
+        $toqc = "";
+        if (Auth::user()->plant == 'YS') {
+            $toqc = 'YS2-QC';
+        } else if (Auth::user()->plant == 'CH') {
+            $toqc = 'CH-QC';
+        } else if (Auth::user()->plant == 'YS1') {
+            $toqc = 'YS1-QC';
+        } else {
+            $toqc = 'HG-QC';
+        }
+
+        try {
+            DB::beginTransaction();
+            $changedData = [];
+            $data = json_encode($payload['Data']);
+
+            if ($payload['CompleQty'] > 0) {
+                $notifi = NotireceiptTb::create([
+                    'LSX' => $payload['LSX'],
+                    'text' => 'Production information waiting for confirmation',
+                    'Quantity' => $payload['CompleQty'],
+                    'MaThiTruong' => $payload['MaThiTruong'],
+                    'FatherCode' => $payload['FatherCode'],
+                    'ItemCode' => $payload['ItemCode'],
+                    'ItemName' => $payload['ItemName'],
+                    'team' => $payload['Team'],
+                    'NextTeam' => $payload['NexTeam'],
+                    'CongDoan' => $payload['CongDoan'],
+                    'QuyCach' => $payload['CDay'] . "*" . $payload['CRong'] . "*" . $payload['CDai'],
+                    'type' => 0,
+                    'openQty' => 0,
+                    'ProdType' => $payload['ProdType'],
+                    'version' => $payload['version'],
+                    'CreatedBy' => Auth::user()->id,
+                    'loinhamay' => null,
+                ]);
+                $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                // Lưu dữ liệu vào awaitingstocks cho VCN
+                foreach ($payload['Data']['SubItemQty'] as $subItem) {
+                    AwaitingstocksTb::create([
+                        'notiId' => $notifi->id,
+                        'SubItemCode' => $subItem['SubItemCode'],
+                        'AwaitingQty' => $payload['CompleQty'] * $subItem['BaseQty'],
+                        'team' => $payload['Team'],
+                    ]);
+                }
+            }
+            if ($payload['RejectQty'] > 0) {
+                $notifi = NotireceiptTb::create([
+                    'LSX' => $payload['LSX'],
+                    'text' => 'Error information sent to QC',
+                    'FatherCode' => $payload['FatherCode'],
+                    'ItemCode' => $payload['ItemCode'],
+                    'ItemName' => $payload['ItemName'],
+                    'Quantity' => $payload['RejectQty'],
+                    'SubItemCode' => $payload['SubItemCode'], //mã báo lỗi
+                    'SubItemName' => $payload['SubItemName'], //tên mã báo lỗi
+                    'team' => $payload['Team'],
+                    'NextTeam' => $toqc,
+                    'CongDoan' => $payload['CongDoan'],
+                    'QuyCach' => $payload['CDay'] . "*" . $payload['CRong'] . "*" . $payload['CDai'],
+                    'type' => 1,
+                    'openQty' => $payload['RejectQty'],
+                    'ProdType' => $payload['ProdType'],
+                    'ErrorData' => $data,
+                    'MaThiTruong' => $payload['MaThiTruong'],
+                    'CreatedBy' => Auth::user()->id,
+                    'loinhamay' => $payload['loinhamay'],
+                ]);
+                $changedData[] = $notifi; // Thêm dữ liệu đã thay đổi vào mảng
+
+                // Lưu dữ liệu vào awaitingstocks cho VCN
+                if (empty($request->SubItemCode)) {
+                    // Lưu lỗi thành phẩm
+                    foreach ($payload['Data']['SubItemQty'] as $subItem) {
+                        AwaitingstocksTb::create([
+                            'notiId' => $notifi->id,
+                            'SubItemCode' => $subItem['SubItemCode'],
+                            'AwaitingQty' => $payload['RejectQty'] * $subItem['BaseQty'],
+                            'team' => $payload['Team'],
+                        ]);
+                    }
+                } else {
+                    // Lưu lỗi bán thành phẩm
+                    foreach ($payload['ErrorData']['SubItemQty'] as $subItem) {
+                        if ($subItem['SubItemCode'] == $payload['SubItemCode']) {
+                            $awaitingStock = AwaitingstocksTb::create([
+                                'notiId' => $notifi->id,
+                                'SubItemCode' => $subItem['SubItemCode'],
+                                'AwaitingQty' => $payload['RejectQty'] * $subItem['BaseQty'],
+                                'team' => $payload['Team'],
+                            ]);
+                            break;
+                        }
+                    }
+                }
+            }
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'ghi nhận sản lượng không thành công', 'error' => $e->getMessage()], 500);
+        }
+        return response()->json([
+            'message' => 'Successful',
+            'data' => $changedData
+        ], 200);
     }
 }
