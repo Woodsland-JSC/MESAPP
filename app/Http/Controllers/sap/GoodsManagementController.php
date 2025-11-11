@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class GoodsManagementController extends Controller
 {
+    private $SQL_BIN_ITEMS_DEFAULT = <<<SQL
+        SELECT 
+            A.*, B."DistNumber", C."BinCode", D."ItemName" 
+        FROM OBBQ A 
+        JOIN OBTN B ON A."SnBMDAbs" = B."AbsEntry"
+        JOIN OBIN C ON A."BinAbs" = C."AbsEntry" 
+        JOIN OITM D ON D."ItemCode" = A."ItemCode"
+        WHERE A."WhsCode" = ? AND C."BinCode" = ?
+    SQL;
     // 1. Lấy danh sách kho quản lý bin
     function getBinManagedWarehouses(Request $request)
     {
@@ -165,25 +174,36 @@ class GoodsManagementController extends Controller
                 }
             }
 
-            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+            $query = $this->SQL_BIN_ITEMS_DEFAULT;
 
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
+
             if (!odbc_execute($stmt, [$request->warehouse, $DefaultBinCode])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
             $results = array();
+            $groupItems = [];
+
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
+                if (!isset($groupItems[$row['ItemCode']])) {
+                    $groupItems[$row['ItemCode']] = [
+                        'ItemCode' => $row['ItemCode'],
+                        'ItemName' => $row['ItemName'],
+                    ];
+                }
             }
+
             odbc_close($conDB);
             return response()->json([
                 "DefaultBinCode" => $DefaultBinCode,
                 "DefaultBinID" => $DefaultBinID,
-                "ItemData" => $results
+                "ItemData" => $results,
+                "groupItems" => array_values($groupItems)
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -211,7 +231,7 @@ class GoodsManagementController extends Controller
 
             $BinCode = $request->bin;
 
-            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+            $query = $this->SQL_BIN_ITEMS_DEFAULT;
 
             $stmt = odbc_prepare($conDB, $query);
             if (!$stmt) {
@@ -355,57 +375,29 @@ class GoodsManagementController extends Controller
         try {
             $conDB = (new ConnectController)->connect_sap();
 
-            $query = 'CALL "USP_GETINVENTORYDETAILS"(?, ?)';
+            $query = $this->SQL_BIN_ITEMS_DEFAULT;
             $stmt = odbc_prepare($conDB, $query);
 
             if (!$stmt) {
                 throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
             }
 
-            if (!odbc_execute($stmt, [$request->warehouse, $request->bin, $request->code])) {
+            if (!odbc_execute($stmt, [$request->warehouse, $request->bin])) {
                 throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
             }
 
             $results = [];
-            $hasBatch = false;
 
             while ($row = odbc_fetch_array($stmt)) {
                 $results[] = $row;
-                if (!empty($row['BatchNum'])) {
-                    $hasBatch = true;
-                }
+                
             }
 
-            $results = array_filter($results, fn($item) => $item['ItemCode'] === $request->code);
+            $results = array_filter($results, fn($item) => $item['ItemCode'] == $request->code);
 
             odbc_close($conDB);
 
-            $response = [];
-
-            // dd($results);
-
-            if ($hasBatch) {
-                // Trả về danh sách BatchNum và OnHand tương ứng
-                $response = array_map(function ($item) {
-                    return [
-                        'BatchNum' => $item['BatchNum'],
-                        'OnHand'   => $item['Quantity']
-                    ];
-                }, array_filter($results, fn($item) => !empty($item['BatchNum'])));
-            } else {
-                $totalOnHand = array_sum(array_column($results, 'Quantity'));
-                $response = [];
-            }
-
-            $responsePayload = [
-                'BatchData' => $response
-            ];
-
-            if (!$hasBatch) {
-                $responsePayload['OnHand'] = $totalOnHand;
-            }
-
-            return response()->json($responsePayload, 200);
+            return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
@@ -491,15 +483,15 @@ class GoodsManagementController extends Controller
         if (isset($response['error']['message']['value'])) {
             return $response['error']['message']['value'];
         }
-        
+
         if (isset($response['error']['message'])) {
             return $response['error']['message'];
         }
-        
+
         if (isset($response['message'])) {
             return $response['message'];
         }
-        
+
         return 'Có lỗi xảy ra trong quá trình xử lý';
     }
 
@@ -528,36 +520,34 @@ class GoodsManagementController extends Controller
                     "Quantity" => floatval($item['quantity']),
                     "FromWarehouseCode" => $transferData['fromWarehouse'],
                     "WarehouseCode" => $transferData['toWarehouse'],
-                    "UseBaseUnits" => "tYES",
+                    // "UseBaseUnits" => "tYES",
                     "StockTransferLinesBinAllocations" => [
                         [
                             "BinAbsEntry" => intval($item['fromBin']),
                             "Quantity" => floatval($item['quantity']),
-                            "AllowNegativeQuantity" => "tNO",
-                            "SerialAndBatchNumbersBaseLine" => -1,
                             "BinActionType" => "batFromWarehouse",
+                            // "AllowNegativeQuantity" => "tNO",
+                            "SerialAndBatchNumbersBaseLine" => $index,
                             "BaseLineNumber" => $index
                         ],
                         [
                             "BinAbsEntry" => intval($item['toBin']),
                             "Quantity" => floatval($item['quantity']),
-                            "AllowNegativeQuantity" => "tNO",
-                            "SerialAndBatchNumbersBaseLine" => -1,
                             "BinActionType" => "batToWarehouse",
+                            // "AllowNegativeQuantity" => "tNO",
+                            "SerialAndBatchNumbersBaseLine" => $index,
                             "BaseLineNumber" => $index
                         ]
-                    ],
-                    "BatchNumbers"  => [
-                        "BatchNumber" => $item['batch'] || "",
-                        "Quantity" => floatval($item['quantity']) || 0,
-                    ],
+                    ]
                 ];
 
                 // Chỉ thêm BatchNumbers nếu có batch number
                 if (!empty($item['batch'])) {
                     $stockTransferLine["BatchNumbers"] = [
-                        "BatchNumber" => $item['batch'],
-                        "Quantity" => floatval($item['quantity'])
+                        [
+                            "BatchNumber" => $item['batch'],
+                            "Quantity" => floatval($item['quantity'])
+                        ]
                     ];
                 }
 
@@ -572,8 +562,6 @@ class GoodsManagementController extends Controller
                 'StockTransferLines' => $stockTransferLines
             ];
 
-            // dd($body);
-
             $response = Http::withOptions([
                 'verify' => false,
             ])->withHeaders([
@@ -585,25 +573,26 @@ class GoodsManagementController extends Controller
             $responseBody = $response->json();
 
             // Kiểm tra xem response có chứa thông tin lỗi không
-            if (isset($responseBody['error']) || 
-                (isset($responseBody['message']) && str_contains(strtolower($responseBody['message']), 'error'))) {
-                
+            if (
+                isset($responseBody['error']) ||
+                (isset($responseBody['message']) && str_contains(strtolower($responseBody['message']), 'error'))
+            ) {
+
                 $errorMessage = $this->extractErrorMessage($responseBody);
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => $errorMessage,
                     'data' => null
                 ], 400);
             }
-    
+
             // Nếu không có lỗi, trả về kết quả thành công
             return response()->json([
                 'success' => true,
                 'message' => 'Điều chuyển hàng hóa thành công',
                 'data' => $responseBody
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => false,
