@@ -35,44 +35,6 @@ import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/src/sweetalert2.scss";
 import { Spinner } from "@chakra-ui/react";
 
-const warehouses = [
-    { value: "WTH.001", label: "Warehouse 1" },
-    { value: "WTH.002", label: "Warehouse 2" },
-    { value: "WTH.003", label: "Warehouse 3" },
-    { value: "WTH.004", label: "Warehouse 4" },
-    { value: "WTH.005", label: "Warehouse 5" },
-    { value: "WTH.006", label: "Warehouse 6" },
-    { value: "WTH.007", label: "Warehouse 7" },
-    { value: "WTH.008", label: "Warehouse 8" },
-];
-
-const bins = [
-    { value: "BIN.001", label: "Bin 1" },
-    { value: "BIN.002", label: "Bin 2" },
-    { value: "BIN.003", label: "Bin 3" },
-    { value: "BIN.004", label: "Bin 4" },
-    { value: "BIN.005", label: "Bin 5" },
-    { value: "BIN.006", label: "Bin 6" },
-    { value: "BIN.007", label: "Bin 7" },
-    { value: "BIN.008", label: "Bin 8" },
-];
-
-const batch = [
-    { value: "2025-01-01", label: "2025-01-01" },
-    { value: "2025-01-02", label: "2025-01-02" },
-];
-
-const items = [
-    { value: "ITEM.001", label: "Luxury Table", onHand: 14 },
-    { value: "ITEM.002", label: "Ergonomic Chair", onHand: 73 },
-    { value: "ITEM.003", label: "Modern Bench", onHand: 28 },
-    { value: "ITEM.004", label: "Minimalist Stool", onHand: 0 },
-    { value: "ITEM.005", label: "Designer Coffee Table", onHand: 91 },
-    { value: "ITEM.006", label: "Dining Table Set", onHand: 19 },
-    { value: "ITEM.007", label: "Vintage Rocking Chair", onHand: 85 },
-    { value: "ITEM.008", label: "Executive Armchair", onHand: 67 },
-];
-
 function BinWarehouseTransfer() {
     const navigate = useNavigate();
     const { user } = useAppContext();
@@ -174,6 +136,7 @@ function BinWarehouseTransfer() {
 
     const [isBinStackingLoading, setIsBinStackingLoading] = useState(false);
     const [isBinTransferLoading, setIsBinTransferLoading] = useState(false);
+    const [batchItems, setBatchItems] = useState([]);
 
     const handleTabChange = (index) => {
         const hasData =
@@ -193,7 +156,7 @@ function BinWarehouseTransfer() {
     const saveBinStackingRecord = async () => {
         const isEditing = editingBinStackingIndex !== null;
         const recordToSave = isEditing ? editingBinStackingRecord : BinStackingRecord;
-        
+
         const { warehouse, item, quantity, bin, defaultBin } = recordToSave;
 
         // Validation checks
@@ -223,7 +186,7 @@ function BinWarehouseTransfer() {
             );
             return;
         }
-        if( isEditing && updatedCurrentStock < quantity) {
+        if (isEditing && updatedCurrentStock < quantity) {
             toast.error(
                 `Số lượng điều chuyển không được lớn hơn số lượng tồn kho hiện có (${updatedCurrentStock}).`
             );
@@ -250,8 +213,8 @@ function BinWarehouseTransfer() {
                 // Thêm mới từ BinStackingRecord
                 setBinStackingData([...BinStackingData, BinStackingRecord]);
                 toast.success("Thêm bản ghi mới thành công!");
-                setItemOptions([]);
-                setBatchOptions([]);
+                // setItemOptions([]);
+                // setBatchOptions([]);
                 // Reset form
                 const inheritedWarehouse = BinStackingData.length > 0 ? BinStackingData[0].warehouse : warehouse;
                 const inheritedDefaultBin = BinStackingData.length > 0 ? BinStackingData[0].defaultBin : defaultBin;
@@ -283,7 +246,9 @@ function BinWarehouseTransfer() {
     const editBinStackingRecord = async (index) => {
         setEditingBinStackingIndex(index);
         setEditingBinStackingRecord(BinStackingData[index]);
-        getEditBatchByItemDefaultBin(BinStackingData[index].item);
+        // getEditBatchByItemDefaultBin(BinStackingData[index]);
+        console.log("batchOptions", batchOptions);
+
         onOpen();
     };
 
@@ -313,9 +278,9 @@ function BinWarehouseTransfer() {
     const saveBinTransferRecord = async () => {
         const isEditing = editingBinTransferIndex !== null;
         const recordToSave = isEditing ? editingBinTransferRecord : BinTransferRecord;
-        
+
         const { fromWarehouse, fromBin, item, quantity, toWarehouse, toBin } = recordToSave;
-        
+
         if (!fromWarehouse) {
             toast.error("Kho điều chuyển không được để trống.");
             return;
@@ -346,13 +311,13 @@ function BinWarehouseTransfer() {
             );
             return;
         }
-        if(isEditing && updatedCurrentStock < quantity) {
+        if (isEditing && updatedCurrentStock < quantity) {
             toast.error(
                 `Số lượng điều chuyển không được lớn hơn số lượng tồn kho hiện có (${updatedCurrentStock}).`
             );
             return;
         }
-        if(fromWarehouse === toWarehouse && fromBin === toBin) {
+        if (fromWarehouse === toWarehouse && fromBin === toBin) {
             toast.error(
                 `Kho nguồn và kho đích, cùng với bin nguồn và bin đích không thể trùng nhau.`
             );
@@ -380,8 +345,8 @@ function BinWarehouseTransfer() {
                 // Thêm mới từ BinTransferRecord
                 setBinTransferData([...BinTransferData, BinTransferRecord]);
                 toast.success("Thêm bản ghi mới thành công!");
-                setItemOptions([]);
-                setBatchOptions([]);
+                // setItemOptions([]);
+                // setBatchOptions([]);
                 // Reset form
                 const inheritedFromWarehouse = BinTransferData.length > 0 ? BinTransferData[0].fromWarehouse : fromWarehouse;
                 const inheritedToWarehouse = BinTransferData.length > 0 ? BinTransferData[0].toWarehouse : toWarehouse;
@@ -418,9 +383,11 @@ function BinWarehouseTransfer() {
     };
 
     const editBinTransferRecord = (index) => {
-        setEditingBinTransferIndex(index);   
-        setEditingBinTransferRecord(BinTransferData[index]); 
-        
+        console.log("batchOptions", batchOptions);
+
+        setEditingBinTransferIndex(index);
+        setEditingBinTransferRecord(BinTransferData[index]);
+
         const fromBinLabel = fromBinOptions.find((item) => item.value === BinTransferData[index].fromBin)?.label;
         getEditBatchByItem(BinTransferData[index].item, fromBinLabel);
         onOpen();
@@ -462,12 +429,15 @@ function BinWarehouseTransfer() {
             );
             console.log(res);
             const itemOptions =
-                res.ItemData?.map((item) => ({
+                res.groupItems?.map((item) => ({
                     value: item.ItemCode,
                     label: `${item.ItemCode} - ${item.ItemName}`,
                     name: item.ItemName,
                 })) || [];
 
+            const batchOptions = res.ItemData;
+
+            setBatchItems(batchOptions);
             setItemOptions(itemOptions);
             setTempItemOptions(itemOptions);
             setBinStackingRecord(prevState => ({
@@ -482,26 +452,25 @@ function BinWarehouseTransfer() {
         }
     };
 
-    const getBatchByItemDefaultBin = async (item) => {       
+    const getBatchByItemDefaultBin = async (item) => {
         setIsBatchByItemDefaultBinLoading(true);
         try {
-            const res = await goodsManagementApi.getBatchByItemDefaultBin(
-                BinStackingRecord.warehouse,
-                item
-            );
+            let items = batchItems.filter(batch => batch.ItemCode == item);
 
-            if (res.BatchData.length > 0) {
-                setBatchOptions(
-                    res.BatchData.map((batch) => ({
-                        value: batch.batchNum,
-                        label: `${batch.batchNum}`,
-                        onHand: batch.onHand,
-                    }))
-                );
+            let options = [];
+            items.forEach((data, i) => {
+                options.push({
+                    label: `${data.DistNumber} - ${data.OnHandQty}`,
+                    value: data.DistNumber,
+                    onHand: data.OnHandQty
+                })
+            })
+
+            if (options.length > 0) {
+                setBatchOptions(options);
                 setCurrentStock(0);
             } else {
                 setBatchOptions([]);
-                setCurrentStock(res.OnHand);
             }
             setIsBatchByItemDefaultBinLoading(false);
         } catch (error) {
@@ -511,13 +480,17 @@ function BinWarehouseTransfer() {
         }
     };
 
-    const getEditBatchByItemDefaultBin = async (item) => {   
+    const getEditBatchByItemDefaultBin = async (item) => {
         setIsEditBatchByItemDefaultBinLoading(true);
         try {
-            const res = await goodsManagementApi.getBatchByItemDefaultBin(
-                BinStackingRecord.warehouse,
-                item
-            );
+            console.log("item", item);
+            console.log("batchItems", batchItems);
+            let batch = batchItems.find(b => b.DistNumber == item.batch);
+            console.log("batch", batch);
+            // const res = await goodsManagementApi.getBatchByItemDefaultBin(
+            //     BinStackingRecord.warehouse,
+            //     item
+            // );
 
             if (res.BatchData.length > 0) {
                 setUpdatedBatchOptions(
@@ -565,10 +538,10 @@ function BinWarehouseTransfer() {
             // const res = await goodsManagementApi.getAllBinByWarehouse(warehouse);
 
             const fromBinOptions =
-            res?.map((item) => ({
-                value: item.AbsEntry,
-                label: item.BinCode,
-            })) || [];
+                res?.map((item) => ({
+                    value: item.AbsEntry,
+                    label: item.BinCode,
+                })) || [];
 
             setFromBinOptions(fromBinOptions);
             setIsFromBinByWarehouseLoading(false);
@@ -597,7 +570,7 @@ function BinWarehouseTransfer() {
         }
     };
 
-    const getItemsByBin= async (bin) => {
+    const getItemsByBin = async (bin) => {
         setIsGetItemByBinLoading(true);
         try {
             const res = await goodsManagementApi.getItemsByBin(
@@ -631,12 +604,12 @@ function BinWarehouseTransfer() {
                 item
             );
 
-            if (res.BatchData.length > 0) {
+            if (res.length > 0) {
                 setBatchOptions(
-                    res.BatchData.map((batch) => ({
-                        value: batch.batchNum,
-                        label: `${batch.batchNum}`,
-                        onHand: batch.onHand,
+                    res.map((batch) => ({
+                        value: batch.DistNumber,
+                        label: `${batch.DistNumber} - ${batch.OnHandQty}`,
+                        onHand: batch.OnHandQty,
                     }))
                 );
                 setCurrentStock(0);
@@ -646,7 +619,6 @@ function BinWarehouseTransfer() {
             }
             setIsBatchByItemLoading(false);
         } catch (error) {
-            console.log(error);
             toast.error("Không thể tải dữ liệu, hãy thử lại sau.");
             setIsBatchByItemLoading(false);
         }
@@ -684,15 +656,6 @@ function BinWarehouseTransfer() {
 
     const handleExecuteBinStacking = async (e) => {
         const data = {
-            // fromWarehouse: BinStackingData[0].warehouse,
-            // toWarehouse: BinStackingData[0].warehouse,
-            // body: BinStackingData.map((item) => ({
-            //     fromBin: item.defaultBin,
-            //     toBin: item.bin,
-            //     item: item.item,
-            //     batch: item.batch,
-            //     quantity: item.quantity,
-            // })),
             transferData: {
                 fromWarehouse: BinStackingData[0].warehouse,
                 toWarehouse: BinStackingData[0].warehouse,
@@ -728,29 +691,6 @@ function BinWarehouseTransfer() {
                 }
             );
             getBinManagedWarehouse();
-            console.log(res);
-            // setTimeout(() => {
-            //     Swal.fire({
-            //         title: "Điều chuyển thành công!",
-            //         text: "Bạn có thể xem lại thông tin điều chuyển tại SAP.",
-            //         icon: "success",
-            //     });
-            //     setIsBinStackingLoading(false);
-            //     onConfirmClose();
-            //     setBinStackingData([]);
-            //     setBinStackingRecord(
-            //         {
-            //             warehouse: "",
-            //             defaultBin: "",
-            //             bin: "",
-            //             item: "",
-            //             batch: "",
-            //             quantity: "",
-            //         }
-            //     );
-            //     getBinManagedWarehouse();
-            //     console.log(res);
-            // }, 2000);
         } catch (error) {
             console.error("Lỗi điều chuyển:", error);
             setIsBinStackingLoading(false);
@@ -777,7 +717,7 @@ function BinWarehouseTransfer() {
                     toBin: item.toBin,
                     item: item.item,
                     batch: item.batch,
-                    quantity: item.quantity,    
+                    quantity: item.quantity,
                 })),
             }
         }
@@ -871,7 +811,7 @@ function BinWarehouseTransfer() {
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
                         onClick={() =>
                             BinStackingData?.length === 0 &&
-                            BinTransferData?.length === 0
+                                BinTransferData?.length === 0
                                 ? navigate(-1)
                                 : onExitConfirmOpen()
                         }
@@ -904,7 +844,7 @@ function BinWarehouseTransfer() {
                                         </div>
                                     </div>
                                 </Tab>
-                                <Tab 
+                                <Tab
                                     onClick={() => {
                                         handleTabChange(1)
                                         // setType("bin_transfer");
@@ -950,10 +890,6 @@ function BinWarehouseTransfer() {
                                                             fromWarehouseOptions
                                                         }
                                                         onChange={(option) => {
-                                                            console.log(
-                                                                "Selected Warehouse:",
-                                                                option
-                                                            );
                                                             getDefaultBinItemsByWarehouse(
                                                                 option?.value
                                                             );
@@ -990,17 +926,8 @@ function BinWarehouseTransfer() {
                                                             isDefaultBinItemsLoading
                                                         }
                                                         onChange={(option) => {
-                                                            console.log(
-                                                                "Selected Item:",
-                                                                option
-                                                            );
-                                                            changeBinStackingRecord(
-                                                                "item",
-                                                                option?.value
-                                                            );
-                                                            getBatchByItemDefaultBin(
-                                                                option?.value
-                                                            );
+                                                            changeBinStackingRecord("item", option?.value);
+                                                            getBatchByItemDefaultBin(option?.value);
                                                         }}
                                                     />
                                                 </div>
@@ -1012,33 +939,14 @@ function BinWarehouseTransfer() {
                                                         Mã lô hàng
                                                     </div>
                                                     <Select
-                                                        value={
-                                                            batchOptions.find(
-                                                                (batch) =>
-                                                                    batchOptions.value ===
-                                                                    BinStackingRecord.batch
-                                                            ) || null
-                                                        }
-                                                        isDisabled={
-                                                            batchOptions.length ===
-                                                            0 || BinStackingRecord.item !== null
-                                                        }
+                                                        isDisabled={batchOptions.length === 0}
+                                                        value={BinStackingRecord.batch ? batchOptions.find(item => item.value == BinStackingRecord.batch) : null}
                                                         placeholder="Chọn mã lô hàng"
                                                         className=" text-[15px]"
                                                         options={batchOptions}
                                                         onChange={(option) => {
-                                                            console.log(
-                                                                "Selected Batch:",
-                                                                option
-                                                            );
-                                                            changeBinStackingRecord(
-                                                                "batch",
-                                                                option?.value
-                                                            );
-                                                            setCurrentStock(
-                                                                option?.onHand ||
-                                                                    0
-                                                            );
+                                                            changeBinStackingRecord("batch", option?.value);
+                                                            setCurrentStock(option?.onHand || 0);
                                                         }}
                                                     />
                                                 </div>
@@ -1109,7 +1017,7 @@ function BinWarehouseTransfer() {
                                                     !isBatchByItemDefaultBinLoading && (
                                                         <div className="flex flex-col items-start mt-2">
                                                             {batchOptions.length ===
-                                                            0 ? (
+                                                                0 ? (
                                                                 <div className="text-red-500 font-semibold text-[15px]">
                                                                     Sản phẩm
                                                                     hiện tại
@@ -1122,16 +1030,16 @@ function BinWarehouseTransfer() {
                                                                     chọn mã lô.
                                                                 </div>
                                                             )}
-                                                            <div className="text-red-500 text-[15px]">
+                                                            {/* <div className="text-red-500 text-[15px]">
                                                                 Tồn kho hiện có
                                                                 :{" "}
                                                                 {currentStock?.toLocaleString(
                                                                     "en-US"
                                                                 ) || 0}
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                     )}
-                                                    {/* <button
+                                                {/* <button
                                                         className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                                         onClick={() => {
                                                             console.log(
@@ -1560,7 +1468,7 @@ function BinWarehouseTransfer() {
                                                             {" "}
                                                             *
                                                         </span>
-                                                    </div>                                 
+                                                    </div>
                                                     <Select
                                                         value={toBinOptions?.find(
                                                             (bin) =>
@@ -1594,7 +1502,7 @@ function BinWarehouseTransfer() {
                                                     !isBatchByItemLoading && (
                                                         <div className="flex flex-col items-start mt-2">
                                                             {batchOptions.length ===
-                                                            0 ? (
+                                                                0 ? (
                                                                 <div className="text-red-500 font-semibold text-[15px]">
                                                                     Sản phẩm
                                                                     hiện tại
@@ -1607,35 +1515,15 @@ function BinWarehouseTransfer() {
                                                                     chọn mã lô.
                                                                 </div>
                                                             )}
-                                                            <div className="text-red-500 text-[15px]">
+                                                            {/* <div className="text-red-500 text-[15px]">
                                                                 Tồn kho hiện có
                                                                 :{" "}
                                                                 {currentStock?.toLocaleString(
                                                                     "en-US"
                                                                 ) || 0}
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                     )}
-                                                    {/* <button
-                                                        className="w-fit h-full space-x-2 flex items-center bg-cyan-800 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
-                                                        onClick={() => {
-                                                            console.log(
-                                                                BinTransferRecord
-                                                            );
-                                                            console.log(
-                                                                "Danh sách kho đi",
-                                                                fromWarehouseOptions
-                                                            );
-                                                            console.log(
-                                                                "Danh sách kho đến",
-                                                                toWarehouseOptions
-                                                            );
-                                                        }}
-                                                    >
-                                                        <div className="text-[15px]">
-                                                            In ra dữ liệu
-                                                        </div>
-                                                    </button> */}
                                             </div>
                                             <div className=" items-center flex justify-between">
                                                 <button
@@ -1714,7 +1602,7 @@ function BinWarehouseTransfer() {
                                                                                 className={
                                                                                     index %
                                                                                         2 ===
-                                                                                    0
+                                                                                        0
                                                                                         ? "bg-gray-50"
                                                                                         : ""
                                                                                 }
@@ -1725,7 +1613,7 @@ function BinWarehouseTransfer() {
                                                                                     }
                                                                                 </td>
                                                                                 <td className="w-[140px] px-2 py-3 text-center border border-gray-300">
-                                                                                    {fromBinOptions.find( ({value}) => value === row.fromBin )?.label || "Không tìm thấy"}
+                                                                                    {fromBinOptions.find(({ value }) => value === row.fromBin)?.label || "Không tìm thấy"}
                                                                                 </td>
                                                                                 <td className="w-[350px] px-4 py-3 border border-gray-300">
                                                                                     <div className="flex flex-col justify-start gap-x-2">
@@ -1762,7 +1650,7 @@ function BinWarehouseTransfer() {
                                                                                     }
                                                                                 </td>
                                                                                 <td className="w-[140px] px-2 text-center py-3 border border-gray-300">
-                                                                                    {toBinOptions.find( ({value}) => value === row.toBin )?.label || "Không tìm thấy"}
+                                                                                    {toBinOptions.find(({ value }) => value === row.toBin)?.label || "Không tìm thấy"}
                                                                                 </td>
                                                                                 <td className=" px-6 py-3 space-x-2 border border-gray-300 text-center">
                                                                                     <button
@@ -1873,7 +1761,7 @@ function BinWarehouseTransfer() {
                                                 value={fromWarehouseOptions.find(
                                                     (warehouse) =>
                                                         warehouse.value ==
-                                                    editingBinStackingRecord.warehouse
+                                                        editingBinStackingRecord.warehouse
                                                 )}
                                                 isDisabled={true}
                                                 placeholder="Chọn kho xếp bin"
@@ -1905,7 +1793,7 @@ function BinWarehouseTransfer() {
                                                 value={tempItemOptions?.find(
                                                     (item) =>
                                                         item.value ==
-                                                    editingBinStackingRecord.item
+                                                        editingBinStackingRecord.item
                                                 ) || null}
                                                 isDisabled={true}
                                                 placeholder="Chọn sản phẩm"
@@ -1928,56 +1816,42 @@ function BinWarehouseTransfer() {
                                                 Mã lô hàng
                                             </div>
                                             <Select
-                                                value={batch.find(
-                                                    (batch) =>
-                                                        batch.value ===
-                                                    editingBinStackingRecord.batch
-                                                )}
-                                                isDisabled={true}
+                                                value={editingBinStackingRecord.batch ? batchOptions.find(item => item.value == editingBinStackingRecord.batch) : null}
+                                                // isDisabled={batchOptions.length == 0}
                                                 placeholder="Chọn mã lô hàng"
                                                 className="w-[70%] text-[15px]"
-                                                options={batch}
+                                                options={batchOptions}
                                                 onChange={(option) => {
-                                                    console.log(
-                                                        "Selected Batch:",
-                                                        option
-                                                    );
-                                                    changeEditingBinStackingRecord(
-                                                        "batch",
-                                                        option?.value
-                                                    );
-                                                    setUpdatedCurrentStock(
-                                                        option?.onHand || 0
-                                                    )
+                                                    changeEditingBinStackingRecord("batch", option?.value);
+                                                    setUpdatedCurrentStock(option?.onHand || 0)
                                                 }}
                                             />
                                         </div>
                                         {editingBinStackingRecord.item &&
-                                                    !isEditBatchByItemDefaultBinLoading && (
-                                                        <div className="flex flex-col items-start mt-2">
-                                                            {updatedBatchOptions.length ===
-                                                            0 ? (
-                                                                <div className="text-red-500 font-semibold text-[15px]">
-                                                                    Sản phẩm
-                                                                    hiện tại
-                                                                    không có lô
-                                                                    hàng nào.
-                                                                </div>
-                                                            ) : (
-                                                                <div className="text-green-500 font-semibold text-[15px]">
-                                                                    Vui lòng
-                                                                    chọn mã lô.
-                                                                </div>
-                                                            )}
-                                                            <div className="text-red-500 text-[15px]">
-                                                                Tồn kho hiện có
-                                                                :{" "}
-                                                                {updatedCurrentStock?.toLocaleString(
-                                                                    "en-US"
-                                                                ) || 0}
-                                                            </div>
+                                            !isEditBatchByItemDefaultBinLoading && (
+                                                <div className="flex flex-col items-start mt-2">
+                                                    {updatedBatchOptions.length ===
+                                                        0 ? (
+                                                        <div className="text-red-500 font-semibold text-[15px]">
+                                                            Sản phẩm
+                                                            hiện tại
+                                                            không có lô
+                                                            hàng nào.
                                                         </div>
-                                        )}
+                                                    ) : (
+                                                        <div className="text-green-500 font-semibold text-[15px]">
+                                                            Vui lòng chọn mã lô .
+                                                        </div>
+                                                    )}
+                                                    {/* <div className="text-red-500 text-[15px]">
+                                                        Tồn kho hiện có
+                                                        :{" "}
+                                                        {updatedCurrentStock?.toLocaleString(
+                                                            "en-US"
+                                                        ) || 0}
+                                                    </div> */}
+                                                </div>
+                                            )}
                                         <div className="flex items-center space-x-4">
                                             <div className="mb-2 w-[30%] text-[15px] font-medium">
                                                 Số lượng điều chuyển{" "}
@@ -2013,7 +1887,7 @@ function BinWarehouseTransfer() {
                                                 value={stackBinOptions?.find(
                                                     (bin) =>
                                                         bin.value ===
-                                                    editingBinStackingRecord.bin
+                                                        editingBinStackingRecord.bin
                                                 ) || null}
                                                 // isDisabled={true}
                                                 placeholder="Chọn bin chuyển đến"
@@ -2028,7 +1902,7 @@ function BinWarehouseTransfer() {
                                                         "bin",
                                                         option?.value
                                                     );
-                                                    
+
                                                 }}
                                             />
                                         </div>
@@ -2143,31 +2017,31 @@ function BinWarehouseTransfer() {
                                             />
                                         </div>
                                         {editingBinTransferRecord.item &&
-                                                    !isEditBatchByItemLoading && (
-                                                        <div className="flex flex-col items-start mt-2">
-                                                            {updatedBatchOptions.length ===
-                                                            0 ? (
-                                                                <div className="text-red-500 font-semibold text-[15px]">
-                                                                    Sản phẩm
-                                                                    hiện tại
-                                                                    không có lô
-                                                                    hàng nào.
-                                                                </div>
-                                                            ) : (
-                                                                <div className="text-green-500 font-semibold text-[15px]">
-                                                                    Vui lòng
-                                                                    chọn mã lô.
-                                                                </div>
-                                                            )}
-                                                            <div className="text-red-500 text-[15px]">
-                                                                Tồn kho hiện có
-                                                                :{" "}
-                                                                {updatedCurrentStock?.toLocaleString(
-                                                                    "en-US"
-                                                                ) || 0}
-                                                            </div>
+                                            !isEditBatchByItemLoading && (
+                                                <div className="flex flex-col items-start mt-2">
+                                                    {updatedBatchOptions.length ===
+                                                        0 ? (
+                                                        <div className="text-red-500 font-semibold text-[15px]">
+                                                            Sản phẩm
+                                                            hiện tại
+                                                            không có lô
+                                                            hàng nào.
                                                         </div>
-                                        )}
+                                                    ) : (
+                                                        <div className="text-green-500 font-semibold text-[15px]">
+                                                            Vui lòng
+                                                            chọn mã lô.
+                                                        </div>
+                                                    )}
+                                                    {/* <div className="text-red-500 text-[15px]">
+                                                        Tồn kho hiện có
+                                                        :{" "}
+                                                        {updatedCurrentStock?.toLocaleString(
+                                                            "en-US"
+                                                        ) || 0}
+                                                    </div> */}
+                                                </div>
+                                            )}
                                         <div className="flex items-center space-x-4">
                                             <div className="mb-2 w-[30%] text-[15px] font-medium">
                                                 Số lượng{" "}
@@ -2344,9 +2218,9 @@ function BinWarehouseTransfer() {
                                         className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                         type="button"
                                         onClick={() => {
-                                            if(BinStackingData.length > 0){
+                                            if (BinStackingData.length > 0) {
                                                 handleExecuteBinStacking();
-                                            }else{
+                                            } else {
                                                 handleExecuteBinTransfer();
                                             }
                                         }}
