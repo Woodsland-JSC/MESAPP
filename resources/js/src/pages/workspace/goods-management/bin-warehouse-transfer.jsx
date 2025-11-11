@@ -1250,7 +1250,7 @@ function BinWarehouseTransfer() {
                                     </div>
                                 </TabPanel>
                                 <TabPanel>
-                                    {/* <div className="px-2">
+                                    <div className="px-2">
                                         <div className=" space-y-3">
                                             <div className="grid grid-cols-2 gap-x-3">
                                                 <div className="col-span-1 w-full flex flex-col justify-between">
@@ -1718,7 +1718,7 @@ function BinWarehouseTransfer() {
                                                 )}
                                             </div>
                                         </div>
-                                    </div> */}
+                                    </div>
                                 </TabPanel>
                             </TabPanels>
                         </Tabs>
