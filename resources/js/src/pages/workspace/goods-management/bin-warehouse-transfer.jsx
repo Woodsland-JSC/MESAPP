@@ -1250,8 +1250,7 @@ function BinWarehouseTransfer() {
                                     </div>
                                 </TabPanel>
                                 <TabPanel>
-                                    <div className="px-2">
-                                        {/* Bin Transfrom Input */}
+                                    {/* <div className="px-2">
                                         <div className=" space-y-3">
                                             <div className="grid grid-cols-2 gap-x-3">
                                                 <div className="col-span-1 w-full flex flex-col justify-between">
@@ -1515,13 +1514,6 @@ function BinWarehouseTransfer() {
                                                                     chọn mã lô.
                                                                 </div>
                                                             )}
-                                                            {/* <div className="text-red-500 text-[15px]">
-                                                                Tồn kho hiện có
-                                                                :{" "}
-                                                                {currentStock?.toLocaleString(
-                                                                    "en-US"
-                                                                ) || 0}
-                                                            </div> */}
                                                         </div>
                                                     )}
                                             </div>
@@ -1542,7 +1534,6 @@ function BinWarehouseTransfer() {
 
                                         <div className="my-4 border-b border-gray-200"></div>
 
-                                        {/* Bin Transfer Records*/}
                                         <div className="">
                                             <div className="overflow-x-auto">
                                                 {BinTransferData.length > 0 ? (
@@ -1727,7 +1718,7 @@ function BinWarehouseTransfer() {
                                                 )}
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </TabPanel>
                             </TabPanels>
                         </Tabs>
