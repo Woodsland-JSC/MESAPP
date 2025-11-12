@@ -24,17 +24,20 @@ class MasterDataController extends Controller
     SQL;
     private $SQL_TEAM_UTUB = <<<SQL
         SELECT
-            "VisResCode" AS "Code",
-            "ResName" AS "Name",
-            "U_CDOAN" AS "CongDoan",
-            "U_FAC" AS "Factory",
-            "U_QC",
-            "U_KHOI"
+            A."VisResCode" AS "Code",
+            A."ResName" AS "Name",
+            A."U_CDOAN" AS "CongDoan",
+            A."U_FAC" AS "Factory",
+            A."U_KHOI"
         FROM
             "ORSC" A
             JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
             JOIN OHEM C ON B."EmpID" = C."empID"
-        WHERE C."empID" = ? AND "U_FAC" = ? AND "U_KHOI" = 'TUB' AND "U_QC" = 'N'
+            JOIN OWOR D ON D."U_To" = b."ResCode"
+        WHERE A."U_FAC" = ? AND A."U_KHOI" = 'CBG' AND A."U_QC" = 'N' and D."U_IType" = 'TUBEP'
+
+        GROUP BY A."VisResCode", A."ResName", A."U_CDOAN", A."U_FAC", A."U_KHOI"
+        ORDER BY A."ResName" asc
     SQL;
 
     public function __construct(HanaService $hanaService)
@@ -129,7 +132,7 @@ class MasterDataController extends Controller
 
     public function getTeamUTub(Request $request){
         try {
-            $teams = $this->hanaService->select($this->SQL_TEAM_UTUB, [Auth::user()->sap_id, $request->query('factory')]);
+            $teams = $this->hanaService->select($this->SQL_TEAM_UTUB, [$request->query('factory')]);
 
             $data = [
                 'teams' => $teams

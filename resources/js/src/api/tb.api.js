@@ -14,3 +14,14 @@ export const viewDetail = (params) => {
     });
 }
 
+export const acceptReceiptTB = (data) => {
+    return axiosClient().post(`${BASEURL}/acceptReceiptTB`, data);
+}
+
+export const confirmAcceptReceipt = (data) => {
+    return axiosClient().post(`${BASEURL}/confirmAcceptReceipt`, data);
+}
+
+export const confirmRejectTB = (data) => {
+    return axiosClient().post(`${BASEURL}/confirmRejectTB`, data);
+}

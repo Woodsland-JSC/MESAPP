@@ -11,13 +11,53 @@ import productionApi from "../../../api/productionApi";
 import { formatNumber } from "../../../utils/numberFormat";
 import { BiConfused, BiSolidBadgeCheck } from "react-icons/bi";
 import { getFactoryUTub, getTeamUTub } from "../../../api/MasterDataApi";
-import { Alert, Box, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Radio, Text, useDisclosure } from "@chakra-ui/react";
+import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    AlertDialogCloseButton,
+    Alert,
+    ModalOverlay,
+    Modal,
+    ModalHeader,
+    ModalContent,
+    ModalCloseButton,
+    ModalBody,
+    ModalFooter,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Badge,
+    Button,
+    Box,
+    Text,
+    Radio,
+    RadioGroup,
+    Spinner,
+    useDisclosure,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuItemOption,
+    MenuGroup,
+    MenuOptionGroup,
+    MenuDivider,
+} from "@chakra-ui/react";
 import { FaBox, FaCircleRight, FaClock, FaDiceD6, FaInstalod } from "react-icons/fa6";
 import { MdDangerous } from "react-icons/md";
 import { FaExclamationCircle } from "react-icons/fa";
 import { TbPlayerTrackNextFilled, TbTrash } from "react-icons/tb";
-import { sanLuongTB, viewDetail } from "../../../api/tb.api";
+import { acceptReceiptTB, sanLuongTB, viewDetail } from "../../../api/tb.api";
 import Loading from '../../../components/loading/Loading';
+import { HiMiniBellAlert } from "react-icons/hi2";
+import AwaitingReception from "../../../components/AwaitingReception";
+import moment from "moment";
 
 const TuBep = () => {
     const { user } = useAppContext();
@@ -35,6 +75,11 @@ const TuBep = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [data, setData] = useState([]);
     const [groupList, setGroupList] = useState([]);
+    const [amount, setAmount] = useState("");
+    const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [packagedAmount, setPackagedAmount] = useState("");
+    const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const [loadingData, setLoadingData] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -63,11 +108,23 @@ const TuBep = () => {
         onClose: onModalClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isModalNotiOpen,
+        onOpen: onModalNotiOpen,
+        onClose: onModalNotiClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isAlertDialogOpen,
+        onOpen: onAlertDialogOpen,
+        onClose: onAlertDialogClose,
+    } = useDisclosure();
+
     const getDataTB = async () => {
         try {
             setLoadingData(true);
             const res = await sanLuongTB({
-                TO: 'NMTH-X03-TC1'
+                TO: selectedGroup.value
             });
 
             if (typeof res?.data === "object") {
@@ -89,16 +146,18 @@ const TuBep = () => {
     };
 
     const viewProductionsDetails = async (itemTB, itemDetail, lsx) => {
+        console.log("itemTB", itemTB);
+
         setLsxSelected({
             lsx,
             itemDetail,
             itemTB
         });
 
-        loadPlywoodItemDetailByLSX(itemTB, itemDetail, lsx);
+        loadItemByLSX(itemTB, itemDetail, lsx);
     };
 
-    const loadPlywoodItemDetailByLSX = async (itemTB, itemDetail, lsx) => {
+    const loadItemByLSX = async (itemTB, itemDetail, lsx) => {
         try {
             setLoading(true);
             const params = {
@@ -152,7 +211,198 @@ const TuBep = () => {
             itemDetail: null,
             itemTB: null
         });
+
+        setIsItemCodeDetech(false);
+        setConfirmLoading(false);
+        setFaults({});
+        setAmount();
+        setFaultyAmount();
+        onAlertDialogClose();
+        onModalClose();
     }
+
+    const handleSubmitQuantity = async () => {
+        console.log("selectedItemDetails", selectedItemDetails);
+        console.log("lsxselected", lsxSelected);
+        console.log("selectedFaultItem", selectedFaultItem);
+
+        if (amount < 0) {
+            toast.error("Số lượng ghi nhận phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (amount > selectedItemDetails.maxQty) {
+            toast.error("Đã vượt quá số lượng tối đa có thể xuất");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (amount > selectedItemDetails.remainQty - selectedItemDetails.WaitingConfirmQty) {
+            toast.error(
+                <span>
+                    Số lượng ghi nhận (
+                    <span style={{ fontWeight: "bold" }}>{amount}</span>) đã
+                    vượt quá số lượng còn lại phải sản xuất (
+                    <span style={{ fontWeight: "bold" }}>
+                        {selectedItemDetails.remainQty -
+                            selectedItemDetails.WaitingConfirmQty}
+                    </span>
+                    )
+                </span>
+            );
+            onAlertDialogClose();
+            return;
+        }
+
+        if (faultyAmount < 0) {
+            toast.error("Số lượng lỗi phải lớn hơn 0");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (faultyAmount > selectedItemDetails.maxQty) {
+            toast.error("Đã vượt quá số lượng lỗi có thể ghi nhận");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (selectedFaultItem.SubItemCode === "" && selectedFaultItem.ItemCode === "" && faultyAmount) {
+            toast.error("Vui lòng chọn sản phẩm cần ghi nhận lỗi");
+            onAlertDialogClose();
+            return;
+        }
+
+        if (selectedFaultItem.ItemCode !== "" && parseInt(faultyAmount) + parseInt(amount) > parseInt(selectedItemDetails.maxQty)) {
+            toast.error(
+                <span>
+                    Tổng số lượng ghi nhận (
+                    <span style={{ fontWeight: "bold" }}>
+                        {parseInt(faultyAmount) + parseInt(amount)}
+                    </span>
+                    ) đã vượt quá số lượng tối đa có thể xuất (
+                    <span style={{ fontWeight: "bold" }}>
+                        {selectedItemDetails.maxQty}
+                    </span>
+                    )
+                </span>
+            );
+            return;
+        }
+        const Data = isItemCodeDetech
+            ? {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+            }
+            : {
+                SubItemWhs: selectedItemDetails.SubItemWhs,
+                SubItemQty: selectedItemDetails.stocks.map((item) => ({
+                    SubItemCode: item.SubItemCode,
+                    BaseQty: item.BaseQty,
+                })),
+            };
+
+        try {
+            setConfirmLoading(true);
+            const payload = {
+                FatherCode: lsxSelected.itemTB.SPDICH,
+                ItemCode: selectedItemDetails.ItemChild,
+                ItemName: selectedItemDetails.ChildName,
+                SubItemName: selectedFaultItem.SubItemName,
+                SubItemCode: selectedFaultItem.SubItemCode,
+                MaThiTruong: lsxSelected.itemTB.MaThiTruong,
+                CDay: selectedItemDetails.CDay,
+                CRong: selectedItemDetails.CRong,
+                CDai: selectedItemDetails.CDai,
+                Team: selectedItemDetails.TO,
+                CongDoan: selectedItemDetails.NameTO,
+                NexTeam: selectedItemDetails.TOTT,
+                Data: Data,
+                Type: "TUBEP",
+                version: choosenItem.Version || "",
+                ProdType: selectedItemDetails.ProdType || "",
+                LSX: lsxSelected.lsx,
+                CompleQty: 0,
+                RejectQty: 0,
+                PackagedQty: 0,
+                KHOI: "CBG" || "",
+                loinhamay: faults?.factory?.value || user.plant || "",
+                Factory: selectedFactory || "",
+            };
+
+
+            if (amount && amount > 0) {
+                payload.CompleQty = Number(amount);
+            }
+            if (faultyAmount && faultyAmount > 0) {
+                payload.RejectQty = Number(faultyAmount);
+            }
+            if (packagedAmount && packagedAmount > 0) {
+                payload.PackagedQty = Number(packagedAmount);
+            }
+            if (payload.FatherCode && payload.ItemCode) {
+                if (payload.CompleQty || payload.RejectQty) {
+                    console.log("payload", payload);
+                    let res = await acceptReceiptTB(payload);
+                    console.log("res", res);
+                    toast.success("Ghi nhận & chuyển tiếp thành công!");
+                    setSelectedFaultItem({
+                        ItemCode: "",
+                        ItemName: "",
+                        SubItemCode: "",
+                        SubItemName: "",
+                        SubItemBaseQty: "",
+                        OnHand: "",
+                    });
+
+                    setIsItemCodeDetech(false);
+                    setConfirmLoading(false);
+                    setFaults({});
+                    setAmount();
+                    setFaultyAmount();
+                    onAlertDialogClose();
+                    onModalClose();
+                } else {
+                    toast("Chưa nhập bất kì số lượng nào.");
+                }
+            } else {
+                toast("Có lỗi xảy ra. Vui lòng thử lại");
+            }
+        } catch (error) {
+            // Xử lý lỗi (nếu có)
+            console.error("Đã xảy ra lỗi:", error);
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            setConfirmLoading(false);
+        }
+
+    };
+
+    const handleConfirmReceipt = (id) => {
+        if (selectedGroup) {
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
+            toast.success("Ghi nhận thành công.");
+        }
+        if (awaitingReception.length <= 0) {
+            onModalNotiClose();
+        }
+    };
+
+    const handleRejectReceipt = (id) => {
+        if (selectedGroup) {
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
+            toast.success("Huỷ bỏ & chuyển lại thành công.");
+        }
+        if (awaitingReception.length <= 0) {
+            onModalNotiClose();
+        }
+    };
 
     useEffect(() => {
         if (!selectedGroup) return;
@@ -311,11 +561,11 @@ const TuBep = () => {
                                             />
                                         </div>
                                     </div>
-                                    {/* {selectedGroup &&
+                                    {selectedGroup &&
                                         !loadingData &&
                                         awaitingReception?.length > 0 && (
                                             <button
-                                                onClick={onModalOpen}
+                                                onClick={onModalNotiOpen}
                                                 className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                             >
                                                 <HiMiniBellAlert className="text-xl" />
@@ -324,7 +574,7 @@ const TuBep = () => {
                                                     nhận
                                                 </div>
                                             </button>
-                                        )} */}
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -753,81 +1003,75 @@ const TuBep = () => {
                                                 selectedItemDetails?.notifications &&
                                                 selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.length > 0 &&
                                                 selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.map((item, index) => (
-                                                    <>
-                                                        <div className="">
-                                                            <div key={"Processing_" + index}
-                                                                className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
-                                                                        {
-                                                                            Number(item?.Quantity)
-                                                                        }
-                                                                    </div>
-                                                                    <Text className="font-semibold text-[15px] ">
-                                                                        Người giao:{" "}
-                                                                        <span className="text-green-700">
-                                                                            {
-                                                                                item?.last_name + " " + item?.first_name
-                                                                            }
-                                                                        </span>
-                                                                    </Text>
+                                                    <div className="" key={"Processing_" + index}>
+                                                        <div key={"Processing_" + index}
+                                                            className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                        >
+                                                            <div className="flex flex-col">
+                                                                <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
                                                                     {
-                                                                        selectedItemDetails?.CongDoan == "DG" && (
-                                                                            <div className="flex text-sm">
-                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
-                                                                                    Số lượng đã đóng gói chờ giao:{" "}
-                                                                                </Text>
-                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
-                                                                                    Đã đóng gói chờ giao:{" "}
-                                                                                </Text>
-                                                                                <span className="ml-1 text-gray-600">
-                                                                                    {
-                                                                                        Number(item?.SLDG || 0)
-                                                                                    }
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
-                                                                    <div className="flex text-sm">
-                                                                        <Text className=" font-medium text-gray-600">
-                                                                            Thời gian  giao:{" "}
-                                                                        </Text>
-                                                                        <span className="ml-1 text-gray-600">
-                                                                            {
-                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""
-                                                                            }
-                                                                            {" "}
-                                                                            {
-                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format() || ""
-                                                                            }
-                                                                        </span>
-                                                                    </div>
+                                                                        Number(item?.Quantity)
+                                                                    }
                                                                 </div>
-                                                                <div className="flex gap-x-6">
-                                                                    <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
+                                                                <Text className="font-semibold text-[15px] ">
+                                                                    Người giao:{" "}
+                                                                    <span className="text-green-700">
                                                                         {
-                                                                            Number(item?.Quantity)
+                                                                            item?.last_name + " " + item?.first_name
                                                                         }
-                                                                    </div>
-
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            // onDeleteProcessingDialogOpen();
-                                                                            // setSelectedDelete(
-                                                                            //     item?.id
-                                                                            // );
-                                                                            // setDialogType(
-                                                                            //     "product"
-                                                                            // );
-                                                                        }}
-                                                                        className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
-                                                                    >
-                                                                        <TbTrash className="text-white text-2xl" />
-                                                                    </button>
+                                                                    </span>
+                                                                </Text>
+                                                                {
+                                                                    selectedItemDetails?.CongDoan == "DG" && (
+                                                                        <div className="flex text-sm">
+                                                                            <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                Số lượng đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                Đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <span className="ml-1 text-gray-600">
+                                                                                {
+                                                                                    Number(item?.SLDG || 0)
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                <div className="flex text-sm">
+                                                                    <Text className=" font-medium text-gray-600">
+                                                                        Thời gian  giao:{" "}
+                                                                    </Text>
+                                                                    <span className="ml-1 text-gray-600">
+                                                                        {
+                                                                            moment(item?.created_at).format("DD/MM/YYYY HH:mm:ss") || ""
+                                                                        }
+                                                                    </span>
                                                                 </div>
                                                             </div>
+                                                            <div className="flex gap-x-6">
+                                                                <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
+                                                                    {
+                                                                        Number(item?.Quantity)
+                                                                    }
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={() => {
+                                                                        // onDeleteProcessingDialogOpen();
+                                                                        // setSelectedDelete(
+                                                                        //     item?.id
+                                                                        // );
+                                                                        // setDialogType(
+                                                                        //     "product"
+                                                                        // );
+                                                                    }}
+                                                                    className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
+                                                                >
+                                                                    <TbTrash className="text-white text-2xl" />
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 ))}
 
                                             {
@@ -888,18 +1132,18 @@ const TuBep = () => {
                                                         min={1}
                                                         className="mt-2 mb-2"
                                                         onChange={(value) => {
-                                                            // if (
-                                                            //     value >
-                                                            //     selectedItemDetails.stockQuantity
-                                                            // ) {
-                                                            //     setAmount(
-                                                            //         selectedItemDetails.stockQuantity
-                                                            //     );
-                                                            // } else {
-                                                            //     setAmount(
-                                                            //         value
-                                                            //     );
-                                                            // }
+                                                            if (
+                                                                value >
+                                                                selectedItemDetails.stockQuantity
+                                                            ) {
+                                                                setAmount(
+                                                                    selectedItemDetails.stockQuantity
+                                                                );
+                                                            } else {
+                                                                setAmount(
+                                                                    value
+                                                                );
+                                                            }
                                                         }}
                                                     >
                                                         <NumberInputField />
@@ -952,8 +1196,7 @@ const TuBep = () => {
                                                     selectedItemDetails?.notifications &&
                                                     selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1)?.length > 0 &&
                                                     selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 1).map((item, index) => (
-                                                        <div
-                                                            key={"Error_" + index}
+                                                        <div key={"Error_" + index}
                                                             className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-red-50 border border-red-300 rounded-xl"
                                                         >
                                                             {/*  */}
@@ -995,9 +1238,9 @@ const TuBep = () => {
                                                                         Thời gian giao:{" "}
                                                                     </Text>
                                                                     <span className="ml-1 text-gray-600">
-                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""}
+                                                                        {moment(item?.created_at).format("DD/MM/YYYY") || ""}
                                                                         {" "}
-                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("HH:mm:ss") || ""}
+                                                                        {moment(item?.created_at).format("HH:mm:ss") || ""}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1036,57 +1279,57 @@ const TuBep = () => {
                                                     min={0}
                                                     className="mt-2"
                                                     onChange={(value) => {
-                                                        // if (
-                                                        //     value >
-                                                        //     selectedItemDetails.stockQuantity
-                                                        // ) {
-                                                        //     setFaultyAmount(
-                                                        //         selectedItemDetails.stockQuantity
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             amount: selectedItemDetails.stockQuantity,
-                                                        //         })
-                                                        //     );
-                                                        // } else {
-                                                        //     setFaultyAmount(
-                                                        //         value
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             amount: value,
-                                                        //         })
-                                                        //     );
-                                                        // }
-                                                        // if (
-                                                        //     value == 0 ||
-                                                        //     !value
-                                                        // ) {
-                                                        //     setSelectedFaultItem(
-                                                        //         {
-                                                        //             ItemCode:
-                                                        //                 "",
-                                                        //             ItemName:
-                                                        //                 "",
-                                                        //             SubItemCode:
-                                                        //                 "",
-                                                        //             SubItemName:
-                                                        //                 "",
-                                                        //             SubItemBaseQty:
-                                                        //                 "",
-                                                        //             OnHand: "",
-                                                        //         }
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 null,
-                                                        //         })
-                                                        //     );
-                                                        // }
+                                                        if (
+                                                            value >
+                                                            selectedItemDetails.stockQuantity
+                                                        ) {
+                                                            setFaultyAmount(
+                                                                selectedItemDetails.stockQuantity
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    amount: selectedItemDetails.stockQuantity,
+                                                                })
+                                                            );
+                                                        } else {
+                                                            setFaultyAmount(
+                                                                value
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    amount: value,
+                                                                })
+                                                            );
+                                                        }
+                                                        if (
+                                                            value == 0 ||
+                                                            !value
+                                                        ) {
+                                                            setSelectedFaultItem(
+                                                                {
+                                                                    ItemCode:
+                                                                        "",
+                                                                    ItemName:
+                                                                        "",
+                                                                    SubItemCode:
+                                                                        "",
+                                                                    SubItemName:
+                                                                        "",
+                                                                    SubItemBaseQty:
+                                                                        "",
+                                                                    OnHand: "",
+                                                                }
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        null,
+                                                                })
+                                                            );
+                                                        }
                                                     }}
                                                 >
                                                     <NumberInputField />
@@ -1107,7 +1350,7 @@ const TuBep = () => {
                                                                     ? "font-semibold text-gray-800 "
                                                                     : "text-gray-600"
                                                                     }`}
-                                                                key={index}
+                                                            // key={index}
                                                             >
                                                                 <Radio
                                                                     value={
@@ -1117,24 +1360,24 @@ const TuBep = () => {
                                                                         selectedFaultItem.ItemCode === choosenItem.ItemChild
                                                                     }
                                                                     onChange={() => {
-                                                                        // setSelectedFaultItem(
-                                                                        //     {
-                                                                        //         ItemCode:
-                                                                        //             choosenItem.ItemChild,
-                                                                        //         ItemName:
-                                                                        //             choosenItem.ChildName,
-                                                                        //         SubItemCode:
-                                                                        //             "",
-                                                                        //         SubItemName:
-                                                                        //             "",
-                                                                        //         SubItemBaseQty:
-                                                                        //             "",
-                                                                        //         OnHand: "",
-                                                                        //     }
-                                                                        // );
-                                                                        // setIsItemCodeDetech(
-                                                                        //     true
-                                                                        // );
+                                                                        setSelectedFaultItem(
+                                                                            {
+                                                                                ItemCode:
+                                                                                    choosenItem.ItemChild,
+                                                                                ItemName:
+                                                                                    choosenItem.ChildName,
+                                                                                SubItemCode:
+                                                                                    "",
+                                                                                SubItemName:
+                                                                                    "",
+                                                                                SubItemBaseQty:
+                                                                                    "",
+                                                                                OnHand: "",
+                                                                            }
+                                                                        );
+                                                                        setIsItemCodeDetech(
+                                                                            true
+                                                                        );
                                                                     }}
                                                                 >
                                                                     {
@@ -1208,7 +1451,7 @@ const TuBep = () => {
                                                         </>
                                                     ))}
                                             </Box>
-                                            <Box className="px-0 pt-2">
+                                            {/* <Box className="px-0 pt-2">
                                                 <label className="font-semibold">
                                                     Lỗi phôi nhận từ nhà máy  khác:
                                                 </label>
@@ -1222,29 +1465,29 @@ const TuBep = () => {
                                                     isSearchable
                                                     value={faults.factory}
                                                     onChange={(value) => {
-                                                        // if (
-                                                        //     !faultyAmount ||
-                                                        //     faultyAmount < 1
-                                                        // ) {
-                                                        //     toast(
-                                                        //         "Vui lòng khai báo số lượng lỗi."
-                                                        //     );
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 null,
-                                                        //         })
-                                                        //     );
-                                                        // } else {
-                                                        //     setFaults(
-                                                        //         (prev) => ({
-                                                        //             ...prev,
-                                                        //             factory:
-                                                        //                 value,
-                                                        //         })
-                                                        //     );
-                                                        // }
+                                                        if (
+                                                            !faultyAmount ||
+                                                            faultyAmount < 1
+                                                        ) {
+                                                            toast(
+                                                                "Vui lòng khai báo số lượng lỗi."
+                                                            );
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        null,
+                                                                })
+                                                            );
+                                                        } else {
+                                                            setFaults(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    factory:
+                                                                        value,
+                                                                })
+                                                            );
+                                                        }
                                                     }}
                                                 />
                                                 <p className="text-sm text-gray-500 mb-1">
@@ -1252,7 +1495,7 @@ const TuBep = () => {
                                                     nhận là của nhà máy hiện
                                                     tại.
                                                 </p>
-                                            </Box>
+                                            </Box> */}
                                         </div>
                                     </div>
                                 </div>
@@ -1283,12 +1526,14 @@ const TuBep = () => {
                                             clearData();
                                             onModalClose();
 
+
                                         }}
                                         className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
                                     >
                                         Đóng
                                     </button>
                                     <button
+                                        onClick={onAlertDialogOpen}
                                         className="bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75  transition-all xl:w-fit md:w-fit w-full text-white"
                                         type="button"
                                     >
@@ -1301,6 +1546,137 @@ const TuBep = () => {
                 )
             }
 
+            <AlertDialog
+                isOpen={isAlertDialogOpen}
+                closeOnOverlayClick={false}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>Xác nhận ghi nhận</AlertDialogHeader>
+                        <AlertDialogBody>
+                            {(amount && amount !== "") ||
+                                (faultyAmount && faultyAmount !== "") ? (
+                                <div className="space-y-1">
+                                    {packagedAmount && (
+                                        <div className="text-yellow-700">
+                                            Số lượng đã đóng gói chờ giao:{" "}
+                                            <span className="font-bold">
+                                                {packagedAmount || 0}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {amount && (
+                                        <div className="text-green-700">
+                                            Ghi nhận sản lượng:{" "}
+                                            <span className="font-bold">
+                                                {amount}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {faultyAmount && (
+                                        <div className="text-red-700">
+                                            Ghi nhận lỗi:{" "}
+                                            <span className="font-bold">
+                                                {faultyAmount}
+                                            </span>
+                                            {faults &&
+                                                faults.ItemCode &&
+                                                faults.factory && (
+                                                    <span>
+                                                        {" "}
+                                                        từ{" "}
+                                                        {
+                                                            faults
+                                                                .factory
+                                                                .label
+                                                        }
+                                                    </span>
+                                                )}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <p>
+                                    Bạn chưa ghi nhận bất kỳ giá trị
+                                    nào.
+                                </p>
+                            )}
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
+                            <button
+                                disabled={confirmLoading}
+                                className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleSubmitQuantity}
+                            >
+                                {confirmLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+
+            <Modal
+                isCentered
+                isOpen={isModalNotiOpen}
+                size="full"
+                onClose={onModalNotiClose}
+                scrollBehavior="inside"
+            >
+                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                <ModalContent>
+                    <ModalHeader className="!p-2.5 ">
+                        <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
+                            Danh sách phôi chờ nhận
+                        </h1>
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="bg-gray-100 !p-4">
+                        <div className="flex gap-4 justify-center h-full">
+                            {selectedGroup && awaitingReception?.length > 0 ? (
+                                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                    {awaitingReception.map((item, index) => (
+                                        <AwaitingReception
+                                            type="CBG-TUBEP"
+                                            data={item}
+                                            key={index}
+                                            index={index}
+                                            isQualityCheck={isQualityCheck}
+                                            onConfirmReceipt={
+                                                handleConfirmReceipt
+                                            }
+                                            onRejectReceipt={
+                                                handleRejectReceipt
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex w-full min-h-[80vh] justify-center items-center">
+                                    <div className="text-center text-gray-600">
+                                        <div className="text-xl font-semibold">
+                                            Hệ thống chưa nhận được dữ liệu ghi
+                                            nhận nào.
+                                        </div>
+                                        <div>
+                                            Vui lòng ghi nhận và thử lại sau.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </Layout >
     );
 }
