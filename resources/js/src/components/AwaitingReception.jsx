@@ -41,7 +41,7 @@ import useAppContext from "../store/AppContext";
 import { TbClock } from "react-icons/tb";
 import { id } from "date-fns/locale";
 import { acceptVCNRong, accpetVCNQCRong } from "../api/vcn.api";
-import { confirmAcceptReceipt, confirmRejectTB } from "../api/tb.api";
+import { checkReceiptTB, confirmAcceptReceipt, confirmRejectTB } from "../api/tb.api";
 
 const reasonOfReturn = [
     {
@@ -90,7 +90,7 @@ const AwaitingReception = ({
     onRejectReceipt,
     CongDoan,
     variant,
-    Factory,
+    Factory
 }) => {
     const errorTypeRef = useRef();
     const solutionRef = useRef();
@@ -364,6 +364,13 @@ const AwaitingReception = ({
                         Factory: Factory || null,
                     });
                     break;
+                case "CBG-TUBEP":
+                    const resRejectTB = await checkReceiptTB({
+                        id: data?.id,
+                    });
+                    console.log("resRejectTB", resRejectTB);
+                    
+                    break;
                 default:
                     res = await productionApi.checkReceiptsCBG({
                         id: data?.id,
@@ -490,8 +497,8 @@ const AwaitingReception = ({
         <>
             <div
                 className={`bg-white rounded-xl ${variant === "QC"
-                        ? " border-2 border-gray-200 !shadow-md"
-                        : " border-2 border-gray-200 !shadow-md"
+                    ? " border-2 border-gray-200 !shadow-md"
+                    : " border-2 border-gray-200 !shadow-md"
                     } `}
             >
                 <div className="!px-5 !py-3.5">

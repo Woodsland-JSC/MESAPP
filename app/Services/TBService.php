@@ -653,7 +653,7 @@ class TBService
                         'confirm_at' => Carbon::now()->format('YmdHis'),
                         'document_log' => json_encode($documentLog)
                     ]);
-                    AwaitingstocksTb::where('notiId', $data->id)->delete(); 
+                    AwaitingstocksTb::where('notiId', $data->id)->delete();
                 } else {
                     $this->throwSAPError($res);
                 }
@@ -786,5 +786,96 @@ class TBService
             DB::rollBack();
             return response()->json(['message' => 'Trả lại không thành công', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    function checkReceiptTB($id)
+    {
+        $dataNoti = NotireceiptTb::query()->where('id', '=', $id)->first();
+        if (!$dataNoti) {
+            return response()->json([
+                'error' => true,
+                'status_code' => 500,
+                'message' => 'Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.',
+            ], 500);
+        }
+        $requiredInventory = $this->getRequiredInventory($dataNoti->ItemCode, $dataNoti->LSX, $dataNoti->team);
+
+        // Kiểm tra xem có nguyên vật liệu nào không đủ
+        if (count($requiredInventory) != 0) {
+            return response()->json([
+                'message' => 'Nguyên vật liệu đã đủ để giao nhận.',
+                'requiredInventory' => $requiredInventory,
+            ], 200);
+        } else {
+            return response()->json([
+                'error' => true,
+                'status_code' => 40001,
+                'message' => 'Nguyên vật liệu không đủ để giao nhận',
+                'requiredInventory' => $requiredInventory,
+            ], 500);
+        }
+    }
+
+    private function getRequiredInventory($itemCode, $lsx, $to)
+    {
+        $requiredItems = [];
+        $groupedItems = [];
+
+        // Truy vấn view UV_TONKHOSAP để lấy thông tin
+        $query = <<<SQL
+            SELECT
+                "DocNum",
+                "U_GRID",
+                "U_To",
+                "U_CDOAN",
+                "U_SPDICH",
+                "ItemCode",
+                "ItemName",
+                "SubItemCode",
+                "SubItemName",
+                "wareHouse",
+                "BaseQty" AS "DinhMuc",
+                "Factory",
+                (("PlannedQty" - "IssuedQty")) AS "SoLuongConPhaiSanXuat",
+                "OnHand" AS "TonTaiTo",
+                ROUND(("PlannedQty" - "IssuedQty") - "OnHand") AS "SoLuongToiThieuCanBoSung"
+            FROM UV_TONKHOSAP
+            WHERE "ItemCode" = ?
+            AND "U_GRID" = ?
+            AND "U_To"= ?
+            AND ROUND(("PlannedQty" - "IssuedQty") - "OnHand") > 0
+        SQL;
+
+        $results = $this->hanaService->select($query, [$itemCode, $lsx, $to]);
+
+        // Nhóm dữ liệu theo SubItemCode và wareHouse
+        foreach ($results as $item) {
+            // Tính toán số lượng tối thiểu cần bổ sung
+            $requiredQuantity = (float)$item['SoLuongToiThieuCanBoSung'];
+
+            $key = $item['SubItemCode'] . '_' . $item['wareHouse'];
+
+            if (!isset($groupedItems[$key])) {
+                $groupedItems[$key] = [
+                    'SubItemCode' => $item['SubItemCode'],
+                    'SubItemName' => $item['SubItemName'],
+                    'wareHouse' => $item['wareHouse'],
+                    'requiredQuantity' => $requiredQuantity,
+                    'DinhMuc' => (float)$item['DinhMuc']
+                ];
+            } else {
+                // Cộng dồn số lượng cần bổ sung nếu đã có cùng SubItemCode và wareHouse
+                $groupedItems[$key]['requiredQuantity'] += $requiredQuantity;
+            }
+        }
+
+        // Chuyển từ mảng kết hợp sang mảng tuần tự
+        foreach ($groupedItems as $item) {
+            // Làm tròn số lượng để dễ đọc
+            $item['requiredQuantity'] = round($item['requiredQuantity'], 2);
+            $requiredItems[] = $item;
+        }
+
+        return $requiredItems;
     }
 }

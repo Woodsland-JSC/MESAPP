@@ -81,4 +81,9 @@ class TBController extends Controller
 
         return $tbService->confirmRejectTB($request->all());
     }
+
+    function checkReceiptTB(Request $request, TBService $tbService)
+    {
+        return $tbService->checkReceiptTB($request->query('id'));
+    }
 }

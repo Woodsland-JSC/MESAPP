@@ -25,3 +25,9 @@ export const confirmAcceptReceipt = (data) => {
 export const confirmRejectTB = (data) => {
     return axiosClient().post(`${BASEURL}/confirmRejectTB`, data);
 }
+
+export const checkReceiptTB = (params) => {
+    return axiosClient().get(`${BASEURL}/checkReceiptTB`, {
+        params
+    });
+}
