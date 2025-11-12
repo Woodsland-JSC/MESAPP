@@ -55,6 +55,9 @@ import { FaExclamationCircle } from "react-icons/fa";
 import { TbPlayerTrackNextFilled, TbTrash } from "react-icons/tb";
 import { acceptReceiptTB, sanLuongTB, viewDetail } from "../../../api/tb.api";
 import Loading from '../../../components/loading/Loading';
+import { HiMiniBellAlert } from "react-icons/hi2";
+import AwaitingReception from "../../../components/AwaitingReception";
+import moment from "moment";
 
 const TuBep = () => {
     const { user } = useAppContext();
@@ -76,6 +79,7 @@ const TuBep = () => {
     const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [packagedAmount, setPackagedAmount] = useState("");
+    const [isQualityCheck, setIsQualityCheck] = useState(false);
 
     const [loadingData, setLoadingData] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -102,6 +106,12 @@ const TuBep = () => {
         isOpen: isModalOpen,
         onOpen: onModalOpen,
         onClose: onModalClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: isModalNotiOpen,
+        onOpen: onModalNotiOpen,
+        onClose: onModalNotiClose,
     } = useDisclosure();
 
     const {
@@ -208,11 +218,13 @@ const TuBep = () => {
         setAmount();
         setFaultyAmount();
         onAlertDialogClose();
+        onModalClose();
     }
 
     const handleSubmitQuantity = async () => {
         console.log("selectedItemDetails", selectedItemDetails);
         console.log("lsxselected", lsxSelected);
+        console.log("selectedFaultItem", selectedFaultItem);
 
         if (amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
@@ -277,9 +289,6 @@ const TuBep = () => {
             );
             return;
         }
-
-        setConfirmLoading(true);
-        // Object chứa dữ liệu lỗi
         const Data = isItemCodeDetech
             ? {
                 SubItemWhs: selectedItemDetails.SubItemWhs,
@@ -297,6 +306,7 @@ const TuBep = () => {
             };
 
         try {
+            setConfirmLoading(true);
             const payload = {
                 FatherCode: lsxSelected.itemTB.SPDICH,
                 ItemCode: selectedItemDetails.ItemChild,
@@ -354,6 +364,7 @@ const TuBep = () => {
                     setAmount();
                     setFaultyAmount();
                     onAlertDialogClose();
+                    onModalClose();
                 } else {
                     toast("Chưa nhập bất kì số lượng nào.");
                 }
@@ -364,8 +375,33 @@ const TuBep = () => {
             // Xử lý lỗi (nếu có)
             console.error("Đã xảy ra lỗi:", error);
             toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            setConfirmLoading(false);
         }
 
+    };
+
+    const handleConfirmReceipt = (id) => {
+        if (selectedGroup) {
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
+            toast.success("Ghi nhận thành công.");
+        }
+        if (awaitingReception.length <= 0) {
+            onModalNotiClose();
+        }
+    };
+
+    const handleRejectReceipt = (id) => {
+        if (selectedGroup) {
+            setAwaitingReception((prev) =>
+                prev.filter((item) => item.id !== id)
+            );
+            toast.success("Huỷ bỏ & chuyển lại thành công.");
+        }
+        if (awaitingReception.length <= 0) {
+            onModalNotiClose();
+        }
     };
 
     useEffect(() => {
@@ -525,11 +561,11 @@ const TuBep = () => {
                                             />
                                         </div>
                                     </div>
-                                    {/* {selectedGroup &&
+                                    {selectedGroup &&
                                         !loadingData &&
                                         awaitingReception?.length > 0 && (
                                             <button
-                                                onClick={onModalOpen}
+                                                onClick={onModalNotiOpen}
                                                 className="!ml-0 mt-3 sm:mt-0 sm:!ml-4 w-full sm:w-fit backdrop:sm:w-fit h-full space-x-2 inline-flex items-center bg-green-500 p-2.5 rounded-xl text-white px-4 active:scale-[.95] active:duration-75 transition-all"
                                             >
                                                 <HiMiniBellAlert className="text-xl" />
@@ -538,7 +574,7 @@ const TuBep = () => {
                                                     nhận
                                                 </div>
                                             </button>
-                                        )} */}
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -967,81 +1003,75 @@ const TuBep = () => {
                                                 selectedItemDetails?.notifications &&
                                                 selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.length > 0 &&
                                                 selectedItemDetails?.notifications.filter((notif) => notif.confirm == 0 && notif.type == 0)?.map((item, index) => (
-                                                    <>
-                                                        <div className="">
-                                                            <div key={"Processing_" + index}
-                                                                className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
-                                                                        {
-                                                                            Number(item?.Quantity)
-                                                                        }
-                                                                    </div>
-                                                                    <Text className="font-semibold text-[15px] ">
-                                                                        Người giao:{" "}
-                                                                        <span className="text-green-700">
-                                                                            {
-                                                                                item?.last_name + " " + item?.first_name
-                                                                            }
-                                                                        </span>
-                                                                    </Text>
+                                                    <div className="" key={"Processing_" + index}>
+                                                        <div key={"Processing_" + index}
+                                                            className="relative flex justify-between items-center p-2.5 px-3 !mb-4  gap-2 bg-green-50 border border-green-300 rounded-xl"
+                                                        >
+                                                            <div className="flex flex-col">
+                                                                <div className="xl:hidden lg:hidden md:hidden block  text-green-700 text-2xl">
                                                                     {
-                                                                        selectedItemDetails?.CongDoan == "DG" && (
-                                                                            <div className="flex text-sm">
-                                                                                <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
-                                                                                    Số lượng đã đóng gói chờ giao:{" "}
-                                                                                </Text>
-                                                                                <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
-                                                                                    Đã đóng gói chờ giao:{" "}
-                                                                                </Text>
-                                                                                <span className="ml-1 text-gray-600">
-                                                                                    {
-                                                                                        Number(item?.SLDG || 0)
-                                                                                    }
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
-                                                                    <div className="flex text-sm">
-                                                                        <Text className=" font-medium text-gray-600">
-                                                                            Thời gian  giao:{" "}
-                                                                        </Text>
-                                                                        <span className="ml-1 text-gray-600">
-                                                                            {
-                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""
-                                                                            }
-                                                                            {" "}
-                                                                            {
-                                                                                moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format() || ""
-                                                                            }
-                                                                        </span>
-                                                                    </div>
+                                                                        Number(item?.Quantity)
+                                                                    }
                                                                 </div>
-                                                                <div className="flex gap-x-6">
-                                                                    <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
+                                                                <Text className="font-semibold text-[15px] ">
+                                                                    Người giao:{" "}
+                                                                    <span className="text-green-700">
                                                                         {
-                                                                            Number(item?.Quantity)
+                                                                            item?.last_name + " " + item?.first_name
                                                                         }
-                                                                    </div>
-
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            // onDeleteProcessingDialogOpen();
-                                                                            // setSelectedDelete(
-                                                                            //     item?.id
-                                                                            // );
-                                                                            // setDialogType(
-                                                                            //     "product"
-                                                                            // );
-                                                                        }}
-                                                                        className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
-                                                                    >
-                                                                        <TbTrash className="text-white text-2xl" />
-                                                                    </button>
+                                                                    </span>
+                                                                </Text>
+                                                                {
+                                                                    selectedItemDetails?.CongDoan == "DG" && (
+                                                                        <div className="flex text-sm">
+                                                                            <Text className="xl:block lg:block md:block hidden font-medium text-gray-600">
+                                                                                Số lượng đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <Text className="xl:hidden lg:hidden md:hidden  block font-medium text-gray-600">
+                                                                                Đã đóng gói chờ giao:{" "}
+                                                                            </Text>
+                                                                            <span className="ml-1 text-gray-600">
+                                                                                {
+                                                                                    Number(item?.SLDG || 0)
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                <div className="flex text-sm">
+                                                                    <Text className=" font-medium text-gray-600">
+                                                                        Thời gian  giao:{" "}
+                                                                    </Text>
+                                                                    <span className="ml-1 text-gray-600">
+                                                                        {
+                                                                            moment(item?.created_at).format("DD/MM/YYYY HH:mm:ss") || ""
+                                                                        }
+                                                                    </span>
                                                                 </div>
                                                             </div>
+                                                            <div className="flex gap-x-6">
+                                                                <div className="xl:block lg:block md:block hidden text-green-700 rounded-lg cursor-pointer px-3 py-1 bg-green-200 font-semibold !mr-6">
+                                                                    {
+                                                                        Number(item?.Quantity)
+                                                                    }
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={() => {
+                                                                        // onDeleteProcessingDialogOpen();
+                                                                        // setSelectedDelete(
+                                                                        //     item?.id
+                                                                        // );
+                                                                        // setDialogType(
+                                                                        //     "product"
+                                                                        // );
+                                                                    }}
+                                                                    className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
+                                                                >
+                                                                    <TbTrash className="text-white text-2xl" />
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 ))}
 
                                             {
@@ -1208,9 +1238,9 @@ const TuBep = () => {
                                                                         Thời gian giao:{" "}
                                                                     </Text>
                                                                     <span className="ml-1 text-gray-600">
-                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("DD/MM/YYYY") || ""}
+                                                                        {moment(item?.created_at).format("DD/MM/YYYY") || ""}
                                                                         {" "}
-                                                                        {moment(item?.created_at, "YYYY-MM-DD HH:mm:ss").format("HH:mm:ss") || ""}
+                                                                        {moment(item?.created_at).format("HH:mm:ss") || ""}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1594,6 +1624,59 @@ const TuBep = () => {
                 </AlertDialogOverlay>
             </AlertDialog>
 
+            <Modal
+                isCentered
+                isOpen={isModalNotiOpen}
+                size="full"
+                onClose={onModalNotiClose}
+                scrollBehavior="inside"
+            >
+                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                <ModalContent>
+                    <ModalHeader className="!p-2.5 ">
+                        <h1 className="pl-4 text-xl lg:text-2xl serif font-bold ">
+                            Danh sách phôi chờ nhận
+                        </h1>
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="bg-gray-100 !p-4">
+                        <div className="flex gap-4 justify-center h-full">
+                            {selectedGroup && awaitingReception?.length > 0 ? (
+                                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 lg:grid-cols-3">
+                                    {awaitingReception.map((item, index) => (
+                                        <AwaitingReception
+                                            type="CBG-TUBEP"
+                                            data={item}
+                                            key={index}
+                                            index={index}
+                                            isQualityCheck={isQualityCheck}
+                                            onConfirmReceipt={
+                                                handleConfirmReceipt
+                                            }
+                                            onRejectReceipt={
+                                                handleRejectReceipt
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex w-full min-h-[80vh] justify-center items-center">
+                                    <div className="text-center text-gray-600">
+                                        <div className="text-xl font-semibold">
+                                            Hệ thống chưa nhận được dữ liệu ghi
+                                            nhận nào.
+                                        </div>
+                                        <div>
+                                            Vui lòng ghi nhận và thử lại sau.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </Layout >
     );
 }

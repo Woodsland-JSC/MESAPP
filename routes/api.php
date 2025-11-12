@@ -251,10 +251,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('sanLuongTB', [TBController::class, 'sanLuongTB'])->name('sanLuongTB');
         Route::get('viewDetail', [TBController::class, 'viewDetail'])->name('viewDetail');
         Route::post('acceptReceiptTB', [TBController::class, 'acceptReceiptTB'])->name('acceptReceiptTB');
-
-        
-
-        
+        Route::post('confirmAcceptReceipt', [TBController::class, 'confirmAcceptReceipt'])->name('confirmAcceptReceipt');
+        Route::post('confirmRejectTB', [TBController::class, 'confirmRejectTB'])->name('confirmRejectTB');
     });
 });
 

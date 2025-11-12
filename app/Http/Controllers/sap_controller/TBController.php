@@ -45,7 +45,7 @@ class TBController extends Controller
             'Team' => 'required|string|max:254',
             'CongDoan' => 'required|string|max:254',
             'NexTeam' => 'required|string|max:254',
-            'ProdType' => 'required|string|max:254',
+            // 'ProdType' => 'required|string|max:254',
             'loinhamay' => 'required',
         ]);
 
@@ -54,5 +54,31 @@ class TBController extends Controller
         }
 
         return  $tbService->acceptReceiptTB($request->all());
+    }
+
+    public function confirmAcceptReceipt(Request $request, TBService $tbService)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        return $tbService->confirmAcceptReceipt($request->all());
+    }
+
+    function confirmRejectTB(Request $request, TBService $tbService)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'reason' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
+        }
+
+        return $tbService->confirmRejectTB($request->all());
     }
 }

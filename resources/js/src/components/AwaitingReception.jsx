@@ -41,6 +41,7 @@ import useAppContext from "../store/AppContext";
 import { TbClock } from "react-icons/tb";
 import { id } from "date-fns/locale";
 import { acceptVCNRong, accpetVCNQCRong } from "../api/vcn.api";
+import { confirmAcceptReceipt, confirmRejectTB } from "../api/tb.api";
 
 const reasonOfReturn = [
     {
@@ -223,13 +224,16 @@ const AwaitingReception = ({
                     Factory: Factory || null,
                 };
                 let res;
-                
+
                 if (payload.id) {
                     switch (type) {
                         case "plywood":
                             res = await (variant === "QC"
                                 ? (data.CongDoan == 'RO' ? accpetVCNQCRong(payload) : productionApi.acceptReceiptsVCNQC(payload))
                                 : (data.CongDoan == 'RO' ? acceptVCNRong(payload) : productionApi.acceptReceiptsVCN(payload)))
+                            break;
+                        case "CBG-TUBEP":
+                            res = await confirmAcceptReceipt(payload);
                             break;
                         default:
                             res = await (variant === "QC"
@@ -305,6 +309,9 @@ const AwaitingReception = ({
                             const res1 = await productionApi.rejectReceiptsVCN(
                                 payload
                             );
+                            break;
+                        case "CBG-TUBEP":
+                            const resRejectTB = await confirmRejectTB(payload);
                             break;
                         default:
                             const res2 = await productionApi.rejectReceiptsCBG(
@@ -482,11 +489,10 @@ const AwaitingReception = ({
     return (
         <>
             <div
-                className={`bg-white rounded-xl ${
-                    variant === "QC"
+                className={`bg-white rounded-xl ${variant === "QC"
                         ? " border-2 border-gray-200 !shadow-md"
                         : " border-2 border-gray-200 !shadow-md"
-                } `}
+                    } `}
             >
                 <div className="!px-5 !py-3.5">
                     <Stack mt="1" spacing="4.5px">
@@ -494,8 +500,8 @@ const AwaitingReception = ({
                             <div className="flex items-center justify-between gap-x-3 mb-1.5">
                                 <div className="">
                                     {data?.loinhamay != null &&
-                                    data?.loinhamay != user.plant &&
-                                    data?.type == "1" ? (
+                                        data?.loinhamay != user.plant &&
+                                        data?.type == "1" ? (
                                         <div className="flex grid-cols-1 items-center space-x-1">
                                             <MdOutlineSubdirectoryArrowRight className="w-5 h-5 text-red-700" />
                                             <Text
@@ -508,14 +514,14 @@ const AwaitingReception = ({
                                                 {data?.loinhamay == "YS"
                                                     ? "Yên Sơn"
                                                     : data?.loinhamay == "TH"
-                                                    ? "Thuận Hưng"
-                                                    : data?.loinhamay == "TB"
-                                                    ? "Thái Bình"
-                                                    : data?.loinhamay == "CH"
-                                                    ? "Chiêm Hóa"
-                                                    : data?.loinhamay == "VF"
-                                                    ? "Viforex"
-                                                    : "không xác định"}
+                                                        ? "Thuận Hưng"
+                                                        : data?.loinhamay == "TB"
+                                                            ? "Thái Bình"
+                                                            : data?.loinhamay == "CH"
+                                                                ? "Chiêm Hóa"
+                                                                : data?.loinhamay == "VF"
+                                                                    ? "Viforex"
+                                                                    : "không xác định"}
                                             </Text>
                                         </div>
                                     ) : (
@@ -535,15 +541,15 @@ const AwaitingReception = ({
                             <span className="font-bold text-[20px] text-[#155979]">
                                 {variant === "QC"
                                     ? data?.SubItemName ||
-                                      data?.ItemName ||
-                                      "Sản phẩm không xác định"
+                                    data?.ItemName ||
+                                    "Sản phẩm không xác định"
                                     : data?.ItemName ||
-                                      data?.CDay +
-                                          "x" +
-                                          data?.CRong +
-                                          "x" +
-                                          data?.CDai ||
-                                      "Sản phẩm không xác định"}
+                                    data?.CDay +
+                                    "x" +
+                                    data?.CRong +
+                                    "x" +
+                                    data?.CDai ||
+                                    "Sản phẩm không xác định"}
                             </span>
                             <div className="flex justify-between">
                                 <div className="flex grid-cols-1 items-center space-x-1">
@@ -1075,9 +1081,9 @@ const AwaitingReception = ({
                                     {reason
                                         ? reason
                                         : reasonOfReturn.find(
-                                              (item) =>
-                                                  item.value == selectedReason
-                                          )?.label}
+                                            (item) =>
+                                                item.value == selectedReason
+                                        )?.label}
                                 </span>{" "}
                                 ?
                             </div>

@@ -17,4 +17,5 @@ class AwaitingstocksTb extends Model
         'wareHouse',
         'team',
     ];
+    public $timestamps = false;
 }
