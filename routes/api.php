@@ -188,7 +188,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * NEW
      * 17-10-2025
      * 
-     * */ 
+     * */
 
     Route::get('/ORSC/layDanhSachToTheoNhaMayCBG', [ORSCController::class, 'layDanhSachToTheoNhaMayCBG'])->name('layDanhSachToTheoNhaMayCBG');
 
@@ -200,19 +200,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getTeamUTub', [SapMasterDataController::class, 'getTeamUTub'])->name('getTeamUTub');
     });
 
-    Route::group(['prefix' => 'sap/report'], function(){
+    Route::group(['prefix' => 'sap/report'], function () {
         Route::get('baoCaoSanLuongQuyDoiCBG', [Sap_controllerReportController::class, 'baoCaoSanLuongQuyDoiCBG'])->name('baoCaoSanLuongQuyDoiCBG');
         Route::get('bao-cao-quy-luong-cbg', [Sap_controllerReportController::class, 'baoCaoQuyLuongCBG'])->name('baoCaoQuyLuongCBG');
     });
 
-    Route::group(['prefix' => 'sap/oven'], function(){
+    Route::group(['prefix' => 'sap/oven'], function () {
         Route::get('getOvensByFactory', [OvenController::class, 'getOvensByFactory'])->name('getOvensByFactory');
     });
 
 
-    
 
-    Route::group(['prefix' => 'mes/plan-drying'], function(){
+
+    Route::group(['prefix' => 'mes/plan-drying'], function () {
         Route::get('sendPlanDryingToStockController', [PlanDryingController::class, 'sendPlanDryingToStockController'])->name('sendPlanDryingToStockController');
         Route::get('getAllPlantInPlanDrying', [PlanDryingController::class, 'getAllPlantInPlanDrying'])->name('getAllPlantInPlanDrying');
         Route::get('getPlanDryingByFactory', [PlanDryingController::class, 'getPlanDryingByFactory'])->name('getPlanDryingByFactory');
@@ -221,38 +221,35 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('removePallets', [PlanDryingController::class, 'removePallets'])->name('removePallets');
         Route::delete('removePlanDrying', [PlanDryingController::class, 'removePlanDrying'])->name('removePlanDrying');
 
-        
+
         Route::get('getOvenIsDrying', [PlanDryingController::class, 'getOvenIsDrying'])->name('getOvenIsDrying');
     });
 
-    Route::group(['prefix' => 'mes/users'], function(){
+    Route::group(['prefix' => 'mes/users'], function () {
         Route::get('danhSachThuKho', [MesUserController::class, 'danhSachThuKho'])->name('danhSachThuKho');
-        
     });
 
-    Route::group(['prefix' => 'mes/pallet-log'], function(){
+    Route::group(['prefix' => 'mes/pallet-log'], function () {
         Route::get('getLogsByFactory', [PalletLogController::class, 'getLogsByFactory'])->name('getLogsByFactory');
-        
     });
 
-    Route::group(['prefix' => 'mes/pallet'], function(){
+    Route::group(['prefix' => 'mes/pallet'], function () {
         Route::get('getPalletReport', [PalletController::class, 'getPalletReport'])->name('getPalletReport');
-        
     });
 
-    Route::group(['prefix' => 'sap/vcn'], function(){
+    Route::group(['prefix' => 'sap/vcn'], function () {
         Route::get('receiptsProductionsDetail', [VcnController::class, 'receiptsProductionsDetail'])->name('receiptsProductionsDetail');
         Route::post('ghiNhanSanLuongVCN', [VcnController::class, 'ghiNhanSanLuongVCN'])->name('ghiNhanSanLuongVCN');
         Route::get('receiptsProductionsDetailRong', [VcnController::class, 'receiptsProductionsDetailRong'])->name('receiptsProductionsDetailRong');
-        
     });
-    
-    Route::group(['prefix' => 'sap/tb'], function(){
+
+    Route::group(['prefix' => 'sap/tb'], function () {
         Route::get('sanLuongTB', [TBController::class, 'sanLuongTB'])->name('sanLuongTB');
         Route::get('viewDetail', [TBController::class, 'viewDetail'])->name('viewDetail');
         Route::post('acceptReceiptTB', [TBController::class, 'acceptReceiptTB'])->name('acceptReceiptTB');
         Route::post('confirmAcceptReceipt', [TBController::class, 'confirmAcceptReceipt'])->name('confirmAcceptReceipt');
         Route::post('confirmRejectTB', [TBController::class, 'confirmRejectTB'])->name('confirmRejectTB');
+        Route::get('checkReceiptTB', [TBController::class, 'checkReceiptTB'])->name('checkReceiptTB');
     });
 });
 

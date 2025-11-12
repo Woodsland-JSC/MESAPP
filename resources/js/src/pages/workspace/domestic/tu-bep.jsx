@@ -1657,6 +1657,7 @@ const TuBep = () => {
                                             onRejectReceipt={
                                                 handleRejectReceipt
                                             }
+                                            lsxSelect={lsxSelected}
                                         />
                                     ))}
                                 </div>
