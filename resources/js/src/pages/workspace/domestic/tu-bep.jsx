@@ -404,6 +404,35 @@ const TuBep = () => {
         }
     };
 
+    const searchItems = (data, searchTerm) => {
+        if (!searchTerm) {
+            return data;
+        }
+
+        const filteredData = [];
+
+        for (const key in data) {
+            const item = data[key];
+            const filteredDetails = item.Details.filter((detail) => {
+                const subitem = `${detail.ChildName} (${detail.CDay}*${detail.CRong}*${detail.CDai})`;
+
+                // Chuyển đổi cả searchTerm và subitem về chữ thường hoặc chữ hoa trước khi so sánh
+                const searchTermLower = searchTerm.toLowerCase();
+                const subitemLower = subitem.toLowerCase();
+
+                return subitemLower.includes(searchTermLower);
+            });
+
+            if (filteredDetails.length > 0) {
+                filteredData[key] = { ...item, Details: filteredDetails };
+            }
+        }
+
+        return filteredData;
+    };
+
+    const searchResult = searchItems(data, searchTerm);
+
     useEffect(() => {
         if (!selectedGroup) return;
         getDataTB();
@@ -584,8 +613,8 @@ const TuBep = () => {
                         {
                             loadingData ? (
                                 <Loading />
-                            ) : data.length > 0 ? (
-                                data.map((itemTB, index) => (
+                            ) : searchResult.length > 0 ? (
+                                searchResult.map((itemTB, index) => (
                                     <div className="shadow-md relative  rounded-lg bg-white/30 z-1" key={index}>
                                         <div
                                             className=" uppercase text-[18px] font-medium pl-3 bg-[#2A2C31] text-[white] p-2 py-1.5 xl:rounded-t-lg lg:rounded-t-lg md:rounded-t-lg"
