@@ -469,22 +469,44 @@ const TuBep = () => {
         const getFactoriesByBranchId = async () => {
             let selectedBranch = user?.branch;
 
+
+
+
             try {
                 if (selectedBranch) {
-                    factorySelectRef.current.clearValue();
+                    console.log("selectedBranch", selectedBranch);
+                    factorySelectRef?.current?.clearValue();
                     setFactories([]);
+
                     let res = await getFactoryUTub(selectedBranch);
 
-                    let options = res.data.factories.map((item) => ({
-                        value: item.U_FAC,
-                        label: item.Name,
-                    }));
+                    let options = [];
+
+                    res.data.factories.forEach(item => {
+                        if (user?.role == 1) {
+                            options.push({
+                                value: item.U_FAC,
+                                label: item.Name
+                            });
+                        } else {
+                            if (user?.plant == item.U_FAC) {
+                                options.push({
+                                    value: item.U_FAC,
+                                    label: item.Name
+                                });
+                            }
+                        }
+                    });
+
+                    console.log("options", options);
 
                     setFactories(options);
                 } else {
                     setFactories([]);
                 }
             } catch (error) {
+                console.log(error);
+
                 toast.error("Lấy danh sách nhà máy có lỗi.");
             }
         };
@@ -516,22 +538,20 @@ const TuBep = () => {
                         <div className="my-4 mb-2 mt-3 w-full pb-4 rounded-xl bg-white ">
                             <div className="flex flex-col p-4 pb-0  w-full justify-end ">
                                 <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-3 lg:space-x-3 md:space-x-3 space-x-0 ">
-                                    {(user.role == 1 || user.role == 4) && (
-                                        <div className="px-0 w-full">
-                                            <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
-                                                Nhà máy sản xuất
-                                            </div>
-                                            <Select
-                                                ref={factorySelectRef}
-                                                options={factories}
-                                                onChange={(value) => {
-                                                    setSelectedFactory(value);
-                                                }}
-                                                placeholder="Tìm kiếm"
-                                                className="mt-1 mb-3 w-full"
-                                            />
+                                    <div className="px-0 w-full">
+                                        <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900 ">
+                                            Nhà máy sản xuất
                                         </div>
-                                    )}
+                                        <Select
+                                            ref={factorySelectRef}
+                                            options={factories}
+                                            onChange={(value) => {
+                                                setSelectedFactory(value);
+                                            }}
+                                            placeholder="Tìm kiếm"
+                                            className="mt-1 mb-3 w-full"
+                                        />
+                                    </div>
 
                                     <div className="px-0 w-full">
                                         <div className="block xl:text-md lg:text-md md:text-md text-sm font-medium text-gray-900">
