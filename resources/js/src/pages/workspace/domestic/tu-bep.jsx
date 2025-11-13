@@ -127,6 +127,8 @@ const TuBep = () => {
                 TO: selectedGroup.value
             });
 
+            console.log(res);
+
             if (typeof res?.data === "object") {
                 setData(Object.values(res.data));
             } else {
@@ -469,9 +471,6 @@ const TuBep = () => {
         const getFactoriesByBranchId = async () => {
             let selectedBranch = user?.branch;
 
-
-
-
             try {
                 if (selectedBranch) {
                     console.log("selectedBranch", selectedBranch);
@@ -760,32 +759,22 @@ const TuBep = () => {
                                                                                             }
                                                                                         </th>
                                                                                         <td className="px-2 py-2 text-right text-gray-800">
-                                                                                            {formatNumber(
+                                                                                            {
                                                                                                 Number(
                                                                                                     production.SanLuong
-                                                                                                )
-                                                                                            )}
+                                                                                                ).toFixed(6)
+                                                                                            }
                                                                                         </td>
                                                                                         <td className="px-2 py-2 text-right text-gray-900">
-                                                                                            {formatNumber(
-                                                                                                Number(
-                                                                                                    production.DaLam
-                                                                                                )
-                                                                                            )}
+                                                                                            {Number(
+                                                                                                production.DaLam
+                                                                                            ).toFixed(6)}
                                                                                         </td>
                                                                                         <td className="px-2 py-2 text-right text-gray-900">
-                                                                                            {formatNumber(
-                                                                                                Number(
-                                                                                                    production.Loi
-                                                                                                )
-                                                                                            )}
+                                                                                            {Number(production.Loi).toFixed(6)}
                                                                                         </td>
                                                                                         <td className="px-2  py-2 text-right text-gray-800">
-                                                                                            {formatNumber(
-                                                                                                Number(
-                                                                                                    production.ConLai
-                                                                                                )
-                                                                                            )}
+                                                                                            {Number(production.ConLai).toFixed(6)}
                                                                                         </td>
                                                                                     </tr>
                                                                                 )
@@ -801,41 +790,37 @@ const TuBep = () => {
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                                             {
-                                                                                formatNumber(Number(item.LSX.reduce((acc, curr) => acc + Number(curr.SanLuong), 0)))
+                                                                                Number(item.LSX.reduce((acc, curr) => acc + Number(curr.SanLuong), 0)).toFixed(6)
                                                                             }
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
                                                                             {
-                                                                                formatNumber(Number(item.LSX.reduce((acc, curr) => acc + Number(curr.DaLam), 0)))
+                                                                                Number(item.LSX.reduce((acc, curr) => acc + Number(curr.DaLam), 0)).toFixed(6)
                                                                             }
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                            {formatNumber(
-                                                                                Number(
-                                                                                    item.LSX.reduce(
-                                                                                        (acc, curr) =>
-                                                                                            acc +
-                                                                                            Number(
-                                                                                                curr.Loi
-                                                                                            ),
-                                                                                        0
-                                                                                    )
+                                                                            {Number(
+                                                                                item.LSX.reduce(
+                                                                                    (acc, curr) =>
+                                                                                        acc +
+                                                                                        Number(
+                                                                                            curr.Loi
+                                                                                        ),
+                                                                                    0
                                                                                 )
-                                                                            )}
+                                                                            ).toFixed(6)}
                                                                         </td>
                                                                         <td className="px-2 py-2 text-right font-bold text-gray-700">
-                                                                            {formatNumber(
-                                                                                Number(
-                                                                                    item.LSX.reduce(
-                                                                                        (acc, curr) =>
-                                                                                            acc +
-                                                                                            Number(
-                                                                                                curr.ConLai
-                                                                                            ),
-                                                                                        0
-                                                                                    )
+                                                                            {Number(
+                                                                                item.LSX.reduce(
+                                                                                    (acc, curr) =>
+                                                                                        acc +
+                                                                                        Number(
+                                                                                            curr.ConLai
+                                                                                        ),
+                                                                                    0
                                                                                 )
-                                                                            )}
+                                                                            ).toFixed(6)}
                                                                         </td>
                                                                     </tr>
                                                                 </tfoot>
