@@ -975,10 +975,10 @@ const TuBep = () => {
                                                                         </div>
                                                                     </div>
                                                                     <span
-                                                                        className={`${parseInt(item.OnHand || 0) <= 0 ? "bg-gray-500" : "bg-[#155979]"} rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
+                                                                        className={`${Number(item.OnHand || 0) <= 0 ? "bg-gray-500" : "bg-[#155979]"} rounded-lg cursor-pointer px-3 py-1 text-white duration-300`}
                                                                     >
                                                                         {
-                                                                            parseInt(item.OnHand || 0).toLocaleString()
+                                                                            Number(item.OnHand || 0).toFixed(6)
                                                                         }
                                                                     </span>
                                                                 </div>
@@ -994,7 +994,7 @@ const TuBep = () => {
                                                 </Text>
                                                 <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-green-700 hover:bg-green-500 duration-300">
                                                     {
-                                                        selectedItemDetails?.maxQty > 0 ? parseInt(selectedItemDetails?.maxQty || 0).toLocaleString() : 0
+                                                        selectedItemDetails?.maxQty > 0 ? Number(selectedItemDetails?.maxQty || 0).toFixed(6) : 0
                                                     }
                                                 </span>
                                             </div>
@@ -1005,7 +1005,7 @@ const TuBep = () => {
                                                 </Text>
                                                 <span className="rounded-lg cursor-pointer px-3 py-1 text-white bg-yellow-700 hover:bg-yellow-500 duration-300">
                                                     {
-                                                        formatNumber(Number(selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty)) || 0
+                                                        Number(selectedItemDetails?.remainQty - selectedItemDetails?.WaitingConfirmQty).toFixed(6) || 0
                                                     }
                                                 </span>
                                             </div>
