@@ -143,6 +143,10 @@ class VcnController extends Controller
                     'Factory' => 'VF',
                     'FactoryName' => 'Nhà Máy Viforex'
                 ],
+                [
+                    'Factory' => 'OS',
+                    'FactoryName' => 'Lỗi mua ngoài'
+                ]
             ];
 
             $itemInfo = $notireceiptVcnService->getItemByItemCode($params['ItemCode']);
@@ -217,6 +221,10 @@ class VcnController extends Controller
                     'Factory' => 'VF',
                     'FactoryName' => 'Nhà Máy VCN Hà Giang'
                 ],
+                [
+                    'Factory' => 'OS',
+                    'FactoryName' => 'Lỗi mua ngoài'
+                ]
             ];
 
             $CongDoan = null;

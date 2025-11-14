@@ -466,6 +466,10 @@ class VCNController extends Controller
                 'Factory' => 'VF',
                 'FactoryName' => 'Nhà Máy Viforex'
             ],
+            [
+                'Factory' => 'OS',
+                'FactoryName' => 'Lỗi mua ngoài'
+            ]
         ];
 
         $ItemInfo = notireceiptVCN::where('ItemCode', $request->ItemCode)
@@ -654,6 +658,10 @@ class VCNController extends Controller
                 'Factory' => '03',
                 'FactoryName' => 'Nhà Máy CBG Thái Bình'
             ],
+            [
+                'Factory' => 'OS',
+                'FactoryName' => 'Lỗi mua ngoài'
+            ]
         ];
 
         // Lấy công đoạn hiện tại
@@ -1159,6 +1167,10 @@ class VCNController extends Controller
                     'Factory' => '03',
                     'FactoryName' => 'Nhà Máy CBG Thái Bình'
                 ],
+                [
+                    'Factory' => 'OS',
+                    'FactoryName' => 'Lỗi mua ngoài'
+                ]
             ];
 
             // Lấy công đoạn hiện tại
@@ -1621,6 +1633,10 @@ class VCNController extends Controller
                     'Factory' => 'VF',
                     'FactoryName' => 'Nhà Máy VCN Hà Giang'
                 ],
+                [
+                    'Factory' => 'OS',
+                    'FactoryName' => 'Lỗi mua ngoài'
+                ]
             ];
 
             // Lấy công đoạn hiện tại
@@ -2901,7 +2917,7 @@ class VCNController extends Controller
             $stockissue = null;
             $dataReceipt = chiTietRong::where('baseID', $request->id)->where('type', 0)->get();
 
-            
+
             $allocates = [];
             foreach ($dataReceipt as $dtreceipt) {
                 $dataallocate = $this->collectdatadetailrong($data->FatherCode, $dtreceipt->ItemCode, $data->team, $data->version, $data->LSX);
