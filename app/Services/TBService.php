@@ -321,6 +321,10 @@ class TBService
                     'Factory' => 'VF',
                     'FactoryName' => 'Nhà Máy Viforex'
                 ],
+                [
+                    'Factory' => 'OS',
+                    'FactoryName' => 'Lỗi mua ngoài'
+                ]
             ];
 
             $itemInfo = $this->notireceiptTbService->getItemByItemCode($params['ItemCode']);

@@ -677,6 +677,10 @@ class ProductionController extends Controller
                 'Factory' => 'TB',
                 'FactoryName' => 'Nhà Máy Thái Bình'
             ],
+            [
+                'Factory' => 'OS',
+                'FactoryName' => 'Lỗi mua ngoài'
+            ]
         ];
 
         $ItemInfo = DB::table('sanluong as a')
@@ -1529,7 +1533,7 @@ class ProductionController extends Controller
                             "BaseType" => 202,
                             "BatchNumbers" => [
                                 [
-                                    "BatchNumber" => $allocate['ItemChild'] . '-'. substr($request->year, 2) . 'W' . str_pad($request->week, 2, '0', STR_PAD_LEFT),
+                                    "BatchNumber" => $allocate['ItemChild'] . '-' . substr($request->year, 2) . 'W' . str_pad($request->week, 2, '0', STR_PAD_LEFT),
                                     "Quantity" => $allocate['Allocate'],
                                     "ItemCode" =>  $allocate['ItemChild'],
                                     "U_CDai" => $allocate['CDai'],
