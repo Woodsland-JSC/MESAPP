@@ -251,6 +251,8 @@ function ControllerCard(props) {
         }));
     };
 
+    console.log("checkboxStates", checkboxStates);
+
     useEffect(() => {
         const count = Object.values(checkboxStates).reduce(
             (acc, value) => acc + value,
@@ -313,9 +315,11 @@ function ControllerCard(props) {
                 Q7: fanValues.Q7,
                 Q8: fanValues.Q8,
             },
+            count: checkedCount
         };
 
         console.log("02. Dữ liệu sẽ được đưa lên database: ", kilnCheckData);
+        // return;
 
         setIsSavingUpdate(true);
 
@@ -426,6 +430,45 @@ function ControllerCard(props) {
 
     const handleCompleteCheckingKiln = async () => {
         try {
+            const kilnCheckData = {
+                PlanID: planID,
+                CT1: checkboxStates.CT1,
+                CT2: checkboxStates.CT2,
+                CT3: checkboxStates.CT3,
+                CT4: checkboxStates.CT4,
+                CT5: checkboxStates.CT5,
+                CT6: checkboxStates.CT6,
+                CT7: checkboxStates.CT7,
+                CT8: checkboxStates.CT8,
+                CT9: checkboxStates.CT9,
+                CT10: checkboxStates.CT10,
+                CT11: checkboxStates.CT11,
+                CT12: checkboxStates.CT12,
+                SoLan: soLan,
+                CBL: CBL,
+                DoThucTe: doThucTe,
+                CT11Detail: {
+                    M1: samples.M1,
+                    M2: samples.M2,
+                    M3: samples.M3,
+                    M4: samples.M4,
+                    M5: samples.M5,
+                },
+                CT12Detail: {
+                    Q1: fanValues.Q1,
+                    Q2: fanValues.Q2,
+                    Q3: fanValues.Q3,
+                    Q4: fanValues.Q4,
+                    Q5: fanValues.Q5,
+                    Q6: fanValues.Q6,
+                    Q7: fanValues.Q7,
+                    Q8: fanValues.Q8,
+                },
+            };
+
+            console.log("02. Dữ liệu sẽ được đưa lên database: ", kilnCheckData);
+
+            return;
             setLoadKilnCheckingLoading(true);
             const response = await axios.patch("/api/ovens/production-check", {
                 PlanID: planID,
@@ -991,33 +1034,13 @@ function ControllerCard(props) {
                                 >
                                     Đóng
                                 </button>
-                                {checkedCount === 12 ? (
-                                    <button
-                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all xl:w-fit md:w-fit w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={isSavingUpdate}
-                                        onClick={handleCompleteCheckingKiln}
-                                    >
-                                        {loadKilnCheckingLoading ? (
-                                            <div className="flex justify-center items-center space-x-4">
-                                                <Spinner
-                                                    size="sm"
-                                                    color="white"
-                                                />
-                                                <div>Đang tải</div>
-                                            </div>
-                                        ) : (
-                                            "Hoàn thành"
-                                        )}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={isSavingUpdate}
-                                        className="bg-gray-800 text-white p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isSavingUpdate ? "Đang cập nhật..." : "Lưu lại"}
-                                    </button>
-                                )}
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isSavingUpdate}
+                                    className="bg-gray-800 text-white p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isSavingUpdate ? "Đang cập nhật..." : "Lưu lại"}
+                                </button>
                             </div>
                         </div>
                     </ModalFooter>

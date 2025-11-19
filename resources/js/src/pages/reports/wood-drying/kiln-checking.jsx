@@ -1260,9 +1260,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Mẫu 1:{" "}
-                                                        {reportData
-                                                            ?.ActualThickness
-                                                            ?.sample_1 ||
+                                                        {reportData?.ActualThickness[0]?.M1 ||
                                                             "Chưa ghi nhận"}{" "}
                                                     </td>
                                                     <td
@@ -1295,9 +1293,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Mẫu 2:{" "}
-                                                        {reportData
-                                                            ?.ActualThickness
-                                                            ?.sample_2 ||
+                                                        {reportData?.ActualThickness[0]?.M2 ||
                                                             "Chưa ghi nhận"}{" "}
                                                     </td>
                                                 </tr>
@@ -1308,9 +1304,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Mẫu 3:{" "}
-                                                        {reportData
-                                                            ?.ActualThickness
-                                                            ?.sample_3 ||
+                                                        {reportData?.ActualThickness[0]?.M3 ||
                                                             "Chưa ghi nhận"}{" "}
                                                     </td>
                                                 </tr>
@@ -1321,9 +1315,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Mẫu 4:{" "}
-                                                        {reportData
-                                                            ?.ActualThickness
-                                                            ?.sample_4 ||
+                                                        {reportData?.ActualThickness[0]?.M4 ||
                                                             "Chưa ghi nhận"}{" "}
                                                     </td>
                                                 </tr>
@@ -1334,9 +1326,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Mẫu 5:{" "}
-                                                        {reportData
-                                                            ?.ActualThickness
-                                                            ?.sample_5 ||
+                                                        {reportData?.ActualThickness[0]?.M5 ||
                                                             "Chưa ghi nhận"}{" "}
                                                     </td>
                                                 </tr>
@@ -1369,8 +1359,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 1:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_1 ||
+                                                        {reportData?.FanSpeed[0]?.Q1 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1404,8 +1393,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 2:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_2 ||
+                                                        {reportData?.FanSpeed[0]?.Q2 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1417,8 +1405,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 3:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_3 ||
+                                                        {reportData?.FanSpeed[0]?.Q3 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1430,8 +1417,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 4:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_4 ||
+                                                        {reportData?.FanSpeed[0]?.Q4 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1443,8 +1429,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 5:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_5 ||
+                                                        {reportData?.FanSpeed[0]?.Q5 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1456,8 +1441,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 6:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_6 ||
+                                                        {reportData?.FanSpeed[0]?.Q6 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1469,8 +1453,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 7:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_7 ||
+                                                        {reportData?.FanSpeed[0]?.Q7 ||
                                                             "null"}{" "}
                                                         (m/s)
                                                     </td>
@@ -1482,9 +1465,7 @@ function KilnCheckingReport() {
                                                         className="border-r border-b border-gray-400 p-2"
                                                     >
                                                         Quạt 8:{" "}
-                                                        {reportData?.FanSpeed
-                                                            ?.fan_8 ||
-                                                            "null"}{" "}
+                                                        {reportData?.FanSpeed[0]?.Q8 || "null"}{" "}
                                                         (m/s)
                                                     </td>
                                                 </tr>
