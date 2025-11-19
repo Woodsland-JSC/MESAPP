@@ -33,8 +33,8 @@ class MasterDataController extends Controller
             "ORSC" A
             JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
             JOIN OHEM C ON B."EmpID" = C."empID"
-            JOIN OWOR D ON D."U_To" = b."ResCode"
-        WHERE A."U_FAC" = ? AND A."U_KHOI" = 'CBG' AND A."U_QC" = 'N' and D."U_IType" = 'TUBEP'
+            JOIN OWOR D ON D."U_To" = b."ResCode" OR D."U_Next" = A."VisResCode"
+        WHERE A."U_FAC" = ? AND A."U_KHOI" = 'CBG' AND A."U_QC" = 'N' and D."U_IType" = 'TUBEP' AND B."EmpID" = ?
 
         GROUP BY A."VisResCode", A."ResName", A."U_CDOAN", A."U_FAC", A."U_KHOI"
         ORDER BY A."ResName" asc
@@ -132,7 +132,7 @@ class MasterDataController extends Controller
 
     public function getTeamUTub(Request $request){
         try {
-            $teams = $this->hanaService->select($this->SQL_TEAM_UTUB, [$request->query('factory')]);
+            $teams = $this->hanaService->select($this->SQL_TEAM_UTUB, [$request->query('factory'), Auth::user()->sap_id]);
 
             $data = [
                 'teams' => $teams
