@@ -627,6 +627,8 @@ class PlanController extends Controller
                 'DoThucTe'
             );
 
+            $checkCount = $request->count;
+
             // LỌC: Loại bỏ các giá trị null để tránh overwrite bằng null
             $planUpdate = collect($data)
                 ->filter(fn($v) => !is_null($v))   // giữ lại 0, "", false… chỉ bỏ null
@@ -677,6 +679,43 @@ class PlanController extends Controller
             $CT12Detail = logchecked::where('PlanID', $id)
                 ->select('Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8')
                 ->get();
+
+            if ($checkCount == 12) {
+                $plandrying->update(
+                    [
+                        'Checked' => 1,
+                        'CheckedBy' => Auth::user()->id,
+                        'CT1' => 1,
+                        'CT2' => 1,
+                        'CT3' => 1,
+                        'CT4' => 1,
+                        'CT5' => 1,
+                        'CT6' => 1,
+                        'CT7' => 1,
+                        'CT8' => 1,
+                        'CT9' => 1,
+                        'CT10' => 1,
+                        'CT11' => 1,
+                        'CT12' => 1,
+                        'DateChecked' => now(),
+                        'NoCheck' => $id
+                    ]
+                );
+
+                // Fetch data for API request
+                $data = DB::table('plan_detail as a')
+                    ->join('pallets as b', 'a.pallet', '=', 'b.palletID')
+                    ->select('DocEntry', 'pallet')
+                    ->where('PlanID', $id)
+                    ->distinct()
+                    ->get();
+                //update hàng loạt lệnh production orders sang plan
+                foreach ($data as $entry) {
+                    Pallet::where('palletID', $entry->pallet)->update(['flag' => 1]);
+                }
+            }
+            
+            DB::commit();
 
             return response()->json([
                 'message'    => 'success',
