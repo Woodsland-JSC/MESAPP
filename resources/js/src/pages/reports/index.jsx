@@ -108,6 +108,13 @@ const SAYReports = [
         link: "/reports/wood-drying/oven-drying",
         description: "Báo cáo số liệu các lò đang sấy."
     },
+    {
+        id: "0014",
+        name: "Báo cáo sấy phôi",
+        link: "/reports/wood-drying/completed",
+        description: "Báo cáo số liệu các Pallet đã hoàn thành."
+    },
+
 ];
 
 const CBGReports = [

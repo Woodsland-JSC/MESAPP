@@ -34,8 +34,9 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import useAppContext from "../../../store/AppContext";
+import { getDryingQueue } from "../../../api/pallet.api";
 
-function DryingQueueReport() {
+function DryingCompletedReport() {
     const navigate = useNavigate();
 
     const { user } = useAppContext();
@@ -60,10 +61,8 @@ function DryingQueueReport() {
     const [reportData, setReportData] = useState(null);
 
     const handleFactorySelect = async (factory) => {
-        console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
         setReportData(null);
-        setTeamData(null);
         setSelectedTeams([]);
     };
 
@@ -73,17 +72,14 @@ function DryingQueueReport() {
             to_date: format(toDate, "yyyy-MM-dd"),
             plant: selectedFactory,
         };
-        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
+
         setIsDataReportLoading(true);
         try {
-            const res = await reportApi.getDryingQueue(
-                params.from_date,
-                params.to_date,
-                params.plant
-            );
+            const res = await getDryingQueue(params.from_date, params.to_date, params.plant);
+
             const formattedData = res.map((item) => {
                 let khoiLuongTinhThuong = 0;
-                let dgnc = 99500;
+                let dgnc = 140400;
                 let heSoQuyDoi = 1.35;
                 let quyLuong = 0;
 
@@ -93,27 +89,27 @@ function DryingQueueReport() {
 
                 if (item.day <= 21 && item.dai < 800) {
                     heSoQuyDoi = 1.2
-                    dgnc = 88400;
+                    dgnc = 129300;
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 73700;
+                    dgnc = 114600;
                 }
 
                 if (item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 73700;
+                    dgnc = 114600;
                 }
 
                 if (item.day > 25) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 62600;
+                    dgnc = 103500;
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 62600;
+                    dgnc = 103500;
                 }
 
                 // Tính toán
@@ -138,7 +134,11 @@ function DryingQueueReport() {
                     dgnc,
                     quyLuong,
                     stacking_time: item.stacking_time ?? "",
+                    completedDate: item.completed_date ?? '',
+                    completed_by: item.completed_by ?? '',
+                    type: item.type ?? '',
                     created_fullname: item.created_fullname ?? '',
+                    completed_fullname: item.completed_fullname ?? '',
                 }
             });
             setIsDataReportLoading(false);
@@ -162,9 +162,9 @@ function DryingQueueReport() {
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
-        setSelectAll(false);
+        // setSelectAll(false);
         setIsReceived(true);
-        setTeamData([]);
+        // setTeamData([]);
 
         setReportData(null);
 
@@ -192,6 +192,13 @@ function DryingQueueReport() {
             filter: true,
         },
         {
+            headerName: "Ngày ra lò",
+            field: "completedDate",
+            width: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
             headerName: "MNV",
             field: "mnv",
             width: 100,
@@ -201,6 +208,20 @@ function DryingQueueReport() {
         {
             headerName: "Người xếp",
             field: "created_fullname",
+            width: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "MNV ra lò",
+            field: "completed_by",
+            width: 100,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
+            headerName: "Người ra lò",
+            field: "completed_fullname",
             width: 200,
             suppressHeaderMenuButton: true,
             filter: true,
@@ -315,6 +336,13 @@ function DryingQueueReport() {
             }
         },
         {
+            headerName: "Loại hàng",
+            field: "type",
+            filter: true,
+            width: 180,
+            suppressHeaderMenuButton: true,
+        },
+        {
             headerName: "Mục đích sấy",
             field: "reason",
             filter: true,
@@ -379,7 +407,7 @@ function DryingQueueReport() {
                                     Báo cáo sấy phôi
                                 </div>
                                 <div className="serif text-3xl font-bold">
-                                    Báo cáo xếp chờ sấy
+                                    Báo cáo sấy phôi
                                 </div>
                             </div>
                         </div>
@@ -536,4 +564,4 @@ function DryingQueueReport() {
     );
 }
 
-export default DryingQueueReport;
+export default DryingCompletedReport;

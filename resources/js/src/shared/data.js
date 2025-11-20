@@ -129,3 +129,19 @@ export const PALLET_LOG_TYPE = {
     MOVE: 1,
     REMOVE: 2
 };
+
+export const HXL_QC = {
+    SAY_LAI: 1,
+    CAT_HA: 2
+};
+
+export const HXL_QC_DATA = [
+    {
+        id: 1,
+        name: 'Sấy lại'
+    },
+    {
+        id: 2,
+        name: 'Cắt hạ'
+    }
+];
