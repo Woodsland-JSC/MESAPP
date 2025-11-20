@@ -104,6 +104,7 @@ import TuBep from "../pages/workspace/domestic/tu-bep";
 import BaoCaoRaLoPallet from "../pages/reports/wood-drying/ra-lo-pallet";
 import OvenDrying from "../pages/reports/wood-drying/oven-drying";
 import HandleItemQc from "../pages/workspace/wood-working/handle-qc";
+import DryingCompletedReport from "../pages/reports/wood-drying/bao-cao-pallet-ra-lo";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -435,6 +436,17 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
                     />
+
+                    <Route
+                        path="/reports/wood-drying/completed"
+                        element={
+                            <ProtectedRoute>
+                                <DryingCompletedReport />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    
 
                     <Route
                         path="/reports/wood-drying/oven-drying"

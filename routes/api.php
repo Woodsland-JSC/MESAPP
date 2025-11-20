@@ -237,6 +237,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'mes/pallet'], function () {
         Route::get('getPalletReport', [PalletController::class, 'getPalletReport'])->name('getPalletReport');
+        Route::get('getPalletComplete', [PalletController::class, 'getPalletComplete'])->name('getPalletComplete');
     });
 
     Route::group(['prefix' => 'sap/vcn'], function () {

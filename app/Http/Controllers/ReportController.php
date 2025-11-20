@@ -251,10 +251,11 @@ class ReportController extends Controller
                         'rong' => $detail->CRong,
                         'day' => $detail->CDay,
                         'qty' => $detail->Qty_T,
-                        'mass' => round($detail->Qty, 4), // Làm tròn 4 chữ số thập phân
+                        'mass' => round($detail->Qty, 6), 
                         'reason' => $pallet->LyDo,
                         'status' => $status,
                         'created_username' => $pallet->createdBy->username,
+                        'created_fullname' => $pallet->createdBy->last_name . ' ' . $pallet->createdBy->first_name,
                         'stacking_time' => $pallet->stacking_time
                     ];
                 }

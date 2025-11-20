@@ -7,3 +7,13 @@ export const getPalletReport = (params) => {
         params: params
     });
 }
+
+export const getDryingQueue = (fromDate, toDate, factory) => {
+    return axiosClient().get(`${BASEURL}/getPalletComplete`, {
+        params: {
+            fromDate: fromDate,
+            toDate: toDate,
+            factory: factory,
+        },
+    });
+}

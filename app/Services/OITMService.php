@@ -36,6 +36,8 @@ class OITMService
         WHERE "Code" = ?
     SQL;
 
+    private $SQL_GET_BY_ITEMCODES = 'SELECT * FROM OITM WHERE "ItemCode"  in (?)';
+
     public function __construct(HanaService $hanaService)
     {
         $this->hanaService = $hanaService;
@@ -67,6 +69,21 @@ class OITMService
             return $this->hanaService->selectOne($this->SQL_GET_ITEMS_BY_QC, [$quyCach]);
         } catch (Throwable $th) {
             throw $th;
+        }
+    }
+
+    public function getItemCodeWithListItemCode($places, $itemCodes)
+    {
+        try {
+            $sql = $this->SQL_GET_BY_ITEMCODES;
+            $sql = str_replace('?', $places, $sql);
+            $params = [];
+            foreach ($itemCodes as $code) {
+                $params[] = $code;
+            }
+            return $this->hanaService->select($sql, $params);
+        } catch (Exception $th) {
+            throw new Exception("Lấy danh sách item có lỗi." . $th->getMessage());
         }
     }
 }
