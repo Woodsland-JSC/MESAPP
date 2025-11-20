@@ -103,6 +103,7 @@ import NoiDia from "../pages/workspace/domestic/noi-dia";
 import TuBep from "../pages/workspace/domestic/tu-bep";
 import BaoCaoRaLoPallet from "../pages/reports/wood-drying/ra-lo-pallet";
 import OvenDrying from "../pages/reports/wood-drying/oven-drying";
+import HandleItemQc from "../pages/workspace/wood-working/handle-qc";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -203,6 +204,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute permissionsRequired={['QCCBG']}>
                                 <WoodProductingQC />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/wood-working/handle-qc"
+                        element={
+                            <ProtectedRoute permissionsRequired={['QCCBG']}>
+                                <HandleItemQc />
                             </ProtectedRoute>
                         }
                     />

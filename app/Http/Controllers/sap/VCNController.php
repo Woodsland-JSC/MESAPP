@@ -1923,7 +1923,7 @@ class VCNController extends Controller
                             "CostingCode4" => "Default",
                             "BatchNumbers" => [
                                 [
-                                    "BatchNumber" => Carbon::now()->format('YmdHis') . $allocate['DocEntry'],
+                                    "BatchNumber" => $allocate['ItemChild'] . '-' . substr($request->year, 2) . 'W' . str_pad($request->week, 2, '0', STR_PAD_LEFT),
                                     "Quantity" => $allocate['Allocate'],
                                     "ItemCode" =>  $allocate['ItemChild'],
                                     "U_CDai" => $allocate['CDai'],

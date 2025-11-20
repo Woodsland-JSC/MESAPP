@@ -400,6 +400,16 @@ function Workspace() {
                                                     description:
                                                         "Báo cáo tiến độ lắp đặt đồ nội thất.",
                                                     type: "ND",
+                                                },
+                                                {
+                                                    permission: [
+                                                        "QCCBG"
+                                                    ],
+                                                    link: "/workspace/wood-working/handle-qc",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Xử lý hàng QC",
+                                                    description: "Xử lý lỗi sản phẩm.",
+                                                    type: "CBG",
                                                 }
                                             ].map(
                                                 ({

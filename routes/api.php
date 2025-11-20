@@ -14,6 +14,7 @@ use App\Http\Controllers\api\ReportController;
 use App\Http\Controllers\mes\PalletController;
 use App\Http\Controllers\mes\PalletLogController;
 use App\Http\Controllers\mes\PlanDryingController;
+use App\Http\Controllers\mes\QcCbgController;
 use App\Http\Controllers\mes\UserController as MesUserController;
 use App\Http\Controllers\sap_controller\ORSCController;
 use App\Http\Controllers\sap\GoodsManagementController;
@@ -191,6 +192,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
      * */
 
     Route::get('/ORSC/layDanhSachToTheoNhaMayCBG', [ORSCController::class, 'layDanhSachToTheoNhaMayCBG'])->name('layDanhSachToTheoNhaMayCBG');
+    Route::get('/ORSC/getTeamProductionByFactory', [ORSCController::class, 'getTeamProductionByFactory'])->name('getTeamProductionByFactory');
 
     Route::group(['prefix' => 'sap/masterdata'], function () {
         Route::get('danhSachNhaMayCBG', [SapMasterDataController::class, 'danhSachNhaMayCBG'])->name('danhSachNhaMayCBG');
@@ -250,6 +252,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('confirmAcceptReceipt', [TBController::class, 'confirmAcceptReceipt'])->name('confirmAcceptReceipt');
         Route::post('confirmRejectTB', [TBController::class, 'confirmRejectTB'])->name('confirmRejectTB');
         Route::get('checkReceiptTB', [TBController::class, 'checkReceiptTB'])->name('checkReceiptTB');
+    });
+
+    Route::group(['prefix' => 'mes/qc'], function () {
+        Route::get('getAllWhQC', [QcCbgController::class, 'getAllWhQC'])->name('getAllWhQC');
+        Route::get('getItemByWhQC', [QcCbgController::class, 'getItemByWhQC'])->name('getItemByWhQC');
+        Route::get('getWhSL', [QcCbgController::class, 'getWhSL'])->name('getWhSL');
+        Route::post('handleSL', [QcCbgController::class, 'handleSL'])->name('handleSL');
+        Route::post('handleCH', [QcCbgController::class, 'handleCH'])->name('handleCH');
     });
 });
 

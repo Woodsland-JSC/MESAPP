@@ -10,3 +10,12 @@ export const layDanhSachToTheoNhaMayCBG = (factory) => {
         }
     });
 }
+
+export const getTeamProductionByFactory = (factory) => {
+    const url = `${BASEURL}/getTeamProductionByFactory`;
+    return axiosClient().get(url, {
+        params: {
+            factory
+        }
+    });
+}
