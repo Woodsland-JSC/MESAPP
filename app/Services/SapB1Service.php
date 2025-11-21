@@ -29,8 +29,6 @@ class SapB1Service
                 'body' => $payload
             ]);
 
-            Log::info('SapB1Service::batch - ' . $res->getBody()->getContents());
-
             $status = $res->getStatusCode();
 
             if ($status == 202) {

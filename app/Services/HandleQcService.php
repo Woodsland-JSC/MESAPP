@@ -171,8 +171,6 @@ class HandleQcService
                 $dataEntries["DocumentLines"][] = $itemEntry;
             }
 
-            Log::info(123456);
-
             $dataExits = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "DocumentLines" => []
