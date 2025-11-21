@@ -239,7 +239,7 @@ const ItemInput = ({
                 await productionApi.getFinishedRongPlywoodGoodsDetail(
                     params
                 );
-                
+
             setSelectedItemDetails({
                 ...item,
                 CongDoan: res.CongDoan,
@@ -498,27 +498,39 @@ const ItemInput = ({
             return;
         }
 
+        let invalid = true;
+
+        for (let i = 0; i < rongData.length; i++) {
+            const item = rongData[i];
+            if (
+                item.CompleQty != undefined ||
+                item.CompleQty != null ||
+                item.CompleQty != "" ||
+                isNaN(Number(item.CompleQty))
+            ) {
+                invalid = false;
+            }
+        }
+
+        if (invalid) {
+            toast.error(
+                <span>
+                    Vui lòng nhập số lượng ghi nhận cho 1 Item.
+                </span>
+            );
+            return
+        }
+
         for (let i = 0; i < rongData.length; i++) {
             const item = rongData[i];
 
-            // CompleQty là bắt buộc
             if (
                 item.CompleQty === undefined ||
                 item.CompleQty === null ||
                 item.CompleQty === "" ||
                 isNaN(Number(item.CompleQty))
             ) {
-                toast.error(
-                    <span>
-                        Vui lòng nhập số lượng ghi nhận cho{" "}
-                        <span style={{ fontWeight: "bold" }}>
-                            {item.ItemName}
-                        </span>
-                        .
-                    </span>
-                );
-                onAlertDialogClose();
-                return;
+                continue;
             }
 
             const comple = Number(item.CompleQty);
@@ -595,11 +607,12 @@ const ItemInput = ({
                 SubItemName: choosenItem.ChildName,
                 team: choosenItem.TO,
                 NextTeam: choosenItem.TOTT,
-                Data: rongData,
+                Data: rongData.filter(item => item.CompleQty !== undefined && item.CompleQty !== null && item.CompleQty !== ""),
                 KHOI: "VCN",
             };
             console.log("Data", Data);
-            
+            return
+
             const res = await productionApi.enterFinishedRongAmountVCN(Data);
             toast.success("Ghi nhận & chuyển tiếp thành công!");
         } catch (error) {
@@ -3876,4 +3889,3 @@ const ItemInput = ({
 };
 
 export default ItemInput;
- 
