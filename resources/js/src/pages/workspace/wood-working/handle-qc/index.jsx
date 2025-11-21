@@ -35,12 +35,8 @@ const HandleItemQc = () => {
     const [row, setRow] = useState([]);
     const [hxl, setHXL] = useState();
     const [dataSL, setDataSL] = useState({
-        ItemCode: "",
-        Quantity: "",
-        WhsCode: "",
-        QuantitySL: 0,
-        ToWhsCode: "",
-        M3: 0
+        dataSL: [],
+        ToWhsCode: null
     });
 
     const [dataCH, setDataCH] = useState({
@@ -154,6 +150,19 @@ const HandleItemQc = () => {
             flex: 1
         },
         {
+            headerName: "Batch",
+            field: "BatchNum",
+            filter: true,
+            width: 150,
+            flex: 1
+        },
+        {
+            headerName: "Số lượng",
+            field: "BatchQuantity",
+            filter: true,
+            width: 150,
+        },
+        {
             headerName: "Tồn kho",
             field: "Quantity",
             filter: true,
@@ -204,14 +213,14 @@ const HandleItemQc = () => {
 
     const handleQC = (hxl) => {
         setHXL(hxl);
-        setDataSL({
-            ItemCode: row[0].ItemCode,
-            Quantity: row[0].Quantity,
-            WhsCode: row[0].WhsCode,
-            QuantitySL: 0,
-            ToWhsCode: "",
-            M3: 0
+        let obj = [];
+
+        row.forEach(item => {
+            obj.push({ ...item, qtySL: Number(0) });
         });
+
+        console.log('obj', obj);
+        setDataSL(pre => ({...pre, dataSL: obj}));
         onModalOpen();
     }
 
@@ -226,13 +235,9 @@ const HandleItemQc = () => {
                 Quantity: item.Quantity,
                 WhsCode: item.WhsCode,
                 ToWhsCode: facRef?.current?.getValue()[0].value,
-                Data: []
+                ...item
             })
         });
-
-        console.log(row);
-        console.log(items);
-
 
         setDataCH({
             selectedItem: items,
@@ -243,12 +248,8 @@ const HandleItemQc = () => {
 
     const clearDataSL = () => {
         setDataSL({
-            ItemCode: "",
-            Quantity: "",
-            WhsCode: "",
-            QuantitySL: 0,
-            ToWhsCode: "",
-            M3: 0
+            dataSL: [],
+            ToWhsCode: null
         });
     }
 
@@ -271,33 +272,26 @@ const HandleItemQc = () => {
     }
 
     const confirmHXLSayLai = () => {
+        let invalid = false;
+        dataSL.dataSL.forEach(item => {
+            let qty = item.BatchQuantity ? Number(item.BatchQuantity) : Number(item.Quantity);
+            if (item.qtySL > qty) {
+                invalid = true;
+                toast.error(`Số lượng sấy lại ${item.qtySL} đang lớn hơn tồn kho ${qty} của mã sản phẩm ${item.ItemCode}`);
+                return;
+            }
+        })
+
+        if(invalid) return;
+
         let data = {
-            ...dataSL,
+            dataSL: dataSL.dataSL,
             ToWhsCode: dataSL.ToWhsCode ? dataSL.ToWhsCode : facRef?.current?.getValue()[0].value
-        }
-
-        let m3 = (row[0].Quantity * row[0].U_CDai * row[0].U_CDay * row[0].U_CRong) / 1000000000;
-
-        if (m3 > currentM3) {
-            toast.error(`Khối lượng mới ${m3} đang lớn hơn khối lượng items ${currentM3}`);
-            return;
-        }
-
-        if (data.M3 > currentM3) {
-            toast.error(`Khối lượng mới ${data.M3} đang lớn hơn khối lượng items ${currentM3}`);
-            return;
-        }
-
-        if (!data.M3 || data.M3 == 0) {
-            toast.error(`Vui lòng nhập khối lượng.`);
-            return;
         }
 
         Swal.fire({
             title: 'Chuyển kho sấy lại',
-            text: `Xác nhận chuyển ${Number(data.QuantitySL)} 
-                    từ kho ${warehouse.label} 
-                    đến kho ${wareHouseSL.find(fac => fac.fac == dataSL.ToWhsCode ? dataSL.ToWhsCode : facRef?.current?.getValue()[0].value).label}`,
+            text: `Xác nhận chuyển đến kho ${wareHouseSL.find(fac => fac.value == data.ToWhsCode).label}`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Xác nhận',
@@ -472,6 +466,10 @@ const HandleItemQc = () => {
         row.forEach(item => {
             let m3 = (item.Quantity * item.U_CDai * item.U_CDay * item.U_CRong) / 1000000000;
             total += m3;
+        });
+
+        row.forEach(item => {
+            total += Number(item.BatchQuantity);
         })
 
         return total;
@@ -537,13 +535,7 @@ const HandleItemQc = () => {
                             row && row.length > 0 && (
                                 <div className="md:w-1/6 w-full flex items-center justify-end gap-x-2">
                                     {
-                                        HXL_QC_DATA.filter(hxl => {
-                                            if (tab == 0) {
-                                                return hxl.id == HXL_QC.SAY_LAI
-                                            } else {
-                                                return hxl.id == HXL_QC.CAT_HA
-                                            }
-                                        }).map((hxl, index) => (
+                                        HXL_QC_DATA.map((hxl, index) => (
                                             <button
                                                 key={index}
                                                 type="button"
@@ -571,60 +563,26 @@ const HandleItemQc = () => {
                             items.length > 0 ? (
                                 <>
                                     <div className="xl:display:block lg:block md:block hidden">
-                                        <Tabs isFitted onChange={(index) => { setTab(index); setRow([]) }} index={tab}>
-                                            <TabList className="bg-[#FFFFFF] p-2">
-                                                <Tab>Sấy lại</Tab>
-                                                <Tab>Cắt hạ</Tab>
-                                            </TabList>
-
-                                            <TabPanels>
-                                                <TabPanel p={0}>
-                                                    <div
-                                                        className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2"
-                                                        style={{
-                                                            height: 630,
-                                                            fontSize: 16,
-                                                        }}
-                                                        id="app-ag-grid"
-                                                    >
-                                                        <AgGridReact
-                                                            ref={gridRef}
-                                                            rowData={items}
-                                                            columnDefs={colDefs}
-                                                            groupDisplayType={"multipleColumns"}
-                                                            getRowStyle={getRowStyle}
-                                                            localeText={AG_GRID_LOCALE_VI}
-                                                            onSelectionChanged={onSelectionChanged}
-                                                            rowSelection="single"
-                                                            suppressRowClickSelection={true}
-                                                        />
-                                                    </div>
-                                                </TabPanel>
-                                                <TabPanel p={0}>
-                                                    <div
-                                                        className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2"
-                                                        style={{
-                                                            height: 630,
-                                                            fontSize: 16,
-                                                        }}
-                                                        id="app-ag-grid"
-                                                    >
-                                                        <AgGridReact
-                                                            ref={gridRef}
-                                                            rowData={items}
-                                                            columnDefs={colDefs}
-                                                            groupDisplayType={"multipleColumns"}
-                                                            getRowStyle={getRowStyle}
-                                                            localeText={AG_GRID_LOCALE_VI}
-                                                            onSelectionChanged={onSelectionChanged}
-                                                            rowSelection="multiple"
-                                                            suppressRowClickSelection={true}
-                                                        />
-                                                    </div>
-                                                </TabPanel>
-                                            </TabPanels>
-                                        </Tabs>
-
+                                        <div
+                                            className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2"
+                                            style={{
+                                                height: 630,
+                                                fontSize: 16,
+                                            }}
+                                            id="app-ag-grid"
+                                        >
+                                            <AgGridReact
+                                                ref={gridRef}
+                                                rowData={items}
+                                                columnDefs={colDefs}
+                                                groupDisplayType={"multipleColumns"}
+                                                getRowStyle={getRowStyle}
+                                                localeText={AG_GRID_LOCALE_VI}
+                                                onSelectionChanged={onSelectionChanged}
+                                                rowSelection="multiple"
+                                                suppressRowClickSelection={true}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="xl:display:hidden lg:hidden md:hidden sm:block block mt-3 ">
@@ -728,12 +686,12 @@ const HandleItemQc = () => {
             </div>
         </Layout>
         {
-            (hxl && row[0]) && (
+            (hxl && row.length > 0) && (
                 <>
                     <Modal
                         isCentered
                         isOpen={isModalOpen}
-                        size="2xl"
+                        size="full"
                         onClose={onModalClose}
                         scrollBehavior="inside"
 
@@ -749,7 +707,7 @@ const HandleItemQc = () => {
                             <div className="border-b-2 border-gray-200"></div>
                             <ModalBody className="bg-gray-100 !p-4">
                                 <div className=" p-4">
-                                    <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#f0faff]">
+                                    <div className="xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#FFFFFF]">
                                         <div className="flex justify-between pb-1 ">
                                             <div className="flex items-center space-x-2">
                                                 <FaDiceD6 className="w-7 h-7 text-amber-700" />
@@ -759,31 +717,59 @@ const HandleItemQc = () => {
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-2 items-center justify-between py-3 border-t ">
-                                            <Text className="font-semibold">
-                                                Mã sản phẩm
-                                            </Text>
-                                            <span className="">
-                                                {row[0].ItemCode}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex gap-2 items-center justify-between py-3 border-t ">
-                                            <Text className="font-semibold">
-                                                Tên sản phẩm
-                                            </Text>
-                                            <span className="">
-                                                {row[0].ItemName}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex gap-2 items-center py-3 border-t !mt-0 justify-between">
-                                            <Text className="font-semibold">
-                                                Tồn kho
-                                            </Text>
-                                            <span className="">
-                                                {Number(row[0].Quantity)}
-                                            </span>
+                                        <div className=" border-t pt-3">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="uppercase">
+                                                        <th>
+                                                            Mã sản phẩm
+                                                        </th>
+                                                        <th>
+                                                            Tên sản phẩm
+                                                        </th>
+                                                        <th>
+                                                            Số lượng
+                                                        </th>
+                                                        <th>
+                                                            Tổng tồn kho
+                                                        </th>
+                                                        <th>
+                                                            Số lượng SL
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        dataSL?.dataSL?.map((item, i) => (
+                                                            <tr className="text-center" key={i}>
+                                                                <td>{item.ItemCode}</td>
+                                                                <td>{item.ItemName}</td>
+                                                                <td>{Number(item.BatchQuantity)}</td>
+                                                                <td>{Number(item.Quantity)}</td>
+                                                                <td className="w-[250px]">
+                                                                    <NumberInput
+                                                                        min={0}
+                                                                        value={item.qtySL}
+                                                                        className="mt-2"
+                                                                        onChange={value => {
+                                                                            let items = [...dataSL.dataSL];
+                                                                            items[i].qtySL = value;
+                                                                            setDataSL(pre => ({ ...pre, dataSL: items }));
+                                                                        }}
+                                                                        max={item.BatchQuantity ? Number(item.BatchQuantity) : Number(item.Quantity)}
+                                                                    >
+                                                                        <NumberInputField />
+                                                                        {/* <NumberInputStepper>
+                                                                            <NumberIncrementStepper />
+                                                                            <NumberDecrementStepper />
+                                                                        </NumberInputStepper> */}
+                                                                    </NumberInput>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                     <div className="mt-2 xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#FFFFFF]">
@@ -791,13 +777,13 @@ const HandleItemQc = () => {
                                             <div className="flex items-center space-x-2">
                                                 <FaDiceD6 className="w-7 h-7 text-amber-700" />
                                                 <div className="font-semibold text-md">
-                                                    Nhập số lượng sấy lại
+                                                    Nhà máy sấy lại
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="gap-2 items-center justify-between py-3 border-t ">
-                                            <Box className="mb-2">
+                                            {/* <Box className="mb-2">
                                                 <label className="font-semibold">
                                                     Khối lượng hiện tại
                                                 </label>
@@ -863,7 +849,7 @@ const HandleItemQc = () => {
                                                         </NumberInputStepper>
                                                     </NumberInput>
                                                 </span>
-                                            </Box>
+                                            </Box> */}
                                             <Box>
                                                 <label className="font-semibold">
                                                     Chuyển đến nhà máy:
