@@ -24,31 +24,61 @@ class HandleQcService
     public function handleQcSL($data)
     {
         try {
-            $quantitySL = $data['QuantitySL'];
-            $fromWh = $data['WhsCode'];
-            $itemCode = $data['ItemCode'];
+            $dataSL = $data['dataSL'] ?? [];
+
+            if (count($dataSL) == 0) {
+                return response([
+                    'message' => 'Chuyển về kho sấy lại có lỗi. Vui lòng kiểm tra lại số lượng sấy lại.'
+                ], 500);
+            }
+
             $toWh = $data['ToWhsCode'];
+            $fromWH = $dataSL[0]['WhsCode'];
+
+            $documentLineExit = [];
+            $documentLineEntries = [];
+
+            foreach ($dataSL as $key => $item) {
+                $digitItemCode = substr($item['ItemCode'], 0, 2);
+
+                $itemExit = [
+                    "ItemCode"      => $item['ItemCode'],
+                    "Quantity"      => (float) $item['qtySL'],
+                    "WarehouseCode" => $fromWH
+                ];
+
+                $itemEntry = [
+                    "ItemCode"      => $item['ItemCode'],
+                    "Quantity"      => (float) $item['qtySL'],
+                    "WarehouseCode" => $toWh
+                ];
+
+                if ($digitItemCode == 'MM') {
+                    $itemExit['BatchNumbers'] = [[
+                        "Quantity" => (float) $item['qtySL'],
+                        "ItemCode"      => $item['ItemCode'],
+                        "BatchNumber" => $item['BatchNum']
+                    ]];
+
+                    $itemEntry['BatchNumbers'] = [[
+                        "Quantity" => (float) $item['qtySL'],
+                        "ItemCode"      => $item['ItemCode'],
+                        "BatchNumber" => $item['ItemCode'] . '-' . substr(Carbon::now()->year, 2) . 'W' . str_pad(Carbon::now()->weekOfYear, 2, '0', STR_PAD_LEFT)
+                    ]];
+                }
+
+                $documentLineExit[] = $itemExit;
+                $documentLineEntries[] = $itemEntry;
+            }
 
             $bodyExit = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "DocumentLines" => [
-                    [
-                        "ItemCode"      => $itemCode,
-                        "Quantity"      => $quantitySL,
-                        "WarehouseCode" => $fromWh
-                    ]
-                ]
+                "DocumentLines" => $documentLineExit
             ];
 
             $bodyEntry = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
-                "DocumentLines" => [
-                    [
-                        "ItemCode"      => $itemCode,
-                        "Quantity"      => $quantitySL,
-                        "WarehouseCode" => $toWh
-                    ]
-                ]
+                "DocumentLines" => $documentLineEntries
             ];
 
             $bodyEntryJson = json_encode($bodyEntry, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -82,6 +112,7 @@ class HandleQcService
                 'message' => 'Chuyển về kho sấy lại thành công.'
             ], 200);
         } catch (Exception $e) {
+            Log::info('Handle Qc SL Error: ' . $e->getMessage());
             return response([
                 'message' => 'Chuyển về kho sấy lại có lỗi.'
             ], 500);
@@ -90,9 +121,6 @@ class HandleQcService
 
     public function handleCH($data)
     {
-        $exitDocEntry = null;
-        $importDocEntry = null;
-
         try {
             // Item xuất kho
             $dataCH = $data['selectedItem'];
@@ -128,7 +156,7 @@ class HandleQcService
             ];
 
             foreach ($dataHandle as $key => $data) {
-                $dataEntries["DocumentLines"][] = [
+                $itemEntry = [
                     "Quantity" => (float) $data['data']["Quantity"],
                     "ItemCode" => $data['item'] != null ? $data['item']['U_ItemCode'] : $defaultItemCode,
                     "WarehouseCode" => $team['whCode'],
@@ -139,6 +167,8 @@ class HandleQcService
                         ]
                     ]
                 ];
+
+                $dataEntries["DocumentLines"][] = $itemEntry;
             }
 
             $dataExits = [
@@ -147,11 +177,23 @@ class HandleQcService
             ];
 
             foreach ($dataCH as $key => $item) {
-                $dataExits["DocumentLines"][] = [
+                $digitItemCode = substr($item['ItemCode'], 0, 2);
+
+                $itemExit = [
                     "ItemCode"      => $item['ItemCode'],
                     "Quantity"      => $item['Quantity'],
                     "WarehouseCode" => $item['WhsCode']
                 ];
+
+                if ($digitItemCode == 'MM') {
+                    $itemExit['BatchNumbers'] = [[
+                        "Quantity" => (float) $item['Quantity'],
+                        "ItemCode"      => $item['ItemCode'],
+                        "BatchNumber" => $item['BatchNum']
+                    ]];
+                }
+
+                $dataExits["DocumentLines"][] = $itemExit;
             }
 
             $bodyEntryJson = json_encode($dataEntries, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -185,6 +227,7 @@ class HandleQcService
                 'message' => 'Xử lý cắt hạ các items thành công.'
             ], 200);
         } catch (Exception $e) {
+            Log::info('Handle CH Error: ' . $e->getMessage());
             return response([
                 'message' => 'Xử lý cắt hạ các items có lỗi.',
                 'detail' => $e->getMessage()
