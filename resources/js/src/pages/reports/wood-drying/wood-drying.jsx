@@ -170,9 +170,7 @@ function CBGWoodDryingReports() {
 
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value
-                            ? params.value.toLocaleString("en-US")
-                            : "";
+                        return params.value ? Number(params.value).toFixed(6) : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
                 },
@@ -184,7 +182,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Vào lò" },
@@ -197,7 +195,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Ra lò" },
@@ -215,9 +213,7 @@ function CBGWoodDryingReports() {
 
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value
-                            ? params.value.toLocaleString("en-US")
-                            : "";
+                        return params.value ? Number(params.value).toFixed(6) : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
                 },
@@ -230,7 +226,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Vào lò" },
@@ -244,7 +240,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Ra lò" },
@@ -263,7 +259,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
@@ -277,7 +273,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Vào lò" },
@@ -291,7 +287,7 @@ function CBGWoodDryingReports() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? params.value.toLocaleString("en-US")
+                            ? Number(params.value).toFixed(6)
                             : "";
                     },
                     headerComponentParams: { displayName: "Ra lò" },

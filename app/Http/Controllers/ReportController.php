@@ -251,7 +251,7 @@ class ReportController extends Controller
                         'rong' => $detail->CRong,
                         'day' => $detail->CDay,
                         'qty' => $detail->Qty_T,
-                        'mass' => round($detail->Qty, 6), 
+                        'mass' => round($detail->Qty, 6),
                         'reason' => $pallet->LyDo,
                         'status' => $status,
                         'created_username' => $pallet->createdBy->username,
@@ -277,17 +277,19 @@ class ReportController extends Controller
         // $oven= $request->input('oven');
 
         // Start the query and add conditions based on the request inputs
-        $query = DB::table('gt_say_xepsaycbg');
+        $query = DB::table('wl_cbg_bc_xepsay');
 
         if ($fromDate && $ToDate) {
             // where beetwen
-            $query->whereBetween('created_at', [$fromDate, $ToDate]);
+            $fromDateNow = $fromDate . ' 00:00:00';
+            $toDateTime = $ToDate . ' ' . Carbon::now()->format('H:i:s');
+            $query->whereBetween('created_at', [$fromDateNow, $toDateTime]);
         }
 
         // Get the results
         $data = $query->get();
-        $itemdistinct = $query->distinct()->pluck('ItemCode');
-        $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
+        // $itemdistinct = $query->distinct()->pluck('ItemCode');
+        // $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
         // $dataQuyCach = qtycachIemSAP($itemstring);
 
         // $dataQuyCachMap = [];
