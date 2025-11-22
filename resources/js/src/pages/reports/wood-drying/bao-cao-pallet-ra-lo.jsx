@@ -79,7 +79,7 @@ function DryingCompletedReport() {
 
             const formattedData = res.map((item) => {
                 let khoiLuongTinhThuong = 0;
-                let dgnc = 140400;
+                let dgnc = 40900;
                 let heSoQuyDoi = 1.35;
                 let quyLuong = 0;
 
@@ -89,27 +89,27 @@ function DryingCompletedReport() {
 
                 if (item.day <= 21 && item.dai < 800) {
                     heSoQuyDoi = 1.2
-                    dgnc = 129300;
+                    dgnc = 40900;
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 114600;
+                    dgnc = 40900;
                 }
 
                 if (item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 114600;
+                    dgnc = 40900;
                 }
 
                 if (item.day > 25) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 103500;
+                    dgnc = 40900;
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 103500;
+                    dgnc = 40900;
                 }
 
                 // Tính toán
