@@ -277,7 +277,7 @@ class ReportController extends Controller
         // $oven= $request->input('oven');
 
         // Start the query and add conditions based on the request inputs
-        $query = DB::table('gt_say_xepsaycbg');
+        $query = DB::table('wl_cbg_bc_xepsay');
 
         if ($fromDate && $ToDate) {
             // where beetwen
