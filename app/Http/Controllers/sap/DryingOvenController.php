@@ -400,7 +400,17 @@ class DryingOvenController extends Controller
                     Log::channel('pallets')->error("Code Exist:: " . $generatedCode);
                     $recordCount++;
                 } else {
-                    break;
+                    $palletResponse = Http::withOptions([
+                        'verify' => false,
+                    ])->withHeaders([
+                        "Content-Type" => "application/json",
+                        "Accept" => "application/json",
+                        "Authorization" => "Basic " . BasicAuthToken(),
+                    ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
+
+                    if($palletResponse->successful()){
+                        break;
+                    }
                 }
 
                 if ($attempt >= $maxAttempts) {
@@ -409,18 +419,6 @@ class DryingOvenController extends Controller
             } while (true);
 
             Log::channel('pallets')->info("Generated Code:: " . $generatedCode);
-
-            $palletResponse = Http::withOptions([
-                'verify' => false,
-            ])->withHeaders([
-                "Content-Type" => "application/json",
-                "Accept" => "application/json",
-                "Authorization" => "Basic " . BasicAuthToken(),
-            ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
-
-            if (!$palletResponse->successful()) {
-                throw new \Exception('Tạo Pallet SAP có lỗi.');
-            }
 
             $palletResult = $palletResponse->json();
             $pallet_error_log['palletResult'] = $palletResult;
