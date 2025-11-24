@@ -274,16 +274,11 @@ class ReportController extends Controller
     {
         $fromDate = $request->input('from_date');
         $ToDate = $request->input('to_date');
-        // $oven= $request->input('oven');
 
-        // Start the query and add conditions based on the request inputs
         $query = DB::table('wl_cbg_bc_xepsay');
 
         if ($fromDate && $ToDate) {
-            // where beetwen
-            $fromDateNow = $fromDate . ' 00:00:00';
-            $toDateTime = $ToDate . ' ' . Carbon::now()->format('H:i:s');
-            $query->whereBetween('created_at', [$fromDateNow, $toDateTime]);
+            $query->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($ToDate)->endOfDay()]);
         }
 
         // Get the results
