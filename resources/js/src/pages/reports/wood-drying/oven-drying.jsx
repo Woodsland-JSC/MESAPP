@@ -107,6 +107,9 @@ const OvenDrying = () => {
             filter: true,
             aggFunc: "sum",
             width: 150,
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
+            }
         },
         {
             headerName: "Số lượng Pallet",
@@ -116,14 +119,14 @@ const OvenDrying = () => {
             headerComponentParams: { displayName: "Số lượng Pallet" },
         },
         {
-            headerName: "Người đánh giá",
-            field: "userCheckOven",
+            headerName: "MNV",
+            field: "MNV",
             width: 150,
             filter: true
         },
         {
             headerName: "Người chạy lò",
-            field: "userRunOven",
+            field: "user",
             width: 150,
             filter: true
         },
@@ -361,7 +364,7 @@ const OvenDrying = () => {
                                                         <div className="grid grid-cols-2 font-semibold mb-2">
                                                             <span>Người đánh giá: </span>
                                                             <span className="font-normal">
-                                                                 {report.userCheckOven ? report.userCheckOven : ''}
+                                                                {report.userCheckOven ? report.userCheckOven : ''}
                                                             </span>
                                                         </div>
                                                     </div>

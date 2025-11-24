@@ -303,16 +303,38 @@ class PlanDryingController extends Controller
         }
     }
 
-    public function getOvenIsDrying(Request $request){
+    public function getOvenIsDrying(Request $request)
+    {
         try {
             $factory = $request->query('factory');
-            $data = PlanDrying::query()
-                ->with('userRunOven')
-                ->with('userCheckOven')
-                ->where('plant', '=' , $factory ? $factory : Auth::user()->plant)
-                ->where('Status', '=', 1)
-                ->whereNull('CompletedBy')
-                ->orderBy('PlanID', 'desc')
+            $data = DB::table('pallets as A')
+                ->join('pallet_details as B', 'A.palletID', '=', 'B.palletID')
+                ->join('plan_detail as C', 'A.palletID', '=', 'C.pallet')
+                ->join('planDryings as D', 'C.PlanID', '=', 'D.PlanID')
+                ->join('users as E', 'E.id', '=', 'D.RunBy')
+                ->select(
+                    'D.Oven',
+                    'D.Code',
+                    'D.Reason',
+                    'D.Method',
+                    DB::raw('COUNT(*) as TotalPallet'),
+                    DB::raw('SUM(B.Qty) as Mass'),
+                    'E.username as MNV',
+                    DB::raw("CONCAT(E.last_name, ' ', E.first_name) as user"),
+                    'D.runDate'
+                )
+                ->whereNull('D.CompletedBy')
+                ->where('D.plant', '=', $factory)
+                ->groupBy(
+                    'D.Oven',
+                    'D.Code',
+                    'D.Reason',
+                    'D.Method',
+                    'E.username',
+                    'E.last_name',
+                    'E.first_name',
+                    'D.runDate'
+                )
                 ->get();
             return response()->json([
                 'reports' => $data
