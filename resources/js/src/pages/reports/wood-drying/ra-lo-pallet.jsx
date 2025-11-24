@@ -289,8 +289,13 @@ const BaoCaoRaLoPallet = () => {
                                             <AgGridReact
                                                 ref={gridRef}
                                                 rowData={reports.filter(report => {
-                                                    if(statusPallet.value == 2) return report;
-                                                    return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
+                                                    if(statusPallet.value == 1){
+                                                        return report.CompletedBy
+                                                    }else if(statusPallet.value == 2){
+                                                        return !report.CompletedBy
+                                                    }else{
+                                                        return report
+                                                    }
                                                 })}
                                                 columnDefs={colDefs}
                                                 groupDisplayType={"multipleColumns"}
