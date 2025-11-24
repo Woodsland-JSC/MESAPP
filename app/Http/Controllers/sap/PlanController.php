@@ -216,7 +216,7 @@ class PlanController extends Controller
                 throw new \Exception('Lò không hợp lệ.');
             }
             $existingPallet = plandetail::where('pallet', $pallet)->count();
-            if ($existingPallet > 1) {
+            if ($existingPallet > 0) {
                 throw new \Exception('Pallet đã được assign.');
             }
             $data = pallet_details::where('palletID', $pallet)->first();
