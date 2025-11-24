@@ -153,7 +153,10 @@ const BaoCaoRaLoPallet = () => {
             field: "Mass",
             width: 150,
             aggFunc: "sum",
-            headerComponentParams: { displayName: "Khối lượng" }
+            headerComponentParams: { displayName: "Khối lượng" },
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+            }
         },
         {
             headerName: "Người hoàn thành",
@@ -289,11 +292,11 @@ const BaoCaoRaLoPallet = () => {
                                             <AgGridReact
                                                 ref={gridRef}
                                                 rowData={reports.filter(report => {
-                                                    if(statusPallet.value == 1){
+                                                    if (statusPallet.value == 1) {
                                                         return report.CompletedBy
-                                                    }else if(statusPallet.value == 2){
+                                                    } else if (statusPallet.value == 2) {
                                                         return !report.CompletedBy
-                                                    }else{
+                                                    } else {
                                                         return report
                                                     }
                                                 })}
