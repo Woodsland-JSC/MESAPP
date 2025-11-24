@@ -390,6 +390,7 @@ class DryingOvenController extends Controller
                     . str_pad($recordCount, 5, '0', STR_PAD_LEFT);
 
                 $body2['U_Code'] = $generatedCode;
+                $body['U_Pallet'] = $generatedCode;
                 $pallet->Code = $generatedCode;
 
                 $palletResponse = Http::withOptions([
