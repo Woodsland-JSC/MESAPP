@@ -36,8 +36,8 @@ class PalletController extends Controller
                     u.username,
                     u.first_name,
                     u.last_name,
-                    pld.Qty,
-                    pld.Mass,
+                    pd.Qty_T as Qty,
+	                pd.Qty as Mass,
                     pl.Oven,
                     pl.Code as OvenCode
                 FROM pallets p
@@ -47,8 +47,7 @@ class PalletController extends Controller
                 LEFT JOIN users u ON u.id = p.CompletedBy
                 WHERE p.factory = ? AND p.activeStatus = 1
                 AND p.created_at >= ?
-                AND p.created_at <= ?
-                GROUP BY p.palletID, pld.Qty, pld.Mass, pl.Oven, pl.Code',
+                AND p.created_at <= ?',
                 [$factory, $fromDate, $toDate]
             );
             return response()->json([

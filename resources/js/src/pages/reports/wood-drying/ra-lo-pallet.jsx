@@ -289,7 +289,7 @@ const BaoCaoRaLoPallet = () => {
                                             <AgGridReact
                                                 ref={gridRef}
                                                 rowData={reports.filter(report => {
-                                                    if(statusPallet.value == 3) return report;
+                                                    if(statusPallet.value == 2) return report;
                                                     return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
                                                 })}
                                                 columnDefs={colDefs}
