@@ -39,9 +39,13 @@ const BaoCaoRaLoPallet = () => {
         {
             label: "Chưa ra lò",
             value: 2
+        },
+        {
+            label: "Tất cả",
+            value: 3
         }
     ]);
-    const [statusPallet, setStatusPallet] = useState(statusPallets[0]);
+    const [statusPallet, setStatusPallet] = useState(statusPallets[2]);
 
     const getFactories = async () => {
         try {
@@ -285,6 +289,7 @@ const BaoCaoRaLoPallet = () => {
                                             <AgGridReact
                                                 ref={gridRef}
                                                 rowData={reports.filter(report => {
+                                                    if(statusPallet.value == 3) return report;
                                                     return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
                                                 })}
                                                 columnDefs={colDefs}
