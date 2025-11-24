@@ -273,7 +273,7 @@ function DryingQueueReport() {
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
             valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
+                return params.value ?  Number(params.value).toFixed(6).toLocaleString() : "0";
             },
             headerComponentParams: { displayName: "Khối lượng (m3)" },
         },
