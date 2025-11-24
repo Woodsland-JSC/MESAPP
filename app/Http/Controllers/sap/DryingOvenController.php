@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Pallet;
 use App\Models\pallet_details;
 use App\Models\planDryings;
+use App\Services\GPALLETService;
 // use App\Models\Warehouse;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -228,7 +229,7 @@ class DryingOvenController extends Controller
         }
     }
 
-    function StorePalletNew(Request $request)
+    function StorePalletNew(Request $request, GPALLETService $gPALLETService)
     {
         $stockTransferResponse = null;
         $palletResponse = null;
@@ -393,20 +394,10 @@ class DryingOvenController extends Controller
                 $body['U_Pallet'] = $generatedCode;
                 $pallet->Code = $generatedCode;
 
-                $palletResponse = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    "Content-Type" => "application/json",
-                    "Accept" => "application/json",
-                    "Authorization" => "Basic " . BasicAuthToken(),
-                ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
-                $palletResult = $palletResponse->json();
-                $pallet_error_log['palletResult'] = $palletResult;
+                $palletFind = $gPALLETService->getByCode($generatedCode);
 
-                if (!$palletResponse->successful()) {
-                    Log::channel('pallets')->error($generatedCode . ' palletResult', $palletResult);
-                    Log::channel('pallets')->error($generatedCode . ' palletBody', $body2);
-                    Log::channel('pallets')->error($generatedCode . ' palletBody', $body);
+                if ($palletFind || $palletFind != null) {
+                    Log::channel('pallets')->error("Code Exist:: " . $generatedCode);
                     $recordCount++;
                 } else {
                     break;
@@ -416,6 +407,23 @@ class DryingOvenController extends Controller
                     throw new \Exception("Tạo Pallet SAP có lỗi. Vui lòng thử lại.");
                 }
             } while (true);
+
+            Log::channel('pallets')->info("Generated Code:: " . $generatedCode);
+
+            $palletResponse = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+                "Authorization" => "Basic " . BasicAuthToken(),
+            ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
+
+            if (!$palletResponse->successful()) {
+                throw new \Exception('Tạo Pallet SAP có lỗi.');
+            }
+
+            $palletResult = $palletResponse->json();
+            $pallet_error_log['palletResult'] = $palletResult;
 
             $stockTransferResponse = Http::withOptions([
                 'verify' => false,
@@ -428,6 +436,7 @@ class DryingOvenController extends Controller
             $pallet_error_log['stockTransferResult'] = $stockTransferResult;
 
             if (!$stockTransferResponse->successful()) {
+                $gPALLETService->deletePallet($palletResult['DocEntry']);
                 throw new \Exception('Tạo StockTransfer SAP có lỗi.');
             }
 
@@ -452,12 +461,6 @@ class DryingOvenController extends Controller
         } catch (\Exception | QueryException $e) {
             DB::rollBack();
 
-            Log::error([
-                'message' => 'Lỗi khi tạo Pallet',
-                'stockTransferResponse' => $stockTransferResponse ? $stockTransferResponse->json() : null,
-                'palletResponse' => $palletResponse ? $palletResponse->json() : null,
-            ]);
-
             $errorResponse = [
                 'message' => 'Failed to create pallet and details',
                 'error' => $e->getMessage()
@@ -467,11 +470,12 @@ class DryingOvenController extends Controller
                 $errorResponse['stockTransferResult'] = $stockTransferResponse->json();
             }
 
-            if ($palletResponse) {
-                $errorResponse['palletResult'] = $palletResponse->json();
+            if ($palletResponse && $palletResponse->successful()) {
+                $palletResult = $palletResponse->json();
+                $gPALLETService->deletePallet($palletResult['DocEntry']);
             }
 
-            if ($stockTransferResult) {
+            if ($stockTransferResult && $stockTransferResponse->successful()) {
                 $revertResponse = Http::withOptions([
                     'verify' => false,
                 ])->withHeaders([
@@ -481,10 +485,7 @@ class DryingOvenController extends Controller
                 ])->post(UrlSAPServiceLayer() . "/b1s/v1/StockTransfers({$stockTransferResult['DocEntry']})/Cancel");
 
                 if (!$revertResponse->successful()) {
-                    \Log::error('Failed to revert StockTransfer', [
-                        'docEntry' => $stockTransferResult['DocEntry'],
-                        'error' => $revertResponse->json()
-                    ]);
+                    Log::channel('pallets')->info("Lỗi khi tạo Pallet StockTransfers");
                 }
             }
 
