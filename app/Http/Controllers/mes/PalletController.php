@@ -46,8 +46,8 @@ class PalletController extends Controller
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 LEFT JOIN users u ON u.id = p.CompletedBy
                 WHERE p.factory = ? AND p.activeStatus = 1
-                AND p.LoadedIntoKilnDate >= ?
-                AND p.LoadedIntoKilnDate <= ?
+                AND p.created_at >= ?
+                AND p.created_at <= ?
                 GROUP BY p.palletID, pld.Qty, pld.Mass, pl.Oven, pl.Code',
                 [$factory, $fromDate, $toDate]
             );
