@@ -236,9 +236,21 @@ class ReportController extends Controller
 
             foreach ($pallets as $pallet) {
                 foreach ($pallet->details as $detail) {
-                    $status = 'Chưa sấy';
-                    if (!empty($pallet->RanBy)) {
-                        $status = !empty($pallet->CompletedBy) ? 'Đã sấy' : 'Đang sấy';
+                    // if($pallet->CompletedBy){
+                    //     $status = 'Đã sấy';
+                    // }else if(!$pallet->CompletedBy && $pallet->RanBy){
+                    //     $status = 'Đang sấy';
+                    // }else{
+                    //     $status = 'Chưa sấy';
+                    // }
+                    $status = '';
+
+                    if($pallet->activeStatus==0){
+                        $status = 'Chưa sấy';
+                    }else if($pallet->activeStatus == 1 && !$pallet->CompletedBy){
+                        $status = 'Đang sấy';
+                    }else{
+                        $status = 'Đã sấy';
                     }
 
                     $result[] = [
