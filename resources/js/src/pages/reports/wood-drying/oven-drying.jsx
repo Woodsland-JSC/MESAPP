@@ -20,6 +20,9 @@ const OvenDrying = () => {
     const { user } = useAppContext();
     const gridRef = useRef();
 
+    console.log("user", user);
+
+
     const [factories, setFactories] = useState([]);
     const [factory, setFactory] = useState(null);
     const [reports, setReports] = useState([]);
@@ -189,22 +192,26 @@ const OvenDrying = () => {
                     </div>
 
                     {
-                        user?.role == 1 && (
-                            <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0 bg-white p-4 pt-3 rounded-xl mb-4 gap-x-2 gap-y-2 items-center">
-                                <div className="md:w-1/3 w-full">
-                                    <label className=" text-sm font-medium text-gray-900">
-                                        Nhà máy
-                                    </label>
-                                    <Select
-                                        options={factories}
-                                        placeholder="Chọn nhà máy"
-                                        className="w-full mt-2 cursor-pointer"
-                                        onChange={(factory) => {
-                                            setFactory({ ...factory });
-                                        }}
-                                    />
-                                </div>
-                                {/* <div className="md:w-2/3 w-full">
+                        <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0 bg-white p-4 pt-3 rounded-xl mb-4 gap-x-2 gap-y-2 items-center">
+                            <div className="md:w-1/3 w-full">
+                                <label className=" text-sm font-medium text-gray-900">
+                                    Nhà máy
+                                </label>
+                                <Select
+                                    options={factories.filter(f => {
+                                        console.log(f);
+                                        
+                                        if(user?.role == 1) return f;
+                                        else return f.value == user?.plant
+                                    })}
+                                    placeholder="Chọn nhà máy"
+                                    className="w-full mt-2 cursor-pointer"
+                                    onChange={(factory) => {
+                                        setFactory({ ...factory });
+                                    }}
+                                />
+                            </div>
+                            {/* <div className="md:w-2/3 w-full">
                             <div className="flex gap-x-3">
                                 <div className="w-1/2">
                                     <label className="block text-sm font-medium text-gray-900">
@@ -234,8 +241,7 @@ const OvenDrying = () => {
                                 </div>
                             </div>
                         </div> */}
-                            </div>
-                        )
+                        </div>
                     }
 
 
