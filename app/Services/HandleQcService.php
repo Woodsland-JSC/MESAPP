@@ -41,34 +41,34 @@ class HandleQcService
             foreach ($dataSL as $key => $item) {
                 $digitItemCode = substr($item['ItemCode'], 0, 2);
 
-                $itemExit = [
-                    "ItemCode"      => $item['ItemCode'],
-                    "Quantity"      => (float) $item['qtySL'],
-                    "WarehouseCode" => $fromWH
-                ];
-
-                $itemEntry = [
-                    "ItemCode"      => $item['ItemCode'],
-                    "Quantity"      => (float) $item['qtySL'],
-                    "WarehouseCode" => $toWh
-                ];
-
                 if ($digitItemCode == 'MM') {
+                    $itemExit = [
+                        "ItemCode"      => $item['ItemCode'],
+                        "Quantity"      => (float) $item['qtySLM3'],
+                        "WarehouseCode" => $fromWH
+                    ];
+
+                    $itemEntry = [
+                        "ItemCode"      => $item['ItemCode'],
+                        "Quantity"      => (float) $item['qtySLM3'],
+                        "WarehouseCode" => $toWh
+                    ];
+
                     $itemExit['BatchNumbers'] = [[
-                        "Quantity" => (float) $item['qtySL'],
+                        "Quantity" => (float) $item['qtySLM3'],
                         "ItemCode"      => $item['ItemCode'],
                         "BatchNumber" => $item['BatchNum']
                     ]];
 
                     $itemEntry['BatchNumbers'] = [[
-                        "Quantity" => (float) $item['qtySL'],
+                        "Quantity" => (float) $item['qtySLM3'],
                         "ItemCode"      => $item['ItemCode'],
                         "BatchNumber" => $item['ItemCode'] . '-' . substr(Carbon::now()->year, 2) . 'W' . str_pad(Carbon::now()->weekOfYear, 2, '0', STR_PAD_LEFT)
                     ]];
-                }
 
-                $documentLineExit[] = $itemExit;
-                $documentLineEntries[] = $itemEntry;
+                    $documentLineExit[] = $itemExit;
+                    $documentLineEntries[] = $itemEntry;
+                }
             }
 
             $bodyExit = [

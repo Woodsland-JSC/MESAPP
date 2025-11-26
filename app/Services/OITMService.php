@@ -31,9 +31,9 @@ class OITMService
         SELECT 
             OITM."ItemCode",
             OITM."ItemName",
-            OITM."U_CDai",
-            OITM."U_CRong",
-            OITM."U_CDay",
+            T0."U_CDai",
+            T0."U_CRong",
+            T0."U_CDay",
             T0."Quantity" as "BatchQuantity",
             OITW."OnHand" as "Quantity",
             T0."DistNumber" as "BatchNum",
@@ -42,7 +42,7 @@ class OITMService
         INNER JOIN OITW ON OITM."ItemCode" = OITW."ItemCode"
         Left Join
         (
-            Select OBTN."DistNumber",OBTN."ItemCode",OBTQ."WhsCode",OBTQ."Quantity"
+            Select OBTN."DistNumber",OBTN."ItemCode",OBTQ."WhsCode",OBTQ."Quantity", OBTN."U_CDai", OBTN."U_CRong", OBTN."U_CDay"
             From OBTN 
             inner JOIN OBTQ ON OBTN."ItemCode" = OBTQ."ItemCode" and OBTN."SysNumber" = OBTQ."SysNumber" AND OBTQ."Quantity" > 0
 

@@ -314,10 +314,10 @@ class DryingOvenController extends Controller
                     $datainsert['CDai'] =  0;
                     $datainsert['CDay'] = 0;
                     $datainsert['CRong'] = 0;
-                    $quyCachSite = $detailData['CDay'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDai'];
+                    $quyCachSite = 0 . 'x' . 0 . 'x' . 0;
                     $datainsert['QuyCachSite'] = $quyCachSite;
                     // Save the Qty
-                    $datainsert['Qty'] = $detailData['Qty'] ? $detailData['Qty'] : 0;
+                    $datainsert['Qty'] = $detailData['qtyM3'] ? $detailData['qtyM3'] : 0;
                     $datainsert['Qty_T'] = 0;
                 } else {
                     $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
