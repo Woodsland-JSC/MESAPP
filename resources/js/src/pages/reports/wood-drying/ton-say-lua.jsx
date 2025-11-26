@@ -215,7 +215,8 @@ function BaoCaoTonSayLua() {
             // rowGroup: true,
             // hide: true,
             filter: true,
-            headerClass: 'text-center'
+            headerClass: 'text-center',
+            pinned: 'left',
         },
         {
             headerName: "Quy cách",
@@ -225,18 +226,21 @@ function BaoCaoTonSayLua() {
                     field: "day",
                     width: 120,
                     filter: true,
+                    pinned: 'left',
                 },
                 {
                     headerName: "Rộng",
                     field: "rong",
                     width: 120,
                     filter: true,
+                    pinned: 'left',
                 },
                 {
                     headerName: "Dài",
                     field: "dai",
                     width: 120,
                     filter: true,
+                    pinned: 'left',
                 },
             ],
         },
@@ -491,7 +495,7 @@ function BaoCaoTonSayLua() {
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
                                 </div> */}
-                                <div className="col-span-1 w-full">
+                                <div className="col-span-1 w-1/2">
                                     <label
                                         htmlFor="indate"
                                         className="block mb-1 text-sm font-medium text-gray-900 "
