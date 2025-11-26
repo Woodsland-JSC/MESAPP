@@ -228,6 +228,9 @@ const HandleItemQc = () => {
 
         let items = [];
 
+        console.log(row);
+        
+
         row.forEach(item => {
             items.push({
                 ItemCode: item.ItemCode,
@@ -463,7 +466,7 @@ const HandleItemQc = () => {
         let total = 0;
 
         row.forEach(item => {
-            let m3 = (item.Quantity * item.U_CDai * item.U_CDay * item.U_CRong) / 1000000000;
+            let m3 = (item.Quantity * item.dai * item.day * item.rong) / 1000000000;
             total += m3;
         });
 
@@ -939,16 +942,20 @@ const HandleItemQc = () => {
                                                             Tên sản phẩm
                                                         </th>
                                                         <th>
+                                                            Quy cách
+                                                        </th>
+                                                        <th>
                                                             Tồn kho
                                                         </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        row.map((item, i) => (
+                                                        row.map((item, i) => (                                                            
                                                             <tr className="text-center" key={i}>
                                                                 <td>{item.ItemCode}</td>
                                                                 <td>{item.ItemName}</td>
+                                                                <td>{`${Number(item.day)}x${Number(item.rong)}x${Number(item.dai)}`}</td>
                                                                 <td>{Number(item.Quantity)}</td>
                                                             </tr>
                                                         ))

@@ -14,20 +14,6 @@ class OITMService
     private HanaService $hanaService;
     private $SQL_GET_LIST_SKU_BY_ITEMCODES = 'SELECT "U_SKU", "U_CDay", "U_CRong", "U_CDai" FROM OITM WHERE "ItemCode" IN ?';
     private $SQL_GET_ITEM_BY_WH_QC = <<<SQL
-        -- SELECT 
-        --     OITM."ItemCode",
-        --     OITM."ItemName",
-        --     OITW."OnHand" AS "Quantity",
-        --     OITW."WhsCode",
-        --     OITM."U_CDai",
-        --     OITM."U_CRong",
-        --     OITM."U_CDay"
-        -- FROM 
-        --     OITM
-        -- INNER JOIN OITW ON OITM."ItemCode" = OITW."ItemCode"
-        -- WHERE 
-        --     OITW."WhsCode" = ?
-        --     AND OITW."OnHand" > 0;
         SELECT 
             OITM."ItemCode",
             OITM."ItemName",
@@ -37,7 +23,10 @@ class OITMService
             T0."Quantity" as "BatchQuantity",
             OITW."OnHand" as "Quantity",
             T0."DistNumber" as "BatchNum",
-            OITW."WhsCode"
+            OITW."WhsCode",
+            OITM."U_CDai" as "dai",
+            OITM."U_CRong" as "rong",
+            OITM."U_CDay" as "day"
         FROM  OITM
         INNER JOIN OITW ON OITM."ItemCode" = OITW."ItemCode"
         Left Join
