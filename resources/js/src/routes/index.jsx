@@ -105,6 +105,7 @@ import BaoCaoRaLoPallet from "../pages/reports/wood-drying/ra-lo-pallet";
 import OvenDrying from "../pages/reports/wood-drying/oven-drying";
 import HandleItemQc from "../pages/workspace/wood-working/handle-qc";
 import DryingCompletedReport from "../pages/reports/wood-drying/bao-cao-pallet-ra-lo";
+import BaoCaoTonSayLua from "../pages/reports/wood-drying/ton-say-lua";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -442,6 +443,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <DryingCompletedReport />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/reports/wood-drying/ton-say-lua"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoTonSayLua />
                             </ProtectedRoute>
                         }
                     />

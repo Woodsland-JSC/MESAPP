@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pallet;
 use App\Services\HanaService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controller báo cáo SAP
@@ -44,12 +46,15 @@ class ReportController extends Controller
 
     private $SQL_BAO_CAO_QUY_LUONG = '{call USP_REPORT_CONVERTQTY(?, ?)}';
 
+    private $SQL_BAO_CAO_TON_SAY_LUA_CBG = '{CALL "SP_TON_SAY_LUA_CBG"(?)}';
+
     public function __construct(HanaService $hanaService)
     {
         $this->hanaService = $hanaService;
     }
 
-    public function baoCaoSanLuongQuyDoiCBG(Request $request){
+    public function baoCaoSanLuongQuyDoiCBG(Request $request)
+    {
         try {
             $params = [$request->fromDate, $request->toDate, $request->team, $request->team, $request->CD, $request->CD];
             $results = $this->hanaService->select($this->SQL_BAO_CAO_SAN_LUONG_QUY_DOI, $params);
@@ -58,10 +63,11 @@ class ReportController extends Controller
             return response()->json([
                 'message' => $e->getMessage()
             ], 500);
-        } 
+        }
     }
 
-    public function baoCaoQuyLuongCBG(Request $request){
+    public function baoCaoQuyLuongCBG(Request $request)
+    {
         try {
             $params = [$request->year, $request->factory];
             $results = $this->hanaService->select($this->SQL_BAO_CAO_QUY_LUONG, $params);
@@ -70,6 +76,73 @@ class ReportController extends Controller
             return response()->json([
                 'message' => $e->getMessage()
             ], 500);
-        } 
+        }
+    }
+
+    public function bao_cao_ton_say_lua(Request $request)
+    {
+        try {
+            $params = [$request->to_date];
+            $results = $this->hanaService->select($this->SQL_BAO_CAO_TON_SAY_LUA_CBG, $params);
+            $p = [];
+
+            $date = $request->to_date . ' 23:59:59';
+
+
+            Pallet::with(['details'])
+                ->where('created_at', '<=', $date)
+                ->whereNull('CompletedBy')
+                ->chunk(1000, function ($pallets) use ($date, &$p) {
+                    foreach ($pallets as $pallet) {
+                        $klChuaSay = 0;
+                        $klTrongLoChuaSay = 0;
+                        $klDangSay = 0;
+                        $factory = $pallet->factory;
+                        $quyCach = $pallet->QuyCach;
+                        $itemCode = '';
+
+                        foreach ($pallet->details as $detail) {
+                            $itemCode = $detail->ItemCode;
+                            if ($pallet->activeStatus == 0) {
+                                $klChuaSay += $detail->Qty;
+                            }
+
+                            if ($pallet->activeStatus == 1 && $pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
+                                $klTrongLoChuaSay += $detail->Qty;
+                            }
+
+                            if ($pallet->activeStatus == 1 && $pallet->RanBy != null && $pallet->RanDate <= $date) {
+                                $klDangSay += $detail->Qty;
+                            }
+                        }
+
+                        $k = $itemCode . '-' . $quyCach . '-' . $factory;
+
+                        if (!isset($p[$k])) {
+                            $p[$k] = [
+                                'ItemCode' => $itemCode,
+                                'QuyCach' => $quyCach,
+                                'Factory' => $factory,
+                                'KL_Chua_Say' => $klChuaSay,
+                                'KL_Trong_Lo_Chua_Say' => $klTrongLoChuaSay,
+                                'KL_Dang_Say' => $klDangSay
+                            ];
+                        } else {
+                            $p[$k]['KL_Chua_Say'] += $klChuaSay;
+                            $p[$k]['KL_Trong_Lo_Chua_Say'] += $klTrongLoChuaSay;
+                            $p[$k]['KL_Dang_Say'] += $klDangSay;
+                        }
+                    }
+                });
+
+            return response()->json([
+                'report_data' => $results,
+                'pallets' => $p
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

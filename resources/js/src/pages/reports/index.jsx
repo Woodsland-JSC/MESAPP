@@ -114,7 +114,12 @@ const SAYReports = [
         link: "/reports/wood-drying/completed",
         description: "Báo cáo số liệu các Pallet đã hoàn thành."
     },
-
+    {
+        id: "0015",
+        name: "Báo cáo tồn sấy lựa",
+        link: "/reports/wood-drying/ton-say-lua",
+        description: "Báo cáo số liệu tồn kho gỗ tươi."
+    },
 ];
 
 const CBGReports = [
