@@ -564,6 +564,7 @@ function WoodSorting() {
                 QuyCach: `${formatNumber(card.props.thickness)}x${formatNumber(
                     card.props.width
                 )}x${formatNumber(card.props.height)}`,
+                qtyM3: palletQuantities[card.key]
             })),
         };
         return palletObject;

@@ -216,10 +216,9 @@ const HandleItemQc = () => {
         let obj = [];
 
         row.forEach(item => {
-            obj.push({ ...item, qtySL: Number(0) });
+            obj.push({ ...item, qtySL: Number(0), qtySLM3: 0 });
         });
 
-        console.log('obj', obj);
         setDataSL(pre => ({...pre, dataSL: obj}));
         onModalOpen();
     }
@@ -274,10 +273,10 @@ const HandleItemQc = () => {
     const confirmHXLSayLai = () => {
         let invalid = false;
         dataSL.dataSL.forEach(item => {
-            let qty = item.BatchQuantity ? Number(item.BatchQuantity) : Number(item.Quantity);
-            if (item.qtySL > qty) {
+            let maxQty = Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong));
+            if (item.qtySL > maxQty) {
                 invalid = true;
-                toast.error(`Số lượng sấy lại ${item.qtySL} đang lớn hơn tồn kho ${qty} của mã sản phẩm ${item.ItemCode}`);
+                toast.error(`Số lượng sấy lại ${item.qtySL} đang lớn hơn tồn kho ${maxQty} của mã sản phẩm ${item.ItemCode}`);
                 return;
             }
         })
@@ -728,13 +727,16 @@ const HandleItemQc = () => {
                                                             Tên sản phẩm
                                                         </th>
                                                         <th>
-                                                            Số lượng
+                                                            Kl(m3)
                                                         </th>
                                                         <th>
-                                                            Tổng tồn kho
+                                                            Số thanh có thể SL
                                                         </th>
                                                         <th>
-                                                            Số lượng SL
+                                                            Khối lượng SL
+                                                        </th>
+                                                        <th>
+                                                            Số thanh SL
                                                         </th>
                                                     </tr>
                                                 </thead>
@@ -745,7 +747,12 @@ const HandleItemQc = () => {
                                                                 <td>{item.ItemCode}</td>
                                                                 <td>{item.ItemName}</td>
                                                                 <td>{Number(item.BatchQuantity)}</td>
-                                                                <td>{Number(item.Quantity)}</td>
+                                                                <td>
+                                                                    {
+                                                                        Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong))
+                                                                    }
+                                                                </td>
+                                                                <td>{Number(item.qtySLM3 ?? 0)}</td>
                                                                 <td className="w-[250px]">
                                                                     <NumberInput
                                                                         min={0}
@@ -753,16 +760,14 @@ const HandleItemQc = () => {
                                                                         className="mt-2"
                                                                         onChange={value => {
                                                                             let items = [...dataSL.dataSL];
+                                                                            let qtyM3 = (value * item.U_CDai * item.U_CDay * item.U_CRong) / 1000000000;
                                                                             items[i].qtySL = value;
+                                                                            items[i].qtySLM3 = qtyM3;
                                                                             setDataSL(pre => ({ ...pre, dataSL: items }));
                                                                         }}
-                                                                        max={item.BatchQuantity ? Number(item.BatchQuantity) : Number(item.Quantity)}
+                                                                        max={Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong))}
                                                                     >
                                                                         <NumberInputField />
-                                                                        {/* <NumberInputStepper>
-                                                                            <NumberIncrementStepper />
-                                                                            <NumberDecrementStepper />
-                                                                        </NumberInputStepper> */}
                                                                     </NumberInput>
                                                                 </td>
                                                             </tr>
