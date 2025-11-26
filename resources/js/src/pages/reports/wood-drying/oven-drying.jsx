@@ -20,9 +20,6 @@ const OvenDrying = () => {
     const { user } = useAppContext();
     const gridRef = useRef();
 
-    console.log("user", user);
-
-
     const [factories, setFactories] = useState([]);
     const [factory, setFactory] = useState(null);
     const [reports, setReports] = useState([]);
@@ -199,8 +196,6 @@ const OvenDrying = () => {
                                 </label>
                                 <Select
                                     options={factories.filter(f => {
-                                        console.log(f);
-                                        
                                         if(user?.role == 1) return f;
                                         else return f.value == user?.plant
                                     })}
