@@ -67,8 +67,6 @@ function BaoCaoTonSayLua() {
 
             let uniqueItemCodeData = [];
 
-            let total = 0;
-
             Object.keys(pallets).forEach(key => {
                 let pallet = pallets[key];
 
@@ -76,10 +74,73 @@ function BaoCaoTonSayLua() {
                     itemCode: pallet.ItemCode,
                     itemName: "",
                     quyCach: pallet.QuyCach,
-                    day: 0,
-                    rong: 0,
-                    dai: 0,
                     factory: pallet.Factory,
+                    chosay_TH: 0,
+                    tronglo_chuasay_TH: 0,
+                    tronglo_TH: 0,
+                    chosay_YS: 0,
+                    tronglo_chuasay_YS: 0,
+                    tronglo_YS: 0,
+                    chosay_TB: 0,
+                    tronglo_chuasay_TB: 0,
+                    tronglo_TB: 0
+                }
+
+                if (obj.factory == 'TH') {
+                    obj.chosay_TH = Number(pallet['KL_Chua_Say'] || 0);
+                    obj.tronglo_chuasay_TH = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
+                    obj.tronglo_TH = Number(pallet['KL_Dang_Say'] || 0);
+                }
+
+                if (obj.factory == 'TB') {
+                    obj.chosay_TB = Number(pallet['KL_Chua_Say'] || 0);
+                    obj.tronglo_chuasay_TB = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
+                    obj.tronglo_TB = Number(pallet['KL_Dang_Say'] || 0);
+                }
+
+                if (obj.factory == 'YS') {
+                    obj.chosay_YS = Number(pallet['KL_Chua_Say'] || 0);
+                    obj.tronglo_chuasay_YS = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
+                    obj.tronglo_YS = Number(pallet['KL_Dang_Say'] || 0);
+                }
+
+                let itemFind = uniqueItemCodeData.find(i => i.itemCode == obj.itemCode);
+
+                if (!itemFind) {
+                    uniqueItemCodeData.push(obj);
+                } else {
+                    itemFind.chosay_TH += obj.chosay_TH;
+                    itemFind.tronglo_chuasay_TH += obj.tronglo_chuasay_TH;
+                    itemFind.tronglo_TH += obj.tronglo_TH;
+
+                    itemFind.chosay_TB += obj.chosay_TB;
+                    itemFind.tronglo_chuasay_TB += obj.tronglo_chuasay_TB;
+                    itemFind.tronglo_TB += obj.tronglo_TB;
+
+                    itemFind.chosay_YS += obj.chosay_YS;
+                    itemFind.tronglo_chuasay_YS += obj.tronglo_chuasay_YS;
+                    itemFind.tronglo_YS += obj.tronglo_YS;
+                }
+            })
+
+            let formattedData = [];
+
+            reportData.forEach(data => {
+                let cday = Number(data.U_CDay || 0);
+                let crong = Number(data.U_CRong || 0);
+                let cdai = Number(data.U_CDai || 0);
+                let factory = data.factory;
+                let itemCode = data.ItemCode;
+                let EB = Number(data.EB || 0);
+                let itemName = data.ItemName;
+
+                let obj = {
+                    itemCode: itemCode,
+                    itemName: itemName,
+                    day: cday,
+                    rong: crong,
+                    dai: cdai,
+                    factory: factory,
                     tonKho_TH: 0,
                     chosay_TH: 0,
                     tronglo_chuasay_TH: 0,
@@ -94,37 +155,47 @@ function BaoCaoTonSayLua() {
                     tronglo_TB: 0
                 }
 
-                if(pallet.Factory == 'YS'){
-                    total += pallet.KL_Chua_Say;
+                let palletObj = uniqueItemCodeData.find(i => i.itemCode == itemCode && i.quyCach == `${cday}x${crong}x${cdai}`);
+
+                if (factory && factory == 'TH') {
+                    obj.tonKho_TH = EB;
+
+                    // 
+                    obj.chosay_TH += palletObj ? palletObj.chosay_TH : 0;
+                    obj.tronglo_chuasay_TH += palletObj ? palletObj.tronglo_chuasay_TH : 0;
+                    obj.tronglo_TH += palletObj ? palletObj.tronglo_TH : 0;
                 }
 
-                if (pallet && pallet['Factory'] == 'TH') {
-                    obj.chosay_TH = Number(pallet['KL_Chua_Say'] || 0);
-                    obj.tronglo_chuasay_TH = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
-                    obj.tronglo_TH = Number(pallet['KL_Dang_Say'] || 0);
+                if (factory && factory == 'TB') {
+                    obj.tonKho_TB = EB;
+
+                    // 
+                    obj.chosay_TB += palletObj ? palletObj.chosay_TB : 0;
+                    obj.tronglo_chuasay_TB += palletObj ? palletObj.tronglo_chuasay_TB : 0;
+                    obj.tronglo_TB += palletObj ? palletObj.tronglo_TB : 0;
                 }
 
-                if (pallet && pallet['Factory'] == 'TB') {
-                    obj.chosay_TB = Number(pallet['KL_Chua_Say'] || 0);
-                    obj.tronglo_chuasay_TB = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
-                    obj.tronglo_TB = Number(pallet['KL_Dang_Say'] || 0);
+                if (factory && factory == 'YS') {
+                    obj.tonKho_YS = EB;
+                    // 
+                    obj.chosay_YS += palletObj ? palletObj.chosay_YS : 0;
+                    obj.tronglo_chuasay_YS += palletObj ? palletObj.tronglo_chuasay_YS : 0;
+                    obj.tronglo_YS += palletObj ? palletObj.tronglo_YS : 0;
                 }
 
-                if (pallet && pallet['Factory'] == 'YS') {
-                    obj.chosay_YS = Number(pallet['KL_Chua_Say'] || 0);
-                    obj.tronglo_chuasay_YS = Number(pallet['KL_Trong_Lo_Chua_Say'] || 0);
-                    obj.tronglo_YS = Number(pallet['KL_Dang_Say'] || 0);
-                }
-
-                let itemFind = uniqueItemCodeData.find(i => i.itemCode === pallet.ItemCode)
+                let itemFind = formattedData.find(i => i.itemCode == itemCode)
 
                 if (!itemFind) {
-                    uniqueItemCodeData.push(obj);
-                }else{
+                    formattedData.push(obj);
+                } else {
+                    itemFind.tonKho_TH += obj.tonKho_TH;
+                    itemFind.tonKho_TB += obj.tonKho_TB;
+                    itemFind.tonKho_YS += obj.tonKho_YS;
+
                     itemFind.chosay_TH += obj.chosay_TH;
                     itemFind.tronglo_chuasay_TH += obj.tronglo_chuasay_TH;
                     itemFind.tronglo_TH += obj.tronglo_TH;
-                    
+
                     itemFind.chosay_TB += obj.chosay_TB;
                     itemFind.tronglo_chuasay_TB += obj.tronglo_chuasay_TB;
                     itemFind.tronglo_TB += obj.tronglo_TB;
@@ -134,42 +205,6 @@ function BaoCaoTonSayLua() {
                     itemFind.tronglo_YS += obj.tronglo_YS;
                 }
             })
-
-
-            let formattedData = [];
-
-            uniqueItemCodeData.forEach((item, index) => {
-                let combineItemCode = item.ItemCode + '-' + item.quyCach + '-' + item.factory;
-                let cday = item.quyCach.split('x')[0];
-                let crong = item.quyCach.split('x')[1];
-                let cdai = item.quyCach.split('x')[2];
-
-                let itemCode = item.itemCode;
-
-                let itemWithItemCode = reportData.filter(i => i.ItemCode === itemCode && Number(i.U_CDay) == Number(cday) && Number(i.U_CRong) == Number(crong) && Number(i.U_CDai) == Number(cdai));
-
-                itemWithItemCode.forEach(data => {
-                    item.itemName = data.ItemName;
-                    if (data.factory == 'TH') {
-                        item.tonKho_TH += Number(data.EB || 0);
-                    }
-
-                    if (data.factory == 'TB') {
-                        item.tonKho_TB += Number(data.EB || 0);
-                    }
-
-                    if (data.factory == 'YS') {
-                        item.tonKho_YS += Number(data.EB || 0);
-                    }
-                });
-
-                item.day = Number(cday);
-                item.rong = Number(crong);
-                item.dai = Number(cdai);
-                item.itemName = itemWithItemCode.length > 0 ? itemWithItemCode[0].ItemName : '';
-
-                formattedData.push(item);
-            });
 
             setRowData(formattedData);
             setReportData(res);
@@ -259,7 +294,7 @@ function BaoCaoTonSayLua() {
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
                 {
-                    headerName: "Xếp sấy",
+                    headerName: "Chờ sấy",
                     field: "chosay_TH",
                     width: 120,
                     suppressHeaderMenuButton: true,
@@ -267,7 +302,7 @@ function BaoCaoTonSayLua() {
                     valueFormatter: (params) => {
                         return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
                     },
-                    headerComponentParams: { displayName: "Xếp sấy" },
+                    headerComponentParams: { displayName: "Chờ sấy" },
                 },
                 {
                     headerName: "Trong lò chưa sấy",
@@ -312,7 +347,7 @@ function BaoCaoTonSayLua() {
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
                 {
-                    headerName: "Xếp sấy",
+                    headerName: "Chờ sấy",
                     field: "chosay_YS",
                     width: 120,
                     suppressHeaderMenuButton: true,
@@ -320,7 +355,7 @@ function BaoCaoTonSayLua() {
                     valueFormatter: (params) => {
                         return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
                     },
-                    headerComponentParams: { displayName: "Xếp sấy" },
+                    headerComponentParams: { displayName: "Chờ sấy" },
                 },
                 {
                     headerName: "Trong lò chưa sấy",
@@ -365,7 +400,7 @@ function BaoCaoTonSayLua() {
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
                 {
-                    headerName: "Xếp sấy",
+                    headerName: "Chờ sấy",
                     field: "chosay_TB",
                     width: 120,
                     suppressHeaderMenuButton: true,
@@ -373,7 +408,7 @@ function BaoCaoTonSayLua() {
                     valueFormatter: (params) => {
                         return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
                     },
-                    headerComponentParams: { displayName: "Xếp sấy" },
+                    headerComponentParams: { displayName: "Chờ sấy" },
                 },
                 {
                     headerName: "Trong lò chưa sấy",
