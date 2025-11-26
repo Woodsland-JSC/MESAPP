@@ -182,8 +182,10 @@ const HandleItemQc = () => {
             field: "U_CDay",
             filter: true,
             width: 150,
-            valueFormatter: node => {
-                return Number(node.value || "")
+            valueGetter: (p) => {
+                let prefix = p.data.ItemCode?.slice(0, 2);
+                if (p.node.id == 'rowGroupFooter_ROOT_NODE_ID' || p.node.group) return "";
+                return prefix == 'SF' ? `${Number(p?.data?.day)}` : Number(p?.data?.U_CDay);
             }
         },
         {
@@ -191,8 +193,10 @@ const HandleItemQc = () => {
             field: "U_CRong",
             filter: true,
             width: 150,
-            valueFormatter: node => {
-                return Number(node.value || "")
+            valueGetter: (p) => {
+                let prefix = p.data.ItemCode?.slice(0, 2);
+                if (p.node.id == 'rowGroupFooter_ROOT_NODE_ID' || p.node.group) return "";
+                return prefix == 'SF' ? `${Number(p?.data?.rong)}` : Number(p?.data?.U_CRong);
             }
         },
         {
@@ -200,8 +204,10 @@ const HandleItemQc = () => {
             field: "U_CDai",
             filter: true,
             width: 150,
-            valueFormatter: node => {
-                return Number(node.value || "")
+            valueGetter: (p) => {
+                let prefix = p.data.ItemCode?.slice(0, 2);
+                if (p.node.id == 'rowGroupFooter_ROOT_NODE_ID' || p.node.group) return "";
+                return prefix == 'SF' ? `${Number(p?.data?.dai)}` : Number(p?.data?.U_CDai);
             }
         }
     ]);
@@ -219,7 +225,7 @@ const HandleItemQc = () => {
             obj.push({ ...item, qtySL: Number(0), qtySLM3: 0 });
         });
 
-        setDataSL(pre => ({...pre, dataSL: obj}));
+        setDataSL(pre => ({ ...pre, dataSL: obj }));
         onModalOpen();
     }
 
@@ -229,7 +235,7 @@ const HandleItemQc = () => {
         let items = [];
 
         console.log(row);
-        
+
 
         row.forEach(item => {
             items.push({
@@ -276,7 +282,7 @@ const HandleItemQc = () => {
     const confirmHXLSayLai = () => {
         let invalid = false;
         dataSL.dataSL.forEach(item => {
-            let maxQty = Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong));
+            let maxQty = Math.floor((Number(item.BatchQuantity) * 1000000000) / (item.U_CDai * item.U_CDay * item.U_CRong));
             if (item.qtySL > maxQty) {
                 invalid = true;
                 toast.error(`Số lượng sấy lại ${item.qtySL} đang lớn hơn tồn kho ${maxQty} của mã sản phẩm ${item.ItemCode}`);
@@ -284,7 +290,7 @@ const HandleItemQc = () => {
             }
         })
 
-        if(invalid) return;
+        if (invalid) return;
 
         let data = {
             dataSL: dataSL.dataSL,
@@ -449,7 +455,7 @@ const HandleItemQc = () => {
             res.forEach(item => {
                 options.push({
                     value: item.Code,
-                    label: `${item.Name}-${item.Code}`,
+                    label: `${item.Name} - ${item.Code}`,
                     whCode: item.WhsCode
                 });
             });
@@ -588,90 +594,6 @@ const HandleItemQc = () => {
                                     </div>
 
                                     <div className="xl:display:hidden lg:hidden md:hidden sm:block block mt-3 ">
-                                        {/* <div className="w-full">
-                                        <label
-                                            htmlFor="search"
-                                            className="mb-2 font-medium text-gray-900 sr-only"
-                                        >
-                                            Tìm kiếm
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                <svg
-                                                    className="w-4 h-4 text-gray-500"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 20 20"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <input
-                                                type="search"
-                                                id="search"
-                                                className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Tìm theo mã lò"
-                                                onChange={e => setSearch(e.target.value)}
-                                            />
-                                        </div>
-                                    </div> */}
-                                        {/* {
-                                            reports.filter(report => {
-                                                return statusPallet.value == 1 ? report.CompletedBy : !report.CompletedBy
-                                            }).filter(report => {
-                                                if (search == "") {
-                                                    return report
-                                                } else {
-                                                    return report.Oven.includes(search.toUpperCase())
-                                                }
-                                            }).map((report, i) => (
-                                                <div className="flex bg-gray-50 border-2 border-[#84b0c5] rounded-xl p-4 mt-4" key={i}>
-                                                    <div className="flex-col w-full">
-                                                        <div className="text-xl font-semibold text-[#17506B] mb-1">
-                                                            {report.Oven}
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Mã lò: </span>
-                                                            <span className="font-normal">
-                                                                {report.OvenCode}
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Quy cách: </span>
-                                                            <span className="font-normal">
-                                                                {report.QuyCach}
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Ngày vào lò: </span>
-                                                            <span className="font-normal">
-                                                                {moment(report.LoadedIntoKilnDate).format(`DD/MM/YYYY HH:mm:ss`)}
-                                                            </span>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Ngày ra lò: </span>
-                                                            <span className="font-normal">
-                                                                {moment(report.CompletedDate).format(`DD/MM/YYYY HH:mm:ss`)}
-                                                            </span>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-2 font-semibold mb-2">
-                                                            <span>Người thao tác: </span>
-                                                            <span className="font-normal">
-                                                                {report.username}_{report.first_name} {report.last_name}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        } */}
                                     </div>
                                 </>
                             ) : (
@@ -752,7 +674,7 @@ const HandleItemQc = () => {
                                                                 <td>{Number(item.BatchQuantity)}</td>
                                                                 <td>
                                                                     {
-                                                                        Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong))
+                                                                        Math.floor((Number(item.BatchQuantity) * 1000000000) / (item.U_CDai * item.U_CDay * item.U_CRong))
                                                                     }
                                                                 </td>
                                                                 <td>{Number(item.qtySLM3 ?? 0)}</td>
@@ -768,7 +690,7 @@ const HandleItemQc = () => {
                                                                             items[i].qtySLM3 = qtyM3;
                                                                             setDataSL(pre => ({ ...pre, dataSL: items }));
                                                                         }}
-                                                                        max={Math.floor((Number(item.BatchQuantity) * 1000000000 ) / (item.U_CDai * item.U_CDay * item.U_CRong))}
+                                                                        max={Math.floor((Number(item.BatchQuantity) * 1000000000) / (item.U_CDai * item.U_CDay * item.U_CRong))}
                                                                     >
                                                                         <NumberInputField />
                                                                     </NumberInput>
@@ -951,7 +873,7 @@ const HandleItemQc = () => {
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        row.map((item, i) => (                                                            
+                                                        row.map((item, i) => (
                                                             <tr className="text-center" key={i}>
                                                                 <td>{item.ItemCode}</td>
                                                                 <td>{item.ItemName}</td>
@@ -1012,26 +934,28 @@ const HandleItemQc = () => {
 
                                             <Box className="mb-2" >
                                                 <SimpleGrid columns={3} spacing={4}>
+
                                                     <Box>
                                                         <Text className="font-semibold">
-                                                            Chiều dài
+                                                            Chiều dày
                                                         </Text>
                                                         <span className="">
                                                             <NumberInput
                                                                 step={1}
+                                                                value={itemCH.CDay}
                                                                 className="mt-2"
-                                                                value={itemCH.CDai}
                                                                 onChange={(
                                                                     value
                                                                 ) => {
-                                                                    setItemCH(pre => ({ ...pre, CDai: value }));
+                                                                    setItemCH(pre => ({ ...pre, CDay: value }));
 
                                                                     if (!value) {
                                                                         setItemCH(pre => ({ ...pre, M3: 0 }))
                                                                     }
 
-                                                                    if (value && itemCH.CDay && itemCH.CRong && itemCH.Quantity) {
-                                                                        let total = (itemCH.Quantity * value * itemCH.CDay * itemCH.CRong) / 1000000000;
+
+                                                                    if (itemCH.CDai && value && itemCH.CRong && itemCH.Quantity) {
+                                                                        let total = (itemCH.Quantity * itemCH.CDai * value * itemCH.CRong) / 1000000000;
                                                                         setItemCH(pre => ({ ...pre, M3: total }))
                                                                     } else {
                                                                         setItemCH(pre => ({ ...pre, M3: 0 }))
@@ -1084,25 +1008,24 @@ const HandleItemQc = () => {
                                                     </Box>
                                                     <Box>
                                                         <Text className="font-semibold">
-                                                            Chiều dày
+                                                            Chiều dài
                                                         </Text>
                                                         <span className="">
                                                             <NumberInput
                                                                 step={1}
-                                                                value={itemCH.CDay}
                                                                 className="mt-2"
+                                                                value={itemCH.CDai}
                                                                 onChange={(
                                                                     value
                                                                 ) => {
-                                                                    setItemCH(pre => ({ ...pre, CDay: value }));
+                                                                    setItemCH(pre => ({ ...pre, CDai: value }));
 
                                                                     if (!value) {
                                                                         setItemCH(pre => ({ ...pre, M3: 0 }))
                                                                     }
 
-
-                                                                    if (itemCH.CDai && value && itemCH.CRong && itemCH.Quantity) {
-                                                                        let total = (itemCH.Quantity * itemCH.CDai * value * itemCH.CRong) / 1000000000;
+                                                                    if (value && itemCH.CDay && itemCH.CRong && itemCH.Quantity) {
+                                                                        let total = (itemCH.Quantity * value * itemCH.CDay * itemCH.CRong) / 1000000000;
                                                                         setItemCH(pre => ({ ...pre, M3: total }))
                                                                     } else {
                                                                         setItemCH(pre => ({ ...pre, M3: 0 }))
@@ -1119,7 +1042,6 @@ const HandleItemQc = () => {
                                                         </span>
                                                     </Box>
                                                 </SimpleGrid>
-
                                             </Box>
                                             <Box className="mb-2">
                                                 <SimpleGrid columns={1} spacing={4}>
