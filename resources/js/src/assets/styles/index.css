@@ -584,6 +584,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     color: #FFFFFF;
 }
 
+#app-ag-grid .ag-header-group-cell{
+    background-color: #17506B;
+    color: #FFFFFF;
+}
+
 /* Giữ màu mặc định của SweetAlert2 */
 .swal2-confirm, .swal2-cancel {
   color: #fff !important;

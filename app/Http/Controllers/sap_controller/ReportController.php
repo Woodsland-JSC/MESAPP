@@ -87,8 +87,7 @@ class ReportController extends Controller
             $p = [];
 
             $date = $request->to_date . ' 23:59:59';
-
-
+            
             Pallet::with(['details'])
                 ->where('created_at', '<=', $date)
                 ->whereNull('CompletedBy')
