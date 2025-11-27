@@ -764,7 +764,7 @@ const ItemInput = ({
                     Type: variant,
                     version: choosenItem.Version || "",
                     ProdType: selectedItemDetails.ProdType || "",
-                    LSX: LSX,
+                    LSX: variant == "CBG" ? selectedItemDetails.LSX[0].LSX :  LSX,
                     CompleQty: 0,
                     RejectQty: 0,
                     PackagedQty: 0,
