@@ -116,7 +116,9 @@ function BaoCaoTonSayLua() {
                     obj.tronglo_YS = Number(pallet['KL_Dang_Say'] || 0);
                 }
 
-                let itemFind = uniqueItemCodeData.find(i => i.itemCode === pallet.ItemCode)
+
+
+                let itemFind = uniqueItemCodeData.find(i => i.itemCode === pallet.ItemCode && i.quyCach == pallet.QuyCach);
 
                 if (!itemFind) {
                     uniqueItemCodeData.push(obj);
@@ -134,6 +136,9 @@ function BaoCaoTonSayLua() {
                     itemFind.tronglo_YS += obj.tronglo_YS;
                 }
             })
+
+            console.log("uniqueItemCodeData", uniqueItemCodeData);
+            
 
 
             let formattedData = [];
