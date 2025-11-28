@@ -138,11 +138,12 @@ function Header(props) {
 
     const handleSignOut = async () => {
         try {
-            const res = await usersApi.signOut();
+            // const res = await usersApi.signOut();
             localStorage.removeItem("userInfo");
             Cookies.remove("isAuthenticated");
             setUser(null);
             toast.success("Đã đăng xuất");
+            navigate("/login");
         } catch (error) {
             console.error(error);
             localStorage.removeItem("userInfo");
