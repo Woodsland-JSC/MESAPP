@@ -1846,7 +1846,7 @@ const ItemInput = ({
                                                                 [{Math.abs(stockItem?.BaseQty || 0 )}
                                                                 ]{" "} {stockItem?.ItemCode || ""}
                                                                 &nbsp;
-                                                                [Hệ số rong - {Number(stockItem?.U_HSRO || 0)}]
+                                                                [Hệ số rong = {Number(stockItem?.U_HSRO || 0)}]
                                                             </div>
                                                             <p className="font-semibold">
                                                                 {stockItem?.ItemName ||
