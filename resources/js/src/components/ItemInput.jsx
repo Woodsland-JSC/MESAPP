@@ -610,8 +610,6 @@ const ItemInput = ({
                 Data: rongData.filter(item => item.CompleQty !== undefined && item.CompleQty !== null && item.CompleQty !== ""),
                 KHOI: "VCN",
             };
-            console.log("Data", Data);
-            return
 
             const res = await productionApi.enterFinishedRongAmountVCN(Data);
             toast.success("Ghi nhận & chuyển tiếp thành công!");
@@ -3620,9 +3618,7 @@ const ItemInput = ({
                         </AlertDialogBody>
                         <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
-                            {(amount ||
-                                faultyAmount ||
-                                (RONGInputQty && rongData)) && (
+                            {(amount || faultyAmount || (RONGInputQty && rongData)) && (
                                     <button
                                         disabled={confirmLoading}
                                         className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
