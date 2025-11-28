@@ -1843,14 +1843,10 @@ const ItemInput = ({
                                                     <div className="flex items-center bg-gray-900 border-[#DADADA]  rounded-t-xl p-3 py-2.5 border-b-0 ">
                                                         <div className="pl-2 text-white text-lg">
                                                             <div className="text-xs font-medium text-gray-400">
-                                                                [
-                                                                {Math.abs(
-                                                                    stockItem?.BaseQty ||
-                                                                    0
-                                                                )}
-                                                                ]{" "}
-                                                                {stockItem?.ItemCode ||
-                                                                    ""}
+                                                                [{Math.abs(stockItem?.BaseQty || 0 )}
+                                                                ]{" "} {stockItem?.ItemCode || ""}
+                                                                &nbsp;
+                                                                [Hệ số rong - {Number(stockItem?.U_HSRO || 0)}]
                                                             </div>
                                                             <p className="font-semibold">
                                                                 {stockItem?.ItemName ||
