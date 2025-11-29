@@ -860,7 +860,7 @@ const TuBep = () => {
                                 </div>
                                 {
                                     <div class={"xl:ml-6 serif font-bold text-xl"}>
-                                        {LSX}
+                                        {lsxSelected.lsx}
                                     </div>
                                 }
                             </ModalHeader>
