@@ -379,7 +379,7 @@ function DryingCompletedReport() {
             width: 150,
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
-                return params.value ? Math.round(params.value).toLocaleString() : "0";
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
             },
             aggFunc: "sum"
         },
