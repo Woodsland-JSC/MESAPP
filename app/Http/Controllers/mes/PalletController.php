@@ -113,11 +113,11 @@ class PalletController extends Controller
                         'mass' => round($detail->Qty, 6),
                         'reason' => $detail->CDay != 14 ? $pallet->LyDo : '',
                         'status' => $status,
-                        'created_username' => $pallet->createdBy->username,
-                        'created_fullname' => $pallet->createdBy->last_name . ' ' . $pallet->createdBy->first_name,
+                        'created_username' => $pallet->createdBy ? $pallet->createdBy->username : "",
+                        'created_fullname' => $pallet->createdBy ? $pallet->createdBy->last_name . ' ' . $pallet->createdBy->first_name : "",
                         'stacking_time' => $pallet->stacking_time,
-                        'completed_by' => $pallet->completedBy->username,
-                        'completed_fullname' => $pallet->completedBy->last_name . ' ' . $pallet->completedBy->first_name,
+                        'completed_by' => $pallet->completedBy ? $pallet->completedBy->username : "",
+                        'completed_fullname' => $pallet->completedBy ? $pallet->completedBy->last_name . ' ' . $pallet->completedBy->first_name : "",
                         'completed_date' => $pallet->CompletedDate,
                         'type' => $detail->CDay == 14 ? 'Runnen' : ''
                     ];
