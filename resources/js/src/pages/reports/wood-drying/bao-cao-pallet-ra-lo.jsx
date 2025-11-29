@@ -79,9 +79,17 @@ function DryingCompletedReport() {
 
             const formattedData = res.map((item) => {
                 let khoiLuongTinhThuong = 0;
-                let dgnc = 40900;
+                let dgnc = 0;
                 let heSoQuyDoi = 1.35;
                 let quyLuong = 0;
+
+                if (selectedFactory == 'YS') {
+                    dgnc = 40900;
+                }
+
+                if (selectedFactory == 'TB') {
+                    dgnc = 140400;
+                }
 
                 if (item.day <= 16) {
 
@@ -89,27 +97,43 @@ function DryingCompletedReport() {
 
                 if (item.day <= 21 && item.dai < 800) {
                     heSoQuyDoi = 1.2
-                    dgnc = 40900;
+
+                    if (selectedFactory == 'TB') {
+                        dgnc = 129300;
+                    }
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 40900;
+
+                    if (selectedFactory == 'TB') {
+                        dgnc = 114600;
+                    }
                 }
 
                 if (item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
-                    dgnc = 40900;
+                    
+
+                    if (selectedFactory == 'TB') {
+                        dgnc = 114600;
+                    }
                 }
 
                 if (item.day > 25) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 40900;
+                    
+                    if (selectedFactory == 'TB') {
+                        dgnc = 103500;
+                    }
                 }
 
                 if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
                     heSoQuyDoi = 0.85;
-                    dgnc = 40900;
+                    
+                    if (selectedFactory == 'TB') {
+                        dgnc = 103500;
+                    }
                 }
 
                 // Tính toán
@@ -526,7 +550,7 @@ function DryingCompletedReport() {
                     {/* Content */}
                     {isDataReportLoading ? (
                         <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center p-3 px-4 pr-1 rounded-lg ">
-                            <div class="dots"></div>
+                            <div className="dots"></div>
                         </div>
                     ) : (
                         <>
