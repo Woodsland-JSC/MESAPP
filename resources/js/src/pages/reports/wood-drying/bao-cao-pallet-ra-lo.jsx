@@ -140,6 +140,13 @@ function DryingCompletedReport() {
                 khoiLuongTinhThuong = item.mass * heSoQuyDoi;
                 quyLuong = item.mass * dgnc;
 
+                let month = new Date().getMonth() + 1;                
+
+                let pow = month == 11 ? 3 : 4;
+
+                let hs = (Math.pow(0.982, 7) *1.05) * Math.pow((1-0.01), month == 11 ? 3 : pow);
+                let tt = dgnc * hs;
+
                 return {
                     created_at: item.created_at,
                     code: item.code,
@@ -163,6 +170,8 @@ function DryingCompletedReport() {
                     type: item.type ?? '',
                     created_fullname: item.created_fullname ?? '',
                     completed_fullname: item.completed_fullname ?? '',
+                    hs,
+                    tt
                 }
             });
             setIsDataReportLoading(false);
@@ -340,6 +349,27 @@ function DryingCompletedReport() {
                 return params.value ? params.value.toLocaleString() : "0";
             },
             filter: true,
+        },
+        {
+            headerName: "Hệ số",
+            field: "hs",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toFixed(6) : "0";
+            },
+            filter: true,
+        },
+        {
+            headerName: "Thành tiền",
+            field: "tt",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
+            },
+            filter: true,
+            aggFunc: "sum"
         },
         {
             headerName: "Quỹ lương",
