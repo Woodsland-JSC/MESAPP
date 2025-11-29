@@ -64,7 +64,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/datepicker.css";
 import { BiSolidBadgeCheck } from "react-icons/bi";
-import { NOI_DIA, VAN_CONG_NGHIEP } from "../shared/data";
+import { CHE_BIEN_GO, NOI_DIA, TU_BEP, VAN_CONG_NGHIEP } from "../shared/data";
 import { ghiNhanSanLuongVCN, receiptsProductionsDetail, receiptsProductionsDetailRong } from "../api/vcn.api";
 
 const ItemInput = ({
@@ -762,7 +762,7 @@ const ItemInput = ({
                     Type: variant,
                     version: choosenItem.Version || "",
                     ProdType: selectedItemDetails.ProdType || "",
-                    LSX: variant == "CBG" ? selectedItemDetails.LSX[0].LSX :  LSX,
+                    LSX: variant == "CBG" ? selectedItemDetails.LSX[0].LSX : LSX,
                     CompleQty: 0,
                     RejectQty: 0,
                     PackagedQty: 0,
@@ -1725,10 +1725,17 @@ const ItemInput = ({
             >
                 <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                 <ModalContent className="!px-0">
-                    <ModalHeader className="h-[50px] flex items-center justify-center">
-                        <div class="xl:ml-6 serif font-bold text-2xl  ">
+                    <ModalHeader className={`h-[65px] flex flex-col items-center justify-center`}>
+                        <div class={"xl:ml-6 serif font-bold text-xl "}>
                             Ghi nhận sản lượng
                         </div>
+                        {
+                            variant != CHE_BIEN_GO && (
+                                <div class={"xl:ml-6 serif font-bold text-xl"}>
+                                    {LSX}
+                                </div>
+                            )
+                        }
                     </ModalHeader>
                     <div className="border-b-2 border-[#DADADA]"></div>
                     <ModalBody px={0} py={0}>
@@ -1843,7 +1850,7 @@ const ItemInput = ({
                                                     <div className="flex items-center bg-gray-900 border-[#DADADA]  rounded-t-xl p-3 py-2.5 border-b-0 ">
                                                         <div className="pl-2 text-white text-lg">
                                                             <div className="text-xs font-medium text-gray-400">
-                                                                [{Math.abs(stockItem?.BaseQty || 0 )}
+                                                                [{Math.abs(stockItem?.BaseQty || 0)}
                                                                 ]{" "} {stockItem?.ItemCode || ""}
                                                                 &nbsp;
                                                                 [Hệ số rong = {Number(stockItem?.U_HSRO || 0)}]
@@ -3615,25 +3622,25 @@ const ItemInput = ({
                         <AlertDialogFooter className="gap-4">
                             <Button onClick={onAlertDialogClose}>Hủy bỏ</Button>
                             {(amount || faultyAmount || (RONGInputQty && rongData)) && (
-                                    <button
-                                        disabled={confirmLoading}
-                                        className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
-                                        onClick={
-                                            selectedItemDetails?.CongDoan === "RO"
-                                                ? handleSubmitQuantityRong
-                                                : handleSubmitQuantity
-                                        }
-                                    >
-                                        {confirmLoading ? (
-                                            <div className="flex items-center space-x-4">
-                                                <Spinner size="sm" color="white" />
-                                                <div>Đang tải</div>
-                                            </div>
-                                        ) : (
-                                            "Xác nhận"
-                                        )}
-                                    </button>
-                                )}
+                                <button
+                                    disabled={confirmLoading}
+                                    className="w-fit bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                    onClick={
+                                        selectedItemDetails?.CongDoan === "RO"
+                                            ? handleSubmitQuantityRong
+                                            : handleSubmitQuantity
+                                    }
+                                >
+                                    {confirmLoading ? (
+                                        <div className="flex items-center space-x-4">
+                                            <Spinner size="sm" color="white" />
+                                            <div>Đang tải</div>
+                                        </div>
+                                    ) : (
+                                        "Xác nhận"
+                                    )}
+                                </button>
+                            )}
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
