@@ -138,7 +138,7 @@ function DryingCompletedReport() {
 
                 // Tính toán
                 khoiLuongTinhThuong = item.mass * heSoQuyDoi;
-                quyLuong = item.mass * dgnc;
+                
 
                 let month = new Date().getMonth() + 1;                
 
@@ -146,6 +146,8 @@ function DryingCompletedReport() {
 
                 let hs = Math.pow((1-0.01), month == 11 ? 3 : pow);
                 let tt = dgnc * hs;
+
+                quyLuong = item.mass * tt;
 
                 return {
                     created_at: item.created_at,
@@ -377,7 +379,7 @@ function DryingCompletedReport() {
             width: 150,
             suppressHeaderMenuButton: true,
             valueFormatter: (params) => {
-                return params.value ? Math.round(params.value).toLocaleString() : "0";
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
             },
             aggFunc: "sum"
         },
