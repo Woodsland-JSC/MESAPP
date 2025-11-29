@@ -497,8 +497,6 @@ const TuBep = () => {
                         }
                     });
 
-                    console.log("options", options);
-
                     setFactories(options);
                 } else {
                     setFactories([]);
@@ -856,10 +854,15 @@ const TuBep = () => {
                     >
                         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
                         <ModalContent className="!px-0">
-                            <ModalHeader className="h-[50px] flex items-center justify-center">
-                                <div className="xl:ml-6 serif font-bold text-2xl  ">
+                            <ModalHeader className={`h-[65px] flex flex-col items-center justify-center`}>
+                                <div class={"xl:ml-6 serif font-bold text-xl "}>
                                     Ghi nhận sản lượng
                                 </div>
+                                {
+                                    <div class={"xl:ml-6 serif font-bold text-xl"}>
+                                        {LSX}
+                                    </div>
+                                }
                             </ModalHeader>
                             <div className="border-b-2 border-[#DADADA]"></div>
                             <ModalBody px={0} py={0}>
