@@ -144,7 +144,7 @@ function DryingCompletedReport() {
 
                 let pow = month == 11 ? 3 : 4;
 
-                let hs = (Math.pow(0.982, 7) *1.05) * Math.pow((1-0.01), month == 11 ? 3 : pow);
+                let hs = Math.pow((1-0.01), month == 11 ? 3 : pow);
                 let tt = dgnc * hs;
 
                 return {
