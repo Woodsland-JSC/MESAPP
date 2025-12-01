@@ -173,6 +173,7 @@ function ReceiptInSapReportCBG() {
                 production_order_mes: item.ProductionOrderMES,
                 mes_noti: item.U_UUID,
                 m3_sap: item.M3SAP,
+                BarCode: item.BarCode,
             }));
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -318,6 +319,13 @@ function ReceiptInSapReportCBG() {
             field: "market_code",
             pinned: "left",
             minWidth: 200,
+            filter: true,
+        },
+         {
+            headerName: "Mã vạch",
+            field: "BarCode",
+            pinned: "left",
+            minWidth: 150,
             filter: true,
         },
         {
