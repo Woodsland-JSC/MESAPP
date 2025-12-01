@@ -744,8 +744,7 @@ class ReportController extends Controller
                 IN_FROM_DATE => '$fromDate',
                 IN_TO_DATE => '$toDate', 
                 IN_FACTORY => '$factory',
-                IN_DIVISION => '$khoi',
-                OUTPUT_RESULT => ?
+                IN_DIVISION => '$khoi'
             )";
 
             $result = odbc_exec($conDB, $query);
