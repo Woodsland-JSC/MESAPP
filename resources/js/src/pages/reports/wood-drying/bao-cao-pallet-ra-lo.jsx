@@ -142,9 +142,9 @@ function DryingCompletedReport() {
 
                 let month = new Date().getMonth() + 1;                
 
-                let pow = month == 11 ? 3 : 4;
+                let pow = 2;
 
-                let hs = Math.pow((1-0.01), month == 11 ? 3 : pow);
+                let hs = Math.pow((1-0.01), pow);
                 let tt = dgnc * hs;
 
                 quyLuong = item.mass * tt;
