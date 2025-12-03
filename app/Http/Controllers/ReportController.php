@@ -245,11 +245,11 @@ class ReportController extends Controller
                     // }
                     $status = '';
 
-                    if($pallet->activeStatus==0){
+                    if ($pallet->activeStatus == 0) {
                         $status = 'Chưa sấy';
-                    }else if($pallet->activeStatus == 1 && !$pallet->CompletedBy){
+                    } else if ($pallet->activeStatus == 1 && !$pallet->CompletedBy) {
                         $status = 'Đang sấy';
-                    }else{
+                    } else {
                         $status = 'Đã sấy';
                     }
 
@@ -285,34 +285,43 @@ class ReportController extends Controller
     function xepsay(Request $request)
     {
         $fromDate = $request->input('from_date');
-        $ToDate = $request->input('to_date');
+        $toDate = $request->input('to_date');
 
-        $query = DB::table('wl_cbg_bc_xepsay');
+        $FromDate = Carbon::parse($fromDate)->startOfDay();
+        $ToDate = Carbon::parse($toDate)->endOfDay();
 
-        if ($fromDate && $ToDate) {
-            $query->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($ToDate)->endOfDay()]);
-        }
 
-        // Get the results
-        $data = $query->get();
-        // $itemdistinct = $query->distinct()->pluck('ItemCode');
-        // $itemstring = "'" . implode("','", $itemdistinct->toArray()) . "'";
-        // $dataQuyCach = qtycachIemSAP($itemstring);
-
-        // $dataQuyCachMap = [];
-        // foreach ($dataQuyCach as $item) {
-        //     $dataQuyCachMap[$item['ItemCode']] = $item;
-        // }
-
-        // // Lặp qua originalData và thay thế các giá trị
-        // $updatedData = $data->map(function ($item) use ($dataQuyCachMap) {
-        //     if (isset($dataQuyCachMap[$item->ItemCode])) {
-        //         $item->CDay = $dataQuyCachMap[$item->ItemCode]['CDay'];
-        //         $item->CRong = $dataQuyCachMap[$item->ItemCode]['CRong'];
-        //         $item->CDai = $dataQuyCachMap[$item->ItemCode]['CDai'];
-        //     }
-        //     return $item;
-        // });
+        $data = DB::table('pallets as a')
+            ->join('pallet_details as b', 'b.palletID', '=', 'a.palletID')
+            ->select(
+                'a.Code as PalletCode',
+                'b.ItemCode',
+                'b.ItemName',
+                'b.CDai',
+                'b.CRong',
+                'b.CDay',
+                DB::raw("(CASE 
+            WHEN (a.created_at >= '$FromDate' AND a.created_at <= '$ToDate') 
+            THEN b.Qty ELSE 0 END) AS sepxay"),
+                DB::raw("(CASE 
+            WHEN (a.activeStatus = 1 
+              AND a.LoadedIntoKilnDate >= '$FromDate'
+              AND a.LoadedIntoKilnDate <= '$ToDate') 
+            THEN b.Qty ELSE 0 END) AS vaolo"),
+                DB::raw("(CASE 
+            WHEN (a.activeStatus = 1 
+              AND a.CompletedBy IS NOT NULL 
+              AND a.CompletedDate >= '$FromDate'
+              AND a.CompletedDate <= '$ToDate') 
+            THEN b.Qty ELSE 0 END) AS ralo"),
+                'a.created_at',
+                'a.factory as plant'
+            )
+            ->whereBetween('a.created_at', [
+                $FromDate,
+                $ToDate
+            ])
+            ->get();
 
         return response()->json($data);
     }
@@ -445,86 +454,6 @@ class ReportController extends Controller
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
-
-    // function KilnCheckingMinutes(Request $request)
-    // {
-    //     $branch = $request->input('branch');
-    //     $kiln = $request->input('kiln');
-
-    //     $validate = Validator::make($request->all(), [
-    //         'branch' => 'required',
-    //         'kiln' => 'required',
-    //     ]);
-
-    //     if ($validate->fails()) {
-    //         return response()->json(['error' => $validate->errors()], 400);
-    //     }
-
-    //     try {
-    //         // Tìm bản ghi kế hoạch sấy mới nhất với Oven = $kiln và status = 0 hoặc 1
-    //         $planDrying = planDryings::where('Oven', $kiln)
-    //             ->whereIn('Status', [0, 1])
-    //             ->orderBy('created_at', 'desc')
-    //             ->first();
-
-    //         if (!$planDrying) {
-    //             return response()->json([
-    //                 'error' => 'Không tìm thấy kế hoạch sấy phù hợp cho lò ' . $kiln
-    //             ], 404);
-    //         }
-
-    //         // Lấy thông tin ActualThickness theo PlanID
-    //         $actualThickness = ActualThickness::where('PlanID', $planDrying->PlanID)
-    //             ->orderBy('created_at', 'desc')
-    //             ->get();
-
-    //         // Lấy thông tin FanSpeed theo PlanID
-    //         $fanSpeed = FanSpeed::where('PlanID', $planDrying->PlanID)
-    //             ->orderBy('created_at', 'desc')
-    //             ->get();
-
-    //         // Lấy thông tin user để ghép tên
-    //         $nguoiTaoPhieu = '';
-    //         if ($planDrying->CheckedBy) {
-    //             $user = User::find($planDrying->CheckedBy);
-    //             if ($user) {
-    //                 $nguoiTaoPhieu = trim($user->last_name . ' ' . $user->first_name);
-    //             }
-    //         }
-
-    //         // Chuẩn bị dữ liệu trả về
-    //         $result = [
-    //             'PlanID' => $planDrying->PlanID,
-    //             'Oven' => $planDrying->Oven,
-    //             'CheckedBy' => $planDrying->CheckedBy,
-    //             'NguoiTaoPhieu' => $nguoiTaoPhieu,
-    //             'DateChecked' => $planDrying->DateChecked ? \Carbon\Carbon::parse($planDrying->DateChecked)->format('d/m/Y') : null,
-    //             'CT1' => $planDrying->CT1,
-    //             'CT2' => $planDrying->CT2,
-    //             'CT3' => $planDrying->CT3,
-    //             'CT4' => $planDrying->CT4,
-    //             'CT5' => $planDrying->CT5,
-    //             'CT6' => $planDrying->CT6,
-    //             'CT7' => $planDrying->CT7,
-    //             'CT8' => $planDrying->CT8,
-    //             'CT9' => $planDrying->CT9,
-    //             'CT10' => $planDrying->CT10,
-    //             'CT11' => $planDrying->CT11,
-    //             'CT12' => $planDrying->CT12,
-    //             'SoLan' => $planDrying->SoLan ?? 0,
-    //             'CBL' => $planDrying->CBL,
-    //             'DoThucTe' => $planDrying->DoThucTe,
-    //             'ActualThickness' => $actualThickness->toArray(),
-    //             'FanSpeed' => $fanSpeed->toArray()
-    //         ];
-
-    //         return response()->json($result, 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'error' => 'Có lỗi xảy ra: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
 
     function KilnCheckingMinutes(Request $request)
     {
