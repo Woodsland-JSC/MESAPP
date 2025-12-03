@@ -87,7 +87,7 @@ const SAYReports = [
         id: "0010",
         name: "Báo cáo xếp sấy",
         link: "/reports/wood-drying/drying-queue",
-        description: "Báo cáo thông tin xếp chờ sấy.",
+        description: "Báo cáo thông tin xếp sấy.",
         // updated: true,
     },
     {

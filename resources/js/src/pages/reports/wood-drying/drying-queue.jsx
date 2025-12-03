@@ -379,7 +379,7 @@ function DryingQueueReport() {
                                     Báo cáo sấy phôi
                                 </div>
                                 <div className="serif text-3xl font-bold">
-                                    Báo cáo xếp chờ sấy
+                                    Báo cáo xếp sấy
                                 </div>
                             </div>
                         </div>
