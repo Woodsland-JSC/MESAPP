@@ -267,7 +267,7 @@ class ReportController extends Controller
                         'reason' => $pallet->LyDo,
                         'status' => $status,
                         'created_username' => $pallet->employeeInfo->username,
-                        'created_fullname' => $pallet->employeeInfo->last_name . ' ' . $pallet->createdBy->first_name,
+                        'created_fullname' => $pallet->employeeInfo->last_name . ' ' . $pallet->employeeInfo->first_name,
                         'stacking_time' => $pallet->stacking_time
                     ];
                 }

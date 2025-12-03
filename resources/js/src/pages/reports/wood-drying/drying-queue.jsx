@@ -67,7 +67,7 @@ function DryingQueueReport() {
         setSelectedTeams([]);
     };
 
-    const getReportData = useCallback(async () => {
+    const getReportData = async () => {
         let params = {
             from_date: format(fromDate, "yyyy-MM-dd"),
             to_date: format(toDate, "yyyy-MM-dd"),
@@ -149,7 +149,7 @@ function DryingQueueReport() {
             toast.error("Đã xảy ra lỗi khi lấy dữ liệu.");
             setIsDataReportLoading(false);
         }
-    }, [fromDate, toDate, selectedFactory]);
+    }
 
     useEffect(() => {
         const allFieldsFilled = selectedFactory && fromDate && toDate;
@@ -158,13 +158,13 @@ function DryingQueueReport() {
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [selectedFactory, fromDate, toDate, getReportData]);
+    }, [selectedFactory, fromDate, toDate]);
 
     const handleResetFilter = () => {
         setSelectedFactory(null);
         setSelectAll(false);
         setIsReceived(true);
-        setTeamData([]);
+        // setTeamData([]);
 
         setReportData(null);
 
@@ -273,7 +273,7 @@ function DryingQueueReport() {
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
             valueFormatter: (params) => {
-                return params.value ?  Number(params.value).toFixed(6).toLocaleString() : "0";
+                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
             },
             headerComponentParams: { displayName: "Khối lượng (m3)" },
         },
@@ -430,15 +430,6 @@ function DryingQueueReport() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setFromDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -455,15 +446,6 @@ function DryingQueueReport() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            if (
-                                                fromDate &&
-                                                toDate &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
