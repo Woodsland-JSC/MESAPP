@@ -226,7 +226,7 @@ class ReportController extends Controller
             odbc_close($conDB);
 
             // Lấy dữ liệu pallet với điều kiện lọc
-            $pallets = Pallet::with(['details', 'createdBy'])
+            $pallets = Pallet::with(['details', 'createdBy', 'employeeInfo'])
                 ->where('factory', $factory)
                 ->whereBetween('created_at', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
@@ -266,8 +266,8 @@ class ReportController extends Controller
                         'mass' => round($detail->Qty, 6),
                         'reason' => $pallet->LyDo,
                         'status' => $status,
-                        'created_username' => $pallet->createdBy->username,
-                        'created_fullname' => $pallet->createdBy->last_name . ' ' . $pallet->createdBy->first_name,
+                        'created_username' => $pallet->employeeInfo->username,
+                        'created_fullname' => $pallet->employeeInfo->last_name . ' ' . $pallet->createdBy->first_name,
                         'stacking_time' => $pallet->stacking_time
                     ];
                 }
