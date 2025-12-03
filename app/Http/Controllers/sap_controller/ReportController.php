@@ -90,7 +90,7 @@ class ReportController extends Controller
 
 
             Pallet::with(['details'])
-                // ->where('created_at', '<=', $date)
+                ->where('created_at', '<=', $date)
                 ->whereNull('CompletedBy')
                 ->chunk(1000, function ($pallets) use ($date, &$p) {
                     foreach ($pallets as $pallet) {
@@ -103,7 +103,7 @@ class ReportController extends Controller
 
                         foreach ($pallet->details as $detail) {
                             $itemCode = $detail->ItemCode;
-                            if ($pallet->activeStatus == 0 && $pallet->created_at <= $date) {
+                            if ($pallet->activeStatus == 0) {
                                 $klChuaSay += $detail->Qty;
                             }
 
