@@ -512,15 +512,6 @@ function BaoCaoTonSayLua() {
                                         dateFormat="dd/MM/yyyy"
                                         onChange={(date) => {
                                             setToDate(date);
-                                            // if (
-                                            //     fromDate &&
-                                            //     toDate &&
-                                            //     selectedFactory &&
-                                            //     isReceived &&
-                                            //     selectedTeams
-                                            // ) {
-                                            //     getReportData();
-                                            // }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
