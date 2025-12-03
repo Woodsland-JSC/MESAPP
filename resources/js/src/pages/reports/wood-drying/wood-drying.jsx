@@ -430,6 +430,7 @@ function CBGWoodDryingReports() {
                                             height: 630,
                                             fontSize: 16,
                                         }}
+                                        id="app-ag-grid"
                                     >
                                         <AgGridReact
                                             ref={gridRef}
