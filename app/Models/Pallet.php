@@ -56,4 +56,8 @@ class Pallet extends Model
     public function completedBy(){
         return $this->belongsTo(User::class, 'CompletedBy', 'id');
     }
+
+    public function employeeInfo(){
+        return $this->belongsTo(User::class, 'employee', 'id');
+    }
 }
