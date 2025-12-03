@@ -105,14 +105,14 @@ class ReportController extends Controller
                             $itemCode = $detail->ItemCode;
                             if ($pallet->activeStatus == 0) {
                                 $klChuaSay += $detail->Qty;
-                            }
+                            } else {
+                                if ($pallet->activeStatus == 1 && $pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
+                                    $klTrongLoChuaSay += $detail->Qty;
+                                }
 
-                            if ($pallet->activeStatus == 1 && $pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
-                                $klTrongLoChuaSay += $detail->Qty;
-                            }
-
-                            if ($pallet->activeStatus == 1 && $pallet->RanBy != null && $pallet->LoadedIntoKilnDate <= $date) {
-                                $klDangSay += $detail->Qty;
+                                if ($pallet->activeStatus == 1 && $pallet->RanBy != null && $pallet->LoadedIntoKilnDate <= $date) {
+                                    $klDangSay += $detail->Qty;
+                                }
                             }
                         }
 
