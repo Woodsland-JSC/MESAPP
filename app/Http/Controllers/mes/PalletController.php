@@ -78,7 +78,7 @@ class PalletController extends Controller
 
         try {
             // Lấy dữ liệu pallet với điều kiện lọc
-            $pallets = Pallet::with(['details', 'createdBy', 'completedBy'])
+            $pallets = Pallet::with(['details', 'employeeInfo', 'completedBy'])
                 ->where('factory', $factory)
                 ->whereBetween('CompletedDate', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
@@ -113,8 +113,8 @@ class PalletController extends Controller
                         'mass' => round($detail->Qty, 6),
                         'reason' => $detail->CDay != 14 ? $pallet->LyDo : '',
                         'status' => $status,
-                        'created_username' => $pallet->createdBy ? $pallet->createdBy->username : "",
-                        'created_fullname' => $pallet->createdBy ? $pallet->createdBy->last_name . ' ' . $pallet->createdBy->first_name : "",
+                        'created_username' => $pallet->employeeInfo ? $pallet->employeeInfo->username : "",
+                        'created_fullname' => $pallet->employeeInfo ? $pallet->employeeInfo->last_name . ' ' . $pallet->employeeInfo->first_name : "",
                         'stacking_time' => $pallet->stacking_time,
                         'completed_by' => $pallet->completedBy ? $pallet->completedBy->username : "",
                         'completed_fullname' => $pallet->completedBy ? $pallet->completedBy->last_name . ' ' . $pallet->completedBy->first_name : "",
