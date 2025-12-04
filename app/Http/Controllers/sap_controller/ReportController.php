@@ -91,7 +91,6 @@ class ReportController extends Controller
 
             Pallet::with(['details'])
                 ->where('created_at', '<=', $date)
-                ->whereNull('CompletedBy')
                 ->chunk(1000, function ($pallets) use ($date, &$p) {
                     foreach ($pallets as $pallet) {
                         $klChuaSay = 0;
@@ -106,16 +105,30 @@ class ReportController extends Controller
                             if ($pallet->activeStatus == 0) {
                                 $klChuaSay += $detail->Qty;
                             } else {
-                                if($pallet->LoadedIntoKilnDate > $date){
+                                if ($pallet->LoadedIntoKilnDate > $date) {
                                     $klChuaSay += $detail->Qty;
                                 }
 
-                                if ($pallet->activeStatus == 1 && $pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
-                                    $klTrongLoChuaSay += $detail->Qty;
+                                if ($pallet->activeStatus == 1 && $pallet->CompletedBy == null) {
+                                    if ($pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
+                                        $klTrongLoChuaSay += $detail->Qty;
+                                    }
+
+                                    if ($pallet->RanBy != null && $pallet->LoadedIntoKilnDate <= $date) {
+                                        $klDangSay += $detail->Qty;
+                                    }
+
+                                    if($pallet->RanBy != null && $pallet->RanDate > $date){
+                                        $klTrongLoChuaSay += $detail->Qty;
+                                    }
                                 }
 
-                                if ($pallet->activeStatus == 1 && $pallet->RanBy != null && $pallet->LoadedIntoKilnDate <= $date) {
-                                    $klDangSay += $detail->Qty;
+
+
+                                if ($pallet->activeStatus == 1 && ($pallet->CompletedBy != null)) {
+                                    if($pallet->CompletedDate > $date){
+                                        $klDangSay += $detail->Qty;
+                                    }
                                 }
                             }
                         }
