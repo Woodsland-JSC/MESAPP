@@ -118,9 +118,9 @@ class ReportController extends Controller
                                         $klDangSay += $detail->Qty;
                                     }
 
-                                    if ($pallet->RanBy != null && $pallet->RanDate > $date) {
-                                        $klTrongLoChuaSay += $detail->Qty;
-                                    }
+                                    // if ($pallet->RanBy != null && $pallet->RanDate > $date) {
+                                    //     $klTrongLoChuaSay += $detail->Qty;
+                                    // }
                                 } else {
                                     if ($pallet->CompletedDate > $date) {
                                         $klDangSay += $detail->Qty;
