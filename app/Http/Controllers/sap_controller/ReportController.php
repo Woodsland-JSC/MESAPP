@@ -110,21 +110,24 @@ class ReportController extends Controller
                                 }
 
                                 if ($pallet->CompletedBy == null) {
+                                    // 
                                     if ($pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
                                         $klTrongLoChuaSay += $detail->Qty;
                                     }
 
-                                    if ($pallet->RanBy != null && $pallet->LoadedIntoKilnDate <= $date) {
-                                        $klDangSay += $detail->Qty;
+                                    if ($pallet->RanDate > $date && $pallet->LoadedIntoKilnDate <= $date) {
+                                        $klTrongLoChuaSay += $detail->Qty;
                                     }
 
-                                    // if ($pallet->RanBy != null && $pallet->RanDate > $date) {
-                                    //     $klTrongLoChuaSay += $detail->Qty;
-                                    // }
-                                } else {
-                                    if ($pallet->CompletedDate > $date) {
+
+                                    //
+                                    if ($pallet->RanDate <= $date) {
                                         $klDangSay += $detail->Qty;
                                     }
+                                }
+
+                                if ($pallet->CompletedBy != null && $pallet->CompletedDate > $date) {
+                                    $klDangSay += $detail->Qty;
                                 }
                             }
                         }
