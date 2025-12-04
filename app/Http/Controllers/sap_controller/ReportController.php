@@ -88,6 +88,8 @@ class ReportController extends Controller
 
             $date = $request->to_date . ' 23:59:59';
 
+            $total1 = 0;
+            $total2 = 0;
 
             Pallet::with(['details'])
                 ->where('created_at', '<=', $date)
@@ -123,10 +125,12 @@ class ReportController extends Controller
                                     //
                                     if ($pallet->RanDate <= $date) {
                                         $klDangSay += $detail->Qty;
+                                        $total1 += $detail->Qty;
                                     }
                                 } else {
                                     if ($pallet->CompletedDate > $date) {
                                         $klDangSay += $detail->Qty;
+                                        $total2 += $detail->Qty;
                                     }
                                 }
                             }
