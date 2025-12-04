@@ -88,7 +88,6 @@ class ReportController extends Controller
 
             $date = $request->to_date . ' 23:59:59';
 
-
             Pallet::with(['details'])
                 ->where('created_at', '<=', $date)
                 ->chunk(1000, function ($pallets) use ($date, &$p) {
@@ -119,9 +118,8 @@ class ReportController extends Controller
                                         $klTrongLoChuaSay += $detail->Qty;
                                     }
 
-
                                     //
-                                    if ($pallet->RanDate <= $date) {
+                                    if ($pallet->RanBy != null && $pallet->RanDate <= $date) {
                                         $klDangSay += $detail->Qty;
                                     }
                                 } else {
