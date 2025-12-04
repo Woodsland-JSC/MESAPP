@@ -109,7 +109,7 @@ class ReportController extends Controller
                                     $klChuaSay += $detail->Qty;
                                 }
 
-                                if ($pallet->activeStatus == 1 && $pallet->CompletedBy == null) {
+                                if ($pallet->CompletedBy == null) {
                                     if ($pallet->RanBy == null && $pallet->LoadedIntoKilnDate <= $date) {
                                         $klTrongLoChuaSay += $detail->Qty;
                                     }
@@ -118,15 +118,11 @@ class ReportController extends Controller
                                         $klDangSay += $detail->Qty;
                                     }
 
-                                    if($pallet->RanBy != null && $pallet->RanDate > $date){
+                                    if ($pallet->RanBy != null && $pallet->RanDate > $date) {
                                         $klTrongLoChuaSay += $detail->Qty;
                                     }
-                                }
-
-
-
-                                if ($pallet->activeStatus == 1 && ($pallet->CompletedBy != null)) {
-                                    if($pallet->CompletedDate > $date){
+                                } else {
+                                    if ($pallet->CompletedDate > $date) {
                                         $klDangSay += $detail->Qty;
                                     }
                                 }
