@@ -94,7 +94,7 @@ function BaoCaoTonSayLua() {
                     tronglo_TB: 0
                 }
 
-                if(pallet.Factory == 'YS'){
+                if (pallet.Factory == 'YS') {
                     total += pallet.KL_Chua_Say;
                 }
 
@@ -122,11 +122,11 @@ function BaoCaoTonSayLua() {
 
                 if (!itemFind) {
                     uniqueItemCodeData.push(obj);
-                }else{
+                } else {
                     itemFind.chosay_TH += obj.chosay_TH;
                     itemFind.tronglo_chuasay_TH += obj.tronglo_chuasay_TH;
                     itemFind.tronglo_TH += obj.tronglo_TH;
-                    
+
                     itemFind.chosay_TB += obj.chosay_TB;
                     itemFind.tronglo_chuasay_TB += obj.tronglo_chuasay_TB;
                     itemFind.tronglo_TB += obj.tronglo_TB;
@@ -137,14 +137,9 @@ function BaoCaoTonSayLua() {
                 }
             })
 
-            console.log("uniqueItemCodeData", uniqueItemCodeData);
-            
-
-
             let formattedData = [];
 
             uniqueItemCodeData.forEach((item, index) => {
-                let combineItemCode = item.ItemCode + '-' + item.quyCach + '-' + item.factory;
                 let cday = item.quyCach.split('x')[0];
                 let crong = item.quyCach.split('x')[1];
                 let cdai = item.quyCach.split('x')[2];
@@ -166,6 +161,8 @@ function BaoCaoTonSayLua() {
                     if (data.factory == 'YS') {
                         item.tonKho_YS += Number(data.EB || 0);
                     }
+
+                    data.used = 1;
                 });
 
                 item.day = Number(cday);
@@ -175,6 +172,62 @@ function BaoCaoTonSayLua() {
 
                 formattedData.push(item);
             });
+
+            let notExistData = reportData.filter(item => !item.used && item.EB != 0);
+
+            notExistData.forEach(item => {
+                let find = uniqueItemCodeData.find(i => i.ItemCode == item.itemCode && Number(i.U_CDay) == Number(item.day) && Number(i.U_CRong) == Number(item.rong) && Number(i.U_CDai) == Number(item.dai));
+
+                if (!find) {
+                    let obj = {
+                        itemCode: item.ItemCode,
+                        itemName: item.ItemName,
+                        quyCach: Number(item.U_CDay) + "x" + Number(item.U_CRong) + "x" + Number(item.U_CDai),
+                        day: Number(item.U_CDay),
+                        rong: Number(item.U_CRong),
+                        dai: Number(item.U_CDai),
+                        factory: item.factory,
+                        tonKho_TH: 0,
+                        chosay_TH: 0,
+                        tronglo_chuasay_TH: 0,
+                        tronglo_TH: 0,
+                        tonKho_YS: 0,
+                        chosay_YS: 0,
+                        tronglo_chuasay_YS: 0,
+                        tronglo_YS: 0,
+                        tonKho_TB: 0,
+                        chosay_TB: 0,
+                        tronglo_chuasay_TB: 0,
+                        tronglo_TB: 0
+                    }                    
+
+                    if (obj.factory == 'TH') {
+                        obj.tonKho_TH += Number(item.EB || 0);
+                    }
+
+                    if (obj.factory == 'TB') {
+                        obj.tonKho_TB += Number(item.EB || 0);
+                    }
+
+                    if (obj.factory == 'YS') {
+                        obj.tonKho_YS += Number(item.EB || 0);
+                    }
+
+                    formattedData.push(obj);
+                } else {
+                    if (find.factory == 'TH') {
+                        find.tonKho_TH += Number(item.EB || 0);
+                    }
+
+                    if (find.factory == 'TB') {
+                        find.tonKho_TB += Number(item.EB || 0);
+                    }
+
+                    if (find.factory == 'YS') {
+                        find.tonKho_YS += Number(item.EB || 0);
+                    }
+                }
+            })
 
             setRowData(formattedData);
             setReportData(res);
