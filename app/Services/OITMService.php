@@ -61,6 +61,14 @@ class OITMService
 
     private $SQL_GET_BY_ITEMCODES = 'SELECT * FROM OITM WHERE "ItemCode"  in (?)';
 
+    private $SQL_GET_ITEM_BY_QC_WH = <<<SQL
+        Select OBTN."DistNumber",OBTN."ItemCode",OBTQ."WhsCode",OBTQ."Quantity", OBTN."U_CDai", OBTN."U_CRong", OBTN."U_CDay"
+        From OBTN 
+        inner JOIN OBTQ ON OBTN."ItemCode" = OBTQ."ItemCode" and OBTN."SysNumber" = OBTQ."SysNumber" AND OBTQ."Quantity" > 0
+        WHERE OBTN."U_CDay" = ? AND OBTN."U_CRong" = ? AND OBTN."U_CDai" = ? AND OBTQ."WhsCode" = ?
+        ORDER BY OBTQ."Quantity" desc limit 1
+    SQL;
+
     public function __construct(HanaService $hanaService)
     {
         $this->hanaService = $hanaService;
@@ -144,6 +152,15 @@ class OITMService
             return $this->hanaService->select($sql, $params);
         } catch (Exception $th) {
             throw new Exception("Lấy danh sách item có lỗi." . $th->getMessage());
+        }
+    }
+
+    public function findItemByQCAndWH($day, $rong, $dai, $wh)
+    {
+        try {
+            return $this->hanaService->selectOne($this->SQL_GET_ITEM_BY_QC_WH, [$day, $rong, $dai, $wh]);
+        } catch (Throwable $th) {
+            throw $th;
         }
     }
 }

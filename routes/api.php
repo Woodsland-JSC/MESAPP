@@ -11,6 +11,7 @@ use App\Http\Controllers\sap\DryingOvenController;
 use App\Http\Controllers\sap\PlanController;
 use App\Http\Controllers\sap\ProductionController;
 use App\Http\Controllers\api\ReportController;
+use App\Http\Controllers\mes\LogErrorHumidityController;
 use App\Http\Controllers\mes\PalletController;
 use App\Http\Controllers\mes\PalletLogController;
 use App\Http\Controllers\mes\PlanDryingController;
@@ -18,7 +19,9 @@ use App\Http\Controllers\mes\QcCbgController;
 use App\Http\Controllers\mes\UserController as MesUserController;
 use App\Http\Controllers\sap_controller\ORSCController;
 use App\Http\Controllers\sap\GoodsManagementController;
+use App\Http\Controllers\sap_controller\InventoryPostingController;
 use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
+use App\Http\Controllers\sap_controller\OitwController;
 use App\Http\Controllers\sap_controller\OvenController;
 use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
 use App\Http\Controllers\sap_controller\TBController;
@@ -200,6 +203,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('factoryNDByUser', [SapMasterDataController::class, 'factoryNDByUser'])->name('factoryNDByUser');
         Route::get('getFactoryUTub', [SapMasterDataController::class, 'getFactoryUTub'])->name('getFactoryUTub');
         Route::get('getTeamUTub', [SapMasterDataController::class, 'getTeamUTub'])->name('getTeamUTub');
+        Route::get('getWhHTCBG', [SapMasterDataController::class, 'getWhHTCBG'])->name('getWhHTCBG');
+        Route::get('getTeamsCBG', [SapMasterDataController::class, 'getTeamsCBG'])->name('getTeamsCBG');
+
+        
     });
 
     Route::group(['prefix' => 'sap/report'], function () {
@@ -212,7 +219,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getOvensByFactory', [OvenController::class, 'getOvensByFactory'])->name('getOvensByFactory');
     });
 
-
+    Route::group(['prefix' => 'sap/OITW'], function () {
+        Route::get('getItemsByFactory', [OitwController::class, 'getItemsByFactory'])->name('getItemsByFactory');
+    });
 
 
     Route::group(['prefix' => 'mes/plan-drying'], function () {
@@ -256,13 +265,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('checkReceiptTB', [TBController::class, 'checkReceiptTB'])->name('checkReceiptTB');
     });
 
+    Route::group(['prefix' => 'sap/inventory-posting'], function () {
+        Route::post('inventoryPostingItems', [InventoryPostingController::class, 'inventoryPostingItems'])->name('inventoryPostingItems');
+    });
+
+    
+
     Route::group(['prefix' => 'mes/qc'], function () {
         Route::get('getAllWhQC', [QcCbgController::class, 'getAllWhQC'])->name('getAllWhQC');
         Route::get('getItemByWhQC', [QcCbgController::class, 'getItemByWhQC'])->name('getItemByWhQC');
         Route::get('getWhSL', [QcCbgController::class, 'getWhSL'])->name('getWhSL');
         Route::post('handleSL', [QcCbgController::class, 'handleSL'])->name('handleSL');
         Route::post('handleCH', [QcCbgController::class, 'handleCH'])->name('handleCH');
+        Route::post('baoLoiSayAm', [QcCbgController::class, 'baoLoiSayAm']);
     });
+
+    Route::group(['prefix' => 'mes/humidity-error'], function () {
+        Route::get('getDataByFactory', [LogErrorHumidityController::class, 'getDataByFactory']);
+    });
+
+    
 });
 
 

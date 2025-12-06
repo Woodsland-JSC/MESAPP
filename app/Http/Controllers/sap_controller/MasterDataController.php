@@ -4,6 +4,7 @@ namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
 use App\Services\HanaService;
+use App\Services\OWHSService;
 use Auth;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,6 +39,27 @@ class MasterDataController extends Controller
 
         GROUP BY A."VisResCode", A."ResName", A."U_CDOAN", A."U_FAC", A."U_KHOI"
         ORDER BY A."ResName" asc
+    SQL;
+
+    private $SQL_TEAM_CBG = <<<SQL
+        SELECT
+            A."VisResCode" AS "Code",
+            A."ResName" AS "Name",
+            A."U_CDOAN" AS "CongDoan",
+            A."U_FAC" AS "Factory",
+            A."U_KHOI",
+            D."WhsCode"
+        FROM "ORSC" A
+        JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
+        JOIN OHEM C ON B."EmpID" = C."empID"
+        JOIN RSC1 D ON D."ResCode" = A."VisResCode"
+        WHERE A."U_FAC" = ? AND A."U_KHOI" = 'CBG' AND A."U_QC" = 'N' AND B."EmpID" = ?  AND D."Locked" = 'N' 
+        GROUP BY A."VisResCode",
+            A."ResName",
+            A."U_CDOAN",
+            A."U_FAC",
+            A."U_KHOI",
+            D."WhsCode";
     SQL;
 
     public function __construct(HanaService $hanaService)
@@ -130,12 +152,55 @@ class MasterDataController extends Controller
         }
     }
 
-    public function getTeamUTub(Request $request){
+    public function getTeamUTub(Request $request)
+    {
         try {
             $teams = $this->hanaService->select($this->SQL_TEAM_UTUB, [$request->query('factory'), Auth::user()->sap_id]);
 
             $data = [
                 'teams' => $teams
+            ];
+
+            return response()->json([
+                'data' => $data
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getTeamsCBG(Request $request)
+    {
+        try {
+            $teams = $this->hanaService->select($this->SQL_TEAM_CBG, [$request->query('factory'), Auth::user()->sap_id]);
+
+            $data = [
+                'teams' => $teams
+            ];
+
+            return response()->json([
+                'data' => $data
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getWhHTCBG(Request $request, OWHSService $oWHSService)
+    {
+        try {
+            $warehouses = $oWHSService->getWhHTCBG($request->query('factory'));
+
+            $data = [
+                'warehouses' => $warehouses
             ];
 
             return response()->json([

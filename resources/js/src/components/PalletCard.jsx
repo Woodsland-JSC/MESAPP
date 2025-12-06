@@ -33,9 +33,9 @@ function PalletCard(props) {
     const handleQuantityChange = (value) => {
         setQuantity(value);
 
-        if (flag === "SL" && (value < 0 || value === 0 || value > inStock)){
+        if (flag === "SL" && (value === 0 || value > (height == 0 ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))))) {
             setIsInvalid(true);
-        } else if (flag !== "SL" && (value < 0 || value === 0 || value > Math.floor(inStock*1000000000/(height*width*thickness)))) {
+        } else if (flag !== "SL" && (value < 0 || value === 0 || value > Math.floor(inStock * 1000000000 / (height * width * thickness)))) {
             setIsInvalid(true);
         } else {
             setIsInvalid(false);
@@ -56,7 +56,7 @@ function PalletCard(props) {
                     onClick={onDelete}
                     disabled={createPalletLoading}
                 >
-                    <AiFillCloseCircle className="w-10 h-10"/>
+                    <AiFillCloseCircle className="w-10 h-10" />
                 </button>
             </div>
             <div className=" pallet-line grid xl:grid-cols-2 md:grid-cols-2 grid-cols-2 gap-4 bg-white py-3 px-4 rounded-b-xl">
@@ -96,12 +96,24 @@ function PalletCard(props) {
                 </div>
                 {flag === "SL" ? (
                     <div>
-                        <label
-                            htmlFor="company"
-                            className="block mb-2 text-md font-medium text-gray-900 "
-                        >
-                            Tồn kho (m<sup className="">3</sup>)
-                        </label>
+                        {
+                            height == 0 ? (
+                                <label
+                                    htmlFor="company"
+                                    className="block mb-2 text-md font-medium text-gray-900 "
+                                >
+                                    Tồn kho (m<sup className="">3</sup>)
+                                </label>
+                            ) : (
+                                <label
+                                    htmlFor="company"
+                                    className="block mb-2 text-md font-medium text-gray-900 "
+                                >
+                                    Tồn kho (T)
+                                </label>
+                            )
+                        }
+
                         <input
                             type="text"
                             id="inStock"
@@ -109,10 +121,10 @@ function PalletCard(props) {
                             placeholder="0"
                             readOnly={true}
                             required
-                            value={inStock}
+                            value={height == 0 ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))}
                         />
-                    </div>                    
-                ): (
+                    </div>
+                ) : (
                     <div>
                         <label
                             htmlFor="company"
@@ -127,11 +139,11 @@ function PalletCard(props) {
                             placeholder="0"
                             readOnly={true}
                             required
-                            value={Math.floor(inStock*1000000000/(height*width*thickness))}
+                            value={Math.floor(inStock * 1000000000 / (height * width * thickness))}
                         />
                     </div>
-                )}   
-                
+                )}
+
                 <div>
                     <label
                         htmlFor="quantity"
@@ -143,8 +155,9 @@ function PalletCard(props) {
                         defaultValue={0}
                         isInvalid={isInvalid}
                         onChange={handleQuantityChange}
+                        min={0}
                     >
-                        <NumberInputField/>
+                        <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />

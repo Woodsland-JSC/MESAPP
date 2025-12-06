@@ -79,6 +79,30 @@ class SapB1Service
 
             return $response;
         } catch (\Throwable $th) {
+            Log::info("SapB1Service::post - " . $th->getMessage());
+            throw $th;
+        }
+    }
+
+     /***
+     * return \Illuminate\Http\Client\Response $response
+     */
+    public function delete($data, $endpoint)
+    {
+        try {
+            $url = UrlSAPServiceLayer() . '/b1s/v1/' . $endpoint;
+            $response = Http::withOptions([
+                'verify' => false,
+
+            ])->withHeaders([
+                'Content-Type' => "application/json",
+                'Accept' => 'application/json',
+                'Authorization' => 'Basic ' . BasicAuthToken(),
+            ])->post($url, $data);
+
+            return $response;
+        } catch (\Throwable $th) {
+            Log::info("SapB1Service::post - " . $th->getMessage());
             throw $th;
         }
     }

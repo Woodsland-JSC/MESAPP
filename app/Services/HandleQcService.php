@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\LogErrorHumidity;
 use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,11 +15,13 @@ class HandleQcService
 {
     private SapB1Service $SapB1Service;
     private OITMService $oitmService;
+    private OWHSService $OWHSService;
 
-    public function __construct(SapB1Service $SapB1Service, OITMService $oitmService)
+    public function __construct(SapB1Service $SapB1Service, OITMService $oitmService, OWHSService $OWHSService)
     {
         $this->SapB1Service = $SapB1Service;
         $this->oitmService = $oitmService;
+        $this->OWHSService = $OWHSService;
     }
 
 
@@ -231,6 +235,149 @@ class HandleQcService
             return response([
                 'message' => 'Xử lý cắt hạ các items có lỗi.',
                 'detail' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function baoLoiSayAm($data)
+    {
+
+        $entry = null;
+        $exit = null;
+        DB::beginTransaction();
+
+        try {
+            $dai = $data['dai'];
+            $rong = $data['rong'];
+            $day = $data['day'];
+            $quantity = $data['quantity'];
+            $m3 = $data['m3'];
+            $team = $data['team'];
+            $warehouse = $team["WhsCode"];
+
+            $qc = $day . 'x' . $rong . 'x' . $dai;
+            $itemFind = $this->oitmService->findItemByQCAndWH($day, $rong, $dai, $warehouse);
+
+            if (!$itemFind) {
+                return response()->json([
+                    'message' => "Không tìm thấy item với quy cách $qc"
+                ], 500);
+            }
+
+            $whSL = $this->OWHSService->getWhSLByFactory($team['Factory']);
+
+            if (!$whSL) {
+                return response()->json([
+                    'message' => "Không tìm thấy kho sấy lại."
+                ], 500);
+            }
+
+            $bodyExit = [
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "Comments" => "Xuất gỗ sấy ẩm  đưa về kho sấy lại",
+                "DocumentLines" => [
+                    [
+                        "ItemCode"      => $itemFind['ItemCode'],
+                        "Quantity"      => (float) $m3,
+                        "WarehouseCode" => $warehouse,
+                        "BatchNumbers" => [
+                            [
+                                "Quantity" => (float) $m3,
+                                "ItemCode"      => $itemFind['ItemCode'],
+                                "BatchNumber" => $itemFind['DistNumber']
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            $resInventoryGenExits = $this->SapB1Service->post($bodyExit, 'InventoryGenExits');
+            $statusInventoryGenExits = $resInventoryGenExits->successful();
+            $responseInventoryGenExits = $resInventoryGenExits->json();
+
+            if (!$statusInventoryGenExits) {
+                return response()->json([
+                    'message' => $responseInventoryGenExits['error'] ? $responseInventoryGenExits['error']['message']['value'] : "Xuất kho " . $warehouse . " có lỗi"
+                ], 500);
+            }
+
+            $exit = $responseInventoryGenExits;
+
+            $bodyEntry = [
+                "BPL_IDAssignedToInvoice" => Auth::user()->branch,
+                "Comments" => "Nhập gỗ sấy ẩm về kho sấy lại",
+                "DocumentLines" => [
+                    [
+                        "ItemCode"      => $itemFind['ItemCode'],
+                        "Quantity"      => $m3,
+                        "WarehouseCode" => $whSL['WhsCode'],
+                        "BatchNumbers" => [
+                            [
+                                "Quantity" => $m3,
+                                "ItemCode"      => $itemFind['ItemCode'],
+                                "BatchNumber" => $qc,
+                                "U_CDay" => $day,
+                                "U_CRong" => $rong,
+                                "U_CDai" => $dai,
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            $resInventoryGenEntry = $this->SapB1Service->post($bodyEntry, 'InventoryGenEntries');
+            $statusInventoryGenEntry = $resInventoryGenEntry->successful();
+            $responseInventoryGenEntry = $resInventoryGenEntry->json();
+
+            if (!$statusInventoryGenEntry) {
+                if ($exit != null) {
+                    $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
+                }
+
+                return response()->json([
+                    'message' => $responseInventoryGenEntry['error'] ? $responseInventoryGenEntry['error']['message']['value'] : "Nhập kho " . $whSL['WhsCode'] . " có lỗi"
+                ], 500);
+            }
+
+            $entry = $responseInventoryGenEntry;
+
+            LogErrorHumidity::create([
+                'ItemCode' => $itemFind['ItemCode'],
+                'CDay' => $day,
+                'CRong' => $rong,
+                'CDai' => $dai,
+                'Quantity' => $m3,
+                'QuantityT' => $dai != 0 ? $quantity : null,
+                'Warehouse' => $warehouse,
+                'ToWarehouse' => $whSL['WhsCode'],
+                'Team' => $team['Code'],
+                'CreatedBy' => Auth::user()->id,
+                'EntryId' => $entry['DocEntry'],
+                'ExitId' => $exit['DocEntry']
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Xử lý báo lỗi sấy ẩm thành công.',
+                'EntryId' => $entry['DocEntry'],
+                'ExitId' => $exit['DocEntry']
+            ], 200);
+        } catch (Exception $e) {
+            Log::info("HandleQcService::baoLoiSayAm - " . $e->getMessage());
+
+            if ($entry != null) {
+                $this->SapB1Service->cancelInventoryGenEntries($entry['DocEntry']);
+            }
+
+            if ($exit != null) {
+                $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
+            }
+
+            // DB::rollBack();
+
+            return response()->json([
+                'message' => 'Xử lý báo lỗi sấy ẩm có lỗi.'
             ], 500);
         }
     }

@@ -106,6 +106,9 @@ import OvenDrying from "../pages/reports/wood-drying/oven-drying";
 import HandleItemQc from "../pages/workspace/wood-working/handle-qc";
 import DryingCompletedReport from "../pages/reports/wood-drying/bao-cao-pallet-ra-lo";
 import BaoCaoTonSayLua from "../pages/reports/wood-drying/ton-say-lua";
+import PrintInventoryPosting from "../pages/workspace/goods-management/print-inventory-posting";
+import BaoLoiSayLai from "../pages/workspace/wood-working/bao-loi-say-lai";
+import HumidityReport from "../pages/reports/wood-working/humidity-report";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -220,6 +223,15 @@ function AppRoutes() {
                     />
 
                     <Route
+                        path="/workspace/wood-working/bao-loi-say-lai"
+                        element={
+                            <ProtectedRoute>
+                                <BaoLoiSayLai />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
                         path="/workspace/plywood/finished-goods-receipt"
                         element={
                             <ProtectedRoute >
@@ -315,6 +327,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <BinWarehouseTransfer />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/goods-management/print-inventory-posting"
+                        element={
+                            <ProtectedRoute>
+                                <PrintInventoryPosting />
                             </ProtectedRoute>
                         }
                     />
@@ -592,6 +613,15 @@ function AppRoutes() {
                             </ProtectedRoute>
                         }
 
+                    />
+
+                    <Route
+                        path="/reports/wood-working/say-am"
+                        element={
+                            <ProtectedRoute>
+                                <HumidityReport />
+                            </ProtectedRoute>
+                        }
                     />
 
                     {/* VCN Reports */}
