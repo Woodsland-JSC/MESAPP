@@ -73,7 +73,6 @@ function DryingQueueReport() {
             to_date: format(toDate, "yyyy-MM-dd"),
             plant: selectedFactory,
         };
-        console.log(params); // Log toàn bộ giá trị param trước khi chạy API
         setIsDataReportLoading(true);
         try {
             const res = await reportApi.getDryingQueue(
@@ -91,7 +90,7 @@ function DryingQueueReport() {
 
                 }
 
-                if (item.day <= 21 && item.dai < 800) {
+                if (item.day > 16 && item.day <= 21 && item.dai < 800) {
                     heSoQuyDoi = 1.2
                     dgnc = 88400;
                 }
@@ -101,7 +100,7 @@ function DryingQueueReport() {
                     dgnc = 73700;
                 }
 
-                if (item.day <= 21 && item.dai >= 800) {
+                if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
                     dgnc = 73700;
                 }
