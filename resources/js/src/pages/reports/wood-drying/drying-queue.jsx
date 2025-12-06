@@ -120,6 +120,11 @@ function DryingQueueReport() {
                 khoiLuongTinhThuong = item.mass * heSoQuyDoi;
                 quyLuong = item.mass * dgnc;
 
+                let pow = 2;
+
+                let hs = Math.pow((1 - 0.01), pow);
+                let tt = dgnc * hs;
+
                 return {
                     created_at: item.created_at,
                     code: item.code,
@@ -139,6 +144,8 @@ function DryingQueueReport() {
                     quyLuong,
                     stacking_time: item.stacking_time ?? "",
                     created_fullname: item.created_fullname ?? '',
+                    hs,
+                    tt
                 }
             });
             setIsDataReportLoading(false);
@@ -265,7 +272,6 @@ function DryingQueueReport() {
             },
             headerComponentParams: { displayName: "Số lượng (T)" },
         },
-
         {
             headerName: "Khối lượng (m3)",
             field: "mass",
@@ -295,6 +301,27 @@ function DryingQueueReport() {
                 return params.value ? params.value.toLocaleString() : "0";
             },
             filter: true,
+        },
+        {
+            headerName: "Hệ số",
+            field: "hs",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? params.value : "0";
+            },
+            filter: true,
+        },
+        {
+            headerName: "Thành tiền",
+            field: "tt",
+            width: 150,
+            suppressHeaderMenuButton: true,
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            },
+            filter: true,
+             aggFunc: "sum",
         },
         {
             headerName: "Quỹ lương",
@@ -459,19 +486,13 @@ function DryingQueueReport() {
                                     >
                                         Chọn nhà máy
                                     </label>
-                                    <FactoryOption
-                                        value="TH"
-                                        label="Thuận Hưng"
-                                    />
+                                    <FactoryOption value="TH" label="Thuận Hưng" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
                                     <FactoryOption value="YS" label="Yên Sơn" />
                                 </div>
                                 <div className="col-span-1 w-full flex items-end">
-                                    <FactoryOption
-                                        value="TB"
-                                        label="Thái Bình"
-                                    />
+                                    <FactoryOption value="TB" label="Thái Bình" />
                                 </div>
                             </div>
                         </div>
