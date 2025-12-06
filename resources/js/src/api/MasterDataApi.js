@@ -35,3 +35,23 @@ export const getTeamUTub = (factory) => {
         }
     });
 }
+
+export const getTeamsCBG = (factory) => {
+    const url = `${BASEURL}/getTeamsCBG`;
+    return axiosClient().get(url, {
+        params: {
+            factory
+        }
+    });
+}
+
+
+
+export const getWhHTCBG = (factory) => {
+    const url = `${BASEURL}/getWhHTCBG`;
+    return axiosClient().get(url, {
+        params: {
+            factory
+        }
+    });
+}

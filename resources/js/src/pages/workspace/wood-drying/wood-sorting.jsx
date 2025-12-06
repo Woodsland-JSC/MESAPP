@@ -259,7 +259,6 @@ function WoodSorting() {
                     label: item.Name,
                 }));
                 setWoodTypes(woodTypesOptions);
-                console.log(woodTypes);
             } catch (error) {
                 console.error("Error fetching wood types:", error);
             }
@@ -588,14 +587,11 @@ function WoodSorting() {
             var height = parseFloat(card.props.height);
             var width = parseFloat(card.props.width);
             var thickness = parseFloat(card.props.thickness);
-            var quantity = parseFloat(palletQuantities[card.key] || 0);
+            var quantity = parseFloat(palletQuantities[card.key] || 0);            
 
             if (
                 selectedDryingReason.value !== "SL" &&
-                (quantity >
-                    Math.floor(
-                        (inStock * 1000000000) / (height * width * thickness)
-                    ) ||
+                (quantity > Math.floor( (inStock * 1000000000) / (height * width * thickness)) ||
                     quantity === 0 ||
                     quantity < 0 ||
                     quantity == "" ||
@@ -604,11 +600,9 @@ function WoodSorting() {
                 hasInvalidQuantity = true;
                 break;
             }
-            if (
-                selectedDryingReason.value === "SL" &&
-                (quantity > inStock ||
+
+            if (selectedDryingReason.value === "SL" && (quantity > (height == 0 ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))) ||
                     quantity === 0 ||
-                    quantity < 0 ||
                     quantity == "" ||
                     quantity == null)
             ) {
@@ -627,6 +621,10 @@ function WoodSorting() {
         }
 
         const palletObject = createPalletObject();
+
+        // console.log("palletObject", palletObject);
+        // return
+        
         setCreatePalletLoading(true);
 
         try {

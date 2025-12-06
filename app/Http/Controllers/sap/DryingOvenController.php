@@ -308,17 +308,19 @@ class DryingOvenController extends Controller
                 $datainsert['BatchNum'] = $detailData['BatchNum'];
 
                 if ($palletData['LyDo'] === 'SL') {
+                    $check = ($detailData['CDai'] ? $detailData['CDai'] : 0) * ($detailData['CDay'] ? $detailData['CDay'] : 0) * ($detailData['CRong'] ? $detailData['CRong'] : 0);
+
                     $datainsert['CDai_Site'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
                     $datainsert['CDay_Site'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
                     $datainsert['CRong_Site'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
-                    $datainsert['CDai'] =  0;
-                    $datainsert['CDay'] = 0;
-                    $datainsert['CRong'] = 0;
-                    $quyCachSite = 0 . 'x' . 0 . 'x' . 0;
+                    $datainsert['CDai'] =  $detailData['CDai'] ? $detailData['CDai'] : 0;
+                    $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;
+                    $datainsert['CRong'] = $detailData['CRong'] ? $detailData['CRong'] : 0;
+                    $quyCachSite = $detailData['CDay'] . 'x' . $detailData['CRong'] . 'x' . $detailData['CDai'];
                     $datainsert['QuyCachSite'] = $quyCachSite;
                     // Save the Qty
-                    $datainsert['Qty'] = $detailData['qtyM3'] ? $detailData['qtyM3'] : 0;
-                    $datainsert['Qty_T'] = 0;
+                    $datainsert['Qty'] = $check == 0 ? $detailData['qtyM3'] : (float)$detailData['Qty'] * $check / 1000000000;
+                    $datainsert['Qty_T'] = $check == 0 ? 0 : (float)$detailData['Qty'];
                 } else {
                     $datainsert['CDai'] = $detailData['CDai'] ? $detailData['CDai'] : 0;
                     $datainsert['CDay'] = $detailData['CDay'] ? $detailData['CDay'] : 0;

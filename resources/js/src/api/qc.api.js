@@ -28,3 +28,8 @@ export const handleItemsCH = (data) => {
     const url = `${BASEURL}/handleCH`;
     return axiosClient().post(url, data);
 }
+
+export const baoLoiSayAm = (data) => {
+    const url = `${BASEURL}/baoLoiSayAm`;
+    return axiosClient().post(url, data);
+}

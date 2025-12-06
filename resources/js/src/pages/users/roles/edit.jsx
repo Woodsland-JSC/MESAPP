@@ -36,6 +36,11 @@ const goodsManagementPermissions = [
         name: "Điều chuyển hàng hóa theo bin, kho",
         description: "Xếp bin và điều chuyển bin, kho",
     },
+    {
+        value: "kiemkevattuson",
+        name: "Quản lý kiểm kê vật tư sơn",
+        description: "Kiểm kê và quản lý vật tư sơn",
+    }
 ];
 
 const managementPermissions = [

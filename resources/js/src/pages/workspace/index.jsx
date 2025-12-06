@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Layout from "../../layouts/layout";
 import { HiSearchCircle, HiBadgeCheck } from "react-icons/hi";
 import {
@@ -17,12 +17,34 @@ import {
     TabList,
     TabPanels,
     Tab,
-    TabPanel
+    TabPanel,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    Box,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    SimpleGrid,
+    Text
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAppContext from "../../store/AppContext";
 import "../../assets/styles/customTabs.css";
 import "../../assets/styles/index.css";
+import { getTeamsCBG } from "../../api/MasterDataApi";
+import Select from 'react-select'
+import { FaDiceD6 } from "react-icons/fa6";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import { baoLoiSayAm } from "../../api/qc.api";
+import Loader from "../../components/Loader";
 
 function Workspace() {
     const { user } = useAppContext();
@@ -32,6 +54,25 @@ function Workspace() {
     const ThirdTab = useRef();
 
     const [openInlandSelect, setOpenInlandSelect] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const {
+        isOpen: isModalOpen,
+        onOpen: onModalOpen,
+        onClose: onModalClose,
+    } = useDisclosure();
+
+    const [teams, setTeams] = useState([]);
+    const [team, setTeam] = useState(null);
+
+    const [data, setData] = useState({
+        team: null,
+        day: '',
+        rong: '',
+        dai: '',
+        quantity: '',
+        m3: ''
+    });
 
     const handleMenuClick = (type) => {
         switch (type) {
@@ -69,6 +110,93 @@ function Workspace() {
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.pushState({}, "", newUrl);
     };
+
+    const onHandle = async () => {
+        try {
+            if (teams.length == 0) {
+                let res = await getTeamsCBG(user?.plant);
+                let data = res.data.teams.sort((item1, item2) => item1.Name.localeCompare(item2.Name))
+                setTeams(data.map(item => (
+                    {
+                        ...item,
+                        label: `${item.Name} - ${item.Code}`,
+                        value: item.Code
+                    }
+                )))
+            }
+
+            onModalOpen();
+        } catch (error) {
+            toast.error("Lấy danh sách tổ có lỗi.");
+        }
+    }
+
+    const onConfirm = () => {
+        if (!data.team) {
+            toast.error("Vui lòng chọn tổ báo lỗi.");
+            return
+        }
+
+        if (!data.day) {
+            toast.error("Vui lòng nhập chiều dày.");
+            return
+        }
+
+        if (!data.rong) {
+            toast.error("Vui lòng nhập chiều dày.");
+            return
+        }
+
+        if ((!data.quantity || data.quantity == 0) && (!data.m3 || data.m3 == 0)) {
+            toast.error("Vui lòng nhập số thanh hoặc khối lượng.");
+            return
+        }
+
+        let postData = { ...data };
+
+        if (postData.dai == 0 || !postData.dai) {
+            postData.quantity = 0
+        }
+
+        Swal.fire({
+            title: 'Xác nhận lỗi sấy ẩm.',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    setLoading(true);
+                    let res = await baoLoiSayAm(postData);
+                    onClose();
+                    setLoading(false);
+                    toast.success(res.message ?? "Xử lý thành công.");
+                } catch (error) {
+                    setLoading(false);
+                    toast.error(error?.response?.data?.message ?? "Xử lý có lỗi.");
+                }
+            }
+        });
+    }
+
+    const onClose = () => {
+        onModalClose();
+        setData({
+            team: null,
+            day: '',
+            rong: '',
+            dai: '',
+            quantity: '',
+            m3: ''
+        });
+    }
+
+    useEffect(() => {
+        let calc = data.day * data.rong * data.dai * data.quantity / 1000000000;
+        setData(pre => ({ ...pre, m3: calc + '' }))
+    }, [data.dai, data.rong, data.day, data.quantity])
 
     useEffect(() => {
         document.title = "Woodsland - Workspace";
@@ -348,47 +476,6 @@ function Workspace() {
                                                         "Nhập sản lượng lắp đặt tủ bếp",
                                                     type: "ND",
                                                 },
-                                                // {
-                                                //     permission: [
-                                                //         "DAND",
-                                                //         "DAND(CX)",
-                                                //     ],
-                                                //     link: "/workspace/domestic/noi-dia",
-                                                //     icon: (
-                                                //         <HiArchiveBoxArrowDown />
-                                                //     ),
-                                                //     title: "Sản lượng nội địa",
-                                                //     description:
-                                                //         "Nhập sản lượng lắp đặt khối nội địa",
-                                                //     type: "ND",
-                                                // },
-                                                // {
-                                                //     permission: [
-                                                //         "DAND",
-                                                //         "DAND(CX)",
-                                                //     ],
-                                                //     link: "/workspace/domestic/finished-goods-receipt",
-                                                //     icon: (
-                                                //         <HiArchiveBoxArrowDown />
-                                                //     ),
-                                                //     title: "Sản lượng nội địa",
-                                                //     description:
-                                                //         "Nhập sản lượng lắp đặt khối nội địa",
-                                                //     type: "ND",
-                                                // },
-                                                // {
-                                                //     permission: [
-                                                //         "SLTBND",
-                                                //     ],
-                                                //     link: "/workspace/kitchen-cabinet/finished-goods-receipt",
-                                                //     icon: (
-                                                //         <HiMiniWrenchScrewdriver />
-                                                //     ),
-                                                //     title: "Sản lượng tủ bếp",
-                                                //     description:
-                                                //         "Nhập sản lượng lắp đặt khối tủ bếp",
-                                                //     type: "ND",
-                                                // },
                                                 {
                                                     permission: [
                                                         "DAND",
@@ -409,6 +496,14 @@ function Workspace() {
                                                     icon: <HiViewColumns />,
                                                     title: "Xử lý hàng QC",
                                                     description: "Xử lý lỗi sản phẩm.",
+                                                    type: "CBG",
+                                                },
+                                                {
+                                                    permission: ["CBG"],
+                                                    link: "/workspace/wood-working/bao-loi-say-lai",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Báo lỗi xấy ẩm",
+                                                    description: "Báo lỗi xấy ẩm.",
                                                     type: "CBG",
                                                 }
                                             ].map(
@@ -473,46 +568,93 @@ function Workspace() {
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <Link
-                                                                to={link}
-                                                                key={title}
-                                                            >
-                                                                <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
-                                                                    <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
-                                                                        <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
-                                                                            <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
-                                                                                {
-                                                                                    title
-                                                                                }
-                                                                            </h5>
-                                                                            <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
-                                                                                {
-                                                                                    description
-                                                                                }
-                                                                            </p>
-                                                                        </div>
-                                                                        <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
-                                                                            <div
-                                                                                className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
-                                                                                    "CBG"
-                                                                                    ? "bg-[#DAF1E8] text-green-900"
-                                                                                    : type ===
-                                                                                        "VCN"
-                                                                                        ? "bg-[#f9eeff] text-violet-900"
+                                                            link == "/workspace/wood-working/bao-loi-say-lai" ? (
+                                                                <div
+                                                                    className="cursor-pointer"
+                                                                    key={title}
+                                                                    onClick={() => {
+                                                                        onHandle();
+                                                                    }}
+                                                                >
+                                                                    <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                        <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                            <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                                <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                    {
+                                                                                        title
+                                                                                    }
+                                                                                </h5>
+                                                                                <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                    {
+                                                                                        description
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                                <div
+                                                                                    className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
+                                                                                        "CBG"
+                                                                                        ? "bg-[#DAF1E8] text-green-900"
                                                                                         : type ===
-                                                                                            "ND"
-                                                                                            ? "bg-[#ffeef2] text-red-900"
-                                                                                            : "bg-[#F5F5F5]"
-                                                                                    }`}
-                                                                            >
-                                                                                {
-                                                                                    icon
-                                                                                }
+                                                                                            "VCN"
+                                                                                            ? "bg-[#f9eeff] text-violet-900"
+                                                                                            : type ===
+                                                                                                "ND"
+                                                                                                ? "bg-[#ffeef2] text-red-900"
+                                                                                                : "bg-[#F5F5F5]"
+                                                                                        }`}
+                                                                                >
+                                                                                    {
+                                                                                        icon
+                                                                                    }
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </Link>
+                                                            ) : (
+                                                                <Link
+                                                                    to={link}
+                                                                    key={title}
+                                                                >
+                                                                    <div className="z-10 flex justify-center xl:h-full lg:h-full md:h-full h-[12rem] w-full">
+                                                                        <div className="xl:w-full w-full flex xl:flex-row ml:flex-row md:flex-row flex-col xl:gap-x-6 max-w-sm items-center xl:justify-start md:justify-start justify-center mr-0 xl:p-7 md:p-8 p-4 bg-white rounded-3xl xl:h-[10rem] md:h-[10rem] xl:rounded-xl hover:shadow-md transition-all duration-500 xl:hover:scale-105">
+                                                                            <div className="xl:h-full lg:h-full md:h-full h-[60%] w-full">
+                                                                                <h5 className="serif mb-2 xl:text-2xl lg:text-2xl md:text-2xl text-[21px] font-bold tracking-tight text-gray-900">
+                                                                                    {
+                                                                                        title
+                                                                                    }
+                                                                                </h5>
+                                                                                <p className="hidden xl:inline-block lg:inline-block text-[15px] font-normal text-gray-500">
+                                                                                    {
+                                                                                        description
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="flex xl:items-start h-[40%] xl:h-full lg:h-full md:h-full xl:w-fit lg:w-fit md:w-fit w-full ">
+                                                                                <div
+                                                                                    className={`text-3xl h-fit rounded-full m-1 p-3  ${type ===
+                                                                                        "CBG"
+                                                                                        ? "bg-[#DAF1E8] text-green-900"
+                                                                                        : type ===
+                                                                                            "VCN"
+                                                                                            ? "bg-[#f9eeff] text-violet-900"
+                                                                                            : type ===
+                                                                                                "ND"
+                                                                                                ? "bg-[#ffeef2] text-red-900"
+                                                                                                : "bg-[#F5F5F5]"
+                                                                                        }`}
+                                                                                >
+                                                                                    {
+                                                                                        icon
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </Link>
+                                                            )
+
                                                         )
                                                     ) : (
                                                         <div key={title}>
@@ -563,54 +705,64 @@ function Workspace() {
                                                     type: "DCHH",
                                                 },
                                                 {
-                                                    permission: ["X"],
-                                                    link: "/workspace/wood-working/qc",
-                                                    icon: <HiBadgeCheck />,
-                                                    title: "Kiểm định chất lượng chế biến gỗ",
+                                                    permission: ["kiemkevattuson"],
+                                                    link: "/workspace/goods-management/print-inventory-posting",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Kiểm kê vật tư sơn",
                                                     description:
-                                                        "Xử lý lỗi nhập thành phẩm.",
+                                                        "Quản lý tồn kho vật tư sơn.",
                                                     type: "CBG",
                                                 },
-                                                {
-                                                    permission: ["X"],
-                                                    link: "/workspace/plywood/finished-goods-receipt",
-                                                    icon: (
-                                                        <HiArchiveBoxArrowDown />
-                                                    ),
-                                                    title: "Sản lượng ván công nghiệp",
-                                                    description:
-                                                        "Nhập sản lượng theo công đoạn.",
-                                                    type: "VCN",
-                                                },
-                                                {
-                                                    permission: ["X"],
-                                                    link: "/workspace/plywood/qc",
-                                                    icon: <HiBadgeCheck />,
-                                                    title: "Kiểm định chất lượng ván công nghiệp",
-                                                    description:
-                                                        "Xử lý lỗi nhập thành phẩm.",
-                                                    type: "VCN",
-                                                },
-                                                {
-                                                    permission: ["X"],
-                                                    select: "ND",
-                                                    icon: (
-                                                        <HiArchiveBoxArrowDown />
-                                                    ),
-                                                    title: "Sản lượng nội địa",
-                                                    description:
-                                                        "Nhập sản lượng lắp đặt khối nội địa.",
-                                                    type: "ND",
-                                                },
-                                                {
-                                                    permission: ["X"],
-                                                    link: "/workspace/inland/installation-progress",
-                                                    icon: <HiViewColumns />,
-                                                    title: "Tiến độ lắp đặt nội địa",
-                                                    description:
-                                                        "Báo cáo tiến độ lắp đặt đồ nội thất.",
-                                                    type: "ND",
-                                                },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     link: "/workspace/wood-working/qc",
+                                                //     icon: <HiBadgeCheck />,
+                                                //     title: "Kiểm định chất lượng chế biến gỗ",
+                                                //     description:
+                                                //         "Xử lý lỗi nhập thành phẩm.",
+                                                //     type: "CBG",
+                                                // },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     link: "/workspace/plywood/finished-goods-receipt",
+                                                //     icon: (
+                                                //         <HiArchiveBoxArrowDown />
+                                                //     ),
+                                                //     title: "Sản lượng ván công nghiệp",
+                                                //     description:
+                                                //         "Nhập sản lượng theo công đoạn.",
+                                                //     type: "VCN",
+                                                // },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     link: "/workspace/plywood/qc",
+                                                //     icon: <HiBadgeCheck />,
+                                                //     title: "Kiểm định chất lượng ván công nghiệp",
+                                                //     description:
+                                                //         "Xử lý lỗi nhập thành phẩm.",
+                                                //     type: "VCN",
+                                                // },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     select: "ND",
+                                                //     icon: (
+                                                //         <HiArchiveBoxArrowDown />
+                                                //     ),
+                                                //     title: "Sản lượng nội địa",
+                                                //     description:
+                                                //         "Nhập sản lượng lắp đặt khối nội địa.",
+                                                //     type: "ND",
+                                                // },
+                                                // {
+                                                //     permission: ["X"],
+                                                //     link: "/workspace/inland/installation-progress",
+                                                //     icon: <HiViewColumns />,
+                                                //     title: "Tiến độ lắp đặt nội địa",
+                                                //     description:
+                                                //         "Báo cáo tiến độ lắp đặt đồ nội thất.",
+                                                //     type: "ND",
+                                                // },
+
                                             ].map(
                                                 ({
                                                     permission,
@@ -746,11 +898,187 @@ function Workspace() {
                                     </div>
                                 </TabPanel>
                             </TabPanels>
-                        </Tabs>
-                    </div>
-                </div>
-            </div>
-        </Layout>
+                        </Tabs >
+                    </div >
+                </div >
+            </div >
+
+            <Modal
+                isCentered
+                isOpen={isModalOpen}
+                size="3xl"
+                onClose={onModalClose}
+                scrollBehavior="inside"
+                closeOnOverlayClick={false}
+                closeOnEsc={false}
+            >
+                <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+                <ModalContent m={0} h="100vh">
+                    <ModalHeader className="!p-2.5 ">
+                        <h1 className="pl-4 text-xl lg:text-2xl serif font-bold text-center">
+                            Báo lỗi sấy ẩm
+                        </h1>
+                    </ModalHeader>
+                    <div className="border-b-2 border-gray-200"></div>
+                    <ModalBody className="bg-gray-100 !p-6">
+                        <div className="pt-3">
+                            <div className="mt-2 xl:mx-0 md:mx-0 lg:mx-0 mx-3 p-4 border-2 border-[#C6D2D9] shadow-sm rounded-xl space-y-2 bg-[#FFFFFF]">
+                                <div className="flex justify-between pb-1 ">
+                                    <div className="flex items-center space-x-2">
+                                        <FaDiceD6 className="w-7 h-7 text-amber-700" />
+                                        <div className="font-semibold text-md">
+                                            Nhập thông tin
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="gap-2 items-center justify-between py-3 border-t">
+                                    <Box className="mb-3" >
+                                        <label className="font-semibold">
+                                            Tổ báo lỗi
+                                        </label>
+                                        <Select
+                                            options={teams}
+                                            placeholder="Chọn tổ"
+                                            className="w-full mt-2 cursor-pointer"
+                                            onChange={(team) => {
+                                                setTeam(team);
+                                                setData(pre => ({ ...pre, team }))
+                                            }}
+                                        />
+                                    </Box>
+
+                                    <Box className="mb-3" >
+                                        <SimpleGrid columns={3} spacing={4}>
+
+                                            <Box>
+                                                <Text className="font-semibold">
+                                                    Chiều dày
+                                                </Text>
+                                                <span className="">
+                                                    <NumberInput
+                                                        step={1}
+                                                        className="mt-2"
+                                                        onChange={(
+                                                            value
+                                                        ) => {
+                                                            setData(pre => ({ ...pre, day: Number(value) }));
+                                                        }}
+                                                        min={0}
+                                                    >
+                                                        <NumberInputField />
+                                                    </NumberInput>
+                                                </span>
+                                            </Box>
+                                            <Box>
+                                                <Text className="font-semibold">
+                                                    Chiều Rộng
+                                                </Text>
+                                                <span className="">
+                                                    <NumberInput
+                                                        step={1}
+                                                        className="mt-2"
+                                                        onChange={(
+                                                            value
+                                                        ) => {
+                                                            setData(pre => ({ ...pre, rong: Number(value) }))
+                                                        }}
+                                                        min={0}
+                                                    >
+                                                        <NumberInputField />
+                                                    </NumberInput>
+                                                </span>
+                                            </Box>
+                                            <Box>
+                                                <Text className="font-semibold">
+                                                    Chiều dài
+                                                </Text>
+                                                <span className="">
+                                                    <NumberInput
+                                                        step={1}
+                                                        className="mt-2"
+                                                        onChange={(
+                                                            value
+                                                        ) => {
+                                                            setData(pre => ({ ...pre, dai: Number(value) }))
+                                                        }}
+                                                        min={0}
+                                                    >
+                                                        <NumberInputField />
+                                                    </NumberInput>
+                                                </span>
+                                            </Box>
+                                        </SimpleGrid>
+                                    </Box>
+                                    <Box className="mb-2">
+                                        <SimpleGrid columns={1} spacing={3}>
+                                            <Box>
+                                                <Text className="font-semibold">
+                                                    Số lượng
+                                                </Text>
+                                                <span className="">
+                                                    <NumberInput
+                                                        step={1}
+                                                        className="mt-2"
+                                                        onChange={(
+                                                            value
+                                                        ) => {
+                                                            setData(pre => ({ ...pre, quantity: Number(value) }))
+                                                        }}
+                                                        min={1}
+                                                    >
+                                                        <NumberInputField />
+                                                    </NumberInput>
+                                                </span>
+                                            </Box>
+                                            <Box>
+                                                <Text className="font-semibold">
+                                                    Khối lượng
+                                                </Text>
+                                                <span className="">
+                                                    <NumberInput
+                                                        className="mt-2"
+                                                        value={data.m3}
+                                                        onChange={(
+                                                            value
+                                                        ) => {
+                                                            setData(pre => ({ ...pre, m3: value }))
+                                                        }}
+                                                        step={1}
+                                                    >
+                                                        <NumberInputField />
+                                                    </NumberInput>
+                                                </span>
+                                            </Box>
+                                        </SimpleGrid>
+                                    </Box>
+
+                                </div>
+                            </div>
+                        </div>
+                    </ModalBody>
+                    <ModalFooter className="flex flex-col !p-0">
+                        <div className="border-b-2 border-gray-100"></div>
+                        <div className="flex flex-row xl:px-6 lg-px-6 md:px-6 px-4 w-full items-center justify-end py-4 gap-x-3 ">
+                            <button
+                                onClick={onClose}
+                                className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                onClick={onConfirm}
+                                className="bg-[#17506B] text-[#FFFFFF] p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
+                            >
+                                Xác nhận
+                            </button>
+                        </div>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {loading && <Loader />}
+        </Layout >
     );
 }
 

@@ -232,6 +232,12 @@ const CBGReports = [
         link: "/reports/wood-working/quy-luong",
         description: "Báo cáo quỹ lương"
     },
+    {
+        id: "0016",
+        name: "Báo cáo lỗi sấy ẩm",
+        link: "/reports/wood-working/say-am",
+        description: "Báo cáo lỗi sấy ẩm tại công đoạn"
+    },
 ];
 
 const QCReports = [
