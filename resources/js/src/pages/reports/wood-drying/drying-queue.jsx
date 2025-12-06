@@ -117,12 +117,14 @@ function DryingQueueReport() {
 
                 // Tính toán
                 khoiLuongTinhThuong = item.mass * heSoQuyDoi;
-                quyLuong = item.mass * dgnc;
+                
 
                 let pow = 2;
 
                 let hs = Math.pow((1 - 0.01), pow);
                 let tt = dgnc * hs;
+
+                quyLuong = item.mass * tt;
 
                 return {
                     created_at: item.created_at,
