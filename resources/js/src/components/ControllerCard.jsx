@@ -251,8 +251,6 @@ function ControllerCard(props) {
         }));
     };
 
-    console.log("checkboxStates", checkboxStates);
-
     useEffect(() => {
         const count = Object.values(checkboxStates).reduce(
             (acc, value) => acc + value,
@@ -598,11 +596,14 @@ function ControllerCard(props) {
         palletOptions?.forEach(pallet => {
             let s = pallet.label;
             let inner = s.match(/\((\d+x\d+x\d+)\)/);
-            if (!options.some(item => item.value == inner[1])) {
-                options.push({
-                    value: inner[1],
-                    label: inner[1]
-                });
+            if (inner && inner.length > 0) {
+                let _inner = (inner && inner[1]) ?? 0;
+                if (!options.some(item => item.value == _inner)) {
+                    options.push({
+                        value: inner[1],
+                        label: inner[1]
+                    });
+                }
             }
         });
 
@@ -1147,7 +1148,6 @@ function ControllerCard(props) {
                             placeholder="Chọn Thủ kho"
                             value={userStockSelect}
                             onChange={(option) => {
-                                console.log("option", option);
                                 setUserStockSelect(option);
                             }}
                         />
