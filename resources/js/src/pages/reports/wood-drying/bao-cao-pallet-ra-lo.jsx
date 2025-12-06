@@ -95,7 +95,7 @@ function DryingCompletedReport() {
 
                 }
 
-                if (item.day <= 21 && item.dai < 800) {
+                if (item.day > 16 && item.day <= 21 && item.dai < 800) {
                     heSoQuyDoi = 1.2
 
                     if (selectedFactory == 'TB') {
@@ -111,7 +111,7 @@ function DryingCompletedReport() {
                     }
                 }
 
-                if (item.day <= 21 && item.dai >= 800) {
+                if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
                     
 
