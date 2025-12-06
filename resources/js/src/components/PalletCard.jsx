@@ -97,7 +97,7 @@ function PalletCard(props) {
                 {flag === "SL" ? (
                     <div>
                         {
-                            height == 0 ? (
+                            (height == 0 || !height || (height * width * thickness) <= 0) ? (
                                 <label
                                     htmlFor="company"
                                     className="block mb-2 text-md font-medium text-gray-900 "
@@ -121,7 +121,7 @@ function PalletCard(props) {
                             placeholder="0"
                             readOnly={true}
                             required
-                            value={height == 0 ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))}
+                            value={(height == 0 || !height || (height * width * thickness) <= 0) ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))}
                         />
                     </div>
                 ) : (
