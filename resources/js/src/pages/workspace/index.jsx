@@ -114,6 +114,7 @@ function Workspace() {
     const onHandle = async () => {
         try {
             if (teams.length == 0) {
+                setLoading(true)
                 let res = await getTeamsCBG(user?.plant);
                 let data = res.data.teams.sort((item1, item2) => item1.Name.localeCompare(item2.Name))
                 setTeams(data.map(item => (
@@ -123,10 +124,12 @@ function Workspace() {
                         value: item.Code
                     }
                 )))
+                setLoading(false)
             }
 
             onModalOpen();
         } catch (error) {
+            setLoading(false)
             toast.error("Lấy danh sách tổ có lỗi.");
         }
     }
