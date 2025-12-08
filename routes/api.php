@@ -123,6 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/production-run', [PlanController::class, 'runOven'])->name('chay-lo');
         Route::get('/production-completed', [PlanController::class, 'Listcomplete'])->name('danh-sach-me-ra-lo');
         Route::patch('/production-completed', [PlanController::class, 'completed'])->name('ra-lo');
+        Route::patch('/production-completed-sl', [PlanController::class, 'completedSL'])->name('ra-lo-sl');
         Route::post('/production-complete-by-pallets', [PlanController::class, 'completeByPallets'])->name('ra-lo-theo-pallets');
     });
     Route::group(['prefix' => 'production'], function () {
@@ -249,7 +250,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getPalletReport', [PalletController::class, 'getPalletReport'])->name('getPalletReport');
         Route::get('getPalletComplete', [PalletController::class, 'getPalletComplete'])->name('getPalletComplete');
         Route::get('getQuantityPallets', [PalletController::class, 'getQuantityPallets'])->name('getQuantityPallets');
-        
     });
 
     Route::group(['prefix' => 'sap/vcn'], function () {
@@ -270,8 +270,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['prefix' => 'sap/inventory-posting'], function () {
         Route::post('inventoryPostingItems', [InventoryPostingController::class, 'inventoryPostingItems'])->name('inventoryPostingItems');
     });
-
-    
 
     Route::group(['prefix' => 'mes/qc'], function () {
         Route::get('getAllWhQC', [QcCbgController::class, 'getAllWhQC'])->name('getAllWhQC');

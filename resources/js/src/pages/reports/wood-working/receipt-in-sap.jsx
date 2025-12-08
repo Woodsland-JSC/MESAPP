@@ -36,6 +36,7 @@ import { FaExclamation } from "react-icons/fa";
 import useAppContext from "../../../store/AppContext";
 import "../../../assets/styles/customTable.css";
 import moment from "moment";
+import { TU_BEP } from "../../../shared/data";
 
 function ReceiptInSapReportCBG() {
     const navigate = useNavigate();
@@ -159,9 +160,9 @@ function ReceiptInSapReportCBG() {
                 height: item.U_CDai,
                 unit: item.UnitOfMeasure,
                 market_code: item.MaThiTruong,
-                quantity: parseInt(item.Quantity),
+                quantity: item.U_IType != TU_BEP ? parseInt(item.Quantity) : "",
                 m3_sp: Number(item.U_M3SP),
-                m3: Number(item.M3),
+                m3: item.U_IType == TU_BEP ? Number(item.Quantity) : Number(item.M3),
                 sender: item.DeliveryPerson,
                 receiver: item.Recipient,
                 warehouse: item.WarehouseCode,
@@ -174,7 +175,9 @@ function ReceiptInSapReportCBG() {
                 mes_noti: item.U_UUID,
                 m3_sap: item.M3SAP,
                 BarCode: item.BarCode,
+                type: item.U_IType
             }));
+            
             setIsDataReportLoading(false);
             setRowData(formattedData);
             setReportData(res);
