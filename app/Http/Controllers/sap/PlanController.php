@@ -559,6 +559,137 @@ class PlanController extends Controller
         }
     }
 
+    //ra lò
+    function completedSL(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $validator = Validator::make($request->all(), [
+                'PlanID' => 'required',
+                'result' => 'required'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+            }
+            $id = $request->input('PlanID');
+            $record = planDryings::where('PlanID', $id)->whereNotIn('status', [0, 2])->get();
+
+            $team = $request->team;
+
+            if (!$team) {
+                return response()->json([
+                    'error' => false,
+                    'status_code' => 500,
+                    'message' => 'Chưa có tổ sản xuất'
+                ], 500);
+            }
+
+            if ($record->count() > 0) {
+                $plan = planDryings::query()->where('PlanID', $id)->first();
+
+                if ($plan == null) {
+                    return response()->json([
+                        'error' => false,
+                        'status_code' => 500,
+                        'message' => 'Không tìm thấy kế hoạch sấy'
+                    ], 500);
+                }
+
+                $plan->update([
+                    'Status' => 2,
+                    'CompletedBy' => Auth::user()->id,
+                    'CompletedDate' => now(),
+                ]);
+
+                $results = planDryings::select(
+                    'planDryings.Code as newbatch',
+                    'planDryings.Oven',
+                    'pallets.DocEntry',
+                    'pallets.Code',
+                    'pallets.palletID',
+                    'pallets.palletSAP',
+                    'pallets.CompletedBy',
+                    'pallet_details.ItemCode',
+                    'pallet_details.WhsCode2',
+                    'pallet_details.Qty',
+                    'pallet_details.CDai',
+                    'pallet_details.CRong',
+                    'pallet_details.CDay',
+                    'pallet_details.BatchNum',
+                    DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+                    'pallet_details.palletID'
+                )
+                    ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+                    ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                    ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+                    ->where('planDryings.PlanID', $id)
+                    ->whereNull('pallets.CompletedBy')
+                    ->get();
+
+                $groupedResults = $results->groupBy('DocEntry');
+
+                foreach ($groupedResults as $docEntry => $group) {
+                    $data = [];
+                    foreach ($group as $batchData) {
+                        $data[] = [
+                            "ItemCode" => $batchData->ItemCode,
+                            "Quantity" => $batchData->Qty,
+                            "WarehouseCode" =>  $team['value'],
+                            "FromWarehouseCode" => $batchData->WhsCode2,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => $batchData->BatchNum,
+                                    "Quantity" => $batchData->Qty,
+                                    "U_Status" => $request->result
+                                ]
+                            ]
+                        ];
+                    };
+
+                    $header = $group->first();
+
+                    Pallet::where('palletID', $header->palletID)->update([
+                        'IssueNumber' => -1,
+                        'CompletedBy' => Auth::user()->id,
+                        'CompletedDate' => now(),
+                    ]);
+
+                    $body = [
+                        "U_Pallet" => $header->Code,
+                        "U_CreateBy" => Auth::user()->sap_id,
+                        "BPLID" => Auth::user()->branch,
+                        "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò sấy lại",
+                        "StockTransferLines" => $data
+                    ];
+                    inventorytransfer::dispatch($body);
+                    UpdatePalletSAP::dispatch($header->palletSAP, $request->result);
+                }
+
+                // ulock lò sấy
+                $conDB = (new ConnectController)->connect_sap();
+                $sql = 'Update  "@G_SAY3" set "U_status"=0 where "Code"=?';
+                $stmt = odbc_prepare($conDB, $sql);
+                if (!$stmt) {
+                    throw new \Exception('Error preparing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                if (!odbc_execute($stmt, [$plan->Oven])) {
+                    throw new \Exception('Error executing SQL statement: ' . odbc_errormsg($conDB));
+                }
+                DB::commit();
+                return response()->json(['message' => 'updated successfully', 'data' => $record]);
+            } else {
+                return response()->json(['error' => 'Lò không hợp lệ'], 404);
+            }
+        } catch (\Exception | QueryException $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     function productionDetail($id)
     {
         $plandrying = PlanDryings::with(['details' => function ($query) {
@@ -714,7 +845,7 @@ class PlanController extends Controller
                     Pallet::where('palletID', $entry->pallet)->update(['flag' => 1]);
                 }
             }
-            
+
             DB::commit();
 
             return response()->json([

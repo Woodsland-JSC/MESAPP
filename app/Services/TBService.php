@@ -410,10 +410,6 @@ class TBService
 
     public function acceptReceiptTB($payload)
     {
-        $toqc = "";
-        $teamQC = $this->ORSCService->getTeamQC($payload['Factory'] ? $payload['Factory']['value'] : Auth::user()->plant, $payload['KHOI']);
-        $toqc = $teamQC['ResName'];
-
         try {
             DB::beginTransaction();
             $changedData = [];
@@ -452,6 +448,11 @@ class TBService
             }
 
             if ($payload['RejectQty'] > 0) {
+                $toqc = "";
+                $teamQC = $this->ORSCService->getTeamQC($payload['Factory'] ? $payload['Factory']['value'] : Auth::user()->plant, $payload['KHOI']);
+                $toqc = $teamQC['ResName'];
+
+
                 $notifi = NotireceiptTb::create([
                     'LSX' => $payload['LSX'],
                     'text' => 'Error information sent to QC',

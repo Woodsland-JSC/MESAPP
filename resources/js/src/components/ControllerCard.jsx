@@ -41,6 +41,8 @@ import Swal from "sweetalert2";
 import { getUserStock } from "../api/user.api";
 import { sendPlanDryingToStockController } from "../api/plan-drying.api";
 import useAppContext from "../store/AppContext";
+import Loader from "./Loader";
+import { getTeamsCBG } from "../api/MasterDataApi";
 
 const checkItems = [
     {
@@ -135,6 +137,9 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
+    console.log("lý do", reason);
+
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -152,6 +157,17 @@ function ControllerCard(props) {
         onOpen: onUserSelectOpen,
         onClose: onUserSelectClose,
     } = useDisclosure();
+
+    const {
+        isOpen: isOvenSLOpen,
+        onOpen: onOvenSLOpen,
+        onClose: onOvenSLClose,
+    } = useDisclosure();
+
+    const [isLoadingSL, setLoadingSL] = useState(false);
+    const [teams, setTeams] = useState([]);
+    const [team, setTeam] = useState(null);
+
 
     let navigate = useNavigate();
 
@@ -543,6 +559,39 @@ function ControllerCard(props) {
         }
     };
 
+    const handleFinishDryingSL = async () => {
+        if(!team){
+            toast.error("Vui lòng chọn tổ chuyển về.");
+            return;
+        }
+
+        try {
+            setLoadingSL(true);
+            const response = await axios.patch(
+                "/api/ovens/production-completed-sl",
+                {
+                    PlanID: planID,
+                    result: "SD",
+                    team: team
+                }
+            );
+            if (response.status === 200) {
+                onOvenSLClose();
+
+                toast.success("Ra lò thành công");
+                setLoadingSL(false);
+                navigate("/workspace/drying-wood-checking");
+            } else {
+                toast.error("Không thể ra lò lúc này");
+                setLoadingSL(false);
+            }
+        } catch (error) {
+            onOvenSLClose();
+            toast.error("Hiện không thể thực hiện hành động này.");
+            setLoadingSL(false);
+        }
+    };
+
     const loadUserStockController = async () => {
         if (planDrying?.Status != 1) return;
 
@@ -613,6 +662,25 @@ function ControllerCard(props) {
     const filteredPallet = useMemo(() => {
         return quyCach ? palletOptions.filter(p => p.label.includes(quyCach.value)) : palletOptions;
     }, [palletOptions, quyCach])
+
+    const loadTeams = async () => {
+        try {
+            setLoadingSL(true)
+            let res = await getTeamsCBG(user?.plant);
+            let data = res.data.teams.sort((item1, item2) => item1.Name.localeCompare(item2.Name))
+            setTeams(data.map(item => (
+                {
+                    value: item.WhsCode,
+                    label: `${item.Name} - ${item.Code}`
+                }
+            )));
+            onOvenSLOpen();
+            setLoadingSL(false)
+        } catch (error) {
+            setLoadingSL(false)
+            toast.error('Lấy tổ có lỗi.');
+        }
+    }
 
     useEffect(() => {
         loadUserStockController();
@@ -839,24 +907,35 @@ function ControllerCard(props) {
                             </div>
                         </div>
                         {
-                            (planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay')) ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
-                                (user?.role == 1 || !user?.permissions.some(p => p == 'xacnhanlosay')) && <button
+                            reason.substring(0, 2) == 'SL' ? <>
+                                <button
                                     className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                    onClick={onUserSelectOpen}
+                                    onClick={loadTeams}
                                 >
-                                    Gửi Thủ kho xác nhận
+                                    Xác nhận ra lò xấy lại
                                 </button>
-                        }
-                        {
-                            (planDrying?.receiver_id == user?.id) && (
-                                (user?.role == 1 || user?.permissions.some(p => p == 'xacnhanlosay')) && <button
-                                    disabled={isUnComplete}
-                                    className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
-                                    onClick={onFinalOpen}
-                                >
-                                    Xác nhận hoàn thành
-                                </button>
-                            )
+                            </> : <>
+                                {
+                                    (planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay')) ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
+                                        (user?.role == 1 || !user?.permissions.some(p => p == 'xacnhanlosay')) && <button
+                                            className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
+                                            onClick={onUserSelectOpen}
+                                        >
+                                            Gửi Thủ kho xác nhận
+                                        </button>
+                                }
+                                {
+                                    (planDrying?.receiver_id == user?.id) && (
+                                        (user?.role == 1 || user?.permissions.some(p => p == 'xacnhanlosay')) && <button
+                                            disabled={isUnComplete}
+                                            className={`${isUnComplete ? 'opacity-50 cursor-not-allowed' : ''} bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]`}
+                                            onClick={onFinalOpen}
+                                        >
+                                            Xác nhận hoàn thành
+                                        </button>
+                                    )
+                                }
+                            </>
                         }
                     </div>
                 ) : null}
@@ -874,12 +953,6 @@ function ControllerCard(props) {
                                     Mẻ sấy đã đủ điều kiện ra lò.
                                 </div>
                             </div>
-                            {/* <button
-                                className="bg-[#1F2937] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                onClick={onFinalOpen}
-                            >
-                                Xác nhận ra lò
-                            </button> */}
                         </>
                     ) : (
                         <>
@@ -1175,6 +1248,64 @@ function ControllerCard(props) {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
+            <Modal
+                closeOnOverlayClick={false}
+                isOpen={isOvenSLOpen}
+                onClose={onOvenSLClose}
+                isCentered
+                size="md"
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Bạn chắc chắn muốn ra lò?</ModalHeader>
+                    <ModalBody pb={6}>
+                        <div className="mb-4">
+                            Bấm xác nhận để hoàn thành quy trình sấy lại.
+                        </div>
+                        <div>
+                            <label htmlFor="" className="mb-1">Chọn tổ chuyển về</label>
+                            <Select
+                                options={teams}
+                                placeholder="Chọn tổ"
+                                value={team}
+                                onChange={(option) => {
+                                    setTeam(option);
+                                }}
+                            />
+                        </div>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <div className="w-full flex xl:justify-end lg:justify-end md:justify-end gap-x-3">
+                            <button
+                                disabled={isLoadingSL}
+                                onClick={onOvenSLClose}
+                                className="w-full bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
+                                onClick={handleFinishDryingSL}
+                            >
+                                {isLoadingSL ? (
+                                    <div className="flex justify-center items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </div>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {
+                isLoadingSL && <Loader></Loader>
+            }
         </div>
     );
 }
