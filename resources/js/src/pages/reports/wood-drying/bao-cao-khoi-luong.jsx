@@ -132,13 +132,15 @@ const BaoCaoKhoiLuongLoSay = () => {
             headerName: "Khối lượng",
             field: "Mass",
             width: 150,
-            suppressHeaderMenuButton: true
+            suppressHeaderMenuButton: true,
+            aggFunc: "sum"
         },
         {
             headerName: "Số lượng (T)",
             field: "Qty",
             width: 150,
-            suppressHeaderMenuButton: true
+            suppressHeaderMenuButton: true,
+            aggFunc: "sum"
         },
         {
             headerName: "Ngày vào lò",
@@ -164,7 +166,8 @@ const BaoCaoKhoiLuongLoSay = () => {
             headerName: "Trạng thái",
             field: "status",
             width: 150,
-            suppressHeaderMenuButton: true
+            suppressHeaderMenuButton: true,
+            filter: true,
         }
     ]);
 
