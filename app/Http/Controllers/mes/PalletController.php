@@ -83,7 +83,7 @@ class PalletController extends Controller
                 ->whereBetween('CompletedDate', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
 
-            if($pallets->count() == 0){
+            if ($pallets->count() == 0) {
                 return response()->json([], 200);
             }
 
@@ -97,8 +97,8 @@ class PalletController extends Controller
 
                     if (!in_array($detail->ItemCode, $itemCodes)) {
                         $itemCodes[] = $detail->ItemCode;
-                    } 
-                    
+                    }
+
 
                     $result[] = [
                         'created_at' => Carbon::parse($pallet->created_at)->format('H:i:s d/m/Y'),
@@ -142,6 +142,84 @@ class PalletController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Lỗi khi lấy dữ liệu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getQuantityPallets(Request $request, OITMService $OITMService)
+    {
+        try {
+            $factory = $request->query('factory');
+            $fromDate = $request->query('fromDate');
+            $toDate = $request->query('toDate');
+
+            $data = DB::select(
+                'SELECT
+                    p.palletID,
+                    p.Code,
+                    p.LyDo,
+                    p.QuyCach,
+                    p.LoadedIntoKilnDate,
+                    p.CompletedDate,
+                    pd.Qty_T as Qty,
+	                pd.Qty as Mass,
+                    pl.Oven,
+                    pl.Code as OvenCode,
+                    p.RanBy,
+                    p.CompletedBy,
+                    pd.ItemCode,
+                    pd.CDay,
+                    pd.CRong,
+                    pd.CDai,
+                    pd.ItemName
+                FROM pallets p
+                JOIN pallet_details pd ON pd.palletID = p.palletID
+                JOIN plan_detail pld ON pld.pallet = p.palletID
+                JOIN planDryings pl ON pld.PlanID = pl.PlanID
+                WHERE p.factory = ? 
+                AND p.created_at >= ?
+                AND p.created_at <= ?
+                AND p.RanBy is not null',
+                [$factory, Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
+            ); 
+
+            // if (count($data) > 0) {
+                // $itemCodes = [];
+
+                // foreach ($data as &$pallet) {
+                //     $status = 'Chưa hoàn thành';
+
+                    // if (!in_array($pallet->ItemCode, $itemCodes)) {
+                    //     $itemCodes[] = $pallet->ItemCode;
+                    // }
+
+                    // if ($pallet->CompletedBy) {
+                    //     $status = 'Hoàn thành';
+                    // }
+
+                    // $pallet['status'] = $status;
+                // }
+
+                // $placeholders = implode(',', array_fill(0, count($itemCodes), '?'));
+                // $listItems = $OITMService->getItemCodeWithListItemCode($placeholders, $itemCodes);
+                // $oitmItems = [];
+
+                // foreach ($listItems as $key => $item) {
+                //     $oitmItems[$item['ItemCode']] = $item['ItemName'];
+                // }
+
+                // foreach ($data as $key => &$pallet) {
+                //     $pallet['item_name'] = $oitmItems[$pallet['ItemCode']] ?? 'Không xác định';
+                // }
+            // }
+
+            return response()->json([
+                'reports' => $data
+            ]);
+        } catch (Exception $e) {
+            Log::info($e->getMessage());
+            return response()->json([
+                'message' => 'Lấy Pallets có lỗi!'
             ], 500);
         }
     }
