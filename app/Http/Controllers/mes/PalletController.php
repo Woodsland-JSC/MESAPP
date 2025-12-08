@@ -171,7 +171,8 @@ class PalletController extends Controller
                     pd.CDay,
                     pd.CRong,
                     pd.CDai,
-                    pd.ItemName
+                    pd.ItemName,
+                    p.Code as PalletCode
                 FROM pallets p
                 JOIN pallet_details pd ON pd.palletID = p.palletID
                 JOIN plan_detail pld ON pld.pallet = p.palletID
