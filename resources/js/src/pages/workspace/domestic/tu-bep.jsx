@@ -1166,7 +1166,7 @@ const TuBep = () => {
                                                 ) : (
                                                     <NumberInput
                                                         step={1}
-                                                        min={1}
+                                                        min={0}
                                                         className="mt-2 mb-2"
                                                         onChange={(value) => {
                                                             if (
