@@ -123,6 +123,13 @@ const BaoCaoKhoiLuongLoSay = () => {
             filter: true,
         },
         {
+            headerName: "Mã Pallet",
+            field: "PalletCode",
+            width: 200,
+            suppressHeaderMenuButton: true,
+            filter: true,
+        },
+        {
             headerName: "Chi tiết",
             field: "ItemName",
             width: 200,
