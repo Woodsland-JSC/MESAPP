@@ -9,6 +9,7 @@ import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
 import { getQuantityPallets } from "../../../api/pallet.api";
 import moment from "moment";
+import Loader from "../../../components/Loader";
 
 const BaoCaoKhoiLuongLoSay = () => {
     const [reportData, setReportData] = useState([]);
@@ -305,6 +306,9 @@ const BaoCaoKhoiLuongLoSay = () => {
                     )}
                 </div>
             </div>
+            {
+                loading && <Loader></Loader>
+            }
         </Layout>
     )
 }
