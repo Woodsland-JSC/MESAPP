@@ -88,7 +88,7 @@ const BaoCaoKhoiLuongLoSay = () => {
         {
             headerName: "Lò sấy",
             field: "Oven",
-            width: 200,
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
             rowGroup: true
@@ -96,7 +96,7 @@ const BaoCaoKhoiLuongLoSay = () => {
         {
             headerName: "Quy cách",
             field: "QuyCach",
-            width: 200,
+            width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
             rowGroup: true
@@ -143,7 +143,13 @@ const BaoCaoKhoiLuongLoSay = () => {
             width: 150,
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
-            headerComponentParams: { displayName: "Khối lượng" }
+            headerComponentParams: { displayName: "Khối lượng" },
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
+            }
         },
         {
             headerName: "Số lượng (T)",
@@ -151,7 +157,11 @@ const BaoCaoKhoiLuongLoSay = () => {
             width: 150,
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
-            headerComponentParams: { displayName: "Số lượng (T)" }
+            headerComponentParams: { displayName: "Số lượng (T)" },
+            valueFormatter: param => {
+                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
+                return param.value ? param.value.toLocaleString() : "0";
+            },
         },
         {
             headerName: "Ngày vào lò",

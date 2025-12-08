@@ -147,6 +147,9 @@ const BaoCaoRaLoPallet = () => {
             width: 150,
             aggFunc: "sum",
             headerComponentParams: { displayName: "Số lượng" },
+            valueFormatter: (params) => {
+                return params.value ? params.value.toLocaleString() : "0";
+            }
         },
         {
             headerName: "Khối lượng",
@@ -154,9 +157,12 @@ const BaoCaoRaLoPallet = () => {
             width: 150,
             aggFunc: "sum",
             headerComponentParams: { displayName: "Khối lượng" },
-            valueFormatter: (params) => {
-                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
-            }
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
+            },
         },
         {
             headerName: "Người hoàn thành",
