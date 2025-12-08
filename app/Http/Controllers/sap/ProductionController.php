@@ -222,68 +222,6 @@ class ProductionController extends Controller
         // 3. Tạo mảng results[] và trả về dữ liệu
         $results = [];
 
-        // 3.1. Tạo một key có giá trị là 'SPDICH' và lọc qua toàn bộ kết quả tìm được, sau đó gom nhóm các sản phẩm có cùng SPDICH
-        // while ($row = odbc_fetch_array($stmt)) {
-        //     $key = $row['SPDICH'];
-
-        //     //Đối với các kết quả key tìm được, tạo một mảng có các trường sau
-        //     if (!isset($results[$key])) {
-        //         $results[$key] = [
-        //             'SPDICH' => $row['SPDICH'],
-        //             'NameSPDich' => $row['NameSPDich'],
-        //             'MaThiTruong' => $row['MaThiTruong'],
-        //             'Details' => [],
-        //         ];
-        //     }
-        //     // 3.2. Tạo key có giá trị hỗn hợp là ItemChild.TO.TOTT
-        //     $detailsKey = $row['ItemChild'] . $row['TO'] . $row['TOTT'];
-
-        //     $details = [
-        //         'ItemChild' => $row['ItemChild'],
-        //         'ChildName' => $row['ChildName'],
-        //         'CDay' => $row['CDay'],
-        //         'CRong' => $row['CRong'],
-        //         'CDai' => $row['CDai'],
-        //         'LSX' => [
-        //             [
-        //                 'LSX' => $row['LSX'],
-        //                 'SanLuong' => $row['SanLuong'],
-        //                 'DaLam' => $row['DaLam'],
-        //                 'Loi' => $row['Loi'],
-        //                 'ConLai' => $row['ConLai'],
-        //             ],
-        //         ],
-        //         'totalsanluong' => $row['SanLuong'],
-        //         'totalDaLam' => $row['DaLam'],
-        //         'totalLoi' => $row['Loi'],
-        //         'totalConLai' => $row['ConLai'],
-        //     ];
-
-        //     // Check if the composite key already exists
-        //     $compositeKeyExists = false;
-        //     foreach ($results[$key]['Details'] as &$existingDetails) {
-        //         $existingKey = $existingDetails['ItemChild'] . $existingDetails['TO'] . $existingDetails['TOTT'];
-        //         if ($existingKey === $detailsKey) {
-        //             $existingDetails['LSX'][] = $details['LSX'][0];
-        //             $existingDetails['totalsanluong'] += $row['SanLuong'];
-        //             $existingDetails['totalDaLam'] += $row['DaLam'];
-        //             $existingDetails['totalLoi'] += $row['Loi'];
-        //             $existingDetails['totalConLai'] += $row['ConLai'];
-        //             $compositeKeyExists = true;
-        //             break;
-        //         }
-        //     }
-
-        //     if (!$compositeKeyExists) {
-        //         $results[$key]['Details'][] = array_merge($details, [
-        //             'TO' => $row['TO'],
-        //             'NameTO' => $row['NameTO'],
-        //             'TOTT' => $row['TOTT'],
-        //             'NameTOTT' => $row['NameTOTT']
-        //         ]);
-        //     }
-        // }
-
         while ($row = odbc_fetch_array($stmt)) {
             $key = $row['SPDICH'];
 
