@@ -159,7 +159,6 @@ const BaoCaoKhoiLuongLoSay = () => {
             aggFunc: "sum",
             headerComponentParams: { displayName: "Số lượng (T)" },
             valueFormatter: param => {
-                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
                 return param.value ? param.value.toLocaleString() : "0";
             },
         },
