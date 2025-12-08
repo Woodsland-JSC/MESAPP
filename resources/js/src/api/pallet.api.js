@@ -17,3 +17,13 @@ export const getDryingQueue = (fromDate, toDate, factory) => {
         },
     });
 }
+
+export const getQuantityPallets = (fromDate, toDate, factory) => {
+    return axiosClient().get(`${BASEURL}/getQuantityPallets`, {
+        params: {
+            fromDate: fromDate,
+            toDate: toDate,
+            factory: factory,
+        },
+    });
+}

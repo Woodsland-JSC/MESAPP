@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { danhSachNhaMayCBG } from "../../../api/MasterDataApi";
 import Layout from "../../../layouts/layout";
 import { IoIosArrowBack } from "react-icons/io";
@@ -127,6 +127,10 @@ const HumidityReport = () => {
         },
     ]);
 
+    const handleExportExcel = useCallback(() => {
+        gridRef.current.api.exportDataAsExcel();
+    }, []);
+
 
     useEffect(() => {
         if (factory) getReports();
@@ -154,7 +158,7 @@ const HumidityReport = () => {
                     <div className="flex space-x-4 mb-4 justify-between">
                         <div className="serif text-xl md:text-4xl font-bold">Báo cáo sẩy ẩm</div>
                         <div className="md:block hidden">
-                            {/* {
+                            {
                                 reports.length > 0 && (
                                     <button
                                         onClick={handleExportExcel}
@@ -163,7 +167,7 @@ const HumidityReport = () => {
                                     >
                                         <FaArrowUpRightFromSquare /> Xuất Excel
                                     </button>)
-                            } */}
+                            }
                         </div>
                     </div>
 

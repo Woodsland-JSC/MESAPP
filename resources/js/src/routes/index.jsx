@@ -109,6 +109,7 @@ import BaoCaoTonSayLua from "../pages/reports/wood-drying/ton-say-lua";
 import PrintInventoryPosting from "../pages/workspace/goods-management/print-inventory-posting";
 import BaoLoiSayLai from "../pages/workspace/wood-working/bao-loi-say-lai";
 import HumidityReport from "../pages/reports/wood-working/humidity-report";
+import BaoCaoKhoiLuongLoSay from "../pages/reports/wood-drying/bao-cao-khoi-luong";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -438,6 +439,14 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <DryingQueueReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-drying/khoi-luong-ra-lo"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoKhoiLuongLoSay />
                             </ProtectedRoute>
                         }
                     />
