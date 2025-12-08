@@ -163,7 +163,7 @@ const BaoCaoKhoiLuongLoSay = () => {
             suppressHeaderMenuButton: true,
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY hh:mm:ss')
+                return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : ""
             },
         },
         {

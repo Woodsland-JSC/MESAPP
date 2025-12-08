@@ -353,7 +353,8 @@ class HandleQcService
                 'Team' => $team['Code'],
                 'CreatedBy' => Auth::user()->id,
                 'EntryId' => $entry['DocEntry'],
-                'ExitId' => $exit['DocEntry']
+                'ExitId' => $exit['DocEntry'],
+                'Factory' => $team['Factory']
             ]);
 
             DB::commit();
