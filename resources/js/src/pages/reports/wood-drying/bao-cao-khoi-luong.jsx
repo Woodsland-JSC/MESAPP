@@ -70,6 +70,8 @@ const BaoCaoKhoiLuongLoSay = () => {
                 if (item.CompletedBy) {
                     item.status = 'Hoàn thành'
                 }
+
+                item.Mass = Number(item.Mass);
             })
 
             setReportData(res.reports)
@@ -133,14 +135,16 @@ const BaoCaoKhoiLuongLoSay = () => {
             field: "Mass",
             width: 150,
             suppressHeaderMenuButton: true,
-            aggFunc: "sum"
+            aggFunc: "sum",
+            headerComponentParams: { displayName: "Khối lượng" }
         },
         {
             headerName: "Số lượng (T)",
             field: "Qty",
             width: 150,
             suppressHeaderMenuButton: true,
-            aggFunc: "sum"
+            aggFunc: "sum",
+            headerComponentParams: { displayName: "Số lượng (T)" }
         },
         {
             headerName: "Ngày vào lò",
