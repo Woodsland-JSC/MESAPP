@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { getQuantityPallets } from "../../../api/pallet.api";
 import moment from "moment";
 import Loader from "../../../components/Loader";
+import { AgGridReact } from "ag-grid-react";
 
 const BaoCaoKhoiLuongLoSay = () => {
     const [reportData, setReportData] = useState([]);
