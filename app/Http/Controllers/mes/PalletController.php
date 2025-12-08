@@ -177,9 +177,8 @@ class PalletController extends Controller
                 JOIN plan_detail pld ON pld.pallet = p.palletID
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 WHERE p.factory = ? 
-                AND p.created_at >= ?
-                AND p.created_at <= ?
-                AND p.RanBy is not null',
+                AND p.CompletedDate >= ?
+                AND p.CompletedDate <= ?',
                 [$factory, Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
             ); 
 
