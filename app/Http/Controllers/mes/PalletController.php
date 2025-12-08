@@ -183,36 +183,6 @@ class PalletController extends Controller
                 [$factory, Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
             ); 
 
-            // if (count($data) > 0) {
-                // $itemCodes = [];
-
-                // foreach ($data as &$pallet) {
-                //     $status = 'Chưa hoàn thành';
-
-                    // if (!in_array($pallet->ItemCode, $itemCodes)) {
-                    //     $itemCodes[] = $pallet->ItemCode;
-                    // }
-
-                    // if ($pallet->CompletedBy) {
-                    //     $status = 'Hoàn thành';
-                    // }
-
-                    // $pallet['status'] = $status;
-                // }
-
-                // $placeholders = implode(',', array_fill(0, count($itemCodes), '?'));
-                // $listItems = $OITMService->getItemCodeWithListItemCode($placeholders, $itemCodes);
-                // $oitmItems = [];
-
-                // foreach ($listItems as $key => $item) {
-                //     $oitmItems[$item['ItemCode']] = $item['ItemName'];
-                // }
-
-                // foreach ($data as $key => &$pallet) {
-                //     $pallet['item_name'] = $oitmItems[$pallet['ItemCode']] ?? 'Không xác định';
-                // }
-            // }
-
             return response()->json([
                 'reports' => $data
             ]);
