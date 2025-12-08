@@ -113,7 +113,7 @@ function DryingCompletedReport() {
 
                 if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
                     heSoQuyDoi = 1;
-                    
+
 
                     if (selectedFactory == 'TB') {
                         dgnc = 114600;
@@ -122,7 +122,7 @@ function DryingCompletedReport() {
 
                 if (item.day > 25) {
                     heSoQuyDoi = 0.85;
-                    
+
                     if (selectedFactory == 'TB') {
                         dgnc = 103500;
                     }
@@ -130,7 +130,7 @@ function DryingCompletedReport() {
 
                 if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
                     heSoQuyDoi = 0.85;
-                    
+
                     if (selectedFactory == 'TB') {
                         dgnc = 103500;
                     }
@@ -138,17 +138,42 @@ function DryingCompletedReport() {
 
                 // Tính toán
                 khoiLuongTinhThuong = item.mass * heSoQuyDoi;
-                
 
-                let month = new Date().getMonth() + 1;                
+
+                let month = new Date().getMonth() + 1;
 
                 let pow = 2;
 
-                let hs = Math.pow((1-0.01), pow);
+                let hs = Math.pow((1 - 0.01), pow);
                 let tt = dgnc * hs;
 
                 quyLuong = item.mass * tt;
-
+                console.log({
+                    created_at: item.created_at,
+                    code: item.code,
+                    ma_lo: item.ma_lo,
+                    item_code: item.item_code,
+                    item_name: item.item_name,
+                    thickness: parseInt(item.day),
+                    width: parseInt(item.rong),
+                    height: parseInt(item.dai),
+                    qty: parseInt(item.qty),
+                    mass: item.mass,
+                    reason: item.reason,
+                    status: item.status,
+                    mnv: item.created_username,
+                    khoiLuongTinhThuong,
+                    dgnc,
+                    quyLuong,
+                    stacking_time: item.stacking_time ?? "",
+                    completedDate: item.completed_date ?? '',
+                    completed_by: item.completed_by ?? '',
+                    type: item.type ?? '',
+                    created_fullname: item.created_fullname ?? '',
+                    completed_fullname: item.completed_fullname ?? '',
+                    hs,
+                    tt
+                });
                 return {
                     created_at: item.created_at,
                     code: item.code,
@@ -175,6 +200,9 @@ function DryingCompletedReport() {
                     hs,
                     tt
                 }
+
+
+
             });
             setIsDataReportLoading(false);
             setRowData(formattedData);
@@ -328,8 +356,11 @@ function DryingCompletedReport() {
             width: 170,
             suppressHeaderMenuButton: true,
             aggFunc: "sum",
-            valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
             },
             headerComponentParams: { displayName: "Khối lượng (m3)" },
         },
@@ -338,17 +369,23 @@ function DryingCompletedReport() {
             field: "khoiLuongTinhThuong",
             width: 250,
             suppressHeaderMenuButton: true,
-            valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
-            }
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
+            },
         },
         {
             headerName: "Đơn giá",
             field: "dgnc",
             width: 150,
             suppressHeaderMenuButton: true,
-            valueFormatter: (params) => {
-                return params.value ? params.value.toLocaleString() : "0";
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
             },
             filter: true,
         },
@@ -367,8 +404,11 @@ function DryingCompletedReport() {
             field: "tt",
             width: 150,
             suppressHeaderMenuButton: true,
-            valueFormatter: (params) => {
-                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
             },
             filter: true,
             aggFunc: "sum"
@@ -378,8 +418,11 @@ function DryingCompletedReport() {
             field: "quyLuong",
             width: 150,
             suppressHeaderMenuButton: true,
-            valueFormatter: (params) => {
-                return params.value ? Number(params.value).toFixed(6).toLocaleString() : "0";
+            valueFormatter: param => {
+                return param.value ? Number(param.value).toLocaleString('en-US', {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                }) : 0
             },
             aggFunc: "sum"
         },
