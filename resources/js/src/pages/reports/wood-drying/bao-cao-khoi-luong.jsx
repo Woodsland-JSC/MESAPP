@@ -9,6 +9,7 @@ import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
 import { getQuantityPallets } from "../../../api/pallet.api";
 import moment from "moment";
+import Loader from "../../../components/Loader";
 
 const BaoCaoKhoiLuongLoSay = () => {
     const [reportData, setReportData] = useState([]);
@@ -278,8 +279,36 @@ const BaoCaoKhoiLuongLoSay = () => {
                             </div>
                         </div>
                     </div>
+
+                    {reportData?.length > 0 ? (
+                        <div>
+                            <div
+                                className="ag-theme-quartz border-2 border-gray-300 rounded-lg mt-2 "
+                                style={{
+                                    height: 630,
+                                    fontSize: 16
+                                }}
+                                id="app-ag-grid"
+                            >
+                                <AgGridReact
+                                    ref={gridRef}
+                                    rowData={reportData}
+                                    columnDefs={colDefs}
+                                    groupDisplayType={"multipleColumns"}
+                                    grandTotalRow={"bottom"}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mt-4 bg-[#C2C2CB] flex items-center justify-center  p-2 px-4 pr-1 rounded-lg ">
+                            Không có dữ liệu để hiển thị.
+                        </div>
+                    )}
                 </div>
             </div>
+            {
+                loading && <Loader></Loader>
+            }
         </Layout>
     )
 }
