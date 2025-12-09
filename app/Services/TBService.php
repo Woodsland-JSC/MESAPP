@@ -443,7 +443,7 @@ class TBService
                     AwaitingstocksTb::create([
                         'notiId' => $notifi->id,
                         'SubItemCode' => $subItem['SubItemCode'],
-                        'AwaitingQty' => $payload['CompleQty'],
+                        'AwaitingQty' => $payload['CompleQty'] * $subItem['BaseQty'],
                         'team' => $payload['Team'],
                     ]);
                 }
