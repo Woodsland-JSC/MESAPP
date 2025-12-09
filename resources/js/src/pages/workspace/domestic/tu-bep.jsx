@@ -53,7 +53,7 @@ import { FaBox, FaCircleRight, FaClock, FaDiceD6, FaInstalod } from "react-icons
 import { MdDangerous } from "react-icons/md";
 import { FaExclamationCircle } from "react-icons/fa";
 import { TbPlayerTrackNextFilled, TbTrash } from "react-icons/tb";
-import { acceptReceiptTB, sanLuongTB, viewDetail } from "../../../api/tb.api";
+import { acceptReceiptTB, sanLuongTB, viewDetail, deleteNoti } from "../../../api/tb.api";
 import Loading from '../../../components/loading/Loading';
 import { HiMiniBellAlert } from "react-icons/hi2";
 import AwaitingReception from "../../../components/AwaitingReception";
@@ -120,6 +120,16 @@ const TuBep = () => {
         onClose: onAlertDialogClose,
     } = useDisclosure();
 
+    const {
+        isOpen: isDeleteProcessingDialogOpen,
+        onOpen: onDeleteProcessingDialogOpen,
+        onClose: onDeleteProcessingDialogClose,
+    } = useDisclosure();
+
+    const [deleteProcessingLoading, setDeleteProcessingLoading] = useState(false);
+    const [selectedDelete, setSelectedDelete] = useState(null);
+    const [dialogType, setDialogType] = useState(null);
+
     const getDataTB = async () => {
         try {
             setLoadingData(true);
@@ -148,8 +158,6 @@ const TuBep = () => {
     };
 
     const viewProductionsDetails = async (itemTB, itemDetail, lsx) => {
-        console.log("itemTB", itemTB);
-
         setLsxSelected({
             lsx,
             itemDetail,
@@ -172,7 +180,6 @@ const TuBep = () => {
             };
 
             let res = await viewDetail(params);
-            console.log("res", res);
 
             setSelectedItemDetails({
                 ...itemDetail,
@@ -224,17 +231,13 @@ const TuBep = () => {
     }
 
     const handleSubmitQuantity = async () => {
-        console.log("selectedItemDetails", selectedItemDetails);
-        console.log("lsxselected", lsxSelected);
-        console.log("selectedFaultItem", selectedFaultItem);
-
         if (amount < 0) {
             toast.error("Số lượng ghi nhận phải lớn hơn 0");
             onAlertDialogClose();
             return;
         }
 
-        if (amount > selectedItemDetails.maxQty) {
+        if (amount > selectedItemDetails.maxQty && selectedItemDetails?.stocks[0]['IssueType'] != 'M') {
             toast.error("Đã vượt quá số lượng tối đa có thể xuất");
             onAlertDialogClose();
             return;
@@ -434,6 +437,23 @@ const TuBep = () => {
     };
 
     const searchResult = searchItems(data, searchTerm);
+
+    const handleDeleteProcessingReceipt = async (item) => {
+        try {
+            const payload = {
+                id: selectedDelete
+            };
+            setDeleteProcessingLoading(true);
+            await deleteNoti(payload);
+            await loadItemByLSX(lsxSelected.itemTB, lsxSelected.itemDetail, lsxSelected.lsx);
+            toast.success("Thao tác thành công.");
+            setDeleteProcessingLoading(false);
+            onDeleteProcessingDialogClose();
+        } catch (error) {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+            setDeleteProcessingLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!selectedGroup) return;
@@ -1094,13 +1114,13 @@ const TuBep = () => {
 
                                                                 <button
                                                                     onClick={() => {
-                                                                        // onDeleteProcessingDialogOpen();
-                                                                        // setSelectedDelete(
-                                                                        //     item?.id
-                                                                        // );
-                                                                        // setDialogType(
-                                                                        //     "product"
-                                                                        // );
+                                                                        onDeleteProcessingDialogOpen();
+                                                                        setSelectedDelete(
+                                                                            item?.id
+                                                                        );
+                                                                        setDialogType(
+                                                                            "product"
+                                                                        );
                                                                     }}
                                                                     className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black duration-200 ease hover:bg-red-600"
                                                                 >
@@ -1715,6 +1735,51 @@ const TuBep = () => {
                     </ModalBody>
                 </ModalContent>
             </Modal>
+
+            <AlertDialog
+                isOpen={isDeleteProcessingDialogOpen}
+                onClose={onDeleteProcessingDialogClose}
+                closeOnOverlayClick={false}
+                isCentered
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>Xác nhận xoá</AlertDialogHeader>
+                        <AlertDialogBody>
+                            <div className="text-red-700">
+                                {dialogType === "product"
+                                    ? "Bạn chắc chắn muốn xoá số lượng đã giao chờ xác nhận?"
+                                    : dialogType === "qc"
+                                        ? "Bạn chắc chắn muốn xóa ghi nhận lỗi chờ xác nhận?"
+                                        : "Bạn chắc chắn muốn xóa thông tin lịch sử trả lại?"}
+                            </div>
+                        </AlertDialogBody>
+                        <AlertDialogFooter className="gap-4">
+                            <Button
+                                onClick={() => {
+                                    setSelectedDelete(null);
+                                    onDeleteProcessingDialogClose();
+                                }}
+                            >
+                                Huỷ bỏ
+                            </Button>
+                            <button
+                                className="w-fit bg-[#c53030] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all"
+                                onClick={handleDeleteProcessingReceipt}
+                            >
+                                {deleteProcessingLoading ? (
+                                    <div className="flex items-center space-x-4">
+                                        <Spinner size="sm" color="white" />
+                                        <div>Đang tải</div>
+                                    </div>
+                                ) : (
+                                    "Xác nhận"
+                                )}
+                            </button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </Layout >
     );
 }

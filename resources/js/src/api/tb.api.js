@@ -31,3 +31,9 @@ export const checkReceiptTB = (params) => {
         params
     });
 }
+
+export const deleteNoti = (params) => {
+    return axiosClient().delete(`${BASEURL}/delete`, {
+        params
+    });
+}
