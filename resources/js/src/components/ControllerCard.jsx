@@ -137,9 +137,6 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
-    console.log("lý do", reason);
-
-
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -560,7 +557,7 @@ function ControllerCard(props) {
     };
 
     const handleFinishDryingSL = async () => {
-        if(!team){
+        if (!team) {
             toast.error("Vui lòng chọn tổ chuyển về.");
             return;
         }
@@ -908,12 +905,7 @@ function ControllerCard(props) {
                         </div>
                         {
                             reason.substring(0, 2) == 'SL' ? <>
-                                <button
-                                    className="bg-[#17506B] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all items-end w-full xl:w-[25%]"
-                                    onClick={loadTeams}
-                                >
-                                    Xác nhận ra lò xấy lại
-                                </button>
+                                
                             </> : <>
                                 {
                                     (planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay')) ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :
@@ -1244,60 +1236,6 @@ function ControllerCard(props) {
                                     </button>
                                 )
                             }
-                        </div>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-            <Modal
-                closeOnOverlayClick={false}
-                isOpen={isOvenSLOpen}
-                onClose={onOvenSLClose}
-                isCentered
-                size="md"
-            >
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Bạn chắc chắn muốn ra lò?</ModalHeader>
-                    <ModalBody pb={6}>
-                        <div className="mb-4">
-                            Bấm xác nhận để hoàn thành quy trình sấy lại.
-                        </div>
-                        <div>
-                            <label htmlFor="" className="mb-1">Chọn tổ chuyển về</label>
-                            <Select
-                                options={teams}
-                                placeholder="Chọn tổ"
-                                value={team}
-                                onChange={(option) => {
-                                    setTeam(option);
-                                }}
-                            />
-                        </div>
-                    </ModalBody>
-
-                    <ModalFooter>
-                        <div className="w-full flex xl:justify-end lg:justify-end md:justify-end gap-x-3">
-                            <button
-                                disabled={isLoadingSL}
-                                onClick={onOvenSLClose}
-                                className="w-full bg-gray-800 p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit active:duration-75 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Đóng
-                            </button>
-                            <button
-                                className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit w-full active:duration-75 transition-all"
-                                onClick={handleFinishDryingSL}
-                            >
-                                {isLoadingSL ? (
-                                    <div className="flex justify-center items-center space-x-4">
-                                        <Spinner size="sm" color="white" />
-                                        <div>Đang tải</div>
-                                    </div>
-                                ) : (
-                                    "Xác nhận"
-                                )}
-                            </button>
                         </div>
                     </ModalFooter>
                 </ModalContent>
