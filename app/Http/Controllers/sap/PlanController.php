@@ -21,6 +21,8 @@ use Carbon\Carbon;
 use App\Models\Warehouse;
 use App\Jobs\inventorytransfer;
 use App\Jobs\UpdatePalletSAP;
+use App\Services\HanaService;
+use App\Services\OvenService;
 use Exception;
 
 class PlanController extends Controller
@@ -492,46 +494,6 @@ class PlanController extends Controller
                         'message' => 'Vẫn còn pallet chưa được ra lò.'
                     ], 500);
                 }
-
-                // $groupedResults = $results->groupBy('DocEntry');
-                // $test = [];
-                // foreach ($groupedResults as $docEntry => $group) {
-                //     $data = [];
-                //     foreach ($group as $batchData) {
-                //         $data[] = [
-                //             "ItemCode" => $batchData->ItemCode,
-                //             "Quantity" => $batchData->Qty,
-                //             "WarehouseCode" =>  $towarehouse,
-                //             "FromWarehouseCode" => $batchData->WhsCode2,
-                //             "BatchNumbers" => [
-                //                 [
-                //                     "BatchNumber" => $batchData->BatchNum,
-                //                     "Quantity" => $batchData->Qty,
-                //                     "U_Status" => $request->result
-                //                 ]
-                //             ]
-                //         ];
-                //     };
-
-                //     $header = $group->first();
-
-                //     Pallet::where('palletID', $header->palletID)->update([
-                //         'IssueNumber' => -1,
-                //         'CompletedBy' => Auth::user()->id,
-                //         'CompletedDate' => now(),
-                //     ]);
-
-                //     $body = [
-                //         "U_Pallet" => $header->Code,
-                //         "U_CreateBy" => Auth::user()->sap_id,
-                //         "BPLID" => Auth::user()->branch,
-                //         "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò",
-                //         "StockTransferLines" => $data
-                //     ];
-                //     inventorytransfer::dispatch($body);
-                //     UpdatePalletSAP::dispatch($header->palletSAP, $request->result);
-                //     $test[] = $body;
-                // }
 
 
                 // ulock lò sấy
@@ -1009,6 +971,179 @@ class PlanController extends Controller
                 'error' => false,
                 'status_code' => 500,
                 'message' => 'Lỗi khi xử lý ra lò'
+            ], 500);
+        }
+    }
+
+    public function completeByPalletsSL(Request $request, ConnectController $connectController, HanaService $hanaService, OvenService $ovenService)
+    {
+        $validator = Validator::make($request->all(), [
+            'planId' => 'required',
+            'result' => 'required',
+            'palletIds' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Thiếu dữ liệu ra lò.'], 500);
+        }
+
+        $palletIds = $request->palletIds;
+
+        if (count($palletIds) == 0) {
+            return response()->json(['error' => 'Thiếu dữ liệu pallets.'], 500);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $planId = $request->input('planId');
+            $planDrying = planDryings::where('PlanID', $planId)->whereNotIn('status', [0, 2])->get();
+            $result = $request->result;
+            $palletIds = $request->palletIds;
+
+            if ($planDrying->count() > 0) {
+                Pallet::whereIn('palletID', $palletIds)->update([
+                    'IssueNumber' => -1,
+                    'CompletedBy' => Auth::user()->id,
+                    'CompletedDate' => now(),
+                ]);
+
+                $SQL_TEAM_CBG = <<<SQL
+                    SELECT
+                        A."VisResCode" AS "Code",
+                        A."ResName" AS "Name",
+                        A."U_CDOAN" AS "CongDoan",
+                        A."U_FAC" AS "Factory",
+                        A."U_KHOI",
+                        D."WhsCode"
+                    FROM "ORSC" A
+                    JOIN "RSC4" B ON A."VisResCode" = b."ResCode"
+                    JOIN OHEM C ON B."EmpID" = C."empID"
+                    JOIN RSC1 D ON D."ResCode" = A."VisResCode"
+                    WHERE A."U_FAC" = ? AND A."U_KHOI" = 'CBG' AND A."U_QC" = 'N' AND B."EmpID" = ?  AND D."Locked" = 'N' 
+                    GROUP BY A."VisResCode",
+                        A."ResName",
+                        A."U_CDOAN",
+                        A."U_FAC",
+                        A."U_KHOI",
+                        D."WhsCode"
+                    ORDER BY A."ResName";
+                SQL;
+
+                $team = $hanaService->selectOne($SQL_TEAM_CBG, [Auth::user()->plant, Auth::user()->sap_id]);
+
+                if (!$team) {
+                    return response()->json(['error' => 'Không tìm thấy tổ theo người thao tác.'], 500);
+                }
+
+                $towarehouse = $team['WhsCode'];
+
+                $dataPallets = planDryings::select([
+                    'planDryings.Code as newbatch',
+                    'planDryings.Oven',
+                    'pallets.DocEntry',
+                    'pallets.Code',
+                    'pallets.palletID',
+                    'pallets.palletSAP',
+                    'pallet_details.ItemCode',
+                    'pallet_details.WhsCode2',
+                    'pallet_details.Qty',
+                    'pallet_details.CDai',
+                    'pallet_details.CRong',
+                    'pallet_details.CDay',
+                    'pallet_details.BatchNum',
+                    DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+                    'pallet_details.palletID'
+                ])
+                    ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+                    ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                    ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+                    ->where('planDryings.PlanID', $planId)
+                    ->whereIn('pallets.palletID', $palletIds)
+                    ->get();
+
+                $groupedData = $dataPallets->groupBy('DocEntry');
+
+                foreach ($groupedData as $docEntry => $group) {
+                    $data = [];
+                    foreach ($group as $batchData) {
+                        $data[] = [
+                            "ItemCode" => $batchData->ItemCode,
+                            "Quantity" => $batchData->Qty,
+                            "WarehouseCode" =>  $towarehouse,
+                            "FromWarehouseCode" => $batchData->WhsCode2,
+                            "BatchNumbers" => [
+                                [
+                                    "BatchNumber" => $batchData->BatchNum,
+                                    "Quantity" => $batchData->Qty,
+                                    "U_Status" => $result
+                                ]
+                            ]
+                        ];
+                    };
+
+                    $header = $group->first();
+
+                    $body = [
+                        "U_Pallet" => $header->Code,
+                        "U_CreateBy" => Auth::user()->sap_id,
+                        "BPLID" => Auth::user()->branch,
+                        "Comments" => "WLAPP PORTAL điều chuyển pallet ra lò",
+                        "StockTransferLines" => $data
+                    ];
+                    inventorytransfer::dispatch($body);
+                    UpdatePalletSAP::dispatch($header->palletSAP, $request->result);
+                }
+
+                $results = planDryings::select(
+                    'planDryings.Code as newbatch',
+                    'planDryings.Oven',
+                    'pallets.DocEntry',
+                    'pallets.Code',
+                    'pallets.palletID',
+                    'pallets.palletSAP',
+                    'pallets.CompletedBy',
+                    'pallet_details.ItemCode',
+                    'pallet_details.WhsCode2',
+                    'pallet_details.Qty',
+                    'pallet_details.CDai',
+                    'pallet_details.CRong',
+                    'pallet_details.CDay',
+                    'pallet_details.BatchNum',
+                    DB::raw('SUM(pallet_details.Qty) OVER (PARTITION BY pallets.palletID) AS TotalQty'),
+                    'pallet_details.palletID'
+                )
+                    ->join('plan_detail', 'planDryings.PlanID', '=', 'plan_detail.PlanID')
+                    ->join('pallets', 'plan_detail.pallet', '=', 'pallets.palletID')
+                    ->join('pallet_details', 'pallets.palletID', '=', 'pallet_details.palletID')
+                    ->where('planDryings.PlanID', $planId)
+                    ->whereNull('pallets.CompletedBy')
+                    ->get();
+
+                if ($results->count() == 0) {
+                    $plan = planDryings::query()->where('PlanID', $planId)->first();
+
+                    $plan->update([
+                        'Status' => 2,
+                        'CompletedBy' => Auth::user()->id,
+                        'CompletedDate' => now(),
+                    ]);
+
+                    $ovenService->unlockOven($plan->Oven);
+                }
+
+                DB::commit();
+                return response()->json(['success' => 'Ra lò pallets thành công!']);
+            } else {
+                return response()->json(['error' => 'Lò không hợp lệ'], 500);
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => false,
+                'status_code' => 500,
+                'message' => 'Lỗi khi xử lý ra lò',
+                'detail' => $e->getMessage()
             ], 500);
         }
     }

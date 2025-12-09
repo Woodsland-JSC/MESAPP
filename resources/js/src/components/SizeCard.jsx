@@ -31,9 +31,13 @@ import useAppContext from "../store/AppContext";
 import ExcelJS from 'exceljs';
 import toast from "react-hot-toast";
 import { saveAs } from 'file-saver';
+import Loader from "./Loader";
 
 function SizeCard(props) {
     const { planID, reload, palletDatam, onReload, onReloadPalletList, reason, type, onCallback, planDrying } = props;
+
+    console.log("reason", reason);
+
 
     const { user } = useAppContext();
 
@@ -43,6 +47,7 @@ function SizeCard(props) {
     const [palletSelected, setPalletSelected] = useState([]);
     const [palletStatus, setPalletStatus] = useState(COMPLETE_PALLET_STATUS.ALL);
     const [loadingExport, setLoadingExport] = useState(false);
+    const [loadingRaLo, setLoadingRalo] = useState(false);
 
     const loadSizeData = () => {
         palletsApi.getBOWById(planID)
@@ -107,6 +112,50 @@ function SizeCard(props) {
                         'success'
                     );
                 } catch (error) {
+                    Swal.fire(
+                        'Có lỗi',
+                        'Ra lò các pallet có lỗi.',
+                        'error'
+                    )
+                }
+            }
+        });
+    }
+
+    const completePalletSL = () => {
+        if (type != 'ls') return;
+
+        Swal.fire({
+            title: `Xác nhận ra lò các Pallet đã chọn?`,
+            text: "Hành động này sẽ không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ra lò',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    let data = {
+                        planId: planID,
+                        palletIds: palletSelected,
+                        result: 'SD'
+                    };
+                    setLoadingRalo(true)
+                    await palletsApi.completeByPalletsSL(data);
+                    setLoadingRalo(false)
+                    loadSizeData();
+                    onCallback();
+                    setPalletSelected([]);
+
+                    Swal.fire(
+                        'Thành công',
+                        'Ra lò các pallet thành công.',
+                        'success'
+                    );
+                    
+                } catch (error) {
+                setLoadingRalo(false)
                     Swal.fire(
                         'Có lỗi',
                         'Ra lò các pallet có lỗi.',
@@ -337,6 +386,17 @@ function SizeCard(props) {
                                     )
                                 }
 
+                                {
+                                    (palletSelected.length > 0 && reason?.substring(0, 2) == "SL") &&
+                                    <button
+                                        onClick={completePalletSL}
+                                        className="bg-[#155979] p-2 rounded-xl text-white px-4 active:scale-[.95] h-fit xl:w-fit lg:w-fit md:w-fit w-full active:duration-75 transition-all"
+                                    >
+                                        <span className="hidden sm:hidden md:block">Xác nhận ra lò pallet sấy lại</span>
+                                        <span className="block sm:block md:hidden ">Ra lò</span>
+                                    </button>
+                                }
+
                                 <button
                                     onClick={() => {
                                         onClose()
@@ -400,6 +460,9 @@ function SizeCard(props) {
                 )}
             </div>
 
+            {
+                loadingRaLo && <Loader></Loader>
+            }
         </div>
     );
 }

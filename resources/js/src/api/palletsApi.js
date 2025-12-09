@@ -149,7 +149,13 @@ const palletsApi = {
     completeByPallets: (data) => {
         const url = `ovens/production-complete-by-pallets`;
         return axiosClient().post(url, data);
+    },
+    completeByPalletsSL: (data) => {
+        const url = `ovens/production-complete-by-pallets-sl`;
+        return axiosClient().post(url, data);
     }
+
+    
 };
 
 export default palletsApi;

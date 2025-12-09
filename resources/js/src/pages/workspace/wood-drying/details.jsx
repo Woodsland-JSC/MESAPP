@@ -443,6 +443,7 @@ function Details() {
                                                     type={"ls"}
                                                     onCallback={updateData}
                                                     planDrying={BOWData}
+                                                    reason={BOWData.Reason}
                                                 />
                                             </Skeleton>
                                         </div>
