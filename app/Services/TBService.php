@@ -259,6 +259,7 @@ class TBService
                 $subItemName = $result['SubItemName'];
                 $onHand = (float) $result['OnHand'];
                 $baseQty = (float) $result['BaseQty'];
+                $issueType = $result['IssueType'];
 
                 if (!array_key_exists($subItemCode, $groupedResults)) {
                     $groupedResults[$subItemCode] = [
@@ -266,6 +267,7 @@ class TBService
                         'SubItemName' => $subItemName,
                         'OnHand' => 0,
                         'BaseQty' => $baseQty,
+                        'IssueType' => $issueType
                     ];
                 }
 
@@ -441,7 +443,7 @@ class TBService
                     AwaitingstocksTb::create([
                         'notiId' => $notifi->id,
                         'SubItemCode' => $subItem['SubItemCode'],
-                        'AwaitingQty' => $payload['CompleQty'] * $subItem['BaseQty'],
+                        'AwaitingQty' => $payload['CompleQty'],
                         'team' => $payload['Team'],
                     ]);
                 }

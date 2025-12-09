@@ -266,6 +266,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('confirmAcceptReceipt', [TBController::class, 'confirmAcceptReceipt'])->name('confirmAcceptReceipt');
         Route::post('confirmRejectTB', [TBController::class, 'confirmRejectTB'])->name('confirmRejectTB');
         Route::get('checkReceiptTB', [TBController::class, 'checkReceiptTB'])->name('checkReceiptTB');
+        Route::delete('delete', [TBController::class, 'delete'])->name('delete');
     });
 
     Route::group(['prefix' => 'sap/inventory-posting'], function () {

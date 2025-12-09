@@ -1097,6 +1097,7 @@ class ProductionController extends Controller
             'returnedHistory' => $dataReturn,
         ], 200);
     }
+    
     function collectdata($spdich, $item, $to)
     {
         $conDB = (new ConnectController)->connect_sap();

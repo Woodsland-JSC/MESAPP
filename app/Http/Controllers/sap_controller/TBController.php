@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\sap_controller;
 
 use App\Http\Controllers\Controller;
+use App\Models\AwaitingstocksTb;
+use App\Models\NotireceiptTb;
 use App\Services\HanaService;
 use App\Services\mes\NotireceiptTbService;
 use App\Services\OvenService;
 use App\Services\TBService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -85,5 +90,36 @@ class TBController extends Controller
     function checkReceiptTB(Request $request, TBService $tbService)
     {
         return $tbService->checkReceiptTB($request->query('id'));
+    }
+
+    function delete(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required'
+        ]);
+
+        DB::beginTransaction();
+        // dd($request);
+        if ($validator->fails()) {
+            return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
+        }
+
+        $data = DB::table('notireceipt_tb as a')
+            ->where('a.id', $request->id)
+            ->where('a.deleted', 0)
+            ->where('a.confirm', 0)
+            ->first();
+        if (!$data) {
+            throw new \Exception('Thông báo đã được nhận hoặc trả lại. Vui lòng load lại trang');
+        }
+
+        // Xóa số lượng giao chờ xác nhận
+        NotireceiptTb::where('id', $data->id)->update(['deleted' => 1, 'deletedBy' => Auth::user()->id, 'deleted_at' => Carbon::now()->format('YmdHis')]);
+        AwaitingstocksTb::where('notiId', $data->id)->delete();
+        DB::commit();
+
+        return response()->json([
+            'message' => 'success'
+        ], 200);
     }
 }
