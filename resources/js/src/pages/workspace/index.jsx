@@ -502,11 +502,11 @@ function Workspace() {
                                                     type: "CBG",
                                                 },
                                                 {
-                                                    permission: ["CBG"],
+                                                    permission: ["CBG", "CBG(CX)", ],
                                                     link: "/workspace/wood-working/bao-loi-say-lai",
                                                     icon: <HiViewColumns />,
-                                                    title: "Báo lỗi xấy ẩm",
-                                                    description: "Báo lỗi xấy ẩm.",
+                                                    title: "Báo lỗi sấy ẩm",
+                                                    description: "Báo lỗi sấy ẩm.",
                                                     type: "CBG",
                                                 }
                                             ].map(
@@ -716,56 +716,15 @@ function Workspace() {
                                                         "Quản lý tồn kho vật tư sơn.",
                                                     type: "CBG",
                                                 },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     link: "/workspace/wood-working/qc",
-                                                //     icon: <HiBadgeCheck />,
-                                                //     title: "Kiểm định chất lượng chế biến gỗ",
-                                                //     description:
-                                                //         "Xử lý lỗi nhập thành phẩm.",
-                                                //     type: "CBG",
-                                                // },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     link: "/workspace/plywood/finished-goods-receipt",
-                                                //     icon: (
-                                                //         <HiArchiveBoxArrowDown />
-                                                //     ),
-                                                //     title: "Sản lượng ván công nghiệp",
-                                                //     description:
-                                                //         "Nhập sản lượng theo công đoạn.",
-                                                //     type: "VCN",
-                                                // },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     link: "/workspace/plywood/qc",
-                                                //     icon: <HiBadgeCheck />,
-                                                //     title: "Kiểm định chất lượng ván công nghiệp",
-                                                //     description:
-                                                //         "Xử lý lỗi nhập thành phẩm.",
-                                                //     type: "VCN",
-                                                // },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     select: "ND",
-                                                //     icon: (
-                                                //         <HiArchiveBoxArrowDown />
-                                                //     ),
-                                                //     title: "Sản lượng nội địa",
-                                                //     description:
-                                                //         "Nhập sản lượng lắp đặt khối nội địa.",
-                                                //     type: "ND",
-                                                // },
-                                                // {
-                                                //     permission: ["X"],
-                                                //     link: "/workspace/inland/installation-progress",
-                                                //     icon: <HiViewColumns />,
-                                                //     title: "Tiến độ lắp đặt nội địa",
-                                                //     description:
-                                                //         "Báo cáo tiến độ lắp đặt đồ nội thất.",
-                                                //     type: "ND",
-                                                // },
-
+                                                {
+                                                    permission: ["quytrinhson"],
+                                                    link: "/workspace/goods-management/print-workflow",
+                                                    icon: <HiViewColumns />,
+                                                    title: "Quy trình sơn",
+                                                    description:
+                                                        "Quản lý quy trình sơn.",
+                                                    type: "CBG",
+                                                }
                                             ].map(
                                                 ({
                                                     permission,
@@ -776,11 +735,7 @@ function Workspace() {
                                                     type,
                                                     select,
                                                 }) =>
-                                                    permission.some((perm) =>
-                                                        user.permissions?.includes(
-                                                            perm
-                                                        )
-                                                    ) ? (
+                                                    permission.some((perm) => user.permissions?.includes(perm)) ? (
                                                         select == "ND" ? (
                                                             <div
                                                                 key={title}
