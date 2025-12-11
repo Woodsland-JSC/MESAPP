@@ -438,6 +438,7 @@ function SizeCard(props) {
                                 <>
                                     {sizeData.map((item, index) => (
                                         <SizeListItem
+                                            key={index}
                                             planID={planID}
                                             reason={reason}
                                             id={item.pallet}

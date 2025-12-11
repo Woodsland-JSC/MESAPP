@@ -137,6 +137,8 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
+    const BASE_REASON = reason;
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -359,14 +361,14 @@ function ControllerCard(props) {
         ).length;
     }, [checkboxStates]);
 
-    const handleLoadIntoKiln = async (reason, callback) => {
+    const handleLoadIntoKiln = async (reason, callback) => {       
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
                 return;
             }
 
-            let reasonSplit = reason.substring(0, 2);
+            let reasonSplit = BASE_REASON.substring(0, 2);
 
             // nếu lò trống, so với chiều dày cơ sở.
             if (loadedPalletList.length == 0) {
