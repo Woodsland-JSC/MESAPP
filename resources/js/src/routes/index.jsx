@@ -215,14 +215,14 @@ function AppRoutes() {
                         }
                     />
 
-                    <Route
+                    {/* <Route
                         path="/workspace/wood-working/handle-qc"
                         element={
                             <ProtectedRoute permissionsRequired={['QCCBG']}>
                                 <HandleItemQc />
                             </ProtectedRoute>
                         }
-                    />
+                    /> */}
 
                     <Route
                         path="/workspace/wood-working/bao-loi-say-lai"
