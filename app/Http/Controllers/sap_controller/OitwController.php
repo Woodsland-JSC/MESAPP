@@ -23,7 +23,8 @@ class OitwController extends Controller
         $this->oitwService = $oitwService;
     }
 
-    public function getItemsByFactory(Request $request){
+    public function getItemsByFactory(Request $request)
+    {
         try {
             $whCode = $request->query('whCode');
             $items = $this->oitwService->getItemsPrintByWh($whCode);
@@ -35,5 +36,14 @@ class OitwController extends Controller
                 'message' => 'Lấy danh sách Items có lỗi!'
             ], 500);
         }
+    }
+
+    public function getItemsSFByWh(Request $request)
+    {
+        $whCode = $request->query('whCode');
+        $items = $this->oitwService->getItemsSFByWh($whCode);
+        return response()->json([
+            'items' => $items
+        ]);
     }
 }

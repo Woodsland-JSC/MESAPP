@@ -29,6 +29,11 @@ const goodsManagementPermissions = [
         value: "kiemkevattuson",
         name: "Quản lý kiểm kê vật tư sơn",
         description: "Kiểm kê và quản lý vật tư sơn",
+    },
+    {
+        value: "quytrinhson",
+        name: "Quản lý Quy trình sơn",
+        description: "Quản lý Quy trình sơn",
     }
 ];
 
@@ -252,14 +257,14 @@ function CreateRole() {
 
         try {
             const res = await roleApi.createRole(roleInfo);
-            toast.success("Vai trò được tạo thành công");  
+            toast.success("Vai trò được tạo thành công");
             setLoading(false);
             navigate("/users?roletab=true");
         } catch (error) {
             toast.error("Có lỗi xảy ra.");
             setLoading(false);
         }
-        
+
     };
 
     useEffect(() => {
@@ -309,13 +314,13 @@ function CreateRole() {
                 <div className="w-screen xl:p-12 p-6 px-5 xl:pt-6 lg:pt-6 md:pt-6 pt-2 xl:px-52 border-t border-gray-200">
 
                     {/* Go back */}
-                    <div 
+                    <div
                         className="flex items-center space-x-1 bg-[#DFDFE6] hover:cursor-pointer active:scale-[.95] active:duration-75 transition-all rounded-2xl p-1 w-fit px-3 mb-3 text-sm font-medium text-[#17506B] xl:ml-0 lg:ml-0 md:ml-0 ml-4"
                         onClick={() => navigate(-1)}
                     >
                         <IoMdArrowRoundBack />
                         <div>Quay lại</div>
-                    </div>                    
+                    </div>
 
                     {/* Header */}
                     <div className="serif text-3xl font-bold pb-3">
@@ -435,11 +440,11 @@ function CreateRole() {
                                                 value={selectedCBGPermission}
                                                 onChange={(e) => {
                                                     setSelectedCBGPermission(e.target.value);
-                                                    if(isUsingCBG){
+                                                    if (isUsingCBG) {
                                                         handleSelectCBGPermissionChange(
                                                             e, e.target.value
                                                         )
-                                                    } 
+                                                    }
                                                 }}
                                             >
                                                 <option value="CBG(CX)">
@@ -481,11 +486,11 @@ function CreateRole() {
                                                 value={selectedVCNPermission}
                                                 onChange={(e) => {
                                                     setSelectedVCNPermission(e.target.value);
-                                                    if(isUsingVCN){
+                                                    if (isUsingVCN) {
                                                         handleSelectVCNPermissionChange(
                                                             e, e.target.value
                                                         )
-                                                    } 
+                                                    }
                                                 }}
                                             >
                                                 <option value="VCN(CX)">
@@ -527,11 +532,11 @@ function CreateRole() {
                                                 value={selectedDANDPermission}
                                                 onChange={(e) => {
                                                     setSelectedDANDPermission(e.target.value);
-                                                    if(isUsingDAND){
+                                                    if (isUsingDAND) {
                                                         handleSelectDANDPermissionChange(
                                                             e, e.target.value
                                                         )
-                                                    } 
+                                                    }
                                                 }}
                                             >
                                                 <option value="DAND(CX)">
@@ -576,7 +581,7 @@ function CreateRole() {
                                         </Checkbox> */}
                                     </div>
                                 </div>
-                                        
+
                                 <div className="py-2">
                                     {goodsManagementPermissions?.map(
                                         (item, index) => (

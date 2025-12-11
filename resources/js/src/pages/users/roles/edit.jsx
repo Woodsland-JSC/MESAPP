@@ -40,6 +40,11 @@ const goodsManagementPermissions = [
         value: "kiemkevattuson",
         name: "Quản lý kiểm kê vật tư sơn",
         description: "Kiểm kê và quản lý vật tư sơn",
+    },
+    {
+        value: "quytrinhson",
+        name: "Quản lý Quy trình sơn",
+        description: "Quản lý Quy trình sơn",
     }
 ];
 

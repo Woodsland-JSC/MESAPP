@@ -166,8 +166,9 @@ function Workspace() {
             text: "Hành động này không thể hoàn tác!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Xác nhận',
             cancelButtonText: 'Hủy',
+            confirmButtonText: 'Xác nhận',
+            reverseButtons: true
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
