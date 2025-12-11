@@ -23,6 +23,7 @@ use App\Http\Controllers\sap_controller\InventoryPostingController;
 use App\Http\Controllers\sap_controller\MasterDataController as SapMasterDataController;
 use App\Http\Controllers\sap_controller\OitwController;
 use App\Http\Controllers\sap_controller\OvenController;
+use App\Http\Controllers\sap_controller\QtSonController;
 use App\Http\Controllers\sap_controller\ReportController as Sap_controllerReportController;
 use App\Http\Controllers\sap_controller\TBController;
 use App\Http\Controllers\sap_controller\VcnController;
@@ -223,6 +224,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'sap/OITW'], function () {
         Route::get('getItemsByFactory', [OitwController::class, 'getItemsByFactory'])->name('getItemsByFactory');
+        Route::get('getItemsSFByWh', [OitwController::class, 'getItemsSFByWh'])->name('getItemsSFByWh');
+
+        
     });
 
 
@@ -271,6 +275,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'sap/inventory-posting'], function () {
         Route::post('inventoryPostingItems', [InventoryPostingController::class, 'inventoryPostingItems'])->name('inventoryPostingItems');
+    });
+
+    Route::group(['prefix' => 'sap/qt-son'], function () {
+        Route::get('getStepsQT', [QtSonController::class, 'getStepsQT']);
     });
 
     Route::group(['prefix' => 'mes/qc'], function () {

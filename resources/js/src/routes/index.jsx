@@ -110,6 +110,7 @@ import PrintInventoryPosting from "../pages/workspace/goods-management/print-inv
 import BaoLoiSayLai from "../pages/workspace/wood-working/bao-loi-say-lai";
 import HumidityReport from "../pages/reports/wood-working/humidity-report";
 import BaoCaoKhoiLuongLoSay from "../pages/reports/wood-drying/bao-cao-khoi-luong";
+import PrintWorkflow from "../pages/workspace/goods-management/print-workflow";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -337,6 +338,15 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <PrintInventoryPosting />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/workspace/goods-management/print-workflow"
+                        element={
+                            <ProtectedRoute>
+                                <PrintWorkflow />
                             </ProtectedRoute>
                         }
                     />

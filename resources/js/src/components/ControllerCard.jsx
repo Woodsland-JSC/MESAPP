@@ -137,6 +137,8 @@ function ControllerCard(props) {
     } = props;
     const { user } = useAppContext();
 
+    const BASE_REASON = reason;
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
         isOpen: isKilnOpen,
@@ -164,6 +166,8 @@ function ControllerCard(props) {
     const [isLoadingSL, setLoadingSL] = useState(false);
     const [teams, setTeams] = useState([]);
     const [team, setTeam] = useState(null);
+
+    console.log(reason);
 
 
     let navigate = useNavigate();
@@ -357,24 +361,23 @@ function ControllerCard(props) {
         ).length;
     }, [checkboxStates]);
 
-    const handleLoadIntoKiln = async (reason, callback) => {
-        console.log("Khoảng kích thước hợp lệ:", minThickness, maxThickness,);
-        console.log("loadedPalletList", loadedPalletList);
-
+    const handleLoadIntoKiln = async (reason, callback) => {       
         try {
             if (!selectedPallet || !selectedPallet.value) {
                 toast.error("Hãy chọn pallet trước khi vào lò.");
                 return;
             }
 
+            let reasonSplit = BASE_REASON ? BASE_REASON.substring(0, 2) : "";
+
             // nếu lò trống, so với chiều dày cơ sở.
             if (loadedPalletList.length == 0) {
-                if (selectedPallet.thickness < minThickness - 3) {
+                if ((selectedPallet.thickness < minThickness - 3) && reasonSplit != 'SL') {
                     toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
                     return;
                 }
 
-                if (selectedPallet.thickness > maxThickness + 3) {
+                if ((selectedPallet.thickness > maxThickness + 3) && reasonSplit != 'SL') {
                     toast.error(
                         `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
                     );
@@ -398,12 +401,12 @@ function ControllerCard(props) {
                 let min = Math.min(...thinkness);
                 let max = Math.max(...thinkness);
 
-                if (selectedPallet.thickness < min - 3) {
+                if ((selectedPallet.thickness < min - 3) && reasonSplit != 'SL') {
                     toast.error(`Chiều dày (${selectedPallet.thickness}) chưa đủ chiều dày cho phép của lò sấy (tối thiểu ${minThickness}).`);
                     return;
                 }
 
-                if (selectedPallet.thickness > max + 3) {
+                if ((selectedPallet.thickness > max + 3) && reasonSplit != 'SL') {
                     toast.error(
                         `Chiều dày (${selectedPallet.thickness}) vượt quá chiều dày cho phép của lò sấy (tối đa ${maxThickness}).`
                     );
@@ -660,25 +663,6 @@ function ControllerCard(props) {
         return quyCach ? palletOptions.filter(p => p.label.includes(quyCach.value)) : palletOptions;
     }, [palletOptions, quyCach])
 
-    const loadTeams = async () => {
-        try {
-            setLoadingSL(true)
-            let res = await getTeamsCBG(user?.plant);
-            let data = res.data.teams.sort((item1, item2) => item1.Name.localeCompare(item2.Name))
-            setTeams(data.map(item => (
-                {
-                    value: item.WhsCode,
-                    label: `${item.Name} - ${item.Code}`
-                }
-            )));
-            onOvenSLOpen();
-            setLoadingSL(false)
-        } catch (error) {
-            setLoadingSL(false)
-            toast.error('Lấy tổ có lỗi.');
-        }
-    }
-
     useEffect(() => {
         loadUserStockController();
     }, [])
@@ -905,7 +889,7 @@ function ControllerCard(props) {
                         </div>
                         {
                             reason.substring(0, 2) == 'SL' ? <>
-                                
+
                             </> : <>
                                 {
                                     (planDrying?.delivery_id && planDrying?.receiver_id && !user?.permissions.some(p => p == 'xacnhanlosay')) ? <span className="text-green-500">Đã gửi đến người xác nhận</span> :

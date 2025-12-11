@@ -10,3 +10,12 @@ export const getItemsByFactory = (whCode) => {
         }
     });
 }
+
+export const getItemsSFByWh = (whCode) => {
+    const url = `${BASEURL}/getItemsSFByWh`;
+    return axiosClient().get(url, {
+        params: {
+            whCode
+        }
+    });
+}
