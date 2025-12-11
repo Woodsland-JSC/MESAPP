@@ -71,17 +71,26 @@ function HumidityCheck(props) {
         if (reason === "INDOOR") {
             return (
                 humidityAnalysis[0].percentage +
-                    humidityAnalysis[1].percentage >=
+                humidityAnalysis[1].percentage >=
                 85
             );
         } else if (reason === "OUTDOOR") {
-            const outdoorHighCount = humidityRecords.filter(
-                (record) => record.value < 14
-            ).length;
-            const outdoorHighPercentage =
-                (outdoorHighCount / humidityRecords?.length) * 100;
+            const outdoorHighCount = humidityRecords.filter((record) => record.value < 14).length;
+            const outdoorHighPercentage = (outdoorHighCount / humidityRecords?.length) * 100;
             return outdoorHighPercentage >= 85;
         }
+
+        if (reason && reason.substring(0, 2) == 'SL') {
+            if (reason == 'SLIN') {
+                return (humidityAnalysis[0].percentage + humidityAnalysis[1].percentage >= 85);
+            } else  {
+                const outdoorHighCount = humidityRecords.filter((record) => record.value < 14).length;
+                const outdoorHighPercentage = (outdoorHighCount / humidityRecords?.length) * 100;
+                return outdoorHighPercentage >= 85;
+            }
+        }
+
+        return false
     };
 
     const getHumidityRanges = (reason) => {
@@ -170,88 +179,6 @@ function HumidityCheck(props) {
         return analyzeHumidity(selectedRecord.detail, reason);
     }, [selectedRecord, reason]);
 
-    // Create Mode
-    // const humidityAnalysis = useMemo(() => {
-    //     const total = humidityRecords.length;
-    //     const low = humidityRecords.filter((record) => record.value < 7).length;
-    //     const target = humidityRecords.filter(
-    //         (record) => record.value >= 7 && record.value <= 9
-    //     ).length;
-    //     const high = humidityRecords.filter(
-    //         (record) => record.value >= 10 && record.value <= 15
-    //     ).length;
-    //     const veryHigh = humidityRecords.filter(
-    //         (record) => record.value > 15
-    //     ).length;
-
-    //     return [
-    //         {
-    //             label: "Thấp (nhỏ hơn 7)",
-    //             count: low,
-    //             percentage: (low / total) * 100,
-    //         },
-    //         {
-    //             label: "Đích (7-9)",
-    //             count: target,
-    //             percentage: (target / total) * 100,
-    //         },
-    //         {
-    //             label: "Cao (10-15)",
-    //             count: high,
-    //             percentage: (high / total) * 100,
-    //         },
-    //         {
-    //             label: "Rất cao (trên 15)",
-    //             count: veryHigh,
-    //             percentage: (veryHigh / total) * 100,
-    //         },
-    //     ];
-    // }, [humidityRecords]);
-
-    // View mode
-    // const selectedAnalysis = useMemo(() => {
-    //     if (!selectedRecord || !selectedRecord.detail) {
-    //         return [];
-    //     }
-
-    //     const total = selectedRecord.detail.length;
-    //     const low = selectedRecord.detail.filter(
-    //         (record) => record.value < 7
-    //     ).length;
-    //     const target = selectedRecord.detail.filter(
-    //         (record) => record.value >= 7 && record.value <= 9
-    //     ).length;
-    //     const high = selectedRecord.detail.filter(
-    //         (record) => record.value >= 10 && record.value <= 15
-    //     ).length;
-    //     const veryHigh = selectedRecord.detail.filter(
-    //         (record) => record.value > 15
-    //     ).length;
-
-    //     return [
-    //         {
-    //             label: "Thấp (nhỏ hơn 7)",
-    //             count: low,
-    //             percentage: (low / total) * 100,
-    //         },
-    //         {
-    //             label: "Đích (7-9)",
-    //             count: target,
-    //             percentage: (target / total) * 100,
-    //         },
-    //         {
-    //             label: "Cao (10-15)",
-    //             count: high,
-    //             percentage: (high / total) * 100,
-    //         },
-    //         {
-    //             label: "Rất cao (trên 15)",
-    //             count: veryHigh,
-    //             percentage: (veryHigh / total) * 100,
-    //         },
-    //     ];
-    // }, [selectedRecord]);
-
     const loadHumidRecordList = async () => {
         palletsApi
             .getHumidListById(planID)
@@ -331,8 +258,8 @@ function HumidityCheck(props) {
         reason === "INDOOR"
             ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
             : reason === "OUTDOOR"
-            ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
-            : "";
+                ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
+                : "";
 
     const requirementMetHandle = () => {
         const body = {
@@ -577,8 +504,8 @@ function HumidityCheck(props) {
                                                                 {data?.label.includes(
                                                                     "Đích"
                                                                 ) && (
-                                                                    <HiMiniSparkles className="ml-2 text-blue-300" />
-                                                                )}
+                                                                        <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                    )}
                                                             </td>
                                                             <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
                                                                 {data?.count ||
@@ -990,7 +917,7 @@ function HumidityCheck(props) {
                     </thead>
                     <tbody>
                         {Array.isArray(recordsList) &&
-                        recordsList.length > 0 ? (
+                            recordsList.length > 0 ? (
                             <>
                                 {recordsList.map((item, index) => (
                                     <tr
@@ -1172,8 +1099,8 @@ function HumidityCheck(props) {
                                                                             {data.label.includes(
                                                                                 "Đích"
                                                                             ) && (
-                                                                                <HiMiniSparkles className="ml-2 text-blue-300" />
-                                                                            )}
+                                                                                    <HiMiniSparkles className="ml-2 text-blue-300" />
+                                                                                )}
                                                                         </td>
                                                                         <td className="px-6 py-3 text-left whitespace-nowrap w-[35%] text-[#D2D6FF]">
                                                                             {data?.count ||
