@@ -1169,7 +1169,7 @@ const TuBep = () => {
                                                     {" "} *
                                                 </span>
                                                 {selectedItemDetails?.CongDoan !== "SC" && selectedItemDetails?.CongDoan !== "XV" && selectedItemDetails?.maxQty <= 0 &&
-                                                    (selectedItemDetails?.stocks?.length !== 1 || selectedItemDetails?.stocks[0]?.SubItemCode !== "MM010000178") ? (
+                                                    (selectedItemDetails?.stocks.length > 0 && selectedItemDetails?.stocks[0]['IssueType'] != 'M') ? (
                                                     <div className="flex space-x-2 items-center px-4 py-3 bg-red-50 rounded-xl text-red-500 mt-2 mb-2">
                                                         <MdDangerous className="w-6 h-6" />
                                                         <div>
