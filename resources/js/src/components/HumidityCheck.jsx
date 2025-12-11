@@ -83,7 +83,7 @@ function HumidityCheck(props) {
         if (reason && reason.substring(0, 2) == 'SL') {
             if (reason == 'SLIN') {
                 return (humidityAnalysis[0].percentage + humidityAnalysis[1].percentage >= 85);
-            } else  {
+            } else {
                 const outdoorHighCount = humidityRecords.filter((record) => record.value < 14).length;
                 const outdoorHighPercentage = (outdoorHighCount / humidityRecords?.length) * 100;
                 return outdoorHighPercentage >= 85;
@@ -264,10 +264,29 @@ function HumidityCheck(props) {
     const requirementMetHandle = () => {
         const body = {
             PlanID: planID,
-            rate: result,
+            rate: "",
             option: "RL",
             note: "Đủ điều kiện ra lò.",
         };
+
+        let result = "";
+        if (reason && reason.substring(0, 2) == 'SL') {
+            if (reason == 'SLIN') {
+                result = (humidityAnalysis[0].percentage + humidityAnalysis[1].percentage);
+            } else {
+                result = humidityAnalysis[0].percentage + humidityAnalysis[1].percentage;
+            }
+        } else {
+            result = (reason === "INDOOR" ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage
+                : reason === "OUTDOOR" ? humidityAnalysis[0].percentage + humidityAnalysis[1].percentage : "");
+        }
+
+        body.rate = result;
+
+        if(!result || result == ''){
+            toast.error("Thiếu tỉ lệ");
+            return;
+        }
 
         palletsApi
             .completeHumidRecord(body)
