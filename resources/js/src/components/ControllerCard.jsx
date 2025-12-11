@@ -368,7 +368,7 @@ function ControllerCard(props) {
                 return;
             }
 
-            let reasonSplit = BASE_REASON.substring(0, 2);
+            let reasonSplit = BASE_REASON ? BASE_REASON.substring(0, 2) : "";
 
             // nếu lò trống, so với chiều dày cơ sở.
             if (loadedPalletList.length == 0) {
