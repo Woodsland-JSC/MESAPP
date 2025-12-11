@@ -373,7 +373,7 @@ function SizeCard(props) {
                         <div>
                             <div className="flex gap-x-3">
                                 {
-                                    palletSelected.length > 0 && (
+                                    palletSelected.length > 0 && reason?.substring(0, 2) != "SL" && (
                                         (user?.id == planDrying.receiver_id) && (
                                             <button
                                                 onClick={completePallet}
