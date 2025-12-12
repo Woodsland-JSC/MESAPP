@@ -88,16 +88,15 @@ class MasterDataController extends Controller
                             AND T3."U_FAC" = ?';
 
             if ($request->reason == 'SL') {
-                $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum"
+                $mainQuery = 'SELECT DISTINCT T0."ItemCode", T2."ItemName" || ? || T1."BatchNum" AS "ItemName", T1."BatchNum", T0."OnHand"
                 FROM OITW T0
                 INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" AND T0."ItemCode" = T1."ItemCode"
                 INNER JOIN OITM T2 ON T0."ItemCode" = T2."ItemCode"
                 INNER JOIN OWHS T3 ON T3."WhsCode" = T0."WhsCode"
-                WHERE (T1."U_CDai" * T1."U_CRong" * T1."U_CDay") <> 0
-                AND (T1."Quantity" * 1000000000 / (T1."U_CDai" * T1."U_CRong" * T1."U_CDay")) > 1
-                AND T3."U_Flag" IN (?) 
+                WHERE T3."U_Flag" IN (?) 
                 AND T3."BPLid" = ? 
-                AND T3."U_FAC" = ?';
+                AND T3."U_FAC" = ?
+                AND T0."OnHand" > 0;';
             }
 
             $stmt = odbc_prepare($conDB, $mainQuery);
@@ -651,7 +650,7 @@ class MasterDataController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
                 // Return validation errors with a 422 Unprocessable Entity status code
             }
-            $conDB = (new ConnectController)->connect_sap();
+            
             $filter = "";
             $flag = '';
             if ($request->reason == 'SL') {
@@ -668,6 +667,8 @@ class MasterDataController extends Controller
             // T0 OITW is Warehouse Table from SAP (WhsCode)
             // T1 OIBT là bảng lưu thành phẩm ghi nhận
             // T2 OITM là bảng lưu Item
+
+
             //
             $query = 'SELECT T0."WhsCode", T3."WhsName",T1."BatchNum",T1."Quantity" as "Quantity",t1."U_CDay" "CDay",t1."U_CRong" "CRong",t1."U_CDai" "CDai",? "Flag" FROM OITW T0 ' .
                 'INNER JOIN OIBT T1 ON T0."WhsCode" = T1."WhsCode" and T0."ItemCode" = T1."ItemCode" ' .
@@ -676,6 +677,7 @@ class MasterDataController extends Controller
                 'where T1."Quantity" > 0 and T0."ItemCode"= ? and t3."WhsCode"=? and T1."BatchNum" =? and "BPLid" = ? and ' . $filter;
 
             // dd($query, $flag, $id, $warehouse, $request->batchnum, Auth::user()->branch);
+            $conDB = (new ConnectController)->connect_sap();
             $stmt = odbc_prepare($conDB, $query);
 
             if (!$stmt) {
