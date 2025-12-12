@@ -258,9 +258,8 @@ class DryingOvenController extends Controller
             $combinedQuyCach = implode('_', $quyCachList);
 
             $prefix = $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . "-";
-            $lastCode = Pallet::where('Code', 'like', $prefix . '%')
-                ->orderBy('Code', 'desc')
-                ->value('Code');
+            
+            $lastCode = $gPALLETService->getLastCode($prefix);
 
             $generatedCode = '';
 
