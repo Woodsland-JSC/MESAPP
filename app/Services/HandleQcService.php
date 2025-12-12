@@ -272,6 +272,8 @@ class HandleQcService
                 ], 500);
             }
 
+            
+
             $bodyExit = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "Comments" => "Xuất gỗ sấy ẩm  đưa về kho sấy lại",
@@ -303,22 +305,24 @@ class HandleQcService
 
             $exit = $responseInventoryGenExits;
 
+            $sitteItemCode = 'MM010000799';
+
             $bodyEntry = [
                 "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                 "Comments" => "Nhập gỗ sấy ẩm về kho sấy lại",
                 "DocumentLines" => [
                     [
-                        "ItemCode"      => $itemFind['ItemCode'],
+                        "ItemCode"      => ($dai || $dai != 0) ? $itemFind['ItemCode'] : $sitteItemCode,
                         "Quantity"      => $m3,
                         "WarehouseCode" => $whSL['WhsCode'],
                         "BatchNumbers" => [
                             [
                                 "Quantity" => $m3,
-                                "ItemCode"      => $itemFind['ItemCode'],
+                                "ItemCode" => ($dai || $dai != 0) ? $itemFind['ItemCode'] : $sitteItemCode,
                                 "BatchNumber" => $qc,
-                                "U_CDay" => $day,
-                                "U_CRong" => $rong,
-                                "U_CDai" => $dai,
+                                "U_CDay" => $day ?? 0,
+                                "U_CRong" => $rong ?? 0,
+                                "U_CDai" => $dai ?? 0,
                             ]
                         ]
                     ]
@@ -342,7 +346,7 @@ class HandleQcService
             $entry = $responseInventoryGenEntry;
 
             LogErrorHumidity::create([
-                'ItemCode' => $itemFind['ItemCode'],
+                'ItemCode' => ($dai || $dai != 0) ? $itemFind['ItemCode'] : $sitteItemCode,
                 'CDay' => $day ?? 0,
                 'CRong' => $rong ?? 0,
                 'CDai' => $dai ?? 0,
