@@ -256,7 +256,7 @@ class HandleQcService
             $warehouse = $team["WhsCode"];
 
             $qc = ($day ?? 0) . 'x' . ($rong ?? 0) . 'x' . ($dai ?? 0);
-            $itemFind = $this->oitmService->findItemByQCAndWH($day, $rong, $warehouse);
+            $itemFind = $this->oitmService->findItemByQCAndWH($day, $rong, $dai, $warehouse);
 
             if (!$itemFind) {
                 return response()->json([
