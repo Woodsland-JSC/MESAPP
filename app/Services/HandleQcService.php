@@ -255,12 +255,12 @@ class HandleQcService
             $team = $data['team'];
             $warehouse = $team["WhsCode"];
 
-            $qc = $day . 'x' . $rong . 'x' . $dai;
-            $itemFind = $this->oitmService->findItemByQCAndWH($day, $rong, $dai, $warehouse);
+            $qc = ($day ?? 0) . 'x' . ($rong ?? 0) . 'x' . ($dai ?? 0);
+            $itemFind = $this->oitmService->findItemByQCAndWH($day, $rong, $warehouse);
 
             if (!$itemFind) {
                 return response()->json([
-                    'message' => "Không tìm thấy item với quy cách $qc"
+                    'message' => 'Không tìm thấy items với quy cách ' . $qc
                 ], 500);
             }
 
@@ -343,9 +343,9 @@ class HandleQcService
 
             LogErrorHumidity::create([
                 'ItemCode' => $itemFind['ItemCode'],
-                'CDay' => $day,
-                'CRong' => $rong,
-                'CDai' => $dai,
+                'CDay' => $day ?? 0,
+                'CRong' => $rong ?? 0,
+                'CDai' => $dai ?? 0,
                 'Quantity' => $m3,
                 'QuantityT' => $dai != 0 ? $quantity : null,
                 'Warehouse' => $warehouse,
@@ -375,7 +375,7 @@ class HandleQcService
                 $this->SapB1Service->cancelInventoryGenExits($exit['DocEntry']);
             }
 
-            // DB::rollBack();
+            DB::rollBack();
 
             return response()->json([
                 'message' => 'Xử lý báo lỗi sấy ẩm có lỗi.'
