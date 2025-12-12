@@ -65,6 +65,14 @@ class OITMService
         Select OBTN."DistNumber",OBTN."ItemCode",OBTQ."WhsCode",OBTQ."Quantity", OBTN."U_CDai", OBTN."U_CRong", OBTN."U_CDay"
         From OBTN 
         inner JOIN OBTQ ON OBTN."ItemCode" = OBTQ."ItemCode" and OBTN."SysNumber" = OBTQ."SysNumber" AND OBTQ."Quantity" > 0
+        WHERE OBTN."U_CDay" = ? AND OBTN."U_CRong" = ? AND OBTN."U_CDai" = ? AND OBTQ."WhsCode" = ?
+        ORDER BY OBTQ."Quantity" desc limit 1
+    SQL;
+
+    private $SQL_GET_ITEM_BY_QC_WH_SITTE = <<<SQL
+        Select OBTN."DistNumber",OBTN."ItemCode",OBTQ."WhsCode",OBTQ."Quantity", OBTN."U_CDai", OBTN."U_CRong", OBTN."U_CDay"
+        From OBTN 
+        inner JOIN OBTQ ON OBTN."ItemCode" = OBTQ."ItemCode" and OBTN."SysNumber" = OBTQ."SysNumber" AND OBTQ."Quantity" > 0
         WHERE OBTN."U_CDay" = ? AND OBTN."U_CRong" = ? AND OBTQ."WhsCode" = ?
         ORDER BY OBTQ."Quantity" desc limit 1
     SQL;
@@ -155,10 +163,14 @@ class OITMService
         }
     }
 
-    public function findItemByQCAndWH($day, $rong, $wh)
+    public function findItemByQCAndWH($day, $rong, $dai, $wh)
     {
         try {
-            return $this->hanaService->selectOne($this->SQL_GET_ITEM_BY_QC_WH, [$day, $rong, $wh]);
+            if($dai || $dai != 0){
+                return $this->hanaService->selectOne($this->SQL_GET_ITEM_BY_QC_WH, [$day, $rong, $dai, $wh]);
+            }
+
+            return $this->hanaService->selectOne($this->SQL_GET_ITEM_BY_QC_WH_SITTE, [$day, $rong, $wh]);
         } catch (Throwable $th) {
             throw $th;
         }
