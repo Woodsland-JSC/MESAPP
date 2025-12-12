@@ -122,14 +122,12 @@ class VcnController extends Controller
                 }
             }
 
-            // Lấy thông tin từ awaitingstocks để tính toán số lượng tồn thực tế
-            foreach ($groupedResults as $item) {
+            foreach ($groupedResults as &$item) {
                 $awaitingQtySum = $awaitingStockVcnService->soLuongTonThucTe($item['SubItemCode'], $params['TO']);
-                $item['OnHand'] -= $awaitingQtySum;
+                $item['OnHand'] = $item['OnHand'] - ($awaitingQtySum ?? 0);
             }
             $groupedResults = array_values($groupedResults);
 
-            // Dữ liệu nhà máy, gửi kèm thôi chứ không có xài
             $factory = [
                 [
                     'Factory' => 'YS',
