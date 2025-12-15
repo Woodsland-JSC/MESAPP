@@ -151,7 +151,7 @@ const BaoCaoRaLoPallet = () => {
             filter: true,
         },
         {
-            headerName: "Ngày ra lò dự kiến",
+            headerName: "Ngày dự kiến ra lò",
             field: "expectedCompletionDate",
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
