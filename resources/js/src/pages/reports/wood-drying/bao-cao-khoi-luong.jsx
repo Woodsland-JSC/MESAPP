@@ -149,7 +149,8 @@ const BaoCaoKhoiLuongLoSay = () => {
                     minimumFractionDigits: 6,
                     maximumFractionDigits: 6
                 }) : 0
-            }
+            },
+            filter: true,
         },
         {
             headerName: "Số lượng (T)",
@@ -161,6 +162,7 @@ const BaoCaoKhoiLuongLoSay = () => {
             valueFormatter: param => {
                 return param.value ? param.value.toLocaleString() : "0";
             },
+            filter: true,
         },
         {
             headerName: "Ngày vào lò",
@@ -171,6 +173,7 @@ const BaoCaoKhoiLuongLoSay = () => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
                 return moment(param.value).format('DD/MM/YYYY HH:mm:ss')
             },
+            filter: true,
         },
         {
             headerName: "Ngày ra lò",
@@ -181,6 +184,7 @@ const BaoCaoKhoiLuongLoSay = () => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
                 return param.value ? moment(param.value).format('DD/MM/YYYY HH:mm:ss') : ""
             },
+            filter: true,
         },
         {
             headerName: "Trạng thái",
