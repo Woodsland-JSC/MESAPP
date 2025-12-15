@@ -21,9 +21,9 @@ class PalletController extends Controller
             $factory = $request->query('factory');
             $fromDate = $request->query('fromDate');
             $toDate = $request->query('toDate');
+            $type = $request->query('type') ?? 1;
 
-            $data = DB::select(
-                'SELECT
+            $SQL = 'SELECT
                     p.palletID,
                     p.Code,
                     p.LyDo,
@@ -39,17 +39,58 @@ class PalletController extends Controller
                     pd.Qty_T as Qty,
 	                pd.Qty as Mass,
                     pl.Oven,
-                    pl.Code as OvenCode
+                    pl.Code as OvenCode,
+                    DATE_FORMAT(DATE_ADD(pl.created_at, INTERVAL pl.Time DAY), "%d/%m/%Y") AS expectedCompletionDate
                 FROM pallets p
                 JOIN pallet_details pd ON pd.palletID = p.palletID
                 JOIN plan_detail pld ON pld.pallet = p.palletID
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 LEFT JOIN users u ON u.id = p.CompletedBy
-                WHERE p.factory = ? AND p.activeStatus = 1
-                AND p.created_at >= ?
-                AND p.created_at <= ?',
-                [$factory, $fromDate, $toDate]
-            );
+                WHERE p.factory = ? AND p.activeStatus = 1';
+
+            if ($type == 1) {
+                $SQL = $SQL . 'AND p.created_at >= ? AND p.created_at <= ?';
+            } else if ($type == 2) {
+                $SQL = $SQL . 'AND p.LoadedIntoKilnDate >= ? AND p.LoadedIntoKilnDate <= ?';
+            } else if ($type == 3) {
+                $SQL = $SQL . 'AND p.CompletedDate >= ? AND p.CompletedDate <= ?';
+            } else {
+                $query = <<<SQL
+                    SELECT
+                        p.palletID,
+                        p.Code,
+                        p.LyDo,
+                        p.QuyCach,
+                        p.factory,
+                        p.LoadedIntoKilnDate,
+                        p.CompletedDate,
+                        p.CompletedBy,
+                        p.stacking_time,
+                        u.username,
+                        u.first_name,
+                        u.last_name,
+                        pd.Qty_T as Qty,
+                        pd.Qty as Mass,
+                        pl.Oven,
+                        pl.Code as OvenCode,
+                        DATE_FORMAT(
+                            DATE_ADD(pl.created_at, INTERVAL pl.Time DAY),
+                            '%d/%m/%Y'
+                        ) AS expectedCompletionDate
+                    FROM pallets p
+                    JOIN pallet_details pd ON pd.palletID = p.palletID
+                    JOIN plan_detail pld ON pld.pallet = p.palletID
+                    JOIN planDryings pl ON pld.PlanID = pl.PlanID
+                    LEFT JOIN users u ON u.id = p.CompletedBy
+                    WHERE p.factory = ? AND p.activeStatus = 1
+                    AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) => ? AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) <= ?
+                SQL;
+
+                $SQL = $query;
+            }
+
+            $data = DB::select($SQL, [$factory, $fromDate, $toDate]);
+
             return response()->json([
                 'reports' => $data
             ]);
@@ -181,7 +222,7 @@ class PalletController extends Controller
                 AND p.CompletedDate >= ?
                 AND p.CompletedDate <= ?',
                 [$factory, Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
-            ); 
+            );
 
             return response()->json([
                 'reports' => $data
