@@ -143,7 +143,7 @@ const BaoCaoRaLoPallet = () => {
             field: "LoadedIntoKilnDate",
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return moment(param.value).format('DD/MM/YYYY hh:mm:ss')
+                return moment(param.value).format('DD/MM/YYYY HH:mm:ss')
             },
             width: 170,
             filter: true,
@@ -153,7 +153,7 @@ const BaoCaoRaLoPallet = () => {
             field: "expectedCompletionDate",
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : ""
+                return param.value ? moment(param.value).format('DD/MM/YYYY HH:mm:ss') : ""
             },
             width: 170,
             filter: true,
@@ -163,7 +163,7 @@ const BaoCaoRaLoPallet = () => {
             field: "CompletedDate",
             valueFormatter: param => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
-                return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : "Chưa ra lò"
+                return param.value ? moment(param.value).format('DD/MM/YYYY HH:mm:ss') : "Chưa ra lò"
             },
             width: 170,
             filter: true,
