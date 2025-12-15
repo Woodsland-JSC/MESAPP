@@ -49,11 +49,11 @@ class PalletController extends Controller
                 WHERE p.factory = ? AND p.activeStatus = 1';
 
             if ($type == 1) {
-                $SQL = $SQL . 'AND p.created_at >= ? AND p.created_at <= ?';
+                $SQL = $SQL . ' AND p.created_at >= ? AND p.created_at <= ?';
             } else if ($type == 2) {
-                $SQL = $SQL . 'AND p.LoadedIntoKilnDate >= ? AND p.LoadedIntoKilnDate <= ?';
+                $SQL = $SQL . ' AND p.LoadedIntoKilnDate >= ? AND p.LoadedIntoKilnDate <= ?';
             } else if ($type == 3) {
-                $SQL = $SQL . 'AND p.CompletedDate >= ? AND p.CompletedDate <= ?';
+                $SQL = $SQL . ' AND p.CompletedDate >= ? AND p.CompletedDate <= ?';
             } else {
                 $query = <<<SQL
                     SELECT
