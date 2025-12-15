@@ -24,6 +24,25 @@ const BaoCaoRaLoPallet = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    const [typeDates, setTypeDates] = useState([
+        {
+            value: 1,
+            label: "Ngày tạo"
+        },
+        {
+            value: 2,
+            label: "Ngày vào lò"
+        },
+        {
+            value: 3,
+            label: "Ngày ra lò"
+        },
+        {
+            value: 4,
+            label: "Ngày ra lò dự kiến"
+        },
+    ]);
+    const [typeDate, setTypeDate] = useState(typeDates[0]);
 
 
     const [filter, setFilter] = useState({
@@ -69,7 +88,8 @@ const BaoCaoRaLoPallet = () => {
             let res = await getPalletReport({
                 factory: factory.value,
                 fromDate: moment(new Date(filter.fromDate)).format('yyyy-MM-DD') + ' 00:00:00',
-                toDate: moment(new Date(filter.toDate)).format('yyyy-MM-DD') + ' 23:59:59'
+                toDate: moment(new Date(filter.toDate)).format('yyyy-MM-DD') + ' 23:59:59',
+                type: typeDate.value
             });
             let reports = res.reports;
             reports.forEach(item => {
@@ -99,21 +119,16 @@ const BaoCaoRaLoPallet = () => {
             rowGroup: true,
             enableRowGroup: true,
         },
-        // {
-        //     headerName: "Mã lò",
-        //     field: "OvenCode",
-        //     filter: true,
-        //     width: 150,
-        // },
-        {
-            headerName: "Pallet",
-            field: "Code",
-            filter: true,
-            width: 150,
-        },
         {
             headerName: "Quy cách",
             field: "QuyCach",
+            filter: true,
+            width: 150,
+            rowGroup: true,
+        },
+        {
+            headerName: "Pallet",
+            field: "Code",
             filter: true,
             width: 150,
         },
@@ -130,7 +145,18 @@ const BaoCaoRaLoPallet = () => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
                 return moment(param.value).format('DD/MM/YYYY hh:mm:ss')
             },
-            width: 170
+            width: 170,
+            filter: true,
+        },
+        {
+            headerName: "Ngày ra lò dự kiến",
+            field: "expectedCompletionDate",
+            valueFormatter: param => {
+                if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
+                return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : ""
+            },
+            width: 170,
+            filter: true,
         },
         {
             headerName: "Ngày ra lò",
@@ -139,7 +165,8 @@ const BaoCaoRaLoPallet = () => {
                 if (param.node.id == 'rowGroupFooter_ROOT_NODE_ID' || param.node.group) return "";
                 return param.value ? moment(param.value).format('DD/MM/YYYY hh:mm:ss') : "Chưa ra lò"
             },
-            width: 170
+            width: 170,
+            filter: true,
         },
         {
             headerName: "Số lượng",
@@ -149,7 +176,8 @@ const BaoCaoRaLoPallet = () => {
             headerComponentParams: { displayName: "Số lượng" },
             valueFormatter: (params) => {
                 return params.value ? params.value.toLocaleString() : "0";
-            }
+            },
+            filter: true,
         },
         {
             headerName: "Khối lượng",
@@ -163,6 +191,7 @@ const BaoCaoRaLoPallet = () => {
                     maximumFractionDigits: 6
                 }) : 0
             },
+            filter: true,
         },
         {
             headerName: "Người hoàn thành",
@@ -171,8 +200,9 @@ const BaoCaoRaLoPallet = () => {
                 return params?.data.username ? `${params?.data.username}_${params?.data.last_name} ${params?.data.first_name}` : ""
             },
             minWidth: 170,
-            flex: 1
-        },
+            flex: 1,
+            filter: true
+        }
     ]);
 
     const getRowStyle = (params) => {
@@ -184,7 +214,7 @@ const BaoCaoRaLoPallet = () => {
 
     useEffect(() => {
         if (factory) getReportPallets();
-    }, [factory, filter.fromDate, filter.toDate])
+    }, [factory, filter.fromDate, filter.toDate, typeDate])
 
     useEffect(() => {
         getFactories();
@@ -222,7 +252,7 @@ const BaoCaoRaLoPallet = () => {
                     </div>
 
                     <div className="flex xl:flex-row lg:flex-row md:flex-row flex-col xl:space-x-4 lg:space-x-4 md:space-x-4 space-x-0 bg-white p-4 pt-3 rounded-xl mb-4 gap-x-2 gap-y-2 items-center">
-                        <div className="md:w-1/3 w-full">
+                        <div className="md:w-1/6 w-full">
                             <label className=" text-sm font-medium text-gray-900">
                                 Nhà máy
                             </label>
@@ -235,9 +265,9 @@ const BaoCaoRaLoPallet = () => {
                                 }}
                             />
                         </div>
-                        <div className="md:w-2/3 w-full">
+                        <div className="md:w-2/6 w-full">
                             <div className="flex gap-x-3">
-                                <div className="w-1/2">
+                                <div className="w-2/4">
                                     <label className="block text-sm font-medium text-gray-900">
                                         Từ ngày
                                     </label>
@@ -250,7 +280,7 @@ const BaoCaoRaLoPallet = () => {
                                         className="mt-2 border border-gray-300 text-gray-900 text-base rounded-md block w-full p-1.5"
                                     />
                                 </div>
-                                <div className="w-1/2">
+                                <div className="w-2/4">
                                     <label className="block text-sm font-medium text-gray-900 ">
                                         Đến ngày
                                     </label>
@@ -265,19 +295,35 @@ const BaoCaoRaLoPallet = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="md:w-1/3 w-full">
-                            <label className=" text-sm font-medium text-gray-900">
-                                Trạng thái Pallet
-                            </label>
-                            <Select
-                                options={statusPallets}
-                                defaultValue={statusPallet}
-                                placeholder=""
-                                className="w-full mt-2 cursor-pointer"
-                                onChange={(pallet) => {
-                                    setStatusPallet(pallet);
-                                }}
-                            />
+                        <div className="md:w-3/6 w-full flex gap-x-3 items-center">
+                            <div className="w-1/2">
+                                <label className=" text-sm font-medium text-gray-900">
+                                    Trạng thái Pallet
+                                </label>
+                                <Select
+                                    options={statusPallets}
+                                    defaultValue={statusPallet}
+                                    placeholder=""
+                                    className="w-full mt-2 cursor-pointer"
+                                    onChange={(pallet) => {
+                                        setStatusPallet(pallet);
+                                    }}
+                                />
+                            </div>
+                            <div className="w-1/2">
+                                <label className=" text-sm font-medium text-gray-900">
+                                    Loại ngày tìm kiếm
+                                </label>
+                                <Select
+                                    options={typeDates}
+                                    value={typeDate}
+                                    placeholder=""
+                                    className="w-full mt-2 cursor-pointer"
+                                    onChange={(date) => {
+                                        setTypeDate(date);
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
 
