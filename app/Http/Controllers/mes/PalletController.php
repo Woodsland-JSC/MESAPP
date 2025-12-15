@@ -40,7 +40,7 @@ class PalletController extends Controller
 	                pd.Qty as Mass,
                     pl.Oven,
                     pl.Code as OvenCode,
-                    DATE_FORMAT(DATE_ADD(pl.created_at, INTERVAL pl.Time DAY), "%d/%m/%Y") AS expectedCompletionDate
+                    DATE_FORMAT(DATE_ADD(pl.created_at, INTERVAL pl.Time DAY), "%Y-%m-%d %H:%i:%s") AS expectedCompletionDate
                 FROM pallets p
                 JOIN pallet_details pd ON pd.palletID = p.palletID
                 JOIN plan_detail pld ON pld.pallet = p.palletID
@@ -75,7 +75,7 @@ class PalletController extends Controller
                         pl.Code as OvenCode,
                         DATE_FORMAT(
                             DATE_ADD(pl.created_at, INTERVAL pl.Time DAY),
-                            '%d/%m/%Y'
+                            '%Y-%m-%d %H:%i:%s'
                         ) AS expectedCompletionDate
                     FROM pallets p
                     JOIN pallet_details pd ON pd.palletID = p.palletID
