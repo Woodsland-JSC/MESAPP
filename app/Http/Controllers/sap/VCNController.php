@@ -582,13 +582,33 @@ class VCNController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422); // Return validation errors with a 422 Unprocessable Entity status code
         }
+
         $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
         if (!$data) {
             throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
         }
         // giá trị cột confirm bằng 2 là trả lại
-        notireceiptVCN::where('id', $request->id)->update(['confirm' => 2, 'confirmBy' => Auth::user()->id, 'confirm_at' => Carbon::now()->format('YmdHis'), 'text' => $request->reason]);
+        DB::beginTransaction();
+        $data->update([
+            'confirm' => 2,
+            'confirmBy' => Auth::user()->id,
+            'confirm_at' => Carbon::now()->format('YmdHis'),
+            'text' => $request->reason,
+            'returned_by' => Auth::user()->id,
+            'returned_at' => Carbon::now()->format('YmdHis')
+        ]);
         awaitingstocksvcn::where('notiId', $request->id)->delete();
+
+        // if($data->isRONG){
+        //     $count = notireceiptVCN::query()->where('disassembly_order_id', $data->disassembly_order_id)->count();
+
+        //     if($count == 0){
+        //         DisassemblyOrder::query()->where('id', $data->disassembly_order_id)->update([
+        //             'isClosed' => 1
+        //         ]);
+        //     }
+        // }
+        DB::commit();
         return response()->json('success', 200);
     }
 
@@ -1653,9 +1673,6 @@ class VCNController extends Controller
                     }
                 }
 
-                // Chỉnh sửa giá trị ConLai của mỗi bản ghi trong $results bằng cách lấy tổng số lượng của trường
-                // Quantity của bảng chitietrong có baseID = $notification->id. Nhóm theo ItemCode.
-                // Sau đó cập nhật giá trị ConLai mới trong $results = ConLai - Qty theo ItemCode của $results.
                 $itemCode = $result['ItemCode'];
                 $chitietrongQty = DB::table('chitietrong')
                     ->join('notireceiptVCN', 'chitietrong.baseID', '=', 'notireceiptVCN.id')
@@ -1663,8 +1680,8 @@ class VCNController extends Controller
                     ->where('notireceiptVCN.team', $request->TO)
                     ->where('notireceiptVCN.version', $request->version)
                     ->where('chitietrong.ItemCode', $itemCode)
+                    ->where('notireceiptVCN.confirm', '!=', 2)
                     ->sum('chitietrong.Quantity');
-
                 $result['ConLai'] = (float) $result['ConLai'] - (float) $chitietrongQty;
                 $results[$key] = $result;
             }
@@ -2091,10 +2108,8 @@ class VCNController extends Controller
         try {
             DB::beginTransaction();
 
-            // Find the disassembly order by ID
             $disassemblyOrder = DisassemblyOrder::find($request->id);
 
-            // Check if the disassembly order exists
             if (!$disassemblyOrder) {
                 throw new \Exception('Lệnh phân rã không tồn tại.');
             }
@@ -2168,8 +2183,7 @@ class VCNController extends Controller
                 throw new \Exception('Không thể đóng lệnh khi còn giao dịch chưa được xác nhận.');
             }
 
-            // Update the status of the disassembly order to 'closed'
-            $disassemblyOrder->status = 'closed';
+            $disassemblyOrder->isClosed = 1;
             $disassemblyOrder->save();
 
             DB::commit();
@@ -2902,6 +2916,9 @@ class VCNController extends Controller
             DB::beginTransaction();
             // to bình thường
             $data = notireceiptVCN::where('id', $request->id)->where('confirm', 0)->first();
+
+
+
             if (!$data) {
                 throw new \Exception('Giao dịch hiện tại có thể đã được xác nhận hoặc bị xóa. Hãy load lại tổ để kiểm tra.');
             }
@@ -2917,11 +2934,13 @@ class VCNController extends Controller
             $stockissue = null;
             $dataReceipt = chiTietRong::where('baseID', $request->id)->where('type', 0)->get();
 
+            $U_GIAO = DB::table('users')->where('id', $data->CreatedBy)->first();
 
             $allocates = [];
             foreach ($dataReceipt as $dtreceipt) {
                 $dataallocate = $this->collectdatadetailrong($data->FatherCode, $dtreceipt->ItemCode, $data->team, $data->version, $data->LSX);
                 $newAllocates = $this->allocatedIssueRong($dataallocate, $dtreceipt->Quantity);
+
                 if (count($newAllocates) == 0) {
                     return response()->json([
                         'error' => false,
@@ -2958,12 +2977,11 @@ class VCNController extends Controller
                         $allocates[$docEntry] = [
                             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                             "U_UUID" => $request->id,
-                            // "DocEntry" => $docEntry,
-                            // "SPDICH" => $allocate['SPDICH'],
-                            // "Version" => $allocate['Version'],
+                            "U_LSX" => $allocate['U_GRID'],
+                            "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
+                            "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                             "U_TO" => $data->team,
                             "DocumentLines" => [
-
                                 [
                                     "BaseEntry" => $docEntry,
                                     "BaseType" => 202,
@@ -2988,7 +3006,11 @@ class VCNController extends Controller
                 'InventoryGenEntries' => $result,
                 'InventoryGenExits' => $stockissue
             ];
+
+
             $payload = playloadBatch($dataSendPayload); // Assuming `playloadBatch()` function prepares the payload.
+
+
             $client = new Client();
             $response = $client->request('POST', UrlSAPServiceLayer() . '/b1s/v1/$batch', [
                 'verify' => false,
