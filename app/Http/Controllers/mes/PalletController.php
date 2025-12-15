@@ -83,7 +83,7 @@ class PalletController extends Controller
                     JOIN planDryings pl ON pld.PlanID = pl.PlanID
                     LEFT JOIN users u ON u.id = p.CompletedBy
                     WHERE p.factory = ? AND p.activeStatus = 1
-                    AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) => ? AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) <= ?
+                    AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) >= ? AND DATE_ADD(pl.created_at, INTERVAL pl.Time DAY) <= ?
                 SQL;
 
                 $SQL = $query;
@@ -96,7 +96,8 @@ class PalletController extends Controller
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Lấy Pallets có lỗi!'
+                'message' => 'Lấy Pallets có lỗi!',
+                'detail' => $e->getMessage()
             ], 500);
         }
     }

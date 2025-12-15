@@ -99,6 +99,8 @@ const BaoCaoRaLoPallet = () => {
             setReports(res.reports);
             setLoading(false)
         } catch (error) {
+            console.log(error);
+            
             setLoading(false)
         }
     }
