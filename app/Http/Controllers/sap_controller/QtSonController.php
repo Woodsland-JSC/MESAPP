@@ -32,4 +32,22 @@ class QtSonController extends Controller
             'data' => $items
         ]);
     }
+
+    public function insert(Request $request)
+    {
+        $data = $request->all();
+        if (count($data) == 0) {
+            return response()->json([
+                'message' => 'Thiếu dữ liệu'
+            ], 500);
+        }
+        $this->QtSonService->insert($data);
+        return response()->json([
+            'message' => "Thêm mới thành công"
+        ]);
+    }
+
+    public function findItem(Request $request){
+        return $this->QtSonService->findItem($request->value);
+    }
 }
