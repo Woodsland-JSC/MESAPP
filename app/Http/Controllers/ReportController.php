@@ -317,10 +317,6 @@ class ReportController extends Controller
                 'a.created_at',
                 'a.factory as plant'
             )
-            ->whereBetween('a.created_at', [
-                $FromDate,
-                $ToDate
-            ])
             ->get();
 
         return response()->json($data);

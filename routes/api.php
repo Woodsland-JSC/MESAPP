@@ -279,6 +279,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::group(['prefix' => 'sap/qt-son'], function () {
         Route::get('getStepsQT', [QtSonController::class, 'getStepsQT']);
+        Route::get('findItem', [QtSonController::class, 'findItem']);
+        Route::post('insert', [QtSonController::class, 'insert']);
     });
 
     Route::group(['prefix' => 'mes/qc'], function () {

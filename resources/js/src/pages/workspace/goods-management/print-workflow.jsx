@@ -11,8 +11,9 @@ import { getItemsSFByWh } from "../../../api/oitw.api";
 import { AgGridReact } from "ag-grid-react";
 import Loader from "../../../components/Loader";
 import AG_GRID_LOCALE_VI from '../../../utils/locale.vi';
-import { getStepsQT } from "../../../api/qt-son.api";
+import { findItem, getStepsQT, insertQT } from "../../../api/qt-son.api";
 import { FaCircleRight } from "react-icons/fa6";
+import Swal from "sweetalert2";
 
 const PrintWorkflow = () => {
     const { user } = useAppContext();
@@ -32,7 +33,8 @@ const PrintWorkflow = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [itemQt, setItemQt] = useState({
-        quantity: ''
+        quantity: '',
+        ItemName: ''
     });
 
     const getFactoryCBG = async () => {
@@ -147,6 +149,10 @@ const PrintWorkflow = () => {
         onClose();
         setItemSelected(null);
         setDataQT([]);
+        setItemQt({
+            quantity: '',
+            ItemName: ''
+        });
     }
 
     const clearDataChangeFactory = () => {
@@ -155,8 +161,13 @@ const PrintWorkflow = () => {
         setWarehouse(null);
     }
 
-    const addItem = () => {
+    const addItem = async () => {
         if (!itemQt.quantity) {
+            toast.error('Vui lòng nhập số lượng.');
+            return;
+        }
+
+        if (itemQt.quantity == 0) {
             toast.error('Vui lòng nhập số lượng.');
             return;
         }
@@ -166,26 +177,79 @@ const PrintWorkflow = () => {
             return;
         }
 
-        let find = data.some(item => item.ItemCode == itemQt.ItemCode && item.CDOAN == itemQt.CDOAN && item.Step == itemQt.Step);
+        try {
+            let find = data.some(item => item.ItemCode == itemQt.ItemCode && item.CDOAN == itemQt.CDOAN && item.Step == itemQt.Step);
 
-        if (find) {
-            toast.error('Công đoạn và bước hiện tại đã được tạo.');
-            return;
-        }        
+            if (find) {
+                toast.error('Công đoạn và bước hiện tại đã được tạo.');
+                return;
+            }
 
-        let _data = [...data, itemQt];
+            setIsLoading(true)
+            let item = await findItem(itemQt.value);
+            setIsLoading(false)
 
-        setData(_data);
-        setItemQt(pre => ({
-            quantity: '',
-            ...pre
-        }));
+            if (item) {
+                toast.error('Công đoạn và ItemCode hiện tại đã được tạo trong cùng ngày.');
+                return;
+            }
+
+            itemQt.ItemName = itemSelected.ItemName ?? ''
+
+            let _data = [...data, itemQt];
+
+            setData(_data);
+            setItemQt(pre => ({
+                quantity: '',
+                ItemName: '',
+                ...pre
+            }));
+        } catch (error) {
+            toast.error('Lỗi khi thêm item.');
+        }
     }
 
     const removeItem = (index) => {
         let _data = [...data];
         _data = _data.filter((_, i) => i != index);
         setData(_data);
+    }
+
+    const saveData = () => {
+        if (data.length == 0) {
+            toast.error('Thiếu dữ liệu.');
+            return
+        }
+
+        if (isLoading) return;
+
+        Swal.fire({
+            title: 'Xác nhận lưu quy trình?',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    setIsLoading(true);
+                    let res = await insertQT(data);
+                    console.log("res", res);
+
+                    setIsLoading(false);
+                    onCloseQt();
+                    setData([]);
+                    setItemQt({
+                        quantity: ''
+                    });
+                    toast.success('Tạo dữ liệu thành công.');
+                } catch (error) {
+                    setIsLoading(false);
+                    toast.error(error.response.data.message ?? 'Tạo dữ liệu có lỗi.');
+                }
+            }
+        })
     }
 
     useEffect(() => {
@@ -390,6 +454,7 @@ const PrintWorkflow = () => {
                                                     step={1}
                                                     min={0}
                                                     className="mt-2 mb-2"
+                                                    value={itemQt.quantity}
                                                     onChange={(value) => {
                                                         setItemQt(pre => ({ ...pre, quantity: value }));
                                                     }}
@@ -434,7 +499,7 @@ const PrintWorkflow = () => {
                                                                             <td class="py-4 px-2">{item.Step}</td>
                                                                             <td class="py-4 px-2">{item.quantity}</td>
                                                                             <td class="py-4 px-2 float-right">
-                                                                                <IoMdTrash color="#dc2626" cursor="pointer" size={28} onClick={() => removeItem(index)}/>
+                                                                                <IoMdTrash color="#dc2626" cursor="pointer" size={28} onClick={() => removeItem(index)} />
                                                                             </td>
                                                                         </tr>
                                                                     ))
@@ -457,7 +522,10 @@ const PrintWorkflow = () => {
                                 </Button>
                                 <Button
                                     colorScheme="blue"
-                                    isDisabled={data.length == 0}
+                                    isDisabled={data.length == 0 || isLoading}
+                                    onClick={saveData}
+                                    isLoading={isLoading}
+
                                 >
                                     Xác nhận
                                 </Button>
