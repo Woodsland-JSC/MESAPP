@@ -28,13 +28,13 @@ import QcDetailViewMobile from "./qc-detail-mobile";
 import QcDetail from "./qc-detail";
 import ViewMobile from "./view-mobile";
 import ViewDefault from "./view-default";
+import Loader from "../../../../../../components/Loader";
 
 const ChungTuNhapKhoChiTiet = () => {
     const navigate = useNavigate();
     const { sapId } = useParams();
     const [searchParams] = useSearchParams();
     
-
     const [dataNLGBQCDetail, setDataNLGBQCDetail] = useState([]);
     const [selectedNLGBQCD, setSelectedNLGBQCD] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -42,6 +42,7 @@ const ChungTuNhapKhoChiTiet = () => {
     const [qcTypes, setQcType] = useState([]);
     const [gqcSelected, setGqcSelected] = useState(null)
     const [loadingGQC, setLoadingGQC] = useState(false);
+    const [loadingNLGBQCDetail, setLoadingNLGBQCDetail] = useState(false);
 
     // chakra-ui Modal State
     const { isOpen: isOpen, onOpen: onOpen, onClose: onClose } = useDisclosure()
@@ -144,6 +145,7 @@ const ChungTuNhapKhoChiTiet = () => {
 
     const getInfoGetQCDetail = async (lineData) => {
         try {
+            setLoadingNLGBQCDetail(true)
             setInfoGetQCDetail([]);
 
             let res = await QCApi.getQcDetail(sapId, lineData.lineId)
@@ -163,7 +165,9 @@ const ChungTuNhapKhoChiTiet = () => {
             setExistingQcType(existingQcTypes);
             setInfoGetQCDetail(res);
             onOpen();
+            setLoadingNLGBQCDetail(false)
         } catch {
+            setLoadingNLGBQCDetail(false)
             setInfoGetQCDetail([]);
             setExistingQcType([]);
             setSelectedNLGBQCD(null);
@@ -1036,6 +1040,8 @@ const ChungTuNhapKhoChiTiet = () => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
+            {loadingNLGBQCDetail && <Loader />}
         </Layout>
     )
 }
