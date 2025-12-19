@@ -69,44 +69,9 @@ const ChungTuQc = ({ factories, loaiChungTu }) => {
     return (
         <>
             <div className="border-2 border-gray-300 bg-white rounded-xl py-2 pb-3 block">
-                <div className="flex-col items-center space-y-3 px-4 mt-1 mb-1">
+                <div className="px-4 ">
                     {/* Date Filter */}
-                    <div className="flex space-x-3">
-                        <div className="col-span-1 w-full">
-                            <label
-                                htmlFor="indate"
-                                className="block mb-1 font-medium text-gray-900 "
-                            >
-                                Từ ngày
-                            </label>
-                            <DatePicker
-                                selected={filter.fromDate}
-                                dateFormat="dd/MM/yyyy"
-                                onChange={(date) => {
-                                    setFilter({ ...filter, fromDate: date })
-                                }}
-                                className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                            />
-                        </div>
-                        <div className="col-span-1 w-full">
-                            <label
-                                htmlFor="indate"
-                                className="block mb-1 font-medium text-gray-900 "
-                            >
-                                Đến ngày
-                            </label>
-                            <DatePicker
-                                selected={filter.toDate}
-                                dateFormat="dd/MM/yyyy"
-                                onChange={(date) => {
-                                    setFilter({ ...filter, toDate: date })
-                                }}
-                                className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex space-x-3 w-full">
+                    <div className="flex flex-col gap-y-3 md:flex-row md:space-y-0 md:gap-x-3">
                         <div className="w-full">
                             <label
                                 htmlFor="first_name"
@@ -122,6 +87,38 @@ const ChungTuQc = ({ factories, loaiChungTu }) => {
                                 onChange={(selected) => {
                                     setFilter({ ...filter, factory: selected.value })
                                 }}
+                            />
+                        </div>
+                        <div className="w-full">
+                            <label
+                                htmlFor="indate"
+                                className="block mb-1 font-medium text-gray-900 "
+                            >
+                                Từ ngày
+                            </label>
+                            <DatePicker
+                                selected={filter.fromDate}
+                                dateFormat="dd/MM/yyyy"
+                                onChange={(date) => {
+                                    setFilter({ ...filter, fromDate: date })
+                                }}
+                                className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                            />
+                        </div>
+                        <div className="w-full">
+                            <label
+                                htmlFor="indate"
+                                className="block mb-1 font-medium text-gray-900 "
+                            >
+                                Đến ngày
+                            </label>
+                            <DatePicker
+                                selected={filter.toDate}
+                                dateFormat="dd/MM/yyyy"
+                                onChange={(date) => {
+                                    setFilter({ ...filter, toDate: date })
+                                }}
+                                className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                             />
                         </div>
                     </div>
@@ -150,7 +147,7 @@ const ChungTuQc = ({ factories, loaiChungTu }) => {
                         ) : (
                             <div>
                                 <div className="">
-                                    <ViewMobileChungTuQC data={data} navigate={navigate} filter={filter} loaiChungTu={loaiChungTu.value}/>
+                                    <ViewMobileChungTuQC data={data} navigate={navigate} filter={filter} loaiChungTu={loaiChungTu.value} />
                                 </div>
                                 {/* <div className="xl:block">
                             <ViewTableNhapKhoQc data={data} navigate={navigate}/>

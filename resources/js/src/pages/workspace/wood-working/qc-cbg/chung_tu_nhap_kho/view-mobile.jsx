@@ -13,14 +13,14 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                             <div className="text-xl font-semibold text-[#17506B] mb-1">
                                 {item.lotEntryId}
                             </div>
-                            <div className="grid grid-cols-2 font-semibold mb-2">
+                            <div className="flex font-semibold justify-between">
                                 <span>Mã SAP: </span>
                                 <span className="font-normal">
                                     {item.sapId}
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-2 font-semibold">
+                            <div className="flex font-semibold justify-between">
                                 <span>Ngày nhập:</span>
                                 <span className="font-normal">
                                     {item.dateEntry.split(" ")[0]}
@@ -36,13 +36,13 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Đơn vị giao hàng
                                                 </div>
                                                 <div className="font-semibold text-[13px] text-[#1B536E]" title={item.deliveryName}>
-                                                    {item.deliveryName}
+                                                    {item.deliveryName ?? '-'}
                                                 </div>
                                                 <div className="text-[13px] mt-2" title={item.deliveryAddress}>
                                                     {item.deliveryAddress ?? '-'}
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    Biển số xe: {item.plateNumber}
+                                                    Biển số xe: {item.plateNumber ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -52,7 +52,7 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Trạng thái MT
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    {item.statusMT}
+                                                    {item.statusMT ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -63,7 +63,7 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Loại gỗ
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    {item.woodType}
+                                                    {item.woodType ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -73,7 +73,7 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Số chứng từ
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    {item.certNumber}
+                                                    {item.certNumber ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -84,7 +84,7 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Nhà cung cấp
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    Mã: {item.suplierId}
+                                                    Mã: {item.suplierId ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -95,10 +95,10 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                     Kho nhập
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    Mã: {item.wareHouseId}
+                                                    Mã: {item.wareHouseId ?? '-'}
                                                 </div>
                                                 <div className="text-[13px]">
-                                                    {item.wareHouseName}
+                                                    {item.wareHouseName ?? '-'}
                                                 </div>
                                             </div>
                                         </div>
@@ -108,7 +108,7 @@ const ViewMobileNhapKhoQC = ({ data, navigate, selecteNLG, filter, loaiChungTu }
                                                 <button
                                                     onClick={() => selecteNLG(item)}
                                                     type="button" 
-                                                    className="w-[150px] text-white bg-[#17506B] font-medium rounded-lg px-5 py-2.5 text-center"
+                                                    className="w-[150px] text-white bg-[#e6264f] font-medium rounded-lg px-5 py-2.5 text-center"
                                                 >
                                                     Trả lại NCC
                                                 </button>
