@@ -23,6 +23,7 @@ class LogErrorHumidity extends Model
         'Team',
         'CreatedBy',
         'EntryId',
-        'ExitId'
+        'ExitId',
+        'Factory'
     ];
 }
