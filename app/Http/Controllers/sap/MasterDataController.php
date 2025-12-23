@@ -10,6 +10,8 @@ use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reasons;
 use App\Models\User;
+use App\Services\HanaService;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -650,7 +652,7 @@ class MasterDataController extends Controller
                 return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
                 // Return validation errors with a 422 Unprocessable Entity status code
             }
-            
+
             $filter = "";
             $flag = '';
             if ($request->reason == 'SL') {
@@ -830,6 +832,40 @@ class MasterDataController extends Controller
                 'error' => false,
                 'status_code' => 500,
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getIndatesByItem(Request $request, HanaService $hanaService)
+    {
+        try {
+            $query = <<<SQL
+                SELECT DISTINCT A."DocDate" FROM IBT1 A
+                JOIN OWHS B ON A."WhsCode" = B."WhsCode"
+                WHERE B."U_Flag" IN (?) 
+                AND B."BPLid" = ?
+                AND B."U_FAC" = ?
+                AND A."ItemCode" = ?
+                AND A."Direction"= 0
+                AND A."BatchNum" = ?
+            SQL;
+
+            $flag = 'TS';
+            if ($request->query('reason') == 'SL') {
+                $flag = 'SL';
+            }
+
+            $branch = Auth::user()->branch;
+            $plant = Auth::user()->plant;
+            $itemCode = $request->query('itemCode');
+            $batch = $request->query('batch');
+
+            $data = $hanaService->select($query, [$flag, $branch, $plant, $itemCode, $batch]);
+
+            return $data;
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lấy dữ liệu có lỗi'
             ], 500);
         }
     }
