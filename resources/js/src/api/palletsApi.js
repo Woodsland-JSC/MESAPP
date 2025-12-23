@@ -73,7 +73,7 @@ const palletsApi = {
         const url = `/ovens/production-batch`;
         return axiosClient().post(url, {});
     },
-    deletePallet: (deleteData ) => {
+    deletePallet: (deleteData) => {
         const url = `/ovens/production-batch-delete`;
         return axiosClient().delete(url, { data: deleteData });
     },
@@ -110,10 +110,10 @@ const palletsApi = {
         return axiosClient().get(url, {
             params: {
                 PlanID,
-                Type : "DA"
+                Type: "DA"
             },
         });
-    },   
+    },
     getTempDisabledRecords: (PlanID, Type) => {
         const url = `/dgm/giatrihientai`;
         return axiosClient().get(url, {
@@ -122,7 +122,7 @@ const palletsApi = {
                 Type: "KT",
             },
         });
-    },   
+    },
     completeHumidRecord: (data) => {
         const url = `/dgm/hoanthanhdoam`;
         return axiosClient().post(url, data);
@@ -133,7 +133,7 @@ const palletsApi = {
     },
     deleteDisabledRecord: (PlanID, id) => {
         const url = `pallets/delete-disabled-record`;
-        return axiosClient().post(url, { 
+        return axiosClient().post(url, {
             PlanID,
             id
         });
@@ -154,8 +154,6 @@ const palletsApi = {
         const url = `ovens/production-complete-by-pallets-sl`;
         return axiosClient().post(url, data);
     }
-
-    
 };
 
 export default palletsApi;

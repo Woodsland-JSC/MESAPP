@@ -55,3 +55,10 @@ export const getWhHTCBG = (factory) => {
         }
     });
 }
+
+export const getIndatesByItem = (params) => {
+    const url = `/getIndatesByItem`;
+    return axiosClient().get(url, {
+        params
+    });
+}

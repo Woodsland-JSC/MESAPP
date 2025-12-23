@@ -42,6 +42,7 @@ import LoadedPallet from "../../../components/custom-icon/LoadedPallet";
 import { FaRotateLeft } from "react-icons/fa6";
 import { HiViewColumns } from "react-icons/hi2";
 import { FaCheck, FaCircle } from "react-icons/fa";
+import { getIndatesByItem } from "../../../api/MasterDataApi";
 
 function WoodSorting() {
     const { user } = useAppContext();
@@ -217,9 +218,8 @@ function WoodSorting() {
 
     const [palletQuantities, setPalletQuantities] = useState({});
 
-    const isPalletCardExists = (id, palletCards) => {
-        return palletCards.some((card) => card.key === id);
-    };
+    const [inDates, setInDates] = useState([]);
+    const [inDate, setInDate] = useState(null);
 
     const getEmployee = async () => {
         try {
@@ -229,7 +229,7 @@ function WoodSorting() {
                 label:
                     item.username +
                     " - " +
-                    item.last_name+
+                    item.last_name +
                     " " +
                     item.first_name,
             }));
@@ -281,6 +281,39 @@ function WoodSorting() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        console.log(selectedDryingMethod);
+        if (selectedDryingMethod) getInDateByItemCode();
+    }, [selectedDryingMethod])
+
+    const getInDateByItemCode = async () => {
+        try {
+            console.log("selectedDryingReason", selectedDryingReason);
+            console.log("selectedDryingMethod", selectedDryingMethod);
+
+            let res = await getIndatesByItem({
+                reason: selectedDryingReason.value,
+                itemCode: selectedDryingMethod.code,
+                batch: selectedDryingMethod.batchNum
+            })
+
+            res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
+
+            let data = [];
+
+            res.forEach(item => {
+                data.push({
+                    value: moment(item.DocDate).format('yyyy-MM-DD'),
+                    label: moment(item.DocDate).format('DD-MM-yyyy')
+                })
+            })
+
+            setInDates(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const formatNumber = (num) => {
         const number = parseFloat(num); // Chuyển đổi sang số
         if (isNaN(number)) {
@@ -312,7 +345,7 @@ function WoodSorting() {
             console.error("Error fetching drying methods:", error);
             toast.error(
                 "Không thể lấy dữ liệu quy cách thô. " +
-                    error?.response?.data?.message
+                error?.response?.data?.message
             );
             setIsItemsLoading(false);
             setDryingMethodsOptions([]);
@@ -344,7 +377,7 @@ function WoodSorting() {
             toast.error("Quy cách thô không được bỏ trống");
             return false;
         }
-        if (!startDate) {
+        if (!inDate) {
             toast.error("Ngày nhập gỗ không được bỏ trống");
             return false;
         }
@@ -374,7 +407,7 @@ function WoodSorting() {
                     batchId: batchId,
                     dryingReason: selectedDryingReason,
                     dryingMethod: selectedDryingMethod,
-                    startDate: formattedStartDate,
+                    startDate: inDate.value,
                 };
                 console.log("1. Dữ liệu từ form:", data);
 
@@ -547,7 +580,7 @@ function WoodSorting() {
             LoaiGo: selectedWoodType.value,
             MaLo: batchId,
             LyDo: selectedDryingReason.value,
-            NgayNhap: formattedStartDate,
+            NgayNhap: inDate.value + ' 00:00:00',
             MaNhaMay: user?.plant,
             stackingTime: stackingTime,
             employee: selectedEmployee.value,
@@ -587,11 +620,11 @@ function WoodSorting() {
             var height = parseFloat(card.props.height);
             var width = parseFloat(card.props.width);
             var thickness = parseFloat(card.props.thickness);
-            var quantity = parseFloat(palletQuantities[card.key] || 0);            
+            var quantity = parseFloat(palletQuantities[card.key] || 0);
 
             if (
                 selectedDryingReason.value !== "SL" &&
-                (quantity > Math.floor( (inStock * 1000000000) / (height * width * thickness)) ||
+                (quantity > Math.floor((inStock * 1000000000) / (height * width * thickness)) ||
                     quantity === 0 ||
                     quantity < 0 ||
                     quantity == "" ||
@@ -602,9 +635,9 @@ function WoodSorting() {
             }
 
             if (selectedDryingReason.value === "SL" && (quantity > (height == 0 ? inStock : Math.floor(inStock * 1000000000 / (height * width * thickness))) ||
-                    quantity === 0 ||
-                    quantity == "" ||
-                    quantity == null)
+                quantity === 0 ||
+                quantity == "" ||
+                quantity == null)
             ) {
                 hasInvalidQuantity = true;
                 break;
@@ -620,11 +653,8 @@ function WoodSorting() {
             setIsInvalidQuantity(false);
         }
 
-        const palletObject = createPalletObject();
+        const palletObject = createPalletObject();        
 
-        // console.log("palletObject", palletObject);
-        // return
-        
         setCreatePalletLoading(true);
 
         try {
@@ -671,8 +701,8 @@ function WoodSorting() {
             const displayError = errorMessage
                 ? errorMessage
                 : systemError
-                ? systemError
-                : "";
+                    ? systemError
+                    : "";
             setCreatePalletLoading(false);
             onConfirmClose();
             Swal.fire({
@@ -971,7 +1001,7 @@ function WoodSorting() {
                                             >
                                                 Đến ngày
                                             </label>
-                                            {}
+                                            { }
                                             <DatePicker
                                                 selected={toDate}
                                                 onChange={(date) =>
@@ -1064,18 +1094,15 @@ function WoodSorting() {
                                         <div className="xl:grid lg:grid md:grid grid-cols-4 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-4 gap-4">
                                             {palletHistory
                                                 .filter((pallet) =>
-                                                    `${pallet.thickness} ${
-                                                        pallet.width
-                                                    } ${pallet.length} ${
-                                                        pallet.pallet_code
-                                                    } ${
-                                                        pallet.sum_quantity
-                                                    } ${format(
-                                                        new Date(
-                                                            pallet.created_date
-                                                        ),
-                                                        "dd/MM/yyyy"
-                                                    )}`
+                                                    `${pallet.thickness} ${pallet.width
+                                                        } ${pallet.length} ${pallet.pallet_code
+                                                        } ${pallet.sum_quantity
+                                                        } ${format(
+                                                            new Date(
+                                                                pallet.created_date
+                                                            ),
+                                                            "dd/MM/yyyy"
+                                                        )}`
                                                         .toLowerCase()
                                                         .includes(
                                                             searchTerm.toLowerCase()
@@ -1097,7 +1124,7 @@ function WoodSorting() {
                                                         <div className="p-2 pb-0">
                                                             <div className="flex items-center space-x-3 rounded-lg w-full px-3 py-2  text-[#155979] bg-[#E0E1E3]">
                                                                 {pallet.activeStatus ==
-                                                                "1" ? (
+                                                                    "1" ? (
                                                                     <LoadedPallet className="text-xl text-[#4d4d4d]" />
                                                                 ) : (
                                                                     <SiElasticstack className="text-xl text-[#4d4d4d]" />
@@ -1131,7 +1158,7 @@ function WoodSorting() {
                                                                     <span>
                                                                         {" "}
                                                                         {pallet.LyDo ===
-                                                                        "SL"
+                                                                            "SL"
                                                                             ? "(m3)"
                                                                             : ""}
                                                                     </span>
@@ -1213,11 +1240,10 @@ function WoodSorting() {
                                         Đóng
                                     </button>
                                     <button
-                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${
-                                            deletePalletLoading
-                                                ? "opacity-100 cursor-not-allowed"
-                                                : ""
-                                        }`}
+                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${deletePalletLoading
+                                            ? "opacity-100 cursor-not-allowed"
+                                            : ""
+                                            }`}
                                         type="button"
                                         onClick={() => {
                                             handleDeletePallet();
@@ -1465,7 +1491,7 @@ function WoodSorting() {
                                                                                 lượng:{" "}
                                                                                 <span className="font-medium">
                                                                                     {palletTracingData.LyDo ==
-                                                                                    "SL" ? (
+                                                                                        "SL" ? (
                                                                                         <span>
                                                                                             <span>
                                                                                                 {
@@ -1785,10 +1811,6 @@ function WoodSorting() {
                                             placeholder="Chọn quy cách thô"
                                             loadOptions={loadDryingMethods}
                                             onChange={(value) => {
-                                                console.log(
-                                                    "Selected Drying Method:",
-                                                    value
-                                                );
                                                 setSelectedDryingMethod(value);
                                             }}
                                         />
@@ -1804,12 +1826,15 @@ function WoodSorting() {
                                                 *
                                             </span>
                                         </label>
-                                        <DatePicker
-                                            selected={startDate}
-                                            onChange={(date) =>
-                                                setStartDate(date)
-                                            }
-                                            className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
+                                        <Select
+                                            placeholder="Chọn ngày nhập gỗ"
+                                            options={inDates}
+                                            value={inDate}
+                                            onChange={(value) => {
+                                                console.log("Chọn ngày nhập gỗ", value);
+                                                setInDate(value);
+                                            }}
+                                            isDisabled={!selectedDryingMethod}
                                         />
                                     </div>
 
@@ -1874,11 +1899,10 @@ function WoodSorting() {
                         <div className="my-6 space-y-5">
                             {/* List of Pallet Cards */}
                             <div
-                                className={`my-6 space-y-5 ${
-                                    createPalletLoading
-                                        ? "pointer-events-none opacity-50"
-                                        : ""
-                                }`}
+                                className={`my-6 space-y-5 ${createPalletLoading
+                                    ? "pointer-events-none opacity-50"
+                                    : ""
+                                    }`}
                             >
                                 {isLoading ? (
                                     <div className="text-center">
@@ -1950,11 +1974,10 @@ function WoodSorting() {
                                         Đóng
                                     </button>
                                     <button
-                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${
-                                            createPalletLoading
-                                                ? "cursor-not-allowed opacity-100"
-                                                : ""
-                                        }`}
+                                        className={`bg-gray-800 p-2 rounded-xl px-4 h-fit font-medium active:scale-[.95]  active:duration-75 transition-all xl:w-fit md:w-fit w-2/3 text-white ${createPalletLoading
+                                            ? "cursor-not-allowed opacity-100"
+                                            : ""
+                                            }`}
                                         type="button"
                                         onClick={() => {
                                             handleCreatePallet();

@@ -144,6 +144,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     }
     // Item Master Data
     Route::get('/items', [MasterDataController::class, 'ItemMasterData'])->name('quy-cach-tho');
+    Route::get('/getIndatesByItem', [MasterDataController::class, 'getIndatesByItem'])->name('getIndatesByItem');
+    
     Route::get('/items-route', [MasterDataController::class, 'ItemByCD']);
     Route::get('/warehouses', [MasterDataController::class, 'WarehouseMasterData'])->name('danh sach kho');
     //Route::get('/warehouses/{WarehouseId}', [MasterDataController::class, 'WarehouseMasterData'])->name('GetWarehouseMasterDataSap');
