@@ -84,14 +84,17 @@ function BaoCaoTonSayLua() {
                     chosay_TH: 0,
                     tronglo_chuasay_TH: 0,
                     tronglo_TH: 0,
+                    tonKhoSS_TH: 0,
                     tonKho_YS: 0,
                     chosay_YS: 0,
                     tronglo_chuasay_YS: 0,
                     tronglo_YS: 0,
+                    tonKhoSS_YS: 0,
                     tonKho_TB: 0,
                     chosay_TB: 0,
                     tronglo_chuasay_TB: 0,
-                    tronglo_TB: 0
+                    tronglo_TB: 0,
+                    tonKhoSS_TB: 0,
                 }
 
                 if (pallet.Factory == 'YS') {
@@ -152,14 +155,17 @@ function BaoCaoTonSayLua() {
                     item.itemName = data.ItemName;
                     if (data.factory == 'TH') {
                         item.tonKho_TH += Number(data.EB || 0);
+                        item.tonKhoSS_TH += Number(data.EB_SS || 0);
                     }
 
                     if (data.factory == 'TB') {
                         item.tonKho_TB += Number(data.EB || 0);
+                        item.tonKhoSS_TB += Number(data.EB_SS || 0);
                     }
 
                     if (data.factory == 'YS') {
                         item.tonKho_YS += Number(data.EB || 0);
+                        item.tonKhoSS_YS += Number(data.EB_SS || 0);
                     }
 
                     data.used = 1;
@@ -191,40 +197,49 @@ function BaoCaoTonSayLua() {
                         chosay_TH: 0,
                         tronglo_chuasay_TH: 0,
                         tronglo_TH: 0,
+                        tonKhoSS_TH: 0,
                         tonKho_YS: 0,
                         chosay_YS: 0,
                         tronglo_chuasay_YS: 0,
                         tronglo_YS: 0,
+                        tonKhoSS_YS: 0,
                         tonKho_TB: 0,
                         chosay_TB: 0,
                         tronglo_chuasay_TB: 0,
-                        tronglo_TB: 0
+                        tronglo_TB: 0,
+                        tonKhoSS_TB: 0
                     }                    
 
                     if (obj.factory == 'TH') {
                         obj.tonKho_TH += Number(item.EB || 0);
+                        obj.tonKhoSS_TH += Number(item.EB_SS || 0);
                     }
 
                     if (obj.factory == 'TB') {
                         obj.tonKho_TB += Number(item.EB || 0);
+                        obj.tonKhoSS_TB += Number(item.EB_SS || 0);
                     }
 
                     if (obj.factory == 'YS') {
                         obj.tonKho_YS += Number(item.EB || 0);
+                        obj.tonKhoSS_YS += Number(item.EB_SS || 0);
                     }
 
                     formattedData.push(obj);
                 } else {
                     if (find.factory == 'TH') {
                         find.tonKho_TH += Number(item.EB || 0);
+                        find.tonKhoSS_TH += Number(item.EB_SS || 0);
                     }
 
                     if (find.factory == 'TB') {
                         find.tonKho_TB += Number(item.EB || 0);
+                        find.tonKhoSS_TB += Number(item.EB_SS || 0);
                     }
 
                     if (find.factory == 'YS') {
                         find.tonKho_YS += Number(item.EB || 0);
+                        find.tonKhoSS_YS += Number(item.EB_SS || 0);
                     }
                 }
             })
@@ -352,6 +367,19 @@ function BaoCaoTonSayLua() {
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
+                },
+                {
+                    headerName: "Tồn kho SS",
+                    field: "tonKhoSS_TH",
+                    width: 120,
+                    suppressHeaderMenuButton: true,
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? Number(params.value).toFixed(6).toLocaleString()
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Tồn kho SS" },
                 }
             ]
         },
@@ -405,6 +433,19 @@ function BaoCaoTonSayLua() {
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
+                },
+                {
+                    headerName: "Tồn kho SS",
+                    field: "tonKhoSS_YS",
+                    width: 120,
+                    suppressHeaderMenuButton: true,
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? Number(params.value).toFixed(6).toLocaleString()
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Tồn kho SS" },
                 }
             ],
         },
@@ -458,6 +499,19 @@ function BaoCaoTonSayLua() {
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
+                },
+                {
+                    headerName: "Tồn kho SS",
+                    field: "tonKhoSS_TB",
+                    width: 120,
+                    suppressHeaderMenuButton: true,
+                    aggFunc: "sum",
+                    valueFormatter: (params) => {
+                        return params.value
+                            ? Number(params.value).toFixed(6).toLocaleString()
+                            : "";
+                    },
+                    headerComponentParams: { displayName: "Tồn kho SS" },
                 }
             ],
         },
