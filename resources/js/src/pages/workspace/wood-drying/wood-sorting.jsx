@@ -288,9 +288,7 @@ function WoodSorting() {
 
     const getInDateByItemCode = async () => {
         try {
-            console.log("selectedDryingReason", selectedDryingReason);
-            console.log("selectedDryingMethod", selectedDryingMethod);
-
+            setInDate(null);
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
@@ -311,6 +309,7 @@ function WoodSorting() {
             setInDates(data);
         } catch (error) {
             console.log(error);
+            toast.error("Có lỗi sảy ra.")
         }
     }
 
