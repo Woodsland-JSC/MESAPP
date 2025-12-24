@@ -65,14 +65,18 @@ class planDryings extends Model
                 $current_year = now()->year;
                 $plant = Auth::user()->plant;
 
-                // Count the number of records for the current year and week
-                $recordCount = static::whereYear('created_at', $current_year)
-                    ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
-                    ->where('plant', $plant)
-                    ->count() + 1;
+                $lastCode = $model->where('plant', $plant)
+                    ->orderBy('created_at', 'desc')
+                    ->value('Code');
 
-                // Set the Code field
-                $model->Code = $current_year . $current_week . '-' . str_pad($recordCount, 4, '0', STR_PAD_LEFT);
+                $prefix = $plant . $current_year . $current_week . '-';
+                $lastNumber = 0;
+                if ($lastCode) {
+                    $lastNumber = intval(substr($lastCode, strlen($prefix)));
+                }
+
+                $nextNumber =  $lastNumber + 1;
+                $model->Code = $plant . $current_year . $current_week . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
             });
         });
     }
@@ -110,11 +114,13 @@ class planDryings extends Model
         return $this->hasOne(ActualThickness::class);
     }
 
-    public function userRunOven(){
+    public function userRunOven()
+    {
         return $this->hasOne(User::class, 'id', 'RunBy');
     }
 
-    public function userCheckOven(){
+    public function userCheckOven()
+    {
         return $this->hasOne(User::class, 'id', 'CheckedBy');
     }
 }
