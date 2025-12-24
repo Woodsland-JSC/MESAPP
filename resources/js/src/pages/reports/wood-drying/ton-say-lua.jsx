@@ -180,6 +180,7 @@ function BaoCaoTonSayLua() {
             });
 
             let notExistData = reportData.filter(item => !item.used && item.EB != 0);
+            let notExistDataSS = reportData.filter(item => !item.used && item.EB_SS != 0);
 
             notExistData.forEach(item => {
                 let find = uniqueItemCodeData.find(i => i.ItemCode == item.itemCode && Number(i.U_CDay) == Number(item.day) && Number(i.U_CRong) == Number(item.rong) && Number(i.U_CDai) == Number(item.dai));
@@ -208,7 +209,70 @@ function BaoCaoTonSayLua() {
                         tronglo_chuasay_TB: 0,
                         tronglo_TB: 0,
                         tonKhoSS_TB: 0
-                    }                    
+                    }
+
+                    if (obj.factory == 'TH') {
+                        obj.tonKho_TH += Number(item.EB || 0);
+                        obj.tonKhoSS_TH += Number(item.EB_SS || 0);
+                    }
+
+                    if (obj.factory == 'TB') {
+                        obj.tonKho_TB += Number(item.EB || 0);
+                        obj.tonKhoSS_TB += Number(item.EB_SS || 0);
+                    }
+
+                    if (obj.factory == 'YS') {
+                        obj.tonKho_YS += Number(item.EB || 0);
+                        obj.tonKhoSS_YS += Number(item.EB_SS || 0);
+                    }
+
+                    formattedData.push(obj);
+                } else {
+                    if (find.factory == 'TH') {
+                        find.tonKho_TH += Number(item.EB || 0);
+                        find.tonKhoSS_TH += Number(item.EB_SS || 0);
+                    }
+
+                    if (find.factory == 'TB') {
+                        find.tonKho_TB += Number(item.EB || 0);
+                        find.tonKhoSS_TB += Number(item.EB_SS || 0);
+                    }
+
+                    if (find.factory == 'YS') {
+                        find.tonKho_YS += Number(item.EB || 0);
+                        find.tonKhoSS_YS += Number(item.EB_SS || 0);
+                    }
+                }
+            })
+
+            notExistDataSS.forEach(item => {
+                let find = uniqueItemCodeData.find(i => i.ItemCode == item.itemCode && Number(i.U_CDay) == Number(item.day) && Number(i.U_CRong) == Number(item.rong) && Number(i.U_CDai) == Number(item.dai));
+
+                if (!find) {
+                    let obj = {
+                        itemCode: item.ItemCode,
+                        itemName: item.ItemName,
+                        quyCach: Number(item.U_CDay) + "x" + Number(item.U_CRong) + "x" + Number(item.U_CDai),
+                        day: Number(item.U_CDay),
+                        rong: Number(item.U_CRong),
+                        dai: Number(item.U_CDai),
+                        factory: item.factory,
+                        tonKho_TH: 0,
+                        chosay_TH: 0,
+                        tronglo_chuasay_TH: 0,
+                        tronglo_TH: 0,
+                        tonKhoSS_TH: 0,
+                        tonKho_YS: 0,
+                        chosay_YS: 0,
+                        tronglo_chuasay_YS: 0,
+                        tronglo_YS: 0,
+                        tonKhoSS_YS: 0,
+                        tonKho_TB: 0,
+                        chosay_TB: 0,
+                        tronglo_chuasay_TB: 0,
+                        tronglo_TB: 0,
+                        tonKhoSS_TB: 0
+                    }
 
                     if (obj.factory == 'TH') {
                         obj.tonKho_TH += Number(item.EB || 0);
