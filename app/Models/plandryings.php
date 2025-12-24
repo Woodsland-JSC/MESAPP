@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class planDryings extends Model
 {
@@ -62,10 +63,12 @@ class planDryings extends Model
             DB::transaction(function () use ($model) {
                 $current_week = now()->format('W');
                 $current_year = now()->year;
+                $plant = Auth::user()->plant;
 
                 // Count the number of records for the current year and week
                 $recordCount = static::whereYear('created_at', $current_year)
                     ->whereRaw('WEEK(created_at,1) = ?', [$current_week])
+                    ->where('plant', $plant)
                     ->count() + 1;
 
                 // Set the Code field
