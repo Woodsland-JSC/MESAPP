@@ -218,6 +218,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('baoCaoSanLuongQuyDoiCBG', [Sap_controllerReportController::class, 'baoCaoSanLuongQuyDoiCBG'])->name('baoCaoSanLuongQuyDoiCBG');
         Route::get('bao-cao-quy-luong-cbg', [Sap_controllerReportController::class, 'baoCaoQuyLuongCBG'])->name('baoCaoQuyLuongCBG');
         Route::get('bao-cao-ton-say-lua', [Sap_controllerReportController::class, 'bao_cao_ton_say_lua'])->name('bao_cao_ton_say_lua');
+        Route::get('bao-cao-ton-go-ngoai-bai', [Sap_controllerReportController::class, 'bao_cao_ton_go_ngoai_bai'])->name('bao-cao-ton-go-ngoai-bai');
+
+
     });
 
     Route::group(['prefix' => 'sap/oven'], function () {
