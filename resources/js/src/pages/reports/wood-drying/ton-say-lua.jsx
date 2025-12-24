@@ -391,7 +391,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
@@ -402,7 +405,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
                 },
@@ -414,7 +420,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò chưa sấy" },
@@ -427,7 +436,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
@@ -440,7 +452,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Tồn kho SS" },
@@ -457,7 +472,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
@@ -468,7 +486,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
                 },
@@ -480,7 +501,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò chưa sấy" },
@@ -493,7 +517,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
@@ -506,7 +533,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Tồn kho SS" },
@@ -523,7 +553,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Tồn ngoài bãi" },
                 },
@@ -534,7 +567,10 @@ function BaoCaoTonSayLua() {
                     suppressHeaderMenuButton: true,
                     aggFunc: "sum",
                     valueFormatter: (params) => {
-                        return params.value ? Number(params.value).toFixed(6).toLocaleString() : "";
+                        return params.value ? Number(params.value).toLocaleString("en-US", {
+                            minimumFractionDigits: 6,
+                            maximumFractionDigits: 6,
+                        }) : "";
                     },
                     headerComponentParams: { displayName: "Xếp sấy" },
                 },
@@ -546,7 +582,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò chưa sấy" },
@@ -559,7 +598,10 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Trong lò" },
@@ -572,13 +614,56 @@ function BaoCaoTonSayLua() {
                     aggFunc: "sum",
                     valueFormatter: (params) => {
                         return params.value
-                            ? Number(params.value).toFixed(6).toLocaleString()
+                            ? Number(params.value).toLocaleString("en-US", {
+                                minimumFractionDigits: 6,
+                                maximumFractionDigits: 6,
+                            })
                             : "";
                     },
                     headerComponentParams: { displayName: "Tồn kho SS" },
                 }
             ],
         },
+        {
+            headerName: "Tổng",
+            aggFunc: "sum",
+            valueGetter: (params) => {
+                if (params.data) {
+                    let {
+                        chosay_TB,
+                        chosay_TH,
+                        chosay_YS,
+                        tonKhoSS_TB,
+                        tonKhoSS_TH,
+                        tonKhoSS_YS,
+                        tonKho_TB,
+                        tonKho_TH,
+                        tonKho_YS,
+                        tronglo_TB,
+                        tronglo_TH,
+                        tronglo_YS,
+                        tronglo_chuasay_TB,
+                        tronglo_chuasay_TH,
+                        tronglo_chuasay_YS
+                    } = { ...params.data };
+                    return Number(chosay_TB + chosay_TH + chosay_YS + tonKhoSS_TB + tonKhoSS_TH + tonKhoSS_YS + tonKho_TB +
+                        tonKho_TH +
+                        tonKho_YS +
+                        tronglo_TB +
+                        tronglo_TH +
+                        tronglo_YS +
+                        tronglo_chuasay_TB +
+                        tronglo_chuasay_TH +
+                        tronglo_chuasay_YS)
+                }
+            },
+            valueFormatter: (params) => {
+                return params.value ? Number(params.value).toLocaleString("en-US", {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6,
+                }) : "";
+            }
+        }
     ]);
 
     const groupDisplayType = "multipleColumns";
