@@ -111,6 +111,7 @@ import BaoLoiSayLai from "../pages/workspace/wood-working/bao-loi-say-lai";
 import HumidityReport from "../pages/reports/wood-working/humidity-report";
 import BaoCaoKhoiLuongLoSay from "../pages/reports/wood-drying/bao-cao-khoi-luong";
 import PrintWorkflow from "../pages/workspace/goods-management/print-workflow";
+import BaoCaoTonGoNgoaiBai from "../pages/reports/wood-drying/bao-cao-ton-go-ngoai-bai";
 
 function AppRoutes() {
     // const { user, isAuthenticated } = useAppContext();
@@ -441,6 +442,14 @@ function AppRoutes() {
                         element={
                             <ProtectedRoute>
                                 <CBGWoodDryingReport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports/wood-drying/ton-go-ngoai-bai"
+                        element={
+                            <ProtectedRoute>
+                                <BaoCaoTonGoNgoaiBai />
                             </ProtectedRoute>
                         }
                     />

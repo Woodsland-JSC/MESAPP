@@ -5,8 +5,11 @@ namespace App\Http\Controllers\sap_controller;
 use App\Http\Controllers\Controller;
 use App\Models\Pallet;
 use App\Services\HanaService;
+use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -47,6 +50,32 @@ class ReportController extends Controller
     private $SQL_BAO_CAO_QUY_LUONG = '{call USP_REPORT_CONVERTQTY(?, ?)}';
 
     private $SQL_BAO_CAO_TON_SAY_LUA_CBG = '{CALL "SP_TON_SAY_LUA_CBG"(?)}';
+
+    private $SQL_TON_GO_NGOAI_BAI = <<<SQL
+        SELECT 
+            D."U_CDay" as "day", 
+            D."U_CRong" as "rong", 
+            D."U_CDai" as "dai", 
+            A."DocDate",
+            CEILING(((1000000000 *  A."Quantity") / (ifnull(D."U_CRong", 1) * ifnull(D."U_CDai", 1) * ifnull(D."U_CDay", 1)))) as "Quantity",
+            A."Quantity" as "m3",
+            A."ItemCode"
+        FROM IBT1 A
+        JOIN OWHS B ON A."WhsCode" = B."WhsCode"
+        JOIN OIBT D ON A."ItemCode" = D."ItemCode"
+        WHERE B."U_Flag" IN ('TS') 
+        AND B."BPLid" = ?
+        AND B."U_FAC" = ?
+        AND A."Direction"= 0
+        AND A."DocDate" >= ? AND  A."DocDate" <= ?
+        AND (ifnull(D."U_CRong", 0) * ifnull(D."U_CDai", 0) * ifnull(D."U_CDay", 0)) > 0
+        GROUP BY D."U_CDay", 
+            D."U_CRong", 
+            D."U_CDai", 
+            A."DocDate",
+            A."Quantity",
+            A."ItemCode"
+    SQL;
 
     public function __construct(HanaService $hanaService)
     {
@@ -153,6 +182,72 @@ class ReportController extends Controller
                 'report_data' => $results,
                 'pallets' => $p
             ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function bao_cao_ton_go_ngoai_bai(Request $request)
+    {
+        try {
+            $fromDate =  $request->fromDate . ' 00:00:00';
+            $toDate =  $request->toDate . ' 23:59:59';
+
+            $results = $this->hanaService->select($this->SQL_TON_GO_NGOAI_BAI, [Auth::user()->branch, $request->factory, $fromDate, $toDate]);
+            $data = [];
+
+            foreach ($results as $key => $item) {
+                // 1. Chuẩn hoá ngày (bỏ giờ)
+                $date = (new DateTime($item['DocDate']))->format('Y-m-d');
+
+                // 2. Chuẩn hoá số (tránh lỗi float)
+                $dai  = (float)$item['dai'];
+                $rong = (float)$item['rong'];
+                $day  = (float)$item['day'];
+
+                $key = implode('|', [
+                    $date,
+                    $dai,
+                    $rong,
+                    $day
+                ]);
+
+                // 4. Cộng dồn
+                if (!isset($data[$key])) {
+                    $data[$key] = $item;
+                    $data[$key]['DocDate'] = $date;
+                    $data[$key]['Quantity'] = (int)$item['Quantity'];
+                } else {
+                    $data[$key]['Quantity'] += (int)$item['Quantity'];
+                }
+            }
+
+            $items = array_values($data);
+
+            Pallet::with(['details'])
+                ->where('created_at', '>=', $fromDate)
+                ->where('created_at', '<=', $toDate)
+                ->chunk(1000, function ($pallets) use (&$items) {
+                    foreach ($items as $key => &$item) {
+                        foreach ($pallets as $pallet) {
+                            $d1 = Carbon::parse($pallet->NgayNhap);
+                            $d2 = Carbon::parse($item['DocDate']);
+                            foreach ($pallet->details as $detail) {
+                                if ((float) $item['day'] == (float) $detail->CDay && (float) $item['rong'] == (float) $detail->CRong && (float) $item['dai'] == (float) $detail->CDai && $d1->isSameDay($d2)) {
+                                    if (!isset($item['xepsay'])) {
+                                        $item['xepsay'] = 0;
+                                    }
+
+                                    $item['xepsay'] += isset($item['xepsay']) ? $detail->Qty_T : 0;
+                                }
+                            }
+                        }
+                    }
+                });
+
+            return $items;
         } catch (Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()

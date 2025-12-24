@@ -22,3 +22,10 @@ export const bao_cao_ton_say_lua = (params) => {
         params: params
     });
 }
+
+export const bao_cao_ton_go_ngoai_bai = (params) => {
+    const url = `${BASEURL}/bao-cao-ton-go-ngoai-bai`;
+    return axiosClient().get(url, {
+        params: params
+    });
+}

@@ -126,6 +126,12 @@ const SAYReports = [
         link: "/reports/wood-drying/khoi-luong-ra-lo",
         description: "Báo cáo số liệu khối lượng ra lò."
     },
+    {
+        id: "0017",
+        name: "Báo cáo tồn gỗ ngoài bãi",
+        link: "/reports/wood-drying/ton-go-ngoai-bai",
+        description: "Báo cáo tồn gỗ ngoài bãi theo ngày nhập."
+    },
 ];
 
 const CBGReports = [
