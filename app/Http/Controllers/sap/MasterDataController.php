@@ -848,6 +848,9 @@ class MasterDataController extends Controller
                 AND A."ItemCode" = ?
                 AND A."Direction"= 0
                 AND A."BatchNum" = ?
+                AND B."U_KHOI" = 'CBG'
+                AND A."DocDate" >= '2025-12-11 00:00:00'
+                order by A."DocDate" desc;
             SQL;
 
             $flag = 'TS';
