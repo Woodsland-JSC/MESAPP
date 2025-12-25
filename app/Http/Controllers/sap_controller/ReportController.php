@@ -57,7 +57,7 @@ class ReportController extends Controller
             D."U_CDay" as "day", 
             D."U_CRong" as "rong", 
             D."U_CDai" as "dai", 
-            A."DocDate",
+            TO_VARCHAR(A."DocDate", 'YYYY-MM-DD') AS "DocDate",
             CEILING(((1000000000 *  A."Quantity") / (ifnull(D."U_CRong", 1) * ifnull(D."U_CDai", 1) * ifnull(D."U_CDay", 1)))) as "Quantity",
             A."Quantity" as "m3",
             A."ItemCode"
@@ -199,14 +199,12 @@ class ReportController extends Controller
             $results = $this->hanaService->select($this->SQL_TON_GO_NGOAI_BAI, [Auth::user()->branch, $factory, $fromDate, $toDate]);
             $data = [];
 
-            foreach ($results as $key => $item) {
-                // 1. Chuẩn hoá ngày (bỏ giờ)
-                $date = (new DateTime($item['DocDate']))->format('Y-m-d');
+            foreach ($results as $key => &$item) {
+                $date = $item['DocDate'];
 
-                // 2. Chuẩn hoá số (tránh lỗi float)
-                $dai  = (float)$item['dai'];
-                $rong = (float)$item['rong'];
-                $day  = (float)$item['day'];
+                $dai  = $item['dai'];
+                $rong = $item['rong'];
+                $day  = $item['day'];
 
                 $key = implode('|', [
                     $date,
@@ -219,9 +217,9 @@ class ReportController extends Controller
                 if (!isset($data[$key])) {
                     $data[$key] = $item;
                     $data[$key]['DocDate'] = $date;
-                    $data[$key]['Quantity'] = (int)$item['Quantity'];
+                    $data[$key]['Quantity'] = $item['Quantity'];
                 } else {
-                    $data[$key]['Quantity'] += (int)$item['Quantity'];
+                    $data[$key]['Quantity'] += $item['Quantity'];
                 }
             }
 
@@ -229,23 +227,23 @@ class ReportController extends Controller
 
             $pallets = DB::table('pallet_details as A')
                 ->join('pallets as B', 'A.palletID', '=', 'B.palletID')
-                ->select(
-                    'B.NgayNhap',
-                    'A.Qty_T',
-                    'A.CDay',
-                    'A.CRong',
-                    'A.CDai'
-                )
+                ->selectRaw('
+                    DATE(B.NgayNhap) as NgayNhap,
+                    A.Qty_T,
+                    CAST(A.CDay AS SIGNED)  AS CDay,
+                    CAST(A.CRong AS SIGNED) AS CRong,
+                    CAST(A.CDai AS SIGNED)  AS CDai
+                ')
                 ->whereBetween('B.created_at', [$fromDate, $toDate])
                 ->where('B.factory', $factory)
                 ->get();
 
             foreach ($items as $key => &$item) {
                 foreach ($pallets as $pallet) {
-                    $d1 = Carbon::parse($pallet->NgayNhap);
-                    $d2 = Carbon::parse($item['DocDate']);
+                    $d1 = $pallet->NgayNhap;
+                    $d2 = $item['DocDate'];
 
-                    if ((float) $item['day'] == (float) $pallet->CDay && (float) $item['rong'] == (float) $pallet->CRong && (float) $item['dai'] == (float) $pallet->CDai && $d1->isSameDay($d2)) {
+                    if ($item['day'] == $pallet->CDay && $item['rong'] == $pallet->CRong && $item['dai'] == $pallet->CDai && $d1 === $d2) {
                         if (!isset($item['xepsay'])) {
                             $item['xepsay'] = 0;
                         }
@@ -254,28 +252,6 @@ class ReportController extends Controller
                     }
                 }
             }
-
-            // Pallet::with(['details'])
-            //     ->where('created_at', '>=', $fromDate)
-            //     ->where('created_at', '<=', $toDate)
-            //     ->where('factory', $factory)
-            //     ->chunk(1000, function ($pallets) use (&$items) {
-            //         foreach ($items as $key => &$item) {
-            //             foreach ($pallets as $pallet) {
-            //                 $d1 = Carbon::parse($pallet->NgayNhap);
-            //                 $d2 = Carbon::parse($item['DocDate']);
-            //                 foreach ($pallet->details as $detail) {
-            //                     if ((float) $item['day'] == (float) $detail->CDay && (float) $item['rong'] == (float) $detail->CRong && (float) $item['dai'] == (float) $detail->CDai && $d1->isSameDay($d2)) {
-            //                         if (!isset($item['xepsay'])) {
-            //                             $item['xepsay'] = 0;
-            //                         }
-
-            //                         $item['xepsay'] += isset($item['xepsay']) ? $detail->Qty_T : 0;
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     });
 
             return $items;
         } catch (Exception $e) {
