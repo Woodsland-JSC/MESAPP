@@ -10,6 +10,7 @@ use DateTime;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -61,10 +62,9 @@ class ReportController extends Controller
             A."Quantity" as "m3",
             A."ItemCode"
         FROM IBT1 A
-        JOIN OWHS B ON A."WhsCode" = B."WhsCode"
-        JOIN OIBT D ON A."ItemCode" = D."ItemCode"
-        WHERE B."U_Flag" IN ('TS') 
-        AND B."BPLid" = ?
+        JOIN OWHS B ON A."WhsCode" = B."WhsCode" AND B."U_Flag" IN ('TS') 
+        JOIN OIBT D ON A."ItemCode" = D."ItemCode" AND D."WhsCode" = A."WhsCode"
+        WHERE  B."BPLid" = ?
         AND B."U_FAC" = ?
         AND A."Direction"= 0
         AND A."DocDate" >= ? AND  A."DocDate" <= ?
@@ -227,27 +227,55 @@ class ReportController extends Controller
 
             $items = array_values($data);
 
-            Pallet::with(['details'])
-                ->where('created_at', '>=', $fromDate)
-                ->where('created_at', '<=', $toDate)
-                ->where('factory', $factory)
-                ->chunk(1000, function ($pallets) use (&$items) {
-                    foreach ($items as $key => &$item) {
-                        foreach ($pallets as $pallet) {
-                            $d1 = Carbon::parse($pallet->NgayNhap);
-                            $d2 = Carbon::parse($item['DocDate']);
-                            foreach ($pallet->details as $detail) {
-                                if ((float) $item['day'] == (float) $detail->CDay && (float) $item['rong'] == (float) $detail->CRong && (float) $item['dai'] == (float) $detail->CDai && $d1->isSameDay($d2)) {
-                                    if (!isset($item['xepsay'])) {
-                                        $item['xepsay'] = 0;
-                                    }
+            $pallets = DB::table('pallet_details as A')
+                ->join('pallets as B', 'A.palletID', '=', 'B.palletID')
+                ->select(
+                    'B.NgayNhap',
+                    'A.Qty_T',
+                    'A.CDay',
+                    'A.CRong',
+                    'A.CDai'
+                )
+                ->whereBetween('B.created_at', [$fromDate, $toDate])
+                ->where('B.factory', $factory)
+                ->get();
 
-                                    $item['xepsay'] += isset($item['xepsay']) ? $detail->Qty_T : 0;
-                                }
-                            }
+            foreach ($items as $key => &$item) {
+                foreach ($pallets as $pallet) {
+                    $d1 = Carbon::parse($pallet->NgayNhap);
+                    $d2 = Carbon::parse($item['DocDate']);
+
+                    if ((float) $item['day'] == (float) $pallet->CDay && (float) $item['rong'] == (float) $pallet->CRong && (float) $item['dai'] == (float) $pallet->CDai && $d1->isSameDay($d2)) {
+                        if (!isset($item['xepsay'])) {
+                            $item['xepsay'] = 0;
                         }
+
+                        $item['xepsay'] += isset($item['xepsay']) ? $pallet->Qty_T : 0;
                     }
-                });
+                }
+            }
+
+            // Pallet::with(['details'])
+            //     ->where('created_at', '>=', $fromDate)
+            //     ->where('created_at', '<=', $toDate)
+            //     ->where('factory', $factory)
+            //     ->chunk(1000, function ($pallets) use (&$items) {
+            //         foreach ($items as $key => &$item) {
+            //             foreach ($pallets as $pallet) {
+            //                 $d1 = Carbon::parse($pallet->NgayNhap);
+            //                 $d2 = Carbon::parse($item['DocDate']);
+            //                 foreach ($pallet->details as $detail) {
+            //                     if ((float) $item['day'] == (float) $detail->CDay && (float) $item['rong'] == (float) $detail->CRong && (float) $item['dai'] == (float) $detail->CDai && $d1->isSameDay($d2)) {
+            //                         if (!isset($item['xepsay'])) {
+            //                             $item['xepsay'] = 0;
+            //                         }
+
+            //                         $item['xepsay'] += isset($item['xepsay']) ? $detail->Qty_T : 0;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     });
 
             return $items;
         } catch (Exception $e) {
