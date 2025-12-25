@@ -194,8 +194,9 @@ class ReportController extends Controller
         try {
             $fromDate =  $request->fromDate . ' 00:00:00';
             $toDate =  $request->toDate . ' 23:59:59';
+            $factory = $request->factory;
 
-            $results = $this->hanaService->select($this->SQL_TON_GO_NGOAI_BAI, [Auth::user()->branch, $request->factory, $fromDate, $toDate]);
+            $results = $this->hanaService->select($this->SQL_TON_GO_NGOAI_BAI, [Auth::user()->branch, $factory, $fromDate, $toDate]);
             $data = [];
 
             foreach ($results as $key => $item) {
@@ -229,6 +230,7 @@ class ReportController extends Controller
             Pallet::with(['details'])
                 ->where('created_at', '>=', $fromDate)
                 ->where('created_at', '<=', $toDate)
+                ->where('factory', $factory)
                 ->chunk(1000, function ($pallets) use (&$items) {
                     foreach ($items as $key => &$item) {
                         foreach ($pallets as $pallet) {

@@ -627,6 +627,7 @@ function BaoCaoTonSayLua() {
         {
             headerName: "Tổng",
             aggFunc: "sum",
+            filter: true,
             valueGetter: (params) => {
                 if (params.data) {
                     let {
