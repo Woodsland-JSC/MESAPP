@@ -288,10 +288,19 @@ function WoodSorting() {
     const getInDateByItemCode = async () => {
         try {
             setInDate(null);
+
+            const date = new Date(inDate.value);
+            const yy = String(date.getFullYear()).slice(2);
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const ymd = `${yy}${mm}${dd}`;
+
+            let splitBatch = selectedDryingMethod.batchNum.split('_');
+
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: selectedDryingMethod.batchNum
+                batch: splitBatch.length > 1 ? splitBatch[0] + '_' + ymd : selectedDryingMethod.batchNum
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
@@ -331,9 +340,6 @@ function WoodSorting() {
                 dryingReasonValue
             );
 
-            console.log("dryingMethodsData", dryingMethodsData.length);
-
-
             let data = [];
 
             dryingMethodsData.forEach(item => {
@@ -347,8 +353,6 @@ function WoodSorting() {
                     data.push(item);
                 }
             })
-
-            console.log("data", data.length);
 
             const options = data.map((item) => ({
                 value: `${item.ItemCode}-${item.BatchNum}`,
@@ -428,7 +432,7 @@ function WoodSorting() {
                     startDate: inDate.value,
                 };
                 console.log("1. Dữ liệu từ form:", data);
-                
+
 
                 const date = new Date(inDate.value);
                 const yy = String(date.getFullYear()).slice(2);
@@ -436,7 +440,7 @@ function WoodSorting() {
                 const dd = String(date.getDate()).padStart(2, '0');
                 const ymd = `${yy}${mm}${dd}`;
 
-                
+
 
                 let splitBatch = selectedDryingMethod.batchNum.split('_');
 
