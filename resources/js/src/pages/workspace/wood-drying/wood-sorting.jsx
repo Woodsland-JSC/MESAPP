@@ -339,8 +339,9 @@ function WoodSorting() {
             dryingMethodsData.forEach(item => {
                 let batchSplit = item.BatchNum.split('_');
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
+                    let currentName = item.ItemName.split('-');
                     if (batchSplit.length > 1) {
-                        let currentName = item.ItemName.split('-');
+                        
                         item.ItemName = batchSplit[0] + " - " + currentName[1];
                         item.BatchNum = batchSplit[0] + '_' + 'BATCH';
                     }else{
