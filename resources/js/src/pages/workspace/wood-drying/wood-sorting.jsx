@@ -348,6 +348,12 @@ function WoodSorting() {
                     item.oldBatch = 1;
                 }
 
+                if(filter.length == 1){
+                    if(batchSplit.length == 1){
+                        item.oldBatch = 1;
+                    }
+                }
+
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
                     let currentName = item.ItemName.split('-');
                     item.ItemName = batchSplit[0] + " - " + currentName[1];
