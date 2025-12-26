@@ -340,11 +340,11 @@ function WoodSorting() {
 
             dryingMethodsData.forEach(item => {
                 let batchSplit = item.BatchNum.split('_');
+                let filter = dryingMethodsData.filter(d => d.BatchNum.split('_')[0] == batchSplit[0]);
+                console.log("filter", filter);
+                
 
-                if (batchSplit.length > 1) {
-                    item.newBatch = 1;
-                    item.oldBatch = 1;
-                }else{
+                if (filter.length > 1) {
                     item.oldBatch = 1;
                 }
 
