@@ -282,7 +282,6 @@ function WoodSorting() {
     }, []);
 
     useEffect(() => {
-        console.log(selectedDryingMethod);
         if (selectedDryingMethod) getInDateByItemCode();
     }, [selectedDryingMethod])
 
@@ -326,12 +325,32 @@ function WoodSorting() {
     };
 
     const loadDryingMethodsData = async (dryingReasonValue) => {
-        setIsItemsLoading(true);
         try {
+            setIsItemsLoading(true);
             const dryingMethodsData = await palletsApi.getDryingMethod(
                 dryingReasonValue
             );
-            const options = dryingMethodsData.map((item) => ({
+
+            console.log("dryingMethodsData", dryingMethodsData.length);
+
+
+            let data = [];
+
+            dryingMethodsData.forEach(item => {
+                let batchSplit = item.BatchNum.split('_');
+                if (!data.some(d => d.BatchNum == batchSplit[0])) {
+                    if (batchSplit.length > 1) {
+                        let currentName = item.ItemName.split('-');
+                        item.ItemName = batchSplit[0] + " - " + currentName[1];
+                        item.BatchNum = batchSplit[0] + '_' + 'BATCH';
+                    }
+                    data.push(item);
+                }
+            })
+
+            console.log("data", data.length);
+
+            const options = data.map((item) => ({
                 value: `${item.ItemCode}-${item.BatchNum}`,
                 label: item.ItemName,
                 batchNum: item.BatchNum,
@@ -400,7 +419,7 @@ function WoodSorting() {
     const handleAddToList = async () => {
         if (validateData()) {
             try {
-                setIsLoading(true);
+                // setIsLoading(true);
                 const data = {
                     woodType: selectedWoodType,
                     batchId: batchId,
@@ -409,17 +428,25 @@ function WoodSorting() {
                     startDate: inDate.value,
                 };
                 console.log("1. Dữ liệu từ form:", data);
+                
+
+                const date = new Date(inDate.value);
+                const yy = String(date.getFullYear()).slice(2);
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                const ymd = `${yy}${mm}${dd}`;
+
+                
+
+                let splitBatch = selectedDryingMethod.batchNum.split('_');
 
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-                    selectedDryingMethod.batchNum
+                    splitBatch.length > 1 ? splitBatch[0] + '_' + ymd : selectedDryingMethod.batchNum
                 );
 
                 console.log("2. Thông tin api trả về:", response);
-
-                // Quy ước validate quy cách:
-                // - Một pallet chỉ chứa tối đa 2 quy cách khác nhau
 
                 if (response && response.length > 0) {
                     response.map((item, index) => {
@@ -652,7 +679,7 @@ function WoodSorting() {
             setIsInvalidQuantity(false);
         }
 
-        const palletObject = createPalletObject();        
+        const palletObject = createPalletObject();
 
         setCreatePalletLoading(true);
 
@@ -1776,10 +1803,6 @@ function WoodSorting() {
                                             options={dryingReasons}
                                             onChange={(value) => {
                                                 setSelectedDryingReason(value);
-                                                console.log(
-                                                    "Selected Drying Reason:",
-                                                    value
-                                                );
                                                 loadDryingMethodsData(
                                                     value.value
                                                 );
