@@ -847,7 +847,7 @@ class MasterDataController extends Controller
                 AND B."U_FAC" = ?
                 AND A."ItemCode" = ?
                 AND A."Direction"= 0
-                AND A."BatchNum" = ?
+                AND A."BatchNum" LIKE ?
                 AND B."U_KHOI" = 'CBG'
                 AND A."DocDate" >= '2025-11-01 00:00:00'
                 order by A."DocDate" desc;
@@ -863,7 +863,7 @@ class MasterDataController extends Controller
             $itemCode = $request->query('itemCode');
             $batch = $request->query('batch');
 
-            $data = $hanaService->select($query, [$flag, $branch, $plant, $itemCode, $batch]);
+            $data = $hanaService->select($query, [$flag, $branch, $plant, $itemCode, $batch . '%']);
 
             return $data;
         } catch (Exception $e) {

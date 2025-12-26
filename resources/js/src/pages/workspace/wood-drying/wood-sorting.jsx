@@ -300,7 +300,7 @@ function WoodSorting() {
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: splitBatch.length > 1 ? splitBatch[0] + '_' + ymd : selectedDryingMethod.batchNum
+                batch: splitBatch.length > 1 ? splitBatch[0] + '_' + yy : selectedDryingMethod.batchNum
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
