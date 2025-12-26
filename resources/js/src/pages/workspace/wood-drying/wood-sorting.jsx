@@ -289,12 +289,14 @@ function WoodSorting() {
         try {
             setInDate(null);
 
-            let splitBatch = selectedDryingMethod.batchNum.split('_');
+            console.log('selectedDryingMethod', selectedDryingMethod);
+            let date = new Date();
+            let yy = String(date.getFullYear()).slice(2);
 
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: splitBatch.length > 1 ? splitBatch[0] : selectedDryingMethod.batchNum
+                batch: selectedDryingMethod.newBatch ? selectedDryingMethod.batchNum + '_' + yy:  selectedDryingMethod.batchNum
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
@@ -340,13 +342,11 @@ function WoodSorting() {
                 let batchSplit = item.BatchNum.split('_');
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
                     let currentName = item.ItemName.split('-');
+                    item.ItemName = batchSplit[0] + " - " + currentName[1];
+                    item.BatchNum = batchSplit[0]
                     if (batchSplit.length > 1) {
-                        item.ItemName = batchSplit[0] + " - " + currentName[1];
-                        item.BatchNum = batchSplit[0] + '_' + 'BATCH';
-                    }else{
-                        item.ItemName = batchSplit[0] + " - " + currentName[1];
-                        item.BatchNum = batchSplit[0]
-                    }
+                        item.newBatch = 1;
+                    } 
                     data.push(item);
                 }
             })
@@ -356,6 +356,7 @@ function WoodSorting() {
                 label: item.ItemName,
                 batchNum: item.BatchNum,
                 code: item.ItemCode,
+                newBatch: item.newBatch ? item.newBatch : null
             }));
 
             setDryingMethodsOptions(options);
@@ -437,14 +438,10 @@ function WoodSorting() {
                 const dd = String(date.getDate()).padStart(2, '0');
                 const ymd = `${yy}${mm}${dd}`;
 
-
-
-                let splitBatch = selectedDryingMethod.batchNum.split('_');
-
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-                    splitBatch.length > 1 ? splitBatch[0] + '_' + ymd : selectedDryingMethod.batchNum
+                    selectedDryingMethod.newBatch ? selectedDryingMethod.batchNum + '_' + ymd : selectedDryingMethod.batchNum
                 );
 
                 console.log("2. Thông tin api trả về:", response);
