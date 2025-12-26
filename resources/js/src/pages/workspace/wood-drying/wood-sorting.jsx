@@ -341,7 +341,6 @@ function WoodSorting() {
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
                     let currentName = item.ItemName.split('-');
                     if (batchSplit.length > 1) {
-                        
                         item.ItemName = batchSplit[0] + " - " + currentName[1];
                         item.BatchNum = batchSplit[0] + '_' + 'BATCH';
                     }else{

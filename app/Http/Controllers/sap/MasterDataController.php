@@ -842,6 +842,7 @@ class MasterDataController extends Controller
             $query = <<<SQL
                 SELECT DISTINCT A."DocDate" FROM IBT1 A
                 JOIN OWHS B ON A."WhsCode" = B."WhsCode"
+                JOIN OIBT C ON A."WhsCode" = C."WhsCode" AND A."ItemCode" = C."ItemCode"
                 WHERE B."U_Flag" IN (?) 
                 AND B."BPLid" = ?
                 AND B."U_FAC" = ?
@@ -850,6 +851,7 @@ class MasterDataController extends Controller
                 AND A."BatchNum" LIKE ?
                 AND B."U_KHOI" = 'CBG'
                 AND A."DocDate" >= '2025-11-01 00:00:00'
+                AND C."Quantity" > 0
                 order by A."DocDate" desc;
             SQL;
 
