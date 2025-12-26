@@ -296,7 +296,7 @@ function WoodSorting() {
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: selectedDryingMethod.newBatch ? selectedDryingMethod.batchNum + '_' + yy:  selectedDryingMethod.batchNum
+                batch: selectedDryingMethod.oldBatch ? selectedDryingMethod.batchNum : selectedDryingMethod.batchNum + '_' + yy
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
@@ -340,13 +340,17 @@ function WoodSorting() {
 
             dryingMethodsData.forEach(item => {
                 let batchSplit = item.BatchNum.split('_');
+
+                if (batchSplit.length > 1) {
+                    item.newBatch = 1;
+                }else{
+                    item.oldBatch = 1;
+                }
+
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
                     let currentName = item.ItemName.split('-');
                     item.ItemName = batchSplit[0] + " - " + currentName[1];
                     item.BatchNum = batchSplit[0]
-                    if (batchSplit.length > 1) {
-                        item.newBatch = 1;
-                    } 
                     data.push(item);
                 }
             })
@@ -356,7 +360,8 @@ function WoodSorting() {
                 label: item.ItemName,
                 batchNum: item.BatchNum,
                 code: item.ItemCode,
-                newBatch: item.newBatch ? item.newBatch : null
+                newBatch: item.newBatch ? item.newBatch : null,
+                oldBatch: item.oldBatch ? item.oldBatch : null
             }));
 
             setDryingMethodsOptions(options);
@@ -441,7 +446,7 @@ function WoodSorting() {
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-                    selectedDryingMethod.newBatch ? selectedDryingMethod.batchNum + '_' + ymd : selectedDryingMethod.batchNum
+                    selectedDryingMethod.oldBatch ? selectedDryingMethod.batchNum : selectedDryingMethod.batchNum + '_' + ymd
                 );
 
                 console.log("2. Thông tin api trả về:", response);
