@@ -326,12 +326,16 @@ function WoodSorting() {
         }
     };
 
+    const [BatchNums, setBatchNums] = useState([]);
+
     const loadDryingMethodsData = async (dryingReasonValue) => {
         try {
             setIsItemsLoading(true);
             const dryingMethodsData = await palletsApi.getDryingMethod(
                 dryingReasonValue
             );
+
+            setBatchNums(dryingMethodsData);
 
             let data = [];
 
@@ -345,6 +349,8 @@ function WoodSorting() {
                     data.push(item);
                 }
             })
+
+            
 
             const options = data.map((item) => ({
                 value: `${item.ItemCode}-${item.BatchNum}`,
@@ -415,7 +421,7 @@ function WoodSorting() {
     const handleAddToList = async () => {
         if (validateData()) {
             try {
-                // setIsLoading(true);
+                setIsLoading(true);
                 const data = {
                     woodType: selectedWoodType,
                     batchId: batchId,
@@ -1846,7 +1852,24 @@ function WoodSorting() {
                                             value={inDate}
                                             onChange={(value) => {
                                                 console.log("Chọn ngày nhập gỗ", value);
+                                                console.log("selectedDryingMethod", selectedDryingMethod);
+
+                                                const date = new Date(value.value);
+                                                const yy = String(date.getFullYear()).slice(2);
+                                                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                                const dd = String(date.getDate()).padStart(2, '0');
+                                                const ymd = `${yy}${mm}${dd}`;
+
+                                                let obj = {...selectedDryingMethod};
+
+                                                if (BatchNums.find(item => item.BatchNum == obj.batchNum + "_" + ymd)) {
+                                                    obj.isNew = true;
+                                                }else{
+                                                    obj.isNew = false;
+                                                }
+
                                                 setInDate(value);
+                                                setSelectedDryingMethod(obj);
                                             }}
                                             isDisabled={!selectedDryingMethod}
                                         />
