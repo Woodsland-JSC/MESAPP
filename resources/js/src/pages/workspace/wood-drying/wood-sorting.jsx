@@ -288,15 +288,12 @@ function WoodSorting() {
     const getInDateByItemCode = async () => {
         try {
             setInDate(null);
-
             console.log('selectedDryingMethod', selectedDryingMethod);
-            let date = new Date();
-            let yy = String(date.getFullYear()).slice(2);
 
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: selectedDryingMethod.oldBatch ? selectedDryingMethod.batchNum : selectedDryingMethod.batchNum + '_' + yy
+                batch: selectedDryingMethod.batchNum
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
@@ -340,19 +337,6 @@ function WoodSorting() {
 
             dryingMethodsData.forEach(item => {
                 let batchSplit = item.BatchNum.split('_');
-                let filter = dryingMethodsData.filter(d => d.BatchNum.split('_')[0] == batchSplit[0]);
-                console.log("filter", filter);
-                
-
-                if (filter.length > 1) {
-                    item.oldBatch = 1;
-                }
-
-                if(filter.length == 1){
-                    if(batchSplit.length == 1){
-                        item.oldBatch = 1;
-                    }
-                }
 
                 if (!data.some(d => d.BatchNum.split('_')[0] == batchSplit[0])) {
                     let currentName = item.ItemName.split('-');
@@ -366,9 +350,7 @@ function WoodSorting() {
                 value: `${item.ItemCode}-${item.BatchNum}`,
                 label: item.ItemName,
                 batchNum: item.BatchNum,
-                code: item.ItemCode,
-                newBatch: item.newBatch ? item.newBatch : null,
-                oldBatch: item.oldBatch ? item.oldBatch : null
+                code: item.ItemCode
             }));
 
             setDryingMethodsOptions(options);
@@ -453,7 +435,7 @@ function WoodSorting() {
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-                    selectedDryingMethod.oldBatch ? selectedDryingMethod.batchNum : selectedDryingMethod.batchNum + '_' + ymd
+                    new Date(inDate.value) >= new Date('2025-12-23') ? selectedDryingMethod.batchNum + '_' + ymd : selectedDryingMethod.batchNum
                 );
 
                 console.log("2. Thông tin api trả về:", response);
