@@ -343,6 +343,7 @@ function WoodSorting() {
 
                 if (batchSplit.length > 1) {
                     item.newBatch = 1;
+                    item.oldBatch = 1;
                 }else{
                     item.oldBatch = 1;
                 }
