@@ -289,18 +289,12 @@ function WoodSorting() {
         try {
             setInDate(null);
 
-            const date = new Date();
-            const yy = String(date.getFullYear()).slice(2);
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const ymd = `${yy}${mm}${dd}`;
-
             let splitBatch = selectedDryingMethod.batchNum.split('_');
 
             let res = await getIndatesByItem({
                 reason: selectedDryingReason.value,
                 itemCode: selectedDryingMethod.code,
-                batch: splitBatch.length > 1 ? splitBatch[0] + '_' + yy : selectedDryingMethod.batchNum
+                batch: splitBatch.length > 1 ? splitBatch[0] : selectedDryingMethod.batchNum
             })
 
             res = res.sort((a, b) => new Date(b.DocDate) - new Date(a.DocDate));
@@ -349,6 +343,9 @@ function WoodSorting() {
                         let currentName = item.ItemName.split('-');
                         item.ItemName = batchSplit[0] + " - " + currentName[1];
                         item.BatchNum = batchSplit[0] + '_' + 'BATCH';
+                    }else{
+                        item.ItemName = batchSplit[0] + " - " + currentName[1];
+                        item.BatchNum = batchSplit[0]
                     }
                     data.push(item);
                 }
