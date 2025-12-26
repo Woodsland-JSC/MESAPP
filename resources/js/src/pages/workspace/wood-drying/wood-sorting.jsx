@@ -350,7 +350,7 @@ function WoodSorting() {
                 }
             })
 
-            
+
 
             const options = data.map((item) => ({
                 value: `${item.ItemCode}-${item.BatchNum}`,
@@ -889,6 +889,29 @@ function WoodSorting() {
     const handleResetPalletHistory = () => {
         setPalletHistory([]);
     };
+
+    useEffect(() => {
+        if (inDate) {
+            console.log("Chọn ngày nhập gỗ", inDate);
+            console.log("selectedDryingMethod", selectedDryingMethod);
+
+            const date = new Date(inDate.value);
+            const yy = String(date.getFullYear()).slice(2);
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const ymd = `${yy}${mm}${dd}`;
+
+            let obj = { ...selectedDryingMethod };
+
+            if (BatchNums.find(item => item.BatchNum == obj.batchNum + "_" + ymd)) {
+                obj.isNew = true;
+            } else {
+                obj.isNew = false;
+            }
+
+            setSelectedDryingMethod(obj);
+        }
+    }, [inDate])
 
     return (
         <Layout>
@@ -1851,25 +1874,7 @@ function WoodSorting() {
                                             options={inDates}
                                             value={inDate}
                                             onChange={(value) => {
-                                                console.log("Chọn ngày nhập gỗ", value);
-                                                console.log("selectedDryingMethod", selectedDryingMethod);
-
-                                                const date = new Date(value.value);
-                                                const yy = String(date.getFullYear()).slice(2);
-                                                const mm = String(date.getMonth() + 1).padStart(2, '0');
-                                                const dd = String(date.getDate()).padStart(2, '0');
-                                                const ymd = `${yy}${mm}${dd}`;
-
-                                                let obj = {...selectedDryingMethod};
-
-                                                if (BatchNums.find(item => item.BatchNum == obj.batchNum + "_" + ymd)) {
-                                                    obj.isNew = true;
-                                                }else{
-                                                    obj.isNew = false;
-                                                }
-
                                                 setInDate(value);
-                                                setSelectedDryingMethod(obj);
                                             }}
                                             isDisabled={!selectedDryingMethod}
                                         />
