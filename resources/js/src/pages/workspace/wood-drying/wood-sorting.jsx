@@ -711,7 +711,7 @@ function WoodSorting() {
                 if (dryingMethodSelectRef) {
                     dryingMethodSelectRef.clearValue();
                 }
-
+                setInDate(null);
                 setCreatePalletLoading(false);
                 setQuyCachList([]);
                 setBatchId("");
