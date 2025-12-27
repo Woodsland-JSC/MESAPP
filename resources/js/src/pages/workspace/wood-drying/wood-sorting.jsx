@@ -328,6 +328,12 @@ function WoodSorting() {
 
     const [BatchNums, setBatchNums] = useState([]);
 
+    useEffect(() => {
+        if (selectedDryingReason) {
+            loadDryingMethodsData(selectedDryingReason.value);
+        }
+    }, [selectedDryingReason])
+
     const loadDryingMethodsData = async (dryingReasonValue) => {
         try {
             setIsItemsLoading(true);
@@ -445,7 +451,7 @@ function WoodSorting() {
 
                 let find = BatchNums.find(item => item.BatchNum == batch);
                 console.log("batch", batch);
-                console.log("find", find);
+                console.log("BatchNums", BatchNums);
                 console.log("BatchNums", BatchNums.filter(item => item.BatchNum == batch));
                 
 
@@ -1812,9 +1818,9 @@ function WoodSorting() {
                                             options={dryingReasons}
                                             onChange={(value) => {
                                                 setSelectedDryingReason(value);
-                                                loadDryingMethodsData(
-                                                    value.value
-                                                );
+                                                // loadDryingMethodsData(
+                                                //     value.value
+                                                // );
                                             }}
                                             isDisabled={palletCards.length > 0}
                                         />
