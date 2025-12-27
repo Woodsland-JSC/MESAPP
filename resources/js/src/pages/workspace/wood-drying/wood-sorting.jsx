@@ -342,7 +342,7 @@ function WoodSorting() {
                 dryingReasonValue
             );
 
-            const resData = [...dryingMethodsData];
+            const resData = dryingMethodsData.map(item => ({ ...item }));
 
             setBatchNums(resData);
 
