@@ -331,11 +331,14 @@ function WoodSorting() {
     const loadDryingMethodsData = async (dryingReasonValue) => {
         try {
             setIsItemsLoading(true);
+            setBatchNums([]);
             const dryingMethodsData = await palletsApi.getDryingMethod(
                 dryingReasonValue
             );
 
-            setBatchNums(dryingMethodsData);
+            const resData = [...dryingMethodsData];
+
+            setBatchNums(resData);
 
             let data = [];
 
@@ -443,6 +446,7 @@ function WoodSorting() {
                 let find = BatchNums.find(item => item.BatchNum == batch);
                 console.log("batch", batch);
                 console.log("find", find);
+                console.log("BatchNums", BatchNums.filter(item => item.BatchNum == batch));
                 
 
                 const response = await palletsApi.getStockByItem(
