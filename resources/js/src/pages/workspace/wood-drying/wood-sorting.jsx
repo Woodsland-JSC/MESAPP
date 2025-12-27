@@ -437,15 +437,18 @@ function WoodSorting() {
                 const mm = String(date.getMonth() + 1).padStart(2, '0');
                 const dd = String(date.getDate()).padStart(2, '0');
                 const ymd = `${yy}${mm}${dd}`;
+                
+                const batch = selectedDryingMethod.batchNum + '_' + ymd;
 
-                let find = BatchNums.find(item => item.BatchNum == selectedDryingMethod.batchNum + '_' + ymd);
+                let find = BatchNums.find(item => item.BatchNum == batch);
+                console.log("batch", batch);
                 console.log("find", find);
                 
 
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
                     selectedDryingReason.value,
-                    find ? selectedDryingMethod.batchNum + '_' + ymd : selectedDryingMethod.batchNum
+                    find ? batch : selectedDryingMethod.batchNum
                 );
 
                 console.log("2. Thông tin api trả về:", response);
