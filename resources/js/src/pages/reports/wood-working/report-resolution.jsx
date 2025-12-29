@@ -371,7 +371,7 @@ const ReportResolution = () => {
                                     <div className="mt-3 mb-3 flex">
                                         <div className="w-1/3">
                                             <div>{handleDate(currentReportSelected.created_at)}</div>
-                                            <div>Người tạo: {currentReportSelected ? (currentReportSelected.first_name + " " + currentReportSelected.last_name) : '-'}</div>
+                                            <div>Người tạo: {currentReportSelected ? (currentReportSelected.last_name + " " + currentReportSelected.first_name) : '-'}</div>
                                         </div>
                                         {
                                             currentReportSelected &&
