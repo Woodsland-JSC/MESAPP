@@ -218,7 +218,7 @@ const ReportResolution = () => {
                         <img className="mx-auto" width="80" src={new URL(`../../../assets/signature/${currentReportSelected.idGD}.png`, import.meta.url).href} alt="giam-doc-sx-chu-ky" crossOrigin="anonymous" />
                     </div>
                     <div>
-                        <div>{currentReportSelected?.firstNameGD + " " + currentReportSelected?.lastNameGD}</div>
+                        <div>{currentReportSelected?.lastNameGD + " " + currentReportSelected?.firstNameGD}</div>
                     </div>
                 </div>
                 <div className="text-center">
@@ -232,7 +232,7 @@ const ReportResolution = () => {
                         <img className="mx-auto" width="80" src={new URL(`../../../assets/signature/${currentReportSelected.idQC}.png`, import.meta.url).href} alt="truong-qc-chu-ky" crossOrigin="anonymous" />
                     </div>
                     <div>
-                        <div>{currentReportSelected.firstNameQC + " " + currentReportSelected.lastNameQC }</div>
+                        <div>{currentReportSelected.lastNameQC + " " + currentReportSelected.firstNameQC }</div>
                     </div>
                 </div>
             </div>
