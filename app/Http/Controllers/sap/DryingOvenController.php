@@ -241,6 +241,7 @@ class DryingOvenController extends Controller
             DB::beginTransaction();
             $current_week = now()->format('W');
             $current_year = now()->year;
+            $isoYear = date('o');
 
             $palletData = $request->only(['LoaiGo', 'MaLo', 'LyDo', 'NgayNhap', 'MaNhaMay', 'stackingTime', 'employee']);
             foreach ($palletData as $key => $value) {
@@ -257,7 +258,7 @@ class DryingOvenController extends Controller
 
             $combinedQuyCach = implode('_', $quyCachList);
 
-            $prefix = $palletData['MaNhaMay'] . substr($current_year, -2) . $current_week . "-";
+            $prefix = $palletData['MaNhaMay'] . substr($isoYear, -2) . $current_week . "-";
             
             $lastCode = $gPALLETService->getLastCode($prefix);
 
@@ -386,7 +387,7 @@ class DryingOvenController extends Controller
             do {
                 $attempt++;
                 $generatedCode = $palletData['MaNhaMay']
-                    . substr($current_year, -2)
+                    . substr($isoYear, -2)
                     . $current_week
                     . '-'
                     . str_pad($recordCount, 5, '0', STR_PAD_LEFT);
