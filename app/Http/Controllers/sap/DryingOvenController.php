@@ -197,6 +197,24 @@ class DryingOvenController extends Controller
         return $palletsData;
     }
 
+    public function getPalletsTracking(Request $request)
+    {
+        $fromDate = $request->input('fromDate');
+        $toDate = $request->input('toDate');
+        $factory = Auth::user()->plant;
+
+        $pallets = Pallet::whereBetween('created_at', [$fromDate . ' 00:00:00', $toDate . ' 23:59:59'])->where('factory', $factory)->get();
+
+        $palletsData = $pallets->map(function ($pallet) {
+            return [
+                'palletID' => $pallet->palletID,
+                'Code' => $pallet->Code,
+            ];
+        })->toArray();
+
+        return $palletsData;
+    }
+
     // danh sách lò xấy trống theo chi nhánh và nhà máy. hệ thống sẽ check theo user
     function ListOvenAvailiable(Request $request)
     {
@@ -259,7 +277,7 @@ class DryingOvenController extends Controller
             $combinedQuyCach = implode('_', $quyCachList);
 
             $prefix = $palletData['MaNhaMay'] . substr($isoYear, -2) . $current_week . "-";
-            
+
             $lastCode = $gPALLETService->getLastCode($prefix);
 
             $generatedCode = '';
@@ -410,7 +428,7 @@ class DryingOvenController extends Controller
                         "Authorization" => "Basic " . BasicAuthToken(),
                     ])->post(UrlSAPServiceLayer() . "/b1s/v1/Pallet", $body2);
 
-                    if($palletResponse->successful()){
+                    if ($palletResponse->successful()) {
                         break;
                     }
                 }

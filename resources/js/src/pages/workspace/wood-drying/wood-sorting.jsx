@@ -161,38 +161,38 @@ function WoodSorting() {
         }
     };
 
-    const loadPalletOptions = (inputValue, callback) => {
-        loadPalletCallback(inputValue, callback);
-    };
-
-    const getUsersByFactory = async () => {
+    const loadPalletTrackings = async () => {
         try {
+            setPalletListLoading(true);
             const response = await axios.get(
-                "/api/users/get-users-by-factory",
+                "/api/pallets/get-pallet-trackings",
                 {
                     params: {
-                        factory: user.plant,
+                        fromDate: format(fromDateTracking, "yyyy-MM-dd"),
+                        toDate: format(toDateTracking, "yyyy-MM-dd"),
                     },
                 }
             );
             const data = response.data;
-            if (Array.isArray(data)) {
-                const options = data.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                }));
-                setEmployeeOptions(options);
-            } else {
-                console.error("Error fetching users: Invalid response format");
-            }
+
+            const options = data.map((item) => ({
+                value: item.palletID,
+                label: item.Code,
+            }));
+            setPalletOptions(options);
+            setPalletListLoading(false);
         } catch (error) {
-            console.error("Error fetching users:", error);
+            console.error("Error fetching data:", error);
+            toast.error("Có lỗi trong quá trình load dữ liệu.");
+            setPalletListLoading(false);
         }
-    };
+    }
 
     // Date picker
     const [startDate, setStartDate] = useState(new Date());
     const [fromDate, setFromDate] = useState(new Date());
+    const [fromDateTracking, setFromDateTracking] = useState(new Date());
+    const [toDateTracking, setToDateTracking] = useState(new Date());
     const [toDate, setToDate] = useState(new Date());
     const formattedStartDate = format(startDate, "yyyy-MM-dd");
     const defaultFromDate = startOfDay(fromDate);
@@ -240,10 +240,11 @@ function WoodSorting() {
     };
 
     useEffect(() => {
-        if (selectedYear && selectedWeek) {
-            loadPalletCallback();
+        if (fromDateTracking && toDateTracking) {
+            // loadPalletCallback();
+            loadPalletTrackings();
         }
-    }, [selectedYear, selectedWeek]);
+    }, [fromDateTracking, toDateTracking]);
 
     useEffect(() => {
         setSelectedWoodType({
@@ -446,14 +447,14 @@ function WoodSorting() {
                 const mm = String(date.getMonth() + 1).padStart(2, '0');
                 const dd = String(date.getDate()).padStart(2, '0');
                 const ymd = `${yy}${mm}${dd}`;
-                
+
                 const batch = selectedDryingMethod.batchNum + '_' + ymd;
 
                 let find = BatchNums.find(item => item.BatchNum == batch);
                 console.log("batch", batch);
                 console.log("BatchNums", BatchNums);
                 console.log("BatchNums", BatchNums.filter(item => item.BatchNum == batch));
-                
+
 
                 const response = await palletsApi.getStockByItem(
                     selectedDryingMethod.code,
@@ -1331,60 +1332,34 @@ function WoodSorting() {
                                         <div className="xl:flex lg:flex md:flex items-end sm:block w-full gap-x-3 ">
                                             {/* Select Filter */}
                                             <div className="w-full xl:grid lg:grid md:grid grid-cols-4 xl:space-y-0 lg:space-y-0 md:space-y-0 space-y-2 gap-x-3">
-                                                <div>
+                                                <div className="col-span-1">
                                                     <label
                                                         htmlFor="indate"
-                                                        className="block mb-1 text-[14px]  font-medium text-gray-900 "
+                                                        className="block mb-1 text-[14px] font-medium text-gray-900 "
                                                     >
-                                                        Chọn năm
+                                                        Từ ngày
                                                     </label>
-                                                    <Select
-                                                        placeholder="Chọn năm"
-                                                        options={years}
-                                                        defaultValue={
-                                                            selectedYear
+                                                    <DatePicker
+                                                        selected={fromDateTracking}
+                                                        onChange={(date) =>
+                                                            setFromDateTracking(date)
                                                         }
-                                                        onChange={(value) => {
-                                                            console.log(
-                                                                "Selected Year:",
-                                                                value
-                                                            );
-                                                            setSelectedYear(
-                                                                value
-                                                            );
-                                                            setReloadAsyncSelectKey(
-                                                                (prevKey) =>
-                                                                    prevKey + 1
-                                                            );
-                                                        }}
+                                                        className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                                     />
                                                 </div>
-                                                <div>
+                                                <div className="col-span-1">
                                                     <label
                                                         htmlFor="indate"
-                                                        className="block mb-1 text-[14px]  font-medium text-gray-900 "
+                                                        className="block mb-1 text-[14px] font-medium text-gray-900 "
                                                     >
-                                                        Chọn tuần
+                                                        Đến ngày
                                                     </label>
-                                                    <Select
-                                                        placeholder="Chọn tuần"
-                                                        options={weeks}
-                                                        onChange={(value) => {
-                                                            console.log(
-                                                                "Selected Week:",
-                                                                value
-                                                            );
-                                                            setSelectedWeek(
-                                                                value
-                                                            );
-                                                            setReloadAsyncSelectKey(
-                                                                (prevKey) =>
-                                                                    prevKey + 1
-                                                            );
-                                                        }}
-                                                        defaultValue={
-                                                            selectedWeek
+                                                    <DatePicker
+                                                        selected={toDateTracking}
+                                                        onChange={(date) =>
+                                                            setToDateTracking(date)
                                                         }
+                                                        className=" pl-3 border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                                     />
                                                 </div>
                                                 <div className="col-span-2">

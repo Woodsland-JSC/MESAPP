@@ -105,6 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/dismantle-pallet', [DryingOvenController::class, 'DismantlePallet'])->name('dismantle-pallet');
         Route::get('/get-pallet-by-year-week', [DryingOvenController::class, 'getPalletsByYearAndWeek'])->name('get-pallet-by-year-week');
         Route::post('/delete-disabled-record', [DryingOvenController::class, 'deleteDisabledRecord']);
+        Route::get('/get-pallet-trackings', [DryingOvenController::class, 'getPalletsTracking']);
     });
     Route::group(['prefix' => 'ovens'], function () {
         Route::get('/', [DryingOvenController::class, 'ListOvenAvailiable'])->name('danh-sach-lo');
