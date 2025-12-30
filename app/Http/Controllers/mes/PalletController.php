@@ -122,6 +122,7 @@ class PalletController extends Controller
             // Lấy dữ liệu pallet với điều kiện lọc
             $pallets = Pallet::with(['details', 'employeeInfo', 'completedBy'])
                 ->where('factory', $factory)
+                ->where('LyDo', '!=', 'SL')
                 ->whereBetween('CompletedDate', [Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()])
                 ->get();
 
@@ -220,9 +221,10 @@ class PalletController extends Controller
                 JOIN plan_detail pld ON pld.pallet = p.palletID
                 JOIN planDryings pl ON pld.PlanID = pl.PlanID
                 WHERE p.factory = ? 
+                AND p.LyDo != ?
                 AND p.CompletedDate >= ?
                 AND p.CompletedDate <= ?',
-                [$factory, Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
+                [$factory, 'SL', Carbon::parse($fromDate)->startOfDay(), Carbon::parse($toDate)->endOfDay()]
             );
 
             return response()->json([
