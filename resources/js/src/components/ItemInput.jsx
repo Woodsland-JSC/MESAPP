@@ -158,7 +158,7 @@ const ItemInput = ({
         SubItemBaseQty: "",
         OnHand: "",
     });
-    const [rongData, setRongData] = useState(null);
+    const [rongData, setRongData] = useState([]);
     const [RONGInputQty, setRONGInputQty] = useState("");
     // const [selectedItem, setSelectedItem] = useState(null);
     const [isItemCodeDetech, setIsItemCodeDetech] = useState(false);
@@ -266,7 +266,7 @@ const ItemInput = ({
                 CDai: stock.CDai,
                 factories: "",
             }));
-            setRongData(RONGReceiptData);
+            setRongData(res.stocks.length > 0 ? RONGReceiptData : []);
             onModalOpen();
         } catch (error) {
             toast.error(
@@ -408,7 +408,7 @@ const ItemInput = ({
         onModalClose();
         setAmount();
         setFaults({});
-        setRongData(null);
+        setRongData([]);
         setSelectedItemDetails(null);
         setFromDate(new Date().setHours(0, 0, 0, 0));
         setToDate(new Date().setHours(23, 59, 59, 999));
@@ -618,7 +618,7 @@ const ItemInput = ({
         }
         setConfirmLoading(false);
         setRONGInputQty("");
-        setRongData(null);
+        setRongData([]);
         onAlertDialogClose();
         closeInputModal();
     };
@@ -934,7 +934,7 @@ const ItemInput = ({
                         CDai: stock.CDai,
                         factories: "",
                     }));
-                    setRongData(RONGReceiptData);
+                    setRongData(res.stocks.length > 0 ? RONGReceiptData : []);
                 } catch (error) {
                     toast.error("Có lỗi xảy ra. Vui lòng thử lại");
                 }
@@ -1190,7 +1190,7 @@ const ItemInput = ({
                 CDai: stock.CDai,
                 factories: "",
             }));
-            setRongData(RONGReceiptData);
+            setRongData(res.stocks.length > 0 ? RONGReceiptData : []);
             onModalOpen();
         } catch (error) {
             toast.error(
@@ -3454,7 +3454,7 @@ const ItemInput = ({
                                     });
                                     setFaultyAmount("");
                                     setIsItemCodeDetech(false);
-                                    setRongData(null);
+                                    setRongData([]);
                                     setLSX("");
                                 }}
                                 className="bg-gray-300  p-2 rounded-xl px-4 active:scale-[.95] h-fit active:duration-75 font-medium transition-all xl:w-fit md:w-fit w-full"
@@ -3504,7 +3504,7 @@ const ItemInput = ({
                                     </div>
                                     <IoIosArrowDown className="my-2 w-full text-center text-3xl text-[#155979]" />
                                     <div className="px-2 rounded-lg bg-gray-50 border-2 border-gray-300 border-dashed divide-y divide-gray-200">
-                                        {rongData.length > 0 ? (
+                                        {rongData && rongData.length > 0 ? (
                                             rongData.filter(
                                                 (data) =>
                                                     data.CompleQty !== "" ||
