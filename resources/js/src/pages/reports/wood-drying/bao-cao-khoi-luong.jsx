@@ -91,8 +91,7 @@ const BaoCaoKhoiLuongLoSay = () => {
             width: 150,
             suppressHeaderMenuButton: true,
             filter: true,
-            rowGroup: true,
-            hide: true  
+            rowGroup: true
         },
         {
             headerName: "Quy cách",
@@ -325,12 +324,6 @@ const BaoCaoKhoiLuongLoSay = () => {
                                     columnDefs={colDefs}
                                     groupDisplayType={"multipleColumns"}
                                     grandTotalRow={"bottom"}
-                                    autoGroupColumnDef={{
-                                        headerName: 'Lò sấy',
-                                        field: 'Oven',
-                                        filter: 'agTextColumnFilter',
-                                        floatingFilter: true,
-                                    }}
                                 />
                             </div>
                         </div>
