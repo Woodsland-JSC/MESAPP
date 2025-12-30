@@ -92,7 +92,9 @@ function BaoCaoTonGoNgoaiBai() {
                     indate: item.DocDate,
                     sepxay: item.xepsay ?? 0,
                     tonSL: item.Quantity - (item.xepsay ?? 0),
-                    tonKL: Number(totalM3 - xepsayM3)
+                    tonKL: Number(totalM3 - xepsayM3),
+                    ItemCode: item.ItemCode,
+                    U_Line: item.U_Line
                 };
             });
 
@@ -156,6 +158,12 @@ function BaoCaoTonGoNgoaiBai() {
             ],
         },
         {
+            headerName: "Mã SP",
+            field: "ItemCode",
+            width: 200,
+            filter: true,
+        },
+        {
             headerName: "Ngày nhập",
             field: "indate",
             width: 200,
@@ -203,6 +211,35 @@ function BaoCaoTonGoNgoaiBai() {
                     maximumFractionDigits: 6
                 }) : 0
             },
+        },
+        {
+            headerName: "Nhóm SP",
+            field: "U_Line",
+            width: 200,
+            filter: true
+        },
+        {
+            headerName: "Trạng thái",
+            width: 200,
+            filter: true,
+            valueGetter: (params) => {
+                let data = params.data;
+
+                if (!data) return "";
+                if (!data.U_Line) return "";
+
+                let date = data.indate;
+                let day = daysBetween(date);
+                let lydo = data.U_Line;
+
+                if(lydo == 'INDOOR' && day > 5){
+                    return "Chưa đạt";
+                }else if(lydo == 'OUTDOOR' && day > 7){
+                    return "Chưa đạt";
+                }else{
+                    return "Đạt";
+                }
+            }
         }
     ]);
 
@@ -228,6 +265,18 @@ function BaoCaoTonGoNgoaiBai() {
         } catch (error) {
             toast.error('Lấy danh sách nhà máy có lỗi.');
         }
+    }
+
+    function daysBetween(date1) {
+        const d1 = new Date(date1);
+        const d2 = new Date();
+
+        // Reset giờ về 00:00:00 để tránh lệch múi giờ
+        d1.setHours(0, 0, 0, 0);
+        d2.setHours(0, 0, 0, 0);
+
+        const diffTime = Math.abs(d2 - d1);
+        return diffTime / (1000 * 60 * 60 * 24);
     }
 
     useEffect(() => {

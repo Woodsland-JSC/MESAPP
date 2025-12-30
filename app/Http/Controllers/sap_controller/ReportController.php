@@ -60,10 +60,12 @@ class ReportController extends Controller
             TO_VARCHAR(A."DocDate", 'YYYY-MM-DD') AS "DocDate",
             CEILING(((1000000000 *  A."Quantity") / (ifnull(D."U_CRong", 1) * ifnull(D."U_CDai", 1) * ifnull(D."U_CDay", 1)))) as "Quantity",
             A."Quantity" as "m3",
-            A."ItemCode"
+            A."ItemCode",
+            E."U_Line"
         FROM IBT1 A
         JOIN OWHS B ON A."WhsCode" = B."WhsCode" AND B."U_Flag" IN ('TS') 
         JOIN OIBT D ON A."ItemCode" = D."ItemCode" AND D."WhsCode" = A."WhsCode"
+        LEFT JOIN OITM E ON A."ItemCode" = E."ItemCode"
         WHERE  B."BPLid" = ?
         AND B."U_FAC" = ?
         AND A."Direction"= 0
@@ -74,7 +76,8 @@ class ReportController extends Controller
             D."U_CDai", 
             A."DocDate",
             A."Quantity",
-            A."ItemCode"
+            A."ItemCode",
+            E."U_Line"
     SQL;
 
     public function __construct(HanaService $hanaService)
