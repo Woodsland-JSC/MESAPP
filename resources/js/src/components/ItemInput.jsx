@@ -1190,6 +1190,10 @@ const ItemInput = ({
                 CDai: stock.CDai,
                 factories: "",
             }));
+
+            console.log("RONGReceiptData:", RONGReceiptData);
+            
+            
             setRongData(res.stocks.length > 0 ? RONGReceiptData : []);
             onModalOpen();
         } catch (error) {
