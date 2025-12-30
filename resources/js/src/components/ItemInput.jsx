@@ -88,7 +88,7 @@ const ItemInput = ({
     const receipInput = useRef(null);
 
     const filteredData = Array.isArray(data)
-        ? data.filter((item) =>
+        ? data?.filter((item) =>
             `${item.ChildName} (${item.CDay}*${item.CRong}*${item.CDai})`
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase())
@@ -607,7 +607,7 @@ const ItemInput = ({
                 SubItemName: choosenItem.ChildName,
                 team: choosenItem.TO,
                 NextTeam: choosenItem.TOTT,
-                Data: rongData.filter(item => item.CompleQty !== undefined && item.CompleQty !== null && item.CompleQty !== ""),
+                Data: rongData?.filter(item => item.CompleQty !== undefined && item.CompleQty !== null && item.CompleQty !== ""),
                 KHOI: "VCN",
             };
 
@@ -884,7 +884,7 @@ const ItemInput = ({
                     maxQty: res.maxQty,
                 }));
                 setFilteredReturnedData((prev) =>
-                    prev.filter((item) => item.id !== selectedDelete)
+                    prev?.filter((item) => item.id !== selectedDelete)
                 );
                 toast.success("Thao tác thành công.");
             } catch (error) {
@@ -912,7 +912,7 @@ const ItemInput = ({
                         ...prev,
                         CongDoan: res.CongDoan,
                         FatherStock: res.FatherStock,
-                        notifications: prev.notifications.filter(
+                        notifications: prev.notifications?.filter(
                             (notification) =>
                                 notification.notiID !== selectedDelete
                         ),
@@ -953,7 +953,7 @@ const ItemInput = ({
                     toast.success("Thao tác thành công.");
                     setSelectedItemDetails((prev) => ({
                         ...prev,
-                        notifications: prev.notifications.filter(
+                        notifications: prev.notifications?.filter(
                             (notification) => notification.id !== selectedDelete
                         ),
                         stocks: res.stocks,
@@ -985,7 +985,7 @@ const ItemInput = ({
                 toast.success("Thao tác thành công.");
                 setSelectedItemDetails((prev) => ({
                     ...prev,
-                    notifications: prev.notifications.filter(
+                    notifications: prev.notifications?.filter(
                         (notification) => notification.id !== selectedDelete
                     ),
                     stocks: res.stocks,
@@ -1019,7 +1019,7 @@ const ItemInput = ({
                         stocks: res.stocks.map((stock) => ({
                             ...stock,
                         })),
-                        notifications: res.notifications.filter(
+                        notifications: res.notifications?.filter(
                             (notification) => notification.id !== payload.id
                         ),
                     }));
@@ -1095,7 +1095,7 @@ const ItemInput = ({
         // Đặt thời gian 1 giây để loading kết thúc
         setTimeout(() => {
             if (selectedItemDetails?.returnedData) {
-                const filtered = selectedItemDetails.returnedData.filter(
+                const filtered = selectedItemDetails.returnedData?.filter(
                     (item) => {
                         const confirmDate = new Date(item.confirm_at);
                         return confirmDate >= fromDate && confirmDate <= toDate;
@@ -1345,7 +1345,7 @@ const ItemInput = ({
                                                 </thead>
                                                 <tbody className=" border-t border-[#c4cfe7]  ">
                                                     {item.LSX?.length > 0 ? (
-                                                        item.LSX.filter(
+                                                        item.LSX?.filter(
                                                             (production) =>
                                                                 production.ConLai > 0
                                                         )
@@ -1585,7 +1585,7 @@ const ItemInput = ({
                                                 </thead>
                                                 <tbody className=" border-t border-[#c4cfe7]  ">
                                                     {item.LSX?.length > 0 ? (
-                                                        item.LSX.filter(
+                                                        item.LSX?.filter(
                                                             (production) =>
                                                                 production.ConLai > 0
                                                         )
@@ -2594,7 +2594,7 @@ const ItemInput = ({
 
                                             {/* Số lượng giao chờ xác nhận */}
                                             {selectedItemDetails?.notifications &&
-                                                selectedItemDetails?.notifications.filter(
+                                                selectedItemDetails?.notifications?.filter(
                                                     (notif) =>
                                                         notif.confirm == 0 &&
                                                         notif.type == 0
@@ -2607,13 +2607,13 @@ const ItemInput = ({
                                                     </div>
                                                 )}
                                             {selectedItemDetails?.notifications &&
-                                                selectedItemDetails?.notifications.filter(
+                                                selectedItemDetails?.notifications?.filter(
                                                     (notif) =>
                                                         notif.confirm == 0 &&
                                                         notif.type == 0
                                                 )?.length > 0 &&
                                                 selectedItemDetails?.notifications
-                                                    .filter(
+                                                    ?.filter(
                                                         (notif) =>
                                                             notif.confirm ==
                                                             0 &&
@@ -2844,7 +2844,7 @@ const ItemInput = ({
                                                     <div className="rounded-lg cursor-pointer px-3 py-1 text-white bg-red-800 hover:bg-red-500 duration-300">
                                                         {formatNumber(
                                                             Number(
-                                                                selectedItemDetails?.notifications.filter(
+                                                                selectedItemDetails?.notifications?.filter(
                                                                     (notif) =>
                                                                         notif.confirm ===
                                                                         0 &&
@@ -2859,13 +2859,13 @@ const ItemInput = ({
                                             <div className="border-b border-gray-200">
                                                 {/* Số lượng ghi nhận lỗi */}
                                                 {selectedItemDetails?.notifications &&
-                                                    selectedItemDetails?.notifications.filter(
+                                                    selectedItemDetails?.notifications?.filter(
                                                         (notif) =>
                                                             notif.confirm ==
                                                             0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
-                                                    selectedItemDetails?.notifications.filter(
+                                                    selectedItemDetails?.notifications?.filter(
                                                         (notif) =>
                                                             notif.confirm ==
                                                             0 &&
@@ -2879,14 +2879,14 @@ const ItemInput = ({
                                                         </div>
                                                     )}
                                                 {selectedItemDetails?.notifications &&
-                                                    selectedItemDetails?.notifications.filter(
+                                                    selectedItemDetails?.notifications?.filter(
                                                         (notif) =>
                                                             notif.confirm ==
                                                             0 &&
                                                             notif.type == 1
                                                     )?.length > 0 &&
                                                     selectedItemDetails?.notifications
-                                                        .filter(
+                                                        ?.filter(
                                                             (notif) =>
                                                                 notif.confirm ==
                                                                 0 &&
@@ -3509,13 +3509,13 @@ const ItemInput = ({
                                     <IoIosArrowDown className="my-2 w-full text-center text-3xl text-[#155979]" />
                                     <div className="px-2 rounded-lg bg-gray-50 border-2 border-gray-300 border-dashed divide-y divide-gray-200">
                                         {rongData && rongData.length > 0 ? (
-                                            rongData.filter(
+                                            rongData?.filter(
                                                 (data) =>
                                                     data.CompleQty !== "" ||
                                                     data.RejectQty !== ""
                                             ).length > 0 ? (
                                                 rongData
-                                                    .filter(
+                                                    ?.filter(
                                                         (data) =>
                                                             data.CompleQty !==
                                                             "" ||
