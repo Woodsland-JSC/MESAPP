@@ -18,7 +18,7 @@ import {
 import { IoMdRadioButtonOff, IoMdRadioButtonOn, IoMdCheckbox, IoMdSquareOutline } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import { formatNumber } from "../../../utils/numberFormat";
-import { format, getYear, getISOWeek, parse, getDay } from "date-fns";
+import { format, getYear, getISOWeek, parse, getDay, getISOWeekYear } from "date-fns";
 import toast from "react-hot-toast";
 import reportApi from "../../../api/reportApi";
 import { AgGridReact } from "ag-grid-react";
@@ -28,6 +28,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 import debounce from "../../../utils/debounce";
 import useAppContext from "../../../store/AppContext";
 import Loader from "../../../components/Loader";
+import Select from 'react-select'
 
 function WeeklyDetailProductionVolumeReport() {
     const navigate = useNavigate();
@@ -481,6 +482,12 @@ function WeeklyDetailProductionVolumeReport() {
     const [reportData, setReportData] = useState([]);
     const [dailyData, setDailyData] = useState([]);
 
+    const [weeks, setWeeks] = useState(getWeeksByYear());
+    const [week, setWeek] = useState({
+        value: getCurrentBusinessWeek(),
+        label: `Tuần ${String(getCurrentBusinessWeek()).padStart(2, "0")}`
+    });
+
     const getRowStyle = (params) => {
         if (params.node.rowPinned) {
             return {
@@ -601,7 +608,7 @@ function WeeklyDetailProductionVolumeReport() {
     }
 
     const getReportData = async () => {
-        if (!fromYear && !fromWeek && !selectedFactory) return;
+        if (!fromYear && !week && !selectedFactory) return;
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -612,7 +619,7 @@ function WeeklyDetailProductionVolumeReport() {
 
         let params = {
             year: getYear(fromYear),
-            week: getISOWeek(fromWeek),
+            week: week.value,
             factory: selectedFactory || '',
         };
 
@@ -778,14 +785,14 @@ function WeeklyDetailProductionVolumeReport() {
     const handleExportExcel = useCallback(() => {
 
         const year = getYear(fromYear);
-        const week = getISOWeek(fromWeek);
+        const week = week.value;
         const factory = selectedFactory || 'Tất cả';
         const fileName = `Báo cáo sản lượng chi tiết theo tuần_${week}_năm_${year}_${factory}.xlsx`;
 
         gridRef.current.api.exportDataAsExcel({
             fileName,
         });
-    }, [fromYear, fromWeek, selectedFactory]);
+    }, [fromYear, week, selectedFactory]);
 
     const handleExportPDF = () => {
         toast("Chức năng xuất PDF đang được phát triển.");
@@ -859,18 +866,45 @@ function WeeklyDetailProductionVolumeReport() {
         }
     }
 
+    function getWeeksByYear(year = new Date().getFullYear()) {
+        // Nghiệp vụ: nếu có ngày cuối năm bị đẩy sang tuần 1 năm sau → gom thành tuần 53
+        const d = new Date(year, 11, 31); // 31/12
+        const isoWeek = getISOWeek(d);
+        const isoYear = getISOWeekYear(d);
+
+        if (isoWeek === 1 && isoYear > year) {
+            return 53;
+        }
+
+        return 52;
+    }
+
+    function getCurrentBusinessWeek(date = new Date()) {
+        const isoWeek = getISOWeek(date);
+        const isoYear = getISOWeekYear(date);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+
+        // Ngày cuối năm bị đẩy sang tuần 1 năm sau
+        if (isoWeek === 1 && isoYear > year && month === 12) {
+            return 53;
+        }
+
+        return isoWeek;
+    }
+
     useEffect(() => {
         getAllFactory();
     }, [])
 
     useEffect(() => {
-        const allFieldsFilled = (fromYear && fromWeek && selectedFactory);
+        const allFieldsFilled = (fromYear && week && selectedFactory);
         if (allFieldsFilled) {
             getReportData();
         } else {
             console.log("Không thể gọi API vì không đủ thông tin");
         }
-    }, [fromYear, fromWeek, selectedFactory])
+    }, [fromYear, week, selectedFactory])
 
     return (
         <Layout>
@@ -951,15 +985,6 @@ function WeeklyDetailProductionVolumeReport() {
                                         // locale="vi"
                                         onChange={(date) => {
                                             setFromYear(date);
-                                            if (
-                                                fromYear &&
-                                                fromWeek &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                // getReportData();
-                                            }
                                         }}
                                         className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
@@ -971,24 +996,18 @@ function WeeklyDetailProductionVolumeReport() {
                                     >
                                         Tuần
                                     </label>
-                                    <DatePicker
-                                        selected={fromWeek}
-                                        dateFormat="ww"
-                                        onChange={(date) => {
-                                            setFromWeek(date);
-                                            if (
-                                                fromYear &&
-                                                fromWeek &&
-                                                selectedFactory &&
-                                                isReceived &&
-                                                selectedTeams
-                                            ) {
-                                                // getReportData();
-                                            }
+                                    <Select
+                                        options={Array.from({ length: weeks }, (_, i) => {
+                                            const v = i + 1;
+                                            return {
+                                                value: v,
+                                                label: `Tuần ${String(v).padStart(2, "0")}`
+                                            };
+                                        })}
+                                        value={week}
+                                        onChange={(selectedOption) => {
+                                            setWeek(selectedOption);
                                         }}
-                                        // showWeekNumbers
-                                        showWeekPicker
-                                        className=" border border-gray-300 text-gray-900 text-base rounded-md focus:ring-whites cursor-pointer focus:border-none block w-full p-1.5"
                                     />
                                 </div>
                             </div>
@@ -1011,30 +1030,6 @@ function WeeklyDetailProductionVolumeReport() {
                                             </div>
                                         ))
                                     }
-                                    {/* <div className="col-span-1 w-full">
-                                        <FactoryOption
-                                            value="TH"
-                                            label="Thuận Hưng"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="YS"
-                                            label="Yên Sơn"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="TB"
-                                            label="Thái Bình"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 w-full flex items-end">
-                                        <FactoryOption
-                                            value="CBG"
-                                            label="Khối chế biến gỗ"
-                                        />
-                                    </div> */}
                                 </div>
                             </div>
 
