@@ -2963,7 +2963,8 @@ class VCNController extends Controller
                             "BaseLine"  => $allocate['LineNum'],
                             "BaseType"  => 202,
                             "CostingCode"  => "VCN",
-                            "CostingCode4" => "Default"
+                            "CostingCode4" => "Default",
+                            "ParentLineNum" => $allocate['LineNum'],
                         ];
 
                         if ($allocate['IssueType'] != 'B') {
@@ -2987,7 +2988,7 @@ class VCNController extends Controller
                             "BaseLine"  => $allocate['LineNum'],
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
-                            "ParentLineNum" => $index,
+                            "ParentLineNum" => $allocate['LineNum'],
                         ];
 
                         if ($allocate['IssueType'] != 'B') {
