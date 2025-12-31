@@ -2957,11 +2957,6 @@ class VCNController extends Controller
                     $itemCode = $allocate['ItemCode'];
                     $quantity = $allocate['Allocated'];
 
-                    // ✅ index DocumentLines ĐÚNG
-                    $lineIndex = isset($allocates[$docEntry]['DocumentLines'])
-                        ? count($allocates[$docEntry]['DocumentLines'])
-                        : 0;
-
                     if (isset($allocates[$docEntry])) {
                         $line = [
                             "BaseEntry" => $docEntry,
@@ -2969,17 +2964,24 @@ class VCNController extends Controller
                             "BaseType"  => 202,
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
-                            "BatchNumbers" => [[
-                                "ParentLineNum" => $lineIndex,
-                                "ItemCode" => $itemCode,
-                                "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
-                                "Quantity" => $quantity,
-                            ]]
+                            // "BatchNumbers" => [[
+                            //     "ItemCode" => $itemCode,
+                            //     "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
+                            //     "Quantity" => $quantity,
+                            // ]]
                         ];
 
                         if ($allocate['IssueType'] != 'B') {
                             $line['Quantity'] = $quantity;
                             $line['Qty'] = $quantity;
+                        }
+
+                        if ($allocate['BatchSeri'] != 'N') {
+                            $line['BatchNumbers'] = [[
+                                "ItemCode" => $itemCode,
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
+                                "Quantity" => $quantity,
+                            ]];
                         }
 
                         $allocates[$docEntry]['DocumentLines'][] = $line;
@@ -2990,17 +2992,24 @@ class VCNController extends Controller
                             "BaseLine"  => $allocate['LineNum'],
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
-                            "BatchNumbers" => [[
-                                "ParentLineNum" => $lineIndex,
-                                "ItemCode" => $itemCode,
-                                "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
-                                "Quantity" => $quantity,
-                            ]]
+                            // "BatchNumbers" => [[
+                            //     "ItemCode" => $itemCode,
+                            //     "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
+                            //     "Quantity" => $quantity,
+                            // ]]
                         ];
 
                         if ($allocate['IssueType'] != 'B') {
                             $line['Quantity'] = $quantity;
                             $line['Qty'] = $quantity;
+                        }
+
+                        if ($allocate['BatchSeri'] != 'N') {
+                            $line['BatchNumbers'] = [[
+                                "ItemCode" => $itemCode,
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
+                                "Quantity" => $quantity,
+                            ]];
                         }
 
                         $allocates[$docEntry] = [
