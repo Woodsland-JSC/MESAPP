@@ -2987,7 +2987,7 @@ class VCNController extends Controller
                             "BaseLine"  => $allocate['LineNum'],
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
-                            
+                            "ParentLineNum" => $index,
                         ];
 
                         if ($allocate['IssueType'] != 'B') {
@@ -3011,7 +3011,6 @@ class VCNController extends Controller
                             "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                             "U_TO" => $data->team,
                             "DocumentLines" => [
-                                "ParentLineNum" => $index,
                                 $line
                             ]
                         ];
