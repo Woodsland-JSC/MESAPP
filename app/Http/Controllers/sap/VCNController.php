@@ -2964,6 +2964,7 @@ class VCNController extends Controller
                             "BaseType"  => 202,
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
+                            "ParentLineNum" => $index,
                             // "BatchNumbers" => [[
                             //     "ItemCode" => $itemCode,
                             //     "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
@@ -2992,6 +2993,7 @@ class VCNController extends Controller
                             "BaseLine"  => $allocate['LineNum'],
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
+                            "ParentLineNum" => $index,
                             // "BatchNumbers" => [[
                             //     "ItemCode" => $itemCode,
                             //     "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
