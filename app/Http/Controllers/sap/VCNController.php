@@ -2951,29 +2951,50 @@ class VCNController extends Controller
                             $data->FatherCode . " LSX." . $data->LSX
                     ], 500);
                 }
-                // Merge allocations with the same DocEntry directly
+
                 foreach ($newAllocates as $allocate) {
                     $docEntry = $allocate['DocEntry'];
                     $itemCode = $allocate['ItemCode'];
                     $quantity = $allocate['Allocated'];
                     if (isset($allocates[$docEntry])) {
-                        // Append the item to DocumentLines if DocEntry exists
-                        $allocates[$docEntry]['DocumentLines'][] = [
-                            "Qty" => $quantity,
+                        $line = [
                             "BaseEntry" => $docEntry,
-                            'BaseLine' => $allocate['LineNum'],
-                            "BaseType" => 202,
-                            "Quantity" => $quantity,
-                            "CostingCode" => "VCN",
+                            "BaseLine"  => $allocate['LineNum'],
+                            "BaseType"  => 202,
+                            "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
                             "BatchNumbers" => [[
                                 "ItemCode" => $itemCode,
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
                                 "Quantity" => $quantity,
-                            ]],
+                            ]]
                         ];
+
+                        if ($allocate['IssueType'] != 'B') {
+                            $line['Quantity'] = $quantity;
+                            $line['Qty'] = $quantity;
+                        }
+
+                        $allocates[$docEntry]['DocumentLines'][] = $line;
                     } else {
-                        // Otherwise, create a new entry for this DocEntry with DocumentLines
+                        $line = [
+                            "BaseEntry" => $docEntry,
+                            "BaseType"  => 202,
+                            "BaseLine"  => $allocate['LineNum'],
+                            "CostingCode"  => "VCN",
+                            "CostingCode4" => "Default",
+                            "BatchNumbers" => [[
+                                "ItemCode" => $itemCode,
+                                "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
+                                "Quantity" => $quantity,
+                            ]]
+                        ];
+
+                        if ($allocate['IssueType'] != 'B') {
+                            $line['Quantity'] = $quantity;
+                            $line['Qty'] = $quantity;
+                        }
+
                         $allocates[$docEntry] = [
                             "BPL_IDAssignedToInvoice" => Auth::user()->branch,
                             "U_UUID" => $request->id,
@@ -2981,20 +3002,7 @@ class VCNController extends Controller
                             "U_NGiao" => $U_GIAO->last_name . " " . $U_GIAO->first_name,
                             "U_NNhan" => Auth::user()->last_name . " " . Auth::user()->first_name,
                             "U_TO" => $data->team,
-                            "DocumentLines" => [
-                                [
-                                    "BaseEntry" => $docEntry,
-                                    "BaseType" => 202,
-                                    'BaseLine' => $allocate['LineNum'],
-                                    "Quantity" => $quantity,
-                                    "Qty" => $quantity,
-                                    "BatchNumbers" => [[
-                                        "ItemCode" => $itemCode,
-                                        "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
-                                        "Quantity" => $quantity,
-                                    ]],
-                                ]
-                            ]
+                            "DocumentLines" => [$line]
                         ];
                     }
                 }
