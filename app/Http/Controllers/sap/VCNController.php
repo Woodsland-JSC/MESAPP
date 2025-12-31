@@ -2952,7 +2952,7 @@ class VCNController extends Controller
                     ], 500);
                 }
 
-                foreach ($newAllocates as $allocate) {
+                foreach ($newAllocates as $index => $allocate) {
                     $docEntry = $allocate['DocEntry'];
                     $itemCode = $allocate['ItemCode'];
                     $quantity = $allocate['Allocated'];
@@ -2964,6 +2964,7 @@ class VCNController extends Controller
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
                             "BatchNumbers" => [[
+                                "ParentLineNum" => $index,
                                 "ItemCode" => $itemCode,
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
                                 "Quantity" => $quantity,
@@ -2984,6 +2985,7 @@ class VCNController extends Controller
                             "CostingCode"  => "VCN",
                             "CostingCode4" => "Default",
                             "BatchNumbers" => [[
+                                "ParentLineNum" => $index,
                                 "ItemCode" => $itemCode,
                                 "BatchNumber" => Carbon::now()->format('YmdHis') . $docEntry,
                                 "Quantity" => $quantity,
