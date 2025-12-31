@@ -3285,7 +3285,7 @@ class VCNController extends Controller
                     $totalQty -= $item['Qty'];
                 } else {
                     // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
-                    if ($item['Qty'] > 0) {
+                    if (isset($item['Qty']) && $item['Qty'] > 0) {
                         $item['Allocated'] = min($item['Qty'], $totalQty);
                         $totalQty -= $item['Allocated'];
                     } else {
