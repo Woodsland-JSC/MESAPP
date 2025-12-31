@@ -3274,14 +3274,14 @@ class VCNController extends Controller
     {
         foreach ($data as &$item) {
             if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
-                $item['Allocate'] = $item['ConLai'];
+                $item['Allocated'] = $item['ConLai'];
                 $totalQty -= $item['ConLai'];
             } else {
                 if ($item['ConLai'] > 0) {
-                    $item['Allocate'] = min($item['ConLai'], $totalQty);
-                    $totalQty -= $item['Allocate'];
+                    $item['Allocated'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocated'];
                 } else {
-                    $item['Allocate'] = 0;
+                    $item['Allocated'] = 0;
                 }
             }
         }
