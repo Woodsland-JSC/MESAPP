@@ -3272,25 +3272,16 @@ class VCNController extends Controller
     // xử lý lấy lệnh rong cần issu và allocate
     function allocatedIssueRong($data, $totalQty)
     {
-        $lastIndex = count($data) - 1;
-        foreach ($data as $index => &$item) {
-            if ($index == $lastIndex) {
-                // Phần tử cuối cùng, phân bổ toàn bộ số lượng còn lại
-                $item['Allocated'] = $totalQty;
-                $totalQty = 0; // Reset totalQty về 0 sau khi phân bổ
+        foreach ($data as &$item) {
+            if (isset($item['ConLai']) && $item['ConLai'] <= $totalQty) {
+                $item['Allocate'] = $item['ConLai'];
+                $totalQty -= $item['ConLai'];
             } else {
-                // Sử dụng isset() thay vì so sánh với phần tử đầu tiên trong mảng
-                if (isset($item['Qty']) && $item['Qty'] <= $totalQty) {
-                    $item['Allocated'] = $item['Qty'];
-                    $totalQty -= $item['Qty'];
+                if ($item['ConLai'] > 0) {
+                    $item['Allocate'] = min($item['ConLai'], $totalQty);
+                    $totalQty -= $item['Allocate'];
                 } else {
-                    // Chỉ cập nhật giá trị nếu Qty lớn hơn 0
-                    if (isset($item['Qty']) && $item['Qty'] > 0) {
-                        $item['Allocated'] = min($item['Qty'], $totalQty);
-                        $totalQty -= $item['Allocated'];
-                    } else {
-                        $item['Allocated'] = 0;
-                    }
+                    $item['Allocate'] = 0;
                 }
             }
         }
