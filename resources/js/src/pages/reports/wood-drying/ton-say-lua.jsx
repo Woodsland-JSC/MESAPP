@@ -37,6 +37,7 @@ import { th } from "date-fns/locale";
 import { getFirstDayOfCurrentMonth } from "../../../utils/date.utils";
 
 import { bao_cao_ton_say_lua } from "../../../api/ReportSAPApi";
+import AG_GRID_LOCALE_VI from "../../../utils/locale.vi";
 
 function BaoCaoTonSayLua() {
     const navigate = useNavigate();
@@ -349,11 +350,15 @@ function BaoCaoTonSayLua() {
             field: "itemName",
             minWidth: 400,
             headerComponentParams: { displayName: "Tên" },
-            // rowGroup: true,
-            // hide: true,
             filter: true,
             headerClass: 'text-center',
             pinned: 'left',
+            valueGetter: (params) => {
+                if(params.node.id == 'rowGroupFooter_ROOT_NODE_ID'){
+                    return "Tổng";
+                }
+                return params.data ? params.data.itemName : "";
+            }
         },
         {
             headerName: "Quy cách",
@@ -667,6 +672,10 @@ function BaoCaoTonSayLua() {
         }
     ]);
 
+    const localeText = useMemo(() => {
+        return AG_GRID_LOCALE_VI;
+    }, []);
+
     const groupDisplayType = "multipleColumns";
 
     const onGridReady = useCallback(() => { }, []);
@@ -800,15 +809,17 @@ function BaoCaoTonSayLua() {
                                             columnDefs={colDefs}
                                             onGridReady={onGridReady}
                                             groupDisplayType={groupDisplayType}
+                                            localeText={localeText}
                                             grandTotalRow={"bottom"}
-                                            autoGroupColumnDef={{
-                                                headerName: "Tên nhóm",
-                                                field: "itemname",
-                                                width: 450,
-                                                cellRendererParams: {
-                                                    suppressCount: false, // hiển thị số lượng bản ghi trong nhóm
-                                                },
-                                            }}
+                                            // autoGroupColumnDef={{
+                                            //     headerName: "Tên nhóm",
+                                            //     field: "itemName",
+                                            //     pinned: "left", // Pin về bên trái
+                                            //     minWidth: 220,
+                                            //     cellRendererParams: {
+                                            //         suppressCount: false
+                                            //     }
+                                            // }}
                                         />
                                     </div>
                                 </div>
