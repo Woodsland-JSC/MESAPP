@@ -892,7 +892,7 @@ class PlanController extends Controller
             DB::beginTransaction();
             $towarehouse =  GetWhsCode(Auth::user()->plant, 'SS');
 
-            if(!$towarehouse){
+            if(!$towarehouse || $towarehouse == '-1'){
                 return response()->json(['error' => 'Không xác định được kho điều chuyển.'], 500);
             }
 
