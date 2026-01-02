@@ -891,6 +891,11 @@ class PlanController extends Controller
         try {
             DB::beginTransaction();
             $towarehouse =  GetWhsCode(Auth::user()->plant, 'SS');
+
+            if(!$towarehouse){
+                return response()->json(['error' => 'Không xác định được kho điều chuyển.'], 500);
+            }
+
             $planId = $request->input('planId');
             $planDrying = planDryings::where('PlanID', $planId)->whereNotIn('status', [0, 2])->get();
             $result = $request->result;
