@@ -384,6 +384,13 @@ class DryingOvenController extends Controller
 
             $fromWarehouse = $palletDetails[0]['WhsCode'] ?? '';
 
+            if (!$fromWarehouse || $fromWarehouse == '') {
+                return response()->json([
+                    'message' => 'Không tìm thấy kho chuyển xấy. Vui lòng liên hệ quản trị hệ thống.',
+                    'error' => 'Không tìm thấy kho chuyển xấy. Vui lòng liên hệ quản trị hệ thống.'
+                ], 500);
+            }
+
             $body = [
                 "U_Pallet" => $pallet->Code,
                 "U_PalletCreatedBy" => Auth::user()->username . ' - ' . Auth::user()->last_name . ' ' . Auth::user()->first_name,
