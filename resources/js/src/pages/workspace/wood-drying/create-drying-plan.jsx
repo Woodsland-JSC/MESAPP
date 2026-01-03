@@ -279,9 +279,9 @@ function CreateDryingPlan() {
                 showCancelButton: true,
                 confirmButtonText: 'Xóa',
                 cancelButtonText: 'Hủy',
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    removePlanDryingById(planRemove.id);
+                    await removePlanDryingById(planRemove.id);
                     onModalRemoveClose();
                     setPlanRemove({
                         id: null,
