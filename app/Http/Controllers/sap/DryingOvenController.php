@@ -274,6 +274,13 @@ class DryingOvenController extends Controller
             })->unique()->toArray();
             $towarehouse = WarehouseCS();
 
+            if (!$towarehouse || $towarehouse == '-1') {
+                return response()->json([
+                    'message' => 'Không tìm thấy kho chuyển xấy. Vui lòng liên hệ quản trị hệ thống.',
+                    'error' => 'Không tìm thấy kho chuyển xấy. Vui lòng liên hệ quản trị hệ thống.'
+                ], 500);
+            }
+
             $combinedQuyCach = implode('_', $quyCachList);
 
             $prefix = $palletData['MaNhaMay'] . substr($isoYear, -2) . $current_week . "-";
