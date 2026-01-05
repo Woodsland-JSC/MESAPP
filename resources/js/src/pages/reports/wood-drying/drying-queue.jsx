@@ -63,7 +63,7 @@ function DryingQueueReport() {
         console.log("Nhà máy đang chọn là:", factory);
         setSelectedFactory(factory);
         setReportData(null);
-        setTeamData(null);
+        // setTeamData(null);
         setSelectedTeams([]);
     };
 
@@ -81,72 +81,72 @@ function DryingQueueReport() {
                 params.plant
             );
             const formattedData = res.map((item) => {
-                let khoiLuongTinhThuong = 0;
-                let dgnc = 99500;
-                let heSoQuyDoi = 1.35;
-                let quyLuong = 0;
+                // let khoiLuongTinhThuong = 0;
+                // let dgnc = 99500;
+                // let heSoQuyDoi = 1.35;
+                // let quyLuong = 0;
 
-                if (item.day <= 16) {
+                // if (item.day <= 16) {
 
-                }
+                // }
 
-                if (item.day > 16 && item.day <= 21 && item.dai < 800) {
-                    heSoQuyDoi = 1.2
-                    dgnc = 88400;
-                }
+                // if (item.day > 16 && item.day <= 21 && item.dai < 800) {
+                //     heSoQuyDoi = 1.2
+                //     dgnc = 88400;
+                // }
 
-                if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
-                    heSoQuyDoi = 1;
-                    dgnc = 73700;
-                }
+                // if (item.day >= 22 && item.day <= 25 && item.dai < 800) {
+                //     heSoQuyDoi = 1;
+                //     dgnc = 73700;
+                // }
 
-                if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
-                    heSoQuyDoi = 1;
-                    dgnc = 73700;
-                }
+                // if (item.day > 16 && item.day <= 21 && item.dai >= 800) {
+                //     heSoQuyDoi = 1;
+                //     dgnc = 73700;
+                // }
 
-                if (item.day > 25) {
-                    heSoQuyDoi = 0.85;
-                    dgnc = 62600;
-                }
+                // if (item.day > 25) {
+                //     heSoQuyDoi = 0.85;
+                //     dgnc = 62600;
+                // }
 
-                if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
-                    heSoQuyDoi = 0.85;
-                    dgnc = 62600;
-                }
+                // if (item.day >= 22 && item.day <= 25 && item.dai >= 800) {
+                //     heSoQuyDoi = 0.85;
+                //     dgnc = 62600;
+                // }
 
-                // Tính toán
-                khoiLuongTinhThuong = item.mass * heSoQuyDoi;
+                // // Tính toán
+                // khoiLuongTinhThuong = item.mass * heSoQuyDoi;
                 
 
-                let pow = 2;
+                // let pow = 2;
 
-                let hs = Math.pow((1 - 0.01), pow);
-                let tt = dgnc * hs;
+                // let hs = Math.pow((1 - 0.01), pow);
+                // let tt = dgnc * hs;
 
-                quyLuong = item.mass * tt;
+                // quyLuong = item.mass * tt;
 
                 return {
                     created_at: item.created_at,
-                    code: item.code,
-                    ma_lo: item.ma_lo,
-                    item_code: item.item_code,
-                    item_name: item.item_name,
-                    thickness: parseInt(item.day),
-                    width: parseInt(item.rong),
-                    height: parseInt(item.dai),
-                    qty: parseInt(item.qty),
-                    mass: item.mass,
-                    reason: item.reason,
+                    code: item.Code,
+                    ma_lo: item.MaLo,
+                    item_code: item.ItemCode,
+                    item_name: item.ItemName,
+                    thickness: parseInt(item.CDay),
+                    width: parseInt(item.CRong),
+                    height: parseInt(item.CDai),
+                    qty: parseInt(item.Qty_T),
+                    mass: item.Qty,
+                    reason: item.LyDo,
                     status: item.status,
-                    mnv: item.created_username,
-                    khoiLuongTinhThuong,
-                    dgnc,
-                    quyLuong,
+                    mnv: item.username,
+                    khoiLuongTinhThuong: Number(item.khoiLuongTinhThuong).toFixed(6),
+                    dgnc: item.dgnc,
+                    quyLuong: item.quy_luong,
                     stacking_time: item.stacking_time ?? "",
-                    created_fullname: item.created_fullname ?? '',
-                    hs,
-                    tt
+                    created_fullname: item.employee ?? '',
+                    hs: item.hs,
+                    tt: item.thanh_tien
                 }
             });
             setIsDataReportLoading(false);
