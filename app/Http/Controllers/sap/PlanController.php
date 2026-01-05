@@ -141,17 +141,33 @@ class PlanController extends Controller
         $validator = Validator::make($request->all(), [
             'reason' => 'required',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['error' => implode(' ', $validator->errors()->all())], 422);
         }
+
         $pallets = DB::table('pallets as a')
             ->join('users as b', 'a.CreateBy', '=', 'b.id')
             ->join('pallet_details as pd', 'a.palletID', '=', 'pd.palletID')
             ->leftJoin('plan_detail as c', 'a.palletID', '=', 'c.pallet')
-            ->select('a.palletID', 'a.Code', 'a.MaLo', 'a.LyDo', 'a.QuyCach', 'pd.Qty_T', 'a.old_pallet_code')
-            ->where('b.plant', '=', Auth::user()->plant)
+            ->select(
+                'a.palletID',
+                'a.Code',
+                'a.MaLo',
+                'a.LyDo',
+                'a.QuyCach',
+                'a.old_pallet_code',
+                DB::raw('SUM(pd.Qty_T) as Qty_T')
+            )
+            ->where('b.plant', Auth::user()->plant)
             ->whereNull('c.pallet')
-            ->where('a.activeStatus', '=', 0);
+            ->where('a.activeStatus', 0)
+            ->groupBy(
+                'a.palletID',
+                'a.Code',
+                'a.QuyCach'
+            );
+
         if ($request->reason == 'INDOOR') {
             $pallets = $pallets->whereIn('LyDo', ['INDOOR', 'OUTDOOR'])->get();
         } else if ($request->reason == 'OUTDOOR') {
@@ -892,7 +908,7 @@ class PlanController extends Controller
             DB::beginTransaction();
             $towarehouse =  GetWhsCode(Auth::user()->plant, 'SS');
 
-            if(!$towarehouse || $towarehouse == '-1'){
+            if (!$towarehouse || $towarehouse == '-1') {
                 return response()->json(['error' => 'Không xác định được kho điều chuyển.'], 500);
             }
 
